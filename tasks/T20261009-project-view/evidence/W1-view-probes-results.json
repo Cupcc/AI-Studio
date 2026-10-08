@@ -1,0 +1,66 @@
+{
+  "generatedFor": "T20261009-project-view W1",
+  "fixtures": "temp dir (removed at exit)",
+  "versions": {
+    "codex": "codex-cli 0.161.0",
+    "claude": "2.1.295 (Claude Code)",
+    "node": "v26.10.0"
+  },
+  "codexSkills": {
+    "skillsListBefore": [
+      {
+        "name": "repo-skill",
+        "scope": "repo",
+        "enabled": true
+      }
+    ],
+    "extraRootsSet_experimentalApiFalse": {},
+    "skillsListAfter": [
+      {
+        "name": "repo-skill",
+        "scope": "repo",
+        "enabled": true
+      },
+      {
+        "name": "studio-project-view",
+        "scope": "user",
+        "enabled": true
+      }
+    ],
+    "threadStartAcceptsDeveloperInstructions": true,
+    "instructionSources": [
+      "project-a/AGENTS.md"
+    ],
+    "extraRootsSet_experimentalApiTrue": {}
+  },
+  "codexSandbox": {
+    ":workspace": {
+      "exit": 0,
+      ".": "writable",
+      ".git": "denied",
+      ".codex": "denied",
+      ".agents": "denied",
+      ".claude": "writable",
+      ".ai-studio": "writable",
+      ".ai-studio/knowledge": "writable",
+      "outside-project(home)": "denied"
+    },
+    ":read-only": {
+      "exit": 0,
+      ".": "denied",
+      ".git": "denied",
+      ".codex": "denied",
+      ".agents": "denied",
+      ".claude": "denied",
+      ".ai-studio": "denied",
+      ".ai-studio/knowledge": "denied",
+      "outside-project(home)": "denied"
+    }
+  },
+  "claudePlugin": {
+    "plugins_applied": true,
+    "fixtureCommands": [
+      "studio:project-view"
+    ]
+  }
+}
