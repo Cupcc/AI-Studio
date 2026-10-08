@@ -344,7 +344,7 @@ Project 记录、`ui_state` 与窗口级状态存入应用的 SQLite（04 第 2 
 
 | 提供 | 形状 | 用途 |
 |---|---|---|
-| 查看信号 | `setViewing(project_id, session_id \| null)`：当且仅当该 Project 是当前 Tab、并且该 Session 正显示在 Conversation 或 Project View 左列时，`session_id` 非空；其余情况为 `null` | 让 session 模块执行 Completed Unread / Error 的清除与 D-05（“Project View 左侧正在显示的 Session 视为正在查看”）。何时清除由 session 模块决定；窗口失焦、最小化时是否仍算“正在查看”，归 `specs/session/` |
+| 查看信号 | `setViewing(project_id, session_id \| null)`：当且仅当该 Project 是当前 Tab、并且该 Session 正显示在 Conversation 或 Project View 左列时，`session_id` 非空；其余情况为 `null` | 让 session 模块执行 Completed Unread / Error 的清除与 D-05（“Project View 左侧正在显示的 Session 视为正在查看”）。何时清除由 session 模块决定。另需推送窗口前台状态，并把“打开 Session”的用户操作（含切换 Tab 返回、启动恢复）作为独立信号发出：窗口失焦、最小化或应用在后台时不算正在查看，窗口回到前台不清除提醒（`specs/session/spec.md` 第 2.11 节，S-Q1 2026-10-09 确认） |
 | 当前 Project 标志 | `current_project_id` 变更事件 | 供 session 模块判断哪个 Project 的状态要在 Tab 上显示 |
 | 关闭确认结果 | “用户已确认关闭并停止”事件 | 触发 `stopProjectTurns` |
 
@@ -381,9 +381,9 @@ Project 记录、`ui_state` 与窗口级状态存入应用的 SQLite（04 第 2 
 
 | 编号 | 问题 | 建议答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
-| PROJ-Q1 | 应用重启后是否恢复上次打开的 Tab 集合与当前 Tab？文档只要求“重新打开 Project 时恢复状态”，且“没有打开任何 Project 时显示启动页” | 恢复 Tab 集合、顺序与当前 Tab；启动页只在没有可恢复 Tab 或首次使用时出现。依据：01 第 6 节“恢复上一次使用状态”的精神与桌面应用惯例；Running 的 CLI 进程不随重启恢复，只恢复界面，不触发 `last_opened_at` 更新 | 是（影响窗口级状态的持久化设计与启动流程） | |
-| PROJ-Q2 | 启动页 Tab 的模型：启动页是否总以一个 Tab 呈现？关闭最后一个 Tab 后是回到启动页、还是关闭窗口？已有启动页 Tab 时再点 `+` 如何处理？从启动页 Tab 选中已打开的目录后，该启动页 Tab 是保留还是关闭？启动页 Tab 激活时左侧导航与右侧边栏如何呈现、Tab 标题是什么？ | 启动页总以 Tab 呈现；最后一个 Project Tab 关闭后回到启动页，窗口不关闭；仅剩一个启动页 Tab 时不可关闭；已有启动页 Tab 时 `+` 切换到它；选中已打开目录时关闭该启动页 Tab（它是为了打开 Project 才创建的）；启动页激活时导航与边栏相关按钮 Disabled 并说明；Tab 标题取“新标签页”（文案待定）。依据：D-09“`+` 在新 Tab 中打开同一启动页”、03 第 6 节、Shell 第 10 节 Disabled 规则 | 是（影响 Tab 数据模型与关闭流程） | |
-| PROJ-Q3 | 右侧边栏的展开状态在 Session Mode 与 Project View Mode 之间是共享还是各自独立？从导航进入 View 时，右侧区域显示 Preview 还是沿用已展开的工具？（AC-06 要求打开 Architecture 即看到 Preview；P-B 又规定打开工具会替换 Preview；FR-PROJ-003 只列“展开状态”一项） | 两种模式各自保存：Session Mode 用 `sidebar_open`，View Mode 用 `view_right_area`，`last_tool` 共享；切换模式互不改写；从导航进入 View 时 `view_right_area` 置为 Preview；Tab 切换与重新打开按 D-15 原样恢复。依据：AC-06、P-B、D-15 | 是（决定 `ui_state` 的形状，也决定 tools 与 project-view 的接口） | |
+| PROJ-Q1 | 应用重启后是否恢复上次打开的 Tab 集合与当前 Tab？文档只要求“重新打开 Project 时恢复状态”，且“没有打开任何 Project 时显示启动页” | 恢复 Tab 集合、顺序与当前 Tab；启动页只在没有可恢复 Tab 或首次使用时出现。依据：01 第 6 节“恢复上一次使用状态”的精神与桌面应用惯例；Running 的 CLI 进程不随重启恢复，只恢复界面，不触发 `last_opened_at` 更新 | 是（影响窗口级状态的持久化设计与启动流程） | 采纳建议：重启后恢复 Tab 集合、顺序与当前 Tab（2026-10-09 确认） |
+| PROJ-Q2 | 启动页 Tab 的模型：启动页是否总以一个 Tab 呈现？关闭最后一个 Tab 后是回到启动页、还是关闭窗口？已有启动页 Tab 时再点 `+` 如何处理？从启动页 Tab 选中已打开的目录后，该启动页 Tab 是保留还是关闭？启动页 Tab 激活时左侧导航与右侧边栏如何呈现、Tab 标题是什么？ | 启动页总以 Tab 呈现；最后一个 Project Tab 关闭后回到启动页，窗口不关闭；仅剩一个启动页 Tab 时不可关闭；已有启动页 Tab 时 `+` 切换到它；选中已打开目录时关闭该启动页 Tab（它是为了打开 Project 才创建的）；启动页激活时导航与边栏相关按钮 Disabled 并说明；Tab 标题取“新标签页”（文案待定）。依据：D-09“`+` 在新 Tab 中打开同一启动页”、03 第 6 节、Shell 第 10 节 Disabled 规则 | 是（影响 Tab 数据模型与关闭流程） | 采纳建议：启动页总以 Tab 呈现，规则同建议答案；Tab 标题文案“新标签页”仍待定（2026-10-09 确认） |
+| PROJ-Q3 | 右侧边栏的展开状态在 Session Mode 与 Project View Mode 之间是共享还是各自独立？从导航进入 View 时，右侧区域显示 Preview 还是沿用已展开的工具？（AC-06 要求打开 Architecture 即看到 Preview；P-B 又规定打开工具会替换 Preview；FR-PROJ-003 只列“展开状态”一项） | 两种模式各自保存：Session Mode 用 `sidebar_open`，View Mode 用 `view_right_area`，`last_tool` 共享；切换模式互不改写；从导航进入 View 时 `view_right_area` 置为 Preview；Tab 切换与重新打开按 D-15 原样恢复。依据：AC-06、P-B、D-15 | 是（决定 `ui_state` 的形状，也决定 tools 与 project-view 的接口） | 采纳建议：两种模式各自保存，`last_tool` 共享，从导航进入 View 时右侧回到 Preview（2026-10-09 确认） |
 | PROJ-Q4 | 最近 Projects 列表：排序、条数、是否包含已打开项、是否可移除、移除的含义？ | 按最近打开时间倒序；显示 10 条；已打开项也列出并标注“已打开”；可移除，只隐藏条目不删除记录与 Session；重新选择同一目录时重新出现。依据：Shell 第 9 节只规定名称、路径、最近打开时间；FR-PROJ-001“同一 Project 后续可以重新打开” | 否 | |
 | PROJ-Q5 | 目录已不存在或不可读时：最近列表条目如何呈现？已打开 Tab 的目录运行中失效怎么办？Project 目录被移动后是否支持重新指定位置？ | 最近列表仍显示并标注，点击提示原因并提供“从列表移除”；已打开 Tab 保持、不轮询，由使用目录的功能各自报错；V1 不支持重新指定位置，在新位置重新打开会创建新 Project，旧 Session 历史不迁移。依据：文档无规定；最小可用且不扩大范围 | 否 | |
 | PROJ-Q6 | 关闭确认后“停止当前一轮”失败或超时时，Tab 是否关闭？ | 保持 Tab 打开，对话框改为失败说明并列出未能停止的 Session，提供“重试”和“取消”，不提供强制关闭；不静默丢弃正在运行的进程。依据：04 第 4 节 Codex Stop 实现约束第 5、6、7 条（须确认退出、清理失败不得并行启动新旧 Runtime）；最终规则归 session / agent-adapter | 否（先按占位接口实现，集成时对齐） | |
@@ -393,7 +393,7 @@ Project 记录、`ui_state` 与窗口级状态存入应用的 SQLite（04 第 2 
 | PROJ-Q10 | 新增 Tab 的位置（`+` 创建、打开 Project 新建）与关闭当前 Tab 后激活哪个 Tab？是否支持拖拽排序？ | 新 Tab 追加在最右；关闭当前 Tab 后激活右侧相邻 Tab，没有则激活左侧相邻；V1 不支持拖拽排序。依据：浏览器与桌面应用惯例；文档无规定 | 否 | |
 | PROJ-Q11 | 未发送的 New Chat 草稿文字：切换 Tab 返回保持（D-15 隐含）；关闭 Tab / 重启后是否保存与恢复？ | project 只保存 `main_canvas.mode = "draft"`，重启后恢复为一个空草稿；草稿文字是否落盘由 `specs/chat/` 决定，倾向落盘到本地以免丢失输入。依据：FR-CHAT-001“未发送草稿不创建 Session”；D-15 | 否 | |
 | PROJ-Q12 | D-15 的“完整状态”到底包含哪些内容？是否包括 Conversation 滚动位置、Session History 滚动位置、输入框草稿文字、Files 展开的目录等？ | 切换 Tab 返回时保留渲染进程内的内存态：Session History 滚动位置、输入框草稿、工具内部状态；Conversation 一律回到最底部（FR-SESSION-001）；重新打开 Project 或重启后只恢复 2.3.1 表中保存的持久化项。依据：D-15、FR-SESSION-001、04 第 6 节“Project 切换即时响应” | 否 | |
-| PROJ-Q13 | 回到某 Project 的 Tab 时，恢复出的 Session 若带有 Completed Unread / Error，是否因“已展示在 Conversation 中”而视为已查看并清除？ | 视为已查看并清除（与 D-05 对 Project View 左列的处理一致）；仅当该 Project 是当前 Tab 且 Session 实际显示时才算。依据：D-05、FR-STATE-005。本条规则最终归 `specs/session/`，此处提出是因为信号来自 project 模块（4.2） | 否 | |
+| PROJ-Q13 | 回到某 Project 的 Tab 时，恢复出的 Session 若带有 Completed Unread / Error，是否因“已展示在 Conversation 中”而视为已查看并清除？ | 视为已查看并清除（与 D-05 对 Project View 左列的处理一致）；仅当该 Project 是当前 Tab 且 Session 实际显示时才算。依据：D-05、FR-STATE-005。本条规则最终归 `specs/session/`，此处提出是因为信号来自 project 模块（4.2） | 否 | 按 S-Q1（b）：视为已查看并清除（2026-10-09 确认） |
 | PROJ-Q14 | 新 Project 首次展开右侧边栏时默认显示哪个工具？新 Project 右侧边栏初始是展开还是收起？（03 第 3 节“默认允许收起”含义不明确） | 初始收起；第一次展开默认 Files（02 中工具列表的第一项）。依据：02 Context Panel 操作原则（完全由用户主动控制）；AC-07“Agent 不得自行强制打开” | 否 | |
 | PROJ-Q15 | 一个已打开 Project 的子目录或父目录，被选择为另一个 Project 时是否允许？ | 允许，视为独立 Project，不合并也不提示。依据：01 第 8 节原则 3（一个 Project 对应一个本地目录）；同一目录判定只处理等价路径，不处理包含关系 | 否 | |
 | PROJ-Q16 | V1 是否只有单个窗口？“窗口级偏好”的说法暗示窗口概念，但文档未提多窗口 | 仅单窗口；第二次启动应用时聚焦已有窗口。依据：03 第 3 节只描述一个窗口；多窗口不属于 V1 非目标之外的任何需求 | 否 | |

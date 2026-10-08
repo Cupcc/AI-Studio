@@ -347,7 +347,7 @@
 | NAV-Q1 | “过去 7 天”分组的起止：与“今天”“昨天”相邻时，是指前天起算 7 天、还是自今天起往前 7 个日历日（与前两组重叠部分归前两组）？ | 本地日历日 D−7 到 D−2（含），即 `T(D−7) ≤ t < T(D−1)`，与“昨天”“今天”无缝衔接、互不重叠。依据：FR-NAV-003“类似 ChatGPT”，其“Previous 7 Days”同样接在昨天之后；文档只列出组名 | 否 | |
 | NAV-Q2 | Rename 输入框失焦时是确认还是取消？输入为空或全空白时如何处理？ | 失焦视同确认；去除首尾空白后为空则视同取消（保留原标题，不报错）。依据：FR-NAV-003 / Shell 第 3 节只规定 Enter 确认、Esc 取消；点击其他列表项时若取消会让人丢失输入，且与 ChatGPT 的行为一致 | 否 | |
 | NAV-Q3 | Rename 的标题长度上限是多少？ | 最多 100 个字符，输入时限制，粘贴时截断，列表中单行省略显示。依据：文档无规定；100 足以描述一次对话，同时避免数据与布局问题。具体数值由人确认 | 否 | |
-| NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入。依据：`tasks/T20261009-session-slice/task.md` 已把 Rename 列入范围（FR-NAV-003；D-12）；实现量小，且 05 第 4 节把 Rename 列入专项测试。若判定为 P1，则首个交付可延后 2.3.6，其余不受影响。需要在 02 中统一优先级 | 否 | |
+| NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入。依据：`tasks/T20261009-session-slice/task.md` 已把 Rename 列入范围（FR-NAV-003；D-12）；实现量小，且 05 第 4 节把 Rename 列入专项测试。若判定为 P1，则首个交付可延后 2.3.6，其余不受影响。需要在 02 中统一优先级 | 否 | Rename 为 P0，纳入 session-slice；02 第 6 节 MVP 表同步改为 P0（2026-10-09 确认） |
 | NAV-Q5 | 已处于某个 View 的 Project View Mode 时，再次点击导航中同一个 View 的行为：忽略，还是回到新草稿 / 回到 Preview？ | 忽略（不改变左列当前对话与右侧区域）。依据：P-A 的“新草稿”限定为“进入 View”；左列顶栏已提供“新建对话”按钮（Shell 第 7 节），无需用导航承担该功能；避免意外丢弃草稿 | 否 | |
 | NAV-Q6 | Session Mode 下停留在 New Chat 草稿时，导航是否有条目高亮（例如 New Chat 按钮呈 Selected）？ | 无任何条目高亮，New Chat 按钮也不呈 Selected。依据：03 第 8 节与 Shell 第 3 节只规定 Session 项与 View 项的 Selected；New Chat 按钮的状态仅列 Default / Hover / Focus | 否 | |
 | NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），Project Views 区域过高时如何处理：独立滚动、限制高度、折叠？ | V1 首发只有五项，不设计该情形；P1 实现时再定，建议 Project Views 区域设最大高度并内部滚动，保证 SESSIONS 区域始终可见。依据：FR-VIEW-002 为 P1；03 第 8 节要求 Session History 可持续增长 | 否 | |

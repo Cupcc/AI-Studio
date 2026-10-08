@@ -27,11 +27,11 @@
 
 | 模块目录 | 覆盖需求 | spec |
 |---|---|---|
-| `project/` | FR-PROJ-001～FR-PROJ-003 | 未创建 |
-| `navigation/` | FR-NAV-001～FR-NAV-003 | 未创建 |
-| `chat/` | FR-CHAT-001～FR-CHAT-003 | 未创建 |
-| `session/` | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007 | 未创建 |
-| `input/` | FR-INPUT-001～FR-INPUT-002 | 未创建 |
+| `project/` | FR-PROJ-001～FR-PROJ-003 | [草稿](project/spec.md) |
+| `navigation/` | FR-NAV-001～FR-NAV-003 | [草稿](navigation/spec.md) |
+| `chat/` | FR-CHAT-001～FR-CHAT-003 | [草稿](chat/spec.md) |
+| `session/` | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007 | [草稿](session/spec.md) |
+| `input/` | FR-INPUT-001～FR-INPUT-002 | [草稿](input/spec.md) |
 | `project-view/` | FR-VIEW-001～FR-VIEW-008 | 未创建 |
 | `tools/` | FR-TOOL-001～FR-TOOL-004 | 未创建 |
 | `agent-adapter/` | 无 FR 前缀；承接 [04. Technical Requirements](<../docs/04. Technical Requirements.md>) 第 3、4 节与 [06. CLI Integration Preflight](<../docs/06. CLI Integration Preflight.md>) | 未创建 |

@@ -137,16 +137,18 @@ Session S 被视为“正在查看”，当且仅当同时满足：
 1. S 所属 Project 是当前窗口的当前 Tab；并且
 2. 该 Project 的 Main Canvas 处于以下之一：
    - Conversation Mode，且显示的是 S；
-   - Project View Mode，且左侧 Conversation 列显示的是 S（D-05；本切片只需支持由壳层传入该值）。
+   - Project View Mode，且左侧 Conversation 列显示的是 S（D-05；本切片只需支持由壳层传入该值）；并且
+3. 窗口处于前台：应用为当前活动应用，窗口获得焦点、未最小化（S-Q1（c），2026-10-09 确认）。
 
-以下不算正在查看：S 只出现在 Session History 列表中；S 所属 Project 是非当前 Tab；Main Canvas 显示草稿或其他 Session / View。
+以下不算正在查看：S 只出现在 Session History 列表中；S 所属 Project 是非当前 Tab；Main Canvas 显示草稿或其他 Session / View；窗口失焦、最小化、应用在后台或锁屏。
 
-文档未决定、本草稿给出建议的部分（S-Q1）：
+S-Q1 的确认结果（2026-10-09）：
 
-- 窗口失焦、最小化、应用在后台、锁屏：建议不影响“正在查看”的判断（与原型一致；文档未规定系统通知，本模块不发系统通知）。
-- 由切换 Tab 返回或启动时 FR-PROJ-003 恢复而重新显示的 S：建议视为查看，清除 Completed Unread 与 Error（用户已看到最新内容；若不清除，当前显示的 Session 在列表中仍带绿点）。
-- 错误发生时 S 正在被查看：建议与 FR-STATE-004 对称，不产生列表 Error 提醒，Error 卡片照常显示。
-- Project View 左侧 Conversation 列中的 Session 发生错误：按上一条处理（D-05 的延伸）。
+- 错误发生时 S 正在被查看：与 FR-STATE-004 对称，不产生列表 Error 提醒，Error 卡片照常显示；Project View 左侧 Conversation 列中的 Session 同样处理（D-05 的延伸）。
+- 由切换 Tab 返回或启动时 FR-PROJ-003 恢复而重新显示的 S：视为查看，清除 Completed Unread 与 Error。
+- 窗口失焦、最小化、应用在后台时，正在显示的 S 完成或出错仍产生提醒。窗口重新回到前台不会自动清除；用户再次点击 S（列表项或其他打开 S 的操作）才清除（FR-STATE-005）。本模块不发系统通知。
+
+因此“清除提醒”（第 3.1 节 E11）只由打开 S 的用户操作触发：点击列表项、切换 Tab 返回、启动恢复、在 Project View 左列继续 S；“是否产生提醒”（E7、E8 中的 V）按上述三个条件在事件发生时计算。
 
 V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”）。若出现多窗口，任一窗口满足上述条件即视为查看（建议，交 project-shell 对齐）。
 
@@ -227,10 +229,10 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 | E5 | 用户在输入框回复 | `activity = needs_input` | 按 I-Q2 解决相关请求；`activity = running`；追加用户消息；更新 `last_user_message_at` |
 | E6 | Adapter：请求被原生撤回 / 失效 | 请求未答复 | 移出集合；卡片只读并标注失效；集合为空且轮仍进行时 `activity = running` |
 | E7 | Adapter：轮成功结束 | 本轮进行中 | `activity = none`；清空集合；追加 Done 完成行；`completion_unread = !V` |
-| E8 | Adapter：轮失败 / 进行中 Runtime 退出 / 创建或恢复失败 / Stop 兜底失败 | 本轮进行中 | `activity = none`；未答复卡片失效；追加 Error 卡片；`error_unseen = !V`（S-Q1 建议；若采纳“始终置 true”，则查看时立即清除） |
+| E8 | Adapter：轮失败 / 进行中 Runtime 退出 / 创建或恢复失败 / Stop 兜底失败 | 本轮进行中 | `activity = none`；未答复卡片失效；追加 Error 卡片；`error_unseen = !V`（S-Q1，2026-10-09 确认） |
 | E9 | 用户 Stop / 关闭 Project 确认 / 退出确认 | `activity ≠ none` | `stopping = true`；未答复卡片失效并标注“已停止”；`activity = running`；暂停新提交 |
 | E10 | Adapter：Stop 完成 | `stopping` | `activity = none`；`stopping = false`；追加“已停止”完成行；不设置任何提醒 |
-| E11 | Session 变为“正在查看” | 任意 | `error_unseen = false`；`completion_unread = false`；`activity` 不变（Needs Input 不因查看清除） |
+| E11 | 用户操作打开 S：点击列表项、切换 Tab 返回、启动恢复、在 Project View 左列继续 S（窗口回到前台不触发，S-Q1） | 任意 | `error_unseen = false`；`completion_unread = false`；`activity` 不变（Needs Input 不因查看清除） |
 | E12 | 无轮进行时 Runtime 退出 | `activity = none` | 状态不变；标记 Runtime 离线（S-Q5） |
 | E13 | 应用启动恢复 | 持久化 `activity ≠ none` | `activity = none`；未答复卡片失效；按 S-Q7 追加“已停止”行或 Error 卡片 |
 | E14 | 迟到事件（turn ID 不属于当前进行中的轮） | 任意 | 丢弃 |
@@ -332,7 +334,7 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 
 | 接口 | 说明 |
 |---|---|
-| 查看上下文推送 | 当前窗口的当前 Project；该 Project Main Canvas 的模式与显示对象：`conversation(sessionId)` / `draft` / `view(viewId, leftSessionId?)`。本模块据此计算“正在查看”（第 2.11 节），状态恢复（FR-PROJ-003）后同样推送 |
+| 查看上下文推送 | 当前窗口的当前 Project；该 Project Main Canvas 的模式与显示对象：`conversation(sessionId)` / `draft` / `view(viewId, leftSessionId?)`。另需窗口前台状态（应用活动、窗口获得焦点、未最小化），以及“打开 S”的用户操作信号（点击列表项、切换 Tab 返回、启动恢复、在 View 左列继续 S），二者区分开：前者决定是否产生提醒，后者触发清除（第 2.11 节，S-Q1 2026-10-09 确认）。状态恢复（FR-PROJ-003）后同样推送 |
 | 打开 Session / 打开 View 的导航接口 | 点击列表项、“在 View 中打开”、创建 Session 后切换到该 Session |
 | 关闭 Tab 前查询与确认后回调 | 调用 `activeTurnCount`、`stopProjectTurns` |
 | 应用退出前钩子 | 调用 `activeTurnCountAll`、`stopAllTurns`（由 app-skeleton / 壳层提供） |
@@ -347,8 +349,8 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
-| S-Q1 | “正在查看”的边界：(a) 错误发生时用户正在查看该 Session，是否仍在列表显示红点？(b) 切换 Tab 返回、启动恢复后重新显示的 Session 是否视为查看并清除绿点 / 红点？(c) 窗口失焦、最小化、应用在后台是否影响？ | (a) 不显示，与 FR-STATE-004 对 Completed Unread 的规则对称，错误卡片已可见；(b) 视为查看并清除，否则当前显示的 Session 带着提醒；(c) 不影响，V1 无系统通知。依据：FR-STATE-004、D-05、D-15；原型 v01 的行为一致 | 是：决定状态机 E8、E11 | |
-| S-Q2 | Error 卡片“重试”做什么？ | 先恢复 CLI Conversation（FR-STATE-003），再把失败那一轮的用户消息（含上下文项）作为新消息重新发送，在对话中可见并更新排序时间；恢复失败则追加新的 Error 卡片。不自动重跑已停止的命令（04 第 4 节第 7 条） | 是：Error 卡片实现前 | |
+| S-Q1 | “正在查看”的边界：(a) 错误发生时用户正在查看该 Session，是否仍在列表显示红点？(b) 切换 Tab 返回、启动恢复后重新显示的 Session 是否视为查看并清除绿点 / 红点？(c) 窗口失焦、最小化、应用在后台是否影响？ | (a) 不显示，与 FR-STATE-004 对 Completed Unread 的规则对称，错误卡片已可见；(b) 视为查看并清除，否则当前显示的 Session 带着提醒；(c) 不影响，V1 无系统通知。依据：FR-STATE-004、D-05、D-15；原型 v01 的行为一致 | 是：决定状态机 E8、E11 | （a）（b）采纳建议；（c）不采纳：窗口失焦、最小化、应用在后台时不算正在查看——此时正在显示的 Session 完成或出错仍产生提醒，窗口重新获得焦点不清除，用户再次点击该 Session 才清除（2026-10-09 确认） |
+| S-Q2 | Error 卡片“重试”做什么？ | 先恢复 CLI Conversation（FR-STATE-003），再把失败那一轮的用户消息（含上下文项）作为新消息重新发送，在对话中可见并更新排序时间；恢复失败则追加新的 Error 卡片。不自动重跑已停止的命令（04 第 4 节第 7 条） | 是：Error 卡片实现前 | 采纳建议：先恢复 CLI Conversation，再把失败那一轮的用户消息作为新消息重发（2026-10-09 确认） |
 | S-Q3 | 原生会话无法恢复（ID 无效、原生记录被删）时，除重试外是否提供其他出路？ | 不提供迁移或“以新会话继续”；Error 卡片说明原因，用户自行 New Chat。依据：04 第 4 节第 7 条“不得静默创建新 Session”；文档未要求其他入口 | 否 | |
 | S-Q4 | 首条消息后原生 ID 尚未产生就失败（如 Claude 在 `system/init` 前退出），下一次发送是创建新的原生会话吗？ | 是。此时不存在原生会话，创建不违反 1:1；一旦绑定 ID 便不再新建。依据：01 第 7 节；06 第 3 节 Claude 初始化时序 | 否 | |
 | S-Q5 | 没有进行中的轮时 Runtime 退出，是否显示 Error？ | 不显示，只标记离线，下一次发送时恢复。FR-STATE-003 的 Error 用于提醒执行出错，空闲退出不影响用户工作；06 第 4 节已验证进程终止后可按原 ID 恢复 | 否 | |
