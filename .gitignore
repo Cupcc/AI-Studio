@@ -1,3 +1,9 @@
 .DS_Store
 .runtime/
 node_modules/
+dist/
+out/
+coverage/
+*.tsbuildinfo
+test-results/
+playwright-report/
