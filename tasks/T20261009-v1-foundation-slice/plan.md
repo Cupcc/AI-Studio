@@ -24,10 +24,11 @@
 | agent-adapter | W2 | Codex Provider | Opus 5.5 xhigh | agent-adapter W1 | todo |
 | agent-adapter | W3 | Claude Provider | Opus 5.5 high | agent-adapter W1 | todo |
 | project-view | W1 | 待决事项调研与决定草稿 | Sonnet 5.5 xhigh | — | in_progress |
-| project-shell | W1 | `specs/project`、`specs/navigation` 草稿 | Sonnet 5.5 high | — | in_progress |
+| project-shell | W1 | `specs/project`、`specs/navigation` 草稿 | Sonnet 5.5 high | — | done |
 | session-slice | W1 | `specs/session`、`specs/chat`、`specs/input` 草稿 | Opus 5.5 high | — | in_progress |
 
 ## 进度与决定
 
 - 2026-10-09 基线提交 `e17e295` 进入 `main`，创建 `dev/v1`；写入本轮拆分与各子 task 卡片。
 - 2026-10-09 Wave 1 启动 5 个 worker，各自在 `.claude/worktrees/agent-*` 的独立 worktree 分支（`worktree-agent-*`）上工作，基于 `98490b2`。`.claude/worktrees/` 已加入本地 `.git/info/exclude`。合并后的验证在临时干净克隆中进行，避免主工作区的 `node_modules` 影响仍在运行的 worktree。
+- 2026-10-09 project-shell W1 合并（spec 草稿，30 个未决问题，3 个阻塞）。
