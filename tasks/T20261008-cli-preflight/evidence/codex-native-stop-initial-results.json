@@ -1,0 +1,12 @@
+{
+  "provider": "codex",
+  "at": "2026-10-08T13:43:27.308Z",
+  "results": [
+    {
+      "label": "codex.native-stop-clean-terminate-isolation",
+      "status": "fail",
+      "detail": "{\"code\":-32600,\"message\":\"no active turn to interrupt\"}",
+      "at": "2026-10-08T13:43:27.227Z"
+    }
+  ]
+}

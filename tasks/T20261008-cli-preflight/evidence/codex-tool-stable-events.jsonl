@@ -1,0 +1,35 @@
+{"at":1791460207232,"provider":"codex","method":"configWarning"}
+{"at":1791460207233,"provider":"codex","method":"remoteControl/status/changed"}
+{"at":1791460207278,"provider":"codex","method":"configWarning"}
+{"at":1791460207278,"provider":"codex","method":"remoteControl/status/changed"}
+{"at":1791460207326,"provider":"codex","method":"thread/started","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d"}
+{"at":1791460207326,"provider":"codex","method":"warning","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d"}
+{"at":1791460207326,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d"}
+{"at":1791460207326,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d"}
+{"at":1791460207389,"provider":"codex","method":"thread/status/changed","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","status":"active"}
+{"at":1791460207389,"provider":"codex","method":"turn/started","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","status":"inProgress"}
+{"at":1791460207477,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d"}
+{"at":1791460207516,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d"}
+{"at":1791460207520,"provider":"codex","method":"item/started","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","itemType":"userMessage"}
+{"at":1791460207522,"provider":"codex","method":"item/completed","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","itemType":"userMessage"}
+{"at":1791460210981,"provider":"codex","method":"item/started","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","itemType":"agentMessage"}
+{"at":1791460210981,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","delta":"I"}
+{"at":1791460210981,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","delta":"’ll"}
+{"at":1791460210982,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","delta":" run"}
+{"at":1791460210982,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","delta":" the"}
+{"at":1791460210982,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","delta":" exact"}
+{"at":1791460211234,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","delta":" command"}
+{"at":1791460211234,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","delta":" now"}
+{"at":1791460211254,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","delta":"."}
+{"at":1791460211429,"provider":"codex","method":"item/completed","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","itemType":"agentMessage"}
+{"at":1791460212695,"provider":"codex","method":"thread/status/changed","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","status":"active"}
+{"at":1791460212695,"provider":"codex","method":"item/started","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","itemType":"commandExecution","itemStatus":"inProgress","exitCode":null}
+{"at":1791460212695,"provider":"codex","method":"item/commandExecution/requestApproval","requestId":0,"threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f"}
+{"at":1791460212881,"provider":"codex","method":"serverRequest/resolved","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d"}
+{"at":1791460212881,"provider":"codex","method":"thread/status/changed","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","status":"active"}
+{"at":1791460213883,"provider":"codex","type":"tool_probe","phase":"before-interrupt","processes":[{"pid":2406,"command":"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python -c import time; print(\"STUDIO_SLEEP_a95625c67e3341c58e251b97d1e5fabc\", flush=True); time.sleep(47)"}]}
+{"at":1791460213972,"provider":"codex","method":"thread/tokenUsage/updated","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f"}
+{"at":1791460213972,"provider":"codex","method":"account/rateLimits/updated"}
+{"at":1791460213976,"provider":"codex","method":"thread/status/changed","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","status":"idle"}
+{"at":1791460213976,"provider":"codex","method":"turn/completed","threadId":"01a11b59-6ab0-7ea3-a345-309eaf00973d","turnId":"01a11b59-6adf-7342-9df9-6feb7e04ff3f","status":"interrupted"}
+{"at":1791460219225,"provider":"codex","type":"tool_probe","phase":"five-seconds-after-interrupt","processes":[{"pid":2406,"command":"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python -c import time; print(\"STUDIO_SLEEP_a95625c67e3341c58e251b97d1e5fabc\", flush=True); time.sleep(47)"}]}

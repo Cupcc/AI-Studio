@@ -1,0 +1,23 @@
+{
+  "provider": "codex",
+  "at": "2026-10-08T11:49:51.452Z",
+  "results": [
+    {
+      "label": "codex.tool-interrupt",
+      "status": "fail",
+      "detail": "Condition not reached after 5000ms",
+      "at": "2026-10-08T11:49:32.879Z"
+    },
+    {
+      "label": "codex.tool-stop-runtime-fallback",
+      "status": "pass",
+      "detail": {
+        "runtimeTerminated": true,
+        "subprocessReaped": true,
+        "sameSessionResumed": true,
+        "requiresIsolatedRuntime": true
+      },
+      "at": "2026-10-08T11:49:51.435Z"
+    }
+  ]
+}

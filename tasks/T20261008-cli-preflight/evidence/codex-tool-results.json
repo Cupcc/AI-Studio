@@ -1,0 +1,12 @@
+{
+  "provider": "codex",
+  "at": "2026-10-08T11:48:00.056Z",
+  "results": [
+    {
+      "label": "codex.tool-interrupt",
+      "status": "fail",
+      "detail": "Condition not reached after 5000ms",
+      "at": "2026-10-08T11:48:00.039Z"
+    }
+  ]
+}

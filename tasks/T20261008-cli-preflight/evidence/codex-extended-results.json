@@ -1,0 +1,27 @@
+{
+  "provider": "codex",
+  "at": "2026-10-08T11:43:44.183Z",
+  "results": [
+    {
+      "label": "codex.question-and-answer",
+      "status": "pass",
+      "detail": {
+        "method": "item/tool/requestUserInput",
+        "questionCount": 1,
+        "waitedForHost": true,
+        "answerApplied": true
+      },
+      "at": "2026-10-08T11:43:36.301Z"
+    },
+    {
+      "label": "codex.crash-isolation-and-resume",
+      "status": "pass",
+      "detail": {
+        "killedDuringTurn": true,
+        "otherProcessHealthy": true,
+        "sameIdRestored": true
+      },
+      "at": "2026-10-08T11:43:44.175Z"
+    }
+  ]
+}

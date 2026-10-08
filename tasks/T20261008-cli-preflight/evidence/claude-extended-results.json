@@ -1,0 +1,23 @@
+{
+  "provider": "claude",
+  "at": "2026-10-08T11:45:14.450Z",
+  "results": [
+    {
+      "label": "claude.question-and-answer",
+      "status": "pass",
+      "detail": {
+        "tool": "AskUserQuestion",
+        "waitedForHost": true,
+        "answerApplied": true,
+        "id": "102c69a2-f306-4904-a18a-427f2afb4a67"
+      },
+      "at": "2026-10-08T11:43:43.321Z"
+    },
+    {
+      "label": "claude.crash-isolation-and-resume",
+      "status": "fail",
+      "detail": "Timeout after 90000ms",
+      "at": "2026-10-08T11:45:14.450Z"
+    }
+  ]
+}

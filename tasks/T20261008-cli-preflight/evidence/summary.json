@@ -1,0 +1,371 @@
+[
+  {
+    "run": "codex-run",
+    "label": "codex.handshake",
+    "status": "pass",
+    "detail": {
+      "transport": "stdio NDJSON",
+      "version": "codex-cli 0.161.0"
+    },
+    "at": "2026-10-08T11:40:20.625Z"
+  },
+  {
+    "run": "codex-run",
+    "label": "codex.model-catalog",
+    "status": "pass",
+    "detail": {
+      "count": 9,
+      "default": "gpt-6.1-sol",
+      "models": [
+        "gpt-6.1-sol",
+        "gpt-6-astra",
+        "gpt-6-sol",
+        "gpt-6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna",
+        "gpt-5.5",
+        "gpt-reserve"
+      ]
+    },
+    "at": "2026-10-08T11:40:20.630Z"
+  },
+  {
+    "run": "codex-run",
+    "label": "codex.create-stream-complete",
+    "status": "pass",
+    "detail": {
+      "id": "01a11b50-771f-7ad0-9100-bd0fc78677fd",
+      "cwd": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/ai-studio-preflight-j35j36wx/codex-run/project with spaces",
+      "model": "gpt-6.1-sol",
+      "status": "completed",
+      "error": null,
+      "text": "STUDIO_399f9697",
+      "deltas": 7,
+      "turnId": "01a11b50-77b7-7e71-b9b7-2792a8f093b0"
+    },
+    "at": "2026-10-08T11:40:26.140Z"
+  },
+  {
+    "run": "codex-run",
+    "label": "codex.restart-resume",
+    "status": "pass",
+    "detail": {
+      "sameId": true,
+      "historyTurns": 1,
+      "status": "completed",
+      "error": null,
+      "text": "STUDIO_399f9697",
+      "deltas": 7,
+      "turnId": "01a11b50-8d0f-73a2-b861-612bb6302e60"
+    },
+    "at": "2026-10-08T11:40:30.249Z"
+  },
+  {
+    "run": "codex-run",
+    "label": "codex.invalid-resume-and-health",
+    "status": "pass",
+    "detail": {
+      "rejected": true,
+      "serverAlive": true
+    },
+    "at": "2026-10-08T11:40:30.276Z"
+  },
+  {
+    "run": "codex-run",
+    "label": "codex.concurrent-session-isolation",
+    "status": "pass",
+    "detail": {
+      "distinctIds": true,
+      "separateCwd": true,
+      "lifecycle": [
+        {
+          "method": "turn/started",
+          "threadId": "01a11b50-9cc7-72f3-a1a5-736cbd3d78af"
+        },
+        {
+          "method": "turn/started",
+          "threadId": "01a11b50-9cec-73b1-96eb-49755aebd521"
+        },
+        {
+          "method": "turn/completed",
+          "threadId": "01a11b50-9cec-73b1-96eb-49755aebd521"
+        },
+        {
+          "method": "turn/completed",
+          "threadId": "01a11b50-9cc7-72f3-a1a5-736cbd3d78af"
+        }
+      ]
+    },
+    "at": "2026-10-08T11:40:37.107Z"
+  },
+  {
+    "run": "codex-run",
+    "label": "codex.approval-decline",
+    "status": "pass",
+    "detail": {
+      "method": "item/commandExecution/requestApproval",
+      "waitedForHost": true,
+      "deniedSideEffectAbsent": true,
+      "status": "completed"
+    },
+    "at": "2026-10-08T11:40:48.971Z"
+  },
+  {
+    "run": "codex-run",
+    "label": "codex.interrupt-and-continue",
+    "status": "pass",
+    "detail": {
+      "interrupted": true,
+      "sameSessionContinued": true
+    },
+    "at": "2026-10-08T11:41:24.002Z"
+  },
+  {
+    "run": "claude-run",
+    "label": "claude.model-catalog",
+    "status": "pass",
+    "detail": {
+      "count": 13,
+      "models": [
+        "default",
+        "opus",
+        "sonnet",
+        "fable",
+        "haiku",
+        "claude-haiku-4-5-20251001",
+        "claude-sonnet-5",
+        "claude-opus-5",
+        "claude-fable-5",
+        "claude-opus-4-8",
+        "claude-opus-4-7",
+        "claude-opus-4-6",
+        "claude-sonnet-4-6"
+      ]
+    },
+    "at": "2026-10-08T11:40:36.483Z"
+  },
+  {
+    "run": "claude-run",
+    "label": "claude.create-stream-complete",
+    "status": "pass",
+    "detail": {
+      "id": "a89f30da-52fe-47a7-aa45-d478af4d6207",
+      "subtype": "success",
+      "isError": false,
+      "text": "STUDIO_9f409107",
+      "deltas": 2,
+      "permissionDenials": 0
+    },
+    "at": "2026-10-08T11:40:39.402Z"
+  },
+  {
+    "run": "claude-run",
+    "label": "claude.restart-resume",
+    "status": "pass",
+    "detail": {
+      "sameId": true,
+      "id": "a89f30da-52fe-47a7-aa45-d478af4d6207",
+      "subtype": "success",
+      "isError": false,
+      "text": "STUDIO_9f409107",
+      "deltas": 2,
+      "permissionDenials": 0
+    },
+    "at": "2026-10-08T11:40:44.638Z"
+  },
+  {
+    "run": "claude-run",
+    "label": "claude.concurrent-session-isolation",
+    "status": "pass",
+    "detail": {
+      "distinctIds": true,
+      "simultaneousRequests": true,
+      "messageStartEvents": 2
+    },
+    "at": "2026-10-08T11:40:53.238Z"
+  },
+  {
+    "run": "claude-run",
+    "label": "claude.approval-decline",
+    "status": "pass",
+    "detail": {
+      "tool": "Write",
+      "waitedForHost": true,
+      "deniedSideEffectAbsent": true,
+      "id": "a9a7d52e-bb5c-4a12-9fa6-4063a9c08f81",
+      "subtype": "success",
+      "isError": false,
+      "text": "The write was denied, so I stopped. The Write tool returned: \"Integration test: deny this synthetic write.\" `approval-probe.txt` was not created.",
+      "deltas": 7,
+      "permissionDenials": 1
+    },
+    "at": "2026-10-08T11:41:02.383Z"
+  },
+  {
+    "run": "claude-run",
+    "label": "claude.interrupt-and-continue",
+    "status": "pass",
+    "detail": {
+      "receipt": {
+        "still_queued": []
+      },
+      "terminalSubtype": "error_during_execution",
+      "terminalIsError": true,
+      "sameSessionContinued": true
+    },
+    "at": "2026-10-08T11:41:20.615Z"
+  },
+  {
+    "run": "claude-run",
+    "label": "claude.invalid-resume",
+    "status": "pass",
+    "detail": {
+      "rejected": true,
+      "detail": {
+        "id": "f9c4a6b0-1bc0-46ae-b60f-535aef4114bd",
+        "subtype": "error_during_execution",
+        "isError": true,
+        "errors": [
+          "No conversation found with session ID: f9c4a6b0-1bc0-46ae-b60f-535aef4114bd"
+        ],
+        "deltas": 0,
+        "permissionDenials": 0
+      }
+    },
+    "at": "2026-10-08T11:41:23.864Z"
+  },
+  {
+    "run": "codex-extended",
+    "label": "codex.question-and-answer",
+    "status": "pass",
+    "detail": {
+      "method": "item/tool/requestUserInput",
+      "questionCount": 1,
+      "waitedForHost": true,
+      "answerApplied": true
+    },
+    "at": "2026-10-08T11:43:36.301Z"
+  },
+  {
+    "run": "codex-extended",
+    "label": "codex.crash-isolation-and-resume",
+    "status": "pass",
+    "detail": {
+      "killedDuringTurn": true,
+      "otherProcessHealthy": true,
+      "sameIdRestored": true
+    },
+    "at": "2026-10-08T11:43:44.175Z"
+  },
+  {
+    "run": "claude-extended",
+    "label": "claude.question-and-answer",
+    "status": "pass",
+    "detail": {
+      "tool": "AskUserQuestion",
+      "waitedForHost": true,
+      "answerApplied": true,
+      "id": "102c69a2-f306-4904-a18a-427f2afb4a67"
+    },
+    "at": "2026-10-08T11:43:43.321Z"
+  },
+  {
+    "run": "claude-extended",
+    "label": "claude.crash-isolation-and-resume",
+    "status": "fail",
+    "detail": "Timeout after 90000ms",
+    "at": "2026-10-08T11:45:14.450Z"
+  },
+  {
+    "run": "claude-crash-retry",
+    "label": "claude.crash-isolation-and-resume",
+    "status": "pass",
+    "detail": {
+      "killedDuringTurn": true,
+      "otherProcessHealthy": true,
+      "sameIdRestored": true
+    },
+    "at": "2026-10-08T11:45:28.745Z"
+  },
+  {
+    "run": "codex-tool",
+    "label": "codex.tool-interrupt",
+    "status": "fail",
+    "detail": "Condition not reached after 5000ms",
+    "at": "2026-10-08T11:48:00.039Z"
+  },
+  {
+    "run": "claude-tool",
+    "label": "claude.tool-interrupt",
+    "status": "pass",
+    "detail": {
+      "startedPids": [
+        780,
+        781
+      ],
+      "receipt": {
+        "still_queued": []
+      },
+      "terminalSubtype": "error_during_execution",
+      "subprocessReaped": true
+    },
+    "at": "2026-10-08T11:47:57.606Z"
+  },
+  {
+    "run": "codex-tool-retry",
+    "label": "codex.tool-interrupt",
+    "status": "fail",
+    "detail": "Condition not reached after 5000ms",
+    "at": "2026-10-08T11:49:32.879Z"
+  },
+  {
+    "run": "codex-tool-retry",
+    "label": "codex.tool-stop-runtime-fallback",
+    "status": "pass",
+    "detail": {
+      "runtimeTerminated": true,
+      "subprocessReaped": true,
+      "sameSessionResumed": true,
+      "requiresIsolatedRuntime": true
+    },
+    "at": "2026-10-08T11:49:51.435Z"
+  },
+  {
+    "run": "codex-tool-stable",
+    "label": "codex.tool-interrupt",
+    "status": "fail",
+    "detail": "Condition not reached after 5000ms",
+    "at": "2026-10-08T11:50:19.300Z"
+  },
+  {
+    "run": "codex-native-stop-initial",
+    "label": "codex.native-stop-clean-terminate-isolation",
+    "status": "fail",
+    "detail": "{\"code\":-32600,\"message\":\"no active turn to interrupt\"}",
+    "at": "2026-10-08T13:43:27.227Z"
+  },
+  {
+    "run": "codex-native-stop",
+    "label": "codex.native-stop-clean-terminate-isolation",
+    "status": "pass",
+    "detail": {
+      "cliVersion": "codex-cli 0.161.0",
+      "turnInterruptPreservedBackground": true,
+      "cleanReply": {},
+      "cleanLatencyMs": 51,
+      "cleanedThreadNativeListEmpty": true,
+      "cleanedThreadOsProbeExited": true,
+      "otherThreadStillActive": true,
+      "otherThreadProbePreserved": true,
+      "terminateReply": {
+        "terminated": true
+      },
+      "terminateLatencyMs": 48,
+      "terminatedThreadOsProbeExited": true,
+      "sameRuntimeContinued": true,
+      "originalThreadContextPreserved": true
+    },
+    "at": "2026-10-08T13:45:37.568Z"
+  }
+]

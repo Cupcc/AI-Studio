@@ -1,0 +1,22 @@
+{
+  "provider": "claude",
+  "at": "2026-10-08T11:47:57.606Z",
+  "results": [
+    {
+      "label": "claude.tool-interrupt",
+      "status": "pass",
+      "detail": {
+        "startedPids": [
+          780,
+          781
+        ],
+        "receipt": {
+          "still_queued": []
+        },
+        "terminalSubtype": "error_during_execution",
+        "subprocessReaped": true
+      },
+      "at": "2026-10-08T11:47:57.606Z"
+    }
+  ]
+}

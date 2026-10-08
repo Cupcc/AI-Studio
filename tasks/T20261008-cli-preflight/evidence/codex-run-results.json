@@ -1,0 +1,120 @@
+{
+  "provider": "codex",
+  "at": "2026-10-08T11:41:24.014Z",
+  "results": [
+    {
+      "label": "codex.handshake",
+      "status": "pass",
+      "detail": {
+        "transport": "stdio NDJSON",
+        "version": "codex-cli 0.161.0"
+      },
+      "at": "2026-10-08T11:40:20.625Z"
+    },
+    {
+      "label": "codex.model-catalog",
+      "status": "pass",
+      "detail": {
+        "count": 9,
+        "default": "gpt-6.1-sol",
+        "models": [
+          "gpt-6.1-sol",
+          "gpt-6-astra",
+          "gpt-6-sol",
+          "gpt-6-luna",
+          "gpt-5.6-sol",
+          "gpt-5.6-terra",
+          "gpt-5.6-luna",
+          "gpt-5.5",
+          "gpt-reserve"
+        ]
+      },
+      "at": "2026-10-08T11:40:20.630Z"
+    },
+    {
+      "label": "codex.create-stream-complete",
+      "status": "pass",
+      "detail": {
+        "id": "01a11b50-771f-7ad0-9100-bd0fc78677fd",
+        "cwd": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/ai-studio-preflight-j35j36wx/codex-run/project with spaces",
+        "model": "gpt-6.1-sol",
+        "status": "completed",
+        "error": null,
+        "text": "STUDIO_399f9697",
+        "deltas": 7,
+        "turnId": "01a11b50-77b7-7e71-b9b7-2792a8f093b0"
+      },
+      "at": "2026-10-08T11:40:26.140Z"
+    },
+    {
+      "label": "codex.restart-resume",
+      "status": "pass",
+      "detail": {
+        "sameId": true,
+        "historyTurns": 1,
+        "status": "completed",
+        "error": null,
+        "text": "STUDIO_399f9697",
+        "deltas": 7,
+        "turnId": "01a11b50-8d0f-73a2-b861-612bb6302e60"
+      },
+      "at": "2026-10-08T11:40:30.249Z"
+    },
+    {
+      "label": "codex.invalid-resume-and-health",
+      "status": "pass",
+      "detail": {
+        "rejected": true,
+        "serverAlive": true
+      },
+      "at": "2026-10-08T11:40:30.276Z"
+    },
+    {
+      "label": "codex.concurrent-session-isolation",
+      "status": "pass",
+      "detail": {
+        "distinctIds": true,
+        "separateCwd": true,
+        "lifecycle": [
+          {
+            "method": "turn/started",
+            "threadId": "01a11b50-9cc7-72f3-a1a5-736cbd3d78af"
+          },
+          {
+            "method": "turn/started",
+            "threadId": "01a11b50-9cec-73b1-96eb-49755aebd521"
+          },
+          {
+            "method": "turn/completed",
+            "threadId": "01a11b50-9cec-73b1-96eb-49755aebd521"
+          },
+          {
+            "method": "turn/completed",
+            "threadId": "01a11b50-9cc7-72f3-a1a5-736cbd3d78af"
+          }
+        ]
+      },
+      "at": "2026-10-08T11:40:37.107Z"
+    },
+    {
+      "label": "codex.approval-decline",
+      "status": "pass",
+      "detail": {
+        "method": "item/commandExecution/requestApproval",
+        "waitedForHost": true,
+        "deniedSideEffectAbsent": true,
+        "status": "completed"
+      },
+      "at": "2026-10-08T11:40:48.971Z"
+    },
+    {
+      "label": "codex.interrupt-and-continue",
+      "status": "pass",
+      "detail": {
+        "interrupted": true,
+        "sameSessionContinued": true
+      },
+      "at": "2026-10-08T11:41:24.002Z"
+    }
+  ]
+}

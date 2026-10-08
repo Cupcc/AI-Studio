@@ -1,0 +1,151 @@
+{"at":1791467105575,"provider":"codex","method":"configWarning"}
+{"at":1791467105575,"provider":"codex","method":"remoteControl/status/changed"}
+{"at":1791467105631,"provider":"codex","method":"thread/started","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1"}
+{"at":1791467105631,"provider":"codex","method":"warning","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1"}
+{"at":1791467105631,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1"}
+{"at":1791467105631,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1"}
+{"at":1791467105712,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","status":"active"}
+{"at":1791467105712,"provider":"codex","method":"turn/started","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","status":"inProgress"}
+{"at":1791467105790,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1"}
+{"at":1791467105858,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1"}
+{"at":1791467105862,"provider":"codex","method":"item/started","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","itemType":"userMessage"}
+{"at":1791467105864,"provider":"codex","method":"item/completed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","itemType":"userMessage"}
+{"at":1791467109943,"provider":"codex","method":"item/started","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","itemType":"agentMessage"}
+{"at":1791467109944,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","delta":"I"}
+{"at":1791467109944,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","delta":"’ll"}
+{"at":1791467109944,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","delta":" run"}
+{"at":1791467109944,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","delta":" the"}
+{"at":1791467109944,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","delta":" exact"}
+{"at":1791467110200,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","delta":" command"}
+{"at":1791467110200,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","delta":" now"}
+{"at":1791467110214,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","delta":".\n"}
+{"at":1791467110352,"provider":"codex","method":"item/completed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","itemType":"agentMessage"}
+{"at":1791467111920,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","status":"active"}
+{"at":1791467111920,"provider":"codex","method":"item/started","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","itemType":"commandExecution","itemStatus":"inProgress","exitCode":null}
+{"at":1791467111920,"provider":"codex","method":"item/commandExecution/requestApproval","requestId":0,"threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7"}
+{"at":1791467112122,"provider":"codex","method":"serverRequest/resolved","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1"}
+{"at":1791467112122,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","status":"active"}
+{"at":1791467113232,"provider":"codex","method":"thread/tokenUsage/updated","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7"}
+{"at":1791467113232,"provider":"codex","method":"account/rateLimits/updated"}
+{"at":1791467113377,"provider":"codex","type":"tool_probe","label":"victim","phase":"started","processes":[{"pid":19495,"command":"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python -c import time; print(\"STUDIO_SLEEP_a1ce7ef722d54f9ca572f2551c4816e9\", flush=True); time.sleep(120)"}]}
+{"at":1791467113434,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","status":"idle"}
+{"at":1791467113434,"provider":"codex","method":"turn/completed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","status":"interrupted"}
+{"at":1791467114522,"provider":"codex","method":"thread/started","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3"}
+{"at":1791467114522,"provider":"codex","method":"warning","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3"}
+{"at":1791467114522,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3"}
+{"at":1791467114522,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3"}
+{"at":1791467114587,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","status":"active"}
+{"at":1791467114587,"provider":"codex","method":"turn/started","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","status":"inProgress"}
+{"at":1791467114587,"provider":"codex","method":"item/started","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","itemType":"userMessage"}
+{"at":1791467114587,"provider":"codex","method":"item/completed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","itemType":"userMessage"}
+{"at":1791467114686,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3"}
+{"at":1791467114726,"provider":"codex","method":"mcpServer/startupStatus/updated","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3"}
+{"at":1791467122555,"provider":"codex","method":"item/started","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","itemType":"agentMessage"}
+{"at":1791467122649,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"I"}
+{"at":1791467122649,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"’ll"}
+{"at":1791467122649,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":" run"}
+{"at":1791467122649,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":" the"}
+{"at":1791467122649,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":" exact"}
+{"at":1791467122896,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":" command"}
+{"at":1791467122896,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":" and"}
+{"at":1791467122896,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":" remember"}
+{"at":1791467122896,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":" `"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"ST"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"UDIO"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"_SLEEP"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"_"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"451"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"6"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"e"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"087"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"622"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"946"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"94"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"a"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"55"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"f"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"20"}
+{"at":1791467123291,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"a"}
+{"at":1791467123302,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"942"}
+{"at":1791467123302,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"22"}
+{"at":1791467123302,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"ef"}
+{"at":1791467123302,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"1"}
+{"at":1791467123302,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"a"}
+{"at":1791467123302,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","delta":"`.\n"}
+{"at":1791467123439,"provider":"codex","method":"item/completed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","itemType":"agentMessage"}
+{"at":1791467124874,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","status":"active"}
+{"at":1791467124926,"provider":"codex","method":"item/started","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","itemType":"commandExecution","itemStatus":"inProgress","exitCode":null}
+{"at":1791467124926,"provider":"codex","method":"item/commandExecution/requestApproval","requestId":1,"threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e"}
+{"at":1791467125182,"provider":"codex","method":"serverRequest/resolved","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3"}
+{"at":1791467125182,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","status":"active"}
+{"at":1791467126183,"provider":"codex","type":"tool_probe","label":"survivor","phase":"started","processes":[{"pid":20014,"command":"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python -c import time; print(\"STUDIO_SLEEP_4516e08762294694a55f20a94222ef1a\", flush=True); time.sleep(120)"}]}
+{"at":1791467126293,"provider":"codex","method":"item/completed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-ad60-7eb1-9e86-a0b8734a9dc7","itemType":"commandExecution","itemStatus":"failed","exitCode":-1}
+{"at":1791467126293,"provider":"codex","method":"thread/tokenUsage/updated","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e"}
+{"at":1791467126293,"provider":"codex","method":"account/rateLimits/updated"}
+{"at":1791467126347,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","status":"idle"}
+{"at":1791467126347,"provider":"codex","method":"turn/completed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","status":"interrupted"}
+{"at":1791467126396,"provider":"codex","method":"item/completed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc2-d01b-7091-a2cc-132daea6450e","itemType":"commandExecution","itemStatus":"failed","exitCode":-1}
+{"at":1791467126403,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","status":"active"}
+{"at":1791467126403,"provider":"codex","method":"turn/started","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","status":"inProgress"}
+{"at":1791467126406,"provider":"codex","method":"item/started","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","itemType":"userMessage"}
+{"at":1791467126408,"provider":"codex","method":"item/completed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","itemType":"userMessage"}
+{"at":1791467129923,"provider":"codex","method":"item/started","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","itemType":"agentMessage"}
+{"at":1791467129924,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"ST"}
+{"at":1791467129924,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"UDIO"}
+{"at":1791467129924,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"_SLEEP"}
+{"at":1791467129924,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"_a"}
+{"at":1791467129924,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"1"}
+{"at":1791467129924,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"ce"}
+{"at":1791467130253,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"7"}
+{"at":1791467130253,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"ef"}
+{"at":1791467130253,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"722"}
+{"at":1791467130253,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"d"}
+{"at":1791467130253,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"54"}
+{"at":1791467130253,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"f"}
+{"at":1791467130253,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"9"}
+{"at":1791467130253,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"ca"}
+{"at":1791467130298,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"572"}
+{"at":1791467130298,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"f"}
+{"at":1791467130299,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"255"}
+{"at":1791467130299,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"1"}
+{"at":1791467130299,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"c"}
+{"at":1791467130299,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"481"}
+{"at":1791467130299,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"6"}
+{"at":1791467130299,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"e"}
+{"at":1791467130347,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","delta":"9"}
+{"at":1791467130402,"provider":"codex","method":"item/completed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","itemType":"agentMessage"}
+{"at":1791467130408,"provider":"codex","method":"thread/tokenUsage/updated","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659"}
+{"at":1791467130408,"provider":"codex","method":"account/rateLimits/updated"}
+{"at":1791467130410,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","status":"idle"}
+{"at":1791467130410,"provider":"codex","method":"turn/completed","threadId":"01a11bc2-ad2c-7c02-98d1-058d6e86d4f1","turnId":"01a11bc2-fe7d-7df0-8d20-048e3e13a659","status":"completed"}
+{"at":1791467130419,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","status":"active"}
+{"at":1791467130419,"provider":"codex","method":"turn/started","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","status":"inProgress"}
+{"at":1791467130422,"provider":"codex","method":"item/started","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","itemType":"userMessage"}
+{"at":1791467130422,"provider":"codex","method":"item/completed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","itemType":"userMessage"}
+{"at":1791467136826,"provider":"codex","method":"item/started","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","itemType":"agentMessage"}
+{"at":1791467136827,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"ST"}
+{"at":1791467136827,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"UDIO"}
+{"at":1791467136827,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"_SLEEP"}
+{"at":1791467136827,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"_"}
+{"at":1791467136827,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"451"}
+{"at":1791467136827,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"6"}
+{"at":1791467136841,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"e"}
+{"at":1791467136841,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"087"}
+{"at":1791467136841,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"622"}
+{"at":1791467136841,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"946"}
+{"at":1791467136841,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"94"}
+{"at":1791467136841,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"a"}
+{"at":1791467136841,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"55"}
+{"at":1791467136841,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"f"}
+{"at":1791467137400,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"20"}
+{"at":1791467137400,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"a"}
+{"at":1791467137400,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"942"}
+{"at":1791467137400,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"22"}
+{"at":1791467137400,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"ef"}
+{"at":1791467137400,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"1"}
+{"at":1791467137400,"provider":"codex","method":"item/agentMessage/delta","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","delta":"a"}
+{"at":1791467137523,"provider":"codex","method":"item/completed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","itemType":"agentMessage"}
+{"at":1791467137557,"provider":"codex","method":"thread/tokenUsage/updated","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768"}
+{"at":1791467137557,"provider":"codex","method":"account/rateLimits/updated"}
+{"at":1791467137559,"provider":"codex","method":"thread/status/changed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","status":"idle"}
+{"at":1791467137559,"provider":"codex","method":"turn/completed","threadId":"01a11bc2-cffc-7781-8b5e-d92f841175e3","turnId":"01a11bc3-0e2b-71d0-9b8e-c1b92d2b6768","status":"completed"}

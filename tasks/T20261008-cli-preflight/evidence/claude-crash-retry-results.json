@@ -1,0 +1,16 @@
+{
+  "provider": "claude",
+  "at": "2026-10-08T11:45:28.745Z",
+  "results": [
+    {
+      "label": "claude.crash-isolation-and-resume",
+      "status": "pass",
+      "detail": {
+        "killedDuringTurn": true,
+        "otherProcessHealthy": true,
+        "sameIdRestored": true
+      },
+      "at": "2026-10-08T11:45:28.745Z"
+    }
+  ]
+}

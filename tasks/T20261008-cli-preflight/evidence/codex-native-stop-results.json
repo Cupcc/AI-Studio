@@ -1,0 +1,28 @@
+{
+  "provider": "codex",
+  "at": "2026-10-08T13:45:37.775Z",
+  "results": [
+    {
+      "label": "codex.native-stop-clean-terminate-isolation",
+      "status": "pass",
+      "detail": {
+        "cliVersion": "codex-cli 0.161.0",
+        "turnInterruptPreservedBackground": true,
+        "cleanReply": {},
+        "cleanLatencyMs": 51,
+        "cleanedThreadNativeListEmpty": true,
+        "cleanedThreadOsProbeExited": true,
+        "otherThreadStillActive": true,
+        "otherThreadProbePreserved": true,
+        "terminateReply": {
+          "terminated": true
+        },
+        "terminateLatencyMs": 48,
+        "terminatedThreadOsProbeExited": true,
+        "sameRuntimeContinued": true,
+        "originalThreadContextPreserved": true
+      },
+      "at": "2026-10-08T13:45:37.568Z"
+    }
+  ]
+}
