@@ -47,4 +47,15 @@ created: 2026-10-09
 
 | 问题 | 回答（确认日期） |
 |---|---|
-| 04 第 7 节第 1、2、3、10、11 项的决定（调研完成后以决定草稿形式提交确认） |  |
+| Q1 `.ai-studio/`（Project 内隐藏目录）作为存放位置与名称是否合适？推荐：是，避开 CLI 保护的目录名（[D20261009-project-knowledge-storage](../../docs/decisions/D20261009-project-knowledge-storage.md)） |  |
+| Q2 `.ai-studio/` 默认被 git 忽略（客户端写入内容为 `*` 的 `.gitignore`）还是默认跟踪？推荐：默认忽略 |  |
+| Q3 V1 是否接受 Agent 只在受信组件词汇内声明式设计 View，自由的沙箱 HTML 推迟到 P1 / 自定义 View？推荐：接受；这与 01 第 7 节、04 第 7 节“AI Generated UI / HTML”的措辞不同，需明确确认（[D20261009-project-view-rendering](../../docs/decisions/D20261009-project-view-rendering.md)） |  |
+| Q4 应用是否内置默认 View Definition，Agent 的 `views/*.view.json` 只作覆盖？推荐：是 |  |
+| Q5 Overview 的 Recent Sessions / Needs Input / Recently Completed 是否为客户端固定渲染区域，Agent 不能读取或摆放？推荐：是 |  |
+| Q6 何时标注“示例数据”（Shell Spec v01 第 7 节）？推荐：数据属性 `example`，默认 false，仅 Agent 写占位内容时设为 true |  |
+| Q7 View Context 是否作为首条消息的独立前置文本块，并折叠为可移除的“当前 View”标签；移除则不注入但仍记录 `origin_view_id`；是否在 04 第 5 节 Session 增加 `view_context_attached`？推荐：均为是（[D20261009-project-view-context](../../docs/decisions/D20261009-project-view-context.md)） |  |
+| Q8 客户端可否在用户发送带 View Context 的消息前，向 `.ai-studio/` 写入自己的指南、Schema 与 `.gitignore`（打开 View 本身不写文件）？推荐：可以 |  |
+| Q9 确认 V1 客户端不自动生成、不提示“知识已过期”、不提供自动修复入口（任何一项都是新增 FR）？推荐：确认 V1 都没有（[D20261009-project-view-refresh](../../docs/decisions/D20261009-project-view-refresh.md)） |  |
+| Q10 View Context 文本是否用英文（面向模型，界面中折叠）？推荐：是 |  |
+| Q11 暂定单文件 256 KB、500 个节点的上限，待渲染原型校准？推荐：接受 |  |
+| Q12 后续选项（内置 Skill、Claude hooks 写后校验反馈、`developerInstructions` / `append`）何时评估？推荐：`specs/agent-adapter` 确定配置加载边界后，或指南文本过长时 |  |
