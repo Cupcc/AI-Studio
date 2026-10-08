@@ -10,7 +10,7 @@
 
 | ID | 职责 | 写入范围 | 产出 | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| W1 | 骨架实现（Opus 5.5 high） | 根目录配置文件；`apps/desktop/**`；`docs/decisions/D20261009-desktop-*.md`（新建）；本 task 的 `research.md`、`evidence/W1-*` | 可启动应用、测试框架、决定草稿、命令清单 | — | todo |
+| W1 | 骨架实现（Opus 5.5 high） | 根目录配置文件；`apps/desktop/**`；`docs/decisions/D20261009-desktop-*.md`（新建）；本 task 的 `research.md`、`evidence/W1-*` | 可启动应用、测试框架、决定草稿、命令清单 | — | in_progress |
 | W2 | 验收（Sonnet 5.5 xhigh） | 本 task 的 `acceptance.md`、`evidence/W2-*` | 验收记录 | W1 | todo |
 
 ## 进度与决定

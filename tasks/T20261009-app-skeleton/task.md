@@ -1,6 +1,6 @@
 ---
 id: T20261009-app-skeleton
-status: ready
+status: in_progress
 fr: []
 ac: []
 specs: []

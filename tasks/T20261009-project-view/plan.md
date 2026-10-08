@@ -10,7 +10,7 @@
 
 | ID | 职责 | 写入范围 | 产出 | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| W1 | 待决事项调研（Sonnet 5.5 xhigh） | 本 task 的 `research.md`、`evidence/W1-*`；`docs/decisions/D20261009-project-knowledge-*.md`、`docs/decisions/D20261009-project-view-*.md`（新建） | 调研记录与决定草稿 | — | todo |
+| W1 | 待决事项调研（Sonnet 5.5 xhigh） | 本 task 的 `research.md`、`evidence/W1-*`；`docs/decisions/D20261009-project-knowledge-*.md`、`docs/decisions/D20261009-project-view-*.md`（新建） | 调研记录与决定草稿 | — | in_progress |
 
 ## 进度与决定
 
