@@ -36,3 +36,4 @@
 - 2026-10-09 session-slice W1 合并（session / chat / input spec 草稿）。人回答阻塞问题：PROJ-Q1～Q3、S-Q2、I-Q2、NAV-Q4 采纳推荐；S-Q1（c）不采纳推荐——窗口失焦、最小化或后台不算正在查看，回到前台不清除提醒。已写入各 spec 并修正 01 第 6 节、02 第 6 节（`cd87cc8`）。
 - 2026-10-09 人对其余非阻塞问题的指示：对话功能参考 Claude Desktop 与 ChatGPT Desktop（含 Codex 的新版）修订推荐，写入 spec 并保持待确认，实现先按推荐进行。已启动 session-slice W2 调研。
 - 2026-10-09 project-view W1 合并：4 份决定草稿登记在 `docs/decisions/README.md`；12 个问题写入 project-view task.md，待本轮收尾时一并请人确认（不阻塞本轮）。
+- 2026-10-09 约 11:5x 三个运行中的 worker（app-skeleton W1、agent-adapter W1、session-slice W2）因账户会话额度限流（HTTP 429，12:10 重置）中断。13:18 恢复：app-skeleton W1 与 agent-adapter W1 通过消息续跑（worktree 中未提交进度保留），并向 agent-adapter W1 补充 I-Q2、S-Q2 的确认结果、session spec 第 4.1 节的接口期望和 Claude SDK `origin` 发现；session-slice W2 未写入任何文件，worktree 已被自动清理，重新启动。要求 worker 分步提交，降低再次中断的损失。
