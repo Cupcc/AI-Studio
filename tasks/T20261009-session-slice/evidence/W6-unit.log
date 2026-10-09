@@ -1,0 +1,26 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run test
+$ tsc -p tsconfig.build.json
+Scope: 2 of 3 workspace projects
+$ vitest run
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/packages/agent-adapter
+
+
+ Test Files  15 passed (15)
+      Tests  181 passed (181)
+   Start at  19:11:42
+   Duration  2.61s (tests 80%, transform 15%, import 4%, worker 1%)
+
+$ vitest run
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/apps/desktop
+
+
+ Test Files  21 passed (21)
+      Tests  130 passed (130)
+   Start at  19:11:45
+   Duration  2.53s (tests 39%, environment 24%, transform 24%, import 12%, worker 1%)
+
+    Isolate  21 workers spawned · ~249ms startup each (spawn + environment, per file)
+             at least ~332ms faster with isolate: false — reuses workers across files instead of one per file
+

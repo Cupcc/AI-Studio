@@ -1,0 +1,70 @@
+
+Running 1 test using 1 worker
+
+(node:38423) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  pw:browser <launching> /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/node_modules/.pnpm/electron@44.4.5_supports-color@7.2.0/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron -r /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/node_modules/.pnpm/playwright-core@1.63.0/node_modules/playwright-core/lib/server/electron/loader.js --inspect=0 --remote-debugging-port=0 /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/apps/desktop --studio-user-data-dir=/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w6-e2e-qzypGK/data +0ms
+  pw:browser <launched> pid=38424 +2ms
+  pw:browser [pid=38424][err] Debugger listening on ws://127.0.0.1:59492/0ed617b6-51b6-4da7-ab13-5474c53efce9 +244ms
+  pw:browser [pid=38424][err] For help, see: https://nodejs.org/learn/getting-started/debugging +0ms
+  pw:browser <ws connecting> ws://127.0.0.1:59492/0ed617b6-51b6-4da7-ab13-5474c53efce9 +0ms
+  pw:browser [pid=38424][err] Debugger attached. +5ms
+  pw:browser <ws connected> ws://127.0.0.1:59492/0ed617b6-51b6-4da7-ab13-5474c53efce9 +1ms
+  pw:browser [pid=38424][err] App threw an error during load +95ms
+  pw:browser [pid=38424][err] Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: Package subpath './codex' is not defined by "exports" in /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/apps/desktop/node_modules/@ai-studio/agent-adapter/package.json +3ms
+  pw:browser [pid=38424][err]     at exportsNotFound (node:internal/modules/esm/resolve:319:10) +0ms
+  pw:browser [pid=38424][err]     at packageExportsResolve (node:internal/modules/esm/resolve:610:13) +0ms
+  pw:browser [pid=38424][err]     at resolveExports (node:internal/modules/cjs/loader:761:36) +0ms
+  pw:browser [pid=38424][err]     at Module._findPath (node:internal/modules/cjs/loader:828:31) +0ms
+  pw:browser [pid=38424][err]     at node:internal/modules/cjs/loader:1564:27 +0ms
+  pw:browser [pid=38424][err]     at Module._resolveFilename (node:electron/js2c/browser_init:1:142664) +0ms
+  pw:browser [pid=38424][err]     at wrapResolveFilename (node:internal/modules/cjs/loader:1125:27) +0ms
+  pw:browser [pid=38424][err]     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1149:10) +0ms
+  pw:browser [pid=38424][err]     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1176:12) +0ms
+  pw:browser [pid=38424][err]     at Module._load (node:internal/modules/cjs/loader:1348:5) +0ms
+  pw:browser [pid=38424][err]  +5s
+  pw:browser [pid=38424][err] DevTools listening on ws://127.0.0.1:59502/devtools/browser/2c095ff9-95c9-4410-a7d8-1d7b8db1501c +0ms
+  pw:browser <ws connecting> ws://127.0.0.1:59502/devtools/browser/2c095ff9-95c9-4410-a7d8-1d7b8db1501c +0ms
+  pw:browser <ws connected> ws://127.0.0.1:59502/devtools/browser/2c095ff9-95c9-4410-a7d8-1d7b8db1501c +48ms
+  pw:browser <ws disconnecting> ws://127.0.0.1:59492/0ed617b6-51b6-4da7-ab13-5474c53efce9 +15s
+  pw:browser [pid=38424][err] Waiting for the debugger to disconnect... +1ms
+  pw:browser <ws disconnecting> ws://127.0.0.1:59492/0ed617b6-51b6-4da7-ab13-5474c53efce9 +0ms
+  pw:browser [pid=38424][err] Debugger ending on ws://127.0.0.1:59492/0ed617b6-51b6-4da7-ab13-5474c53efce9 +1ms
+  pw:browser [pid=38424][err] For help, see: https://nodejs.org/learn/getting-started/debugging +0ms
+  pw:browser <ws disconnected> ws://127.0.0.1:59492/0ed617b6-51b6-4da7-ab13-5474c53efce9 code=1005 reason= +1ms
+  pw:browser <ws disconnected> ws://127.0.0.1:59502/devtools/browser/2c095ff9-95c9-4410-a7d8-1d7b8db1501c code=1006 reason= +25ms
+  pw:browser [pid=38424] <process did exit: exitCode=0, signal=null> +1ms
+  pw:browser [pid=38424] starting temporary directories cleanup +0ms
+  pw:browser [pid=38424] finished temporary directories cleanup +3ms
+  ✘  1 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening (20.1s)
+
+
+  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+
+    Test timeout of 20000ms exceeded while running "beforeEach" hook.
+
+      23 |   await expect(workspace().getByRole('button', { name: 'Stop', exact: true })).toBeVisible()
+      24 | }
+    > 25 | test.beforeEach(async () => { dir = mkdtempSync(join(tmpdir(), 'studio-w6-e2e-')); await launch() })
+         |      ^
+      26 | test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
+      27 |
+      28 | test('S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening', async () => {
+        at /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/tasks/T20261009-session-slice/evidence/W6-session.spec.ts:25:6
+
+    Error: electronApplication.firstWindow: Target page, context or browser has been closed
+
+       9 | async function launch() {
+      10 |   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+    > 11 |   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded'); await expect(page.getByTestId('topbar')).toBeVisible()
+         |                    ^
+      12 | }
+      13 | async function pickProject() {
+      14 |   const path = join(dir, 'W6 Project'); mkdirSync(path)
+        at launch (/Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/tasks/T20261009-session-slice/evidence/W6-session.spec.ts:11:20)
+        at /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/tasks/T20261009-session-slice/evidence/W6-session.spec.ts:25:84
+
+    Error Context: ../../.runtime/w6-test-results/W6-session-S-Q1-FR-STATE-0-0128e-ad-until-explicit-reopening/error-context.md
+
+  1 failed
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 

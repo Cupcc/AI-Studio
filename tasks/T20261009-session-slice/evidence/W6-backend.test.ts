@@ -9,10 +9,50 @@ import { coreAppMeta } from '../../../apps/desktop/src/main/services/database/mi
 import { projectCore } from '../../../apps/desktop/src/main/services/database/migrations/2026100902_project_core'
 import { sessionCore } from '../../../apps/desktop/src/main/services/database/migrations/2026100903_session_core'
 import { createProjectService } from '../../../apps/desktop/src/main/services/project/project-service'
+import { closeProjectWithSessions } from '../../../apps/desktop/src/main/services/project/close-flow'
 import { SessionService } from '../../../apps/desktop/src/main/services/session/session-service'
 import { SessionStore } from '../../../apps/desktop/src/main/services/session/store'
 import type { SessionSummary, TranscriptItem } from '../../../apps/desktop/src/shared/session/types'
 const tick = () => new Promise<void>(resolve => setTimeout(resolve, 0))
+const deferredVoid = () => { let resolve!: () => void; const promise = new Promise<void>(done => { resolve = done }); return { promise, resolve } }
+function memoryHarness(provider: FakeProvider) {
+  const db = new DatabaseSync(':memory:')
+  db.exec('PRAGMA foreign_keys=ON'); runMigrations(db, [coreAppMeta, projectCore, sessionCore])
+  db.prepare('INSERT INTO projects(id,name,local_path,canonical_path,dev,ino,created_at) VALUES (?,?,?,?,?,?,?)').run('p', 'p', '/tmp', '/tmp/w6-project', '1', 'p', '2026-10-09')
+  const service = new SessionService({ store: new SessionStore(db), projects: createProjectService(() => db), providers: [provider, new FakeProvider('claude-code')], environment: async () => ({ env: { PATH: '/usr/bin' } }), isForeground: () => false })
+  return { db, service }
+}
+
+it('keeps a Project usable when close times out but its delayed Stop later succeeds', async () => {
+  const gate = deferredVoid(), provider = new FakeProvider('codex', { behavior: { cleanup: async () => { await gate.promise; return { status: 'confirmed', scope: 'turn' } } } })
+  const { db, service } = memoryHarness(provider)
+  try {
+    const session = await service.create({ projectId: 'p', cli: 'codex', text: 'delayed stop' }); await tick()
+    const result = await closeProjectWithSessions(service, 'p', true, 1)
+    expect(result.status).toBe('failed')
+    gate.resolve(); await tick(); await tick()
+    expect(service.getConversation(session.id).session.activity).toBe('none')
+    expect(() => service.send(session.id, { text: 'Project stayed open after close timeout' })).not.toThrow()
+    await tick()
+    const runtime = provider.sessions.at(-1)!.controller
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'completed' })
+  } finally { gate.resolve(); await service.dispose(); db.close() }
+})
+
+it('ignores a late secret-card answer after service disposal and database closure', async () => {
+  const gate = deferredVoid(), provider = new FakeProvider('codex', { behavior: { onRespond: () => gate.promise } })
+  const { db, service } = memoryHarness(provider)
+  let closed = false
+  try {
+    const session = await service.create({ projectId: 'p', cli: 'codex', text: 'secret answer disposal' }); await tick()
+    const runtime = provider.sessions[0]!.controller
+    const requestId = runtime.sink.inputRequested(runtime.activeTurn!.turnId, { kind: 'question', nativeType: 'w6:secret', questions: [{ id: 'q', prompt: 'Private?', multiSelect: false, allowFreeText: true, secret: true, options: [] }] }, null)!
+    const pending = service.answer(session.id, requestId, { kind: 'answers', answers: { q: { text: 'W6-PRIVATE-ANSWER' } } })
+    await tick(); await service.dispose(); db.close(); closed = true
+    gate.resolve()
+    await expect(pending).resolves.toBeUndefined()
+  } finally { gate.resolve(); await service.dispose(); if (!closed) db.close() }
+})
 
 it('durably reopens 2,000 summaries, all 1,202 paged transcript rows and resumes the exact native conversation', async () => {
   const directory = mkdtempSync(join(tmpdir(), 'studio-w6-durable-'))

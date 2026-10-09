@@ -1,0 +1,50 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification
+
+ ❯ tasks/T20261009-session-slice/evidence/W6-backend.test.ts (3 tests | 2 failed) 758ms
+   × keeps a Project usable when close times out but its delayed Stop later succeeds 17ms
+   × ignores a late secret-card answer after service disposal and database closure 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-session-slice/evidence/W6-backend.test.ts > keeps a Project usable when close times out but its delayed Stop later succeeds
+AssertionError: expected [Function] to not throw an error but 'Error: Project 正在关闭' was thrown
+
+- Expected:
+undefined
+
++ Received:
+"Error: Project 正在关闭"
+
+ ❯ tasks/T20261009-session-slice/evidence/W6-backend.test.ts:35:101
+     33|     gate.resolve(); await tick(); await tick()
+     34|     expect(service.getConversation(session.id).session.activity).toBe(…
+     35|     expect(() => service.send(session.id, { text: 'Project stayed open…
+       |                                                                                                     ^
+     36|     await tick()
+     37|     const runtime = provider.sessions.at(-1)!.controller
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tasks/T20261009-session-slice/evidence/W6-backend.test.ts > ignores a late secret-card answer after service disposal and database closure
+AssertionError: promise rejected "Error: database is not open" instead of resolving
+ ❯ tasks/T20261009-session-slice/evidence/W6-backend.test.ts:53:25
+     51|     await tick(); await service.dispose(); db.close(); closed = true
+     52|     gate.resolve()
+     53|     await expect(pending).resolves.toBeUndefined()
+       |                         ^
+     54|   } finally { gate.resolve(); await service.dispose(); if (!closed) db…
+     55| })
+
+Caused by: Error: database is not open
+ ❯ SessionService.answer apps/desktop/src/main/services/session/session-service.ts:520:27
+ ❯ tasks/T20261009-session-slice/evidence/W6-backend.test.ts:53:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  19:04:13
+   Duration  1.07s (tests 79%, transform 17%, import 3%)
+

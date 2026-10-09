@@ -1,0 +1,9 @@
+
+Running 1 test using 1 worker
+
+(node:46846) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+W6 actual Needs Input attention → noncurrent Tab and fold dot; close count=2; cancel retained; target stopped; other Project remained Running
+  ✓  1 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:60:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns (2.1s)
+
+  1 passed (2.5s)

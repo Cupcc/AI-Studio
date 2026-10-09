@@ -1,0 +1,14 @@
+
+Running 2 tests using 1 worker
+
+(node:43850) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+W6 foreground diagnostic minimize {"documentFocus":true,"focusEvents":[{"focused":false},{"focused":false},{"focused":true},{"focused":true}]} {"focused":true,"visible":true,"minimized":false}
+W6 minimize: terminal unread=true; foreground return retained; explicit reopen cleared
+W6 foreground diagnostic hide {"documentFocus":true,"focusEvents":[{"focused":false},{"focused":false},{"focused":true},{"focused":true},{"focused":false},{"focused":true},{"focused":true}]} {"focused":true,"visible":true,"minimized":false}
+W6 hide: terminal unread=true; foreground return retained; explicit reopen cleared
+  ✓  1 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening (6.8s)
+W6 2000-history renderer {"timings":[0.5,2,8.299999952316284,6.800000190734863,10.099999904632568,7.900000095367432,11.899999856948853,2,11.5,7.900000095367432],"scrollTop":50000,"rows":23,"totalHeight":64048} anchor retained after offscreen rename
+  ✓  2 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename (2.5s)
+
+  2 passed (9.6s)

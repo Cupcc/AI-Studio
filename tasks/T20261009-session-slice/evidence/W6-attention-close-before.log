@@ -1,0 +1,50 @@
+
+Running 1 test using 1 worker
+
+(node:46390) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns (1.0m)
+Worker teardown timeout of 60000ms exceeded.
+
+Failed worker ran 1 test:
+../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns
+
+
+  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns 
+
+    Error: expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+        "activity": "running",
+    -   "nativeSessionId": null,
+    +   "nativeSessionId": "05af69f8-6590-4968-8861-0fe766352e2c",
+      }
+
+      81 |   await expect(page.getByRole('tab', { name: /^W6 Project/ })).toHaveCount(0)
+      82 |   expect((await page.evaluate(projectId => window.studio.session.getProjectState({ projectId }), firstProject)).counts).toEqual({ running: 0, needsInput: 0 })
+    > 83 |   expect((await page.evaluate(sessionId => window.studio.session.getConversation({ sessionId }), other.id)).session).toMatchObject({ activity: 'running', nativeSessionId: other.nativeSessionId })
+         |                                                                                                                      ^
+      84 |   await page.getByRole('button', { name: '展开导航', exact: true }).click()
+      85 |   await workspace().getByRole('button', { name: '[e2e:slow] W6 independent other', exact: true }).click()
+      86 |   await workspace().getByRole('button', { name: 'Stop', exact: true }).click()
+        at /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/tasks/T20261009-session-slice/evidence/W6-session.spec.ts:83:118
+
+    Test timeout of 60000ms exceeded while running "afterEach" hook.
+
+      26 | }
+      27 | test.beforeEach(async () => { dir = mkdtempSync(join(tmpdir(), 'studio-w6-e2e-')); await launch() })
+    > 28 | test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
+         |      ^
+      29 |
+      30 | test('S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening', async () => {
+      31 |   const projectId = await pickProject()
+        at /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:6
+
+    Error Context: ../../.runtime/w6-test-results/W6-session-FR-STATE-006-D--a3b64-s-only-the-two-target-turns/error-context.md
+
+  1 failed
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns 
+  1 error was not a part of any test, see above for details

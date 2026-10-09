@@ -1,0 +1,44 @@
+
+Running 2 tests using 1 worker
+
+(node:37858) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening (1.0m)
+(node:38110) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:48:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename (1.0m)
+
+
+  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+
+    Test timeout of 60000ms exceeded while running "beforeEach" hook.
+
+      23 |   await expect(workspace().getByRole('button', { name: 'Stop', exact: true })).toBeVisible()
+      24 | }
+    > 25 | test.beforeEach(async () => { dir = mkdtempSync(join(tmpdir(), 'studio-w6-e2e-')); await launch() })
+         |      ^
+      26 | test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
+      27 |
+      28 | test('S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening', async () => {
+        at /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/tasks/T20261009-session-slice/evidence/W6-session.spec.ts:25:6
+
+    Error Context: ../../.runtime/w6-test-results/W6-session-S-Q1-FR-STATE-0-0128e-ad-until-explicit-reopening/error-context.md
+
+  2) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:48:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename 
+
+    Test timeout of 60000ms exceeded while running "beforeEach" hook.
+
+      23 |   await expect(workspace().getByRole('button', { name: 'Stop', exact: true })).toBeVisible()
+      24 | }
+    > 25 | test.beforeEach(async () => { dir = mkdtempSync(join(tmpdir(), 'studio-w6-e2e-')); await launch() })
+         |      ^
+      26 | test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
+      27 |
+      28 | test('S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening', async () => {
+        at /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/tasks/T20261009-session-slice/evidence/W6-session.spec.ts:25:6
+
+    Error Context: ../../.runtime/w6-test-results/W6-session-FR-NAV-003-NAV--3b4d9--stable-scroll-after-rename/error-context.md
+
+  2 failed
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:48:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename 

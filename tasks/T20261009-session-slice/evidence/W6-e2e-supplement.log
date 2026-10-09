@@ -1,0 +1,36 @@
+
+Running 2 tests using 1 worker
+
+(node:41891) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening (9.7s)
+(node:41943) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+W6 2000-history renderer {"timings":[0.8999998569488525,2.200000047683716,8.100000143051147,7.199999809265137,9.300000190734863,8.199999809265137,8.300000190734863,8.399999856948853,8.100000143051147,8.299999952316284],"scrollTop":50000,"rows":23,"totalHeight":64048} anchor retained after offscreen rename
+  ✓  2 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:50:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename (2.8s)
+
+
+  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: null
+    Received: "completed_unread"
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      43 |     await page.screenshot({ path: join(evidence, `W6-unread-${mode}.png`) })
+      44 |     await workspace().getByRole('button', { name: text, exact: true }).click()
+    > 45 |     await expect.poll(() => page.evaluate(id => window.studio.session.getConversation({ sessionId: id }).then(page => page.session.status), sessionId)).toBe(null)
+         |                                                                                                                                                         ^
+      46 |     console.info(`W6 ${mode}: terminal unread=true; foreground return retained; explicit reopen cleared`)
+      47 |   }
+      48 | })
+        at /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/tasks/T20261009-session-slice/evidence/W6-session.spec.ts:45:153
+
+    Error Context: ../../.runtime/w6-test-results/W6-session-S-Q1-FR-STATE-0-0128e-ad-until-explicit-reopening/error-context.md
+
+  1 failed
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+  1 passed (13.2s)
