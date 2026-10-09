@@ -6,12 +6,12 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "pnpm --filter @ai-studio/desktop run dev",
-    "build": "pnpm --filter @ai-studio/desktop run build",
-    "typecheck": "pnpm -r --if-present run typecheck",
-    "test": "pnpm -r --if-present run test",
-    "test:e2e": "pnpm --filter @ai-studio/desktop run test:e2e",
-    "package": "pnpm --filter @ai-studio/desktop run package",
+    "dev": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run dev",
+    "build": "pnpm -r --if-present run build",
+    "typecheck": "pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck",
+    "test": "pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run test",
+    "test:e2e": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run test:e2e",
+    "package": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run package",
     "smoke:packaged": "pnpm --filter @ai-studio/desktop run smoke:packaged"
   }
 }

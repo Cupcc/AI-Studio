@@ -168,6 +168,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@ai-studio/agent-adapter':
+        specifier: workspace:*
+        version: link:../../packages/agent-adapter
       node-pty:
         specifier: 1.1.0
         version: 1.1.0

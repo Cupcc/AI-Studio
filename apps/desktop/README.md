@@ -12,6 +12,8 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 
 从仓库根目录执行（路径含空格亦可）：
 
+桌面包通过 workspace 依赖 `@ai-studio/agent-adapter`。根命令会先构建该包；直接使用 `pnpm --filter @ai-studio/desktop …` 时，需先运行 `pnpm --filter @ai-studio/agent-adapter build`。
+
 | 命令 | 作用 |
 |---|---|
 | `pnpm install` | 安装依赖；同时下载 Electron 二进制并修复 node-pty `spawn-helper` 的可执行位 |

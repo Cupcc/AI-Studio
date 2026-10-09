@@ -18,6 +18,7 @@
     "smoke:packaged": "node scripts/packaged-smoke.mjs"
   },
   "dependencies": {
+    "@ai-studio/agent-adapter": "workspace:*",
     "node-pty": "1.1.0"
   },
   "devDependencies": {
