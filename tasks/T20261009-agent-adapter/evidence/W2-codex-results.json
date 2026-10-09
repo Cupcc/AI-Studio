@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-09",
+  "provider": "codex",
+  "cliVersion": "0.161.0",
+  "sourceCommit": "979011409de0a60b52f179721948e65531d26144",
+  "generatedProtocolFiles": 206,
+  "validation": {
+    "typecheck": "passed",
+    "build": "passed",
+    "codexTests": 47,
+    "packageTests": 148,
+    "usesRealCliInDefaultTests": false,
+    "osFixture": { "realSystemProcesses": true, "simulatedAppServer": true, "nativeOsPid": null, "nestedCurrentProcessesExited": true, "earlierServicePreserved": true, "runtimeRestarted": false }
+  },
+  "realCli": {
+    "model": "gpt-6-astra",
+    "effort": "high",
+    "turnsSubmitted": 6,
+    "attempts": [
+      {
+        "suite": "provider.integration.test.ts",
+        "turnsSubmitted": 4,
+        "status": "failed",
+        "passedObservations": ["availability", "catalog", "streaming", "sameNativeIdCrossRuntimeResume", "syntheticContextRetained", "sameTurnDeclineTextDelivered", "deniedFileAbsent", "finalCleanupConfirmed"],
+        "failure": "Synthetic process detector omitted case-insensitive matching for macOS Python process name",
+        "fixtureCorrected": true
+      },
+      {
+        "suite": "stop.integration.test.ts",
+        "turnsSubmitted": 2,
+        "status": "failed",
+        "passedObservations": ["earlierServiceStarted", "currentCommandStarted", "runtimeFallbackExitConfirmed", "originalThreadResumed", "stopReturnedStopped", "finalCleanupConfirmed"],
+        "expectedCleanup": "confirmed",
+        "actualCleanup": "runtime_restarted",
+        "failure": "Pinned runtime always returns osPid:null; previous code required native OS identity",
+        "implementationCorrectedAfterRun": true,
+        "correctedImplementationRetestedWithRealCodex": false
+      }
+    ],
+    "stdinEofProbe": { "modelCalls": 0, "activeThread": false, "exited": true, "exitCode": 0, "cleanupConfirmed": true }
+  },
+  "notVerified": ["correctedNativeStopAgainstRealCodex", "realModelSwitchToSecondModel", "hostCrashWithActiveCommands", "descendantsDetachedBeforeAnyObservation", "externalMcpProcessTrees"],
+  "sharedCoreFollowup": "JsonRpcPeer.dismissIncoming for serverRequest/resolved",
+  "humanAcceptance": "not_requested_by_worker"
+}
