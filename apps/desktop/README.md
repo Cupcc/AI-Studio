@@ -43,7 +43,8 @@ src/
   main/smoke/                  --studio-smoke-output 冒烟模式
   renderer/src/app/            壳层组合（顶栏等）
   renderer/src/features/<feature>/  功能 UI、Zustand store、测试
-  renderer/src/styles/tokens.css    临时设计 Token
+  renderer/src/styles/tokens.css    设计 Token（交互原型 v01 基线，高保真阶段可调整）
+  renderer/src/styles/primitives.css  共享样式原语：按钮、图标按钮、弹层与菜单、状态点、悬停提示
 e2e/                           Playwright Electron 冒烟
 scripts/                       postinstall、afterPack、打包冒烟脚本
 ```
