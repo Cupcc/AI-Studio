@@ -63,6 +63,17 @@ function acceptSummary(summary: SessionSummary): void {
   summaryVersions.set(summary.id, ++revision)
   useSessions.setState((s) => ({ summaries: { ...s.summaries, [summary.id]: summary }, projectStates: { ...s.projectStates, [summary.projectId]: projectSessionState(summary.projectId, [...Object.values(s.summaries).filter((v) => v.id !== summary.id), summary]) } }))
 }
+
+/**
+ * IPC mutation responses can be older than an event already delivered by main.
+ * Keep the event snapshot in that case so a late create/rename response cannot
+ * resurrect Running or erase a newer title/status.
+ */
+function acceptSummaryIfFresh(summary: SessionSummary, startedAt: number): SessionSummary {
+  if ((summaryVersions.get(summary.id) ?? 0) > startedAt) return useSessions.getState().summaries[summary.id] ?? summary
+  acceptSummary(summary)
+  return summary
+}
 function writeDraft(key: DraftKey, draft: ComposerDraft): void {
   // Dispatch in edit order. Main's synchronous draft storage preserves IPC order.
   const pending = sessionApi().saveDraft({ key, draft }).catch((error) => {
@@ -170,8 +181,9 @@ export const useSessions = create<SessionStore>()((set, get) => ({
       if (key.kind === 'new_chat') {
         const provider = get().providers.find((p) => p.cli === draft.cli)
         if (!draft.cli || provider?.status !== 'available') throw new Error(provider?.reason ?? '请选择已安装并已登录的 CLI')
-        result = await sessionApi().create({ projectId: key.projectId, cli: draft.cli, model: draft.model, text: draft.text, contextItems: draft.contextItems, originViewId })
-        acceptSummary(result)
+        const startedAt = revision
+        const created = await sessionApi().create({ projectId: key.projectId, cli: draft.cli, model: draft.model, text: draft.text, contextItems: draft.contextItems, originViewId })
+        result = acceptSummaryIfFresh(created, startedAt)
       } else {
         const session = get().summaries[key.sessionId]
         if (session?.stopping || session?.activity === 'running') throw new Error('当前一轮仍在运行，输入已保留')
@@ -187,7 +199,11 @@ export const useSessions = create<SessionStore>()((set, get) => ({
   answer: (sessionId, requestId, response) => operation(`answer:${requestId}`, () => sessionApi().answer({ sessionId, requestId, response })),
   stop: (sessionId) => operation(`stop:${sessionId}`, () => sessionApi().stop({ sessionId })),
   retry: (sessionId) => operation(`retry:${sessionId}`, () => sessionApi().retry({ sessionId })),
-  rename: (sessionId, title) => operation(`rename:${sessionId}`, async () => acceptSummary(await sessionApi().rename({ sessionId, title }))),
+  rename: (sessionId, title) => operation(`rename:${sessionId}`, async () => {
+    const startedAt = revision
+    const renamed = await sessionApi().rename({ sessionId, title })
+    acceptSummaryIfFresh(renamed, startedAt)
+  }),
   setModel: (sessionId, model) => operation(`model:${sessionId}`, async () => {
     await sessionApi().setModel({ sessionId, model })
     const summary = get().summaries[sessionId]

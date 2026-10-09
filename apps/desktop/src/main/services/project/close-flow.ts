@@ -6,7 +6,7 @@ export async function closeProjectWithSessions(
   port: MainSessionPort, projectId: string, confirmed: boolean, timeoutMs = 10_000
 ): Promise<CloseProjectResult> {
   const counts = await port.getBlockingSessionCounts(projectId)
-  if (counts.running + counts.needsInput === 0) return { status: 'closed' }
+  if (counts.running + counts.needsInput === 0) return releaseProject(port, projectId)
   if (!confirmed) return { status: 'confirmation_required', counts }
   let timer: ReturnType<typeof setTimeout> | undefined
   try {
@@ -19,8 +19,17 @@ export async function closeProjectWithSessions(
     if (remaining.running + remaining.needsInput > 0) {
       return { status: 'failed', failed: [{ sessionId: '', reason: '仍有对话未停止' }] }
     }
-    return { status: 'closed' }
+    return releaseProject(port, projectId)
   } catch (error) {
     return { status: 'failed', failed: [{ sessionId: '', reason: error instanceof Error ? error.message : String(error) }] }
   } finally { clearTimeout(timer) }
+}
+
+async function releaseProject(port: MainSessionPort, projectId: string): Promise<CloseProjectResult> {
+  try {
+    await port.projectClosed?.(projectId)
+    return { status: 'closed' }
+  } catch (error) {
+    return { status: 'failed', failed: [{ sessionId: '', reason: error instanceof Error ? error.message : String(error) }] }
+  }
 }

@@ -10,6 +10,8 @@ export interface MainSessionPort {
   initializeProject?(projectId: string): Promise<void>
   getBlockingSessionCounts(projectId: string): BlockingSessionCounts | Promise<BlockingSessionCounts>
   stopProjectTurns(projectId: string): Promise<StopProjectResult>
+  /** Release idle Runtime handles after the Project Tab has passed Stop checks. */
+  projectClosed?(projectId: string): Promise<void>
   /** Running (including stopping) and Needs Input sessions across all Projects. */
   activeTurnCountAll(): QuitRequest | Promise<QuitRequest>
   /** Stops every current turn; resolves when cleanup finished or gave up. */

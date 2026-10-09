@@ -4,7 +4,7 @@ import { createQuitFlow } from './quit-flow'
 import { stubMainSessionPort, type MainSessionPort } from './session-port'
 
 function port(): MainSessionPort {
-  return { ...stubMainSessionPort, getBlockingSessionCounts: vi.fn(() => ({ running: 1, needsInput: 1 })), stopProjectTurns: vi.fn(async () => ({ stopped: ['s1'], failed: [] })) }
+  return { ...stubMainSessionPort, getBlockingSessionCounts: vi.fn(() => ({ running: 1, needsInput: 1 })), stopProjectTurns: vi.fn(async () => ({ stopped: ['s1'], failed: [] })), projectClosed: vi.fn(async () => {}) }
 }
 describe('trusted close flow · FR-PROJ-002 · D-10', () => {
   it('asks only for running/input and performs no stop before confirmation', async () => {
@@ -20,6 +20,19 @@ describe('trusted close flow · FR-PROJ-002 · D-10', () => {
     session.getBlockingSessionCounts = vi.fn().mockReturnValueOnce({ running: 1, needsInput: 0 }).mockReturnValue({ running: 0, needsInput: 0 })
     expect(await closeProjectWithSessions(session, 'p1', true)).toEqual({ status: 'closed' })
     expect(session.stopProjectTurns).toHaveBeenCalledExactlyOnceWith('p1')
+    expect(session.projectClosed).toHaveBeenCalledExactlyOnceWith('p1')
+  })
+  it('releases idle Project runtimes even when no turn needs confirmation', async () => {
+    const session = port()
+    session.getBlockingSessionCounts = vi.fn(() => ({ running: 0, needsInput: 0 }))
+    expect(await closeProjectWithSessions(session, 'p1', false)).toEqual({ status: 'closed' })
+    expect(session.projectClosed).toHaveBeenCalledExactlyOnceWith('p1')
+  })
+  it('keeps the Project open when runtime release fails', async () => {
+    const session = port()
+    session.getBlockingSessionCounts = vi.fn(() => ({ running: 0, needsInput: 0 }))
+    session.projectClosed = vi.fn(async () => { throw new Error('runtime release failed') })
+    expect(await closeProjectWithSessions(session, 'p1', false)).toMatchObject({ status: 'failed', failed: [{ reason: 'runtime release failed' }] })
   })
   it('keeps the Tab on reported failure, remaining turns or a timeout', async () => {
     const session = port()

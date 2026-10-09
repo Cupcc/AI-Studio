@@ -79,6 +79,30 @@ describe('Session IPC store · FR-SESSION/STATE · AC-02–05', () => {
     expect(useSessions.getState().drafts[draftId(key)]!.text).toBe('Another thought')
     expect(useSessions.getState().summaries.s!.status).toBe('running')
   })
+  it('does not let a late create response overwrite a newer completed event', async () => {
+    disposers.push(watchSessionEvents())
+    await useSessions.getState().loadProject('p')
+    useSessions.getState().updateDraft(key, { cli: 'codex', text: 'Build a feature' })
+    let complete!: (value: SessionSummary) => void
+    vi.mocked(api.create).mockImplementation(() => new Promise((resolve) => { complete = resolve }))
+    const send = useSessions.getState().sendComposer(key)
+    const newer = summary({ status: 'completed_unread', activity: 'none', completionUnread: true })
+    summaryEvent({ session: newer, project: { projectId: 'p', attention: 'completed_unread', counts: { running: 0, needsInput: 0 } } })
+    complete(summary({ activity: 'running', status: 'running' })); await send
+    expect(useSessions.getState().summaries.s).toMatchObject({ status: 'completed_unread', completionUnread: true })
+  })
+  it('does not let a late rename response overwrite a newer summary event', async () => {
+    disposers.push(watchSessionEvents())
+    const current = summary({ activity: 'running', status: 'running' })
+    useSessions.setState({ summaries: { s: current } })
+    let complete!: (value: SessionSummary) => void
+    vi.mocked(api.rename).mockImplementation(() => new Promise((resolve) => { complete = resolve }))
+    const rename = useSessions.getState().rename('s', 'New title')
+    const newer = summary({ title: 'New title', titleSource: 'user', activity: 'none', status: 'completed_unread', completionUnread: true })
+    summaryEvent({ session: newer, project: { projectId: 'p', attention: 'completed_unread', counts: { running: 0, needsInput: 0 } } })
+    complete(summary({ title: 'New title', titleSource: 'user', activity: 'running', status: 'running' })); await rename
+    expect(useSessions.getState().summaries.s).toMatchObject({ title: 'New title', status: 'completed_unread', completionUnread: true })
+  })
   it('rejects unavailable CLI before creation and keeps its draft', async () => {
     useSessions.setState({ providers: [{ ...providers[0]!, status: 'not_logged_in', reason: '请先登录 Codex CLI' }] })
     useSessions.getState().updateDraft(key, { cli: 'codex', text: 'Keep this' })
