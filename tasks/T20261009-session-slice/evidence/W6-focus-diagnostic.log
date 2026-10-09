@@ -7,7 +7,7 @@ W6 foreground diagnostic minimize {"documentFocus":true,"focusEvents":[{"focused
   ✘  1 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening (9.6s)
 
 
-  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening
 
     Error: expect(received).toBe(expected) // Object.is equality
 
@@ -29,4 +29,4 @@ W6 foreground diagnostic minimize {"documentFocus":true,"focusEvents":[{"focused
     Error Context: ../../.runtime/w6-test-results/W6-session-S-Q1-FR-STATE-0-0128e-ad-until-explicit-reopening/error-context.md
 
   1 failed
-    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening

@@ -10,7 +10,7 @@ W6 2000-history renderer {"timings":[0.8999998569488525,2.200000047683716,8.1000
   ✓  2 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:50:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename (2.8s)
 
 
-  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening
 
     Error: expect(received).toBe(expected) // Object.is equality
 
@@ -32,5 +32,5 @@ W6 2000-history renderer {"timings":[0.8999998569488525,2.200000047683716,8.1000
     Error Context: ../../.runtime/w6-test-results/W6-session-S-Q1-FR-STATE-0-0128e-ad-until-explicit-reopening/error-context.md
 
   1 failed
-    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:30:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening
   1 passed (13.2s)

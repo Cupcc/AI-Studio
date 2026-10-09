@@ -9,7 +9,7 @@ Running 2 tests using 1 worker
   ✘  2 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:48:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename (1.0m)
 
 
-  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
+  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening
 
     Test timeout of 60000ms exceeded while running "beforeEach" hook.
 
@@ -24,7 +24,7 @@ Running 2 tests using 1 worker
 
     Error Context: ../../.runtime/w6-test-results/W6-session-S-Q1-FR-STATE-0-0128e-ad-until-explicit-reopening/error-context.md
 
-  2) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:48:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename 
+  2) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:48:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename
 
     Test timeout of 60000ms exceeded while running "beforeEach" hook.
 
@@ -40,5 +40,5 @@ Running 2 tests using 1 worker
     Error Context: ../../.runtime/w6-test-results/W6-session-FR-NAV-003-NAV--3b4d9--stable-scroll-after-rename/error-context.md
 
   2 failed
-    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening 
-    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:48:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename 
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:28:5 › S-Q1 / FR-STATE-005: real minimized and hidden windows preserve unread until explicit reopening
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:48:5 › FR-NAV-003 / NAV-Q12: real renderer handles 2,000 histories with bounded DOM and stable scroll after rename

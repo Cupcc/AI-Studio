@@ -49,7 +49,7 @@ Running 19 tests using 1 worker
   ✓  19 e2e/session.spec.ts:207:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (4.1s)
 
 
-  1) e2e/project.spec.ts:101:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal 
+  1) e2e/project.spec.ts:101:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal
 
     TimeoutError: locator.click: Timeout 30000ms exceeded.
     Call log:
@@ -76,7 +76,7 @@ Running 19 tests using 1 worker
     Error Context: ../../.runtime/desktop-e2e/test-results/project-FR-PROJ-001-symlin-7a389-y-errors-and-recent-removal/error-context.md
 
   1 failed
-    e2e/project.spec.ts:101:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal 
+    e2e/project.spec.ts:101:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal
   18 passed (1.1m)
 [ELIFECYCLE] Command failed with exit code 1.
 Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL

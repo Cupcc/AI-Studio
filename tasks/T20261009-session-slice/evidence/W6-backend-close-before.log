@@ -47,4 +47,3 @@ Caused by: Error: database is not open
       Tests  2 failed | 1 passed (3)
    Start at  19:04:13
    Duration  1.07s (tests 79%, transform 17%, import 3%)
-

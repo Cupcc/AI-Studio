@@ -10,7 +10,7 @@ Failed worker ran 1 test:
 ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns
 
 
-  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns 
+  1) ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns
 
     Error: expect(received).toMatchObject(expected)
 
@@ -46,5 +46,5 @@ Failed worker ran 1 test:
     Error Context: ../../.runtime/w6-test-results/W6-session-FR-STATE-006-D--a3b64-s-only-the-two-target-turns/error-context.md
 
   1 failed
-    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns 
+    ../../tasks/T20261009-session-slice/evidence/W6-session.spec.ts:54:5 › FR-STATE-006 / D-07/10/14: real Session attention drives Tab/fold dots and closes only the two target turns
   1 error was not a part of any test, see above for details
