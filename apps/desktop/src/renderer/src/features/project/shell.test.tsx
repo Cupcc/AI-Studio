@@ -81,6 +81,15 @@ describe('Project shell · FR-PROJ/NAV · AC-01', () => {
     fireEvent.click(screen.getByRole('tab', { name: /b，/ }))
     expect(useProjectShell.getState().windowState.navCollapsed).toBe(true)
   })
+  it('gives every icon-only shell button a prototype v01 tooltip (data-tip) except Tab close buttons', async () => {
+    await mount()
+    const missing = () => [...document.querySelectorAll('button')].filter((b) => !b.textContent?.trim() && !b.classList.contains('project-tab__close') && !b.dataset.tip).map((b) => b.getAttribute('aria-label'))
+    expect(missing()).toEqual([])
+    fireEvent.click(screen.getByRole('button', { name: 'Terminal' }))
+    expect(screen.getByRole('button', { name: '关闭右侧工具' }).dataset.tip).toBeTruthy()
+    expect(missing()).toEqual([])
+    expect(document.querySelector('[data-tooltip]')).toBeNull()
+  })
   it('keeps a non-current Project open on cancel or stop failure, traps focus, and closes only after Stop succeeds', async () => {
     await mount()
     closeResult = { status: 'confirmation_required', counts: { running: 1, needsInput: 1 } }

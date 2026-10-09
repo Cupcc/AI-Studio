@@ -29,9 +29,32 @@ svg {
   flex: none;
 }
 
-/* Shell Spec v01 §10: 2px focus ring for keyboard navigation. */
+/* Buttons start unstyled (prototype v01). Component classes add their own look;
+   the :where() defaults below have zero specificity, so any class rule
+   (background, opacity, ...) overrides them without !important. */
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+button:where(:hover:not(:disabled)) {
+  background: var(--color-hover);
+}
+
+button:where(:disabled) {
+  cursor: default;
+  opacity: var(--disabled-opacity);
+}
+
+/* Shell Spec v01 §10: 2px focus ring for keyboard navigation. The ring follows
+   each element's own border-radius, so no radius is set here. */
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
 }

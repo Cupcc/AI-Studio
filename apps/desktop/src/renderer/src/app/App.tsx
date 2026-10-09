@@ -5,6 +5,7 @@ import { Launcher } from '../features/project/Launcher'
 import { Workspace } from '../features/project/Workspace'
 import { ConfirmDialogs } from './ConfirmDialog'
 import { TopBar } from './TopBar'
+import '../styles/primitives.css'
 import './shell.css'
 
 export function App() {

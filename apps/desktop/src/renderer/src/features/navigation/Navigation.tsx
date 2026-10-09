@@ -22,8 +22,8 @@ export function Navigation(props: ShellSlotProps) {
   }
   return <aside className="navigation" aria-label={S.navLabel}>
     <div className="navigation__new-chat">
-      <div className="split-button"><button onClick={() => shell.startDraft(project.id)}><Icon name="pencil" size={15} />{S.newChat}{slots.NewChatBadge && <span className="split-button__badge" aria-hidden="true"><slots.NewChatBadge {...props} /></span>}</button><button aria-label={S.chooseCli} aria-expanded={menu} onClick={() => setMenu(!menu)}><Icon name="chevron" size={14} /></button></div>
-      {menu && <div className="cli-menu" onKeyDown={(event) => { if (event.key === 'Escape') setMenu(false) }}>
+      <div className="split-button"><button className="split-button__main" onClick={() => shell.startDraft(project.id)}><Icon name="pencil" size={15} />{S.newChat}{slots.NewChatBadge && <span className="split-button__badge" aria-hidden="true"><slots.NewChatBadge {...props} /></span>}</button><button className="split-button__more" aria-label={S.chooseCli} data-tip={S.chooseCli} data-tip-align="end" aria-expanded={menu} onClick={() => setMenu(!menu)}><Icon name="chevron" size={14} /></button></div>
+      {menu && <div className="cli-menu popover" onKeyDown={(event) => { if (event.key === 'Escape') setMenu(false) }}>
         {slots.CliMenu ? <slots.CliMenu {...props} dismiss={() => setMenu(false)} /> : <p>{S.cliMenuPending}</p>}
       </div>}
     </div>

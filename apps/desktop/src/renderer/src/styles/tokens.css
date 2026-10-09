@@ -15,7 +15,7 @@
   --window-min-width: 1024px;
   --window-min-height: 640px;
   --topbar-height: 40px;
-  --traffic-lights-width: 80px;
+  --traffic-lights-width: 76px;
   --nav-width: 248px;
   --canvas-header-height: 48px;
   --conversation-max-width: 720px;
@@ -30,19 +30,41 @@
   --tab-close-size: 18px;
   --icon-button-width: 30px;
   --icon-button-height: 28px;
+  --icon-button-lg-height: 30px;
+  --button-height: 30px;
+  --button-small-height: 26px;
   --new-chat-height: 36px;
+  --new-chat-more-width: 30px;
+  --tab-inner-height: 28px;
+  --vsep-height: 18px;
+  --menu-min-width: 200px;
+  --menu-item-height: 32px;
   --nav-heading-height: 28px;
+  --nav-heading-line-height: 14px;
   --nav-row-height: 32px;
   --attention-size: 7px;
+  --attention-offset: 3px;
+  --attention-ring: 0 0 0 2px;
   --resize-hit-width: 6px;
   --cli-menu-width: 260px;
   --placeholder-icon-size: 28px;
   --placeholder-text-width: 360px;
   --launcher-content-width: 460px;
+  --launcher-gap: 18px;
   --dialog-width: 420px;
+  --dialog-padding: 20px 22px;
+  --placeholder-padding: 40px;
   --send-size: 28px;
   --disabled-opacity: .4;
   --tooltip-delay: 500ms;
+  --tooltip-offset: 6px;
+  --tooltip-padding: 3px 7px;
+
+  /* Stacking */
+  --z-handle: 5;
+  --z-popover: 40;
+  --z-tooltip: 60;
+  --z-modal: 80;
 
   /* Radius */
   --radius-xs: 4px;
@@ -53,10 +75,15 @@
   --radius-bubble: 14px;
   --radius-input: 16px;
   --radius-dialog: 14px;
+  --radius-button: 8px;
+  --radius-tip: 5px;
 
   /* Spacing */
+  --space-0: 2px;
   --space-1: 4px;
+  --space-1-5: 6px;
   --space-2: 8px;
+  --space-2-5: 10px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 20px;
@@ -70,6 +97,10 @@
   --font-size-sm: 12px;
   --font-size-md: 13px;
   --font-size-body: 14px;
+  --font-size-caption: 11.5px;
+  --font-size-note: 12.5px;
+  --font-size-dialog-body: 13.5px;
+  --font-size-heading: 16px;
   --font-size-lg: 17px;
   --font-size-title: 22px;
   --heading-letter-spacing: .06em;

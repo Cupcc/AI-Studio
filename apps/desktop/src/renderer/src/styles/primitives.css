@@ -1,0 +1,52 @@
+/* Shared primitives of the confirmed prototype v01 (design/prototypes/studio-prototype-v01.html).
+   Imported once by app/App.tsx before every feature stylesheet, so a feature class of equal
+   specificity overrides these. Buttons: base.css supplies the reset, a zero-specificity
+   hover background and a zero-specificity disabled opacity. */
+.grow { flex: 1; }
+.muted { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.no-drag { -webkit-app-region: no-drag; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Text buttons (prototype .btn, .btn.pri, .btn.danger, .btn.sm) */
+.primary-button, .secondary-button, .danger-button { display: inline-flex; align-items: center; gap: var(--space-1-5); height: var(--button-height); padding: 0 var(--space-4); border: 1px solid var(--color-border-strong); border-radius: var(--radius-button); background: var(--color-surface); font-size: var(--font-size-md); white-space: nowrap; }
+.secondary-button:hover:not(:disabled) { background: var(--color-hover); }
+.primary-button { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-on-primary); }
+.primary-button:hover:not(:disabled) { background: var(--color-primary-hover); }
+.danger-button { background: var(--color-error); border-color: var(--color-error); color: var(--color-on-primary); }
+.button--small { height: var(--button-small-height); padding: 0 var(--space-2-5); font-size: var(--font-size-sm); }
+.link-button, .text-button { padding: 0; border-radius: var(--radius-xs); background: none; color: var(--color-link); }
+.link-button { font-size: var(--font-size-sm); }
+.text-button { font-size: var(--font-size-md); }
+.link-button:hover:not(:disabled), .text-button:hover:not(:disabled) { background: none; text-decoration: underline; }
+
+/* Icon buttons (prototype .tb 30x28 in the top bar, .ib 30x30 in canvas headers) */
+.icon-button { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 var(--icon-button-width); width: var(--icon-button-width); height: var(--icon-button-height); padding: 0; border-radius: var(--radius-md); color: var(--color-text-3); }
+.icon-button--lg, .canvas-header .icon-button { height: var(--icon-button-lg-height); }
+
+.is-selected { background: var(--color-selected); color: var(--color-text); }
+
+/* Popovers and menus (prototype .pop, .pg, .mi, .sub, .r, .popdiv) */
+.popover { position: absolute; z-index: var(--z-popover); min-width: var(--menu-min-width); padding: var(--space-1-5); background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-card); box-shadow: var(--shadow-popover); }
+.menu-heading { margin: 0; padding: var(--space-1-5) var(--space-2-5) var(--space-1); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.menu-item { display: flex; align-items: center; gap: var(--space-2); width: 100%; min-height: var(--menu-item-height); padding: var(--space-1) var(--space-2-5); border-radius: var(--radius-md); font-size: var(--font-size-md); }
+.menu-item:disabled { background: none; color: var(--color-placeholder); opacity: 1; }
+.menu-item__text { display: flex; flex-direction: column; min-width: 0; }
+.menu-item__sub { font-size: var(--font-size-caption); color: var(--color-text-muted); }
+.menu-item__meta { display: flex; align-items: center; gap: var(--space-1-5); margin-left: auto; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.menu-divider { height: 1px; margin: var(--space-1-5) var(--space-1); background: var(--color-border); }
+
+/* Status dots (prototype .dot) */
+.attention-dot { display: inline-block; flex: 0 0 var(--attention-size); width: var(--attention-size); height: var(--attention-size); border-radius: 50%; }
+.attention-dot--needs_input { background: var(--color-needs-input); }
+.attention-dot--error { background: var(--color-error); }
+.attention-dot--completed_unread { background: var(--color-completed); }
+
+/* Tooltips: dark, below the element, shown after --tooltip-delay on hover or keyboard focus.
+   data-tip-align="end" right-aligns the tip for elements at the window edge.
+   They hide while the element's own popup is open (aria-expanded="true"). */
+:where([data-tip]) { position: relative; }
+[data-tip]:is(:hover, :focus-visible)::after { content: attr(data-tip); position: absolute; top: calc(100% + var(--tooltip-offset)); left: 50%; transform: translateX(-50%); padding: var(--tooltip-padding); border-radius: var(--radius-tip); background: var(--color-tooltip); color: var(--color-on-primary); font: var(--font-size-xs)/1.4 var(--font-sans); white-space: nowrap; text-align: left; z-index: var(--z-tooltip); pointer-events: none; animation: tooltip-in .12s ease var(--tooltip-delay) both; }
+[data-tip][data-tip-align="end"]:is(:hover, :focus-visible)::after { left: auto; right: 0; transform: none; }
+[data-tip][aria-expanded="true"]:is(:hover, :focus-visible)::after { display: none; }
+@keyframes tooltip-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { [data-tip]:is(:hover, :focus-visible)::after { animation-duration: 0s; } }
