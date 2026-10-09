@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-09",
+  "worker": "W3",
+  "sdkVersion": "0.3.293",
+  "unit": { "passed": 128, "failed": 0, "claudeCases": 27 },
+  "typecheck": "passed",
+  "build": "passed",
+  "integrationWithoutOptIn": { "skipped": 4, "modelCalls": 0 },
+  "realIntegration": {
+    "initialRun": { "passed": 0, "failed": 2 },
+    "diagnosticRerun": { "failed": 1, "skipped": 1 },
+    "availability": "passed",
+    "modelCatalog": "passed",
+    "catalogCreatedTranscript": false,
+    "nativeFailure": { "adapterCode": "quota_exceeded", "nativeCode": "rate_limit", "reason": "session limit", "resetHint": "18:10 Asia/Shanghai" },
+    "successfulStreamingResumeModelAndConfig": "blocked_by_quota",
+    "commandStopAndContinue": "not_verified_command_never_started",
+    "runtimeDisposal": "finally_called_for_every_case",
+    "furtherModelCalls": "stopped_at_main_agent_instruction"
+  },
+  "humanAcceptance": "pending"
+}

@@ -1,2 +1,2 @@
-// Placeholder for the Claude Code provider (owned by agent-adapter W3). Replace with the implementation.
-export {};
+export { ClaudeProvider, createClaudeProvider, CLAUDE_CAPABILITIES } from './provider.js';
+export type { ClaudeProviderDependencies, ClaudeProviderOptions, ClaudeQuery, ClaudeQueryFactory } from './types.js';
