@@ -17,6 +17,7 @@ export interface ProjectShellMain {
   setSessionPort(port: MainSessionPort): void
   closeProject(projectId: string, confirmed: boolean): Promise<CloseProjectResult>
   quitFlow: QuitFlow | null
+  onStateFlushed: (() => void) | null
 }
 
 const shells = new WeakMap<object, ProjectShellMain>()
@@ -35,7 +36,8 @@ export function projectShellFor(core: Pick<CoreServices, 'database'>): ProjectSh
         if (!shell!.projects.getProject(id)) throw new Error('Unknown project')
         return closeProjectWithSessions(port, id, confirmed)
       },
-      quitFlow: null
+      quitFlow: null,
+      onStateFlushed: null
     }
     shells.set(core, shell)
   }

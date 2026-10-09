@@ -15,6 +15,8 @@ export interface QuitFlowDeps {
   askRenderer(request: QuitRequest): boolean
   /** Fallback when no window is open. */
   askNative(request: QuitRequest): Promise<boolean>
+  /** Drain renderer IPC writes before disposing persistence services. */
+  flushState?(): Promise<void>
   stopTimeoutMs?: number
   onError?(error: unknown): void
 }
@@ -32,7 +34,8 @@ export function createQuitFlow(deps: QuitFlowDeps): QuitFlow {
   let state: QuitFlow['state'] = 'idle'
   let pending: QuitRequest | null = null
 
-  const approve = () => {
+  const approve = async () => {
+    try { await deps.flushState?.() } catch (error) { deps.onError?.(error) }
     state = 'approved'
     deps.quit()
   }
@@ -66,6 +69,9 @@ export function createQuitFlow(deps: QuitFlowDeps): QuitFlow {
         counts = { sessions: 0, projects: 0 }
       }
       if (!(counts instanceof Promise) && counts.sessions <= 0) {
+        if (deps.flushState) {
+          event.preventDefault(); state = 'checking'; void approve(); return
+        }
         // Nothing to stop: let this quit proceed untouched.
         state = 'approved'
         return
@@ -85,16 +91,19 @@ export function createQuitFlow(deps: QuitFlowDeps): QuitFlow {
     async confirm() {
       if (state !== 'asking') return
       state = 'stopping'
+      let timer: ReturnType<typeof setTimeout> | undefined
       const timeout = new Promise<void>((resolve) => {
-        const timer = setTimeout(resolve, deps.stopTimeoutMs ?? STOP_ALL_TIMEOUT_MS)
+        timer = setTimeout(resolve, deps.stopTimeoutMs ?? STOP_ALL_TIMEOUT_MS)
         timer.unref?.()
       })
       try {
         await Promise.race([deps.getPort().stopAllTurns(), timeout])
       } catch (error) {
         deps.onError?.(error)
+      } finally {
+        clearTimeout(timer)
       }
-      approve()
+      await approve()
     },
     cancel() {
       if (state === 'asking') {

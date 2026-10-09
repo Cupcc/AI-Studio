@@ -67,11 +67,11 @@ export const S = {
 
   // Canvas placeholders (content mounted by other tasks)
   draftTitle: '新对话',
-  placeholderConversation: 'Conversation 由 Session 模块渲染',
-  placeholderDraft: '新对话草稿由 Session 模块渲染',
-  placeholderViewConversation: 'Project View 对话列由 Project View 模块渲染',
-  placeholderPreview: (view: string) => `${view} Preview 由 Project View 模块渲染`,
-  placeholderTool: (tool: string) => `${tool} 由 Context Tools 模块渲染`,
+  placeholderConversation: '对话内容将在这里显示。',
+  placeholderDraft: '新的对话将在这里显示。',
+  placeholderViewConversation: '当前 Project View 的对话将在这里显示。',
+  placeholderPreview: (view: string) => `${view} 的项目预览将在这里显示。`,
+  placeholderTool: (tool: string) => `${tool} 的工具内容将在这里显示。`,
   preview: 'Preview',
   close: '关闭',
   resizeSidebar: '调整右侧边栏宽度',

@@ -109,6 +109,7 @@ export function createProjectFeature(core: Pick<CoreServices, 'database'>, deps:
       handle: ({ projectId, confirmed }) => shell.closeProject(projectId, confirmed)
     },
     confirmQuit: { parse: noInput, handle: () => shell.quitFlow?.confirm() },
+    stateFlushed: { parse: noInput, handle: () => shell.onStateFlushed?.() },
     cancelQuit: { parse: noInput, handle: () => shell.quitFlow?.cancel() }
   })
 }

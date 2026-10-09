@@ -17,7 +17,7 @@ const info: AppInfo = {
 function installFakeStudio(getInfo: () => Promise<AppInfo>) {
   let focusListener: ((p: WindowFocusPayload) => void) | null = null
   const unsubscribe = vi.fn()
-  const api: StudioApi = {
+  const api: Pick<StudioApi, 'app'> = {
     app: {
       getInfo,
       ping: async ({ message }) => ({ message, receivedAt: '' }),
@@ -27,7 +27,7 @@ function installFakeStudio(getInfo: () => Promise<AppInfo>) {
       }
     }
   }
-  Object.defineProperty(window, 'studio', { value: api, configurable: true })
+  Object.defineProperty(window, 'studio', { value: api as StudioApi, configurable: true })
   return { emitFocus: (focused: boolean) => focusListener?.({ focused }), unsubscribe }
 }
 

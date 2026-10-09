@@ -110,7 +110,7 @@ test('renderer has no Node.js, require or raw ipcRenderer', async () => {
     global: 'undefined',
     ipcRenderer: 'undefined',
     electron: 'undefined',
-    studioKeys: ['app'],
+    studioKeys: ['app', 'project'],
     appKeys: ['getInfo', 'onWindowFocusChanged', 'ping']
   })
 })
@@ -133,7 +133,7 @@ test('typed preload API works and main validates input', async () => {
   expect(result.version).toBe('0.0.0')
   expect(result.pong).toBe('hello')
   expect(result.invalid).toMatch(/message must be a string/)
-  await expect(page.getByTestId('app-info')).toContainText(result.electron)
+  await expect(page.getByRole('heading', { name: 'AI Developer Studio' })).toBeVisible()
 })
 
 test('new windows and foreign navigation are denied', async () => {

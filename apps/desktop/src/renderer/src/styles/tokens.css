@@ -18,6 +18,34 @@
   --nav-width: 248px;
   --canvas-header-height: 48px;
   --conversation-max-width: 720px;
+  --session-conversation-min-width: 400px;
+  --view-conversation-min-width: 360px;
+  --view-right-min-width: 400px;
+  --sidebar-min-width: 320px;
+  --tab-height: 32px;
+  --tab-min-width: 96px;
+  --tab-max-width: 200px;
+  --tab-add-width: 28px;
+  --tab-close-size: 16px;
+  --icon-button-width: 30px;
+  --icon-button-height: 28px;
+  --new-chat-height: 36px;
+  --nav-heading-height: 28px;
+  --nav-row-height: 32px;
+  --attention-size: 7px;
+  --resize-hit-width: 6px;
+  --cli-menu-width: 260px;
+  --placeholder-icon-size: 28px;
+  --placeholder-text-width: 280px;
+  --launcher-content-width: 540px;
+  --launcher-top-padding: 64px;
+  --dialog-width: 440px;
+  --radius-small: 5px;
+  --radius-dialog: 10px;
+  --disabled-opacity: .45;
+  --heading-letter-spacing: .7px;
+  --title-letter-spacing: -.6px;
+  --tooltip-delay: 500ms;
 
   /* Spacing (provisional) */
   --space-1: 4px;
@@ -31,8 +59,10 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
   --font-size-sm: 12px;
+  --font-size-xs: 11px;
   --font-size-md: 13px;
   --font-size-lg: 18px;
+  --font-size-title: 28px;
 
   /* Colour (provisional neutral greys) */
   --color-surface: #ffffff;
@@ -41,6 +71,17 @@
   --color-text: #18181b;
   --color-text-muted: #71717a;
   --color-focus-ring: #3b82f6;
+  --color-focus-ring-soft: #3b82f633;
+  --color-hover: #18181b0a;
+  --color-selected: #18181b12;
+  --color-needs-input: #df8e25;
+  --color-error: #d94848;
+  --color-completed: #3c9a67;
+  --color-primary: #27272a;
+  --color-primary-hover: #3f3f46;
+  --color-on-primary: #fff;
+  --color-backdrop: #0005;
+  --shadow-popover: 0 8px 28px #0002;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -50,5 +91,10 @@
     --color-border: #3f3f46;
     --color-text: #f4f4f5;
     --color-text-muted: #a1a1aa;
+    --color-hover: #ffffff0b;
+    --color-selected: #ffffff14;
+    --color-primary: #e4e4e7;
+    --color-primary-hover: #d4d4d8;
+    --color-on-primary: #18181b;
   }
 }

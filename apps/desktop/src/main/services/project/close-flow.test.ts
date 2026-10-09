@@ -32,6 +32,16 @@ describe('trusted close flow · FR-PROJ-002 · D-10', () => {
   })
 })
 describe('application quit · PROJ-Q7/S-Q6 recommendation', () => {
+  it('waits for renderer persistence before quitting even with no active turns', async () => {
+    let release!: () => void
+    const flush = new Promise<void>((resolve) => { release = resolve })
+    const quit = vi.fn(), prevent = vi.fn()
+    const flow = createQuitFlow({ getPort: () => stubMainSessionPort, askRenderer: () => true, askNative: async () => false, quit, flushState: () => flush })
+    flow.onBeforeQuit({ preventDefault: prevent })
+    expect(prevent).toHaveBeenCalledOnce(); expect(quit).not.toHaveBeenCalled()
+    release(); await flush; await Promise.resolve()
+    expect(quit).toHaveBeenCalledOnce(); expect(flow.state).toBe('approved')
+  })
   it('separates cancel from stopping all turns and allows the approved second quit', async () => {
     const session = { ...port(), activeTurnCountAll: () => ({ sessions: 2, projects: 1 }), stopAllTurns: vi.fn(async () => {}) }
     const ask = vi.fn(() => true), quit = vi.fn(), prevent = vi.fn()

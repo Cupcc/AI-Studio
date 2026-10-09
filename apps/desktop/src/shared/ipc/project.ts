@@ -49,12 +49,14 @@ export const projectContract = defineContract('project', {
     updateUiState: invoke<UpdateUiStateRequest, UiState>('project:update-ui-state'),
     saveWindowState: invoke<WindowState, void>('project:save-window-state'),
     closeProject: invoke<ProjectRef & { confirmed: boolean }, CloseProjectResult>('project:close-project'),
+    stateFlushed: invoke<void, void>('project:state-flushed'),
     /** Answer to a `quitRequested` event. */
     confirmQuit: invoke<void, void>('project:confirm-quit'),
     cancelQuit: invoke<void, void>('project:cancel-quit')
   },
   events: {
     menuCommand: event<MenuCommandPayload>('project:menu-command'),
+    flushRequested: event<void>('project:flush-requested'),
     /** ⌘Q while sessions are active: the renderer shows the confirmation. */
     quitRequested: event<QuitRequest>('project:quit-requested')
   }

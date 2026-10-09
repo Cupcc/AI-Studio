@@ -1,4 +1,4 @@
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -41,6 +41,15 @@ describe('Project persistence and identity · FR-PROJ-001/003 · AC-01', () => {
     try { expect(projects.openPath(locked)).toMatchObject({ ok: false, reason: 'unreadable' }) }
     finally { chmodSync(locked, 0o700) }
     expect(projects.listRecent()).toHaveLength(0)
+  })
+  it.skipIf(process.platform !== 'darwin')('recognizes macOS case, Unicode and Data-volume aliases when the volume supports them', () => {
+    const a = open('MiXeD Café')
+    const aliases = [join(dir, 'mixed café'), join(dir, 'MiXeD Café'.normalize('NFD')), `/System/Volumes/Data${a.project.canonicalPath}`]
+    for (const alias of aliases.filter(existsSync)) {
+      const result = projects.openPath(alias)
+      expect(result.ok && result.project.id).toBe(a.project.id)
+    }
+    expect(projects.listRecent()).toHaveLength(1)
   })
   it('restores independent canvases, tools, widths, tab order and current tab after database reopen', () => {
     const a = open('a'), b = open('b'), c = open('c')

@@ -89,6 +89,16 @@ function startRuntime(): void {
     shell.quitFlow = createQuitFlow({
       getPort: shell.sessionPort,
       quit: () => app.quit(),
+      flushState: () => {
+        const win = BrowserWindow.getAllWindows()[0]
+        if (!win || win.webContents.isLoading()) return Promise.resolve()
+        return new Promise<void>((resolve) => {
+          const finish = () => { clearTimeout(timer); shell.onStateFlushed = null; resolve() }
+          const timer = setTimeout(() => { console.error('[project] renderer state flush timed out'); finish() }, 2000)
+          shell.onStateFlushed = finish
+          emit(win.webContents, projectContract.events.flushRequested, undefined)
+        })
+      },
       askRenderer: (request) => {
         const win = BrowserWindow.getAllWindows().find((w) => w.isVisible())
         if (!win) return false
@@ -122,9 +132,11 @@ async function runSmokeAndQuit(output: string): Promise<void> {
     })
     const win = openWindow(true)
     const renderer = await runRendererSmoke(win)
-    win.destroy()
     const full = { ...report, renderer, ok: report.ok && renderer.ok }
     await writeSmokeReport(output, full)
+    // Destroying the last window can trigger Electron's default quit. Finish
+    // the report before that event so its asynchronous write cannot be cut off.
+    win.destroy()
     app.exit(full.ok ? 0 : 1)
   } catch (error) {
     console.error('[smoke] failed:', error)
@@ -145,6 +157,7 @@ if (launch.smokeOutput) {
     const [win] = BrowserWindow.getAllWindows()
     if (win) {
       if (win.isMinimized()) win.restore()
+      win.show()
       win.focus()
     }
   })
