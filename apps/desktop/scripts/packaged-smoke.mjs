@@ -1,9 +1,10 @@
 // Launches the packaged app through LaunchServices (`open`), like Finder
 // does, so it starts with launchd's minimal PATH. The app runs its native
 // smoke checks, writes a sanitized JSON report and quits.
-// Usage: node scripts/packaged-smoke.mjs [--out <file>] [--app <path.app>]
+// Usage: node scripts/packaged-smoke.mjs [--out <file>] [--app <path.app>] [--user-data-dir <dir>]
 import { execFile } from 'node:child_process'
-import { existsSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
@@ -25,6 +26,13 @@ if (!existsSync(appPath)) {
   console.error(`Packaged app not found: ${appPath}\nRun \`pnpm package\` first.`)
   process.exit(2)
 }
+// A smoke run must not migrate or write to the user's real application data.
+// Keep the temporary directory for diagnosis; an explicit path allows a caller
+// to exercise migration/relaunch behavior intentionally.
+const requestedUserData = arg('--user-data-dir', undefined)
+const userDataDir = requestedUserData
+  ? resolve(requestedUserData)
+  : mkdtempSync(join(tmpdir(), 'ai-studio-packaged-smoke-'))
 rmSync(outPath, { force: true })
 
 // On current macOS, `open` forwards the caller's environment to the app, so a
@@ -39,7 +47,7 @@ const launchdEnv = {
 }
 
 // -n: new instance, -W: wait until it quits. Arguments after --args reach the app.
-await promisify(execFile)('/usr/bin/open', ['-n', '-W', appPath, '--args', `--studio-smoke-output=${outPath}`], {
+await promisify(execFile)('/usr/bin/open', ['-n', '-W', appPath, '--args', `--studio-smoke-output=${outPath}`, `--studio-user-data-dir=${userDataDir}`], {
   env: launchdEnv,
   timeout: 120_000
 })
@@ -50,5 +58,6 @@ if (!existsSync(outPath)) {
 }
 const report = JSON.parse(readFileSync(outPath, 'utf8'))
 console.log(JSON.stringify(report, null, 2))
+console.log(`User data (isolated): ${userDataDir}`)
 console.log(`\nReport: ${outPath}\nResult: ${report.ok ? 'PASS' : 'FAIL'}`)
 process.exit(report.ok ? 0 : 1)

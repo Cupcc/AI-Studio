@@ -20,7 +20,7 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 | `pnpm test` | 所有 workspace 包的单元测试（本包为 Vitest） |
 | `pnpm test:e2e` | 构建后运行 Playwright Electron 冒烟测试 |
 | `pnpm package` | 构建并生成未签名的 macOS arm64 应用目录 `apps/desktop/dist/mac-arm64/` |
-| `pnpm smoke:packaged` | 以 `open` 启动打包应用执行原生依赖冒烟，结果默认写入 `.runtime/desktop/packaged-smoke.json`；`-- --out <file>` 可指定位置 |
+| `pnpm smoke:packaged` | 以 `open` 启动打包应用执行原生依赖冒烟，每次默认使用独立临时 userData，保留供诊断；结果默认写入 `.runtime/desktop/packaged-smoke.json`；`-- --out <file>` 指定报告，`-- --user-data-dir <dir>` 显式指定测试数据目录 |
 
 ## 2. 目录
 
