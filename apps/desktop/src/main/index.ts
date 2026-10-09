@@ -2,7 +2,6 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import { join } from 'node:path'
 import type { AppInfo } from '@shared/ipc/app'
-import { appContract } from '@shared/ipc/app'
 import { projectContract } from '@shared/ipc/project'
 import { S } from '@shared/project/strings'
 import { installProjectMenu } from './menu/project-menu'
@@ -64,9 +63,6 @@ function openWindow(hidden = false): BrowserWindow {
       if (core && projectShellFor(core).quitFlow?.state !== 'approved') { event.preventDefault(); win.hide() }
     })
   }
-  const inactive = () => emit(win.webContents, appContract.events.windowFocusChanged, { focused: false })
-  win.on('hide', inactive)
-  win.on('minimize', inactive)
   return win
 }
 

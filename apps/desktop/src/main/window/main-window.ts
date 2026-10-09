@@ -3,6 +3,7 @@
 import { BrowserWindow } from 'electron'
 import { appContract } from '@shared/ipc/app'
 import { emit } from '../ipc/registry'
+import { observeWindowForeground } from './foreground'
 
 export const WINDOW_DEFAULT_SIZE = { width: 1280, height: 800 } as const
 export const WINDOW_MIN_SIZE = { width: 1024, height: 640 } as const
@@ -39,8 +40,7 @@ export function createMainWindow(options: MainWindowOptions): BrowserWindow {
     }
   })
   if (!options.hidden) win.once('ready-to-show', () => win.show())
-  win.on('focus', () => emit(win.webContents, appContract.events.windowFocusChanged, { focused: true }))
-  win.on('blur', () => emit(win.webContents, appContract.events.windowFocusChanged, { focused: false }))
+  observeWindowForeground(win, (focused) => emit(win.webContents, appContract.events.windowFocusChanged, { focused }))
   void win.loadURL(options.url)
   return win
 }
