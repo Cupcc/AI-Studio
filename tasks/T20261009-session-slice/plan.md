@@ -26,3 +26,4 @@
 - 2026-10-09 主 Agent 完成 W2 恢复调研，写入 `research.md`：使用 OpenAI / Anthropic 官方资料，未验证的竞品细节不当作事实。修正 navigation 重复点击 Session 与已确认 S-Q1 的冲突；C-Q5 对齐 Adapter A-Q1；折叠 New Chat 对齐 NAV-Q8；对齐 Provider ID、能力字段与 Stop 清理失败映射。其余建议保留待确认；无新增阻塞问题，可进入实现准备。
 - 2026-10-09 先由 W3 固定共享契约，再让 W4 / W5 在独立 worktree 并行；主 Agent 统一共享注册与依赖变更，避免与 Project W2 重叠。下一批实现使用既有 Provider 契约，不等待真实 CLI 验证才开发产品状态机。
 - 2026-10-09 W3 共享 DTO / IPC 已落盘并通过 `pnpm typecheck`。桌面包增加 Adapter workspace 依赖；根脚本在类型检查、测试、启动 / 打包前构建 Adapter。契约位置为 `src/shared/session/types.ts`、`src/shared/ipc/session.ts`；共享登记在 W4 / W5 合并时统一接线。序列化 DTO 不携带 Runtime 句柄；对话按 sequence 分页与稳定 ID 更新，查看上下文与 opened 为独立调用。
+- 2026-10-09 W3 补充纯展示规则 `shared/session/presentation.ts`：单个状态、Project 注意力 / 计数、用户消息时间排序、本地日历分组与标题。6 项测试及类型检查通过。Session 关闭草稿与 Project §2.2.4 / PROJ-Q6 对齐为停止成功再关闭、失败保留（仍是待确认建议）。

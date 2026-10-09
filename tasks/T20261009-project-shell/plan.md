@@ -24,3 +24,4 @@
 - 2026-10-09 阻塞问题 PROJ-Q1～Q3 已回答；细化验收标准，task 转为 ready；启动 W2 实现。
 - 2026-10-09 Codex 团队接续 W2：先检查保留的未提交实现，再完成壳层与验证。Session 接口尽早报告主 Agent，供下一批 Session worker 对齐。用户限定 GPT-6 Astra 与 GPT-6.1 Sol 的 high / xhigh 配置（2026-10-09 对话确认）。
 - 2026-10-09 W2 写入范围补充 `apps/desktop/e2e/app.spec.ts`：仅更新新增 project IPC / 壳层导致失效的骨架冒烟断言。Session 重复点击须发送 opened 信号，window focus 与 opened 分开（S-Q1 已确认）。
+- 2026-10-09 W2 范围补充 `features/app-info/app-info.test.tsx` 中的 app-only mock 类型，以适配扩展后的 StudioApi；不扩展产品功能。启动页使用产品内容，骨架技术信息不再作为用户首页。

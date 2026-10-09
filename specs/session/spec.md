@@ -171,7 +171,7 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 
 1. 壳层关闭 Tab 前向本模块查询该 Project 中处于 Running 或 Needs Input 的 Session 数量（Stop 进行中的计入 Running）。为 0 时直接关闭；大于 0 时由壳层显示确认对话框并显示该数量。
 2. 用户确认后，壳层调用本模块停止该 Project 全部活动 Session 的当前一轮，规则同第 2.12 节。CLI Conversation 与对话记录保留，重新打开 Project 后可继续（FR-PROJ-002）。
-3. 建议 Tab 在确认后立即关闭，不等待 Stop 完成；Stop 在主进程后台完成（建议；Stop 清理有有限等待时间，04 第 4 节第 5 条）。Stop 完成后释放该 Project 所有 Runtime。
+3. 与负责关闭流程的 project spec §2.2.4 / PROJ-Q6 对齐：确认后由主进程停止，Tab 在停止成功后关闭；停止失败 / 超时保留 Tab，并显示重试与取消。Stop 成功、Project 关闭后释放该 Project 所有 Runtime（建议，待确认；04 第 4 节第 5 条要求有限等待）。
 4. 关闭后保留各 Session 的 Error、Completed Unread 标记，重新打开 Project 后照常显示（持久化，第 3.5 节）。Stop 兜底失败产生的 Error 同样在重新打开后可见。
 5. 关闭期间 Stop 尚未完成时用户重新打开该 Project：相关 Session 显示 Running 直至 Stop 完成。
 
@@ -324,7 +324,7 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 |---|---|---|
 | `projectAttention(projectId)` 与变化订阅 | `needs_input` / `error` / `completed_unread` / 空（第 2.15 节） | Tab 注意力点、折叠按钮注意力点 |
 | `activeTurnCount(projectId)` | Running（含 Stop 进行中）与 Needs Input 的 Session 数量 | 关闭确认对话框 |
-| `stopProjectTurns(projectId)` | 停止该 Project 全部当前一轮；立即返回，后台完成 | 关闭 Tab |
+| `stopProjectTurns(projectId)` | 异步停止该 Project 全部当前一轮，返回 stopped / failed；关闭成功后释放 Runtime（project spec §4.1） | 关闭 Tab |
 | `activeTurnCountAll()` / `stopAllTurns()` | 退出应用确认与停止（S-Q6） | 应用退出流程 |
 | `listSessions(projectId)` 与变化订阅 | 每项：`id`、`title`、`cli_type`、显示状态、`last_user_message_at`、`origin_view_id` | Session History、Overview（后续）、Project View 最近对话（后续） |
 | `renameSession(id, title)` | 写入 `title`，`title_source = user`；空白标题不生效，保留原标题（建议） | navigation 的 Rename |
