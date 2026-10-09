@@ -22,13 +22,15 @@
 | app-skeleton | W1 | 应用骨架 | Opus 5.5 high | — | done |
 | app-skeleton | W2 | 验收 | Sonnet 5.5 xhigh | app-skeleton W1 | done（待人签收） |
 | agent-adapter | W1 | 接口、事件模型、核心运行时、spec 草稿 | Opus 5.5 xhigh | — | done |
-| agent-adapter | W2 | Codex Provider | GPT-6 Astra xhigh | agent-adapter W1 | in_progress |
-| agent-adapter | W3 | Claude Provider | GPT-6 Astra high | agent-adapter W1 | in_progress |
+| agent-adapter | W2 | Codex Provider | GPT-6 Astra xhigh | agent-adapter W1 | delivered |
+| agent-adapter | W3 | Claude Provider | GPT-6 Astra high | agent-adapter W1 | delivered |
 | project-view | W1 | 待决事项调研与决定草稿 | Sonnet 5.5 xhigh | — | done |
 | project-shell | W1 | `specs/project`、`specs/navigation` 草稿 | Sonnet 5.5 high | — | done |
-| project-shell | W2 | 壳层实现 | GPT-6.1 Sol xhigh | app-skeleton W1 | in_progress |
+| project-shell | W2 | 壳层实现 | GPT-6.1 Sol xhigh | app-skeleton W1 | delivered |
 | session-slice | W1 | `specs/session`、`specs/chat`、`specs/input` 草稿 | Opus 5.5 high | — | done |
 | session-slice | W2 | 参考 Claude Desktop / ChatGPT Desktop 修订非阻塞问题的推荐 | 主 Agent 接续 | session-slice W1 | done |
+| session-slice | W4 / W5 | 后端 / 界面与 Electron 场景 | Astra xhigh / Sol xhigh，界面收尾 Astra high | 契约 / Providers / Project | delivered |
+| 验收 | Session W6（兼 Adapter W4、Project W3） | 独立子任务验收；总任务 `acceptance.md` 汇总，只写验收与本人证据 | GPT-6.1 Sol high | 各实现 worker | in_progress |
 
 ## 进度与决定
 
@@ -44,3 +46,6 @@
 - 2026-10-09 用户要求 Codex 接续并调用 agent team，并限定上述四种 GPT 模型配置。恢复检查：`dev/v1` 位于 `385adf0` 且干净；7 个旧 worktree 中仅 project-shell W2 有未提交实现（`agent-a014c55195a9e9487`），保留并在原处继续；其他旧分支提交均已在集成分支。Provider worker 尚无落盘实现，因此从当前集成提交创建独立 worktree。首批并行继续 Project 壳层、Codex Provider、Claude Provider；主 Agent 恢复 Session 推荐与接口计划并负责后续集成。app-skeleton W2 验收已由 `385adf0` 合并，任务不标记 done，等待人签收。
 - 2026-10-09 Session W2 推荐复核与 W3 共享契约已提交；Project W2 主进程阶段 `598ab87` 合入，界面继续。骨架冒烟隔离修复 `c544b2b` 已实测通过，app-skeleton 为 verifying。Claude Provider 模拟测试已通过，真实成功回合受账户 session limit 阻断，停止额外请求；该限制不阻塞 Session 的模拟 Provider 开发，但真实验收不得标通过。
 - 2026-10-09 首批三个 worker 已结束，所有提交集成至 `4ddc59e`。下一批并行：Session W4 Astra xhigh（后端）、W5 Sol xhigh（界面）、Adapter W4 / Project W3 Sol high（独立验收）；主 Agent 修复共享请求撤回、对齐 spec、做最终接线。继续严格限定用户指定四种模型配置。
+- 2026-10-09 Session后端、界面、共享接线已全部合入，W5容量中断后由允许的Astra high接续原worktree，保留未提交进度；W4/W6也在容量恢复后续跑。已交付10项Session Electron流程，W6独立重现并复验IPC旧返回、关闭超时、迟到秘密答复、Adapter exports和macOS前台通知问题。详细恢复记录在Session plan，最新修复 `36abe65`。
+- 2026-10-09 用户要求合理使用已安装skills：使用Vitest行为回归、React组件规则、agent-browser Electron交互；不改既有设计方向。各worker写入范围隔离，原生窗口测试由主Agent串行协调。用户新安装的 `.agents/`、`.claude/` 配置与skill安装task不纳入本轮提交。
+- 2026-10-09 主Agent回写模块spec与子任务report，所有实现task转或保持verifying；Project View仅调研、Context tools不实施。独立验收worker追加总任务acceptance汇总，完成最终门禁后归档证据。真实CLI部分通过边界不变，不追加推理调用、不推送、不合main、不将任何task标done。

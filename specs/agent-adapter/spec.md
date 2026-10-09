@@ -109,6 +109,7 @@
 6. Stop 期间 Runtime 意外退出视为该回合的终态（`interrupted`），进入兜底恢复；Provider 不支持兜底时 Session 以 `runtime_exited` 关闭，回合仍不报错。
 7. 任何 Stop、清理或兜底只作用于本 Session 的 Runtime 及其后代进程，不触及其他 Session、Project 或用户 Terminal（第 7 条；FR-SESSION-003）。
 8. `dispose()` 对活动回合先执行 Stop（有限等待），超时则强制以 `interrupted`（`stop.cleanup = failed`）结束该回合，再终止 Runtime。
+9. 2026-10-09 实现复查边界：`dispose(): Promise<void>` 为不抛错的释放接口，driver 清理错误或超时会转成 diagnostic；调用返回不能单独作为操作系统确认所有进程退出的证明。精确 Stop 的退出证据来自 `StopResult` 与进程身份检查；空闲 Runtime 释放和异常宿主退出的保证仍需后续真实验证。各 phase 的超时相加不等于整个应用固定时限，见 [W4 生命周期复查](../../tasks/T20261009-session-slice/evidence/W4-lifecycle-review.md)。
 
 ### 2.7 错误与终态（FR-STATE-003；06 第 5 节）
 
@@ -214,7 +215,7 @@
 | `checkAvailability(options)` | 第 2.2 节；不可用不抛错，以报告表达 |
 | `listModels(options)` | 不创建原生会话 |
 | `createSession(options)` / `resumeSession(options)` | 第 2.3 节；`options`：`cwd`、`environment`、可选 `overrides`、`timeouts`、`providerOptions` |
-| `dispose()` | 关机：处置全部活动 Session 并确认 Runtime 退出 |
+| `dispose()` | 关机：处置全部活动 Session，尝试终止 Runtime；不抛错契约及退出证明边界见 §2.6 |
 
 ### 4.2 `AgentSession`
 

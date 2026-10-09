@@ -257,7 +257,7 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 | `last_error_summary` | 提案 | 最近一次 Error 的摘要，供列表悬停或 Overview 使用（可选） |
 | `created_at` / `updated_at` | 04 §5 | — |
 
-Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只存在于主进程内存，不持久化。
+Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存；请求卡片、流式文本检查点按第 3.5 节持久化。实现 DTO 使用 camelCase（`projectId`、`cli`、`nativeSessionId`、`titleSource` 等），正式类型见 [`shared/session/types.ts`](../../apps/desktop/src/shared/session/types.ts)。`status` 由第 3.1 节规则推导，`last_error_summary` 未单独存储，诊断来自 Error 条目。
 
 ### 3.3 轮记录（内部，提案）
 
@@ -266,9 +266,9 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 | `turn_id` | 客户端编号；另记录原生 turn ID（如有）用于关联 Stop 与过滤迟到事件 |
 | `session_id` | — |
 | `started_at` / `ended_at` | 用于完成行时长（S-Q10） |
-| `outcome` | `completed` / `stopped` / `failed` / `aborted_by_exit`（S-Q7） |
+| `outcome` | 实现使用 Adapter `completed` / `interrupted` / `failed`；`interrupted` 显示已停止。启动发现未结束轮时按 S-Q7 记为 `failed` 并显示退出中断错误 |
 | `model` | 本轮实际使用的模型（如 Adapter 可报告） |
-| `files_changed` | 预留，本切片为空 |
+| `files_changed` | 后续 Context 工具再提供，本切片不存储该字段 |
 | `error` | 失败时的摘要与原生诊断 |
 
 ### 3.4 对话记录条目
@@ -282,14 +282,17 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 | `error` | 摘要、原生诊断详情、是否可重试 | Adapter / Session Manager |
 | `turn_end` | 时长、结果（Done / 已停止）、`files_changed` | Session Manager |
 
-### 3.5 持久化（技术方案，待实现确认）
+### 3.5 持久化（2026-10-09 实现回写，文档仍为草稿）
 
-- 存储：SQLite（04 第 2 节），数据库位于应用数据目录（app-skeleton task）。表：`sessions`、`session_turns`、`transcript_items`；数据库表结构由实现 worker 与 app-skeleton 的迁移机制确定。
+- 存储：SQLite（04 第 2 节），数据库位于应用数据目录（app-skeleton task）。迁移 [`2026100903_session_core.ts`](../../apps/desktop/src/main/services/database/migrations/2026100903_session_core.ts) 建立 `sessions`、`session_turns`、`transcript_items`、`session_drafts`、`session_preferences`。摘要以可查询索引列及序列化 DTO 保存；`(cli, native_session_id)` 唯一，禁止将已有 Session 静默绑定到另一原生会话。
 - 对话记录以客户端持久化为显示来源，不依赖读取 CLI 原生历史：两种 CLI 的原生历史格式不同，且打开 Session 必须立即显示底部（FR-SESSION-001）。原生会话只负责模型上下文。
-- 流式文本不逐条持久化增量；Agent 消息完成时写入完整文本，进行中按固定间隔（建议 1 秒）写入检查点，异常退出时最多丢失最后一个间隔的增量。
+- 流式文本按稳定条目 ID 合并，32 ms 批量推送 Renderer，1 秒写入检查点；完整消息、状态和轮终态立即写入。正常关闭前 flush，异常退出仍可能丢失最后一个检查点后的增量。
 - 状态变化（`activity`、`error_unseen`、`completion_unread`、`last_user_message_at`、`cli_session_id`）立即写入。
-- 加载：列表只读 `sessions` 元数据；打开 Session 时按倒序分页读取 `transcript_items`，首屏只取尾部。
+- 加载：列表只读 `sessions` 元数据；打开 Session 时按 `sequence` 倒序取尾页，返回页内升序条目，默认 100、单次最多 500。Renderer 按稳定 ID upsert，加载更早页时保留滚动锚；History 使用虚拟列表。列表、create / Rename 返回与事件之间保留版本守卫，旧 IPC 响应不能覆盖已到达的新状态。
+- 本轮采用“只在发送时恢复 Runtime”：打开、分页、Rename 不启动原生会话；继续对话使用原 `nativeSessionId`、Project cwd 和下一轮模型。秘密问题的答案与草稿不写入明文持久化记录，界面记录以隐藏文本代替。
 - 只记录在本应用中发生的轮；在应用外用 CLI 继续同一原生会话产生的内容不会出现在对话记录中（S-Q13）。
+
+实现与验证记录见 [Session task](../../tasks/T20261009-session-slice/task.md)、[后端证据](../../tasks/T20261009-session-slice/evidence/W4-backend-validation.md) 与[独立验收](../../tasks/T20261009-session-slice/acceptance.md)。模拟 Provider 验证不代表真实 CLI 的 AC-02～AC-05 已完整通过。
 
 ## 4. 接口与事件
 
@@ -320,11 +323,13 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 
 ### 4.2 向 Project 壳层与 navigation 提供
 
+正式主进程接缝为 [`MainSessionPort`](../../apps/desktop/src/main/services/project/session-port.ts)，Renderer 接缝为 [`RendererSessionPort`](../../apps/desktop/src/renderer/src/features/project/integration.tsx)；下表保留能力说明，跨进程准确名称见第 4.4 节。
+
 | 接口 | 说明 | 消费方 |
 |---|---|---|
 | `projectAttention(projectId)` 与变化订阅 | `needs_input` / `error` / `completed_unread` / 空（第 2.15 节） | Tab 注意力点、折叠按钮注意力点 |
-| `activeTurnCount(projectId)` | Running（含 Stop 进行中）与 Needs Input 的 Session 数量 | 关闭确认对话框 |
-| `stopProjectTurns(projectId)` | 异步停止该 Project 全部当前一轮，返回 stopped / failed；关闭成功后释放 Runtime（project spec §4.1） | 关闭 Tab |
+| `getBlockingSessionCounts(projectId)` | Running（含 Stop 进行中）与 Needs Input 的 Session 数量 | 关闭确认对话框 |
+| `stopProjectTurns(projectId)` / `projectClosed(projectId)` | 确认后停止全部当前轮，返回 stopped / failed；通过停止检查后由主进程调用 `projectClosed` 释放空闲 Runtime，成功才关闭 Tab | 关闭 Tab |
 | `activeTurnCountAll()` / `stopAllTurns()` | 退出应用确认与停止（S-Q6） | 应用退出流程 |
 | `listSessions(projectId)` 与变化订阅 | 每项：`id`、`title`、`cli_type`、显示状态、`last_user_message_at`、`origin_view_id` | Session History、Overview（后续）、Project View 最近对话（后续） |
 | `renameSession(id, title)` | 写入 `title`，`title_source = user`；空白标题不生效，保留原标题（建议） | navigation 的 Rename |
@@ -336,14 +341,25 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 |---|---|
 | 查看上下文推送 | 当前窗口的当前 Project；该 Project Main Canvas 的模式与显示对象：`conversation(sessionId)` / `draft` / `view(viewId, leftSessionId?)`。另需窗口前台状态（应用活动、窗口获得焦点、未最小化），以及“打开 S”的用户操作信号（点击列表项、切换 Tab 返回、启动恢复、在 View 左列继续 S），二者区分开：前者决定是否产生提醒，后者触发清除（第 2.11 节，S-Q1 2026-10-09 确认）。状态恢复（FR-PROJ-003）后同样推送 |
 | 打开 Session / 打开 View 的导航接口 | 点击列表项、“在 View 中打开”、创建 Session 后切换到该 Session |
-| 关闭 Tab 前查询与确认后回调 | 调用 `activeTurnCount`、`stopProjectTurns` |
+| 关闭 Tab 前查询与确认后回调 | 调用 `getBlockingSessionCounts`、`stopProjectTurns`，通过后调用 `projectClosed` |
 | 应用退出前钩子 | 调用 `activeTurnCountAll`、`stopAllTurns`（由 app-skeleton / 壳层提供） |
 | Project 目录路径 | 作为 CLI cwd |
 
 ### 4.4 与 chat、input 模块
 
-- chat → session：`createSession({projectId, cli, model?, originViewId?, firstMessage})`，返回新 Session ID；本模块负责落库、进入 Running 并调用 Adapter。
-- input → session：`send(sessionId, message)`、`answer(sessionId, requestId, optionId)`、`replyWithText(sessionId, text)`、`stop(sessionId)`、`setModel(sessionId, model)`；以及只读的控件状态输入（`activity`、`stopping`、`capabilities`）。
+正式 IPC 契约为 [`shared/ipc/session.ts`](../../apps/desktop/src/shared/ipc/session.ts)，Preload 暴露 `window.studio.session`，主进程校验字段和可信发送方。参数与结果均为可序列化 DTO，不携带 Runtime 句柄。
+
+| 调用 / 事件 | 实现约定 |
+|---|---|
+| `create({projectId, cli, model?, originViewId?, text, contextItems?})` | 返回已持久化、已接受的 `SessionSummary`；Runtime 启动异步进行，失败转 Error |
+| `send`、`answer`、`replyWithText`、`stop`、`retry`、`rename`、`setModel` | input / History 操作；答案使用 Adapter `InputResponse` 原生选项结构；`setModel` 下一轮生效 |
+| `list`、`getConversation` | 摘要列表与尾部分页；`beforeSequence` 向前翻页 |
+| `getDraft` / `saveDraft` | 以 `DraftKey` 区分每 Project New Chat 与每 Session 输入草稿；关闭 / 退出 flush 等待在途草稿写入 |
+| `getProviders`、`getModels`、`getDefaultCli`、`setDefaultCli` | 菜单、模型与 Project 默认值；不为草稿创建原生会话 |
+| `updateViewing` / `opened` | 展示上下文与显式打开分开；主进程另外核实窗口 focused / visible / 非 minimized |
+| `summaryChanged` / `transcriptChanged` / `providersChanged` | 摘要（含 Project 汇总）、按 ID upsert 的对话条目、CLI 可用性快照 |
+
+Renderer 在 `createRoot` 前一次安装 `installSessionIntegration()`，注册 History、Conversation / Header 与 CLI Menu 槽位，避免 React StrictMode 重复注册。模拟 Provider 仅在未打包且显式设置 `STUDIO_E2E_PROVIDERS=1` 时启用。
 
 ## 5. 未决问题
 

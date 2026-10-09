@@ -105,7 +105,7 @@ Shell Spec 第 6 节规定“Running 期间能否排队发送遵循 CLI 原生�
 
 | 数据 | 字段 | 说明 |
 |---|---|---|
-| 每个 Session 的输入草稿 | `text`、`context_items` | 提案：内存保存，并随 Project UI 状态持久化（I-Q5） |
+| 每个 Session 的输入草稿 | `text`、`contextItems` | 2026-10-09 实现：内存保存并通过 `saveDraft` 写入独立 `session_drafts` 表（I-Q5）；秘密问题待答复内容只在内存中保留，答复成功或清空后清理 |
 | 草稿输入 | 见 chat spec 第 3 节 | — |
 | 控件状态 | 由 `activity`、`stopping`、`pending_requests` 是否为空、输入是否为空、CLI 可用性、`capabilities` 推导 | 不单独存储 |
 | 模型 | `Session.model`（空 = CLI 默认）；草稿 `model` | session spec 第 3.2 节 |
@@ -114,13 +114,15 @@ Shell Spec 第 6 节规定“Running 期间能否排队发送遵循 CLI 原生�
 
 ### 4.1 调用 session / chat 模块
 
+2026-10-09 实现由 `Composer` 调用 Session store，再经 [`sessionContract`](../../apps/desktop/src/shared/ipc/session.ts) 进入主进程。以下参数名对齐正式 DTO；交互推荐的确认状态保持第 5 节所列状态。
+
 | 操作 | 接口 |
 |---|---|
-| 草稿首条发送 | chat `submitDraft(projectId, draftKey, {text, context_items})` |
-| Session 发送 | session `send(sessionId, {text, context_items})` |
-| 输入框回复 Needs Input | session `replyWithText(sessionId, text)` |
-| Stop | session `stop(sessionId)` |
-| 切换模型 | session `setModel(sessionId, model)`；草稿则写入草稿 `model` |
+| 草稿首条发送 | store `sendComposer({projectId, kind: 'new_chat'})` → IPC `create({projectId, cli, model, text, contextItems})` |
+| Session 发送 | store `sendComposer({projectId, kind: 'session', sessionId})` → IPC `send({sessionId, text, contextItems})` |
+| 输入框回复 Needs Input | 同一发送入口根据状态调用 `replyWithText({sessionId, text})`；失败保留草稿，已接受的用户文本先于同步终态入对话记录 |
+| Stop | IPC `stop({sessionId})` |
+| 切换模型 | IPC `setModel({sessionId, model})`；草稿则通过 `saveDraft` 写入 `model` |
 
 ### 4.2 需要 CLI Adapter 提供（经 session 模块）
 
@@ -141,5 +143,5 @@ Shell Spec 第 6 节规定“Running 期间能否排队发送遵循 CLI 原生�
 | I-Q2 | 在输入框输入的回复对 CLI 意味着什么？有多个未答复请求时作用于哪一个？ | 只有一个未答复请求且该请求原生接受自由文本（如提问）时，文字作为该请求的答案；其他情况下，所有未答复请求按“拒绝并附该文字为说明”解决（Claude `canUseTool` 拒绝可附说明；Codex 拒绝后由 Adapter 把文字作为用户消息交给 Agent，具体方式待 Adapter 验证）。对话中显示为用户消息 | 是：涉及 Adapter 接口，须在 Needs Input 实现前确认 | 采纳建议（2026-10-09 确认）；Codex 拒绝后交付文字的具体方式由 Adapter 验证 |
 | I-Q3 | Running 中是否允许发送（排队）？ | 本切片不支持：Running 中 Enter 不发送，输入保留；待 Adapter 报告并验证排队能力（包括 Stop 时排队消息的处理，06 第 5 节 `still_queued`）后再开启。依据：Shell Spec 第 6 节“遵循 CLI 原生能力” | 否 | |
 | I-Q4 | 本轮 `+` 菜单是否显示尚不可用的“从 Files 添加文件”？ | 显示并禁用，说明“Files 工具完成后可用”；Files 上线后启用。也可本轮隐藏菜单只保留按钮，请确认 | 否 | |
-| I-Q5 | 已有 Session 中未发送的文本在切换 Session / Project、重启应用时是否保留？ | 保留，切换时恢复，并随 Project UI 状态持久化；与 chat spec C-Q1 草稿规则一致 | 否 | |
+| I-Q5 | 已有 Session 中未发送的文本在切换 Session / Project、重启应用时是否保留？ | 保留，切换时恢复，并由 Session 独立持久化至 session_drafts；与 chat spec C-Q1 草稿规则一致，秘密问题输入例外见 §3 | 否 | |
 | I-Q6 | 模型选择细节：默认值的显示、Running 期间能否切换、已保存的模型下线时怎么办？ | 未选择显示 CLI 原生默认并标注“默认”，不传覆盖；Running / Needs Input 期间可切换，下一轮生效；已下线模型标注不可用，下一轮回退 CLI 默认并提示一次。依据：FR-INPUT-002；01 第 8 节原则 20；agent-adapter task“下一轮使用新模型” | 否 | |

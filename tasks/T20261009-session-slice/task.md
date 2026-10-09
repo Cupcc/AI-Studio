@@ -1,6 +1,6 @@
 ---
 id: T20261009-session-slice
-status: in_progress
+status: verifying
 fr: [FR-NAV-003, FR-CHAT-001, FR-CHAT-002, FR-CHAT-003, FR-SESSION-001, FR-SESSION-002, FR-SESSION-003, FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-004, FR-STATE-005, FR-STATE-006, FR-STATE-007, FR-INPUT-001, FR-INPUT-002]
 ac: [AC-02, AC-03, AC-04, AC-05]
 specs: [specs/session/spec.md, specs/chat/spec.md, specs/input/spec.md]

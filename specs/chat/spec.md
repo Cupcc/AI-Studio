@@ -48,7 +48,7 @@
    - 每个 Project 最多保留一份 Conversation Mode 草稿（文本、CLI、模型）。
    - 离开草稿（点击 Session、View 或切换 Tab）不丢弃草稿；切换 Tab 返回时恢复离开时的完整状态，包括草稿（D-15）。
    - 再次点击 New Chat 时回到这份草稿（保留已输入文本），而不是新建空草稿；草稿发送或被清空后，下次 New Chat 为空草稿。
-   - 草稿随 Project UI 状态持久化，应用重启后恢复（与 FR-PROJ-003 状态恢复一致）。
+   - 草稿由 Session 模块独立持久化至 `session_drafts`，应用重启后与 Project UI 状态一并恢复（与 FR-PROJ-003 状态恢复一致）。
 6. 空白草稿离开后不留下任何痕迹，Session History 不变（FR-CHAT-001 末段）。
 
 ### FR-CHAT-002 CLI 选择
@@ -114,20 +114,22 @@
 |---|---|---|
 | Project | `default_cli` | 04 第 5 节；可为空（两个 CLI 均不可用且从未设置时） |
 | 应用偏好 | `last_set_default_cli` | 提案：最近一次通过“设为此 Project 默认”设置的值，供新 Project 继承（UX 第 6 节 New Chat 第 3 项） |
-| 草稿（每 Project 一份，另有每个 Project View 一份由 Project View task 定义） | `cli`、`text`、`model`（可空）、`context_items`、`origin_view_id`（Conversation Mode 草稿为空） | 提案：存入 Project UI 状态（C-Q1） |
+| 草稿（每 Project 一份，另有每个 Project View 一份由 Project View task 定义） | `cli`、`text`、`model`（可空）、`contextItems`；创建参数另带 `originViewId` | 2026-10-09 实现：独立 `session_drafts` 表，`DraftKey = {projectId, kind: 'new_chat'}`。Project UI 只保存当前是否显示草稿；同一事实不重复存储 |
 | CLI 可用性快照 | 每个 CLI：`state`（`available` / `not_installed` / `not_logged_in` / 其他见 C-Q5）、`reason`、`checked_at` | 运行时缓存，不持久化 |
 
 ## 4. 接口与事件
 
 ### 4.1 提供给其他模块
 
+2026-10-09 实现入口为 Session Renderer store、`CliMenu` 与 [`sessionContract`](../../apps/desktop/src/shared/ipc/session.ts)，具体持久化与事件见 [Session §3.5 / §4.4](../session/spec.md)。下表替换实现前的占位名称，产品推荐仍待确认。
+
 | 接口 | 说明 | 消费方 |
 |---|---|---|
-| `openDraft(projectId, cli?)` | 打开或回到草稿；`cli` 为空时使用 Default CLI | 导航 New Chat 主按钮、顶栏 New Chat、CLI 菜单 |
-| `setProjectDefaultCli(projectId, cli)` | 写入 `default_cli` 与 `last_set_default_cli` | CLI 菜单 |
-| `resolveDefaultCliForNewProject()` | 新 Project 创建时调用，返回应写入的 `default_cli` | Project 模块（project-shell） |
-| `cliAvailability()` 与变化订阅 | 菜单与草稿显示 | 导航、草稿、input |
-| `submitDraft(projectId, draftKey, message)` | 首条消息；内部调用 session 模块 `createSession`（session spec 第 4.4 节） | input |
+| Renderer `startDraft(projectId, cli?)` | 打开或回到草稿；未指定 CLI 则保留草稿 CLI 或使用 Default CLI | 导航 New Chat 主按钮、顶栏 New Chat、CLI 菜单 |
+| IPC `setDefaultCli({projectId, cli})` | 写入 `projects.default_cli` 与 `session_preferences.last_set_default_cli` | CLI 菜单 |
+| MainSessionPort `initializeProject(projectId)` | Project 创建回复前快照默认 CLI；发现失败不阻止打开目录 | Project 模块（project-shell） |
+| IPC `getProviders()` / `providersChanged` | 版本、登录、兼容性与原因分别来自 Adapter，菜单展示可用性快照 | 导航、草稿、input |
+| Renderer `sendComposer(DraftKey)` → IPC `create` | 首条消息与草稿参数提交；返回新摘要后进入 Session，未接受时保留输入 | input |
 
 ### 4.2 需要 CLI Adapter 提供
 
@@ -143,7 +145,7 @@
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
-| C-Q1 | 未发送草稿在离开、再次点击 New Chat、切换 Project、重启应用时如何处理？ | 每个 Project 保留一份草稿（文本、CLI、模型）；离开不丢弃；再次 New Chat 回到该草稿；切换 Tab 返回恢复（D-15）；随 Project UI 状态持久化，重启后恢复。依据：FR-CHAT-001 只规定不创建 Session；D-15、FR-PROJ-003 要求恢复离开时的状态 | 否 | |
+| C-Q1 | 未发送草稿在离开、再次点击 New Chat、切换 Project、重启应用时如何处理？ | 每个 Project 保留一份草稿（文本、CLI、模型）；离开不丢弃；再次 New Chat 回到该草稿；切换 Tab 返回恢复（D-15）；由 Session 独立持久化至 session_drafts，重启后恢复。依据：FR-CHAT-001 只规定不创建 Session；D-15、FR-PROJ-003 要求恢复离开时的状态 | 否 | |
 | C-Q2 | 在已有草稿时从 CLI 菜单选择另一个 CLI：新建空草稿，还是改变当前草稿的 CLI？ | 改变当前草稿的 CLI，保留已输入文本，模型重置为新 CLI 的原生默认。草稿未创建 Session，CLI 未锁定（FR-CHAT-003） | 否 | |
 | C-Q3 | Project 的 Default CLI 不可用（或两个都不可用）时，New Chat 主按钮如何表现？ | 主按钮仍可点击并打开草稿；草稿内显示不可用原因与安装 / 登录指引（Shell Spec 第 9 节），发送不可用；用户可在 ▾ 菜单中选其他可用 CLI。不自动改写 Project Default CLI | 否 | |
 | C-Q4 | “检测到的第一个可用 CLI”按什么顺序？新 Project 沿用的默认值是创建时的快照，还是始终跟随最近设置？ | 顺序按菜单顺序 Codex CLI → Claude Code（UX 第 6 节 New Chat 第 2 项）；新 Project 在创建时写入快照，之后其他 Project 改默认不影响它（“沿用”指新 Project 的初始值） | 否 | |

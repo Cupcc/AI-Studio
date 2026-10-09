@@ -15,7 +15,7 @@
 | W1 | 接口、事件模型、核心、测试工具、spec 草稿（Opus 5.5 xhigh） | `packages/agent-adapter/**`（`src/codex/**`、`src/claude/**` 及对应测试目录除外）；`specs/agent-adapter/spec.md`；本 task 的 `research.md`、`evidence/W1-*` | 包脚手架与依赖、接口、核心、模拟传输工具、spec 草稿 | — | done |
 | W2 | Codex Provider（GPT-6 Astra xhigh） | `packages/agent-adapter/src/codex/**`、`packages/agent-adapter/test/codex/**`；本 task 的 `evidence/W2-*` | Provider、锁定版本的协议类型、单元与集成测试 | W1 | delivered |
 | W3 | Claude Provider（GPT-6 Astra high） | `packages/agent-adapter/src/claude/**`、`packages/agent-adapter/test/claude/**`；本 task 的 `evidence/W3-*` | Provider、单元与集成测试 | W1 | delivered |
-| W4 | 验收（GPT-6.1 Sol high） | 本 task 的 `acceptance.md`、`evidence/W4-*` | 验收记录 | W2、W3 | in_progress |
+| W4 | 验收（GPT-6.1 Sol high） | 本 task 的 `acceptance.md`、`evidence/W4-*` | 验收记录 | W2、W3 | delivered（待人签收） |
 
 ## 进度与决定
 
@@ -30,3 +30,4 @@
 - 2026-10-09 主 Agent 补齐 `JsonRpcPeer.dismissIncoming(id)` 与 Codex `serverRequest/resolved` 接线：不向原生发送多余响应，释放对应待处理请求，并令既有回调失效；数值 / 字符串 ID、并发请求与 ID 复用有回归测试。相关 38 项测试及 Adapter typecheck 通过，交 W4 独立复核。
 - 2026-10-09 主 Agent 将 W2 / W3 的长期结论回写 `specs/agent-adapter/spec.md` 第 2.11 / 2.12 节：Codex 协议版本、同轮输入顺序与 osPid:null 系统基线；Claude SDK 桥接、配置建议、原生 ID / 模型 / Stop。保留真实失败、配额阻断和宿主崩溃边界，草稿与未确认建议不变；任务转 verifying。
 - 2026-10-09 W4 发现输入竞态：答复在途时忽略原生撤回，后续交付失败留下不可回答的等待。主 Agent 修正为撤回立即解除，答复结束不重复发终态；失败只恢复仍待处理的请求。直接答复 / 输入框答复 × 成功 / 失败四个回归及既有 Provider 用例共 102 项通过，交 W4 复核。
+- 2026-10-09 W4 独立验收 `1b5b76a` 已合并；最终 Adapter 181 项单测通过，206 份协议文件校验一致。真实 CLI 验证为部分通过，Codex 本机升级至0.162.0未真实复测、Claude配额与精确Stop缺口保留。Session 集成补 `234ed32` 四个 exports default 条件，修复Electron CJS启动；W6在真实Electron确认可启动。主 Agent 写 report、补dispose返回值的退出证明边界，task保持verifying。

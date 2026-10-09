@@ -208,7 +208,7 @@
 
 不保存、也不恢复的内容：
 
-- Conversation 的滚动位置：Session 打开时一律直接显示最底部（FR-SESSION-001），不论是首次打开、重新进入 Project 还是切换 Tab 返回（见 PROJ-Q12）。
+- Conversation 的滚动位置不写入 Project 持久化数据；首次 / 重启恢复及从 History 显式打开时定位底部。运行中 Tab 返回保留上滚位置或底部跟随状态，具体规则统一见 [Session §2.2](../session/spec.md)（PROJ-Q12 待确认建议）。
 - 新 Chat 草稿中的文字：是否保存与恢复归 `specs/chat/`，见 PROJ-Q11。
 - 终端输出、Browser 页面内容等工具内部状态：归 `specs/tools/`。
 - AI 执行任务不得改变上述任何状态（Product Definition 第 8 节原则 21、22；02 Context Panel 操作原则）：Agent 完成、报错或需要输入时，不自动切换 View / Session，不自动展开右侧边栏或切换工具。
@@ -321,30 +321,30 @@ Project 记录是新创建的（2.1.4 第 4 步），或没有任何已保存 UI
 
 窗口级状态是否持久化到下次启动，见 PROJ-Q1。
 
-### 3.4 存储位置（技术方案，待实现确认）
+### 3.4 存储位置（2026-10-09 实现回写，文档仍为草稿）
 
-Project 记录、`ui_state` 与窗口级状态存入应用的 SQLite（04 第 2 节本地持久化：Project、UI 状态）；渲染进程不直接读写，经 Preload Bridge 的类型化 IPC 访问（04 第 2 节分层边界）。
+Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级状态存入 `shell_window_state`，迁移见 [`2026100902_project_core.ts`](../../apps/desktop/src/main/services/database/migrations/2026100902_project_core.ts)（04 第 2 节本地持久化）。渲染进程不直接读写，经 Preload Bridge 的类型化 IPC 访问；乐观 UI 按动作顺序串行保存，保存期间的新修改通过 revision 保留，关闭 / 退出前等待 Session 草稿与 Project 状态 flush。
 
 ## 4. 接口与事件
 
-下列接口名为占位，目的是固定数据形状与方向，各 task 实现时可调整名称，但要求在本节记录变更。
+主进程正式接缝见 [`MainSessionPort`](../../apps/desktop/src/main/services/project/session-port.ts)，Renderer 槽位与接缝见 [`features/project/integration.tsx`](../../apps/desktop/src/renderer/src/features/project/integration.tsx)，IPC 见 [`shared/ipc/project.ts`](../../apps/desktop/src/shared/ipc/project.ts)。2026-10-09 已接入 Session；Project View / 工具内容仍为后续 task 的槽位。
 
 ### 4.1 本模块需要 session 模块提供
 
 | 需要 | 形状 | 用途 |
 |---|---|---|
 | Project 注意力状态 | `getProjectAttention(project_id) → "needs_input" \| "error" \| "completed_unread" \| null`；加订阅：状态变化时推送 | 非当前 Tab 的注意力点（2.2.3）；导航折叠按钮的注意力点（navigation）。优先级汇总（Needs Input > Error > Completed Unread）由 session 模块完成，本模块不自行汇总；不含 Running |
-| 阻止关闭的 Session 计数 | `getBlockingSessionCounts(project_id) → { running, needs_input }` | 判断是否需要确认以及对话框中的数量（2.2.4） |
-| 停止当前一轮 | `stopProjectTurns(project_id) → { stopped: SessionId[], failed: { session_id, reason }[] }`，异步；仅停止该 Project 内 Running 与 Needs Input 的 Session | 关闭确认后调用；不得影响其他 Project、其他 Session 与用户 Terminal（04 第 4 节）；关闭后 CLI Conversation 保留 |
-| Project 生命周期 | `onProjectOpened(project_id)`、`onProjectClosed(project_id)` | 加载 / 释放该 Project 的 Session 数据；关闭后 Session 的状态保留规则归 session spec |
-| Session 存在性 | `sessionExists(session_id) → boolean`；`getSession(session_id).origin_view_id` | 恢复时校验（2.3.5） |
+| 阻止关闭的 Session 计数 | `getBlockingSessionCounts(projectId) → { running, needsInput }` | 判断是否需要确认以及对话框中的数量（2.2.4） |
+| 停止当前一轮 | `stopProjectTurns(projectId) → { stopped: SessionId[], failed: { sessionId, reason }[] }`，异步；仅停止该 Project 内 Running 与 Needs Input 的 Session | 关闭确认后调用；不得影响其他 Project、其他 Session 与用户 Terminal（04 第 4 节）；关闭后 CLI Conversation 保留 |
+| Project 生命周期 | Renderer `onProjectOpened(projectId)` / `onProjectClosed(projectId)`；主进程 `projectClosed(projectId)` | Renderer 加载 / 释放 UI 数据；可信关闭流程通过停止检查后在主进程释放空闲 Runtime，成功才允许移除 Tab；历史记录与原生 ID 保留 |
+| Session 存在性 | Renderer `sessionExists(projectId, sessionId) → boolean` | 恢复时校验（2.3.5）；来源 View 从 Session 摘要读取 |
 | Session 列表与状态 | 见 `specs/navigation/spec.md` 4.1 | Session History |
 
 ### 4.2 本模块提供给 session 模块
 
 | 提供 | 形状 | 用途 |
 |---|---|---|
-| 查看信号 | `setViewing(project_id, session_id \| null)`：当且仅当该 Project 是当前 Tab、并且该 Session 正显示在 Conversation 或 Project View 左列时，`session_id` 非空；其余情况为 `null` | 让 session 模块执行 Completed Unread / Error 的清除与 D-05（“Project View 左侧正在显示的 Session 视为正在查看”）。何时清除由 session 模块决定。另需推送窗口前台状态，并把“打开 Session”的用户操作（含切换 Tab 返回、启动恢复）作为独立信号发出：窗口失焦、最小化或应用在后台时不算正在查看，窗口回到前台不清除提醒（`specs/session/spec.md` 第 2.11 节，S-Q1 2026-10-09 确认） |
+| 查看信号 | `setViewing(projectId, sessionId \| null)`、`setWindowForeground(foreground)`、`userOpenedSession(projectId, sessionId)` | Session integration 合并当前 Tab 展示上下文后发送 `updateViewing`；“打开 Session”（含切换 Tab 返回、启动恢复）另发 `opened`。窗口前台变化不发 `opened`，主进程在事件发生时核实 focused / visible / 非 minimized（`specs/session/spec.md` 第 2.11 节，S-Q1 2026-10-09 确认） |
 | 当前 Project 标志 | `current_project_id` 变更事件 | 供 session 模块判断哪个 Project 的状态要在 Tab 上显示 |
 | 关闭确认结果 | “用户已确认关闭并停止”事件 | 触发 `stopProjectTurns` |
 
@@ -355,7 +355,7 @@ Project 记录、`ui_state` 与窗口级状态存入应用的 SQLite（04 第 2 
 
 ### 4.4 与 chat
 
-- 创建 Project 记录时向 chat 取 `default_cli` 初值：`resolveInitialDefaultCli() → "codex" \| "claude" \| null`。
+- 创建 Project 记录后、打开回复前调用 `MainSessionPort.initializeProject(projectId)`，由 Session 服务快照 `default_cli`；正式 Provider ID 为 `codex` / `claude-code`，显示名分别为 Codex CLI / Claude Code。存储与继承规则统一见 [chat §3 / §4.1](../chat/spec.md)。
 - 草稿 UI 状态（`main_canvas.mode = "draft"`）的内容与保存归 chat；Tab 切换期间草稿文字应保持（D-15），重启后的行为见 PROJ-Q11。
 
 ### 4.5 与 project-view、tools（后续 task）
@@ -391,8 +391,8 @@ Project 记录、`ui_state` 与窗口级状态存入应用的 SQLite（04 第 2 
 | PROJ-Q8 | 恢复的 Session / View 已不存在时回落到哪里？ | 回落到 Overview，不弹窗，不改写其他已保存状态（2.3.5）。依据：FR-PROJ-003“首次进入 Project：默认显示 Overview”；V1 没有删除 Session 的入口（见 NAV-Q9），此情形主要来自数据异常 | 否 | 待确认；先按建议实现（2026-10-09） |
 | PROJ-Q9 | Tab 条：目录名相同的 Project 如何区分？Tab 数量多到放不下时怎么办（最小宽度、溢出滚动、溢出菜单）？ | 同名时在名称后加上级目录名消歧（如“app · work”），悬停显示完整路径；Tab 宽度从 200 随数量收缩到最小宽度 96，仍放不下时顶栏 Tab 区域横向滚动，`+` 固定在 Tab 区右端并保持可见。依据：Shell 第 2 节只给最大宽 200 与单行截断；AC-01 要求能“快速切换” | 否 | 待确认；先按建议实现（2026-10-09） |
 | PROJ-Q10 | 新增 Tab 的位置（`+` 创建、打开 Project 新建）与关闭当前 Tab 后激活哪个 Tab？是否支持拖拽排序？ | 新 Tab 追加在最右；关闭当前 Tab 后激活右侧相邻 Tab，没有则激活左侧相邻；V1 不支持拖拽排序。依据：浏览器与桌面应用惯例；文档无规定 | 否 | 待确认；先按建议实现（2026-10-09） |
-| PROJ-Q11 | 未发送的 New Chat 草稿文字：切换 Tab 返回保持（D-15 隐含）；关闭 Tab / 重启后是否保存与恢复？ | project 只保存 `main_canvas.mode = "draft"`，重启后恢复为一个空草稿；草稿文字是否落盘由 `specs/chat/` 决定，倾向落盘到本地以免丢失输入。依据：FR-CHAT-001“未发送草稿不创建 Session”；D-15 | 否 | 待确认；先按建议实现（2026-10-09） |
-| PROJ-Q12 | D-15 的“完整状态”到底包含哪些内容？是否包括 Conversation 滚动位置、Session History 滚动位置、输入框草稿文字、Files 展开的目录等？ | 切换 Tab 返回时保留渲染进程内的内存态：Session History 滚动位置、输入框草稿、工具内部状态；Conversation 一律回到最底部（FR-SESSION-001）；重新打开 Project 或重启后只恢复 2.3.1 表中保存的持久化项。依据：D-15、FR-SESSION-001、04 第 6 节“Project 切换即时响应” | 否 | 待确认；先按建议实现（2026-10-09） |
+| PROJ-Q11 | 未发送的 New Chat 草稿文字：切换 Tab 返回保持（D-15 隐含）；关闭 Tab / 重启后是否保存与恢复？ | project 只保存 `main_canvas.mode = "draft"`；草稿文本由 chat C-Q1 负责独立落盘并恢复。依据：FR-CHAT-001“未发送草稿不创建 Session”；D-15；chat §3 | 否 | 待确认；先按建议实现（2026-10-09） |
+| PROJ-Q12 | D-15 的“完整状态”到底包含哪些内容？是否包括 Conversation 滚动位置、Session History 滚动位置、输入框草稿文字、Files 展开的目录等？ | 切换 Tab 返回时保留内存中的 History 滚动位置、草稿、工具状态；Conversation 依 session §2.2.4 保留上滚位置或底部跟随状态，History 显式打开与重启恢复定位底部；重新打开 Project 或重启恢复 2.3.1 中持久化项与所属模块草稿。依据：D-15、FR-SESSION-001、04 第 6 节“Project 切换即时响应” | 否 | 待确认；先按建议实现（2026-10-09） |
 | PROJ-Q13 | 回到某 Project 的 Tab 时，恢复出的 Session 若带有 Completed Unread / Error，是否因“已展示在 Conversation 中”而视为已查看并清除？ | 视为已查看并清除（与 D-05 对 Project View 左列的处理一致）；仅当该 Project 是当前 Tab 且 Session 实际显示时才算。依据：D-05、FR-STATE-005。本条规则最终归 `specs/session/`，此处提出是因为信号来自 project 模块（4.2） | 否 | 按 S-Q1（b）：视为已查看并清除（2026-10-09 确认） |
 | PROJ-Q14 | 新 Project 首次展开右侧边栏时默认显示哪个工具？新 Project 右侧边栏初始是展开还是收起？（03 第 3 节“默认允许收起”含义不明确） | 初始收起；第一次展开默认 Files（02 中工具列表的第一项）。依据：02 Context Panel 操作原则（完全由用户主动控制）；AC-07“Agent 不得自行强制打开” | 否 | 待确认；先按建议实现（2026-10-09） |
 | PROJ-Q15 | 一个已打开 Project 的子目录或父目录，被选择为另一个 Project 时是否允许？ | 允许，视为独立 Project，不合并也不提示。依据：01 第 8 节原则 3（一个 Project 对应一个本地目录）；同一目录判定只处理等价路径，不处理包含关系 | 否 | 待确认；先按建议实现（2026-10-09） |

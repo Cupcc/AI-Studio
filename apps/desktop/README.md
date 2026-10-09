@@ -20,7 +20,7 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 | `pnpm dev` | electron-vite 开发模式（Renderer 热更新） |
 | `pnpm typecheck` | 所有 workspace 包的类型检查 |
 | `pnpm test` | 所有 workspace 包的单元测试（本包为 Vitest） |
-| `pnpm test:e2e` | 构建后运行 Playwright Electron 冒烟测试 |
+| `pnpm test:e2e` | 构建后运行 Playwright Electron：原生依赖冒烟与使用模拟 Provider 的 Project / Session 流程，不调用模型 |
 | `pnpm package` | 构建并生成未签名的 macOS arm64 应用目录 `apps/desktop/dist/mac-arm64/` |
 | `pnpm smoke:packaged` | 以 `open` 启动打包应用执行原生依赖冒烟，每次默认使用独立临时 userData，保留供诊断；结果默认写入 `.runtime/desktop/packaged-smoke.json`；`-- --out <file>` 指定报告，`-- --user-data-dir <dir>` 显式指定测试数据目录 |
 
@@ -75,3 +75,6 @@ scripts/                       postinstall、afterPack、打包冒烟脚本
 - 启动环境：Finder 启动的应用只有最小 PATH。需要启动 CLI 或 Shell 时使用 `await core.shellEnv.get()` 返回的 `env`（登录 + 交互 Shell 解析，10 秒超时后回退到启动环境，`source` 字段标明来源）。
 - PTY：只在主进程 `services/` 中创建；node-pty 需懒加载并处理加载失败（参考 `services/pty/pty-smoke.ts`）。
 - 启动参数：`--studio-user-data-dir=<abs>` 用于测试隔离数据；`--studio-smoke-output=<abs>` 运行冒烟并退出。
+- Adapter 为 ESM workspace 包；Electron 主进程构建当前为 CJS，包的 `exports` 同时提供 `import` 与 `default` 条件，供支持同步 ESM require 的 Node / Electron 加载。新增公共子路径需一并保留这两个条件，E2E 启动门禁覆盖实际构建产物。
+- Session：`sessionCore` 迁移登记后创建 `createSessionFeature`，注册 Project 的主进程 SessionPort；Renderer 在 `createRoot` 前一次调用 `installSessionIntegration()`。退出前完成草稿 / 壳层 flush、Session 停止与 Runtime 释放；Renderer 确认路径先 flush，原生确认路径先 Stop 再 flush。最终统一等待功能与 IPC 清理后关闭数据库。
+- 自动化：未打包且 `STUDIO_E2E_PROVIDERS=1` 时使用模拟 Provider，打包产物忽略该开关。普通 E2E 截图写 `.runtime/desktop-e2e/`；`STUDIO_E2E_EVIDENCE_DIR` 仅用于明确生成验收证据。需要真实窗口焦点的多份 Electron 测试须串行运行。
