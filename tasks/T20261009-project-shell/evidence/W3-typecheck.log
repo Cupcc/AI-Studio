@@ -1,0 +1,5 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck
+$ tsc -p tsconfig.build.json
+Scope: 2 of 3 workspace projects
+$ tsc -p tsconfig.json --noEmit
+$ tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.e2e.json

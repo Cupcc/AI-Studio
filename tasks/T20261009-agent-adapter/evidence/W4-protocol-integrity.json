@@ -1,0 +1,6 @@
+{
+  "cliVersion": "0.161.0",
+  "filesVerified": 206,
+  "mismatches": [],
+  "note": "Reversed only mechanical relative .js import suffixes; compared with retained raw-source hashes, not current CLI regeneration."
+}

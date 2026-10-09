@@ -1,0 +1,27 @@
+{
+  "modelCalls": 0,
+  "catalogCalls": 0,
+  "fullAuthenticationOutputRetained": false,
+  "reports": [
+    {
+      "provider": "codex",
+      "status": "available",
+      "executableStatus": "ok",
+      "versionStatus": "ok",
+      "version": "0.162.0",
+      "loginStatus": "ok",
+      "loginState": "logged_in",
+      "modelsStatus": "skipped"
+    },
+    {
+      "provider": "claude-code",
+      "status": "available",
+      "executableStatus": "ok",
+      "versionStatus": "ok",
+      "version": "2.1.295",
+      "loginStatus": "ok",
+      "loginState": "logged_in",
+      "modelsStatus": "skipped"
+    }
+  ]
+}

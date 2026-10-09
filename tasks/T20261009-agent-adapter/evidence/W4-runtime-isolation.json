@@ -1,0 +1,28 @@
+{
+  "modelCalls": 0,
+  "installedCliCalls": 0,
+  "protocol": "simulated",
+  "processTable": "real OS",
+  "codexStop": {
+    "cleanup": "confirmed",
+    "currentNestedCommandExited": true,
+    "earlierServiceAlive": true,
+    "claudeRuntimeAlive": true,
+    "claudeState": "running",
+    "externalTerminalAlive": true,
+    "repeatedStopIdentical": true
+  },
+  "claudeStop": {
+    "outcome": "interrupted",
+    "continued": true,
+    "sameNativeId": true,
+    "nextTurnModel": "fixture-b"
+  },
+  "claudeCrash": {
+    "codexUnaffected": true,
+    "codexState": "running",
+    "externalTerminalAlive": true
+  },
+  "recordedProcessIdentitiesExited": true,
+  "cleanupConfirmed": true
+}

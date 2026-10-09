@@ -1,0 +1,21 @@
+Scope: all 3 workspace projects
+✓ Lockfile passes supply-chain policies (verified 2h ago)
+Lockfile is up to date, resolution step is skipped
+Packages are cloned from the content-addressable store to the virtual store.
+  Content-addressable store is at: /Users/Chris/Library/pnpm/store/v11
+  Virtual store is at:             node_modules/.pnpm
+Packages: +481
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 481, reused 481, downloaded 0, added 481, done
+.../node-pty@1.1.0/node_modules/node-pty install$ node scripts/prebuild.js || node-gyp rebuild
+.../node-pty@1.1.0/node_modules/node-pty install: [32m> Checking prebuilds...[0m
+.../node-pty@1.1.0/node_modules/node-pty install: Done
+.../node-pty@1.1.0/node_modules/node-pty postinstall$ node scripts/post-install.js
+.../node-pty@1.1.0/node_modules/node-pty postinstall: [32m> Cleaning release folder...[0m
+.../node-pty@1.1.0/node_modules/node-pty postinstall: [32m> Moving conpty.dll...[0m
+.../node-pty@1.1.0/node_modules/node-pty postinstall:   SKIPPED (not Windows)
+.../node-pty@1.1.0/node_modules/node-pty postinstall: Done
+apps/desktop postinstall$ install-electron && node scripts/ensure-node-pty-helper.mjs
+apps/desktop postinstall: [ensure-node-pty-helper] 1 spawn-helper file(s) made executable
+apps/desktop postinstall: Done
+Done in 2.3s using pnpm v12.10.1

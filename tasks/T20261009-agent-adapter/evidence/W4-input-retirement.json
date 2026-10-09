@@ -1,0 +1,17 @@
+{
+  "modelCalls": 0,
+  "installedCliCalls": 0,
+  "core": {
+    "numericAndStringIdsIndependent": true,
+    "dismissalWritesNoResponse": true,
+    "staleCallbackInvalid": true,
+    "idReuseSafe": true
+  },
+  "provider": {
+    "foreignThreadIgnored": true,
+    "uiInputCleared": true,
+    "withdrawalWritesNoResponse": true,
+    "concurrentRequestStillAnswerable": true,
+    "reusedIdAnswerable": true
+  }
+}

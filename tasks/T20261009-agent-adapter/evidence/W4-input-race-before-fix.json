@@ -1,0 +1,19 @@
+{
+  "modelCalls": 0,
+  "installedCliCalls": 0,
+  "reply": {
+    "success": false,
+    "code": "provider_error"
+  },
+  "pendingAfterWithdrawnReplyFailure": 1,
+  "nativeResolvedEvents": 0,
+  "followupAnswer": {
+    "success": false,
+    "code": "invalid_state"
+  },
+  "expected": {
+    "pendingAfterWithdrawnReplyFailure": 0,
+    "nativeResolvedEvents": 1
+  },
+  "passed": false
+}

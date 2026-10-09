@@ -1,0 +1,22 @@
+
+Running 9 tests using 1 worker
+
+(node:21688) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 ../../tasks/T20261009-project-shell/evidence/W3-app.spec.ts:33:5 › opens one window with the shell spec sizes (133ms)
+  ✓  2 ../../tasks/T20261009-project-shell/evidence/W3-app.spec.ts:62:5 › renders from app://studio with a draggable 40px top bar (52ms)
+  ✓  3 ../../tasks/T20261009-project-shell/evidence/W3-app.spec.ts:77:5 › renderer has no Node.js, require or raw ipcRenderer (3ms)
+  ✓  4 ../../tasks/T20261009-project-shell/evidence/W3-app.spec.ts:118:5 › typed preload API works and main validates input (12ms)
+  ✓  5 ../../tasks/T20261009-project-shell/evidence/W3-app.spec.ts:139:5 › new windows and foreign navigation are denied (515ms)
+  ✓  6 ../../tasks/T20261009-project-shell/evidence/W3-app.spec.ts:151:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (1.4s)
+LAYOUT {"mode":"view","width":1024,"height":640,"conversation":376,"right":400,"total":1024,"window":1024}
+LAYOUT {"mode":"view","width":1280,"height":800,"conversation":450,"right":582,"total":1280,"window":1280}
+LAYOUT {"mode":"view","width":1440,"height":900,"conversation":450,"right":742,"total":1440,"window":1440}
+LAYOUT {"mode":"session","width":1024,"height":640,"conversation":400,"right":376,"total":1024,"window":1024}
+LAYOUT {"mode":"session","width":1280,"height":800,"conversation":622,"right":410,"total":1280,"window":1280}
+LAYOUT {"mode":"session","width":1440,"height":900,"conversation":782,"right":410,"total":1440,"window":1440}
+  ✓  7 ../../tasks/T20261009-project-shell/evidence/W3-project.spec.ts:43:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (2.1s)
+  ✓  8 ../../tasks/T20261009-project-shell/evidence/W3-project.spec.ts:101:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (781ms)
+  ✓  9 ../../tasks/T20261009-project-shell/evidence/W3-project.spec.ts:121:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (655ms)
+
+  9 passed (7.0s)

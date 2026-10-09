@@ -1,0 +1,10 @@
+$ vitest run
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification/packages/agent-adapter
+
+
+ Test Files  15 passed (15)
+      Tests  181 passed (181)
+   Start at  17:33:50
+   Duration  2.69s (tests 77%, transform 15%, import 7%, worker 1%)
+

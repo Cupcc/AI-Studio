@@ -1,0 +1,15 @@
+{
+  "modelCalls": 0,
+  "installedCliCalls": 0,
+  "reply": {
+    "success": false,
+    "code": "provider_error"
+  },
+  "pendingAfterWithdrawnReplyFailure": 0,
+  "nativeResolvedEvents": 1,
+  "expected": {
+    "pendingAfterWithdrawnReplyFailure": 0,
+    "nativeResolvedEvents": 1
+  },
+  "passed": true
+}
