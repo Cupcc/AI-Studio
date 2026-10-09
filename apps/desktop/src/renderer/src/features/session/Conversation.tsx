@@ -21,26 +21,19 @@ export function ConversationHeader({ project, canvas }: ShellSlotProps) {
   </>
 }
 
-interface ScrollPosition { top: number; following: boolean }
-const positions = new Map<string, ScrollPosition>()
-
 function SessionConversation({ sessionId, projectId, active }: { sessionId: string; projectId: string; active: boolean }) {
   const conversation = useSessions((s) => s.conversations[sessionId]), opened = useSessions((s) => s.opened[sessionId] ?? 0)
   const summary = useSessions((s) => s.summaries[sessionId]), openError = useSessions((s) => s.errors[`open:${sessionId}`])
   const ref = useRef<HTMLDivElement>(null), contentRef = useRef<HTMLDivElement>(null)
   const following = useRef(true)
   const [away, setAway] = useState(!following.current), [positioned, setPositioned] = useState(false)
-  const previousOpened = useRef(opened), previouslyActive = useRef(active)
+  const previousOpened = useRef(opened)
   const prepend = useRef<{ height: number; top: number } | null>(null)
   useEffect(() => { void useSessions.getState().loadConversation(sessionId) }, [sessionId])
-  function savePosition() {
-    const node = ref.current
-    if (node) positions.set(sessionId, { top: node.scrollTop, following: following.current })
-  }
   function latest() {
     const node = ref.current
     if (!node) return
-    following.current = true; node.scrollTop = node.scrollHeight; setAway(false); savePosition()
+    following.current = true; node.scrollTop = node.scrollHeight; setAway(false)
   }
   async function older() {
     const node = ref.current
@@ -52,20 +45,19 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
     const node = ref.current
     if (!node || !conversation?.loaded || !active) return
     const reopened = opened !== previousOpened.current
-    // Returning to a mounted background tab preserves an intentionally older
-    // position; clicking a Session in the active tab opens its latest content.
+    // Every explicit open (including a Project Tab return) shows the latest.
+    // A foreground change has no opened signal and keeps the scroll position.
     if (!positioned) {
       node.scrollTop = node.scrollHeight
       setPositioned(true)
-    } else if (reopened && previouslyActive.current) latest()
+    } else if (reopened) latest()
     else if (prepend.current && !conversation.loading) {
       node.scrollTop = prepend.current.top + node.scrollHeight - prepend.current.height
       prepend.current = null
     } else if (following.current) node.scrollTop = node.scrollHeight
     setAway(!following.current)
-    savePosition(); previousOpened.current = opened; previouslyActive.current = active
+    previousOpened.current = opened
   }, [conversation?.items, conversation?.loaded, conversation?.loading, active, opened, positioned])
-  useLayoutEffect(() => { if (!active) previouslyActive.current = false }, [active])
   useEffect(() => {
     const content = contentRef.current
     if (!content) return
@@ -73,13 +65,12 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
     observer.observe(content)
     return () => observer.disconnect()
   }, [active, positioned])
-  useEffect(() => () => savePosition(), [sessionId])
   return <div className="session-conversation">
     <div ref={ref} className="session-conversation__scroll" aria-label="对话记录" tabIndex={0} onScroll={(event) => {
       if (!positioned || prepend.current) return
       const node = event.currentTarget
       following.current = node.scrollHeight - node.scrollTop - node.clientHeight < 48
-      setAway(!following.current); savePosition()
+      setAway(!following.current)
       if (node.scrollTop < 80 && !following.current) void older()
     }}>
       {!conversation?.loaded && !conversation?.error && <div className="conversation-skeleton" aria-label="正在加载对话"><span /><span /><span /></div>}

@@ -73,13 +73,13 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
     <div className="composer__toolbar">
       <div className="composer__context" ref={contextRef} onKeyDown={(event) => { if (event.key === 'Escape') setContextMenu(false) }}>
         <button className="icon-button" aria-label="Context / Attachment" aria-expanded={contextMenu} onClick={() => setContextMenu(!contextMenu)}>+</button>
-        {contextMenu && <div className="composer__context-menu"><button disabled>从 Files 添加文件</button><p>Files 工具完成后可用</p></div>}
+        {contextMenu && <div className="composer__context-menu"><button disabled>从 Files 添加文件</button><p>暂不支持添加附件</p></div>}
       </div>
       <div className="composer__tags">{draft?.contextItems.map((context, index) => <span className="composer__tag" key={`${context.type}:${index}`}>
         {context.type === 'view' ? VIEW_NAMES[context.viewId as ViewId] ?? context.viewId : context.path.split('/').at(-1)}
         <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : context.path}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}>×</button>
       </span>)}</div>
-      <select className="composer__models" aria-label="Model Selector" title={catalog?.error ?? (session?.activity !== 'none' ? '选择的模型从下一轮开始生效' : '当前 CLI 的模型')} value={model ?? ''} disabled={!cli || !catalog || !!catalog.error || !!(session && pending[`model:${session.id}`])} onChange={(event) => {
+      <select className="composer__models" aria-label="Model Selector" title={catalog?.error ?? (session && session.activity !== 'none' ? '选择的模型从下一轮开始生效' : '当前 CLI 的模型')} value={model ?? ''} disabled={!cli || !catalog || !!catalog.error || !!(session && pending[`model:${session.id}`])} onChange={(event) => {
         const selected = event.target.value || null
         if (session) void useSessions.getState().setModel(session.id, selected)
         else useSessions.getState().updateDraft(draftKey, { model: selected })
