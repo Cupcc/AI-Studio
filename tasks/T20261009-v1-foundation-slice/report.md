@@ -18,9 +18,9 @@ Claude 工作区中的本轮任务已接续并集成到 `dev/v1`：Electron 地�
 
 从仓库根目录执行 `pnpm dev` 启动应用。开发、测试与真实 CLI 调用边界见 [AGENTS.md](../../AGENTS.md)、[desktop README](../../apps/desktop/README.md) 和 [scripts README](../../scripts/README.md)。
 
-- 独立 workspace 类型检查与单测：Adapter 181、desktop 130 项通过。
+- 独立 workspace 类型检查通过；单测 Adapter 181、desktop 130 项，共 **311 项通过**。
 - Session 的 10 项模拟 Provider Electron 场景覆盖首条创建、双 CLI 并行、Stop 隔离、未读 / 等待 / Error、重启恢复、Project 关闭重开及滚动。
-- W6 补充验证真实 SQLite 重开 2,000 摘要 / 1,202 消息、真实窗口最小化 / 隐藏、2,000 History 的有界 DOM 与滚动锚。主 Agent 用 agent-browser 查看秘密卡片和 1024×640 小窗布局。
+- W6 的 **3 项补充 Electron 场景通过**：真实窗口最小化 / 隐藏、2,000 History 的有界 DOM 与滚动锚、跨 Project 注意力 / 关闭计数 / Stop 隔离；另有 **5 项独立窄测通过**，覆盖真实 SQLite 重开 2,000 摘要 / 1,202 消息、IPC 竞态、关闭超时及迟到秘密答复。主 Agent 用 agent-browser 查看秘密卡片和 1024×640 小窗布局。
 - 完整 Electron 门禁 **19 / 19 通过**；各次缺陷的修前 / 修后日志保留在 [Session 验收](../T20261009-session-slice/acceptance.md)。测试均使用模拟 Provider，不消耗模型额度；原生 SQLite / PTY / 环境冒烟仍执行真实本机能力。
 
 ## 需要回写的内容
@@ -34,7 +34,7 @@ Claude 工作区中的本轮任务已接续并集成到 `dev/v1`：Electron 地�
 
 ## 遗留问题
 
-1. Claude 真实成功流式 / Resume / 模型切换 / Stop 受配额阻断；Codex 修正版精确 Stop 与本机升级后 `0.162.0` 尚未真实复测。六回合历史证据与失败记录均保留，后续真实调用需另行安排预算。
+1. 真实 CLI UI AC-02～AC-05 本轮均未运行。Claude 真实成功流式 / Resume / 模型切换 / Stop 受配额阻断；Codex 修正版精确 Stop 与本机升级后 `0.162.0` 尚未真实复测。六回合历史证据与失败记录均保留，后续真实调用需另行安排预算。
 2. 宿主崩溃、未观察到的脱离后代、外部 MCP 进程树与 Runtime dispose 的 OS 退出证明仍有边界，见 Adapter / Session 报告。
 3. Project View 实现、Context 工具、打包发布 / 签名公证不在本轮范围。已有骨架打包冒烟不代表本轮最终 Session 产物已打包验证。
 4. 非阻塞产品推荐、Project View 决定草稿与 acceptance 均未人工签收。分支未推送、未合入 `main`；用户新增的 skills / Claude 配置未包含在本轮提交中。

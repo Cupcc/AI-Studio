@@ -30,7 +30,7 @@
 | session-slice | W1 | `specs/session`、`specs/chat`、`specs/input` 草稿 | Opus 5.5 high | — | done |
 | session-slice | W2 | 参考 Claude Desktop / ChatGPT Desktop 修订非阻塞问题的推荐 | 主 Agent 接续 | session-slice W1 | done |
 | session-slice | W4 / W5 | 后端 / 界面与 Electron 场景 | Astra xhigh / Sol xhigh，界面收尾 Astra high | 契约 / Providers / Project | delivered |
-| 验收 | Session W6（兼 Adapter W4、Project W3） | 独立子任务验收；总任务 `acceptance.md` 汇总，只写验收与本人证据 | GPT-6.1 Sol high | 各实现 worker | in_progress |
+| 验收 | Session W6（兼 Adapter W4、Project W3） | 独立子任务验收；总任务 `acceptance.md` 汇总，只写验收与本人证据 | GPT-6.1 Sol high | 各实现 worker | delivered（待人签收） |
 
 ## 进度与决定
 
@@ -49,3 +49,4 @@
 - 2026-10-09 Session后端、界面、共享接线已全部合入，W5容量中断后由允许的Astra high接续原worktree，保留未提交进度；W4/W6也在容量恢复后续跑。已交付10项Session Electron流程，W6独立重现并复验IPC旧返回、关闭超时、迟到秘密答复、Adapter exports和macOS前台通知问题。详细恢复记录在Session plan，最新修复 `36abe65`。
 - 2026-10-09 用户要求合理使用已安装skills：使用Vitest行为回归、React组件规则、agent-browser Electron交互；不改既有设计方向。各worker写入范围隔离，原生窗口测试由主Agent串行协调。用户新安装的 `.agents/`、`.claude/` 配置与skill安装task不纳入本轮提交。
 - 2026-10-09 主Agent回写模块spec与子任务report，所有实现task转或保持verifying；Project View仅调研、Context tools不实施。独立验收worker追加总任务acceptance汇总，完成最终门禁后归档证据。真实CLI部分通过边界不变，不追加推理调用、不推送、不合main、不将任何task标done。
+- 2026-10-09 W6 最终验收提交 `9f54ed8` 已合入，所有本轮交付与独立验收归档完成。最终代码基线 `188bd1d` 的 workspace typecheck、311 项单测、19 项完整 Electron 与 3 项独立补充 Electron 通过；5 项独立窄测和 15 张截图见 [Session 验收](../T20261009-session-slice/acceptance.md)。[总体验收](acceptance.md) 保留部分通过结论：真实 CLI UI AC-02～AC-05 本轮均未运行，Claude 配额及 Codex 修正版精确 Stop / 当前版本兼容边界未变。所有实现 task 保持 `verifying`、spec 保持草稿，等待人工审阅；下一步不自动扩展至 Project View / Context 工具实施或真实模型调用。

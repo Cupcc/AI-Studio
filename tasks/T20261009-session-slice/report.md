@@ -12,7 +12,7 @@ Session Manager、History、Conversation、CLI / Model 菜单、输入区与 Pro
 - 首次打开位于尾部，上滚暂停跟随；Tab 返回保留阅读位置，History 显式点击或“回到最新”定位尾部。
 - SQLite 对话分页与原 native ID 懒恢复；关闭 Project 确认后停止当前轮、释放 Runtime，重开保留会话 / 草稿；数据库等待功能清理完成后关闭。
 
-验证包括 W5 的 10 项 Electron 场景与界面截图、W4 的生命周期回归、W6 的独立 SQLite / 2,000 条历史 / IPC 竞态 / 窗口前台检查，以及主 Agent 的 [agent-browser 小窗交互](evidence/W3-interaction-review.md)。最终门禁：workspace typecheck 通过、Adapter 181 / desktop 130 单测通过、19 / 19 Electron 通过；逐项覆盖与限制见独立验收。
+验证包括 W5 的 10 项 Electron 场景与界面截图、W4 的生命周期回归、W6 的独立 SQLite / 2,000 条历史 / IPC 竞态 / 窗口前台检查，以及主 Agent 的 [agent-browser 小窗交互](evidence/W3-interaction-review.md)。最终门禁：workspace typecheck 通过、Adapter 181 / desktop 130（合计 311 项）单测通过、19 / 19 Electron 通过。W6 另有 3 项补充 Electron 场景及 5 项独立窄测通过，含跨 Project 注意力、关闭计数与 Stop 隔离；逐项覆盖与限制见独立验收。
 
 ## 本轮修复
 
@@ -36,7 +36,7 @@ Session Manager、History、Conversation、CLI / Model 菜单、输入区与 Pro
 
 ## 遗留问题
 
-- 真实 CLI 的 AC-02～AC-05 尚未完整验收；Claude 成功推理受配额阻断，Codex 精确 Stop 修正版与当前 `0.162.0` 兼容未真实复测，详见 [Adapter 验收](../T20261009-agent-adapter/acceptance.md)。
+- 真实 CLI UI AC-02～AC-05 本轮均未运行；Claude 成功推理受配额阻断，Codex 精确 Stop 修正版与当前 `0.162.0` 兼容未真实复测，详见 [Adapter 验收](../T20261009-agent-adapter/acceptance.md)。
 - Project View / Context 工具仅接入点；结构化上下文注入、修改文件统计和真实附件不属于本轮。
 - Runtime dispose 的 diagnostic 与 OS 退出证明边界见 [W4 生命周期记录](evidence/W4-lifecycle-review.md)，宿主崩溃和未观察到的后代清理仍待专项验证。
 - 非阻塞产品推荐与各 spec 草稿仍待人审阅；人工签收尚未发生。

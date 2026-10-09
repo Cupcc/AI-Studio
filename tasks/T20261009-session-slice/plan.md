@@ -14,10 +14,10 @@
 |---|---|---|---|---|---|
 | W1 | spec 草稿（Opus 5.5 high） | `specs/session/spec.md`、`specs/chat/spec.md`、`specs/input/spec.md` | spec 草稿与未决问题 | — | done |
 | W2 | 参考应用调研与推荐修订（主 Agent 接续） | `specs/session/spec.md`、`specs/chat/spec.md`、`specs/input/spec.md`、`specs/navigation/spec.md`；本 task 的 `research.md` | 修订后的推荐（待确认） | W1 | done |
-| W3 | 共享 DTO / IPC 契约与主接线（主 Agent） | `apps/desktop/src/shared/session/**`、`apps/desktop/src/shared/ipc/session.ts`；依赖 / 构建配置；共享登记、主进程生命周期、App 安装、Project 接口的默认 CLI 初始化、草稿 flush、关闭释放接线及相关测试；W5 暂停期间接管 store mutation 竞态修复，提交后归还 | 固定并行边界并集成后端与界面 | W2、Adapter W1 | in_progress |
+| W3 | 共享 DTO / IPC 契约与主接线（主 Agent） | `apps/desktop/src/shared/session/**`、`apps/desktop/src/shared/ipc/session.ts`；依赖 / 构建配置；共享登记、主进程生命周期、App 安装、Project 接口的默认 CLI 初始化、草稿 flush、关闭释放接线及相关测试；W5 暂停期间接管 store mutation 竞态修复，提交后归还 | 固定并行边界并集成后端与界面 | W2、Adapter W1 | delivered |
 | W4 | Session Manager（GPT-6 Astra xhigh） | `apps/desktop/src/main/services/session/**`、`apps/desktop/src/main/ipc/session.ts`、Session 迁移文件；本 task 的 `evidence/W4-*` | 状态机、持久化、Adapter / Project 接入与测试 | W3、Project W2 接口 | delivered |
 | W5 | Session / Chat / Input 界面（GPT-6.1 Sol xhigh；容量中断后 Astra high 接续） | `apps/desktop/src/renderer/src/features/{session,chat,input}/**`、`apps/desktop/e2e/session.spec.ts`；本 task 的 `evidence/W5-*` | History、Conversation、草稿、等待与错误卡片、输入区与测试 | W3、Project W2 | delivered |
-| W6 | 独立验收（GPT-6.1 Sol high） | 本 task 的 `acceptance.md`、`evidence/W6-*` | AC-02～AC-05 验收记录 | W4、W5 | in_progress |
+| W6 | 独立验收（GPT-6.1 Sol high） | 本 task 的 `acceptance.md`、`evidence/W6-*` | AC-02～AC-05 验收记录 | W4、W5 | delivered（待人签收） |
 
 ## 进度与决定
 
@@ -38,3 +38,4 @@
 - 2026-10-09 W6 真实最小化检查发现窗口已恢复前台但迟到 minimize/hide 通知将 Renderer foreground 覆盖为 false，导致显式打开仍不能清提醒；主 Agent 接管 `main/window/**` 与 `main/index.ts` 的窗口状态通知，改为按实际窗口快照合并发布并补回归。W6 在修复后独立复验。2,000 条真实 Renderer History 已验证虚拟 DOM 有界、Rename 保留锚点。
 - 2026-10-09 `36abe65` 修复窗口状态通知；W6 原探针确认 minimize / hide 后完成保留未读、回前台不清除、显式再次打开才清除均通过。实现进入 verifying，W6 进行最终全门禁与验收收尾；主 Agent 回写草稿 spec、report 与 W3 交互证据。没有真实模型追加调用，没有人工签收。
 - 2026-10-09 W6 最终 typecheck、Adapter 181 / desktop 130 单测通过。完整 Electron 首跑18/19，旧 Project E2E 未等待目录打开就新建Tab，主Agent在 `188bd1d` 修 helper 等待实际结果，重跑19/19通过（32.0s）；修前日志保留。W6完成原生窗口与2,000 History补充后，再补一项跨Project实际注意力/关闭计数/停止隔离检查收尾。原Project W2只读审查文档，指出并修正DTO命名、草稿独立存储和两条退出路径的flush顺序；未改确认状态。
+- 2026-10-09 W6 最终提交 `9f54ed8` 已合入 `dev/v1`，交付 [独立验收](acceptance.md)、15 张截图及修前 / 修后证据。最终代码基线 `188bd1d`：typecheck、311 项单测、19 项完整 Electron、3 项独立补充 Electron、5 项独立窄测均通过。跨 Project 注意力、关闭计数与 Stop 隔离补充通过；没有剩余已复现的本地实现阻断。W3 接线和文档回写、W6 验收归档均已交付；task 保持 `verifying`。真实 CLI UI AC-02～AC-05 本轮均未运行，后续真实复测与人工签收仍待安排；未推送或合入 `main`。
