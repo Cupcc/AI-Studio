@@ -12,7 +12,7 @@ Claude 工作区中的本轮任务已接续并集成到 `dev/v1`：Electron 地�
 | Project | 目录身份 / 最近列表、Tab、导航 / 边栏、状态恢复与可信关闭 | [Project 报告](../T20261009-project-shell/report.md) |
 | Adapter | Codex App Server、Claude Agent SDK、统一事件 / 等待 / Stop / Runtime 接口 | [Adapter 报告](../T20261009-agent-adapter/report.md) |
 | Session | 创建 / 续聊、流式 / 工具、Needs Input / Error / 未读、草稿 / 模型 / Rename、历史分页与窗口状态 | [Session 报告](../T20261009-session-slice/report.md) |
-| Project View 调研 | Knowledge 存储、渲染、上下文、刷新四份决定草稿；待决问题已登记 | [调研任务](../T20261009-project-view/task.md)、[决定索引](../../docs/decisions/README.md) |
+| Project View 调研 | Knowledge 存储、渲染、上下文、刷新四份决定草稿；待决问题已登记 | [调研任务](../T20261009-project-view/task.md)、[决定索引](<../../docs/07. Decisions.md>) |
 
 ## 验证与运行
 

@@ -34,7 +34,7 @@
 | `input/` | FR-INPUT-001～FR-INPUT-002 | [草稿](input/spec.md) |
 | `project-view/` | FR-VIEW-001～FR-VIEW-008 | 未创建 |
 | `tools/` | FR-TOOL-001～FR-TOOL-004 | 未创建 |
-| `agent-adapter/` | 无 FR 前缀；承接 [04. Technical Requirements](<../docs/04. Technical Requirements.md>) 第 3、4 节与 [06. CLI Integration Preflight](<../docs/06. CLI Integration Preflight.md>) | 未创建 |
+| `agent-adapter/` | 无 FR 前缀；承接 [04. Technical Requirements](<../docs/04. Technical Requirements.md>) 第 3、4 节与 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md) | [草稿](agent-adapter/spec.md) |
 
 ## 5. 未决问题
 

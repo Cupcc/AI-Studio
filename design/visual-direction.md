@@ -6,7 +6,7 @@
 |---|---|
 | 产品 | AI Developer Studio |
 | 版本 | V1.0 |
-| 状态 | 基于已确认需求整理；具体视觉参数待设计评审 |
+| 状态 | 基于已确认需求整理；当前视觉参数采用交互原型 v01（2026-10-09 确认按 v01 对齐），高保真阶段可调整 |
 | 依据 | [Product Definition](<../docs/01. Product Definition.md>) 第 2、8 章；[UX Specification](<../docs/03. UX Specification.md>) 第 3–8 章 |
 
 ## 1. 视觉目标
@@ -67,4 +67,4 @@ Project View Mode 使用左 Conversation、右 Preview 的布局。Conversation 
 | 布局 | Project View 的 Conversation / Preview 比例及窄窗口表现（初稿见 [Shell Spec v01](components/shell-spec-v01.md) 第 1 节） |
 | 组件外观 | 圆角、边框、图标、Hover、Focus 与 Disabled 表现 |
 
-确认后的组件参数收录到 [components](components/README.md)，采用的主界面版本登记在 [设计索引](README.md)。
+当前取值以[交互原型 v01](prototypes/README.md) 为基线：暖中性灰色板、IBM Plex Sans / Mono（中文回退苹方）、7～16px 圆角、1.4px 线性图标，仅浅色主题（第 1 节、01 原则 23）。确认后的组件参数收录到 [components](components/README.md)，采用的主界面版本登记在 [设计索引](README.md)。

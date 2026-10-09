@@ -4,7 +4,7 @@
 
 ## 方案
 
-先由 W1 起草 `specs/project/spec.md` 与 `specs/navigation/spec.md`，汇总未决问题交人回答；task 进入 ready 后由 W2 实现。W2 遵循 [D20261009-desktop-feature-folders](../../docs/decisions/D20261009-desktop-feature-folders.md)：拥有 `src/renderer/src/app/`、`tokens.css`，以及 `project`、`navigation` 两个功能目录；对 session 模块的依赖（注意力汇总、阻塞 Session 计数、停止当前一轮、Session History 列表、查看信号）以可替换接口占位，由 session-slice 接入。
+先由 W1 起草 `specs/project/spec.md` 与 `specs/navigation/spec.md`，汇总未决问题交人回答；task 进入 ready 后由 W2 实现。W2 遵循 [DEC-03](<../../docs/07. Decisions.md>)：拥有 `src/renderer/src/app/`、`tokens.css`，以及 `project`、`navigation` 两个功能目录；对 session 模块的依赖（注意力汇总、阻塞 Session 计数、停止当前一轮、Session History 列表、查看信号）以可替换接口占位，由 session-slice 接入。
 
 ## Workers
 

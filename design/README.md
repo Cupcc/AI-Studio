@@ -39,12 +39,12 @@ design/
 
 | 项目 | 当前状态 |
 |---|---|
-| 视觉方向 | 已整理需求基线；具体视觉参数待设计评审 |
+| 视觉方向 | 当前基线采用交互原型 v01 的色值、字体、圆角与图标（2026-10-09 确认按 v01 对齐）；高保真阶段可调整 |
 | 参考截图 | 待收集 |
 | 线框图 | 已确认：v02（A2、B1 图标切换、单一右侧边栏、D2），见 [wireframes](wireframes/README.md) |
 | 高保真界面 | 待设计，尚无已确认版本 |
-| 组件规范 | 探索中：[Shell Spec v01](components/shell-spec-v01.md)（布局、尺寸与组件状态，不含视觉参数） |
-| 交互原型 | 探索中：[Studio 灰度交互原型 v01](prototypes/README.md)，待评审 |
+| 组件规范 | 已确认（2026-10-09）：[Shell Spec v01](components/shell-spec-v01.md)（布局、尺寸与组件状态） |
+| 交互原型 | 已确认（2026-10-09）：[Studio 灰度交互原型 v01](prototypes/README.md)；桌面端按其对齐，见 [T20261009-prototype-alignment](../tasks/T20261009-prototype-alignment/task.md) |
 
 方案确认后，在本节添加所采用版本的文件链接或原型链接。探索稿继续保留在对应目录。
 

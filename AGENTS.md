@@ -6,24 +6,28 @@ This repository contains the V1.0 specifications, design workspace, development 
 
 | Path | Contents |
 |---|---|
-| `docs/` | Product-level baseline: the numbered specifications below, plus `docs/decisions/` for recorded product and technical decisions. |
+| `docs/` | Numbered project documents: the index, product-level specifications, and development roadmap, and decision log below. |
 | `specs/` | Long-lived module specs, one `specs/<module>/spec.md` per module. Module list and FR mapping: `specs/README.md`. |
 | `tasks/` | Every unit of work as `tasks/T<YYYYMMDD>-<slug>/` with its task card, research, plan, acceptance, evidence, and report. Protocol: `tasks/AGENTS.md`. |
-| `templates/` | Templates for task, plan, acceptance, report, spec, and decision documents. |
+| `templates/` | Templates for task, plan, acceptance, report, and spec documents. |
 | `design/` | Design materials, described below. |
 | `apps/desktop/` | Electron + React + TypeScript desktop client (electron-vite). Layout, IPC and runtime conventions: `apps/desktop/README.md`. |
 | `packages/` | Workspace packages without Electron dependencies, e.g. `packages/agent-adapter/` (CLI Adapter). |
 | `scripts/` | Reusable development scripts; execution notes in `scripts/README.md`. |
 | `.runtime/` | Local scratch output such as logs, caches, and temporary runs. Git-ignored and safe to delete. |
 
-Numbered specifications in `docs/`:
+Numbered documents in `docs/`:
 
+- `00. Documentation Index.md`: entry points for the roadmap, specifications, and related materials.
 - `01. Product Definition.md`: product scope, concepts, and principles.
 - `02. Functional Requirements.md`: stable `FR-*` identifiers, behaviors, and P0/P1 priorities.
 - `03. UX Specification.md`: layout, navigation, and interaction rules.
 - `04. Technical Requirements.md`: integration constraints, conceptual models, and unresolved technical decisions.
 - `05. Acceptance Criteria.md`: `AC-01` through `AC-07` and the FR-to-AC traceability matrix.
-- `06. CLI Integration Preflight.md`: macOS CLI integration conclusions and development gates; raw evidence lives in `tasks/T20261008-cli-preflight/evidence/`.
+- `06. Development Roadmap.md`: next steps, overall phase, module progress, remaining work, and proposed milestones.
+- `07. Decisions.md`: one short `DEC-NN` entry per product or technical decision (conclusion, reason, source, status); research and evidence stay in the task.
+
+CLI integration experiment results live in `tasks/T20261008-cli-preflight/report.md`, with raw evidence in that task's `evidence/` directory. Long-lived integration constraints belong in `docs/04. Technical Requirements.md` or the relevant module spec.
 
 Design materials live in `design/`, with `README.md` as the index and `visual-direction.md` as the visual direction. Use `references/` for reference images, `wireframes/` for layouts and flows, `screens/` for high-fidelity designs, `components/` for component specifications, and `prototypes/` for interactive prototypes or links. Record versions and design status in the relevant index.
 
@@ -91,13 +95,12 @@ Follow the existing Chinese prose and English product terminology, including Pro
 
 Naming:
 
-- Numbered specifications: `docs/NN. Topic.md`.
-- Decisions: `docs/decisions/D<YYYYMMDD>-<slug>.md`.
+- Top-level documents in `docs/`, including the index and roadmap: `docs/NN. Topic.md`.
 - Module specs: `specs/<module>/spec.md`, with lowercase kebab-case module names.
 - Tasks: `tasks/T<YYYYMMDD>-<slug>/`. Date-based IDs avoid collisions between parallel agents.
 - Evidence: prefix files with the producing worker, e.g. `W1-session-list-dark.png`.
 
-Numbered specifications, specs, and decisions keep a `文档信息` table with a `文档状态` row (`草稿` / `已确认（YYYY-MM-DD）`). Tasks use YAML frontmatter so agents can query status.
+Numbered specifications and specs keep a `文档信息` table with a `文档状态` row (`草稿` / `已确认（YYYY-MM-DD）`); each entry in `07. Decisions.md` carries its own status. Tasks use YAML frontmatter so agents can query status.
 
 Design indexes use `README.md`; retain `design/visual-direction.md` as the visual direction entry point. Name design assets with lowercase descriptive names and version numbers, e.g., `session-main-v01.png`. Keep matching exports and editable source files identifiable by the same name stem.
 

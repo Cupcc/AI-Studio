@@ -28,7 +28,7 @@ created: 2026-10-09
 
 - 功能：[02. Functional Requirements](<../../docs/02. Functional Requirements.md>) 第 2 节对应 FR。
 - 界面：[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6、7、8 节及第 10 节；[Shell Spec v01](../../design/components/shell-spec-v01.md) 第 3～6、9 节；线框图 v02。
-- 技术：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 4、5、6 节；Adapter 接口见 `specs/agent-adapter/spec.md`（[T20261009-agent-adapter](../T20261009-agent-adapter/task.md) 产出）；[06. CLI Integration Preflight](<../../docs/06. CLI Integration Preflight.md>) 第 5 节。
+- 技术：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 4、5、6 节；Adapter 接口见 `specs/agent-adapter/spec.md`（[T20261009-agent-adapter](../T20261009-agent-adapter/task.md) 产出）；[CLI Integration Preflight](../T20261008-cli-preflight/report.md) 第 5 节。
 - 验收：[05. Acceptance Criteria](<../../docs/05. Acceptance Criteria.md>) AC-02～AC-05；第 4 节列出的专项测试中与本 task 相关的部分（Resume、Rename、Model Selector、错误恢复、大量 Session 性能、New Chat 草稿、Needs Input / Error 清除规则、Tab 注意力点、关闭确认、Stop）。
 
 ## 验收标准
@@ -58,9 +58,13 @@ AC 场景（真实 CLI，限量运行）：
 - [ ] 单个 CLI 进程失败不导致应用崩溃，不影响其他 Session 与 Project（04 第 6 节稳定性）。
 - [ ] 单元测试覆盖状态机全部转移、排序与分组、草稿规则；Playwright 以模拟 Provider 覆盖 AC-02～AC-05 的界面流程；真实 CLI 只用于上述 AC 场景的验收运行。
 
-## 未决问题
+## 已确认事项
 
 | 问题 | 回答（确认日期） |
 |---|---|
-| spec 阻塞问题 S-Q1、S-Q2、I-Q2、NAV-Q4 | 已回答，见各 spec 第 5 节（2026-10-09 确认） |
-| 其余非阻塞问题：参考 Claude Desktop 与 ChatGPT Desktop 修订推荐（见 research.md），保持待确认，先按推荐实现 | 2026-10-09 对话指示；W2 复核已落盘 |
+| spec 阻塞问题 S-Q1、S-Q2、I-Q2、NAV-Q4 | 已回答，见各 spec 第 5.1 节（2026-10-09 确认） |
+| 非阻塞问题如何处理 | 参考 Claude Desktop 与 ChatGPT Desktop 修订推荐（见 research.md），保持待确认，先按推荐实现（2026-10-09 对话指示；W2 复核已落盘） |
+
+## 未决问题
+
+本 task 无。非阻塞问题留在 `specs/session/spec.md`、`specs/chat/spec.md`、`specs/input/spec.md`、`specs/navigation/spec.md` 第 5.2 节待确认，先按推荐实现。

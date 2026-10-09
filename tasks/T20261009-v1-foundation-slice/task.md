@@ -13,7 +13,7 @@ created: 2026-10-09
 
 把本轮范围拆成可并行执行的 task，并负责排期、集成与跨 task 接口对齐。本轮范围（2026-10-09 确认）：
 
-- 地基：macOS 应用骨架（[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节技术栈）与 CLI Adapter（04 第 3、4 节；[06. CLI Integration Preflight](<../../docs/06. CLI Integration Preflight.md>) 第 5、6 节）。
+- 地基：macOS 应用骨架（[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节技术栈）与 CLI Adapter（04 第 3、4 节；[CLI Integration Preflight](../T20261008-cli-preflight/report.md) 第 5、6 节）。
 - 首个可用切片：Project 壳层与 Session 对话，实现 AC-01～AC-05 所涉行为；本轮只做实现与验收记录，签收另行进行。
 - Project View：本轮只调研 04 第 7 节相关待决事项并起草决定记录，交人确认。
 
@@ -39,7 +39,7 @@ FR 按层归属：Adapter 层只负责 CLI 原生能力的统一与进程管理�
 
 - 本轮范围、`main` 基线提交与分支开发方式、真实 CLI 限量调用：2026-10-09 对话确认。
 - 技术栈与分层：04 第 2 节；CLI 原生能力复用：04 第 3 节；Runtime 隔离与 Stop：04 第 4 节。
-- Adapter 映射与剩余校验：06 第 5、6 节。
+- Adapter 映射与剩余校验：[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 5、6 节。
 - 功能与验收：[02. Functional Requirements](<../../docs/02. Functional Requirements.md>)；[05. Acceptance Criteria](<../../docs/05. Acceptance Criteria.md>) AC-01～AC-05。
 - 界面：[03. UX Specification](<../../docs/03. UX Specification.md>)；[Shell Spec v01](../../design/components/shell-spec-v01.md)（探索中）；线框图 v02（已确认）。
 

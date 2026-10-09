@@ -4,7 +4,7 @@
 
 ## 1. 依据与资料
 
-- 文档：06 第 3～6 节；04 第 1～4、6、7 节；02 Session、State、Input、Chat 各节；03 第 6 节；Shell Spec v01 第 5、6 节；session spec 第 4.1 节、input spec I-Q2 / I-Q3、chat spec C-Q5（并行起草，主 Agent 转达）。
+- 文档：[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 3～6 节；04 第 1～4、6、7 节；02 Session、State、Input、Chat 各节；03 第 6 节；Shell Spec v01 第 5、6 节；session spec 第 4.1 节、input spec I-Q2 / I-Q3、chat spec C-Q5（并行起草，主 Agent 转达）。
 - 预检脚本与证据：`scripts/cli-preflight.mjs`、`evidence/codex-native-stop-check.mjs` 及 `tasks/T20261008-cli-preflight/evidence/` 下筛选后的事件。
 - 协议形状（不调用模型）：
   - `codex app-server generate-ts --experimental`（本机 0.161.0）生成到临时目录：根目录 102 个、`v2/` 781 个类型文件。查阅了 `ServerRequest`、`ServerNotification`、`ClientRequest`、`ThreadItem`、`Turn`、`TurnError` / `CodexErrorInfo`、`CommandExecutionRequestApprovalParams`、`ToolRequestUserInputParams`、`ServerRequestResolvedNotification`、`TurnStartParams`、`TurnSteerParams`、`ThreadSettingsUpdateParams`、`Model`、`GetAccountResponse`。
@@ -22,7 +22,7 @@
 | Codex `requestUserInput` 一次可含多个问题；每题 `isOther`、`isSecret`；答案为字符串数组 | 生成的类型 | 统一的提问模型支持多题、多选、自由文本、保密 |
 | Codex 服务端请求的 JSON-RPC id 在不同 Runtime 中都从 0 开始递增 | 各次运行的事件中 `requestId: 0`、`1` | Runtime 重启后原生 id 会重复，统一层使用 Adapter 生成的 `requestId` |
 | Claude 主动取消返回 `error_during_execution`、`is_error = true`；无效恢复同样返回 `error_during_execution`，文本为 “No conversation found with session ID …” | `claude-run-events.jsonl` 第 128、142 行 | 取消必须靠已记录的取消意图判断，不能看结果类型或文案；恢复失败可能只在首条消息时才知道 |
-| Claude `session_id` 在首条消息后的 `system/init` 才出现 | 06 第 3 节；`claude-tool-events.jsonl` | 原生 ID 以事件异步报告 |
+| Claude `session_id` 在首条消息后的 `system/init` 才出现 | [CLI 校验报告](../T20261008-cli-preflight/report.md) 第 3 节；`claude-tool-events.jsonl` | 原生 ID 以事件异步报告 |
 | Claude SDK `Options.sessionId` 可预先指定 UUID | `sdk.d.ts` | 可让 Claude 也提前知道 ID，但该 ID 在首条消息被处理前不存在于原生历史，接口仍按“可能异步”设计 |
 | Claude `result.subtype = success` 也可能 `is_error = true`（API 错误） | `sdk.d.ts` 注释 | 06 的“success 且 is_error=false 才算完成”规则成立，提醒 W3 |
 | Claude SDK `spawnClaudeCodeProcess` 只需要一个 ChildProcess 形状的对象 | `SpawnedProcess` 类型 | `RuntimeProcess.processLike()` 让 Claude Runtime 同样处于独立进程组并纳入退出验证 |
@@ -98,4 +98,4 @@ Runtime 意外退出即关闭该 Session，继续对话统一走 `resumeSession`
 
 - W2：`terminate` 的本轮归属映射（`commandExecution.processId`）、实验接口不可用时的兜底、I-Q2 拒绝后交付文字的方式、错误码映射、`thread/name/updated` 是否可作原生标题、stdin 关闭后 App Server 及其命令是否退出。
 - W3：`systemPrompt` 缺省行为、`origin: { kind: 'human' }`、无会话的模型目录读取、`canUseTool` 中 AskUserQuestion 的答复格式与 deny 说明、取消时 `canUseTool` 挂起 Promise 的释放、`interrupt()` 后子进程退出证据、stdin 关闭后 CLI 是否退出。
-- 两者：同 Session 模型切换（06 第 6 节）、授权接受 / 取消等待请求 / 多请求竞态（06 第 6 节）、认证 / 网络 / 配额失败映射。
+- 两者：同 Session 模型切换（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节）、授权接受 / 取消等待请求 / 多请求竞态（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节）、认证 / 网络 / 配额失败映射。

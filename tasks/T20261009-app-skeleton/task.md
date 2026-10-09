@@ -11,7 +11,7 @@ created: 2026-10-09
 
 ## 目标
 
-按 [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节的技术栈建立可开发、可测试、可启动的 Electron 应用骨架，并完成 [06. CLI Integration Preflight](<../../docs/06. CLI Integration Preflight.md>) 第 6 节中属于骨架阶段的两项校验：macOS GUI 启动下的 PATH / 登录环境，以及 Electron 原生依赖（SQLite、node-pty）。
+按 [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节的技术栈建立可开发、可测试、可启动的 Electron 应用骨架，并完成 [CLI Integration Preflight](../T20261008-cli-preflight/report.md) 第 6 节中属于骨架阶段的两项校验：macOS GUI 启动下的 PATH / 登录环境，以及 Electron 原生依赖（SQLite、node-pty）。
 
 本 task 不交付产品功能，为后续 task 提供分层结构、IPC 约定、本地持久化和测试框架。
 
@@ -34,7 +34,7 @@ created: 2026-10-09
 
 - 技术栈、分层边界、首发 macOS：04 第 2 节。
 - 稳定性与性能：04 第 6 节（单个 CLI 进程失败不得导致应用崩溃；并行 Session 不得阻塞主 UI）。
-- 骨架阶段校验项：06 第 6 节“macOS GUI 下 PATH / 登录环境”“Electron 原生依赖、SQLite / node-pty”。
+- 骨架阶段校验项：[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节“macOS GUI 下 PATH / 登录环境”“Electron 原生依赖、SQLite / node-pty”。
 - 窗口尺寸与顶栏：Shell Spec v01 第 1、2 节（探索中；最小窗口与窗口控制区位置按该稿实现）。
 - 用户 Terminal 与 Agent Runtime 隔离：04 第 4 节（本 task 只确保 PTY 由主进程 Runtime Services 管理）。
 
@@ -45,8 +45,8 @@ created: 2026-10-09
 - [ ] 开发模式启动后显示窗口，最小尺寸 1024×640，窗口控制区在左侧，顶部区域可拖拽（Shell Spec v01 第 1、2 节）。
 - [ ] Renderer 中无法访问 Node.js、文件系统和 `ipcRenderer` 原始对象，只能调用 Preload 暴露的类型化 API；有测试或检查证明（04 第 2 节）。
 - [ ] SQLite 在主进程可读写，迁移可重复执行；数据库位于应用数据目录而非 Project 目录。
-- [ ] node-pty 在 Electron 主进程中启动 Shell 并收到输出；打包后的应用中同样可用（06 第 6 节）。
-- [ ] 通过 `open` 启动打包后的应用时，能解析出用户登录 Shell 的 PATH，并找到 `codex` 与 `claude` 可执行文件；结果写入证据，不保存完整环境变量或凭据（06 第 6 节；`tasks/AGENTS.md` 证据规则）。
+- [ ] node-pty 在 Electron 主进程中启动 Shell 并收到输出；打包后的应用中同样可用（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节）。
+- [ ] 通过 `open` 启动打包后的应用时，能解析出用户登录 Shell 的 PATH，并找到 `codex` 与 `claude` 可执行文件；结果写入证据，不保存完整环境变量或凭据（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节；`tasks/AGENTS.md` 证据规则）。
 - [ ] 影响其他模块的技术选择（SQLite 驱动、IPC 约定、目录约定）写成 `docs/decisions/` 下的决定草稿。
 
 ## 未决问题

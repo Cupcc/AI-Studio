@@ -13,7 +13,7 @@
 
 > 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
 
-来源简称：01～05 指 `docs/` 下同编号文档；Shell 指 [Shell Spec v01](../../design/components/shell-spec-v01.md)（状态为“探索中”，尺寸经评审后确认）。
+来源简称：01～05 指 `docs/` 下同编号文档；Shell 指 [Shell Spec v01](../../design/components/shell-spec-v01.md)（已确认（2026-10-09））。
 
 标注约定：
 
@@ -34,7 +34,7 @@
   - Session 状态的含义、来源、优先级与清除规则；Session 标题的来源（CLI 原生名称或客户端生成）；Rename 的持久化 → `specs/session/spec.md`。
   - Project View 的内容、Conversation 列、最近对话块、Preview → `specs/project-view/spec.md`（后续 task）。
   - Tab 条、窗口尺寸与压缩顺序、状态保存 → `specs/project/spec.md`。导航宽度 248 与折叠后为 0 引用其 2.4 节。
-  - 色值、字体、图标、圆角（Visual Direction 第 5 节，高保真阶段确定）。
+  - 色值、字体、图标、圆角（Visual Direction 第 5 节，当前以交互原型 v01 为基线）。
 - V1 范围外（文档未要求，本 spec 不设计）：Session 搜索 / 过滤、删除 / 归档 Session（NAV-Q9）、拖拽排序、导航宽度拖拽、右键菜单、跨 Project 的统一列表（01 第 4 节）。
 
 ## 2. 行为细则
@@ -74,7 +74,7 @@
 4. Agent Team
 5. Business Flow
 
-每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 3 节）。图标由高保真阶段确定。五项在任何 Project 中始终显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。
+每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 3 节）。图标采用交互原型 v01。五项在任何 Project 中始终显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。
 
 #### 2.2.2 点击 View 的导航契约
 
@@ -338,7 +338,17 @@
 | `session.summary.updated` | session → navigation | 摘要变化 |
 | `attention.changed` | session → navigation / project | 注意力状态变化 |
 
-## 5. 未决问题
+## 5. 问题记录
+
+人在对话中回答后，问题从 5.2 移到 5.1，编号不变。
+
+### 5.1 已确认
+
+| 编号 | 问题 | 建议答案与依据 | 阻塞实现 | 回答（确认日期） |
+|---|---|---|---|---|
+| NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入。依据：`tasks/T20261009-session-slice/task.md` 已把 Rename 列入范围（FR-NAV-003；D-12）；实现量小，且 05 第 4 节把 Rename 列入专项测试。若判定为 P1，则首个交付可延后 2.3.6，其余不受影响。需要在 02 中统一优先级 | 否 | Rename 为 P0，纳入 session-slice；02 第 6 节 MVP 表同步改为 P0（2026-10-09 确认） |
+
+### 5.2 未决问题
 
 2026-10-09 参考应用复核见 [Session research](../../tasks/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
 
@@ -349,7 +359,6 @@
 | NAV-Q1 | “过去 7 天”分组的起止：与“今天”“昨天”相邻时，是指前天起算 7 天、还是自今天起往前 7 个日历日（与前两组重叠部分归前两组）？ | 本地日历日 D−7 到 D−2（含），即 `T(D−7) ≤ t < T(D−1)`，与“昨天”“今天”无缝衔接、互不重叠。依据：FR-NAV-003 给出组名，具体边界是本项目建议；参考应用的精确边界未由官方资料证实（见本轮 research） | 否 | |
 | NAV-Q2 | Rename 输入框失焦时是确认还是取消？输入为空或全空白时如何处理？ | 失焦视同确认；去除首尾空白后为空则视同取消（保留原标题，不报错）。依据：FR-NAV-003 / Shell 第 3 节只规定 Enter 确认、Esc 取消；此建议避免点击其他列表项时丢失输入。参考应用失焦行为未由官方资料证实（见本轮 research） | 否 | |
 | NAV-Q3 | Rename 的标题长度上限是多少？ | 最多 100 个字符，输入时限制，粘贴时截断，列表中单行省略显示。依据：文档无规定；100 足以描述一次对话，同时避免数据与布局问题。具体数值由人确认 | 否 | |
-| NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入。依据：`tasks/T20261009-session-slice/task.md` 已把 Rename 列入范围（FR-NAV-003；D-12）；实现量小，且 05 第 4 节把 Rename 列入专项测试。若判定为 P1，则首个交付可延后 2.3.6，其余不受影响。需要在 02 中统一优先级 | 否 | Rename 为 P0，纳入 session-slice；02 第 6 节 MVP 表同步改为 P0（2026-10-09 确认） |
 | NAV-Q5 | 已处于某个 View 的 Project View Mode 时，再次点击导航中同一个 View 的行为：忽略，还是回到新草稿 / 回到 Preview？ | 忽略（不改变左列当前对话与右侧区域）。依据：P-A 的“新草稿”限定为“进入 View”；左列顶栏已提供“新建对话”按钮（Shell 第 7 节），无需用导航承担该功能；避免意外丢弃草稿 | 否 | |
 | NAV-Q6 | Session Mode 下停留在 New Chat 草稿时，导航是否有条目高亮（例如 New Chat 按钮呈 Selected）？ | 无任何条目高亮，New Chat 按钮也不呈 Selected。依据：03 第 8 节与 Shell 第 3 节只规定 Session 项与 View 项的 Selected；New Chat 按钮的状态仅列 Default / Hover / Focus | 否 | |
 | NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），Project Views 区域过高时如何处理：独立滚动、限制高度、折叠？ | V1 首发只有五项，不设计该情形；P1 实现时再定，建议 Project Views 区域设最大高度并内部滚动，保证 SESSIONS 区域始终可见。依据：FR-VIEW-002 为 P1；03 第 8 节要求 Session History 可持续增长 | 否 | |

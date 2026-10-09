@@ -9,7 +9,7 @@
 | 覆盖需求 | FR-CHAT-001～FR-CHAT-003；关联 FR-VIEW-007（只记录 `origin_view_id`）、FR-NAV-003（Session 命名） |
 | 相关验收 | AC-02、AC-03；05 第 4 节专项测试中的 New Chat 草稿 |
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、3、7、9 节；线框图 v02（[design/wireframes](../../design/wireframes/README.md)） |
-| 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-CHAT-001～003、FR-VIEW-007、FR-NAV-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6 节 New Chat、第 10 节 D-01、D-11、D-15、P-A；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 5 节 Project、Session；[06. CLI Integration Preflight](<../../docs/06. CLI Integration Preflight.md>) 第 5 节 |
+| 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-CHAT-001～003、FR-VIEW-007、FR-NAV-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6 节 New Chat、第 10 节 D-01、D-11、D-15、P-A；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 5 节 Project、Session；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 |
 
 > 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
 >
@@ -42,7 +42,7 @@
    1. 发送前检查草稿 CLI 的可用性；已知不可用时不发送、不创建 Session，保留输入内容并显示原因（UX 第 6 节 New Chat 第 4 项；避免产生空 Session）。
    2. 可用时调用 session 模块创建 Session：`cli_type` = 草稿 CLI，`model` = 草稿中选择的模型（未选择则为空，使用 CLI 原生默认），`origin_view_id` = 草稿所在 View（Conversation Mode 草稿为空），首条消息与上下文项一并提交。
    3. Session 立即出现在 Session History（今天分组顶部），Main Canvas 从草稿切换为该 Session 的 Conversation，进入 Running（FR-STATE-001）。
-   4. 此后 CLI 已锁定（FR-CHAT-003）。CLI 实际调用失败（例如登录状态检测通过但调用失败，06 第 5 节末条）时，Session 已存在，显示 Error，规则见 session spec 第 2.7 节。
+   4. 此后 CLI 已锁定（FR-CHAT-003）。CLI 实际调用失败（例如登录状态检测通过但调用失败，[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节末条）时，Session 已存在，显示 Error，规则见 session spec 第 2.7 节。
 4. 草稿顶栏：建议显示“新对话 · <CLI 名称>”（Shell Spec 第 7 节 Project View 草稿为“新对话 · <View 名称>”，Conversation Mode 草稿未规定；文案以高保真为准）。
 5. 草稿的保留与离开（建议，C-Q1）：
    - 每个 Project 最多保留一份 Conversation Mode 草稿（文本、CLI、模型）。
@@ -78,7 +78,7 @@
 2. 菜单中不可用的 CLI 整项禁用（包括“设为此 Project 默认”），并显示原因（“未安装”“未登录”）（Shell Spec 第 3 节 CLI 菜单；第 10 节 Disabled）。
 3. 草稿的 CLI 不可用时（例如 Default CLI 后来退出登录）：草稿内显示“CLI 不可用”说明与安装 / 登录指引（Shell Spec 第 9 节），发送不可用；用户可通过 ▾ 菜单换用其他可用 CLI（C-Q3）。
 4. 可用性检测时机（技术方案，待实现确认）：应用启动时检测一次；打开 CLI 菜单、显示草稿时若缓存超过短时限则重新检测；检测进行中菜单项显示“检测中”，不阻塞打开草稿。
-5. 登录状态“可用”不保证调用成功（06 第 5 节末条）；调用失败按 Error 处理。
+5. 登录状态“可用”不保证调用成功（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节末条）；调用失败按 Error 处理。
 
 ### FR-CHAT-003 Session CLI 锁定
 
@@ -135,8 +135,8 @@
 
 | 能力 | 说明 | 需对齐的点 |
 |---|---|---|
-| 可用性检测 | 分开报告是否安装、版本、登录状态（06 第 5 节末条；agent-adapter task） | 版本不支持时的报告方式（C-Q5）；GUI 启动下的 PATH 由 app-skeleton 提供 |
-| 模型目录 | 草稿阶段即可读取所选 CLI 的模型列表 | **读取目录不得创建原生会话**，否则违反 FR-CHAT-001“不产生空 Session”的意图并污染 CLI 历史；Claude SDK 初始化需首条消息或控制请求触发（06 第 3 节），需 Adapter 确认可行方式 |
+| 可用性检测 | 分开报告是否安装、版本、登录状态（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节末条；agent-adapter task） | 版本不支持时的报告方式（C-Q5）；GUI 启动下的 PATH 由 app-skeleton 提供 |
+| 模型目录 | 草稿阶段即可读取所选 CLI 的模型列表 | **读取目录不得创建原生会话**，否则违反 FR-CHAT-001“不产生空 Session”的意图并污染 CLI 历史；Claude SDK 初始化需首条消息或控制请求触发（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 3 节），需 Adapter 确认可行方式 |
 | 原生名称（可选） | 见本文 FR-NAV-003 节 | 两种 CLI 是否提供 |
 
 ## 5. 未决问题

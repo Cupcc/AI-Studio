@@ -11,8 +11,8 @@
 | 开发模式启动后显示窗口，最小尺寸 1024×640，窗口控制区在左侧，顶部区域可拖拽 | task.md；Shell Spec v01 第 1、2 节 | 通过（未取得系统窗口控制区的截图，见“未覆盖与边界”第 3 条） | [W2-clean-clone-commands.log](evidence/W2-clean-clone-commands.log)、[W2-dev-mode-probe.json](evidence/W2-dev-mode-probe.json)、[W1-dev-window.png](evidence/W1-dev-window.png) |
 | Renderer 中无法访问 Node.js、文件系统和 `ipcRenderer` 原始对象，只能调用 Preload 暴露的类型化 API；有测试或检查证明 | task.md；04 第 2 节 | 通过（有残余风险，见“未覆盖与边界”第 4 条） | [W2-renderer-isolation-probe.json](evidence/W2-renderer-isolation-probe.json)、[W2-clean-clone-commands.log](evidence/W2-clean-clone-commands.log) |
 | SQLite 在主进程可读写，迁移可重复执行；数据库位于应用数据目录而非 Project 目录 | task.md | 通过 | [W2-packaged-smoke.json](evidence/W2-packaged-smoke.json)、[W2-userdata-isolation.txt](evidence/W2-userdata-isolation.txt) |
-| node-pty 在 Electron 主进程中启动 Shell 并收到输出；打包后的应用中同样可用 | task.md；06 第 6 节 | 通过 | [W2-packaged-smoke.json](evidence/W2-packaged-smoke.json)、[W2-packaged-app-inspection.txt](evidence/W2-packaged-app-inspection.txt) |
-| 通过 `open` 启动打包后的应用时，能解析登录 Shell 的 PATH，并找到 `codex` 与 `claude`；结果不含完整环境变量或凭据 | task.md；06 第 6 节；`tasks/AGENTS.md` 证据规则 | 通过（以 `open` + launchd 默认环境代替 Finder，见“未覆盖与边界”第 5 条） | [W2-packaged-smoke.json](evidence/W2-packaged-smoke.json) |
+| node-pty 在 Electron 主进程中启动 Shell 并收到输出；打包后的应用中同样可用 | task.md；[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节 | 通过 | [W2-packaged-smoke.json](evidence/W2-packaged-smoke.json)、[W2-packaged-app-inspection.txt](evidence/W2-packaged-app-inspection.txt) |
+| 通过 `open` 启动打包后的应用时，能解析登录 Shell 的 PATH，并找到 `codex` 与 `claude`；结果不含完整环境变量或凭据 | task.md；[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节；`tasks/AGENTS.md` 证据规则 | 通过（以 `open` + launchd 默认环境代替 Finder，见“未覆盖与边界”第 5 条） | [W2-packaged-smoke.json](evidence/W2-packaged-smoke.json) |
 | SQLite 驱动、IPC 约定、目录约定写成 `docs/decisions/` 下的决定草稿 | task.md | 通过 | `docs/decisions/D20261009-desktop-sqlite-driver.md`、`D20261009-desktop-ipc-convention.md`、`D20261009-desktop-feature-folders.md`；登记于 `docs/decisions/README.md` |
 
 ## 验证记录
@@ -23,7 +23,7 @@
 4. SQLite：`database.test.ts` 覆盖路径落在 userData 内、拒绝越界文件名、迁移只执行一次、失败回滚、拒绝更新版本写入的库、WAL。打包应用在**全新**的 userData 上冒烟：`firstRunApplied: 1`、`secondRunApplied: 0`、`readBack: true`；之后用只读 `sqlite3` 确认库中有 `schema_migrations`（`2026100901_core_app_meta`）与 `app_meta`（`smoke.lastRun`）。W1 提交的报告中 `firstRunApplied` 为 0（复用了已迁移的真实库），不能单独证明首次迁移，本次补足。
 5. node-pty 与打包：打包产物中 `app.asar.unpacked/node_modules/node-pty/prebuilds/darwin-arm64/` 含 `pty.node` 与可执行的 `spawn-helper`（`-rwxr-xr-x`）；Fuses 与设计一致（RunAsNode、NODE_OPTIONS、inspect 参数、`file://` 额外权限关闭，Cookie 加密与 `onlyLoadAppFromAsar` 开启，asar 完整性校验关闭）。冒烟报告 `pty.ok: true`、收到标记、退出码 0；隐藏窗口加载 `app://studio`（从 asar 读取）通过。
 6. GUI 启动环境：冒烟脚本以 `PATH=/usr/bin:/bin:/usr/sbin:/sbin`（无 `SHELL`）调用 `/usr/bin/open -n -W`。报告显示启动 PATH 只有 4 项，`codex`、`claude` 均不在其上；登录 Shell 解析来源为 `login-shell`（`/bin/zsh`，约 0.5 秒，PATH 21 项），随后找到两个可执行文件并读到 `--version`（codex 0.161.0、claude 2.1.295）。证据中只有布尔值、数量、版本和可执行文件路径，没有环境变量值、认证输出或邮箱；路径含本机用户名，W2 证据已把主目录替换为 `~`，W1 证据未替换。没有发起任何模型调用。
-7. 决定草稿：三份均存在，`文档状态` 为 `草稿`，日期 2026-10-09，IPC 决定引用 04 第 2、4、6 节，SQLite 决定引用 04 第 2、6 节与 06 第 6 节，目录决定引用 `tasks/AGENTS.md` 与另两份决定；三份都有“依据”小节指向 research、测试或证据。
+7. 决定草稿：三份均存在，`文档状态` 为 `草稿`，日期 2026-10-09，IPC 决定引用 04 第 2、4、6 节，SQLite 决定引用 04 第 2、6 节与 [CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节，目录决定引用 `tasks/AGENTS.md` 与另两份决定；三份都有“依据”小节指向 research、测试或证据。
 
 ## 未覆盖与边界
 
@@ -49,7 +49,7 @@
 
 ### 5. GUI 启动环境不是真正的 Finder 启动
 
-W1 发现当前 macOS 的 `open` 会把调用方环境传给应用，所以脚本用 launchd 默认环境调用 `open`。这能复现“最小 PATH、无 SHELL”，但不是从 Finder 双击。06 第 6 节要求的是 Finder / `open` 启动，本项按 `open` 满足；Finder 双击、Dock 启动、登录项启动未覆盖。解析只在作者本机的 zsh 配置下验证过；bash、fish、会在交互模式下输出提示或阻塞的 rc 文件未验证（超时与回退有单元测试）。Shell 环境在应用运行期间只解析一次，用户修改配置后需要 `refresh()`。
+W1 发现当前 macOS 的 `open` 会把调用方环境传给应用，所以脚本用 launchd 默认环境调用 `open`。这能复现“最小 PATH、无 SHELL”，但不是从 Finder 双击。[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节要求的是 Finder / `open` 启动，本项按 `open` 满足；Finder 双击、Dock 启动、登录项启动未覆盖。解析只在作者本机的 zsh 配置下验证过；bash、fish、会在交互模式下输出提示或阻塞的 rc 文件未验证（超时与回退有单元测试）。Shell 环境在应用运行期间只解析一次，用户修改配置后需要 `refresh()`。
 
 ### 6. 其他未覆盖
 

@@ -51,4 +51,4 @@ node tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs \
 - 文本取消与异常退出测试生成合成长文本。工具取消测试额外执行一条合成 Python 命令，输出唯一标记后睡眠 47 秒；只为验证 Stop 是否终止子进程，不修改文件。校验失败后会清理确切匹配该标记的测试进程。
 - 原生 Stop 补充复核使用两条带唯一标记、睡眠 120 秒的 Python 命令；同时检查原生后台列表和系统 Python 进程退出。进程探测限定实际 Python 可执行文件，排除包含命令文本的 Shell。`clean` / `terminate` 是实验接口，需锁定所支持 CLI 版本；具体语义与覆盖边界见校验报告第 4、5 节。
 - 本脚本不验证 Electron、PTY、Browser、SQLite、文件变更归因或 GUI 提醒行为，也不代表完整 AC 已验收。
-- 本次实测结果见 [CLI Integration Preflight](<../docs/06. CLI Integration Preflight.md>)。
+- 本次实测结果见 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md)。

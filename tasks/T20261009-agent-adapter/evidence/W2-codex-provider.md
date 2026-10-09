@@ -3,7 +3,7 @@
 - 日期：2026-10-09。
 - 范围：`src/codex/**`、`test/codex/**`；未修改共享核心、package 配置、spec、task 或 plan。
 - worktree：`codex-provider-resume`；基线 `385adf0`。
-- 依据：task 验收标准；spec 第 2.2～2.11、4.4 节；04 第 4 节；06 第 3～6 节。影响 FR-CHAT-002/003、FR-SESSION-002/003、FR-STATE-001/002/003/007、FR-INPUT-001/002；AC-02/03/05 Adapter 部分。
+- 依据：task 验收标准；spec 第 2.2～2.11、4.4 节；04 第 4 节；[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 3～6 节。影响 FR-CHAT-002/003、FR-SESSION-002/003、FR-STATE-001/002/003/007、FR-INPUT-001/002；AC-02/03/05 Adapter 部分。
 - 结果文件：[W2-codex-results.json](W2-codex-results.json)。本文不是人工验收确认，不修改任务状态。
 
 ## 实现

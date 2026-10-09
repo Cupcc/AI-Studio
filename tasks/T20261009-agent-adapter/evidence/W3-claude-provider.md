@@ -65,4 +65,4 @@ await provider.dispose();
 
 ## 依据
 
-实现核对 SDK 0.3.293 的 `sdk.d.ts`（CanUseTool、PermissionResult、SpawnOptions、Query、Options、SDKMessage），并参考官方 [用户输入](https://code.claude.com/docs/en/agent-sdk/user-input)。产品行为遵循 `specs/agent-adapter/spec.md`、`docs/04. Technical Requirements.md`、`docs/06. CLI Integration Preflight.md`。SDK 类型声明是本阶段版本的具体行为依据。
+实现核对 SDK 0.3.293 的 `sdk.d.ts`（CanUseTool、PermissionResult、SpawnOptions、Query、Options、SDKMessage），并参考官方 [用户输入](https://code.claude.com/docs/en/agent-sdk/user-input)。产品行为遵循 `specs/agent-adapter/spec.md`、`docs/04. Technical Requirements.md`、`tasks/T20261008-cli-preflight/report.md`。SDK 类型声明是本阶段版本的具体行为依据。

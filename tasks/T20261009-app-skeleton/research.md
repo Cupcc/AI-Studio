@@ -1,6 +1,6 @@
 # 调研记录：T20261009-app-skeleton（W1）
 
-> 过程记录，无需评审。长期结论见 `docs/decisions/D20261009-desktop-*.md` 与 `apps/desktop/README.md`。环境：macOS 15（Darwin 24.6.0）/ arm64，Node 26.10.0，pnpm 12.10.1，2026-10-09。
+> 过程记录，无需评审。长期结论见 [07. Decisions](<../../docs/07. Decisions.md>) DEC-01～03 与 `apps/desktop/README.md`。环境：macOS 15（Darwin 24.6.0）/ arm64，Node 26.10.0，pnpm 12.10.1，2026-10-09。
 
 ## 1. 版本选择
 
@@ -26,10 +26,10 @@ pnpm 12 默认阻止依赖构建脚本。`pnpm-workspace.yaml` 的 `allowBuilds`
 
 ## 2. IPC 与目录约定
 
-- 契约（shared）→ 通用 Preload 桥接 → 主进程处理器（parse + handle）。设计理由与备选方案见 [D20261009-desktop-ipc-convention](../../docs/decisions/D20261009-desktop-ipc-convention.md)。
+- 契约（shared）→ 通用 Preload 桥接 → 主进程处理器（parse + handle）。设计理由与备选方案见 [DEC-02](<../../docs/07. Decisions.md>)。
 - 新增功能的改动面：功能自有文件 + `src/shared/ipc/contracts.ts` 一行 + `src/main/ipc/index.ts` 一行（有表时再加 `migrations/index.ts` 一行）。启动时校验契约与处理器一一对应。
 - 处理器工厂接收 `CoreServices`，功能自有服务在工厂内创建；退出时 `dispose` 最多等待 5 秒。
-- 目录归属见 [D20261009-desktop-feature-folders](../../docs/decisions/D20261009-desktop-feature-folders.md)。
+- 目录归属见 [DEC-03](<../../docs/07. Decisions.md>)。
 
 ## 3. SQLite：node:sqlite 与 better-sqlite3
 
@@ -43,7 +43,7 @@ Electron 主进程探针（`require('node:sqlite')`，内存库建表、插入�
 - 系统 Node 26.10.0 同样提供 `node:sqlite`，Vitest 直接使用同一实现。
 - better-sqlite3 13.0.3 基于 V8 原生接口，需按 Electron ABI 149 编译，与 Vitest 的 Node 26 ABI 不同，需要两份二进制或在 Electron 中跑单元测试，因此未采用。
 
-结论见 [D20261009-desktop-sqlite-driver](../../docs/decisions/D20261009-desktop-sqlite-driver.md)。
+结论见 [DEC-01](<../../docs/07. Decisions.md>)。
 
 ## 4. node-pty
 

@@ -6,13 +6,15 @@
 |---|---|
 | 产品名称 | AI Developer Studio |
 | 版本 | v02 |
-| 文档类型 | 开发前 CLI 集成校验 |
+| 文档类型 | 开发前 CLI 集成校验报告 |
 | 日期 | 2026-10-08 |
 | 平台 | macOS 15.6（24G84），Apple Silicon / arm64 |
 | 状态 | 基础集成与 Codex 原生 Stop 清理路径已验证；产品 Adapter / Process Manager 待实现 |
-| 依据 | [Technical Requirements](<04. Technical Requirements.md>) 第 2、3、4、6、7 节；FR-CHAT-001～003、FR-SESSION-001～003、FR-STATE-001～006、FR-INPUT-001～002；AC-02、AC-03、AC-05 |
-| 校验脚本 | [cli-preflight.mjs](../scripts/cli-preflight.mjs)；补充复核使用 [codex-native-stop-check.mjs](../tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs)，操作说明见 [scripts/README.md](../scripts/README.md) |
-| 证据 | [逐项结果汇总](../tasks/T20261008-cli-preflight/evidence/summary.json)；各轮筛选后的事件摘要见同目录；任务记录见 [T20261008-cli-preflight](../tasks/T20261008-cli-preflight/task.md) |
+| 依据 | [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2、3、4、6、7 节；FR-CHAT-001～003、FR-SESSION-001～003、FR-STATE-001～006、FR-INPUT-001～002；AC-02、AC-03、AC-05 |
+| 校验脚本 | [cli-preflight.mjs](../../scripts/cli-preflight.mjs)；补充复核使用 [codex-native-stop-check.mjs](evidence/codex-native-stop-check.mjs)，操作说明见 [scripts/README.md](../../scripts/README.md) |
+| 证据 | [逐项结果汇总](evidence/summary.json)；各轮筛选后的事件摘要见同目录；任务记录见 [T20261008-cli-preflight](task.md) |
+
+> 本报告于 2026-10-09 归入原任务。实测环境与结论保留 2026-10-08 的记录；长期技术约束见 [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2、4 节。
 
 ## 1. 结论与开发准入
 
@@ -90,13 +92,13 @@
 
 主要证据：
 
-- [Codex 基础结果](../tasks/T20261008-cli-preflight/evidence/codex-run-results.json)、[扩展结果](../tasks/T20261008-cli-preflight/evidence/codex-extended-results.json)。
-- [Claude 基础结果](../tasks/T20261008-cli-preflight/evidence/claude-run-results.json)、[问题测试及首次超时](../tasks/T20261008-cli-preflight/evidence/claude-extended-results.json)、[异常退出重跑](../tasks/T20261008-cli-preflight/evidence/claude-crash-retry-results.json)。
-- [Claude 工具取消](../tasks/T20261008-cli-preflight/evidence/claude-tool-results.json)。
-- [Codex 工具回合中断与 Runtime 兜底路径](../tasks/T20261008-cli-preflight/evidence/codex-tool-retry-results.json)、[启动稳定后复核](../tasks/T20261008-cli-preflight/evidence/codex-tool-stable-results.json)。
-- [Codex 子进程快照](../tasks/T20261008-cli-preflight/evidence/codex-tool-retry-events.jsonl)：同一 PID 在取消前与取消后 5 秒仍存在。
-- [Codex 原生 Stop 复核结果](../tasks/T20261008-cli-preflight/evidence/codex-native-stop-results.json)、[筛选后的事件与系统进程快照](../tasks/T20261008-cli-preflight/evidence/codex-native-stop-events.jsonl)、[复核脚本](../tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs)。
-- [原生 Stop 首轮校验失败](../tasks/T20261008-cli-preflight/evidence/codex-native-stop-initial-results.json)、[首轮事件](../tasks/T20261008-cli-preflight/evidence/codex-native-stop-initial-events.jsonl)：保留脚本误判记录，不计为原生清理接口失败。
+- [Codex 基础结果](evidence/codex-run-results.json)、[扩展结果](evidence/codex-extended-results.json)。
+- [Claude 基础结果](evidence/claude-run-results.json)、[问题测试及首次超时](evidence/claude-extended-results.json)、[异常退出重跑](evidence/claude-crash-retry-results.json)。
+- [Claude 工具取消](evidence/claude-tool-results.json)。
+- [Codex 工具回合中断与 Runtime 兜底路径](evidence/codex-tool-retry-results.json)、[启动稳定后复核](evidence/codex-tool-stable-results.json)。
+- [Codex 子进程快照](evidence/codex-tool-retry-events.jsonl)：同一 PID 在取消前与取消后 5 秒仍存在。
+- [Codex 原生 Stop 复核结果](evidence/codex-native-stop-results.json)、[筛选后的事件与系统进程快照](evidence/codex-native-stop-events.jsonl)、[复核脚本](evidence/codex-native-stop-check.mjs)。
+- [原生 Stop 首轮校验失败](evidence/codex-native-stop-initial-results.json)、[首轮事件](evidence/codex-native-stop-initial-events.jsonl)：保留脚本误判记录，不计为原生清理接口失败。
 
 ### 源码核对与原生 Stop 复核
 

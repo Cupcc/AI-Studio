@@ -1,15 +1,15 @@
 # 调研记录：Project View 待决技术事项（W1）
 
-> 作者：W1（Sonnet 5.5）。日期：2026-10-09。范围：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 7 节第 1、2、3、10、11 项。本文是过程记录，不是决定；结论与推荐见 `docs/decisions/` 下的四份草稿。没有进行任何真实模型调用。
+> 作者：W1（Sonnet 5.5）。日期：2026-10-09。范围：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 7 节第 1、2、3、10、11 项。本文是过程记录，不是决定；结论与推荐见 [07. Decisions](<../../docs/07. Decisions.md>) DEC-04～07（2026-10-09 由四份草稿精简合并）。没有进行任何真实模型调用。
 
 ## 1. 产出与分工
 
 | 待决项（04 第 7 节） | 决定草稿 |
 |---|---|
-| 第 1 项 Knowledge 存储格式；第 2 项是否放在 Project 内隐藏目录 | [D20261009-project-knowledge-storage](../../docs/decisions/D20261009-project-knowledge-storage.md) |
-| 第 3 项 AI Generated View 渲染与安全沙箱 | [D20261009-project-view-rendering](../../docs/decisions/D20261009-project-view-rendering.md) |
-| 第 10 项 Project View Context 注入两种 CLI | [D20261009-project-view-context](../../docs/decisions/D20261009-project-view-context.md) |
-| 第 11 项 数据刷新时机与权限边界 | [D20261009-project-view-refresh](../../docs/decisions/D20261009-project-view-refresh.md) |
+| 第 1 项 Knowledge 存储格式；第 2 项是否放在 Project 内隐藏目录 | [DEC-04](<../../docs/07. Decisions.md>) |
+| 第 3 项 AI Generated View 渲染与安全沙箱 | [DEC-05](<../../docs/07. Decisions.md>) |
+| 第 10 项 Project View Context 注入两种 CLI | [DEC-06](<../../docs/07. Decisions.md>) |
+| 第 11 项 数据刷新时机与权限边界 | [DEC-07](<../../docs/07. Decisions.md>) |
 
 任务卡建议第 10、11 项合写一份；这里拆成两份，因为注入方式（发送时发生一次）与刷新、权限（持续发生）可以分别确认，互不阻塞。
 
@@ -63,7 +63,7 @@
 - Codex 的结构化输入里没有“文件引用”或“上下文块”类型。要给 Agent 一个 View 上下文，只有文本、`skill` 输入项、`thread/start` 的 `developerInstructions` 和低层的 `thread/inject_items`（追加原始 Responses 项，持久化并参与后续请求，属于低层接口）。
 - `text_elements` 的设计目的是让客户端在历史与恢复时还原“特殊元素”标记而不改变文字内容（源码注释）；可考虑为 View Context 文本块标出整段范围，使 Codex 历史自带标记。它是 Codex 专有，Claude 没有等价物，所以客户端仍须自己保存“这条消息附带了 View Context”。
 - Claude 的 hooks 可以每轮动态附加 `additionalContext`，适合“校验失败反馈”之类的动态内容；因为 Codex 没有已验证的等价物，没有作为主路径。
-- CLAUDE.md 只有在 `settingSources` 含 `project` 时才会加载，而 06 的校验为隔离而使用了空来源；这说明依赖原生指令文件还需要 Adapter 先确定配置加载边界（06 第 6 节“原生 Skill / Rule / Context 加载”）。
+- CLAUDE.md 只有在 `settingSources` 含 `project` 时才会加载，而 [CLI 校验报告](../T20261008-cli-preflight/report.md) 的校验为隔离而使用了空来源；这说明依赖原生指令文件还需要 Adapter 先确定配置加载边界（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节“原生 Skill / Rule / Context 加载”）。
 
 ### 3.4 刷新与权限
 

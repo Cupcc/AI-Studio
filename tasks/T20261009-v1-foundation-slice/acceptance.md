@@ -13,7 +13,7 @@
 | 本轮每个 FR 有负责的子 task，无遗漏 / 重复工作 | 通过 | 下方归属表与 [总任务拆分](task.md)；Adapter 负责原生协议 / Runtime，Session 负责产品状态 / 持久化 / UI；Project 编排关闭，Session 停止目标轮次，职责相接且不重复 |
 | 合入 dev/v1 后安装、类型检查、单测与应用冒烟通过；命令登记 AGENTS | 通过（安装与打包为历史基线，见说明） | 独立 [frozen 安装](../T20261009-project-shell/evidence/W3-install.log)；最终 [类型检查](../T20261009-session-slice/evidence/W6-typecheck.log)、[单测](../T20261009-session-slice/evidence/W6-unit.log) Adapter181 / desktop130、[Electron19/19](../T20261009-session-slice/evidence/W6-final-e2e-fixed.log) 含真实 SQLite / PTY / 登录 Shell 冒烟；命令见 [AGENTS](../../AGENTS.md) |
 | AC-01～05 可演示，各子 task 有独立 acceptance | 部分通过 | [骨架](../T20261009-app-skeleton/acceptance.md)、[Project](../T20261009-project-shell/acceptance.md)、[Adapter](../T20261009-agent-adapter/acceptance.md)、[Session](../T20261009-session-slice/acceptance.md) 均存在；AC-01 壳层隔离 / 恢复通过，实际 Session 跨 Project 聚合 / 关闭隔离亦通过；AC-02～05 模拟流程通过，但 task 所要求的真实 CLI 场景未运行，不能认定完整 AC 通过 |
-| 需人确认的决定 / 问题归负责文档 | 通过（记录完备，尚未确认） | [spec索引](../../specs/README.md) 中 Project / navigation / session / chat / input / Adapter 未决问题；[决定索引](../../docs/decisions/README.md) 中地基三份与 Project View 四份草稿；[Project View task](../T20261009-project-view/task.md) 十二问题仍待确认；阻塞问题的2026-10-09确认保留在负责spec，非阻塞推荐按授权实施并保持待确认 |
+| 需人确认的决定 / 问题归负责文档 | 通过（记录完备，尚未确认） | [spec索引](../../specs/README.md) 中 Project / navigation / session / chat / input / Adapter 未决问题；[决定索引](<../../docs/07. Decisions.md>) 中地基三份与 Project View 四份草稿；[Project View task](../T20261009-project-view/task.md) 十二问题仍待确认；阻塞问题的2026-10-09确认保留在负责spec，非阻塞推荐按授权实施并保持待确认 |
 
 最终阶段未新增或升级依赖；W3 安装发生在 `8774bc1`，更早的骨架 [W2干净克隆](../T20261009-app-skeleton/evidence/W2-clean-clone-commands.log) 发生在 `1cd7b73`。不把它们称为最终HEAD从零冷缓存安装。最终构建与原生能力通过Electron实际加载验证；骨架历史打包 / open冒烟见其 acceptance，不代表最终Session产物已打包验证。
 
@@ -28,7 +28,7 @@ FR / AC 来源：[02 FR](<../../docs/02. Functional Requirements.md>)、[05 AC](
 | 无新增产品FR；可信IPC、数据库、构建 / 原生环境 | app-skeleton | 技术要求04 §2；独立骨架验收 |
 | 上述Session / 输入FR的原生能力部分 | agent-adapter | 协议映射、事件、Stop / Runtime隔离；不承担UI状态清除 |
 
-task frontmatter列出的21个FR均有责任归属。Project View本轮仅调研，四份决定草稿分别为 [Knowledge存储](../../docs/decisions/D20261009-project-knowledge-storage.md)、[渲染](../../docs/decisions/D20261009-project-view-rendering.md)、[刷新](../../docs/decisions/D20261009-project-view-refresh.md)、[上下文](../../docs/decisions/D20261009-project-view-context.md)。Context工具与AC-06/07实现留待后续轮次。
+task frontmatter列出的21个FR均有责任归属。Project View本轮仅调研，四份决定草稿分别为 [Knowledge存储](<../../docs/07. Decisions.md>)、[渲染](<../../docs/07. Decisions.md>)、[刷新](<../../docs/07. Decisions.md>)、[上下文](<../../docs/07. Decisions.md>)。Context工具与AC-06/07实现留待后续轮次。
 
 Session独立补充验证：真实SQLite重开2,000摘要 / 1,202 transcript、renderer异步竞态、关闭超时 / 迟到输入探针共5项；真实minimize/hide未读规则和2,000历史有界DOM共2项；实际Session聚合驱动Tab / 折叠点、关闭计数2 / 取消保持 / 仅目标停止共1项。日志与逐项截图见 [Session acceptance](../T20261009-session-slice/acceptance.md)。已发现实现缺陷均有修前 / 修后证据，没有剩余已复现的本地自动化阻断。
 

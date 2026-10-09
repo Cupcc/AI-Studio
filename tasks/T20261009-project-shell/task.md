@@ -54,10 +54,12 @@ created: 2026-10-09
 - [ ] Agent 或后台事件不改变 Workspace 布局：Session 状态变化不切换 Tab、View、Session 或右侧工具（01 第 8 节原则 21、22；project spec 2.3.1）。
 - [ ] 单元测试覆盖 Project 识别、状态保存与恢复、Tab 规则；Playwright 覆盖三 Project 切换与重启恢复（AC-01）。
 
-## 未决问题
-
-阻塞问题已回答，其余见两份 spec 的未决问题表（待确认，先按推荐实现）。
+## 已确认事项
 
 | 问题 | 回答（确认日期） |
 |---|---|
-| spec 阻塞问题 PROJ-Q1～Q3 | 已回答，见 `specs/project/spec.md` 第 5 节（2026-10-09 确认） |
+| spec 阻塞问题 PROJ-Q1～Q3 | 已回答，见 `specs/project/spec.md` 第 5.1 节（2026-10-09 确认） |
+
+## 未决问题
+
+本 task 无。非阻塞问题留在 `specs/project/spec.md`、`specs/navigation/spec.md` 第 5.2 节待确认，先按推荐实现。

@@ -50,3 +50,4 @@
 - 2026-10-09 用户要求合理使用已安装skills：使用Vitest行为回归、React组件规则、agent-browser Electron交互；不改既有设计方向。各worker写入范围隔离，原生窗口测试由主Agent串行协调。用户新安装的 `.agents/`、`.claude/` 配置与skill安装task不纳入本轮提交。
 - 2026-10-09 主Agent回写模块spec与子任务report，所有实现task转或保持verifying；Project View仅调研、Context tools不实施。独立验收worker追加总任务acceptance汇总，完成最终门禁后归档证据。真实CLI部分通过边界不变，不追加推理调用、不推送、不合main、不将任何task标done。
 - 2026-10-09 W6 最终验收提交 `9f54ed8` 已合入，所有本轮交付与独立验收归档完成。最终代码基线 `188bd1d` 的 workspace typecheck、311 项单测、19 项完整 Electron 与 3 项独立补充 Electron 通过；5 项独立窄测和 15 张截图见 [Session 验收](../T20261009-session-slice/acceptance.md)。[总体验收](acceptance.md) 保留部分通过结论：真实 CLI UI AC-02～AC-05 本轮均未运行，Claude 配额及 Codex 修正版精确 Stop / 当前版本兼容边界未变。所有实现 task 保持 `verifying`、spec 保持草稿，等待人工审阅；下一步不自动扩展至 Project View / Context 工具实施或真实模型调用。
+- 2026-10-09 按用户要求新增 [人工验收清单](manual-acceptance.md)：准备、应用窗口、Project / 导航（AC-01）、Session 模拟模式（AC-02～05）、真实 CLI 补验与签收方式，逐项列步骤与预期；模拟模式启动命令已在本机实际启动验证。[建设计划](<../../docs/06. Development Roadmap.md>) 第 2 节第 4 步链接本清单。各 task 状态不变。

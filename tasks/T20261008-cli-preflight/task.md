@@ -9,7 +9,7 @@ created: 2026-10-08
 
 # CLI 集成开发前校验
 
-> 本任务早于 `tasks/` 规范执行。task.md 于 2026-10-08 依据 [06. CLI Integration Preflight](<../../docs/06. CLI Integration Preflight.md>) 和 [scripts/README.md](../../scripts/README.md) 补录。06 即本任务的结论报告，不另写 report.md 和 acceptance.md。
+> 本任务早于 `tasks/` 规范执行。task.md 于 2026-10-08 依据 [CLI Integration Preflight](report.md) 和 [scripts/README.md](../../scripts/README.md) 补录。结论报告于 2026-10-09 归入本任务的 report.md；验收逐项结果见报告，未另写 acceptance.md。
 
 ## 目标
 
@@ -28,7 +28,7 @@ created: 2026-10-08
 
 ## 验收标准
 
-补录说明：按 06 第 4 节实测矩阵整理，逐项结论与证据链接见 06。
+补录说明：按 [report.md](report.md) 第 4 节实测矩阵整理，逐项结论与证据链接见报告。
 
 - [x] 协议初始化与 Model Selector 数据来源
 - [x] 创建 Session 与流式回复
@@ -43,7 +43,7 @@ created: 2026-10-08
 - [x] Codex 原生 `clean` / `terminate` 清理与 Thread 隔离
 - [x] Codex 停止独立 Runtime 后恢复（兜底路径）
 
-后续必须完成的校验见 06 第 6 节，将拆为新的 task。
+后续必须完成的校验见 [report.md](report.md) 第 6 节，将拆为新的 task。
 
 ## 未决问题
 
