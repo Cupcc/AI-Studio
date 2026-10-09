@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useId } from 'react'
 import { SESSION_CLIS } from '@shared/session/types'
 import type { ShellSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
@@ -6,6 +6,7 @@ import { cliName, useSessions } from '../session/store'
 import { CliBadge } from '../session/Status'
 
 export function CliMenu({ project, dismiss }: ShellSlotProps & { dismiss(): void }) {
+  const menuId = useId()
   const providers = useSessions((s) => s.providers), selected = useSessions((s) => s.defaultCli[project.id]), error = useSessions((s) => s.errors[`default:${project.id}`])
   const providersError = useSessions((s) => s.providersError), pending = useSessions((s) => s.pending[`default:${project.id}`])
   useEffect(() => { void useSessions.getState().loadProviders() }, [])
@@ -17,10 +18,12 @@ export function CliMenu({ project, dismiss }: ShellSlotProps & { dismiss(): void
     <p className="menu-heading">选择 CLI 新建对话</p>
     {SESSION_CLIS.map((cli) => {
       const { available, reason } = availability(cli)
-      return <button className="menu-item session-cli-menu__select" key={cli} disabled={!available} title={!available ? reason : undefined} onClick={() => { useSessions.getState().startDraft(project.id, cli); useProjectShell.getState().startDraft(project.id); dismiss() }}>
+      const labelId = `${menuId}-${cli}-label`, reasonId = `${menuId}-${cli}-reason`, defaultId = `${menuId}-${cli}-default`
+      const descriptionIds = [!available && reasonId, selected === cli && defaultId].filter(Boolean).join(' ') || undefined
+      return <button className="menu-item session-cli-menu__select" key={cli} aria-labelledby={labelId} aria-describedby={descriptionIds} disabled={!available} title={!available ? reason : undefined} onClick={() => { useSessions.getState().startDraft(project.id, cli); useProjectShell.getState().startDraft(project.id); dismiss() }}>
         <CliBadge cli={cli} />
-        <span className="menu-item__text"><span>{cliName(cli)}</span>{!available && <span className="menu-item__sub">{reason}</span>}</span>
-        {selected === cli && <span className="menu-item__meta">默认</span>}
+        <span className="menu-item__text"><span id={labelId}>{cliName(cli)}</span>{!available && <span id={reasonId} className="menu-item__sub">{reason}</span>}</span>
+        {selected === cli && <span id={defaultId} className="menu-item__meta">默认</span>}
       </button>
     })}
     <div className="menu-divider" />

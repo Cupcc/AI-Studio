@@ -1,4 +1,26 @@
-# 开发前 CLI 校验
+# 开发脚本与 Commit 门禁
+
+## 本地 Commit 门禁
+
+依据：[仓库指南](../AGENTS.md) 的开发命令与提交约定；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
+
+根目录执行 `pnpm install` 时，`prepare` 自动通过 Husky 安装 hooks；已有依赖时可用 `pnpm prepare` 重新安装。需要 Node >= 24、pnpm 12，Git 客户端的 PATH 也必须能找到它们。若 GUI 客户端找不到版本管理器安装的 Node / pnpm，按 [Husky 官方说明](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis) 配置用户级初始化文件，不在仓库硬编码个人路径。
+
+| 时机 | 检查 | 手动执行 |
+|---|---|---|
+| `pre-commit` | 全 workspace 类型检查，然后运行单元测试；任一失败终止提交 | `pnpm check:commit` |
+| `commit-msg` | commitlint 检查 Conventional Commits | `pnpm commitlint --edit <提交信息文件>` |
+
+提交信息示例：`fix(session): preserve stop state`、`feat!: change session API`、`docs(tasks): 更新验收记录`。使用 `@commitlint/config-conventional` 的标准规则，放开主题大小写，并允许按仓库约定仅使用 `!` 或 `BREAKING CHANGE:` footer 标记破坏性变更。检查不会自动修改文件或暂存区。
+
+边界：
+
+- 类型检查和单元测试检查当前工作树，不是暂存区快照；部分暂存时应确保未暂存改动没有掩盖问题。检查沿用现有构建流程，会更新被 Git 忽略的构建输出。
+- 每次提交（含纯文档提交）都运行检查；不自动执行 E2E、打包、真实 CLI 或模型请求。目前没有源码 formatter / linter，因此不引入 lint-staged。
+- 本地 hooks 可被 `git commit --no-verify` 或 `HUSKY=0` 绕过，不是强制安全边界；本任务未配置 CI 或远端分支保护。CI 可用 `HUSKY=0 pnpm install --frozen-lockfile` 安装开发依赖，再显式运行 `pnpm check:commit`。
+- 配置文件纳入版本控制的是 `.husky/pre-commit`、`.husky/commit-msg` 与 `commitlint.config.cjs`；Husky 生成的 `.husky/_/` 自带忽略规则，无需提交。
+
+## 开发前 CLI 校验
 
 `cli-preflight.mjs` 是验证真实本机 CLI 的开发前实验脚本，不是产品 Adapter 或 GUI 验收测试。依据：FR-CHAT-001～003、FR-SESSION-001～003、FR-STATE-001～006、FR-INPUT-002；AC-02、AC-03、AC-05。
 

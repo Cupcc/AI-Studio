@@ -64,7 +64,8 @@ Read `tasks/AGENTS.md` before creating or executing a task. In short:
 
 The repository is a pnpm workspace (`pnpm-workspace.yaml`: `apps/*`, `packages/*`; Node >= 24, pnpm 12). Run from the repository root; paths containing spaces are supported:
 
-- `pnpm install`: install dependencies; also downloads the Electron binary and fixes the node-pty `spawn-helper` executable bit. Build scripts are allow-listed in `pnpm-workspace.yaml` (`allowBuilds`).
+- `pnpm install`: install dependencies and configure local Husky Git hooks; also downloads the Electron binary and fixes the node-pty `spawn-helper` executable bit. Build scripts are allow-listed in `pnpm-workspace.yaml` (`allowBuilds`).
+- `pnpm check:commit`: run type-checking and unit tests, also invoked by `pre-commit`. `commit-msg` validates Conventional Commits; setup and limitations: `scripts/README.md`.
 - `pnpm dev`: start the desktop app in electron-vite development mode.
 - `pnpm typecheck`: type-check every workspace package.
 - `pnpm test`: run every package's unit tests (Vitest); no real CLI or model calls.

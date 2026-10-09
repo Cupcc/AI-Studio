@@ -6,6 +6,9 @@
     "node": ">=24"
   },
   "scripts": {
+    "prepare": "husky",
+    "check:commit": "pnpm typecheck && pnpm test",
+    "commitlint": "commitlint",
     "dev": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run dev",
     "build": "pnpm -r --if-present run build",
     "typecheck": "pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck",
@@ -13,5 +16,10 @@
     "test:e2e": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run test:e2e",
     "package": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run package",
     "smoke:packaged": "pnpm --filter @ai-studio/desktop run smoke:packaged"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
+    "husky": "9.1.7"
   }
 }
