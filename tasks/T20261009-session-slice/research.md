@@ -30,7 +30,7 @@ S-Q1、S-Q2、I-Q2 与 NAV-Q4 已确认，不因参考产品调整。特别是�
 
 ## 3. 实现前接口对齐
 
-- Adapter 的可执行契约已经在 `packages/agent-adapter/src/provider.ts`、`events.ts`、`types.ts`，不再实现 session §4.1 的示意名字。Provider ID 使用 `codex` / `claude`；界面名称为 Codex CLI / Claude Code。
+- Adapter 的可执行契约已经在 `packages/agent-adapter/src/provider.ts`、`events.ts`、`types.ts`，不再实现 session §4.1 的示意名字。Provider ID 使用 `BUILT_IN_PROVIDER_IDS` 的 `codex` / `claude-code`；界面名称为 Codex CLI / Claude Code。
 - `sendUserInput`、`respondToInput`、`replyWithText(text)`、`setModel(model | null)` 为正式方法；Running 输入能力为 `inputWhileRunning`，自由文字用 `freeTextAnswers` 与具体请求判断。
 - 只有回合事件有 `turnId`。Session 级原生 ID、标题、Runtime 事件按当前 Runtime 句柄与 generation 处理，不能因缺少 turnId 全部丢弃。
 - Stop 清理失败会产生 `turn.completed(outcome=interrupted, stop.cleanup=failed)` 与 `session.error`。Session Manager 应记录一个 Error，不能追加“已停止”成功行后再重复报错；以 `StopResult` 和 Adapter spec §4.5 对齐。

@@ -245,7 +245,7 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 |---|---|---|
 | `id` | 04 §5 | 客户端 ID |
 | `project_id` | 04 §5 | 所属 Project |
-| `cli_type` | 04 §5 | `codex` / `claude`（Adapter ProviderId；显示名为 Claude Code）；创建后不可变（FR-CHAT-003） |
+| `cli_type` | 04 §5 | `codex` / `claude-code`（Adapter BUILT_IN_PROVIDER_IDS；显示名为 Claude Code）；创建后不可变（FR-CHAT-003） |
 | `cli_session_id` | 04 §5 | 原生会话 ID；可为空直到 Adapter 报告；绑定后不可变 |
 | `title` | 04 §5 | 显示标题；生成方法见 chat spec |
 | `title_source` | 提案 | `client` / `native` / `user`；决定原生名称能否覆盖（chat spec） |

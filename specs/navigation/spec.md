@@ -291,7 +291,7 @@
 | 字段 | 说明 | 来源 |
 |---|---|---|
 | `id` | Session 标识 | 04 第 5 节 |
-| `cli_type` | `codex` / `claude`，决定 CX / CC | 04 第 5 节；P-D |
+| `cli_type` | `codex` / `claude-code`，决定 CX / CC（对齐 Adapter BUILT_IN_PROVIDER_IDS） | 04 第 5 节；P-D |
 | `title` | 显示标题 | 04 第 5 节 |
 | `status` | `running` / `needs_input` / `error` / `completed_unread` / 空；已按 session 规则折算为单一值 | 04 第 5 节 `status`、`completion_unread`；FR-STATE |
 | `last_user_message_at` | 分组与排序依据 | 04 第 5 节 |
