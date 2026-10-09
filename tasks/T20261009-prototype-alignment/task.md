@@ -1,6 +1,6 @@
 ---
 id: T20261009-prototype-alignment
-status: in_progress
+status: verifying
 fr: [FR-PROJ-001, FR-PROJ-002, FR-NAV-001, FR-NAV-002, FR-NAV-003, FR-CHAT-001, FR-SESSION-001, FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-004, FR-INPUT-001, FR-INPUT-002, FR-TOOL-001]
 ac: [AC-01, AC-02, AC-04, AC-05, AC-07]
 specs: [specs/project/spec.md, specs/navigation/spec.md, specs/chat/spec.md, specs/session/spec.md, specs/input/spec.md]
