@@ -1,0 +1,99 @@
+# W2 clean-clone run (2026-10-09). Clone of dev/v1 at 1cd7b73 into <tmp>/repo (path contains a space). Paths sanitized: <tmp>, ~.
+# Host: macOS 15 (Darwin 24.6.0) arm64, Node 26.10.0, pnpm 12.10.1. pnpm store and Electron download cache were warm.
+
+## pnpm install --frozen-lockfile
+Scope: all 2 workspace projects
+✓ Lockfile passes supply-chain policies (verified 6h ago)
+Lockfile is up to date, resolution step is skipped
+Packages are cloned from the content-addressable store to the virtual store.
+  Content-addressable store is at: ~/Library/pnpm/store/v11
+  Virtual store is at:             node_modules/.pnpm
+Packages: +402
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 402, reused 402, downloaded 0, added 402, done
+.../node-pty@1.1.0/node_modules/node-pty install$ node scripts/prebuild.js || node-gyp rebuild
+.../node-pty@1.1.0/node_modules/node-pty install: > Checking prebuilds...
+.../node-pty@1.1.0/node_modules/node-pty install: Done
+.../node-pty@1.1.0/node_modules/node-pty postinstall$ node scripts/post-install.js
+.../node-pty@1.1.0/node_modules/node-pty postinstall: > Cleaning release folder...
+.../node-pty@1.1.0/node_modules/node-pty postinstall: > Moving conpty.dll...
+.../node-pty@1.1.0/node_modules/node-pty postinstall:   SKIPPED (not Windows)
+.../node-pty@1.1.0/node_modules/node-pty postinstall: Done
+apps/desktop postinstall$ install-electron && node scripts/ensure-node-pty-helper.mjs
+apps/desktop postinstall: [ensure-node-pty-helper] 1 spawn-helper file(s) made executable
+apps/desktop postinstall: Done
+Done in 2.4s using pnpm v12.10.1
+exit=0
+
+## pnpm typecheck
+$ pnpm -r --if-present run typecheck
+$ tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.e2e.json
+exit=0
+
+## pnpm test
+$ pnpm -r --if-present run test
+$ vitest run
+
+ RUN  v5.0.1 <tmp>/repo/apps/desktop
+
+
+ Test Files  11 passed (11)
+      Tests  53 passed (53)
+   Start at  13:31:41
+   Duration  1.44s (tests 51%, environment 22%, transform 17%, import 9%, worker 1%)
+
+exit=0
+
+## pnpm test:e2e
+$ pnpm --filter @ai-studio/desktop run test:e2e
+$ electron-vite build && playwright test
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 23 modules transformed.
+rendering chunks...
+out/main/index.js  30.52 kB
+✓ built in 79ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 5 modules transformed.
+rendering chunks...
+out/preload/index.js  2.49 kB
+✓ built in 10ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 38 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.85 kB
+../../out/renderer/assets/index-BEJRfUgq.css    3.29 kB
+../../out/renderer/assets/index-YrdsKw-u.js   646.31 kB
+✓ built in 836ms
+
+Running 6 tests using 1 worker
+
+  ✓  1 e2e/app.spec.ts:33:5 › opens one window with the shell spec sizes (160ms)
+  ✓  2 e2e/app.spec.ts:62:5 › renders from app://studio with a draggable 40px top bar (76ms)
+  ✓  3 e2e/app.spec.ts:77:5 › renderer has no Node.js, require or raw ipcRenderer (4ms)
+  ✓  4 e2e/app.spec.ts:118:5 › typed preload API works and main validates input (15ms)
+  ✓  5 e2e/app.spec.ts:139:5 › new windows and foreign navigation are denied (508ms)
+  ✓  6 e2e/app.spec.ts:151:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (1.2s)
+
+  6 passed (3.3s)
+exit=0
+
+## pnpm package (last 16 lines)
+✓ built in 865ms
+  • electron-builder  version=26.16.1 os=24.6.0
+  • loaded configuration  file=<tmp>/repo/apps/desktop/electron-builder.yml
+  • author is missed in the package.json  appPackageFile=<tmp>/repo/apps/desktop/package.json
+  • packageManager not detected by file, falling back to environment detection  resolvedPackageManager=pnpm detected=<tmp>/repo/apps/desktop
+  • detected workspace root for project using packageManager field  pm=pnpm config=pnpm@12.10.1 resolved=<tmp>/repo projectDir=<tmp>/repo/apps/desktop
+  • skipped dependencies rebuild  reason=npmRebuild is set to false
+  • packaging       platform=darwin arch=arm64 electron=44.4.5 appOutDir=dist/mac-arm64
+  • downloaded      label=electron progress=100%
+  • downloaded electron zip extracted successfully  output=<tmp>/repo/apps/desktop/dist/mac-arm64
+  • searching for node modules  pm=pnpm searchDir=<tmp>/repo/apps/desktop
+  • default Electron icon is used  reason=application icon is not set
+  • afterPack: node-pty spawn-helper executable for darwin-arm64
+  • executing @electron/fuses  electronPath=dist/mac-arm64/AI Developer Studio.app
+  • skipped macOS code signing  reason=identity explicitly is set to null
+exit=0

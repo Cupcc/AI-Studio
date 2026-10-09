@@ -1,0 +1,22 @@
+{
+  "note": "W2 probe of `pnpm exec electron-vite dev --remoteDebuggingPort 9333 -- --studio-user-data-dir=<tmp>` in the clean clone, attached over CDP with Playwright connectOverCDP. Output copied from the probe run; the OS-level window object was not reachable (Browser.getWindowForTarget is not implemented by Electron), so size comes from window.outerWidth/outerHeight.",
+  "url": "http://localhost:5173/",
+  "title": "AI Developer Studio",
+  "outer": [1280, 800],
+  "inner": [1280, 800],
+  "topbar": { "region": "drag", "height": 40, "top": 0, "left": 0 },
+  "cspScript": "script-src 'self' 'unsafe-inline'",
+  "cspHasUnsafeEval": false,
+  "types": {
+    "require": "undefined",
+    "process": "undefined",
+    "module": "undefined",
+    "Buffer": "undefined",
+    "global": "undefined",
+    "ipcRenderer": "undefined",
+    "electron": "undefined"
+  },
+  "studioKeys": ["app"],
+  "appKeys": ["getInfo", "onWindowFocusChanged", "ping"],
+  "minimumSizeOverCdp": "not testable (Browser.setWindowBounds / getWindowForTarget unsupported); minimum size is asserted by e2e through BrowserWindow.setSize(800, 500) -> [1024, 640]"
+}

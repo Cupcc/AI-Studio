@@ -1,0 +1,47 @@
+{
+  "mainWorld": {
+    "studioShape": {
+      "app": {
+        "getInfo": "function",
+        "ping": "function",
+        "onWindowFocusChanged": "function"
+      }
+    },
+    "frozen": {
+      "studio": true,
+      "app": true
+    },
+    "canAddMember": false,
+    "canAddFeature": false,
+    "importNodeFs": "failed:TypeError",
+    "fetchFile": "failed:TypeError",
+    "fetchRemote": "failed:TypeError",
+    "iframeViolations": [
+      "connect-src:file",
+      "connect-src:https://example.com/",
+      "frame-src:"
+    ],
+    "iframeContentAccessible": "null",
+    "bridgeFnConstructorIsMainWorldFunction": true,
+    "globalsMatching": [
+      "globalThis",
+      "ProcessingInstruction"
+    ],
+    "processTypeofIdentifier": "undefined"
+  },
+  "navigation": {
+    "openReturnsNull": true,
+    "urlAfterFileNav": "app://studio/index.html"
+  },
+  "windowCount": 1,
+  "permission": {
+    "geolocation": "denied:1",
+    "notification": "denied",
+    "clipboardRead": "denied:NotAllowedError"
+  },
+  "untrustedSender": {
+    "dataUrl": "Error invoking remote method 'app:get-info': Error: Rejected IPC app:get-info from untrusted sender",
+    "aboutBlank": "Error invoking remote method 'app:get-info': Error: Rejected IPC app:get-info from untrusted sender"
+  },
+  "trustedStillWorks": "string"
+}

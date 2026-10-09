@@ -1,0 +1,36 @@
+# W2: where the packaged smoke wrote its data (paths sanitized: <tmp>, ~)
+
+## Finding: apps/desktop/scripts/packaged-smoke.mjs (line 42) passes only --studio-smoke-output.
+Without --studio-user-data-dir a packaged app uses app.getPath('userData')
+(~/Library/Application Support/AI Developer Studio), so `pnpm smoke:packaged` as shipped writes
+studio.sqlite3 (app_meta key smoke.lastRun) and Chromium profile directories (Cache, Code Cache,
+GPUCache, Local State, ...) into the real user's application data. W1 reported the same side effect.
+The override switch exists (apps/desktop/src/main/launch-options.ts), the script just does not use it.
+
+## What W2 ran instead
+A verbatim copy of packaged-smoke.mjs kept outside the repository, with one added argument:
+
+42c42
+< ... '--args', `--studio-smoke-output=${outPath}`], {
+---
+> ... '--args', `--studio-smoke-output=${outPath}`, `--studio-user-data-dir=<tmp>/smoke userdata`], {
+
+Same launch environment (PATH=/usr/bin:/bin:/usr/sbin:/sbin, HOME/USER/LOGNAME/TMPDIR only), same
+`/usr/bin/open -n -W <app> --args ...` call. The unmodified `pnpm smoke:packaged` was deliberately
+not run, to avoid touching the real application data again.
+
+## Real application data before and after W2's runs (mtime, local time)
+~/Library/Application Support/AI Developer Studio                 2026-10-09 13:26:12  (before and after)
+~/Library/Application Support/AI Developer Studio/studio.sqlite3 2026-10-09 13:26:11  (before and after)
+~/Library/Application Support/AI Developer Studio (Dev)           2026-10-09 13:21:46  (before and after)
+=> unchanged: neither the packaged smoke, the dev-mode probe nor the e2e/probe runs touched them.
+(These timestamps predate W2 and come from W1 / main-agent runs.)
+
+## Isolated data produced by the packaged smoke (<tmp>/smoke userdata)
+files: studio.sqlite3 (+ -shm/-wal created by W2's later read-only sqlite3 inspection), Chromium profile dirs
+schema_migrations.id : 2026100901_core_app_meta
+app_meta.key         : smoke.lastRun
+tables               : app_meta, schema_migrations
+Report sqlite block  : firstRunApplied 1, secondRunApplied 0, readBack true, dbInsideUserData true
+(W1's committed report shows firstRunApplied 0 because it ran against an already-migrated real database;
+the W2 run on a fresh directory shows the migration actually being applied once and then skipped.)

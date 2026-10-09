@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "ok": true,
+  "app": {
+    "version": "0.0.0",
+    "isPackaged": true,
+    "platform": "darwin",
+    "arch": "arm64",
+    "electron": "44.4.5",
+    "node": "24.21.0"
+  },
+  "launchEnv": {
+    "pathEntryCount": 4,
+    "codexOnLaunchPath": false,
+    "claudeOnLaunchPath": false
+  },
+  "sqlite": {
+    "ok": true,
+    "driver": "node:sqlite",
+    "dbInsideUserData": true,
+    "firstRunApplied": 1,
+    "secondRunApplied": 0,
+    "readBack": true,
+    "sqliteVersion": "3.53.4"
+  },
+  "shellEnv": {
+    "ok": true,
+    "source": "login-shell",
+    "shell": "/bin/zsh",
+    "durationMs": 504,
+    "pathEntryCount": 21
+  },
+  "pty": {
+    "shell": "/bin/zsh",
+    "ok": true,
+    "receivedMarker": true,
+    "exitCode": 0,
+    "durationMs": 110
+  },
+  "executables": {
+    "codex": {
+      "found": true,
+      "path": "~/.local/bin/codex",
+      "version": "0.161.0"
+    },
+    "claude": {
+      "found": true,
+      "path": "~/.local/bin/claude",
+      "version": "2.1.295"
+    }
+  },
+  "renderer": {
+    "origin": "app://studio",
+    "topBarRendered": true,
+    "nodeGlobalsAbsent": true,
+    "preloadApiWorks": true,
+    "ok": true
+  }
+}

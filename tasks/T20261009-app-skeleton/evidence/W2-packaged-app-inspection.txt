@@ -1,0 +1,36 @@
+# W2 inspection of the packaged app produced in the clean clone (paths sanitized).
+## Bundle
+dev.aistudio.desktop
+AI Developer Studio
+0.0.0
+bundle size: 309M
+
+## codesign -dv (unsigned build keeps Electron's ad-hoc linker signature)
+Executable=<tmp>/repo/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/MacOS/AI Developer Studio
+Identifier=Electron
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=392 flags=0x20002(adhoc,linker-signed) hashes=9+0 location=embedded
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none
+
+## Electron fuses (@electron/fuses read)
+Analyzing app: AI Developer Studio.app
+Fuse Version: v1
+  RunAsNode is Disabled
+  EnableCookieEncryption is Enabled
+  EnableNodeOptionsEnvironmentVariable is Disabled
+  EnableNodeCliInspectArguments is Disabled
+  EnableEmbeddedAsarIntegrityValidation is Disabled
+  OnlyLoadAppFromAsar is Enabled
+  LoadBrowserProcessSpecificV8Snapshot is Disabled
+  GrantFileProtocolExtraPrivileges is Disabled
+  undefined is Enabled
+
+## node-pty files outside app.asar (app.asar.unpacked)
+-rw-r--r-- 85496 pty.node
+-rwxr-xr-x 50480 spawn-helper
+prebuilds present: darwin-arm64 darwin-x64 
+app.asar size: 1.0M
