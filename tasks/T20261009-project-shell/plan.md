@@ -13,9 +13,8 @@
 | ID | 职责 | 写入范围 | 产出 | 依赖 | 状态 |
 |---|---|---|---|---|---|
 | W1 | spec 草稿（Sonnet 5.5 high） | `specs/project/spec.md`、`specs/navigation/spec.md` | spec 草稿与未决问题 | — | done |
-
-| W2 | 壳层实现（Opus 5.5 high） | `apps/desktop/src/renderer/src/app/**`、`apps/desktop/src/renderer/src/styles/tokens.css`、`apps/desktop/src/renderer/src/features/{project,navigation}/**`、`apps/desktop/src/{shared,main}/ipc/project.ts`、`apps/desktop/src/shared/project/**`、`apps/desktop/src/main/services/project/**`、`apps/desktop/src/main/menu/**`（新建）、project 迁移文件、`apps/desktop/e2e/project.spec.ts`；共享登记文件各加一行；`src/main/index.ts` 仅为菜单与窗口关闭 / 退出流程做最小改动；本 task 的 `evidence/W2-*` | 壳层实现与测试 | W1 | in_progress |
-| W3 | 验收（Sonnet 5.5 xhigh） | 本 task 的 `acceptance.md`、`evidence/W3-*` | 验收记录 | W2 | todo |
+| W2 | 壳层实现（GPT-6.1 Sol xhigh） | `apps/desktop/src/renderer/src/app/**`、`apps/desktop/src/renderer/src/styles/tokens.css`、`apps/desktop/src/renderer/src/features/{project,navigation}/**`、`apps/desktop/src/{shared,main}/ipc/project.ts`、`apps/desktop/src/shared/project/**`、`apps/desktop/src/main/services/project/**`、`apps/desktop/src/main/menu/**`（新建）、project 迁移文件、`apps/desktop/e2e/project.spec.ts`；共享登记文件各加一行；`src/main/index.ts` 仅为菜单与窗口关闭 / 退出流程做最小改动；本 task 的 `evidence/W2-*` | 壳层实现与测试 | W1 | delivered |
+| W3 | 验收（GPT-6.1 Sol high） | 本 task 的 `acceptance.md`、`evidence/W3-*` | 验收记录 | W2 | in_progress |
 
 ## 进度与决定
 
@@ -29,3 +28,4 @@
 - 2026-10-09 W2 范围补充 `features/app-info/app-info.test.tsx` 中的 app-only mock 类型，以适配扩展后的 StudioApi；不扩展产品功能。启动页使用产品内容，骨架技术信息不再作为用户首页。
 - 2026-10-09 W2 主进程 / 共享阶段提交 `598ab87` 已合并：Project 路径身份、持久化、共享状态规则、关闭 IPC、菜单与退出接口；worker 报告类型检查和 66 项单测通过。界面、既有测试适配和截图仍由 W2 后续提交；Session 后端可基于该接口开工。
 - 2026-10-09 W2 界面阶段 `b64065e` 已由 `4ddc59e` 合并：worker 报告 74 项单测、9 项 Electron E2E 通过，两种模式三个宽度截图已落盘。开始独立 W3 验收；Session / 工具 / Preview 仍按范围留槽位。
+- 2026-10-09 W3 在独立 worktree 复核 frozen install、全 workspace typecheck、desktop 80 项 / Adapter 175 项单测及 9 项 Electron E2E 通过，另覆盖不可读目录；1024 / 1280 / 1440 两种模式新截图无截断溢出。正式结果等待 W3 验收记录，不将 task 标为 done。

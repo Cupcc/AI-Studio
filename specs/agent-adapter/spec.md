@@ -14,7 +14,7 @@
 
 > 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
 >
-> 本文的类型名、方法名与 `packages/agent-adapter/src` 一致；字段的完整定义以代码为准，本文只写行为规则与约束。第 2.11、2.12 节的 Provider 细节由主 Agent 依据 W2、W3 报告补写。
+> 本文的类型名、方法名与 `packages/agent-adapter/src` 一致；字段的完整定义以代码为准，本文只写行为规则与约束。第 2.11、2.12 节记录已实现的 Provider 行为，并分别列明模拟测试与真实 CLI 验证的边界。
 
 ## 1. 职责与边界
 
@@ -37,7 +37,7 @@
 
 1. 独立 workspace 包 `@ai-studio/agent-adapter`，ESM + 严格 TypeScript，不引用 Electron；在 Electron 主进程的 Node 中运行，以 Node 22 为 API 基线（`@types/node` 22 用于类型检查）。
 2. 依赖精确锁定：`@anthropic-ai/claude-agent-sdk` 为 06 第 2 节验证过的 `0.3.293`。
-3. 入口：`.`（接口与核心）、`./codex`、`./claude`（各 Provider，W2、W3 实现）、`./testing`（测试工具）。根入口不加载 Claude SDK。
+3. 入口：`.`（接口与核心）、`./codex`（`CodexProvider`）、`./claude`（`ClaudeProvider` / `createClaudeProvider`）、`./testing`（测试工具）。根入口不加载 Claude SDK。
 4. 测试：`test` 只跑单元测试，不启动真实 CLI、不调用模型；`test:integration` 只有设置 `AI_STUDIO_REAL_CLI=1` 时运行真实 CLI 套件，否则跳过（任务 task.md 范围，2026-10-09 确认）。真实测试项目目录在系统临时目录下创建（`createScratchProject`），不在仓库内（`tasks/AGENTS.md` 证据规则）。
 5. 环境：本模块从不隐式读取 `process.env`。宿主传入 `ProviderEnvironment.env`（桌面应用解析出的登录 Shell 环境，06 第 6 节；app-skeleton task）及可选的显式可执行文件路径。
 
@@ -81,7 +81,7 @@
 3. 解除：用户答复后发出 `input.resolved`（`answered`，含答复，保密问题的文字以 `[secret]` 代替）；CLI 自行撤回（如 Codex `serverRequest/resolved`）发出 `cancelled` / `native_resolved`；回合结束、Stop、Runtime 退出、dispose 分别以 `turn_ended`、`turn_stopping`、`runtime_exited`、`disposed` 取消。仅查看不解除（FR-STATE-002）。
 4. 输入框回复 `replyWithText(text)`（I-Q2，2026-10-09 确认）作用于当前回合全部未答复请求：
    - 恰好一个未答复请求，且原生可以把文字作为答案（`acceptsFreeTextAnswer`：只含一个问题且该问题接受自由文本的提问）→ 文字作为该请求的答案，`input.resolved` 为 `answered` 且 `viaText = true`；
-   - 其他情况 → 所有未答复请求被拒绝并以该文字为说明，Agent 收到文字后继续当前回合；`input.resolved` 为 `declined_with_text`。驱动方法 `declineInputsWithText` 负责原生实现：Claude 用 `canUseTool` 的 deny 说明；Codex 拒绝后由 Adapter 把文字交给 Agent，具体机制由 W2 验证（A-Q4）。
+   - 其他情况 → 所有未答复请求被拒绝并以该文字为说明，Agent 收到文字后继续当前回合；`input.resolved` 为 `declined_with_text`。驱动方法 `declineInputsWithText` 负责原生实现：Claude 用 `canUseTool` 的 deny 说明；Codex 先取得当前回合 `turn/steer` 的接收回执，再拒绝请求（第 2.11 节、A-Q4）。
    - 没有未答复请求时以 `invalid_state` 拒绝，上层改用 `sendUserInput`。
    - 静态能力 `capabilities.freeTextAnswers`（questions / approvals）供输入区预判；逐个请求以 `acceptsFreeTextAnswer` 为准。
 5. 回合已结束、Stop 进行中或 Session 关闭时到达的新请求不予接受（sink 返回 `undefined`），驱动须立即在原生侧拒绝 / 取消，避免 CLI 一直等待。
@@ -138,24 +138,28 @@
 
 ### 2.11 Codex Provider
 
-> 待主 Agent 依据 W2 报告补写。以下为 W1 记录的已知输入，供 W2 实现时参考，不是结论。
+实现与证据：[Provider 说明](../../packages/agent-adapter/src/codex/README.md)、[W2 实施记录](../../tasks/T20261009-agent-adapter/evidence/W2-codex-provider.md)。本节为 2026-10-09 实现记录，版本策略仍按 A-Q1 推荐，待人工审阅。
 
-- 本机 `codex app-server --listen stdio://`，消息不带 `jsonrpc` 字段（`JsonRpcPeer` 默认如此）；授权与 `requestUserInput` 是服务端请求，必须答复（06 第 3 节）。
-- 0.161.0 生成的协议中：`serverRequest/resolved` 通知可映射为原生撤回；`item/commandExecution/requestApproval` 带有序的 `availableDecisions`（部分为对象形式），应原样转为选项；`commandExecution` 条目带 App Server `processId` 与 `commandActions`（read / listFiles / search / unknown，可映射活动动词）；`Turn` 带 `durationMs` 与 `error.codexErrorInfo`（含 `unauthorized`、`usageLimitExceeded`、`rateLimitExceeded`、`httpConnectionFailed` 等，可映射第 2.7 节错误码）；`error` 通知带 `willRetry`；`thread/name/updated` 可作为原生标题来源；`turn/steer` 与 `thread/settings/update`（`model`）可用于运行中输入与模型切换。
-- Stop：`cleanupAfterInterrupt` 用 `thread/backgroundTerminals/terminate`（`processId`，不是系统 PID）精确终止本轮命令，并以 `waitForExit` 等系统探测取得退出证据；`clean` 只在范围明确时使用（04 第 4 节第 3、4 条）。`recoverRuntime` 通过 `RuntimeSlot.replace()` 实现。
-- `replyWithText` 的拒绝路径：拒绝后如何把文字交给 Agent（例如 `turn/steer`）待验证（A-Q4）。
+1. 每 Session 启动本机 `codex app-server --listen stdio://`，以共享 `JsonRpcPeer` 连接，消息缺省不带 `jsonrpc` 字段。`initialize` 声明实验能力后发送 `initialized`；协议类型由 CLI `0.161.0` 生成，206 份传递类型及原始内容摘要保存在 `src/codex/protocol/`。模型、权限与配置只传调用方明确覆盖的项，不读取或改写用户配置。
+2. 新建使用 `thread/start`，恢复使用 `thread/resume` 并要求返回原 ID；恢复失败不创建新 Thread。文本增量和完整条目按同一 item ID 更新；命令的 `commandActions` 映射活动，`thread/name/updated` 报告原生标题。`turn/completed` 是权威终态；`error` 通知只作诊断，避免原生重试期间提前结束。
+3. 命令、文件、权限授权与问题均映射为第 2.5 节的请求，保留原生选项顺序及对象形式决定。`serverRequest/resolved` 同时通过 `dismissIncoming(id)` 无响应地释放 JSON-RPC 记录，并解除 Session 等待；旧回调不可再答复。未知请求明确拒绝，其他 Thread 的通知不影响当前 Session。
+4. I-Q2 的拒绝路径先以当前 `expectedTurnId` 调用 `turn/steer`，确认文字已被同一回合接收，再对所有待处理请求答复 `decline`。交付失败时保留原请求可回答，不发新 `turn/start`。真实场景已确认同一回合回复指定标记且被拒绝命令未执行；这不开放一般 Running 中追加（`inputWhileRunning = none`）。
+5. 模型目录分页使用 `model/list`，不创建 Thread。模型选择保留到下一轮 `turn/start`；重置为 `null` 时读取原生配置的默认模型。错误依据 `codexErrorInfo` 归一，认证 / 配额 / 网络错误有模拟覆盖；可用性只保留粗粒度登录结果。
+6. Stop 以当前命令 item / App Server `processId` 调用 `thread/backgroundTerminals/terminate`；`processId` 从不作为系统 PID。生成类型虽含 `osPid`，锁定的 `0.161.0` 实现实际返回 `null`（源码位置见 W2 证据），不能依赖该字段取得退出证明。
+7. 提交前保存后台命令与系统后代身份基线，运行中和 Stop 前继续采样。有 `osPid` 时验证其 Runtime 归属；没有时保守跟踪本轮新出现的后代集合。原生终态后终止对应命令，并以 PID + 启动时间确认已观察目标均退出。没有身份、映射歧义、接口错误或无法确认退出时，按第 2.6 节先确认旧 Runtime 退出，再恢复原 ID；不重放输入。不会调用 Thread 级 `clean` 替代本轮清理。
+8. 验证边界：六个真实 Astra high 回合确认流式、跨 Runtime 原 ID 恢复及上下文、I-Q2 同轮文字拒绝和 Runtime 兜底恢复。`osPid:null` 修正版已用真实 Node / 系统进程 fixture 证明本轮两层进程退出、先前服务保留，但六回合预算用完后未再对真实 Codex 重测，因此精确 Stop 真实验收仍未通过。真实第二模型切换、活动命令下宿主崩溃、未观察即脱离的后代与外部 MCP 进程树仍待验证；两次真实套件失败记录保留在 W2 证据。
 
 ### 2.12 Claude Provider
 
-> 待主 Agent 依据 W3 报告补写。以下为 W1 记录的已知输入，供 W3 实现时参考，不是结论。
+实现与证据：[W3 实施记录](../../tasks/T20261009-agent-adapter/evidence/W3-claude-provider.md)。以下行为已落入 SDK 模拟测试；真实成功回合的限制见第 7 项。
 
-- SDK `0.3.293`，`pathToClaudeCodeExecutable` 指向本机 CLI；`spawnClaudeCodeProcess` 返回 `RuntimeProcess.processLike()`，使 Runtime 仍在独立进程组中并纳入退出验证；SDK 传入的 `env` 需原样使用（含协议所需变量）。
-- 人类输入的 `SDKUserMessage.origin` 应标为 `{ kind: 'human' }`；缺省会被视为来源不明（project-view 调研，2026-10-09）。
-- `settingSources` 缺省即加载全部（与 CLI 默认一致，CLAUDE.md 需要 `project`）；`systemPrompt` 缺省时是否等同 Claude Code 预设未在类型中说明，需 W3 核实，复用原生能力时考虑 `{ type: 'preset', preset: 'claude_code' }`（A-Q5）。
-- 成功终态的判断：`result.subtype = success` 且 `is_error = false`；`success` 也可能带 `is_error = true`（API 错误），应映射为失败。取消后的 `error_during_execution` 由核心依据取消意图映射为 `interrupted`。
-- 原生 ID：`system/init` 的 `session_id` 经 `sink.nativeSessionId` 报告；SDK 也支持 `sessionId` 选项预先指定 UUID，是否采用由 W3 决定（预先指定的 ID 在首条消息被处理前并不存在于原生历史中）。
-- 模型目录：用不推送任何消息、`persistSession: false` 的探测 Query 调用 `supportedModels()` 后关闭，满足“读取目录不创建原生会话”；需以集成测试确认没有写入会话文件。
-- `interrupt()` 的回执包含 `still_queued`；排队消息的处理未验证（06 第 5 节；I-Q3）。
+1. 锁定 SDK `0.3.293`，`pathToClaudeCodeExecutable` 指向宿主发现的本机 CLI。每 Session 独立 Query / Runtime；同步 `spawnClaudeCodeProcess` 回调通过 stdio 缓冲桥接共享异步 `RuntimeProcess.start`，保留 SDK 给出的协议环境，Runtime 仍使用独立进程组与统一退出验证。
+2. 按 A-Q5 推荐加载 user / project / local `settingSources`，使用 `claude_code` 系统预设，不追加产品指令，不设产品级默认模型或权限。该推荐尚待人工确认，真实 Rule / Skill 加载未验证。用户消息标记 `origin: human`；用户授权决定标记 SDK 的 `user_temporary` / `user_permanent` / `user_reject`。
+3. `system/init.session_id` 到达后报告原生 ID，不预造已存在的原生会话。恢复先按原 ID 初始化，CLI 的最终校验可能延后到首次发送；ID 不匹配或懒加载恢复失败均关闭，不静默新建。
+4. `message_start` 的 message ID 与内容 index 组成稳定条目 ID，完整 assistant 消息替换 partial 内容，消息及结果 UUID 去重。只有 `result.subtype = success && is_error = false` 成功，主动取消按核心取消意图判断。SDK 给出 `user_message_uuid` 时关联原回合，未给关联字段的新异步帧只能回退到当前回合，不能承诺识别任意旧生产者的乱序流。
+5. `canUseTool` 保留原生说明、工具 ID、建议权限更新与选项顺序；只在原生允许时提供持久授权。`AskUserQuestion` 按原题目与选项回写答案，SDK abort 撤回原请求。输入框拒绝以 `deny.message` 交付文字；Stop / 终态 / dispose 释放所有等待。结构化附件当前前置返回 `unsupported`，不宣称已支持。
+6. Running / Stopping 中改模型先暂存，下一轮提交前调用 `Query.setModel`；空闲时立即设置。Provider 目录探测不发送消息，使用 `persistSession:false` 调用 `supportedModels()` 后关闭。Stop 前后按本轮后代身份取得退出证明；`still_queued` 若仍含本轮输入，或清理无法确认，走旧 Runtime 退出后原 ID 恢复。没有原生 ID 时不以新建代替恢复。
+7. 验证边界：27 项 Claude 模拟测试覆盖上述行为；本机 CLI `2.1.295` 的 executable / version / login 与模型目录探测通过，目录读取前后 transcript 文件集合无新增。真实成功流式、Rule / Skill、恢复、模型切换、命令 Stop / 继续被 session quota（`rate_limit` / `quota_exceeded`）阻断，没有通过。不得用模拟结果代替 AC-02 / AC-03 / AC-05 的真实验收。采样前已脱离的后代、外部 MCP 进程树与宿主崩溃清理仍未验证。
 
 ## 3. 状态与数据
 
@@ -281,7 +285,7 @@ Provider 不直接实现 `AgentSession`，而是为每个 Session 提供一个�
 | `nativeTitle(title)`（可选） | `session.title` + `capabilities.nativeTitle` | — |
 | `capabilities`：Running 中提交、自由文本答复、原生名称 | `inputWhileRunning`、`freeTextAnswers`、`nativeTitle` | 命名不同（input spec 用 `queueWhileRunning`、`freeTextAnswer`）；`inputWhileRunning` 目前只有“追加到当前回合”（steer）语义，Claude 式排队为独立回合尚未建模（I-Q3） |
 | 可用性：已安装、版本、已登录、原因；版本不受支持 | 一致，`unsupported_version` 为第三种不可用原因 | 是否采用见 C-Q5 / A-Q1 |
-| `listModels` 不创建原生会话 | 一致 | Claude 方案待 W3 验证 |
+| `listModels` 不创建原生会话 | 一致 | Claude 真实目录探测未新增 transcript，见第 2.12 节 |
 | `shutdownAll()` 不遗留子进程 | `ProviderRegistry.shutdownAll()` | 宿主崩溃场景见 A-Q3 |
 | 事件携带 Session 句柄与 turn ID | 信封 `sessionId`；回合事件 `turnId` | Session 级事件（原生 ID、标题、Runtime、模型）无 turn ID |
 | 轮记录中的实际模型（第 3.3 节） | `turn.completed.model`（CLI 提供时） | — |
@@ -292,6 +296,6 @@ Provider 不直接实现 `AgentSession`，而是为每个 Session 提供一个�
 |---|---|---|---|
 | A-Q1 | CLI 版本策略：本机 Claude Code 已从预检的 2.1.294 升到 2.1.295。不在已验证集合内的版本是标为“未验证但可用”，还是作为“版本不受支持”禁用？Codex 的实验接口（后台命令清理）要求锁定版本（04 第 4 节第 2 条），版本不一致时 Stop 应如何处理？ | 已验证版本 `tested`；其他版本报告 `untested` 但仍可用，并在 Stop 时若实验接口不可用走兜底（04 第 4 节第 6 条）；只有已知不兼容（例如低于最低版本、协议握手失败）才报告 `unsupported_version`。与 chat spec C-Q5 一并确认 | |
 | A-Q2 | 运行中发送（I-Q3）若开启：Codex `turn/steer` 是追加到当前回合，Claude 的排队消息会形成独立的回合与结果。是否需要在接口中区分“追加”与“排队”？ | 待 I-Q3 确认后再扩展 `inputWhileRunning`；本阶段两个 Provider 报告 `none` | |
-| A-Q3 | 宿主进程异常崩溃时，独立进程组中的 Runtime 不会随之收到挂断信号；它们能否在 stdin 关闭后自行退出、其工具子进程是否随之结束，均未验证。是否需要应用启动时清理上次遗留的 Runtime（例如记录 PID 与启动时间，下次启动按身份终止）？ | 建议需要，并由 W2、W3 先验证 stdin 关闭后的退出行为；正常退出由 `shutdownAll` 覆盖。关联 session spec 第 2.14 节第 3 条、S-Q7 | |
-| A-Q4 | I-Q2 拒绝路径在 Codex 上如何把文字交给 Agent（例如拒绝后 `turn/steer`），以及无法在当前回合交付时怎么办？ | 由 W2 验证后补入第 2.11 节；若只能在当前回合结束后作为新消息发送，需另行确认（会产生新的回合） | |
-| A-Q5 | Claude Provider 的原生配置加载边界：`settingSources` 缺省加载全部；`systemPrompt` 是否使用 Claude Code 预设？06 第 6 节“原生 Skill / Rule / Context 加载”尚未校验 | 采用与 CLI 一致的默认：不限制 `settingSources`，`systemPrompt` 用 `claude_code` 预设，不追加产品指令；由 W3 核实缺省行为并以集成测试确认 | |
+| A-Q3 | 宿主进程异常崩溃时，是否需要启动时按 PID 与启动时间清理上次遗留 Runtime？独立进程组不会随宿主收到挂断信号；当前仅确认空闲 Codex App Server 在 stdin EOF 后退出，活动命令与 Claude 场景未验证 | 建议需要；正常退出由 `shutdownAll` 覆盖。宿主异常退出与未观察到的脱离后代需单独验证，不能以空闲 EOF 结果替代。关联 session spec 第 2.14 节第 3 条、S-Q7 | |
+| A-Q4 | I-Q2 拒绝路径如何在 Codex 当前回合交付文字？ | 技术验证已完成（2026-10-09）：先 `turn/steer` 回执，再拒绝原请求，失败保留原请求；真实证据见第 2.11 节。保持已确认 I-Q2 的同轮语义，无新增产品选择 | |
+| A-Q5 | Claude Provider 的原生配置加载边界：`settingSources` 缺省加载全部；`systemPrompt` 是否使用 Claude Code 预设？06 第 6 节“原生 Skill / Rule / Context 加载”尚未校验 | 已按推荐实现不限制 `settingSources`、使用 `claude_code` 预设且不追加产品指令；真实 Rule / Skill 验证受配额阻断，见第 2.12 节 | |

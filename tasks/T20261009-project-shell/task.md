@@ -1,6 +1,6 @@
 ---
 id: T20261009-project-shell
-status: in_progress
+status: verifying
 fr: [FR-PROJ-001, FR-PROJ-002, FR-PROJ-003, FR-NAV-001, FR-NAV-002]
 ac: [AC-01]
 specs: [specs/project/spec.md, specs/navigation/spec.md]
