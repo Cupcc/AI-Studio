@@ -1,0 +1,109 @@
+# W1 unit test run: pnpm --filter @ai-studio/agent-adapter exec vitest run --reporter=verbose
+# 2026-10-09, node v26.10.0, vitest 5.0.3, typescript 7.0.2. No real CLI processes, no model calls.
+# Process tests spawn only short-lived node / sleep children created by the tests.
+ RUN  v5.0.3 <worktree>/packages/agent-adapter
+ ✓ test/core/emitter.test.ts > EventStream > delivers in order and queues re-entrant emits until the current event reached every listener
+ ✓ test/core/emitter.test.ts > EventStream > isolates listener exceptions
+ ✓ test/core/emitter.test.ts > EventStream > supports unsubscribe, once and clean dispose
+ ✓ test/core/emitter.test.ts > EventStream > does not deliver to a listener removed during dispatch
+ ✓ test/core/emitter.test.ts > TypedEmitter > routes by event type and disposes all channels
+ ✓ test/core/misc.test.ts > AsyncQueue > delivers pushed values to waiting and later readers, then ends
+ ✓ test/core/misc.test.ts > AsyncQueue > rejects pending readers on fail
+ ✓ test/core/misc.test.ts > withTimeout > aborts the work signal and rejects with a timeout AdapterError
+ ✓ test/core/misc.test.ts > redaction > removes tokens, keys and emails
+ ✓ test/core/misc.test.ts > availability summary > reports not installed, not logged in, unsupported version and available separately
+ ✓ test/core/misc.test.ts > errors and helpers > normalizes thrown values
+ ✓ test/core/misc.test.ts > errors and helpers > decides which requests take composer text as an answer
+ ✓ test/core/provider-contract.test.ts > provider contract via FakeProvider > retry after a runtime crash: resume the same native id, then send the message again (S-Q2)
+ ✓ test/core/provider-contract.test.ts > provider contract via FakeProvider > reuses a live session and creates only when no native id exists
+ ✓ test/core/provider-contract.test.ts > provider contract via FakeProvider > rejects resume with resume_failed and never creates a new native session
+ ✓ test/core/provider-contract.test.ts > provider contract via FakeProvider > shutdownAll disposes every live session of every provider
+ ✓ test/core/provider-contract.test.ts > provider contract via FakeProvider > reports availability through the shared summary
+ ✓ test/core/runtime-slot.test.ts > RuntimeSlot > starts once and replaces only after the old runtime exit is confirmed
+ ✓ test/core/runtime-slot.test.ts > RuntimeSlot > refuses to start a parallel runtime when the old one is not proven gone
+ ✓ test/core/runtime-slot.test.ts > RuntimeSlot > serializes concurrent replace calls
+ ✓ test/core/exec.test.ts > resolveExecutable > finds an executable on the supplied PATH only, never on process.env implicitly
+ ✓ test/core/exec.test.ts > resolveExecutable > honours an explicit path and rejects non-executables
+ ✓ test/core/exec.test.ts > execBounded > captures output with the supplied environment
+ ✓ test/core/process-probe.test.ts > parsePsOutput > parses lstart columns and keeps argument spacing
+ ✓ test/core/process-probe.test.ts > parsePsOutput > builds descendant trees and skips zombies
+ ✓ test/core/line-transport.test.ts > LineSplitter > splits across chunk boundaries, strips CR and keeps multi-byte characters intact
+ ✓ test/core/line-transport.test.ts > LineSplitter > reports overflow for unterminated lines beyond the limit
+ ✓ test/core/line-transport.test.ts > createStreamLineTransport > sends newline-terminated lines and closes when the input ends
+ ✓ test/core/line-transport.test.ts > createStreamLineTransport > closes with a protocol error when a line is too long
+ ✓ test/core/session-controller.test.ts > SessionController: turns > emits turn.started on submit, before the CLI acknowledges (FR-STATE-001)
+ ✓ test/core/session-controller.test.ts > SessionController: turns > rejects submissions while running and empty input
+ ✓ test/core/session-controller.test.ts > SessionController: turns > steers into the running turn when the provider supports it
+ ✓ test/core/session-controller.test.ts > SessionController: turns > streams deltas, completes the message without duplicating text, and reports duration
+ ✓ test/core/session-controller.test.ts > SessionController: turns > fills the final text from deltas when the native completion omits it
+ ✓ test/core/session-controller.test.ts > SessionController: turns > reports failures with a normalized error and stays usable
+ ✓ test/core/session-controller.test.ts > SessionController: turns > fails the turn when native submission rejects
+ ✓ test/core/session-controller.test.ts > SessionController: turns > closes open items when a turn ends without their completion
+ ✓ test/core/session-controller.test.ts > SessionController: turns > drops late events after the terminal state without resurrecting the turn
+ ✓ test/core/session-controller.test.ts > SessionController: turns > applies model changes to subsequent turns and validates them
+ ✓ test/core/session-controller.test.ts > SessionController: turns > reports a native title once per change
+ ✓ test/core/session-controller.test.ts > SessionController: input requests > handles concurrent requests independently and validates answers
+ ✓ test/core/session-controller.test.ts > SessionController: input requests > refuses a second answer while the first is in flight and restores the request when the driver fails
+ ✓ test/core/session-controller.test.ts > SessionController: input requests > validates question answers and redacts secret free text in events
+ ✓ test/core/session-controller.test.ts > SessionController: input requests > reports native withdrawal and cancels leftovers when the turn ends
+ ✓ test/core/session-controller.test.ts > SessionController: input requests > replyWithText (I-Q2) > answers the single pending free-text question with the text
+ ✓ test/core/session-controller.test.ts > SessionController: input requests > replyWithText (I-Q2) > declines every pending request with the text otherwise
+ ✓ test/core/session-controller.test.ts > SessionController: input requests > replyWithText (I-Q2) > declines a single approval or a multi-question request, and rejects when nothing is pending
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > interrupts, maps the native end to interrupted without error, and resumes accepting input
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > never reports a user Stop as an error even when the native result is an error (Claude error_during_execution)
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > is idempotent, pauses submissions and is a no-op without a turn
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > cancels pending requests at stop time, hands them to interruptTurn and rejects new ones
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > runs cleanup after the native terminal state and reports confirmed exit evidence
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > falls back to runtime recovery on interrupt_failed and keeps the session usable
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > correlates responses to requests, also out of order
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > rejects with JsonRpcRemoteError on error responses
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > times out, drops the pending entry and reports a late response
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > delivers notifications in both directions
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > tracks server-initiated requests until answered exactly once
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > answers -32601 when no request handler is registered
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > fails all pending requests when the transport closes
+ ✓ test/core/turn-guard.test.ts > TurnGuard > runs idle → running → idle and refuses a second submission while running
+ ✓ test/core/turn-guard.test.ts > TurnGuard > records stop intent once; duplicate stop is idempotent; submissions are paused while stopping
+ ✓ test/core/turn-guard.test.ts > TurnGuard > accepts one native terminal state and classifies later ones as duplicate or late
+ ✓ test/core/turn-guard.test.ts > TurnGuard > maps native turn ids, also after the turn finished
+ ✓ test/core/turn-guard.test.ts > TurnGuard > stays closed after close, even when the current turn is finished afterwards
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > reports malformed lines without closing
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > omits the jsonrpc field by default and adds it when configured
+ ✓ test/core/json-rpc.test.ts > JsonRpcPeer > honours abort signals
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > falls back to runtime recovery on terminal_timeout and keeps the session usable
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > falls back to runtime recovery on cleanup_unsupported and keeps the session usable
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > falls back to runtime recovery on cleanup_failed and keeps the session usable
+ ✓ test/core/runtime-process.test.ts > RuntimeProcess > runs in its own process group with line-framed stdio and bounded stderr
+ ✓ test/core/runtime-process.test.ts > RuntimeProcess > maps a missing executable to not_installed
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > falls back to runtime recovery on cleanup_timeout and keeps the session usable
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > closes the session with stop_cleanup_failed when cleanup fails and recovery is unavailable
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > closes the session when recovery cannot resume the same native session
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > treats a native completion that wins the race as completed and skips cleanup
+ ✓ test/core/session-controller.test.ts > SessionController: Stop (04 §4) > waits for a slow native submission before interrupting
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > fails the turn and closes the session when the runtime crashes during a turn
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > closes without a turn error when an idle runtime exits
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > treats a runtime exit during Stop as the terminal state and recovers
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > ignores exits of superseded runtime generations
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > accepts a native id that arrives after the first input and never lets it change
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > rejects a resumed session that binds to a different native id
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > closes the session when the first turn reveals a failed resume
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > fails the turn on a fatal error, but keeps a Stop in flight as interrupted
+ ✓ test/core/session-controller.test.ts > SessionController: runtime exit, native ids, isolation > isolates sessions: a crash in one does not affect another
+ ✓ test/core/session-controller.test.ts > SessionController: subscription and dispose > buffers events emitted before the first subscription
+ ✓ test/core/session-controller.test.ts > SessionController: subscription and dispose > isolates listener exceptions from the state machine
+ ✓ test/core/session-controller.test.ts > SessionController: subscription and dispose > dispose stops an active turn, terminates the driver once and closes
+ ✓ test/core/session-controller.test.ts > SessionController: subscription and dispose > dispose finalizes the turn even when the Stop flow hangs
+ ✓ test/core/exec.test.ts > execBounded > kills the process group on timeout and truncates large output
+ ✓ test/core/exec.test.ts > execBounded > maps a missing file to not_installed
+ ✓ test/core/exec.test.ts > versions > parses and compares dotted versions
+ ✓ test/core/runtime-process.test.ts > RuntimeProcess > detects an unexpected exit (crash) and keeps the stderr tail
+ ✓ test/core/process-probe.test.ts > process probing with a real child > lists a short-lived sleep child, then proves it exited after a signal
+ ✓ test/core/process-probe.test.ts > process probing with a real child > never matches a reused pid with a different start time
+ ✓ test/core/runtime-process.test.ts > RuntimeProcess > escalates to SIGKILL and kills recorded descendants that left the process group
+ ✓ test/core/runtime-process.test.ts > RuntimeProcess > isolates crashes: killing one runtime leaves another working
+ ✓ test/core/runtime-process.test.ts > RuntimeProcess > terminate is idempotent and safe after exit
+ ✓ test/core/runtime-process.test.ts > RuntimeProcess > exposes a ChildProcess-like view whose kill marks the exit as expected
+ Test Files  11 passed (11)
+      Tests  101 passed (101)
+   Start at  13:31:38
+   Duration  1.51s (tests 73%, transform 21%, import 5%, worker 1%)
