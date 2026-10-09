@@ -32,6 +32,7 @@ interface Entry {
   turn?: ActiveTurn
   secrets: Set<string>
   secretComposer?: boolean
+  replyEvents?: { generation: number; events: AdapterEvent[] }
 }
 
 export interface SessionServiceOptions {
@@ -261,6 +262,10 @@ export class SessionService implements MainSessionPort {
 
   private onEvent(entry: Entry, event: AdapterEvent): void {
     if (this.disposed) return
+    if (entry.replyEvents?.generation === entry.generation) {
+      entry.replyEvents.events.push(event)
+      return
+    }
     if (event.type === 'session.native_id') { this.bindNativeId(entry, event.nativeSessionId); return }
     if (event.type === 'session.title') {
       if (entry.summary.titleSource !== 'user' && event.title.trim()) {
@@ -276,9 +281,19 @@ export class SessionService implements MainSessionPort {
       return
     }
     if (event.type === 'runtime.exited') {
-      if (entry.summary.stopping) return // Adapter may recover this same native conversation.
-      if (entry.turn) this.finish(entry, 'failed', { code: 'runtime_crashed', message: 'CLI 进程意外退出', native: { source: 'runtime', detail: { code: event.code, signal: event.signal } } })
-      this.retire(entry)
+      if (entry.summary.stopping || event.expected) return // Adapter may replace its runtime while preserving the native session.
+      const turn = entry.turn
+      const generation = entry.generation
+      // Adapter follows runtime.exited with the normalized terminal + native diagnostic.
+      // Prefer that error; retain a fallback if a Provider fails to issue its terminal.
+      queueMicrotask(() => {
+        if (this.disposed || entry.generation !== generation) return
+        if (turn && entry.turn === turn) this.finish(entry, 'failed', {
+          code: 'runtime_crashed', message: 'CLI 进程意外退出',
+          native: { source: 'runtime', detail: { code: event.code, signal: event.signal, stderrTail: event.stderrTail } }
+        })
+        this.retire(entry)
+      })
       return
     }
     if (event.type === 'session.error') {
@@ -515,14 +530,25 @@ export class SessionService implements MainSessionPort {
     turn.answering = true
     const secret = [...turn.pending.values()].some(item => this.secretRequest(item.request))
     if (secret) entry.secrets.add(text)
-    // Append before invoking: the reply can synchronously release the turn and complete it.
-    this.append(entry, { kind: 'user_message', text: secret ? '[已隐藏]' : text, contextItems: [], ...(secret ? { redacted: true } : {}) })
-    entry.summary.lastUserMessageAt = this.now()
-    this.clearComposer(entry)
-    this.publish(entry)
-    try { await entry.runtime.replyWithText(text) }
+    const buffer = { generation: entry.generation, events: [] as AdapterEvent[] }
+    entry.replyEvents = buffer
+    try {
+      await entry.runtime.replyWithText(text)
+      // Input can release a terminal before its Promise settles. Preserve transcript order
+      // while only committing accepted user text; rejection leaves the composer intact.
+      if (entry.turn === turn && !entry.summary.stopping) {
+        this.append(entry, { kind: 'user_message', text: secret ? '[已隐藏]' : text, contextItems: [], ...(secret ? { redacted: true } : {}) })
+        entry.summary.lastUserMessageAt = this.now()
+        this.clearComposer(entry)
+        this.publish(entry)
+      }
+    }
     catch (error) { throw new Error(this.scrub(entry, toErrorInfo(error).message)) }
-    finally { turn.answering = false }
+    finally {
+      if (entry.replyEvents === buffer) entry.replyEvents = undefined
+      for (const event of buffer.events) if (entry.generation === buffer.generation) this.onEvent(entry, event)
+      turn.answering = false
+    }
   }
 
   retry(sessionId: string): void {

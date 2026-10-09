@@ -404,4 +404,24 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     expect(JSON.stringify(h.db.prepare('SELECT * FROM session_drafts').all())).not.toContain('FULL-SECRET-VALUE')
     expect(h.items(session.id).at(-1)).toMatchObject({ text: '[已隐藏]' })
   })
+
+  it('preserves composer and ordering on rejected text answers; accepted instant completion follows the user reply', async () => {
+    const h = harness(new FakeProvider('codex', { behavior: { onRespond: () => { throw new Error('native refused answer') } } }))
+    const session = await h.create(); await tick()
+    const runtime = h.native().controller
+    const turn = runtime.activeTurn!.turnId
+    runtime.sink.inputRequested(turn, question(), null)
+    const key = { projectId: 'p', kind: 'session', sessionId: session.id } as const
+    h.service.saveDraft(key, { cli: 'codex', model: null, text: 'retained reply', contextItems: [] })
+    h.clock.now = 6000
+    await expect(h.service.replyWithText(session.id, 'retained reply')).rejects.toThrow('native refused')
+    expect((await h.service.getDraft(key)).text).toBe('retained reply')
+    expect(h.summary(session.id)).toMatchObject({ status: 'needs_input', lastUserMessageAt: 1000 })
+    expect(h.items(session.id).filter(item => item.kind === 'user_message')).toHaveLength(1)
+    h.native().driver.behavior.onRespond = () => runtime.sink.nativeTurnEnded(turn, { status: 'completed' })
+    await h.service.replyWithText(session.id, 'retained reply')
+    expect(h.items(session.id).slice(-2).map(item => item.kind)).toEqual(['user_message', 'turn_end'])
+    expect((await h.service.getDraft(key)).text).toBe('')
+    expect(h.summary(session.id).lastUserMessageAt).toBe(6000)
+  })
 })

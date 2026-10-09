@@ -38,6 +38,14 @@ export function createE2eProviders(): AgentProvider[] {
           runs.set(turn.turnId, run)
           turn.signal.addEventListener('abort', () => runs.delete(turn.turnId), { once: true })
           sink.itemStarted(turn.turnId, { itemId: `${turn.turnId}:message`, kind: 'assistant_message', status: 'in_progress', text: '' })
+          sink.itemStarted(turn.turnId, {
+            itemId: `${turn.turnId}:tool`, kind: 'command', status: 'in_progress',
+            activity: { verb: 'run', label: 'Run echo studio-e2e' }, command: { command: 'echo studio-e2e' }
+          })
+          schedule(turn, () => sink.itemCompleted(turn.turnId, {
+            itemId: `${turn.turnId}:tool`, kind: 'command', status: 'completed',
+            activity: { verb: 'run', label: 'Run echo studio-e2e' }, command: { command: 'echo studio-e2e', exitCode: 0, output: 'studio-e2e' }
+          }), 160)
           schedule(turn, () => sink.itemDelta(turn.turnId, `${turn.turnId}:message`, 'text', '正在处理模拟请求…'), 80)
           if (input.text.includes('[e2e:slow]')) return
           if (input.text.includes('[e2e:error]') && !failures.has(input.text)) {

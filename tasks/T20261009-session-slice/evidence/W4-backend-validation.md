@@ -37,8 +37,10 @@
 |---|---|
 | `pnpm install --frozen-lockfile` | 通过，独立 worktree 安装，无锁文件变更 |
 | `pnpm typecheck` | 通过（Adapter + Electron main/preload/shared/renderer/e2e 类型） |
-| `pnpm --filter @ai-studio/desktop exec vitest run src/main/services/session` | 2 文件，24 项通过 |
-| `pnpm test` | Adapter 175 项通过；desktop 104 项通过 |
+| `pnpm --filter @ai-studio/desktop exec vitest run src/main/services/session` | 2 文件，25 项通过（包含答复失败保留草稿与瞬间完成顺序） |
+| `pnpm test` | 首次 Adapter 175 / desktop 104 项通过；合入主 Agent `47f14ba` 后 Adapter 181 / desktop 107 项通过 |
+
+后续修正：输入框答复等待 Provider 接受，期间缓冲事件；成功后先追加用户消息再处理缓冲终态，失败保留草稿与排序。进程退出优先采用 Adapter 随后报告的完整诊断，避免丢失 stderr。模拟 Provider 补充 Run 工具 started/completed 行。
 
 测试覆盖：即时 Running；瞬间完成先于 send Promise；流式校正与稳定 ID；focus/opened 分离；前台 Error；多请求与互斥答复；I-Q2；秘密答案/草稿/错误/分段回显；Runtime 创建期间 Stop；重复 Stop；清理失败去重；Stop/成功竞态；Project 隔离关闭；crash、idle exit；native ID 不可变与懒恢复；无 ID 首轮失败；异常重启恢复；Rename 优先级；最近用户消息排序；模型下一轮；默认 CLI 快照；草稿存储；分页；IPC 深层校验与主进程窗口检查。
 
