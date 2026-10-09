@@ -4,10 +4,10 @@ import { join } from 'node:path'
 import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
 
 const appDir = join(__dirname, '..')
-const evidence = join(appDir, '../../tasks/T20261009-project-shell/evidence')
+const evidence = process.env.STUDIO_E2E_EVIDENCE_DIR ?? join(appDir, '../../.runtime/desktop-e2e/screenshots')
 let dir: string, app: ElectronApplication, page: Page
 async function launch() {
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir })
+  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
 }
@@ -32,7 +32,7 @@ async function capture(mode: string, width: number, height: number) {
   expect(dims.total).toBe(dims.window)
   expect(dims.conversation).toBeGreaterThanOrEqual(mode === 'view' ? 360 : 400)
   expect(dims.right).toBeGreaterThanOrEqual(mode === 'view' ? 400 : 320)
-  await page.screenshot({ path: join(evidence, `W2-${mode}-${width}.png`) })
+  await page.screenshot({ path: join(evidence, `project-${mode}-${width}.png`) })
   return dims
 }
 test.beforeEach(async () => {

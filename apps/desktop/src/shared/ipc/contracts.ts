@@ -3,10 +3,12 @@
 import { appContract } from './app'
 import type { StudioApiOf } from './contract'
 import { projectContract } from './project'
+import { sessionContract } from './session'
 
 export const contracts = [
   appContract,
-  projectContract
+  projectContract,
+  sessionContract
 ] as const
 
 /** Type of `window.studio` as exposed by the preload bridge. */

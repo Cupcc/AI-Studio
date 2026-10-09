@@ -17,7 +17,7 @@
 | W3 | 共享 DTO / IPC 契约与主接线（主 Agent） | `apps/desktop/src/shared/session/**`、`apps/desktop/src/shared/ipc/session.ts`；依赖 / 构建配置；共享登记、主进程生命周期、App 安装、Project 接口的默认 CLI 初始化与草稿 flush 接线及相关测试 | 固定并行边界并集成后端与界面 | W2、Adapter W1 | in_progress |
 | W4 | Session Manager（GPT-6 Astra xhigh） | `apps/desktop/src/main/services/session/**`、`apps/desktop/src/main/ipc/session.ts`、Session 迁移文件；本 task 的 `evidence/W4-*` | 状态机、持久化、Adapter / Project 接入与测试 | W3、Project W2 接口 | in_progress |
 | W5 | Session / Chat / Input 界面（GPT-6.1 Sol xhigh） | `apps/desktop/src/renderer/src/features/{session,chat,input}/**`、`apps/desktop/e2e/session.spec.ts`；本 task 的 `evidence/W5-*` | History、Conversation、草稿、等待与错误卡片、输入区与测试 | W3、Project W2 | in_progress |
-| W6 | 独立验收（GPT-6.1 Sol high，待分配槽位） | 本 task 的 `acceptance.md`、`evidence/W6-*` | AC-02～AC-05 验收记录 | W4、W5 | todo |
+| W6 | 独立验收（GPT-6.1 Sol high） | 本 task 的 `acceptance.md`、`evidence/W6-*` | AC-02～AC-05 验收记录 | W4、W5 | in_progress |
 
 ## 进度与决定
 
@@ -29,3 +29,4 @@
 - 2026-10-09 W3 补充纯展示规则 `shared/session/presentation.ts`：单个状态、Project 注意力 / 计数、用户消息时间排序、本地日历分组与标题。6 项测试及类型检查通过。Session 关闭草稿与 Project §2.2.4 / PROJ-Q6 对齐为停止成功再关闭、失败保留（仍是待确认建议）。
 - 2026-10-09 用户继续执行；Provider 与壳层已集成至 `4ddc59e`。W4 在 `.claude/worktrees/session-runtime-resume`（`codex/session-runtime`）实现后端；W5 在 `.claude/worktrees/session-ui-resume`（`codex/session-ui`）实现界面；两个范围不重叠，共享契约与登记变更由主 Agent 接线。W4 提供可注入 Provider 的测试工厂；W5 的模拟 E2E 在最终接线后运行。
 - 2026-10-09 W4 / W5 接口确定：`createSessionFeature(core, {providers?, isForeground?})`、`createE2eProviders()`、`installSessionIntegration()`；主 Agent 仅在开发环境显式测试开关注入 fixture。Project 创建时初始化默认 CLI 快照；关闭 / 退出前 flush 包括草稿写入。退出不使用骨架的 5 秒强制截断，在 Runtime 释放完成后关闭数据库，重复退出不能绕过清理。
+- 2026-10-09 W4 主体 `fe63821`、W5 主体 `2641d72` 已合并。W3 完成 Session IPC 注册、迁移注册、开发 E2E Provider 注入、Renderer 在 createRoot 前一次安装；注册测试注入无真实 CLI 的 Provider，重复 E2E 截图默认落 `.runtime/`。集成后全 workspace typecheck 通过，Adapter 181 / desktop 118 单测通过。W4 继续处理答复失败保草稿边界，W5 继续 Electron E2E；W6 在 `.claude/worktrees/foundation-verification` 接续独立验收，只写本 task 的 acceptance 与 W6 证据，不覆盖实现 worker 证据。

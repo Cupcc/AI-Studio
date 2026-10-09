@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
+import { DatabaseSync } from 'node:sqlite'
 import { defineContract, event, invoke } from '@shared/ipc/contract'
 import { contracts } from '@shared/ipc/contracts'
 import type { CoreServices } from '../services/core'
 import { createFeatures } from '.'
+import { runMigrations } from '../services/database/migrator'
+import { migrations } from '../services/database/migrations'
 import {
   defineHandlers,
   emit,
@@ -102,12 +105,23 @@ describe('registerFeatureHandlers', () => {
 })
 
 describe('real registry', () => {
-  it('has a handler module for every registered contract', () => {
+  it('has a handler module for every registered contract without invoking real CLIs', async () => {
     const { ipc, handlers } = fakeIpc()
-    const core = { appInfo: () => ({}) } as unknown as CoreServices
-    registerFeatureHandlers(ipc, contracts, createFeatures(core), { isTrustedSender: trusted })
-    const expected = contracts.flatMap((c) => Object.values(c.invoke).map((ch) => ch.channel))
-    expect([...handlers.keys()].sort()).toEqual(expected.sort())
+    const db = new DatabaseSync(':memory:')
+    runMigrations(db, migrations)
+    const core = {
+      appInfo: () => ({}), database: () => ({ db }),
+      shellEnv: { get: async () => ({ env: {} }) }, broadcast: vi.fn()
+    } as unknown as CoreServices
+    const features = createFeatures(core, { providers: [], isForeground: () => false })
+    try {
+      registerFeatureHandlers(ipc, contracts, features, { isTrustedSender: trusted })
+      const expected = contracts.flatMap((c) => Object.values(c.invoke).map((ch) => ch.channel))
+      expect([...handlers.keys()].sort()).toEqual(expected.sort())
+    } finally {
+      for (const feature of features) await feature.dispose?.()
+      db.close()
+    }
   })
 })
 

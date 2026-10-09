@@ -19,6 +19,7 @@ test.beforeAll(async () => {
   userData = mkdtempSync(join(tmpdir(), 'studio e2e '))
   app = await electron.launch({
     args: [appEntry, `--studio-user-data-dir=${userData}`],
+    env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' },
     cwd: appDir
   })
   page = await app.firstWindow()
@@ -110,7 +111,7 @@ test('renderer has no Node.js, require or raw ipcRenderer', async () => {
     global: 'undefined',
     ipcRenderer: 'undefined',
     electron: 'undefined',
-    studioKeys: ['app', 'project'],
+    studioKeys: ['app', 'project', 'session'],
     appKeys: ['getInfo', 'onWindowFocusChanged', 'ping']
   })
 })
@@ -155,6 +156,7 @@ test('smoke mode: SQLite, node-pty and login env work in the Electron main proce
   try {
     await promisify(execFile)(electronPath, [appEntry, `--studio-smoke-output=${output}`, `--studio-user-data-dir=${join(dir, 'user data')}`], {
       cwd: appDir,
+      env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' },
       timeout: 45_000
     }).catch((error: unknown) => {
       // Non-zero exit still writes the report; assertions below explain the failure.

@@ -3,8 +3,10 @@
 import type { Migration } from '../migrator'
 import { coreAppMeta } from './2026100901_core_app_meta'
 import { projectCore } from './2026100902_project_core'
+import { sessionCore } from './2026100903_session_core'
 
 export const migrations: readonly Migration[] = [
   coreAppMeta,
-  projectCore
+  projectCore,
+  sessionCore
 ]

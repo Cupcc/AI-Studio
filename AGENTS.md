@@ -64,7 +64,7 @@ The repository is a pnpm workspace (`pnpm-workspace.yaml`: `apps/*`, `packages/*
 - `pnpm dev`: start the desktop app in electron-vite development mode.
 - `pnpm typecheck`: type-check every workspace package.
 - `pnpm test`: run every package's unit tests (Vitest); no real CLI or model calls.
-- `pnpm test:e2e`: build the desktop app and run the Playwright Electron smoke tests.
+- `pnpm test:e2e`: build the desktop app and run Playwright Electron tests with simulated Session Providers (no model calls); native smoke still checks SQLite, PTY and CLI discovery. Screenshots default to `.runtime/desktop-e2e/`.
 - `pnpm package`: build an unsigned macOS arm64 app directory under `apps/desktop/dist/mac-arm64/`.
 - `pnpm smoke:packaged`: launch the packaged app with `open` and check SQLite, node-pty and login-shell environment resolution; each run uses a fresh temporary userData directory (retained for diagnosis), overridable with `-- --user-data-dir <dir>`; output defaults to `.runtime/desktop/packaged-smoke.json`.
 

@@ -23,6 +23,7 @@ import { runNativeSmoke, writeSmokeReport } from './smoke/native-smoke'
 import { runRendererSmoke } from './smoke/renderer-smoke'
 import { createMainWindow } from './window/main-window'
 import { createShutdownHandler } from './shutdown'
+import { createE2eProviders } from './services/session/e2e-providers'
 
 const launch = parseLaunchOptions(process.argv)
 const devServerUrl = !app.isPackaged ? process.env.ELECTRON_RENDERER_URL : undefined
@@ -83,7 +84,10 @@ function startRuntime(): void {
       for (const win of BrowserWindow.getAllWindows()) emit(win.webContents, channel, payload)
     }
   })
-  disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl))
+  const providers = !app.isPackaged && process.env.STUDIO_E2E_PROVIDERS === '1'
+    ? createE2eProviders()
+    : launch.smokeOutput ? [] : undefined
+  disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl), { providers })
   if (!launch.smokeOutput) {
     const shell = projectShellFor(core)
     shell.quitFlow = createQuitFlow({
@@ -118,7 +122,6 @@ function startRuntime(): void {
 async function runSmokeAndQuit(output: string): Promise<void> {
   const info = appInfo()
   try {
-    startRuntime()
     const report = await runNativeSmoke({
       userDataDir: app.getPath('userData'),
       app: {
@@ -130,6 +133,7 @@ async function runSmokeAndQuit(output: string): Promise<void> {
         node: info.versions.node
       }
     })
+    startRuntime()
     const win = openWindow(true)
     const renderer = await runRendererSmoke(win)
     const full = { ...report, renderer, ok: report.ok && renderer.ok }
