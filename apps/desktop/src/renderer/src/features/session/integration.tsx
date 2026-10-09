@@ -1,6 +1,6 @@
 import type { RendererSessionPort } from '../project/integration'
 import { registerShellIntegration } from '../project/integration'
-import { CliMenu } from '../chat/CliMenu'
+import { CliMenu, NewChatBadge } from '../chat/CliMenu'
 import { sessionApi } from './api'
 import { flushSessionDrafts, useSessions, watchSessionEvents } from './store'
 import { SessionHistory } from './SessionHistory'
@@ -45,6 +45,6 @@ export function createRendererSessionPort(): SessionRendererPort {
 export function installSessionIntegration(): () => void {
   const session = createRendererSessionPort()
   const unwatch = watchSessionEvents()
-  const unregister = registerShellIntegration({ session, SessionHistory, Conversation, ConversationHeader, CliMenu })
+  const unregister = registerShellIntegration({ session, SessionHistory, Conversation, ConversationHeader, CliMenu, NewChatBadge })
   return () => { unwatch(); unregister(); session.dispose() }
 }

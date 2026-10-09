@@ -36,18 +36,22 @@ function ResizeHandle({ width, min, max, direction, label, onPreview, onCommit }
 function RightArea({ props, ui, area, viewMode }: { props: ShellSlotProps; ui: UiState; area: RightArea; viewMode: boolean }) {
   const slots = useShellIntegration(), shell = useProjectShell()
   const viewId = props.canvas.mode === 'view' ? props.canvas.viewId : 'overview'
-  return <section className={`right-area ${viewMode ? 'right-area--view' : ''}`} aria-label={area === 'preview' ? S.preview : TOOL_NAMES[area]}>
+  const title = <span className="right-area__title">{area === 'preview' ? VIEW_NAMES[viewId] : TOOL_NAMES[area]}</span>
+  const tools = TOOL_IDS.map((tool, i) => <button key={tool} className={`icon-button ${area === tool ? 'is-selected' : ''}`} aria-label={TOOL_NAMES[tool]} aria-pressed={area === tool} data-tip={TOOL_NAMES[tool]} data-tip-align={viewMode && i === TOOL_IDS.length - 1 && area === 'preview' ? 'end' : undefined} onClick={() => shell.updateUiState(props.project.id, selectRightArea(ui, tool))}><Icon name={tool} /></button>)
+  return <section className={`right-area ${viewMode ? 'right-area--view' : ''} ${area === 'preview' ? 'right-area--preview' : ''}`} aria-label={area === 'preview' ? S.preview : TOOL_NAMES[area]}>
     <header className="canvas-header right-area__header">
-      <span className="right-area__title">{area === 'preview' ? S.preview : TOOL_NAMES[area]}</span>
-      <div className="tool-switcher" aria-label="右侧工具">
-        {viewMode && <><button className={`icon-button ${area === 'preview' ? 'is-selected' : ''}`} aria-label={S.preview} aria-pressed={area === 'preview'} data-tooltip={S.preview} onClick={() => shell.updateUiState(props.project.id, selectRightArea(ui, 'preview'))}><Icon name="preview" /></button><span className="tool-switcher__divider" /></>}
-        {TOOL_IDS.map((tool) => <button key={tool} className={`icon-button ${area === tool ? 'is-selected' : ''}`} aria-label={TOOL_NAMES[tool]} aria-pressed={area === tool} data-tooltip={TOOL_NAMES[tool]} onClick={() => shell.updateUiState(props.project.id, selectRightArea(ui, tool))}><Icon name={tool} /></button>)}
-      </div>
-      {area !== 'preview' && <button className="icon-button" aria-label="关闭右侧工具" onClick={() => shell.updateUiState(props.project.id, closeRightSidebar(ui))}><Icon name="close" /></button>}
+      {viewMode ? <>
+        {title}<span className="grow" />
+        <div className="tool-switcher" aria-label="右侧工具">
+          <button className={`icon-button ${area === 'preview' ? 'is-selected' : ''}`} aria-label={S.preview} aria-pressed={area === 'preview'} data-tip={`${S.preview} · ${VIEW_NAMES[viewId]}`} onClick={() => shell.updateUiState(props.project.id, selectRightArea(ui, 'preview'))}><Icon name="preview" /></button><span className="tool-switcher__divider" />
+          {tools}
+        </div>
+      </> : <><div className="tool-switcher" aria-label="右侧工具">{tools}</div>{title}<span className="grow" /></>}
+      {area !== 'preview' && <button className="icon-button" aria-label="关闭右侧工具" data-tip={S.close} data-tip-align="end" onClick={() => shell.updateUiState(props.project.id, closeRightSidebar(ui))}><Icon name="close" size={15} /></button>}
     </header>
     <div className="right-area__content">{area === 'preview'
-      ? slots.Preview ? <slots.Preview {...props} viewId={viewId} /> : <div className="canvas-placeholder"><Icon name={viewId} /><h2>{VIEW_NAMES[viewId]}</h2><p>{S.placeholderPreview(VIEW_NAMES[viewId])}</p></div>
-      : slots.Tool ? <slots.Tool {...props} area={area} /> : <div className="canvas-placeholder"><Icon name={area} /><h2>{TOOL_NAMES[area]}</h2><p>{S.placeholderTool(TOOL_NAMES[area])}</p></div>}
+      ? slots.Preview ? <slots.Preview {...props} viewId={viewId} /> : <div className="canvas-placeholder"><Icon name={viewId} size={28} /><h2>{VIEW_NAMES[viewId]}</h2><p>{S.placeholderPreview(VIEW_NAMES[viewId])}</p></div>
+      : slots.Tool ? <slots.Tool {...props} area={area} /> : <div className="canvas-placeholder"><Icon name={area} size={28} /><h2>{TOOL_NAMES[area]}</h2><p>{S.placeholderTool(TOOL_NAMES[area])}</p></div>}
     </div>
   </section>
 }
@@ -76,8 +80,8 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
           : !view && slots.ConversationHeader ? <slots.ConversationHeader {...props} />
           : <span>{ui.mainCanvas.mode === 'view' ? `${ui.mainCanvas.conversation.kind === 'draft' ? S.draftTitle : ui.mainCanvas.conversation.sessionId} · ${VIEW_NAMES[ui.mainCanvas.viewId]}` : ui.mainCanvas.mode === 'draft' ? S.draftTitle : ui.mainCanvas.sessionId}</span>}</header>
         <div className="conversation-pane__content">{view && ui.mainCanvas.mode === 'view'
-          ? slots.ViewConversation ? <slots.ViewConversation {...props} viewId={ui.mainCanvas.viewId} /> : <div className="canvas-placeholder"><Icon name="chat" /><h2>{S.draftTitle}</h2><p>{S.placeholderViewConversation}</p></div>
-          : slots.Conversation ? <slots.Conversation {...props} /> : <div className="canvas-placeholder"><Icon name="chat" /><h2>{ui.mainCanvas.mode === 'draft' ? S.draftTitle : 'Conversation'}</h2><p>{ui.mainCanvas.mode === 'draft' ? S.placeholderDraft : S.placeholderConversation}</p></div>}
+          ? slots.ViewConversation ? <slots.ViewConversation {...props} viewId={ui.mainCanvas.viewId} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{S.draftTitle}</h2><p>{S.placeholderViewConversation}</p></div>
+          : slots.Conversation ? <slots.Conversation {...props} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{ui.mainCanvas.mode === 'draft' ? S.draftTitle : 'Conversation'}</h2><p>{ui.mainCanvas.mode === 'draft' ? S.placeholderDraft : S.placeholderConversation}</p></div>}
         </div>
         {view && <ResizeHandle width={width} min={VIEW_CONVERSATION_WIDTH.min} max={Math.min(VIEW_CONVERSATION_WIDTH.max, available - 400)} direction={1} label={S.resizeConversation} onPreview={setDragWidth} onCommit={(w) => shell.updateUiState(projectId, { viewConversationWidth: w })} />}
       </section>

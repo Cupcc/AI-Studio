@@ -5,6 +5,7 @@ import type { ViewId } from '@shared/project/types'
 import type { DraftKey } from '@shared/session/types'
 import { cliName, draftId, useSessions } from '../session/store'
 import { useProjectShell } from '../project/store'
+import { Icon } from '../../app/Icon'
 
 export interface ComposerProps { draftKey: DraftKey; active: boolean; originViewId?: string | null }
 export function Composer({ draftKey, active, originViewId = null }: ComposerProps) {
@@ -40,7 +41,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
     if (!node) return
     node.style.height = 'auto'
     const line = Number.parseFloat(getComputedStyle(node).lineHeight) || 20
-    node.style.height = `${Math.min(line * 8 + 16, Math.max(line * 2 + 16, node.scrollHeight))}px`
+    node.style.height = `${Math.min(line * 8, Math.max(line, node.scrollHeight))}px`
   }, [text])
   async function send() {
     if (!canSend) return
@@ -61,7 +62,8 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
       {provider?.reason ?? (!cli ? '请选择已安装并已登录的 CLI。' : '正在检查 CLI…')}
       {!cli && providers.filter((item) => item.status === 'available').map((item) => <button className="text-button" key={item.cli} onClick={() => useSessions.getState().updateDraft(draftKey, { cli: item.cli, model: null })}>{item.displayName}</button>)}
     </div>}
-    <textarea ref={input} aria-label={needsInput ? '回复 Agent' : '消息'} placeholder={needsInput ? '回复 Agent…' : `向 ${cliName(cli)} 发送消息…`} value={text} maxLength={SESSION_MESSAGE_MAX_LENGTH} disabled={!!loading || !draft} rows={2}
+    <div className="composer__box">
+    <textarea ref={input} aria-label={needsInput ? '回复 Agent' : '消息'} placeholder={needsInput ? '回复 Agent…' : `向 ${cliName(cli)} 发送消息…`} value={text} maxLength={SESSION_MESSAGE_MAX_LENGTH} disabled={!!loading || !draft} rows={1}
       onChange={(event) => useSessions.getState().updateDraft(draftKey, { text: event.target.value })}
       onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false; justComposedAt.current = performance.now() }}
       onKeyDown={(event) => {
@@ -72,14 +74,14 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
       }} />
     <div className="composer__toolbar">
       <div className="composer__context" ref={contextRef} onKeyDown={(event) => { if (event.key === 'Escape') setContextMenu(false) }}>
-        <button className="icon-button" aria-label="Context / Attachment" aria-expanded={contextMenu} onClick={() => setContextMenu(!contextMenu)}>+</button>
-        {contextMenu && <div className="composer__context-menu"><button disabled>从 Files 添加文件</button><p>暂不支持添加附件</p></div>}
+        <button className="icon-button composer__add" aria-label="Context / Attachment" data-tip="添加上下文" aria-expanded={contextMenu} onClick={() => setContextMenu(!contextMenu)}><Icon name="plus" size={15} /></button>
+        {contextMenu && <div className="composer__context-menu popover"><button className="menu-item" disabled>从 Files 添加文件</button><p className="menu-item__sub">暂不支持添加附件</p></div>}
       </div>
       <div className="composer__tags">{draft?.contextItems.map((context, index) => <span className="composer__tag" key={`${context.type}:${index}`}>
-        {context.type === 'view' ? VIEW_NAMES[context.viewId as ViewId] ?? context.viewId : context.path.split('/').at(-1)}
-        <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : context.path}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}>×</button>
+        <Icon name={context.type === 'view' ? 'preview' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? VIEW_NAMES[context.viewId as ViewId] ?? context.viewId : context.path.split('/').at(-1)}</span>
+        <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : context.path}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}><Icon name="close" size={10} /></button>
       </span>)}</div>
-      <select className="composer__models" aria-label="Model Selector" title={catalog?.error ?? (session && session.activity !== 'none' ? '选择的模型从下一轮开始生效' : '当前 CLI 的模型')} value={model ?? ''} disabled={!cli || !catalog || !!catalog.error || !!(session && pending[`model:${session.id}`])} onChange={(event) => {
+      <span className="composer__models-wrap"><select className="composer__models" aria-label="Model Selector" title={catalog?.error ?? (session && session.activity !== 'none' ? '选择的模型从下一轮开始生效' : '当前 CLI 的模型')} value={model ?? ''} disabled={!cli || !catalog || !!catalog.error || !!(session && pending[`model:${session.id}`])} onChange={(event) => {
         const selected = event.target.value || null
         if (session) void useSessions.getState().setModel(session.id, selected)
         else useSessions.getState().updateDraft(draftKey, { model: selected })
@@ -87,8 +89,11 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
         <option value="">{nativeDefault ? `${nativeDefault.displayName}（默认）` : 'CLI 默认'}</option>
         {knownModels.map((item) => <option key={item.id} value={item.id}>{item.displayName}</option>)}
         {model && !knownModels.some((item) => item.id === model) && <option value={model}>{model}{modelMissing ? '（不可用）' : ''}</option>}
-      </select>
-      <button className="composer__send primary-button" disabled={stopButton ? !!stopping : !canSend} onClick={() => { if (stopButton && session) void useSessions.getState().stop(session.id); else void send() }}>{stopping ? '停止中…' : stopButton ? 'Stop' : busy ? '发送中…' : 'Send'}</button>
+      </select><Icon name="chevron" size={12} /></span>
+      <button className={`composer__send ${stopButton ? 'is-stop' : ''}`} aria-label={stopping ? '停止中…' : stopButton ? 'Stop' : busy ? '发送中…' : 'Send'} data-tip={stopButton ? (stopping ? '停止中…' : '停止') : undefined} data-tip-align="end" disabled={stopButton ? !!stopping : !canSend} onClick={() => { if (stopButton && session) void useSessions.getState().stop(session.id); else void send() }}>
+        {stopping || busy ? <span className="session-spinner session-spinner--inverse" aria-hidden="true" /> : <Icon name={stopButton ? 'stop' : 'arrow-up'} size={14} />}
+      </button>
+    </div>
     </div>
     {modelMissing && <p className="composer__notice">该模型已不可用，下一轮将使用 CLI 默认。</p>}
     {notice && <p className="composer__notice" role="status">{notice}</p>}

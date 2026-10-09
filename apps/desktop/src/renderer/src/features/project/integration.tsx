@@ -29,6 +29,8 @@ export interface ShellIntegration {
   Preview?: ComponentType<ViewSlotProps>
   Tool?: ComponentType<RightSlotProps>
   CliMenu?: ComponentType<ShellSlotProps & { dismiss(): void }>
+  /** Default CLI shown on the New Chat button (prototype v01). */
+  NewChatBadge?: ComponentType<ShellSlotProps>
 }
 
 const placeholderSession: RendererSessionPort = {

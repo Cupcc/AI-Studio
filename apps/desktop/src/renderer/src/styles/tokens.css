@@ -1,14 +1,15 @@
 /*
- * PROVISIONAL design tokens.
+ * Design tokens.
  *
- * Colours, type and spacing below are neutral placeholders: visual parameters
- * are not decided yet (design/visual-direction.md §5) and will be replaced
- * after the high-fidelity review. Keep every visual value here so that the
- * replacement touches one file. Layout sizes follow Shell Spec v01 §1.2
- * (exploratory draft).
+ * Visual values follow the confirmed interactive prototype v01
+ * (design/prototypes/studio-prototype-v01.html, confirmed 2026-10-09) and may
+ * be revised at the high-fidelity stage (design/visual-direction.md §5). Keep
+ * every visual value here so that a revision touches one file. Layout sizes
+ * follow Shell Spec v01 §1–2. V1 has a single light theme (Product
+ * Definition principle 23).
  */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* Layout (Shell Spec v01 §1–2) */
   --window-min-width: 1024px;
@@ -25,8 +26,8 @@
   --tab-height: 32px;
   --tab-min-width: 96px;
   --tab-max-width: 200px;
-  --tab-add-width: 28px;
-  --tab-close-size: 16px;
+  --tab-add-width: 30px;
+  --tab-close-size: 18px;
   --icon-button-width: 30px;
   --icon-button-height: 28px;
   --new-chat-height: 36px;
@@ -36,65 +37,80 @@
   --resize-hit-width: 6px;
   --cli-menu-width: 260px;
   --placeholder-icon-size: 28px;
-  --placeholder-text-width: 280px;
-  --launcher-content-width: 540px;
-  --launcher-top-padding: 64px;
-  --dialog-width: 440px;
-  --radius-small: 5px;
-  --radius-dialog: 10px;
-  --disabled-opacity: .45;
-  --heading-letter-spacing: .7px;
-  --title-letter-spacing: -.6px;
+  --placeholder-text-width: 360px;
+  --launcher-content-width: 460px;
+  --dialog-width: 420px;
+  --send-size: 28px;
+  --disabled-opacity: .4;
   --tooltip-delay: 500ms;
 
-  /* Spacing (provisional) */
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 7px;
+  --radius-lg: 9px;
+  --radius-card: 12px;
+  --radius-bubble: 14px;
+  --radius-input: 16px;
+  --radius-dialog: 14px;
+
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
 
-  /* Typography (provisional) */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
-  --font-size-sm: 12px;
+  /* Typography */
+  --font-sans: 'IBM Plex Sans', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --font-size-xs: 11px;
+  --font-size-sm: 12px;
   --font-size-md: 13px;
-  --font-size-lg: 18px;
-  --font-size-title: 28px;
+  --font-size-body: 14px;
+  --font-size-lg: 17px;
+  --font-size-title: 22px;
+  --heading-letter-spacing: .06em;
 
-  /* Colour (provisional neutral greys) */
+  /* Colour */
   --color-surface: #ffffff;
-  --color-surface-chrome: #f4f4f5;
-  --color-border: #e4e4e7;
-  --color-text: #18181b;
-  --color-text-muted: #71717a;
-  --color-focus-ring: #3b82f6;
-  --color-focus-ring-soft: #3b82f633;
-  --color-hover: #18181b0a;
-  --color-selected: #18181b12;
-  --color-needs-input: #df8e25;
-  --color-error: #d94848;
-  --color-completed: #3c9a67;
-  --color-primary: #27272a;
-  --color-primary-hover: #3f3f46;
-  --color-on-primary: #fff;
-  --color-backdrop: #0005;
-  --shadow-popover: 0 8px 28px #0002;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-surface: #1c1c1f;
-    --color-surface-chrome: #27272a;
-    --color-border: #3f3f46;
-    --color-text: #f4f4f5;
-    --color-text-muted: #a1a1aa;
-    --color-hover: #ffffff0b;
-    --color-selected: #ffffff14;
-    --color-primary: #e4e4e7;
-    --color-primary-hover: #d4d4d8;
-    --color-on-primary: #18181b;
-  }
+  --color-surface-sub: #f7f7f5;
+  --color-surface-chrome: #efeeeb;
+  --color-surface-soft: #f1f0ed;
+  --color-surface-preview: #fafaf8;
+  --color-hover: #efeeea;
+  --color-selected: #e6e5e0;
+  --color-border: #e4e3df;
+  --color-border-strong: #d9d8d3;
+  --color-border-soft: #efeeea;
+  --color-border-focus: #bdbcb6;
+  --color-text: #1d1d1b;
+  --color-text-2: #33332f;
+  --color-text-3: #5a5a55;
+  --color-text-muted: #6b6b65;
+  --color-placeholder: #8a8a84;
+  --color-running: #5a5a55;
+  --color-running-track: #d6d5d1;
+  --color-needs-input: #d97706;
+  --color-needs-input-bg: #fffaf1;
+  --color-needs-input-border: #f0d9b5;
+  --color-completed: #16a34a;
+  --color-error: #dc2626;
+  --color-error-bg: #fef6f5;
+  --color-error-border: #f1d0cc;
+  --color-link: #1d4ed8;
+  --color-focus-ring: #2563eb;
+  --color-focus-ring-soft: #2563eb2e;
+  --color-primary: #1d1d1b;
+  --color-primary-hover: #3a3a36;
+  --color-on-primary: #ffffff;
+  --color-send-disabled: #cfcec9;
+  --color-tooltip: #1d1d1b;
+  --color-backdrop: rgba(24, 24, 22, .28);
+  --shadow-input: 0 1px 2px rgba(0, 0, 0, .04);
+  --shadow-popover: 0 10px 30px rgba(0, 0, 0, .10);
+  --shadow-dialog: 0 20px 50px rgba(0, 0, 0, .18);
+  --shadow-floating: 0 4px 14px rgba(0, 0, 0, .12);
 }

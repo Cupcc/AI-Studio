@@ -16,8 +16,9 @@ export function ConversationHeader({ project, canvas }: ShellSlotProps) {
   return <>
     {(summary?.cli ?? draft?.cli) && <CliBadge cli={(summary?.cli ?? draft?.cli)!} />}
     <span className="session-header__title">{sessionId ? summary?.title ?? '正在加载对话…' : '新对话'}</span>
-    <span className="session-header__cli muted">{cliName(summary?.cli ?? draft?.cli ?? null)}</span>
-    {origin && <button className="session-header__origin" disabled={!DEFAULT_VIEW_IDS.includes(origin as ViewId)} onClick={() => useProjectShell.getState().enterView(project.id, origin as ViewId)} title={origin}>在 {VIEW_NAMES[origin as ViewId] ?? origin} 中打开</button>}
+    <span className="session-header__cli muted">{cliName(summary?.cli ?? draft?.cli ?? null)}{!sessionId && ' · 发送第一条消息后创建 Session'}</span>
+    {origin && <><span className="session-header__from muted">· 来自 {VIEW_NAMES[origin as ViewId] ?? origin}</span>
+      <button className="link-button" disabled={!DEFAULT_VIEW_IDS.includes(origin as ViewId)} onClick={() => useProjectShell.getState().enterView(project.id, origin as ViewId)} title={origin}>在 View 中打开</button></>}
   </>
 }
 
@@ -83,7 +84,7 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
         {openError && <p role="alert" className="error-message">{openError}</p>}
       </div>
     </div>
-    {away && <button className="conversation-latest secondary-button" onClick={latest}>回到最新 ↓</button>}
+    {away && <button className="conversation-latest" onClick={latest}>回到最新 ↓</button>}
     <Composer draftKey={{ projectId, kind: 'session', sessionId }} active={active} />
   </div>
 }
@@ -91,7 +92,7 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
 export function Conversation({ project, canvas, active }: ShellSlotProps) {
   if (canvas.mode === 'session') return <SessionConversation key={canvas.sessionId} projectId={project.id} sessionId={canvas.sessionId} active={active} />
   return <div className="session-conversation session-conversation--draft">
-    <div className="session-draft-intro"><h2>开始新对话</h2><p>发送第一条消息后，对话会保存在此 Project 的 Session History 中。</p></div>
+    <div className="session-draft-intro"><h2>在 {project.name} 中开始新的对话</h2><p>Agent 会直接在 {project.localPath} 中执行</p></div>
     <Composer draftKey={{ projectId: project.id, kind: 'new_chat' }} active={active} />
   </div>
 }

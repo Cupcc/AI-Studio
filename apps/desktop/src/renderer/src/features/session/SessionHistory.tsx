@@ -6,6 +6,7 @@ import type { ShellSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
 import { useSessions } from './store'
 import { CliBadge, SessionStatusIndicator } from './Status'
+import { Icon } from '../../app/Icon'
 
 type Row = { id: string; top: number; height: number } & ({ kind: 'heading'; label: string } | { kind: 'session'; session: SessionSummary })
 export function historyRows(sessions: SessionSummary[], now?: Date): Row[] {
@@ -123,7 +124,7 @@ export function SessionHistory({ project, canvas, active }: ShellSlotProps) {
             useSessions.getState().requestLatest(row.id)
             useProjectShell.getState().openSession(project.id, row.id)
           }}>{row.session.title}</button>}
-          {renaming !== row.id && <button className={`session-row__more icon-button ${menu === row.id ? 'is-open' : ''}`} aria-label={`更多操作 ${row.session.title}`} aria-expanded={menu === row.id} onClick={() => setMenu(menu === row.id ? null : row.id)}>⋯</button>}
+          {renaming !== row.id && <button className={`session-row__more icon-button ${menu === row.id ? 'is-open' : ''}`} aria-label={`更多操作 ${row.session.title}`} aria-expanded={menu === row.id} onClick={() => setMenu(menu === row.id ? null : row.id)}><Icon name="dots" size={14} /></button>}
           <SessionStatusIndicator status={row.session.status} />
           {pending[`rename:${row.id}`] && <span className="sr-only">正在保存标题</span>}
           {errors[`rename:${row.id}`] && <span className="session-row__error" role="alert" title={errors[`rename:${row.id}`] ?? undefined}>标题保存失败</span>}

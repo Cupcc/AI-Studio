@@ -4,9 +4,9 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 
 相关决定（草稿）：
 
-- [D20261009-desktop-ipc-convention](../../docs/decisions/D20261009-desktop-ipc-convention.md)：进程边界、安全基线、类型化 IPC。
-- [D20261009-desktop-feature-folders](../../docs/decisions/D20261009-desktop-feature-folders.md)：功能目录与写入范围。
-- [D20261009-desktop-sqlite-driver](../../docs/decisions/D20261009-desktop-sqlite-driver.md)：SQLite 驱动、数据库位置与迁移。
+- [DEC-02](<../../docs/07. Decisions.md>)：进程边界、安全基线、类型化 IPC。
+- [DEC-03](<../../docs/07. Decisions.md>)：功能目录与写入范围。
+- [DEC-01](<../../docs/07. Decisions.md>)：SQLite 驱动、数据库位置与迁移。
 
 ## 1. 命令
 

@@ -22,7 +22,7 @@ function ProjectTab({ tab, label }: { tab: WindowTab; label: string }) {
       {!active && tab.kind === 'project' && <AttentionDot projectId={tab.projectId} />}
       <span>{label}</span>
     </button>
-    <button className="project-tab__close icon-button" aria-label={S.closeTab(label)} disabled={!canCloseTab(shell.windowState, tab.id)} onClick={() => void shell.requestClose(tab.id)}><Icon name="close" /></button>
+    <button className="project-tab__close" aria-label={S.closeTab(label)} disabled={!canCloseTab(shell.windowState, tab.id)} onClick={() => void shell.requestClose(tab.id)}><Icon name="close" size={12} /></button>
   </div>
 }
 
@@ -34,16 +34,16 @@ export function TopBar() {
   return (
     <header className="topbar" data-testid="topbar">
       <div className="topbar__traffic-lights" aria-hidden="true" />
-      <button className="icon-button no-drag topbar__nav" aria-label={shell.windowState.navCollapsed ? S.expandNav : S.collapseNav} title={id ? undefined : S.availableAfterOpen} disabled={!id} onClick={shell.toggleNav}>
+      <button className="icon-button no-drag topbar__nav" aria-label={shell.windowState.navCollapsed ? S.expandNav : S.collapseNav} data-tip={id ? (shell.windowState.navCollapsed ? S.expandNav : S.collapseNav) : S.availableAfterOpen} disabled={!id} onClick={shell.toggleNav}>
         <Icon name="navigation" />{shell.windowState.navCollapsed && <AttentionDot projectId={id} />}
       </button>
-      {shell.windowState.navCollapsed && <button className="compact-button no-drag" disabled={!id} title={id ? undefined : S.availableAfterOpen} onClick={() => id && shell.startDraft(id)}><Icon name="chat" />{S.newChat}</button>}
+      {shell.windowState.navCollapsed && <button className="icon-button no-drag" aria-label={S.newChat} data-tip={id ? S.newChat : S.availableAfterOpen} disabled={!id} onClick={() => id && shell.startDraft(id)}><Icon name="pencil" size={15} /></button>}
       <div className="topbar__tabs no-drag" role="tablist" aria-label="Projects">
         {shell.windowState.tabs.map((tab) => <ProjectTab key={tab.id} tab={tab} label={tab.kind === 'launcher' ? S.launcherTabTitle : labels.get(tab.projectId) ?? ''} />)}
       </div>
-      <button className="icon-button topbar__add no-drag" aria-label={S.newTab} onClick={shell.newTab}><Icon name="plus" /></button>
+      <button className="topbar__add no-drag" aria-label={S.newTab} data-tip={S.newTab} onClick={shell.newTab}><Icon name="plus" size={14} /></button>
       <div className="topbar__drag-space" />
-      <button className={`icon-button no-drag topbar__sidebar ${ui && isRightSidebarActive(ui) ? 'is-selected' : ''}`} aria-label={S.rightSidebar} aria-pressed={ui ? isRightSidebarActive(ui) : false} title={id ? S.rightSidebar : S.availableAfterOpen} disabled={!id} onClick={() => id && ui && shell.updateUiState(id, toggleRightSidebar(ui))}><Icon name="sidebar" /></button>
+      <button className={`icon-button no-drag topbar__sidebar ${ui && isRightSidebarActive(ui) ? 'is-selected' : ''}`} aria-label={S.rightSidebar} aria-pressed={ui ? isRightSidebarActive(ui) : false} data-tip={id ? S.rightSidebar : S.availableAfterOpen} data-tip-align="end" disabled={!id} onClick={() => id && ui && shell.updateUiState(id, toggleRightSidebar(ui))}><Icon name="sidebar" /></button>
     </header>
   )
 }

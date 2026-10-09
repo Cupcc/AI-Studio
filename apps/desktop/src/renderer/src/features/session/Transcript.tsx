@@ -41,7 +41,7 @@ export function InputRequestCard({ item }: { item: Extract<TranscriptItem, { kin
       {request.toolInput !== undefined && <details><summary>工具参数</summary><pre>{JSON.stringify(request.toolInput, null, 2)}</pre></details>}
       {!resolution && <>
         {request.allowsMessage && <input aria-label="决定说明（可选）" placeholder="说明（可选）" value={message} disabled={readOnly || pending} onChange={(event) => setMessage(event.target.value)} />}
-        <div className="request-card__actions">{request.options.map((option) => <button key={option.id} className={option.primary ? 'primary-button' : 'secondary-button'} title={option.description} disabled={readOnly || pending} onClick={() => answer({ kind: 'approval', optionId: option.id, ...(message.trim() ? { message } : {}) })}>{option.label}</button>)}</div>
+        <div className="request-card__actions">{request.options.map((option) => <button key={option.id} className={option.primary ? 'primary-button' : 'secondary-button'} title={option.description} disabled={readOnly || pending} onClick={() => answer({ kind: 'approval', optionId: option.id, ...(message.trim() ? { message } : {}) })}>{option.label}</button>)}<span className="request-card__hint muted">也可以在下方直接回复</span></div>
       </>}
     </> : <>
       {request.title && <p className="request-card__title">{request.title}</p>}
@@ -57,15 +57,14 @@ export function InputRequestCard({ item }: { item: Extract<TranscriptItem, { kin
           {question.secret && <p className="muted">私密回答不会保存到对话记录。</p>}
         </>}
       </fieldset>)}
-      {!resolution && <button className="primary-button" disabled={readOnly || pending || !canAnswer} onClick={() => answer({ kind: 'answers', answers })}>提交回答</button>}
+      {!resolution && <div className="request-card__actions"><button className="primary-button" disabled={readOnly || pending || !canAnswer} onClick={() => answer({ kind: 'answers', answers })}>提交回答</button><span className="request-card__hint muted">也可以在下方直接回复</span></div>}
     </>}
-    {resolution ? <p className="request-card__resolution">{resolutionText(request, resolution, item.redacted)}</p> : <p className="muted">也可以在下方直接回复</p>}
+    {resolution && <p className="request-card__resolution">{resolutionText(request, resolution, item.redacted)}</p>}
     {error && <p role="alert" className="error-message">{error}</p>}
   </section>
 }
 
 export function Transcript({ item }: { item: TranscriptItem }) {
-  const summary = useSessions((s) => s.summaries[item.sessionId]), pending = useSessions((s) => s.pending[`retry:${item.sessionId}`]), error = useSessions((s) => s.errors[`retry:${item.sessionId}`])
   if (item.kind === 'user_message') return <article className="transcript-user" data-transcript-id={item.id}>
     {item.contextItems.length > 0 && <div className="transcript-user__context">{item.contextItems.map((context, index) => <span key={index}>{context.type === 'view' ? context.viewId : context.path}</span>)}</div>}
     <p>{item.redacted ? '••••••（私密回复不保存）' : item.text}</p>
@@ -86,10 +85,19 @@ export function Transcript({ item }: { item: TranscriptItem }) {
   }
   if (item.kind === 'input_request') return <div data-transcript-id={item.id}><InputRequestCard item={item} /></div>
   if (item.kind === 'turn_end') return <p className="transcript-turn-end" data-transcript-id={item.id}>Worked for {formatWorkedFor(item.durationMs)} · {item.outcome === 'completed' ? 'Done' : '已停止'}</p>
+  return <ErrorCard item={item} />
+}
+
+function ErrorCard({ item }: { item: Extract<TranscriptItem, { kind: 'error' }> }) {
+  const summary = useSessions((s) => s.summaries[item.sessionId]), pending = useSessions((s) => s.pending[`retry:${item.sessionId}`]), error = useSessions((s) => s.errors[`retry:${item.sessionId}`])
+  const [details, setDetails] = useState(false)
   return <section className="transcript-error" aria-label="执行错误" data-transcript-id={item.id}>
     <h3><span className="attention-dot attention-dot--error" />{item.summary}</h3>
-    {item.retryable && <button className="secondary-button" disabled={pending || summary?.activity !== 'none' || summary?.stopping} onClick={() => void useSessions.getState().retry(item.sessionId)}>{pending ? '重试中…' : '重试'}</button>}
-    <details><summary>查看详情</summary><pre>{item.details}</pre></details>
+    {details && <pre>{item.details}</pre>}
+    <div className="request-card__actions">
+      {item.retryable && <button className="primary-button" disabled={pending || summary?.activity !== 'none' || summary?.stopping} onClick={() => void useSessions.getState().retry(item.sessionId)}>{pending ? '重试中…' : '重试'}</button>}
+      <button className="secondary-button" aria-expanded={details} onClick={() => setDetails(!details)}>{details ? '收起详情' : '查看详情'}</button>
+    </div>
     {error && <p className="error-message" role="alert">{error}</p>}
   </section>
 }

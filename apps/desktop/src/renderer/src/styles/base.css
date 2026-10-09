@@ -12,15 +12,26 @@ body,
 }
 
 body {
-  font-family: var(--font-sans);
-  font-size: var(--font-size-md);
+  font: var(--font-size-body)/1.5 var(--font-sans);
   color: var(--color-text);
   background: var(--color-surface);
   -webkit-font-smoothing: antialiased;
 }
 
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+svg {
+  flex: none;
+}
+
 /* Shell Spec v01 §10: 2px focus ring for keyboard navigation. */
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
-  outline-offset: 1px;
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
