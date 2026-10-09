@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository contains the V1.0 specifications, design workspace, and development records for AI Developer Studio, a desktop client built around local projects and CLI agent sessions. There are currently no application source or test directories.
+This repository contains the V1.0 specifications, design workspace, development records, and application source for AI Developer Studio, a desktop client built around local projects and CLI agent sessions.
 
 | Path | Contents |
 |---|---|
@@ -11,6 +11,8 @@ This repository contains the V1.0 specifications, design workspace, and developm
 | `tasks/` | Every unit of work as `tasks/T<YYYYMMDD>-<slug>/` with its task card, research, plan, acceptance, evidence, and report. Protocol: `tasks/AGENTS.md`. |
 | `templates/` | Templates for task, plan, acceptance, report, spec, and decision documents. |
 | `design/` | Design materials, described below. |
+| `apps/desktop/` | Electron + React + TypeScript desktop client (electron-vite). Layout, IPC and runtime conventions: `apps/desktop/README.md`. |
+| `packages/` | Workspace packages without Electron dependencies, e.g. `packages/agent-adapter/` (CLI Adapter). |
 | `scripts/` | Reusable development scripts; execution notes in `scripts/README.md`. |
 | `.runtime/` | Local scratch output such as logs, caches, and temporary runs. Git-ignored and safe to delete. |
 
@@ -56,7 +58,17 @@ Read `tasks/AGENTS.md` before creating or executing a task. In short:
 
 ## Build, Test, and Development Commands
 
-No application build, development server, package manifest, or automated test runner is configured. Useful inspection commands from the repository root:
+The repository is a pnpm workspace (`pnpm-workspace.yaml`: `apps/*`, `packages/*`; Node >= 24, pnpm 12). Run from the repository root; paths containing spaces are supported:
+
+- `pnpm install`: install dependencies; also downloads the Electron binary and fixes the node-pty `spawn-helper` executable bit. Build scripts are allow-listed in `pnpm-workspace.yaml` (`allowBuilds`).
+- `pnpm dev`: start the desktop app in electron-vite development mode.
+- `pnpm typecheck`: type-check every workspace package.
+- `pnpm test`: run every package's unit tests (Vitest); no real CLI or model calls.
+- `pnpm test:e2e`: build the desktop app and run the Playwright Electron smoke tests.
+- `pnpm package`: build an unsigned macOS arm64 app directory under `apps/desktop/dist/mac-arm64/`.
+- `pnpm smoke:packaged`: launch the packaged app with `open` and check SQLite, node-pty and login-shell environment resolution; output defaults to `.runtime/desktop/packaged-smoke.json`.
+
+Inspection commands from the repository root:
 
 - `rg --files docs`: list specification files.
 - `rg --files design`: list design documents and assets.
@@ -65,7 +77,7 @@ No application build, development server, package manifest, or automated test ru
 - `rg -l 'FR-STATE-002' specs tasks/*/task.md`: find specs and tasks covering a requirement.
 - `rg -l '^status: in_progress' tasks/*/task.md`: list active tasks.
 
-`.ignore` excludes `tasks/*/evidence/` from default searches; add `--no-ignore-dot` to include it. Quote paths containing spaces when reading individual files. Document actual build and test commands here when implementation tooling is introduced.
+`.ignore` excludes `tasks/*/evidence/` from default searches; add `--no-ignore-dot` to include it. Quote paths containing spaces when reading individual files. Keep the command list above current when tooling changes.
 
 Development preflight commands (real CLI requests; not application tests):
 

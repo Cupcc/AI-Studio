@@ -28,6 +28,9 @@
 
 | 记录 | 主题 | 文档状态 | 关联 task |
 |---|---|---|---|
+| [D20261009-desktop-sqlite-driver](D20261009-desktop-sqlite-driver.md) | SQLite 驱动、数据库位置与迁移 | 草稿 | T20261009-app-skeleton |
+| [D20261009-desktop-ipc-convention](D20261009-desktop-ipc-convention.md) | 进程边界、安全基线与类型化 IPC | 草稿 | T20261009-app-skeleton |
+| [D20261009-desktop-feature-folders](D20261009-desktop-feature-folders.md) | 功能目录与写入范围 | 草稿 | T20261009-app-skeleton |
 | [D20261009-project-knowledge-storage](D20261009-project-knowledge-storage.md) | Project Knowledge 存储格式与位置（04 第 7 节第 1、2 项） | 草稿 | T20261009-project-view |
 | [D20261009-project-view-rendering](D20261009-project-view-rendering.md) | Project View 渲染方式与安全沙箱（第 3 项） | 草稿 | T20261009-project-view |
 | [D20261009-project-view-context](D20261009-project-view-context.md) | Project View Context 注入两种 CLI（第 10 项） | 草稿 | T20261009-project-view |
