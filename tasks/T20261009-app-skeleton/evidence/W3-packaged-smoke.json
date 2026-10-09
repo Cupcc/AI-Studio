@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-09",
+  "launcherCommit": "c544b2b",
+  "artifact": "Existing app-skeleton W1 packaged app; not a rebuild of the resumed Session slice",
+  "isolatedUserData": true,
+  "defaultUserDataOverrideArgument": "--studio-user-data-dir=<fresh temporary directory>",
+  "ok": true,
+  "app": { "isPackaged": true, "platform": "darwin", "arch": "arm64", "electron": "44.4.5", "node": "24.21.0" },
+  "sqlite": { "ok": true, "firstRunApplied": 1, "secondRunApplied": 0, "readBack": true },
+  "shellEnv": { "ok": true, "source": "login-shell", "pathEntryCount": 21 },
+  "pty": { "ok": true, "receivedMarker": true, "exitCode": 0 },
+  "executables": { "codex": { "found": true, "version": "0.161.0" }, "claude": { "found": true, "version": "2.1.295" } },
+  "renderer": { "origin": "app://studio", "topBarRendered": true, "nodeGlobalsAbsent": true, "preloadApiWorks": true, "ok": true }
+}
