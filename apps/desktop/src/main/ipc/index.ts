@@ -3,11 +3,13 @@
 import { contracts } from '@shared/ipc/contracts'
 import type { CoreServices } from '../services/core'
 import { createAppFeature } from './app'
+import { createProjectFeature } from './project'
 import { registerFeatureHandlers, type FeatureHandlers, type MainIpc } from './registry'
 
 export function createFeatures(core: CoreServices): FeatureHandlers[] {
   return [
-    createAppFeature(core)
+    createAppFeature(core),
+    createProjectFeature(core)
   ]
 }
 

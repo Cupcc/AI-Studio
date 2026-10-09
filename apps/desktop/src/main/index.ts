@@ -1,7 +1,13 @@
 // Main process entry: app lifecycle, security setup, IPC and the window.
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import { join } from 'node:path'
 import type { AppInfo } from '@shared/ipc/app'
+import { appContract } from '@shared/ipc/app'
+import { projectContract } from '@shared/ipc/project'
+import { S } from '@shared/project/strings'
+import { installProjectMenu } from './menu/project-menu'
+import { projectShellFor } from './services/project'
+import { createQuitFlow } from './services/project/quit-flow'
 import { registerIpc } from './ipc'
 import { emit } from './ipc/registry'
 import { parseLaunchOptions } from './launch-options'
@@ -45,11 +51,22 @@ function appInfo(): AppInfo {
 }
 
 function openWindow(hidden = false): BrowserWindow {
-  return createMainWindow({
+  const win = createMainWindow({
     preloadPath: join(__dirname, '../preload/index.js'),
     url: devServerUrl ?? APP_ENTRY_URL,
     hidden
   })
+  if (!hidden && process.platform === 'darwin') {
+    // Keep the renderer and its draft/tool state alive while the macOS window
+    // is closed; sessions continue until an explicit application quit.
+    win.on('close', (event) => {
+      if (core && projectShellFor(core).quitFlow?.state !== 'approved') { event.preventDefault(); win.hide() }
+    })
+  }
+  const inactive = () => emit(win.webContents, appContract.events.windowFocusChanged, { focused: false })
+  win.on('hide', inactive)
+  win.on('minimize', inactive)
+  return win
 }
 
 let core: CoreServices | null = null
@@ -67,6 +84,25 @@ function startRuntime(): void {
     }
   })
   disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl))
+  if (!launch.smokeOutput) {
+    const shell = projectShellFor(core)
+    shell.quitFlow = createQuitFlow({
+      getPort: shell.sessionPort,
+      quit: () => app.quit(),
+      askRenderer: (request) => {
+        const win = BrowserWindow.getAllWindows().find((w) => w.isVisible())
+        if (!win) return false
+        emit(win.webContents, projectContract.events.quitRequested, request); return true
+      },
+      askNative: async (request) => {
+        const result = await dialog.showMessageBox({ type: 'question', title: S.quitTitle, message: S.quitBody(request.sessions, request.projects), buttons: [S.cancel, S.quitConfirm], defaultId: 0, cancelId: 0 })
+        return result.response === 1
+      },
+      onError: (error) => console.error('[project] quit failed', error)
+    })
+    app.on('before-quit', shell.quitFlow.onBeforeQuit)
+    installProjectMenu()
+  }
 }
 
 async function runSmokeAndQuit(output: string): Promise<void> {
@@ -117,7 +153,8 @@ if (launch.smokeOutput) {
     startRuntime()
     openWindow()
     app.on('activate', () => {
-      if (BrowserWindow.getAllWindows().length === 0) openWindow()
+      const [win] = BrowserWindow.getAllWindows()
+      if (win) { win.show(); win.focus() } else openWindow()
     })
   })
 

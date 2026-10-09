@@ -2,7 +2,9 @@
 // and one line here; ids are date-prefixed so parallel tasks do not collide.
 import type { Migration } from '../migrator'
 import { coreAppMeta } from './2026100901_core_app_meta'
+import { projectCore } from './2026100902_project_core'
 
 export const migrations: readonly Migration[] = [
-  coreAppMeta
+  coreAppMeta,
+  projectCore
 ]
