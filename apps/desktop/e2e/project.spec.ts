@@ -1,6 +1,6 @@
-import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
 
 const appDir = join(__dirname, '..')
@@ -11,12 +11,16 @@ async function launch() {
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
 }
-async function pickDirectory(path: string) {
+async function pickDirectory(path: string, expectedError?: string) {
   // Replace only the native chooser; validation, identity, IPC and UI remain real.
   await app.evaluate(({ dialog }, selectedPath) => {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [selectedPath] })
   }, path)
   await page.getByRole('button', { name: '打开本地目录', exact: true }).click()
+  // A click accepts the asynchronous open; wait for its visible result before
+  // a following new-Tab action can reuse the originating launcher.
+  if (expectedError) await expect(page.getByRole('alert')).toContainText(expectedError)
+  else await expect(page.getByRole('tab', { name: basename(realpathSync(path)), exact: true })).toHaveAttribute('aria-selected', 'true')
 }
 const workspace = () => page.locator('.project-workspace:not([hidden])')
 async function capture(mode: string, width: number, height: number) {
@@ -108,8 +112,8 @@ test('FR-PROJ-001: symlink/equivalent path identity, errors and recent removal',
   await expect(page.getByRole('tab', { name: 'Canonical Project' })).toHaveAttribute('aria-selected', 'true')
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
   const file = join(dir, 'a-file'); writeFileSync(file, 'x')
-  await pickDirectory(file); await expect(page.getByRole('alert')).toContainText('所选路径不是目录')
-  await pickDirectory(join(dir, 'missing')); await expect(page.getByRole('alert')).toContainText('目录不存在')
+  await pickDirectory(file, '所选路径不是目录')
+  await pickDirectory(join(dir, 'missing'), '目录不存在')
   await expect(page.getByRole('tab')).toHaveCount(2)
   await page.getByRole('button', { name: '从列表移除 Canonical Project' }).click()
   await expect(page.getByRole('button', { name: /^Canonical Project/ })).toHaveCount(0)
