@@ -35,7 +35,7 @@ interface SessionStore {
   catalogs: Record<string, ModelCatalogResult>
   pending: Record<string, boolean>
   errors: Record<string, string | null>
-  opened: Record<string, number>
+  latestRequests: Record<string, number>
   loadProject(projectId: string): Promise<void>
   loadProviders(): Promise<void>
   loadConversation(sessionId: string, older?: boolean): Promise<void>
@@ -51,6 +51,7 @@ interface SessionStore {
   rename(sessionId: string, title: string): Promise<boolean>
   setModel(sessionId: string, model: string | null): Promise<boolean>
   userOpened(projectId: string, sessionId: string): void
+  requestLatest(sessionId: string): void
   closeProject(projectId: string): void
 }
 
@@ -99,7 +100,7 @@ async function operation(key: string, work: () => Promise<void>): Promise<boolea
 }
 
 export const useSessions = create<SessionStore>()((set, get) => ({
-  summaries: {}, projects: {}, projectStates: {}, providers: [], providersError: null, defaultCli: {}, conversations: {}, drafts: {}, draftLoading: {}, catalogs: {}, pending: {}, errors: {}, opened: {},
+  summaries: {}, projects: {}, projectStates: {}, providers: [], providersError: null, defaultCli: {}, conversations: {}, drafts: {}, draftLoading: {}, catalogs: {}, pending: {}, errors: {}, latestRequests: {},
   async loadProject(projectId) {
     if (get().projects[projectId]?.loaded) return
     return once(`project:${projectId}`, async () => {
@@ -210,8 +211,10 @@ export const useSessions = create<SessionStore>()((set, get) => ({
     if (summary) acceptSummary({ ...summary, model })
   }),
   userOpened(projectId, sessionId) {
-    set((s) => ({ opened: { ...s.opened, [sessionId]: (s.opened[sessionId] ?? 0) + 1 } }))
     void sessionApi().opened({ projectId, sessionId }).catch((error) => set((s) => ({ errors: { ...s.errors, [`open:${sessionId}`]: String(error) } })))
+  },
+  requestLatest(sessionId) {
+    set((s) => ({ latestRequests: { ...s.latestRequests, [sessionId]: (s.latestRequests[sessionId] ?? 0) + 1 } }))
   },
   closeProject(projectId) {
     set((s) => ({ drafts: Object.fromEntries(Object.entries(s.drafts).filter(([id]) => !id.startsWith(`${projectId}:`))), projects: { ...s.projects, [projectId]: { loaded: false, loading: false, error: null } } }))

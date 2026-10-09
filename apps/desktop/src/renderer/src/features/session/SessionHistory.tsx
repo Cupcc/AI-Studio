@@ -119,7 +119,10 @@ export function SessionHistory({ project, canvas, active }: ShellSlotProps) {
             if (event.nativeEvent.isComposing || event.keyCode === 229) return
             if (event.key === 'Enter') { event.preventDefault(); commitRename() }
             if (event.key === 'Escape') { event.preventDefault(); cancelRename.current = true; commitRename() }
-          }} /> : <button className="session-row__open" title={row.session.title} aria-current={selectedId === row.id ? 'page' : undefined} tabIndex={(focusId ?? rows.find((r) => r.kind === 'session')?.id) === row.id ? 0 : -1} onFocus={() => setFocusId(row.id)} onKeyDown={(event) => keyNavigation(event, row.id)} onClick={() => useProjectShell.getState().openSession(project.id, row.id)}>{row.session.title}</button>}
+          }} /> : <button className="session-row__open" title={row.session.title} aria-current={selectedId === row.id ? 'page' : undefined} tabIndex={(focusId ?? rows.find((r) => r.kind === 'session')?.id) === row.id ? 0 : -1} onFocus={() => setFocusId(row.id)} onKeyDown={(event) => keyNavigation(event, row.id)} onClick={() => {
+            useSessions.getState().requestLatest(row.id)
+            useProjectShell.getState().openSession(project.id, row.id)
+          }}>{row.session.title}</button>}
           {renaming !== row.id && <button className={`session-row__more icon-button ${menu === row.id ? 'is-open' : ''}`} aria-label={`更多操作 ${row.session.title}`} aria-expanded={menu === row.id} onClick={() => setMenu(menu === row.id ? null : row.id)}>⋯</button>}
           <SessionStatusIndicator status={row.session.status} />
           {pending[`rename:${row.id}`] && <span className="sr-only">正在保存标题</span>}

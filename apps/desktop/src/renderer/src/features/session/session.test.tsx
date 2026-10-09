@@ -65,6 +65,7 @@ describe('Session IPC store · FR-SESSION/STATE · AC-02–05', () => {
     port.setWindowForeground(true); port.setViewing('p', 's'); await Promise.resolve()
     expect(api.opened).toHaveBeenCalledTimes(1)
     port.userOpenedSession('p', 's'); await Promise.resolve(); expect(api.opened).toHaveBeenCalledTimes(2)
+    expect(useSessions.getState().latestRequests.s).toBeUndefined()
   })
   it('creates a Session only on first send and preserves new text typed while creation is pending', async () => {
     await useSessions.getState().loadProject('p')
@@ -161,6 +162,14 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
 })
 
 describe('Session History and native input cards · FR-NAV-003/STATE-002', () => {
+  it('requests the latest scroll position only for an explicit History open', () => {
+    useSessions.setState({ summaries: { s: summary() }, projects: { p: { loaded: true, loading: false, error: null } } })
+    render(<SessionHistory project={project} canvas={{ mode: 'session', sessionId: 's' }} active />)
+    fireEvent.click(screen.getByRole('button', { name: 'Build feature' }))
+    expect(useSessions.getState().latestRequests.s).toBe(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Build feature' }))
+    expect(useSessions.getState().latestRequests.s).toBe(2)
+  })
   it('virtualizes 2,000 Sessions, anchors dates to user messages, and persists in-place Rename', async () => {
     const list = Array.from({ length: 2000 }, (_, index) => summary({ id: `s${index}`, title: `Session ${index}`, lastUserMessageAt: Date.now() - index * 1_000, updatedAt: Date.now() + index * 1_000 }))
     const rows = historyRows(list)
