@@ -1,0 +1,47 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification
+
+ ❯ tasks/T20261009-session-slice/evidence/W6-renderer.test.ts (2 tests | 2 failed) 6ms
+   × keeps a terminal summary that arrives before first-send IPC acceptance 5ms
+   × keeps terminal state and a renamed title when rename IPC returns after a terminal event 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-session-slice/evidence/W6-renderer.test.ts > keeps a terminal summary that arrives before first-send IPC acceptance
+AssertionError: expected 'running' to be 'none' // Object.is equality
+
+Expected: "none"
+Received: "running"
+
+ ❯ tasks/T20261009-session-slice/evidence/W6-renderer.test.ts:27:70
+     25|   resolveCreate(summary('running'))
+     26|   await pending
+     27|   expect(useSessions.getState().summaries['race-session']!.activity).t…
+       |                                                                      ^
+     28|   expect(useSessions.getState().projectStates.p!.attention).toBe('comp…
+     29| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tasks/T20261009-session-slice/evidence/W6-renderer.test.ts > keeps terminal state and a renamed title when rename IPC returns after a terminal event
+AssertionError: expected 'running' to be 'none' // Object.is equality
+
+Expected: "none"
+Received: "running"
+
+ ❯ tasks/T20261009-session-slice/evidence/W6-renderer.test.ts:45:70
+     43|   resolveRename({ ...summary('running'), title: 'Renamed', titleSource…
+     44|   await pending
+     45|   expect(useSessions.getState().summaries['race-session']!.activity).t…
+       |                                                                      ^
+     46|   expect(useSessions.getState().summaries['race-session']!.title).toBe…
+     47| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  17:47:14
+   Duration  636ms (environment 87%, transform 9%, import 3%, tests 1%, worker 1%)
+

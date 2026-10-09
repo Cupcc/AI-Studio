@@ -1,0 +1,9 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio/.claude/worktrees/foundation-verification
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  17:52:58
+   Duration  1.38s (tests 85%, transform 13%, import 2%)
+

@@ -42,7 +42,7 @@
 
 ## 未覆盖与边界
 
-- 当前应用未接真实 Session 状态 / History / 草稿 / Conversation 和停止实现。注意力与阻塞 Session 关闭流程只验证接口、UI 和主进程编排；优先级汇总、后台 CLI 不受影响及查看清除应在 session-slice 验收。
+- 本次 Project 验收基线未接真实 Session 状态 / History / 草稿 / Conversation 和停止实现。注意力与阻塞 Session 关闭流程只验证接口、UI 和主进程编排；后续集成的优先级汇总、后台 CLI 不受影响及查看清除见 [Session task 验收](../T20261009-session-slice/acceptance.md)。
 - Project View Preview 与 Files / Diff / Browser / Terminal 内容为占位；本次验证区域选择、展开、工具与宽度保存。
 - macOS 已执行；其他平台、系统 TCC 隐私弹窗、已打开目录运行中卸载 / 移动、宿主异常崩溃不在此验收证据内。
 - 视觉参数是中性临时 Token；Shell 尺寸仍继承探索中设计状态，本次通过不构成设计确认。

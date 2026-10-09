@@ -1,0 +1,13 @@
+{
+  "provider": "simulated",
+  "database": "real SQLite file reopened",
+  "summaryCount": 2000,
+  "reopenListMs": 25.926291999999876,
+  "transcriptRows": 1202,
+  "uniqueRows": 1202,
+  "pageLimit": 500,
+  "sequentialRows": true,
+  "lazyStartup": true,
+  "resumeNativeIdRetained": true,
+  "draftTitleUnreadRetained": true
+}
