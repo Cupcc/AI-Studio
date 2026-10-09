@@ -124,12 +124,12 @@ export function SessionHistory({ project, canvas, active }: ShellSlotProps) {
             useSessions.getState().requestLatest(row.id)
             useProjectShell.getState().openSession(project.id, row.id)
           }}>{row.session.title}</button>}
-          {renaming !== row.id && <button className={`session-row__more icon-button ${menu === row.id ? 'is-open' : ''}`} aria-label={`更多操作 ${row.session.title}`} aria-expanded={menu === row.id} onClick={() => setMenu(menu === row.id ? null : row.id)}><Icon name="dots" size={14} /></button>}
+          {renaming !== row.id && <button className={`session-row__more ${menu === row.id ? 'is-open' : ''}`} aria-label={`更多操作 ${row.session.title}`} data-tip="更多操作" data-tip-align="end" aria-expanded={menu === row.id} onClick={() => setMenu(menu === row.id ? null : row.id)}><Icon name="dots" size={14} /></button>}
           <SessionStatusIndicator status={row.session.status} />
           {pending[`rename:${row.id}`] && <span className="sr-only">正在保存标题</span>}
           {errors[`rename:${row.id}`] && <span className="session-row__error" role="alert" title={errors[`rename:${row.id}`] ?? undefined}>标题保存失败</span>}
-          {menu === row.id && <div className="session-row__menu" role="menu" ref={menuRef} onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); setMenu(null); ref.current?.querySelector<HTMLButtonElement>(`[data-session-row="${CSS.escape(row.id)}"] .session-row__more`)?.focus() } }}>
-            <button role="menuitem" onClick={() => { cancelRename.current = false; renameCommitted.current = false; setTitle(row.session.title); setRenaming(row.id); setMenu(null) }}>Rename</button>
+          {menu === row.id && <div className="session-row__menu popover" role="menu" ref={menuRef} onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); setMenu(null); ref.current?.querySelector<HTMLButtonElement>(`[data-session-row="${CSS.escape(row.id)}"] .session-row__more`)?.focus() } }}>
+            <button className="menu-item" role="menuitem" onClick={() => { cancelRename.current = false; renameCommitted.current = false; setTitle(row.session.title); setRenaming(row.id); setMenu(null) }}>Rename</button>
           </div>}
         </div>)}
     </div>

@@ -25,6 +25,7 @@ export function InputRequestCard({ item }: { item: Extract<TranscriptItem, { kin
   const readOnly = !!resolution || !!summary?.stopping || summary?.activity !== 'needs_input'
   useEffect(() => { if (resolution) { setAnswers({}); setMessage('') } }, [resolution])
   const answer = (response: InputResponse) => { void useSessions.getState().answer(item.sessionId, request.requestId, response) }
+  const primaryId = request.kind === 'approval' ? (request.options.find((option) => option.primary) ?? request.options[0])?.id : undefined
   const canAnswer = request.kind === 'question' && request.questions.every((question) => {
     const current = answers[question.id]
     return !!current?.optionIds?.length || (question.allowFreeText && !!current?.text?.trim())
@@ -41,7 +42,7 @@ export function InputRequestCard({ item }: { item: Extract<TranscriptItem, { kin
       {request.toolInput !== undefined && <details><summary>工具参数</summary><pre>{JSON.stringify(request.toolInput, null, 2)}</pre></details>}
       {!resolution && <>
         {request.allowsMessage && <input aria-label="决定说明（可选）" placeholder="说明（可选）" value={message} disabled={readOnly || pending} onChange={(event) => setMessage(event.target.value)} />}
-        <div className="request-card__actions">{request.options.map((option) => <button key={option.id} className={option.primary ? 'primary-button' : 'secondary-button'} title={option.description} disabled={readOnly || pending} onClick={() => answer({ kind: 'approval', optionId: option.id, ...(message.trim() ? { message } : {}) })}>{option.label}</button>)}<span className="request-card__hint muted">也可以在下方直接回复</span></div>
+        <div className="request-card__actions">{request.options.map((option) => <button key={option.id} className={option.id === primaryId ? 'primary-button' : 'secondary-button'} title={option.description} disabled={readOnly || pending} onClick={() => answer({ kind: 'approval', optionId: option.id, ...(message.trim() ? { message } : {}) })}>{option.label}</button>)}<span className="request-card__hint muted">也可以在下方直接回复</span></div>
       </>}
     </> : <>
       {request.title && <p className="request-card__title">{request.title}</p>}

@@ -207,4 +207,12 @@ describe('Session History and native input cards · FR-NAV-003/STATE-002', () =>
     view.rerender(<InputRequestCard item={{ ...item, resolution: { status: 'answered', response: { kind: 'approval', optionId: 'native-yes' } } }} />)
     expect(screen.queryByRole('button', { name: 'Allow once' })).toBeNull(); expect(screen.getByText('已选择：Allow once')).toBeTruthy()
   })
+  it('shows exactly one primary action: the adapter-flagged option, else the first (Shell Spec v01 §5)', () => {
+    const item = (options: { id: string; label: string; primary?: boolean }[]): Extract<TranscriptItem, { kind: 'input_request' }> => ({ id: 'request', sessionId: 's', turnId: 't', sequence: 1, at: 0, kind: 'input_request', request: { kind: 'approval', requestId: 'r', turnId: 't', createdAt: 0, nativeType: 'Bash', subject: 'command', title: 'Allow command?', allowsMessage: false, options: options.map((option) => ({ ...option, intent: 'allow' as const })) }, resolution: null })
+    const classes = () => ['Yes', 'No'].map((name) => screen.getByRole('button', { name }).className)
+    const view = render(<InputRequestCard item={item([{ id: 'a', label: 'Yes' }, { id: 'b', label: 'No' }])} />)
+    expect(classes()).toEqual(['primary-button', 'secondary-button'])
+    view.rerender(<InputRequestCard item={item([{ id: 'a', label: 'Yes' }, { id: 'b', label: 'No', primary: true }])} />)
+    expect(classes()).toEqual(['secondary-button', 'primary-button'])
+  })
 })
