@@ -9,7 +9,7 @@
   - Wave 1 并行：app-skeleton W1；agent-adapter W1（接口与核心）；project-view W1（调研）；project-shell W1、session-slice W1（spec 草稿）。
   - agent-adapter W1 合并后，并行启动 agent-adapter W2（Codex）与 W3（Claude）。
   - spec 草稿的未决问题由人回答后，project-shell 与 session-slice 进入实现（Wave 2）。
-- 模型：仅限 Opus 5.5（xhigh / high）与 Sonnet 5.5（xhigh / high）（2026-10-09 确认）。协议、并发与状态机用 Opus xhigh；骨架与 spec 起草用 Opus high；调研与验收用 Sonnet xhigh；范围明确的文档整理用 Sonnet high。
+- 接续团队模型：仅限 GPT-6 Astra（xhigh / high）与 GPT-6.1 Sol（xhigh / high），替代此前 Claude 团队的模型安排（2026-10-09 对话确认）。协议与状态机使用 Astra xhigh；Claude Provider 使用 Astra high；壳层与界面使用 Sol xhigh；独立验收与范围明确的整理使用 Sol high。已完成 worker 的历史模型记录保留。
 - 根目录文件归属：`package.json`、`pnpm-workspace.yaml`、`tsconfig*.json`、`.gitignore`、`.npmrc` 由 app-skeleton W1 维护；其他 worker 不修改。`pnpm-lock.yaml` 冲突在合并时重新生成。`AGENTS.md` 由主 Agent 在合并时更新。
 - 真实 CLI 调用：只在显式开启的集成测试中限量运行，测试目录在 `/tmp`（2026-10-09 确认）。
 
@@ -20,15 +20,15 @@
 | Task | Worker | 职责 | 模型 | 依赖 | 状态 |
 |---|---|---|---|---|---|
 | app-skeleton | W1 | 应用骨架 | Opus 5.5 high | — | done |
-| app-skeleton | W2 | 验收 | Sonnet 5.5 xhigh | app-skeleton W1 | in_progress |
+| app-skeleton | W2 | 验收 | Sonnet 5.5 xhigh | app-skeleton W1 | done（待人签收） |
 | agent-adapter | W1 | 接口、事件模型、核心运行时、spec 草稿 | Opus 5.5 xhigh | — | done |
-| agent-adapter | W2 | Codex Provider | Opus 5.5 xhigh | agent-adapter W1 | in_progress |
-| agent-adapter | W3 | Claude Provider | Opus 5.5 high | agent-adapter W1 | in_progress |
+| agent-adapter | W2 | Codex Provider | GPT-6 Astra xhigh | agent-adapter W1 | in_progress |
+| agent-adapter | W3 | Claude Provider | GPT-6 Astra high | agent-adapter W1 | in_progress |
 | project-view | W1 | 待决事项调研与决定草稿 | Sonnet 5.5 xhigh | — | done |
 | project-shell | W1 | `specs/project`、`specs/navigation` 草稿 | Sonnet 5.5 high | — | done |
-| project-shell | W2 | 壳层实现 | Opus 5.5 high | app-skeleton W1 | in_progress |
+| project-shell | W2 | 壳层实现 | GPT-6.1 Sol xhigh | app-skeleton W1 | in_progress |
 | session-slice | W1 | `specs/session`、`specs/chat`、`specs/input` 草稿 | Opus 5.5 high | — | done |
-| session-slice | W2 | 参考 Claude Desktop / ChatGPT Desktop 修订非阻塞问题的推荐 | Sonnet 5.5 xhigh | session-slice W1 | in_progress |
+| session-slice | W2 | 参考 Claude Desktop / ChatGPT Desktop 修订非阻塞问题的推荐 | 主 Agent 接续 | session-slice W1 | done |
 
 ## 进度与决定
 
@@ -41,3 +41,4 @@
 - 2026-10-09 约 11:5x 三个运行中的 worker（app-skeleton W1、agent-adapter W1、session-slice W2）因账户会话额度限流（HTTP 429，12:10 重置）中断。13:18 恢复：app-skeleton W1 与 agent-adapter W1 通过消息续跑（worktree 中未提交进度保留），并向 agent-adapter W1 补充 I-Q2、S-Q2 的确认结果、session spec 第 4.1 节的接口期望和 Claude SDK `origin` 发现；session-slice W2 未写入任何文件，worktree 已被自动清理，重新启动。要求 worker 分步提交，降低再次中断的损失。
 - 2026-10-09 app-skeleton W1 合并（`70b9ca6`），干净克隆复核通过；`AGENTS.md` 记录构建命令；project-shell 转为 ready 并启动 W2 实现；启动 app-skeleton W2 验收。
 - 2026-10-09 agent-adapter W1 合并（`e680c2e`），干净克隆复核通过；启动 agent-adapter W2（Codex）、W3（Claude）。
+- 2026-10-09 用户要求 Codex 接续并调用 agent team，并限定上述四种 GPT 模型配置。恢复检查：`dev/v1` 位于 `385adf0` 且干净；7 个旧 worktree 中仅 project-shell W2 有未提交实现（`agent-a014c55195a9e9487`），保留并在原处继续；其他旧分支提交均已在集成分支。Provider worker 尚无落盘实现，因此从当前集成提交创建独立 worktree。首批并行继续 Project 壳层、Codex Provider、Claude Provider；主 Agent 恢复 Session 推荐与接口计划并负责后续集成。app-skeleton W2 验收已由 `385adf0` 合并，任务不标记 done，等待人签收。

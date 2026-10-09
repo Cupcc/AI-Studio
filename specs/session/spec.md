@@ -245,7 +245,7 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 |---|---|---|
 | `id` | 04 §5 | 客户端 ID |
 | `project_id` | 04 §5 | 所属 Project |
-| `cli_type` | 04 §5 | `codex` / `claude-code`；创建后不可变（FR-CHAT-003） |
+| `cli_type` | 04 §5 | `codex` / `claude`（Adapter ProviderId；显示名为 Claude Code）；创建后不可变（FR-CHAT-003） |
 | `cli_session_id` | 04 §5 | 原生会话 ID；可为空直到 Adapter 报告；绑定后不可变 |
 | `title` | 04 §5 | 显示标题；生成方法见 chat spec |
 | `title_source` | 提案 | `client` / `native` / `user`；决定原生名称能否覆盖（chat spec） |
@@ -295,7 +295,7 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 
 ### 4.1 需要 CLI Adapter 提供（抽象）
 
-以下为本模块所需能力，命名为示意。`specs/agent-adapter/spec.md` 并行起草中，主 Agent 需按下表与其对齐。
+以下为本模块所需能力，命名为示意。实现使用 [Adapter spec §4](../agent-adapter/spec.md) 与 `packages/agent-adapter/src/provider.ts` 的正式契约；两者的名称映射见 Adapter §4.5。本轮对齐记录见 [research](../../tasks/T20261009-session-slice/research.md) §3。
 
 | 能力 / 事件 | 用途 | 对应 06 第 5 节 / 04 第 4 节 | 需对齐的点 |
 |---|---|---|---|
@@ -316,7 +316,7 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 | `capabilities(cli)` | 输入区与状态机分支 | Shell Spec 第 6 节 | 至少：Running 中可否提交、等待请求是否接受自由文本、是否提供原生名称 |
 | `shutdownAll()` | 退出应用，不遗留子进程 | 04 §4 第 7 条 | — |
 
-所有事件需携带 Session 句柄与 turn ID，本模块据此丢弃迟到事件（E14）。
+回合事件携带 Adapter Session 句柄与 `turnId`，据此丢弃迟到事件（E14）；Session 级原生 ID、标题、Runtime 事件没有 `turnId`，按当前句柄 / Runtime generation 处理。Stop 清理失败以 `interrupted + stop.cleanup = failed` 与 `session.error` 报告，Session Manager 合并为一次 Error，不生成成功的“已停止”完成行（Adapter §4.5）。
 
 ### 4.2 向 Project 壳层与 navigation 提供
 
@@ -346,6 +346,8 @@ Runtime 句柄、`pending_requests`、`stopping`、流式中的部分文本只�
 - input → session：`send(sessionId, message)`、`answer(sessionId, requestId, optionId)`、`replyWithText(sessionId, text)`、`stop(sessionId)`、`setModel(sessionId, model)`；以及只读的控件状态输入（`activity`、`stopping`、`capabilities`）。
 
 ## 5. 未决问题
+
+2026-10-09 参考应用复核见 [Session research](../../tasks/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|

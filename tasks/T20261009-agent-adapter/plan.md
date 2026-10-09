@@ -8,6 +8,8 @@
 
 ## Workers
 
+2026-10-09 接续分配覆盖下表尚未完成 worker 的历史模型：W2 使用 GPT-6 Astra xhigh，W3 使用 GPT-6 Astra high，W4 使用 GPT-6.1 Sol high。W2 写入 worktree `.claude/worktrees/codex-provider-resume`，W3 写入 `.claude/worktrees/claude-provider-resume`；原有目录写入范围不变，共享核心变更先报告主 Agent。
+
 | ID | 职责 | 写入范围 | 产出 | 依赖 | 状态 |
 |---|---|---|---|---|---|
 | W1 | 接口、事件模型、核心、测试工具、spec 草稿（Opus 5.5 xhigh） | `packages/agent-adapter/**`（`src/codex/**`、`src/claude/**` 及对应测试目录除外）；`specs/agent-adapter/spec.md`；本 task 的 `research.md`、`evidence/W1-*` | 包脚手架与依赖、接口、核心、模拟传输工具、spec 草稿 | — | done |
@@ -21,3 +23,4 @@
 - 2026-10-09 W1 因限流中断后续跑完成，合并到 `dev/v1`（`e680c2e`）；`pnpm-lock.yaml` 冲突以 `pnpm install --lockfile-only` 重新生成。干净克隆复核：类型检查通过，单元测试 desktop 53/53、agent-adapter 101/101。
 - 2026-10-09 W1 提出的问题 A-Q1～A-Q5（`specs/agent-adapter/spec.md` 第 5 节）按 2026-10-09 对话指示先按推荐实现、保持待确认：A-Q4（Codex 拒绝后交付文字的方式）由 W2 验证；A-Q5 按推荐加载全部 `settingSources` 并使用 `claude_code` 系统提示预设。与 session spec 第 4.1 节的不一致见 adapter spec 第 4.5 节，由 session-slice 实现时按 adapter 接口对齐。
 - 2026-10-09 启动 W2（Codex）与 W3（Claude）。
+- 2026-10-09 Codex 团队接续：原 Provider worker 无落盘实现，W2 / W3 从 `385adf0` 创建独立分支，按上述范围重新启动。用户限定 GPT-6 Astra 与 GPT-6.1 Sol 的 high / xhigh 配置（2026-10-09 对话确认）。

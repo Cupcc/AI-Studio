@@ -1,6 +1,6 @@
 ---
 id: T20261009-session-slice
-status: draft
+status: ready
 fr: [FR-NAV-003, FR-CHAT-001, FR-CHAT-002, FR-CHAT-003, FR-SESSION-001, FR-SESSION-002, FR-SESSION-003, FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-004, FR-STATE-005, FR-STATE-006, FR-STATE-007, FR-INPUT-001, FR-INPUT-002]
 ac: [AC-02, AC-03, AC-04, AC-05]
 specs: [specs/session/spec.md, specs/chat/spec.md, specs/input/spec.md]
@@ -63,4 +63,4 @@ AC 场景（真实 CLI，限量运行）：
 | 问题 | 回答（确认日期） |
 |---|---|
 | spec 阻塞问题 S-Q1、S-Q2、I-Q2、NAV-Q4 | 已回答，见各 spec 第 5 节（2026-10-09 确认） |
-| 其余非阻塞问题：参考 Claude Desktop 与 ChatGPT Desktop 修订推荐（session-slice W2 进行中），保持待确认，先按推荐实现 | 2026-10-09 对话指示 |
+| 其余非阻塞问题：参考 Claude Desktop 与 ChatGPT Desktop 修订推荐（见 research.md），保持待确认，先按推荐实现 | 2026-10-09 对话指示；W2 复核已落盘 |

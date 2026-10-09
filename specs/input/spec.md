@@ -78,7 +78,7 @@
 
 #### Running 中发送
 
-Shell Spec 第 6 节规定“Running 期间能否排队发送遵循 CLI 原生能力”。Adapter 需按 CLI 报告能力 `queueWhileRunning`（session spec 第 4.1 节 `capabilities`）。Claude 的排队消息在 Stop 时如何处理尚未验证（06 第 5 节 `still_queued`）。建议本切片先实现“不支持”分支：Running 中 Enter 不发送，按钮保持 Stop，输入内容保留到本轮结束后由用户发送（I-Q3）。
+Shell Spec 第 6 节规定“Running 期间能否排队发送遵循 CLI 原生能力”。Adapter 按 CLI 报告 `capabilities.inputWhileRunning`（Adapter spec §4.5）。Claude 的排队消息在 Stop 时如何处理尚未验证（06 第 5 节 `still_queued`）。建议本切片先实现 `none` 分支：Running 中 Enter 不发送，按钮保持 Stop，输入内容保留到本轮结束后由用户发送（I-Q3）。
 
 #### 在输入框答复 Needs Input
 
@@ -128,10 +128,12 @@ Shell Spec 第 6 节规定“Running 期间能否排队发送遵循 CLI 原生�
 |---|---|---|
 | `listModels(cli)` → `[{id, displayName, isDefault}]` | Model Selector；草稿阶段可用 | 不得为读取目录创建原生会话（chat spec 第 4.2 节） |
 | `setModel` / 发送时携带模型 | 下一轮生效 | 06 第 6 节未验证同 Session 切换 |
-| `capabilities(cli).queueWhileRunning` | Running 中发送 | I-Q3 |
-| `capabilities(cli).freeTextAnswer` 与 `replyWithText` 语义 | 输入框回复 Needs Input | I-Q2 |
+| `capabilities.inputWhileRunning` | Running 中发送；本切片为 `none` | I-Q3；Adapter 正式契约 |
+| `capabilities.freeTextAnswers` 与 `replyWithText(text)` | 输入框回复 Needs Input；作用集合由 Adapter 取当前轮的待答复请求 | I-Q2；Adapter 正式契约 |
 
 ## 5. 未决问题
+
+2026-10-09 参考应用复核见 [Session research](../../tasks/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|

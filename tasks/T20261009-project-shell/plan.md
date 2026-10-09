@@ -8,6 +8,8 @@
 
 ## Workers
 
+2026-10-09 接续分配覆盖下表尚未完成 worker 的历史模型：W2 使用 GPT-6.1 Sol xhigh，W3 使用 GPT-6.1 Sol high。W2 在原 worktree `.claude/worktrees/agent-a014c55195a9e9487` 继续，保留已有未提交 Project service、IPC、共享类型与迁移代码；写入范围沿用下表。
+
 | ID | 职责 | 写入范围 | 产出 | 依赖 | 状态 |
 |---|---|---|---|---|---|
 | W1 | spec 草稿（Sonnet 5.5 high） | `specs/project/spec.md`、`specs/navigation/spec.md` | spec 草稿与未决问题 | — | done |
@@ -20,3 +22,5 @@
 - 2026-10-09 task 卡片为 draft，等待 spec 草稿。
 - 2026-10-09 W1 完成并合并到 `dev/v1`：`specs/project/spec.md`（PROJ-Q1～Q17）、`specs/navigation/spec.md`（NAV-Q1～Q13）。阻塞项 PROJ-Q1～Q3；待与 session-slice 的问题合并后一并提交人回答。发现：Rename 在 FR-NAV-003（P0）与 02 第 6 节 MVP 表（P1）优先级不一致（NAV-Q4）。
 - 2026-10-09 阻塞问题 PROJ-Q1～Q3 已回答；细化验收标准，task 转为 ready；启动 W2 实现。
+- 2026-10-09 Codex 团队接续 W2：先检查保留的未提交实现，再完成壳层与验证。Session 接口尽早报告主 Agent，供下一批 Session worker 对齐。用户限定 GPT-6 Astra 与 GPT-6.1 Sol 的 high / xhigh 配置（2026-10-09 对话确认）。
+- 2026-10-09 W2 写入范围补充 `apps/desktop/e2e/app.spec.ts`：仅更新新增 project IPC / 壳层导致失效的骨架冒烟断言。Session 重复点击须发送 opened 信号，window focus 与 opened 分开（S-Q1 已确认）。
