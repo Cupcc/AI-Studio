@@ -351,7 +351,9 @@ export class SessionController implements AgentSession {
         text,
       );
     } catch (error) {
-      for (const [, entry] of entries) entry.answering = false;
+      for (const [requestId, entry] of entries) {
+        if (this.pending.get(requestId) === entry) entry.answering = false;
+      }
       throw toAdapterError(error, 'provider_error');
     }
     for (const [requestId, entry] of entries) {
@@ -371,7 +373,7 @@ export class SessionController implements AgentSession {
     try {
       await this.driver.respondToInput({ request: entry.request, nativeRef: entry.nativeRef }, response);
     } catch (error) {
-      entry.answering = false;
+      if (this.pending.get(requestId) === entry) entry.answering = false;
       throw toAdapterError(error, 'provider_error');
     }
     if (this.pending.get(requestId) !== entry) return;
@@ -818,7 +820,7 @@ export class SessionController implements AgentSession {
       inputRequested: (turnId, init, nativeRef) => this.onInputRequested(turnId, init, nativeRef),
       inputResolvedNatively: (requestId) => {
         const entry = this.pending.get(requestId);
-        if (!entry || entry.answering) return;
+        if (!entry) return;
         this.pending.delete(requestId);
         this.emit('input.resolved', {
           turnId: entry.request.turnId,

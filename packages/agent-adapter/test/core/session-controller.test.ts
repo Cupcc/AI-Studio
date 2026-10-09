@@ -285,6 +285,45 @@ describe('SessionController: input requests', () => {
     expect(JSON.stringify(recorder.last('input.resolved'))).not.toContain('hunter2');
   });
 
+  it.each([
+    ['answer', 'success'], ['answer', 'failure'],
+    ['composer', 'success'], ['composer', 'failure'],
+  ] as const)('honours native withdrawal during an in-flight %s followed by %s (FR-STATE-002)', async (kind, outcome) => {
+    let release!: () => void;
+    let first = true;
+    const inFlight = new Promise<void>((resolve, reject) => {
+      release = () => outcome === 'failure' ? reject(new Error('delivery failed')) : resolve();
+    });
+    const deliver = () => first ? inFlight : Promise.resolve();
+    const { controller, sink, recorder } = makeSession({
+      behavior: { onRespond: deliver, onDeclineWithText: deliver },
+    });
+    const turnId = await startTurn(controller);
+    const withdrawn = sink.inputRequested(turnId, approval(), { rpcId: 1 })!;
+    const pending = kind === 'answer'
+      ? controller.respondToInput(withdrawn, { kind: 'approval', optionId: 'accept' })
+      : controller.replyWithText('Use another approach');
+    const other = sink.inputRequested(turnId, approval(), { rpcId: 2 })!;
+
+    sink.inputResolvedNatively(withdrawn);
+    sink.inputResolvedNatively(withdrawn);
+    expect(controller.pendingInputs.map((request) => request.requestId)).toEqual([other]);
+    expect(recorder.ofType('input.resolved')).toMatchObject([
+      { requestId: withdrawn, resolution: { status: 'cancelled', reason: 'native_resolved' } },
+    ]);
+    release();
+    if (outcome === 'failure') await expect(pending).rejects.toMatchObject({ code: 'provider_error' });
+    else await pending;
+    expect(controller.pendingInputs.map((request) => request.requestId)).toEqual([other]);
+    expect(recorder.ofType('input.resolved')).toHaveLength(1);
+    await expect(controller.respondToInput(withdrawn, { kind: 'approval', optionId: 'accept' }))
+      .rejects.toMatchObject({ code: 'invalid_argument' });
+    first = false;
+    await controller.respondToInput(other, { kind: 'approval', optionId: 'decline' });
+    expect(controller.pendingInputs).toEqual([]);
+    expect(recorder.ofType('input.resolved')).toHaveLength(2);
+  });
+
   it('reports native withdrawal and cancels leftovers when the turn ends', async () => {
     const { controller, sink, driver, recorder } = makeSession();
     const turnId = await startTurn(controller);
