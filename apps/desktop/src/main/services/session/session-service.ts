@@ -54,7 +54,7 @@ export class SessionService implements MainSessionPort {
   private readonly entries = new Map<string, Entry>()
   private readonly providers = new Map<SessionCli, AgentProvider>()
   private readonly viewing = new Map<number, SessionViewing>()
-  private readonly closing = new Set<string>()
+  private readonly closing = new Map<string, number>()
   private readonly closed = new Set<string>()
   private readonly dirty = new Map<string, TranscriptItem>()
   private readonly changed = new Map<string, TranscriptItem>()
@@ -512,10 +512,13 @@ export class SessionService implements MainSessionPort {
     if (!turn || !item || !entry.runtime || entry.summary.stopping) throw new Error('请求已失效')
     if (turn.answering) throw new Error('正在提交答复')
     turn.answering = true
+    const runtime = entry.runtime
+    const generation = entry.generation
     this.rememberAnswer(entry, item.request, response)
     try {
-      await entry.runtime.respondToInput(requestId, response)
-      if (this.secretRequest(item.request)) this.clearComposer(entry)
+      await runtime.respondToInput(requestId, response)
+      if (!this.disposed && entry.generation === generation && entry.runtime === runtime && entry.turn === turn
+        && !entry.summary.stopping && item.resolution?.status === 'answered' && this.secretRequest(item.request)) this.clearComposer(entry)
     }
     catch (error) { throw new Error(this.scrub(entry, toErrorInfo(error).message)) }
     finally { turn.answering = false }
@@ -612,30 +615,49 @@ export class SessionService implements MainSessionPort {
     return { sessions: entries.length, projects: new Set(entries.map(entry => entry.summary.projectId)).size }
   }
 
+  private lockProject(projectId: string): () => void {
+    this.closing.set(projectId, (this.closing.get(projectId) ?? 0) + 1)
+    return () => {
+      const remaining = (this.closing.get(projectId) ?? 1) - 1
+      if (remaining > 0) this.closing.set(projectId, remaining)
+      else this.closing.delete(projectId)
+    }
+  }
+
   async stopProjectTurns(projectId: string): Promise<StopProjectSessionsResult> {
     this.project(projectId)
-    this.closing.add(projectId)
-    const targets = [...this.entries.values()].filter(entry => entry.summary.projectId === projectId && entry.turn)
-    const result: StopProjectSessionsResult = { stopped: [], failed: [] }
-    await Promise.all(targets.map(async entry => {
-      try { await this.stop(entry.summary.id); result.stopped.push(entry.summary.id) }
-      catch (error) { result.failed.push({ sessionId: entry.summary.id, reason: error instanceof Error ? error.message : '停止失败' }) }
-    }))
-    if (result.failed.length) this.closing.delete(projectId)
-    return result
+    const release = this.lockProject(projectId)
+    try {
+      const targets = [...this.entries.values()].filter(entry => entry.summary.projectId === projectId && entry.turn)
+      const result: StopProjectSessionsResult = { stopped: [], failed: [] }
+      await Promise.all(targets.map(async entry => {
+        try { await this.stop(entry.summary.id); result.stopped.push(entry.summary.id) }
+        catch (error) { result.failed.push({ sessionId: entry.summary.id, reason: error instanceof Error ? error.message : '停止失败' }) }
+      }))
+      return result
+    } finally {
+      // The caller can time out while Adapter cleanup continues. Keep the lock
+      // until the actual operation settles, then let a retained Tab accept work.
+      release()
+    }
   }
 
   async projectClosed(projectId: string): Promise<void> {
     this.project(projectId)
-    const result = await this.stopProjectTurns(projectId)
-    if (result.failed.length) throw new Error(result.failed.map(item => item.reason).join('; '))
-    const entries = [...this.entries.values()].filter(entry => entry.summary.projectId === projectId)
-    for (const entry of entries) this.retire(entry)
-    await Promise.all(entries.map(entry => entry.retiring))
-    for (const [sender, context] of this.viewing) if (context.projectId === projectId) this.viewing.delete(sender)
-    this.closing.delete(projectId)
-    this.closed.add(projectId)
-    this.flushDisk()
+    const release = this.lockProject(projectId)
+    try {
+      const result = await this.stopProjectTurns(projectId)
+      if (result.failed.length) throw new Error(result.failed.map(item => item.reason).join('; '))
+      const entries = [...this.entries.values()].filter(entry => entry.summary.projectId === projectId)
+      for (const entry of entries) this.retire(entry)
+      await Promise.all(entries.map(entry => entry.retiring))
+      for (const [sender, context] of this.viewing) if (context.projectId === projectId) this.viewing.delete(sender)
+      this.closed.add(projectId)
+      this.flushDisk()
+    } finally {
+      // This outer lock spans the interval between Stop and idle Runtime release.
+      release()
+    }
   }
 
   async stopAllTurns(): Promise<void> {

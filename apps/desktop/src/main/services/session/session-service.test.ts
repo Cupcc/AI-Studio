@@ -7,6 +7,7 @@ import { coreAppMeta } from '../database/migrations/2026100901_core_app_meta'
 import { projectCore } from '../database/migrations/2026100902_project_core'
 import { sessionCore } from '../database/migrations/2026100903_session_core'
 import { createProjectService } from '../project/project-service'
+import { closeProjectWithSessions } from '../project/close-flow'
 import { SessionService } from './session-service'
 import { SessionStore } from './store'
 import type { TranscriptItem } from '@shared/session/types'
@@ -39,7 +40,7 @@ function harness(codex = new FakeProvider('codex')) {
     transcriptChanged: event => changes.push(...event.items)
   })
   let service = build()
-  cleanups.push(async () => { await service.dispose().catch(() => {}); db.close() })
+  cleanups.push(async () => { await service.dispose().catch(() => {}); if (db.isOpen) db.close() })
   const create = async (text = 'hello', cli: 'codex' | 'claude-code' = 'codex', projectId = 'p') => service.create({ projectId, cli, text })
   const summary = (id: string) => service.getConversation(id).session
   const items = (id: string) => service.getConversation(id).items
@@ -362,15 +363,73 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
   it('blocks new work throughout Project close including metadata refresh, then allows reopening', async () => {
     const h = harness()
     const session = await h.create(); await tick()
-    await h.service.stopProjectTurns('p')
+    const releaseRuntime = deferred<void>()
+    const driver = h.native().driver
+    const originalDispose = driver.dispose.bind(driver)
+    driver.dispose = async () => { await releaseRuntime.promise; await originalDispose() }
+    const closing = h.service.projectClosed('p')
+    await tick()
     h.service.list('p')
-    expect(() => h.service.send(session.id, { text: 'during close' })).toThrow('关闭')
-    await h.service.projectClosed('p')
+    try {
+      expect(h.service.getBlockingSessionCounts('p')).toEqual({ running: 0, needsInput: 0 })
+      expect(() => h.service.send(session.id, { text: 'during runtime release' })).toThrow('关闭')
+      // A second stopping scope must not unlock the outer Runtime release scope.
+      await h.service.stopProjectTurns('p')
+      expect(() => h.service.send(session.id, { text: 'overlapping close' })).toThrow('关闭')
+    } finally { releaseRuntime.resolve() }
+    await closing
     expect(() => h.service.send(session.id, { text: 'closed project' })).toThrow('关闭')
     h.service.list('p')
     h.service.send(session.id, { text: 'reopened' }); await tick()
     expect(h.summary(session.id).status).toBe('running')
     expect(h.codex.sessions).toHaveLength(2)
+  })
+
+  it('keeps a timed-out close locked only until its actual Stop settles, then allows retained Tab work', async () => {
+    const cleanup = deferred<{ status: 'confirmed'; scope: 'turn' }>()
+    const h = harness(new FakeProvider('codex', { behavior: { cleanup: () => cleanup.promise } }))
+    const session = await h.create(); await tick()
+    const result = await closeProjectWithSessions(h.service, 'p', true, 1)
+    expect(result).toMatchObject({ status: 'failed', failed: [{ reason: '停止超时' }] })
+    try {
+      expect(h.summary(session.id).stopping).toBe(true)
+      expect(() => h.service.send(session.id, { text: 'cleanup still running' })).toThrow('关闭')
+    } finally { cleanup.resolve({ status: 'confirmed', scope: 'turn' }) }
+    await tick()
+    expect(h.summary(session.id).stopping).toBe(false)
+    h.service.send(session.id, { text: 'continue in retained Tab' }); await tick()
+    expect(h.summary(session.id).status).toBe('running')
+    expect(h.codex.sessions).toHaveLength(1)
+  })
+
+  it('ignores a secret card answer resolving after disposal and database close', async () => {
+    const response = deferred<void>()
+    const h = harness(new FakeProvider('codex', { behavior: { onRespond: () => response.promise } }))
+    const session = await h.create(); await tick()
+    const runtime = h.native().controller
+    const request = runtime.sink.inputRequested(runtime.activeTurn!.turnId, question(true), null)!
+    const answer = h.service.answer(session.id, request, { kind: 'answers', answers: { q: { text: 'secret-value' } } })
+    await h.service.dispose()
+    h.db.close()
+    response.resolve()
+    await expect(answer).resolves.toBeUndefined()
+  })
+
+  it('does not let a retired secret answer clear the next turn composer on the same Runtime', async () => {
+    const response = deferred<void>()
+    const h = harness(new FakeProvider('codex', { behavior: { onRespond: () => response.promise } }))
+    const session = await h.create(); await tick()
+    const runtime = h.native().controller
+    const request = runtime.sink.inputRequested(runtime.activeTurn!.turnId, question(true), null)!
+    const answer = h.service.answer(session.id, request, { kind: 'answers', answers: { q: { text: 'secret-value' } } })
+    await h.service.stop(session.id)
+    h.service.send(session.id, { text: 'new turn' }); await tick()
+    const key = { projectId: 'p', kind: 'session', sessionId: session.id } as const
+    h.service.saveDraft(key, { cli: 'codex', model: null, text: 'keep new draft', contextItems: [] })
+    response.resolve(); await answer
+    expect((await h.service.getDraft(key)).text).toBe('keep new draft')
+    expect(h.summary(session.id).status).toBe('running')
+    expect(h.codex.sessions).toHaveLength(1)
   })
 
   it('snapshots initial defaults even while discovery is unavailable, independent of later app preference', async () => {
