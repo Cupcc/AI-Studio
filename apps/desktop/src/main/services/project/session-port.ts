@@ -6,6 +6,8 @@
 import type { BlockingSessionCounts, QuitRequest, StopProjectResult } from '@shared/project/types'
 
 export interface MainSessionPort {
+  /** Capture the initial default CLI at Project creation, before the open reply. */
+  initializeProject?(projectId: string): Promise<void>
   getBlockingSessionCounts(projectId: string): BlockingSessionCounts | Promise<BlockingSessionCounts>
   stopProjectTurns(projectId: string): Promise<StopProjectResult>
   /** Running (including stopping) and Needs Input sessions across all Projects. */

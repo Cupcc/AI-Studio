@@ -117,6 +117,21 @@ describe('Project shell · FR-PROJ/NAV · AC-01', () => {
     expect(port.userOpenedSession).toHaveBeenCalledTimes(2)
     expect(port.setWindowForeground).toHaveBeenCalledWith(false)
   })
+  it('waits for pending Session drafts before closing a Project', async () => {
+    await mount()
+    let release!: () => void
+    port.flush = vi.fn(() => new Promise<void>((resolve) => { release = resolve }))
+    let closing!: Promise<void>
+    act(() => { closing = useProjectShell.getState().requestClose('project:b') })
+    expect(port.flush).toHaveBeenCalledTimes(1)
+    expect(api.closeProject).not.toHaveBeenCalled()
+    expect(port.onProjectClosed).not.toHaveBeenCalled()
+    release()
+    await act(async () => { await closing })
+    expect(api.closeProject).toHaveBeenCalledWith({ projectId: 'b', confirmed: false })
+    expect(port.onProjectClosed).toHaveBeenCalledWith('b')
+    port.flush = undefined
+  })
   it('persists a later edit made while the previous IPC write is in flight', async () => {
     await mount()
     let release!: () => void

@@ -12,6 +12,8 @@ export interface RendererSessionPort {
   setWindowForeground(foreground: boolean): void
   userOpenedSession(projectId: string, sessionId: string): void
   startNewChat(projectId: string): void
+  /** Persist pending composer drafts before Project close or application quit. */
+  flush?(): Promise<void>
 }
 
 export interface ShellSlotProps { project: ProjectRecord; canvas: MainCanvas; active: boolean }

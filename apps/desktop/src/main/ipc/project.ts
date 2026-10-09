@@ -59,6 +59,11 @@ export function createProjectFeature(core: Pick<CoreServices, 'database'>, deps:
 }) {
   const shell = projectShellFor(core)
   const projects = shell.projects
+  const openPath = async (path: string) => {
+    const result = projects.openPath(path)
+    if (result.ok && result.created) await shell.sessionPort().initializeProject?.(result.project.id)
+    return result
+  }
   return defineHandlers(projectContract, {
     bootstrap: { parse: noInput, handle: () => projects.bootstrap() },
     openDirectory: {
@@ -66,10 +71,10 @@ export function createProjectFeature(core: Pick<CoreServices, 'database'>, deps:
       handle: async (_req, ctx) => {
         const path = await deps.pickDirectory(ctx)
         if (!path) return { ok: false, reason: 'cancelled' } as const
-        return projects.openPath(path)
+        return openPath(path)
       }
     },
-    openPath: { parse: parsePath, handle: ({ path }) => projects.openPath(path) },
+    openPath: { parse: parsePath, handle: ({ path }) => openPath(path) },
     listRecent: { parse: noInput, handle: () => projects.listRecent() },
     removeRecent: {
       parse: parseProjectRef,

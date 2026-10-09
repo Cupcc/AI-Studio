@@ -22,8 +22,8 @@ import { createCoreServices, type CoreServices } from './services/core'
 import { runNativeSmoke, writeSmokeReport } from './smoke/native-smoke'
 import { runRendererSmoke } from './smoke/renderer-smoke'
 import { createMainWindow } from './window/main-window'
+import { createShutdownHandler } from './shutdown'
 
-const DISPOSE_TIMEOUT_MS = 5000
 const launch = parseLaunchOptions(process.argv)
 const devServerUrl = !app.isPackaged ? process.env.ELECTRON_RENDERER_URL : undefined
 const rendererOrigin = (devServerUrl && originOf(devServerUrl)) || APP_ORIGIN
@@ -178,21 +178,10 @@ if (launch.smokeOutput) {
   // Hold the quit once so features can dispose asynchronously (e.g. stop
   // processes), then quit again on a fresh tick: calling app.quit() from
   // within the same will-quit microtask chain leaves the app running.
-  let disposed = false
-  app.on('will-quit', (event) => {
-    if (disposed) return
-    event.preventDefault()
-    disposed = true
-    void (async () => {
-      try {
-        const timeout = new Promise<void>((resolve) => setTimeout(resolve, DISPOSE_TIMEOUT_MS).unref())
-        await Promise.race([disposeIpc?.(), timeout])
-        core?.dispose()
-      } catch (error) {
-        console.error('[main] dispose failed:', error)
-      } finally {
-        setImmediate(() => app.quit())
-      }
-    })()
-  })
+  app.on('will-quit', createShutdownHandler({
+    disposeFeatures: async () => { await disposeIpc?.() },
+    disposeCore: () => core?.dispose(),
+    quit: () => app.quit(),
+    onError: (error) => console.error('[main] dispose failed:', error)
+  }))
 }

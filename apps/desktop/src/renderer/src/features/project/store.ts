@@ -210,5 +210,5 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
   },
   async confirmQuit() { set({ quitting: true }); await get().flush(); await studio().project.confirmQuit() },
   cancelQuit() { if (!get().quitting) { set({ quitRequest: null }); void studio().project.cancelQuit() } },
-  flush: () => writes
+  async flush() { await shellIntegration().session.flush?.(); await writes }
 }))
