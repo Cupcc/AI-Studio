@@ -294,6 +294,8 @@ export class CodexDriver implements SessionDriver {
     if (p.threadId !== undefined && p.threadId !== this.threadId) return;
     if (method === 'thread/name/updated' && typeof p.threadName === 'string') { this.sink.nativeTitle(p.threadName); return; }
     if (method === 'serverRequest/resolved') {
+      if (typeof p.requestId !== 'string' && typeof p.requestId !== 'number') return;
+      this.connection?.peer.dismissIncoming(p.requestId);
       const pending = this.sink.findInputByNativeRef((ref) => (ref as NativeInputRef).request.id === p.requestId);
       if (pending) this.sink.inputResolvedNatively(pending.request.requestId);
       return;

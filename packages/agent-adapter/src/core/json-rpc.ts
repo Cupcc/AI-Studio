@@ -25,12 +25,13 @@ export class JsonRpcRemoteError extends Error {
   }
 }
 
-/** A server-initiated request that must be answered exactly once (e.g. Codex approvals). */
+/** A server-initiated request that may be answered once or dismissed by the remote side. */
 export interface IncomingRequest {
   readonly id: JsonRpcId;
   readonly method: string;
   readonly params: unknown;
   readonly receivedAt: number;
+  /** True after a local response or remote dismissal; callbacks can no longer answer it. */
   readonly responded: boolean;
   respond(result: unknown): void;
   respondError(error: JsonRpcErrorObject): void;
@@ -63,6 +64,11 @@ interface PendingRequest {
   cleanup(): void;
 }
 
+interface PendingIncomingRequest {
+  request: IncomingRequest;
+  dismiss(): void;
+}
+
 /**
  * Newline-delimited JSON-RPC peer: outgoing requests with bookkeeping and timeouts,
  * notifications in both directions, and server-initiated requests that are tracked
@@ -72,7 +78,7 @@ export class JsonRpcPeer {
   private nextId = 1;
   private readonly pending = new Map<JsonRpcId, PendingRequest>();
   private readonly abandoned = new Set<JsonRpcId>();
-  private readonly incoming = new Map<JsonRpcId, IncomingRequest>();
+  private readonly incoming = new Map<JsonRpcId, PendingIncomingRequest>();
   private readonly notifications = new EventStream<JsonRpcNotification>();
   private readonly requests = new EventStream<IncomingRequest>();
   private readonly closes = new EventStream<{ error: AdapterError }>();
@@ -99,9 +105,21 @@ export class JsonRpcPeer {
     return this.pending.size;
   }
 
-  /** Server-initiated requests that have not been answered yet. */
+  /** Server-initiated requests that have not been answered or dismissed yet. */
   get pendingIncoming(): IncomingRequest[] {
-    return [...this.incoming.values()];
+    return [...this.incoming.values()].map((entry) => entry.request);
+  }
+
+  /**
+   * Retires a request resolved by the remote side without sending a response.
+   * Returns false for an unknown or already settled id. Captured callbacks become invalid.
+   */
+  dismissIncoming(id: JsonRpcId): boolean {
+    const entry = this.incoming.get(id);
+    if (!entry) return false;
+    entry.dismiss();
+    this.incoming.delete(id);
+    return true;
   }
 
   request<T = unknown>(
@@ -269,7 +287,7 @@ export class JsonRpcPeer {
   private handleIncomingRequest(id: JsonRpcId, method: string, params: unknown): void {
     let responded = false;
     const answer = (payload: Record<string, unknown>) => {
-      if (responded) throw adapterError('invalid_state', `Request ${String(id)} (${method}) was already answered`);
+      if (responded) throw adapterError('invalid_state', `Request ${String(id)} (${method}) was already answered or dismissed`);
       if (this.closeError) throw this.closeError;
       responded = true;
       this.incoming.delete(id);
@@ -286,7 +304,7 @@ export class JsonRpcPeer {
       respond: (result) => answer({ result: result ?? null }),
       respondError: (error) => answer({ error }),
     };
-    this.incoming.set(id, request);
+    this.incoming.set(id, { request, dismiss: () => { responded = true; } });
     if (this.requests.listenerCount === 0) {
       request.respondError({ code: JSON_RPC_METHOD_NOT_FOUND, message: `No handler for ${method}` });
       return;

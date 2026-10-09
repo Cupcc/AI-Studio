@@ -13,9 +13,9 @@
 | ID | 职责 | 写入范围 | 产出 | 依赖 | 状态 |
 |---|---|---|---|---|---|
 | W1 | 接口、事件模型、核心、测试工具、spec 草稿（Opus 5.5 xhigh） | `packages/agent-adapter/**`（`src/codex/**`、`src/claude/**` 及对应测试目录除外）；`specs/agent-adapter/spec.md`；本 task 的 `research.md`、`evidence/W1-*` | 包脚手架与依赖、接口、核心、模拟传输工具、spec 草稿 | — | done |
-| W2 | Codex Provider（Opus 5.5 xhigh） | `packages/agent-adapter/src/codex/**`、`packages/agent-adapter/test/codex/**`；本 task 的 `evidence/W2-*` | Provider、锁定版本的协议类型、单元与集成测试 | W1 | in_progress |
-| W3 | Claude Provider（Opus 5.5 high） | `packages/agent-adapter/src/claude/**`、`packages/agent-adapter/test/claude/**`；本 task 的 `evidence/W3-*` | Provider、单元与集成测试 | W1 | in_progress |
-| W4 | 验收（Sonnet 5.5 xhigh） | 本 task 的 `acceptance.md`、`evidence/W4-*` | 验收记录 | W2、W3 | todo |
+| W2 | Codex Provider（GPT-6 Astra xhigh） | `packages/agent-adapter/src/codex/**`、`packages/agent-adapter/test/codex/**`；本 task 的 `evidence/W2-*` | Provider、锁定版本的协议类型、单元与集成测试 | W1 | delivered |
+| W3 | Claude Provider（GPT-6 Astra high） | `packages/agent-adapter/src/claude/**`、`packages/agent-adapter/test/claude/**`；本 task 的 `evidence/W3-*` | Provider、单元与集成测试 | W1 | delivered |
+| W4 | 验收（GPT-6.1 Sol high） | 本 task 的 `acceptance.md`、`evidence/W4-*` | 验收记录 | W2、W3 | in_progress |
 
 ## 进度与决定
 
@@ -27,3 +27,4 @@
 - 2026-10-09 启动 W2（Codex）与 W3（Claude）。
 - 2026-10-09 Codex 团队接续：原 Provider worker 无落盘实现，W2 / W3 从 `385adf0` 创建独立分支，按上述范围重新启动。用户限定 GPT-6 Astra 与 GPT-6.1 Sol 的 high / xhigh 配置（2026-10-09 对话确认）。
 - 2026-10-09 W2 / W3 已交付并分别合并于 `0176250` / `b04db17`；转独立验收。Codex 6 个真实 Astra high 回合验证流式、原 ID 恢复、同轮文字拒绝；精确 Stop 修正只有系统 fixture 证据，不能宣称真实复测通过。Claude 27 个模拟测试通过，真实成功回合受配额阻断。真实边界保留在各 worker 证据中。
+- 2026-10-09 主 Agent 补齐 `JsonRpcPeer.dismissIncoming(id)` 与 Codex `serverRequest/resolved` 接线：不向原生发送多余响应，释放对应待处理请求，并令既有回调失效；数值 / 字符串 ID、并发请求与 ID 复用有回归测试。相关 38 项测试及 Adapter typecheck 通过，交 W4 独立复核。

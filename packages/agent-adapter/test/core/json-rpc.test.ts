@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { JsonRpcPeer, JsonRpcRemoteError } from '../../src/core/json-rpc.js';
+import { JsonRpcPeer, JsonRpcRemoteError, type IncomingRequest } from '../../src/core/json-rpc.js';
 import { AdapterError } from '../../src/errors.js';
 import { createLinkedTransports, ScriptedJsonRpcServer, ScriptedRpcError } from '../../src/testing/index.js';
 
@@ -79,6 +79,56 @@ describe('JsonRpcPeer', () => {
     const { server } = setup();
     const error = await server.request('item/tool/call', {}).catch((e: unknown) => e);
     expect((error as JsonRpcRemoteError).code).toBe(-32601);
+  });
+
+  it('dismisses only the withdrawn request without a response and rejects stale callbacks', async () => {
+    const [clientSide, serverSide] = createLinkedTransports();
+    const client = new JsonRpcPeer(clientSide);
+    const requests: IncomingRequest[] = [];
+    const responses: string[] = [];
+    client.onRequest((request) => requests.push(request));
+    serverSide.onLine((line) => responses.push(line));
+    serverSide.send(JSON.stringify({ id: 7, method: 'approval' }));
+    serverSide.send(JSON.stringify({ id: '7', method: 'question' }));
+    await Promise.resolve();
+
+    expect(client.dismissIncoming(7)).toBe(true);
+    expect(client.dismissIncoming(7)).toBe(false);
+    expect(client.dismissIncoming('unknown')).toBe(false);
+    expect(requests[0]!.responded).toBe(true);
+    expect(() => requests[0]!.respond({ decision: 'accept' })).toThrow(/dismissed/);
+    expect(() => requests[0]!.respondError({ code: -1, message: 'stale' })).toThrow(/dismissed/);
+    expect(responses).toEqual([]);
+    expect(client.pendingIncoming).toEqual([requests[1]]);
+    requests[1]!.respond({ answer: 'kept' });
+    await Promise.resolve();
+    expect(responses.map((line) => JSON.parse(line))).toEqual([{ id: '7', result: { answer: 'kept' } }]);
+    expect(client.dismissIncoming('7')).toBe(false);
+    expect(client.pendingIncoming).toEqual([]);
+    client.close();
+  });
+
+  it('allows a dismissed id to be reused without reactivating the old callback', async () => {
+    const [clientSide, serverSide] = createLinkedTransports();
+    const client = new JsonRpcPeer(clientSide);
+    const requests: IncomingRequest[] = [];
+    const responses: string[] = [];
+    client.onRequest((request) => requests.push(request));
+    serverSide.onLine((line) => responses.push(line));
+    serverSide.send(JSON.stringify({ id: 'reused', method: 'approval' }));
+    await Promise.resolve();
+    client.dismissIncoming('reused');
+    serverSide.send(JSON.stringify({ id: 'reused', method: 'approval' }));
+    await Promise.resolve();
+
+    expect(() => requests[0]!.respond(null)).toThrow(/dismissed/);
+    expect(client.pendingIncoming).toEqual([requests[1]]);
+    expect(requests[1]!.responded).toBe(false);
+    requests[1]!.respond({ decision: 'accept' });
+    await Promise.resolve();
+    expect(responses.map((line) => JSON.parse(line))).toEqual([{ id: 'reused', result: { decision: 'accept' } }]);
+    expect(client.pendingIncoming).toEqual([]);
+    client.close();
   });
 
   it('fails all pending requests when the transport closes', async () => {
