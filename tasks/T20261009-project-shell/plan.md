@@ -25,3 +25,4 @@
 - 2026-10-09 Codex 团队接续 W2：先检查保留的未提交实现，再完成壳层与验证。Session 接口尽早报告主 Agent，供下一批 Session worker 对齐。用户限定 GPT-6 Astra 与 GPT-6.1 Sol 的 high / xhigh 配置（2026-10-09 对话确认）。
 - 2026-10-09 W2 写入范围补充 `apps/desktop/e2e/app.spec.ts`：仅更新新增 project IPC / 壳层导致失效的骨架冒烟断言。Session 重复点击须发送 opened 信号，window focus 与 opened 分开（S-Q1 已确认）。
 - 2026-10-09 W2 范围补充 `features/app-info/app-info.test.tsx` 中的 app-only mock 类型，以适配扩展后的 StudioApi；不扩展产品功能。启动页使用产品内容，骨架技术信息不再作为用户首页。
+- 2026-10-09 W2 主进程 / 共享阶段提交 `598ab87` 已合并：Project 路径身份、持久化、共享状态规则、关闭 IPC、菜单与退出接口；worker 报告类型检查和 66 项单测通过。界面、既有测试适配和截图仍由 W2 后续提交；Session 后端可基于该接口开工。

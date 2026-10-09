@@ -42,3 +42,4 @@
 - 2026-10-09 app-skeleton W1 合并（`70b9ca6`），干净克隆复核通过；`AGENTS.md` 记录构建命令；project-shell 转为 ready 并启动 W2 实现；启动 app-skeleton W2 验收。
 - 2026-10-09 agent-adapter W1 合并（`e680c2e`），干净克隆复核通过；启动 agent-adapter W2（Codex）、W3（Claude）。
 - 2026-10-09 用户要求 Codex 接续并调用 agent team，并限定上述四种 GPT 模型配置。恢复检查：`dev/v1` 位于 `385adf0` 且干净；7 个旧 worktree 中仅 project-shell W2 有未提交实现（`agent-a014c55195a9e9487`），保留并在原处继续；其他旧分支提交均已在集成分支。Provider worker 尚无落盘实现，因此从当前集成提交创建独立 worktree。首批并行继续 Project 壳层、Codex Provider、Claude Provider；主 Agent 恢复 Session 推荐与接口计划并负责后续集成。app-skeleton W2 验收已由 `385adf0` 合并，任务不标记 done，等待人签收。
+- 2026-10-09 Session W2 推荐复核与 W3 共享契约已提交；Project W2 主进程阶段 `598ab87` 合入，界面继续。骨架冒烟隔离修复 `c544b2b` 已实测通过，app-skeleton 为 verifying。Claude Provider 模拟测试已通过，真实成功回合受账户 session limit 阻断，停止额外请求；该限制不阻塞 Session 的模拟 Provider 开发，但真实验收不得标通过。
