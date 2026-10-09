@@ -1,0 +1,20 @@
+.app-info {
+  display: grid;
+  grid-template-columns: max-content auto;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.app-info dt {
+  color: var(--color-text-muted);
+}
+
+.app-info dd {
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+.app-info__muted {
+  color: var(--color-text-muted);
+}

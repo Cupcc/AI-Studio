@@ -1,0 +1,148 @@
+// Main process entry: app lifecycle, security setup, IPC and the window.
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { join } from 'node:path'
+import type { AppInfo } from '@shared/ipc/app'
+import { registerIpc } from './ipc'
+import { emit } from './ipc/registry'
+import { parseLaunchOptions } from './launch-options'
+import { APP_ENTRY_URL, APP_ORIGIN, createSenderPolicy, originOf } from './security/policy'
+import {
+  denyAllPermissions,
+  handleAppProtocol,
+  installWebContentsGuards,
+  registerAppScheme
+} from './security/hardening'
+import { createCoreServices, type CoreServices } from './services/core'
+import { runNativeSmoke, writeSmokeReport } from './smoke/native-smoke'
+import { runRendererSmoke } from './smoke/renderer-smoke'
+import { createMainWindow } from './window/main-window'
+
+const DISPOSE_TIMEOUT_MS = 5000
+const launch = parseLaunchOptions(process.argv)
+const devServerUrl = !app.isPackaged ? process.env.ELECTRON_RENDERER_URL : undefined
+const rendererOrigin = (devServerUrl && originOf(devServerUrl)) || APP_ORIGIN
+
+if (launch.userDataDir) {
+  app.setPath('userData', launch.userDataDir)
+} else if (!app.isPackaged) {
+  // Keep development data apart from an installed build's data.
+  app.setPath('userData', `${app.getPath('userData')} (Dev)`)
+}
+
+function appInfo(): AppInfo {
+  return {
+    name: app.getName(),
+    version: app.getVersion(),
+    isPackaged: app.isPackaged,
+    platform: process.platform,
+    arch: process.arch,
+    versions: {
+      electron: process.versions.electron,
+      chrome: process.versions.chrome,
+      node: process.versions.node
+    }
+  }
+}
+
+function openWindow(hidden = false): BrowserWindow {
+  return createMainWindow({
+    preloadPath: join(__dirname, '../preload/index.js'),
+    url: devServerUrl ?? APP_ENTRY_URL,
+    hidden
+  })
+}
+
+let core: CoreServices | null = null
+let disposeIpc: (() => Promise<void>) | null = null
+
+/** Runs after `ready`: protocol, permissions, core services and IPC. */
+function startRuntime(): void {
+  denyAllPermissions()
+  handleAppProtocol(join(__dirname, '../renderer'))
+  core = createCoreServices({
+    userDataDir: app.getPath('userData'),
+    appInfo,
+    broadcast: (channel, payload) => {
+      for (const win of BrowserWindow.getAllWindows()) emit(win.webContents, channel, payload)
+    }
+  })
+  disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl))
+}
+
+async function runSmokeAndQuit(output: string): Promise<void> {
+  const info = appInfo()
+  try {
+    startRuntime()
+    const report = await runNativeSmoke({
+      userDataDir: app.getPath('userData'),
+      app: {
+        version: info.version,
+        isPackaged: info.isPackaged,
+        platform: info.platform,
+        arch: info.arch,
+        electron: info.versions.electron,
+        node: info.versions.node
+      }
+    })
+    const win = openWindow(true)
+    const renderer = await runRendererSmoke(win)
+    win.destroy()
+    const full = { ...report, renderer, ok: report.ok && renderer.ok }
+    await writeSmokeReport(output, full)
+    app.exit(full.ok ? 0 : 1)
+  } catch (error) {
+    console.error('[smoke] failed:', error)
+    app.exit(2)
+  }
+}
+
+registerAppScheme()
+installWebContentsGuards(rendererOrigin)
+
+if (launch.smokeOutput) {
+  const output = launch.smokeOutput
+  void app.whenReady().then(() => runSmokeAndQuit(output))
+} else if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    const [win] = BrowserWindow.getAllWindows()
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.focus()
+    }
+  })
+
+  void app.whenReady().then(() => {
+    startRuntime()
+    openWindow()
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) openWindow()
+    })
+  })
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit()
+  })
+
+  // Hold the quit once so features can dispose asynchronously (e.g. stop
+  // processes), then quit again on a fresh tick: calling app.quit() from
+  // within the same will-quit microtask chain leaves the app running.
+  let disposed = false
+  app.on('will-quit', (event) => {
+    if (disposed) return
+    event.preventDefault()
+    disposed = true
+    void (async () => {
+      try {
+        const timeout = new Promise<void>((resolve) => setTimeout(resolve, DISPOSE_TIMEOUT_MS).unref())
+        await Promise.race([disposeIpc?.(), timeout])
+        core?.dispose()
+      } catch (error) {
+        console.error('[main] dispose failed:', error)
+      } finally {
+        setImmediate(() => app.quit())
+      }
+    })()
+  })
+}

@@ -1,0 +1,34 @@
+# Unsigned macOS app directory for skeleton verification (T20261009-app-skeleton).
+# appId and productName are provisional; signing / notarization are out of scope.
+appId: dev.aistudio.desktop
+productName: AI Developer Studio
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - package.json
+  - "!**/*.map"
+  # node-pty sources and other platforms' binaries are not needed at runtime.
+  - "!**/node_modules/node-pty/{deps,src,third_party,scripts,typings,binding.gyp}"
+  - "!**/node_modules/node-pty/prebuilds/win32-*/**"
+asar: true
+# Native binaries (pty.node, spawn-helper) must live outside the asar archive.
+asarUnpack:
+  - "**/node_modules/node-pty/**"
+# node-pty ships N-API prebuilds that load in Electron as-is; no Electron rebuild.
+npmRebuild: false
+afterPack: scripts/after-pack.cjs
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  onlyLoadAppFromAsar: true
+  grantFileProtocolExtraPrivileges: false
+mac:
+  target:
+    - target: dir
+      arch: [arm64]
+  identity: null
+  category: public.app-category.developer-tools

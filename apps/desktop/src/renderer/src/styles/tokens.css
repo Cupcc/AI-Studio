@@ -1,0 +1,54 @@
+/*
+ * PROVISIONAL design tokens.
+ *
+ * Colours, type and spacing below are neutral placeholders: visual parameters
+ * are not decided yet (design/visual-direction.md §5) and will be replaced
+ * after the high-fidelity review. Keep every visual value here so that the
+ * replacement touches one file. Layout sizes follow Shell Spec v01 §1.2
+ * (exploratory draft).
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Layout (Shell Spec v01 §1–2) */
+  --window-min-width: 1024px;
+  --window-min-height: 640px;
+  --topbar-height: 40px;
+  --traffic-lights-width: 80px;
+  --nav-width: 248px;
+  --canvas-header-height: 48px;
+  --conversation-max-width: 720px;
+
+  /* Spacing (provisional) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Typography (provisional) */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 18px;
+
+  /* Colour (provisional neutral greys) */
+  --color-surface: #ffffff;
+  --color-surface-chrome: #f4f4f5;
+  --color-border: #e4e4e7;
+  --color-text: #18181b;
+  --color-text-muted: #71717a;
+  --color-focus-ring: #3b82f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: #1c1c1f;
+    --color-surface-chrome: #27272a;
+    --color-border: #3f3f46;
+    --color-text: #f4f4f5;
+    --color-text-muted: #a1a1aa;
+  }
+}

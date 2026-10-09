@@ -1,0 +1,41 @@
+{
+  "name": "@ai-studio/desktop",
+  "productName": "AI Developer Studio",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AI Developer Studio desktop client (Electron)",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "postinstall": "install-electron && node scripts/ensure-node-pty-helper.mjs",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.e2e.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "electron-vite build && playwright test",
+    "package": "electron-vite build && electron-builder --mac --arm64 --dir",
+    "smoke:packaged": "node scripts/packaged-smoke.mjs"
+  },
+  "dependencies": {
+    "node-pty": "1.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@testing-library/react": "16.3.3",
+    "@types/node": "24.13.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "5.2.0",
+    "electron": "44.4.5",
+    "electron-builder": "26.16.1",
+    "electron-vite": "5.0.0",
+    "jsdom": "30.1.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "7.0.2",
+    "vite": "7.3.6",
+    "vitest": "5.0.1",
+    "zustand": "5.0.15"
+  }
+}
