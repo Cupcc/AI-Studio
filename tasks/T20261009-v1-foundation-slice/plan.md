@@ -19,12 +19,14 @@
 
 | Task | Worker | 职责 | 模型 | 依赖 | 状态 |
 |---|---|---|---|---|---|
-| app-skeleton | W1 | 应用骨架 | Opus 5.5 high | — | in_progress |
-| agent-adapter | W1 | 接口、事件模型、核心运行时、spec 草稿 | Opus 5.5 xhigh | — | in_progress |
-| agent-adapter | W2 | Codex Provider | Opus 5.5 xhigh | agent-adapter W1 | todo |
-| agent-adapter | W3 | Claude Provider | Opus 5.5 high | agent-adapter W1 | todo |
+| app-skeleton | W1 | 应用骨架 | Opus 5.5 high | — | done |
+| app-skeleton | W2 | 验收 | Sonnet 5.5 xhigh | app-skeleton W1 | in_progress |
+| agent-adapter | W1 | 接口、事件模型、核心运行时、spec 草稿 | Opus 5.5 xhigh | — | done |
+| agent-adapter | W2 | Codex Provider | Opus 5.5 xhigh | agent-adapter W1 | in_progress |
+| agent-adapter | W3 | Claude Provider | Opus 5.5 high | agent-adapter W1 | in_progress |
 | project-view | W1 | 待决事项调研与决定草稿 | Sonnet 5.5 xhigh | — | done |
 | project-shell | W1 | `specs/project`、`specs/navigation` 草稿 | Sonnet 5.5 high | — | done |
+| project-shell | W2 | 壳层实现 | Opus 5.5 high | app-skeleton W1 | in_progress |
 | session-slice | W1 | `specs/session`、`specs/chat`、`specs/input` 草稿 | Opus 5.5 high | — | done |
 | session-slice | W2 | 参考 Claude Desktop / ChatGPT Desktop 修订非阻塞问题的推荐 | Sonnet 5.5 xhigh | session-slice W1 | in_progress |
 
@@ -37,3 +39,5 @@
 - 2026-10-09 人对其余非阻塞问题的指示：对话功能参考 Claude Desktop 与 ChatGPT Desktop（含 Codex 的新版）修订推荐，写入 spec 并保持待确认，实现先按推荐进行。已启动 session-slice W2 调研。
 - 2026-10-09 project-view W1 合并：4 份决定草稿登记在 `docs/decisions/README.md`；12 个问题写入 project-view task.md，待本轮收尾时一并请人确认（不阻塞本轮）。
 - 2026-10-09 约 11:5x 三个运行中的 worker（app-skeleton W1、agent-adapter W1、session-slice W2）因账户会话额度限流（HTTP 429，12:10 重置）中断。13:18 恢复：app-skeleton W1 与 agent-adapter W1 通过消息续跑（worktree 中未提交进度保留），并向 agent-adapter W1 补充 I-Q2、S-Q2 的确认结果、session spec 第 4.1 节的接口期望和 Claude SDK `origin` 发现；session-slice W2 未写入任何文件，worktree 已被自动清理，重新启动。要求 worker 分步提交，降低再次中断的损失。
+- 2026-10-09 app-skeleton W1 合并（`70b9ca6`），干净克隆复核通过；`AGENTS.md` 记录构建命令；project-shell 转为 ready 并启动 W2 实现；启动 app-skeleton W2 验收。
+- 2026-10-09 agent-adapter W1 合并（`e680c2e`），干净克隆复核通过；启动 agent-adapter W2（Codex）、W3（Claude）。
