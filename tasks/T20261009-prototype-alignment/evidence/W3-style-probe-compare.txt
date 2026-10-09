@@ -1,0 +1,112 @@
+# W3 computed-style probe: prototype v01 (Chrome, 1280x800) vs desktop app (Electron, 1280x800, simulated providers).
+# Each group compares one prototype selector with its app counterpart in the same visual state (see the arrows).
+# Only differing properties are listed; groups not listed were identical. Classification is in acceptance.md section 4.
+# Generated 2026-10-10 against c9cf37c; scripts were scratch files under .runtime/w3/probe (not kept).
+
+## topbar  (.top -> .topbar)
+   paddingLeft: proto=12px app=0px
+## tab-selected  (.tab.on -> .project-tab.is-selected)
+   width: proto=93.3 app=122.7
+## tab-label  (.tab.on .tn -> .project-tab.is-selected .project-tab__activate)
+   width: proto=61.3 app=90.7
+## nav-heading  (.sec -> .navigation__heading)
+   height: proto=30.5 app=28
+   lineHeight: proto=16.5px app=14px
+   textTransform: proto=uppercase app=none
+## nav-date  (.grp -> .session-history__date)
+   height: proto=28.5 app=24
+   paddingTop: proto=8px app=0px
+## view-rarea  (.rarea -> .right-area)
+   width: proto=592 app=591
+   borderLeftWidth: proto=1px app=0px
+   borderLeftColor: proto=rgb(228, 227, 223) app=rgb(29, 29, 27)
+## view-tool-rarea  (.rarea -> .right-area)
+   width: proto=592 app=591
+   borderLeftWidth: proto=1px app=0px
+   borderLeftColor: proto=rgb(228, 227, 223) app=rgb(29, 29, 27)
+## sidebar  (.side -> .right-pane)
+   width: proto=401 app=400
+## sidebar-header  (.side .hdr -> .right-area .canvas-header)
+   width: proto=400 app=399
+## session-title  (.srow.on .t -> .session-row.is-selected .session-row__open)
+   width: proto=162.2 app=166.2
+   height: proto=19.5 app=32
+-- spinner: MISSING in app (.srow .spin)
+## conv-title  (.hdr .ttl -> .session-header__title)
+   width: proto=95.5 app=255.7
+## feed-in  (.feed-in -> .session-conversation__transcript)
+   height: proto=596 app=340.2
+## user-msg  (.mu -> .transcript-user)
+   width: proto=364.8 app=301.3
+## agent-msg  (.ma -> .transcript-text)
+   height: proto=47.6 app=23.8
+## tool-row  (.tool -> .transcript-tool)
+   height: proto=55.6 app=35.8
+## need-card  (.card.need -> .request-card)
+   fontSize: proto=14px app=13px
+   lineHeight: proto=21px app=19.5px
+## compose  (.compose -> .composer)
+   backgroundColor: proto=rgba(0, 0, 0, 0) app=rgb(255, 255, 255)
+## composer-box  (.input -> .composer__box)
+   borderTopColor: proto=rgb(217, 216, 211) app=rgb(189, 188, 182)
+   borderBottomColor: proto=rgb(217, 216, 211) app=rgb(189, 188, 182)
+   borderLeftColor: proto=rgb(217, 216, 211) app=rgb(189, 188, 182)
+## composer-model  (.model -> .composer__models)
+   width: proto=90.6 app=143.5
+   paddingRight: proto=8px app=26px
+   lineHeight: proto=18px app=normal
+   columnGap: proto=4px app=normal
+## send  (.send -> .composer__send)
+   backgroundColor: proto=rgb(207, 206, 201) app=rgb(29, 29, 27)
+-- send-stop: not in prototype state
+## err-card  (.card.err -> .transcript-error)
+   fontSize: proto=14px app=13px
+   lineHeight: proto=21px app=19.5px
+-- done-line: not in prototype state
+## err-detail  (.card.err .cmd -> .transcript-error pre)
+   height: proto=54.4 app=188.8
+## menu  (.pop -> .cli-menu)
+   width: proto=225 app=260
+   height: proto=164.5 app=149.5
+   fontSize: proto=13px app=14px
+   lineHeight: proto=19.5px app=21px
+## menu-group  (.pop .pg -> .menu-heading)
+   width: proto=211 app=246
+## menu-item  (.pop .mi -> .menu-item)
+   width: proto=211 app=246
+## menu-item-meta  (.pop .mi .r -> .menu-item__meta)
+   color: proto=rgb(29, 29, 27) app=rgb(107, 107, 101)
+   borderTopColor: proto=rgb(29, 29, 27) app=rgb(107, 107, 101)
+   borderBottomColor: proto=rgb(29, 29, 27) app=rgb(107, 107, 101)
+   borderLeftColor: proto=rgb(29, 29, 27) app=rgb(107, 107, 101)
+   fontSize: proto=13px app=12px
+   lineHeight: proto=19.5px app=18px
+## menu-divider  (.pop .popdiv -> .menu-divider)
+   width: proto=203 app=238
+   fontSize: proto=13px app=14px
+   lineHeight: proto=19.5px app=21px
+## menu-item-last  (.pop .mi:last-of-type -> .session-cli-menu__default)
+   width: proto=211 app=246
+   height: proto=47 app=32
+## draft-title  (.draft-empty h2 -> .session-draft-intro h2)
+   width: proto=209.8 app=249.3
+## draft-path  (.draft-empty .meta -> .session-draft-intro p)
+   width: proto=229.9 app=611.2
+## tab-unselected  (.tab:not(.on) -> .project-tab:not(.is-selected))
+   width: proto=108.3 app=137.7
+## tab-unselected-label  (.tab:not(.on) .tn -> .project-tab:not(.is-selected) .project-tab__activate)
+   width: proto=76.3 app=105.7
+## launch  (.launch -> .launcher)
+   paddingTop: proto=0px app=32px
+   paddingRight: proto=0px app=24px
+   paddingBottom: proto=0px app=32px
+   paddingLeft: proto=0px app=24px
+## launch-in  (.launch-in -> .launcher__content)
+   height: proto=391.5 app=211
+## launch-project  (.lp -> .recent-project__open)
+   width: proto=460 app=426
+## launch-path  (.lp .p -> .recent-project__meta)
+   width: proto=175.2 app=402
+   columnGap: proto=normal app=6px
+
+identical: 46, with differences: 36

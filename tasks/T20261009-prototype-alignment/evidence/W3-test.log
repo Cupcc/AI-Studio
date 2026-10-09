@@ -1,0 +1,23 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run test
+$ tsc -p tsconfig.build.json
+Scope: 2 of 3 workspace projects
+$ vitest run
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio/packages/agent-adapter
+
+
+ Test Files  15 passed (15)
+      Tests  181 passed (181)
+   Start at  01:33:41
+   Duration  2.55s (tests 83%, transform 13%, import 4%)
+
+$ vitest run
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio/apps/desktop
+
+
+ Test Files  21 passed (21)
+      Tests  133 passed (133)
+   Start at  01:33:44
+   Duration  2.12s (tests 45%, environment 24%, transform 20%, import 10%, worker 1%)
+

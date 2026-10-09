@@ -1,0 +1,73 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run test:e2e
+$ tsc -p tsconfig.build.json
+$ electron-vite build && playwright test
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 47 modules transformed.
+rendering chunks...
+out/main/index.js  120.32 kB
+✓ built in 148ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 7 modules transformed.
+rendering chunks...
+out/preload/index.js  4.95 kB
+✓ built in 11ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 66 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                                              0.85 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff    13.14 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-CB9ihrfo.woff    13.16 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2   14.71 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2   14.89 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff    22.10 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2   22.59 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff    23.88 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff    23.92 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2   24.18 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2   24.25 kB
+../../out/renderer/assets/index-DVjFP4ll.css                              40.90 kB
+../../out/renderer/assets/index-DmbNPfnS.js                              762.80 kB
+✓ built in 857ms
+
+Running 24 tests using 1 worker
+
+  ✓   1 e2e/alignment.spec.ts:105:5 › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (4.1s)
+  ✓   2 e2e/alignment.spec.ts:120:5 › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.3s)
+  ✓   3 e2e/alignment.spec.ts:130:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (2.3s)
+  ✓   4 e2e/alignment.spec.ts:148:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (2.9s)
+  ✓   5 e2e/alignment.spec.ts:159:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (2.6s)
+  ✓   6 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (17ms)
+  ✓   7 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (38ms)
+  ✓   8 e2e/app.spec.ts:78:5 › renderer has no Node.js, require or raw ipcRenderer (3ms)
+  ✓   9 e2e/app.spec.ts:119:5 › typed preload API works and main validates input (9ms)
+  ✓  10 e2e/app.spec.ts:140:5 › new windows and foreign navigation are denied (513ms)
+  ✓  11 e2e/app.spec.ts:152:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (864ms)
+  ✓  12 e2e/project.spec.ts:47:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (2.2s)
+  ✓  13 e2e/project.spec.ts:105:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (877ms)
+  ✓  14 e2e/project.spec.ts:124:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (751ms)
+  ✘  15 e2e/session.spec.ts:52:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session, native tool row and completion (2.8s)
+Worker teardown timeout of 60000ms exceeded.
+
+Failed worker ran 15 tests, last 10 tests were:
+e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes
+e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar
+e2e/app.spec.ts:78:5 › renderer has no Node.js, require or raw ipcRenderer
+e2e/app.spec.ts:119:5 › typed preload API works and main validates input
+e2e/app.spec.ts:140:5 › new windows and foreign navigation are denied
+e2e/app.spec.ts:152:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process
+e2e/project.spec.ts:47:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch
+e2e/project.spec.ts:105:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal
+e2e/project.spec.ts:124:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace
+e2e/session.spec.ts:52:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session, native tool row and completion
+  ✓  16 e2e/session.spec.ts:68:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (1.4s)
+  ✘  17 e2e/session.spec.ts:82:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (16.6m)
+[ELIFECYCLE] Command failed with signal SIGTERM.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/Chris/Projects/AI Stduio/apps/
+  │ desktop
+
+[ELIFECYCLE] Command failed with exit code 1.
