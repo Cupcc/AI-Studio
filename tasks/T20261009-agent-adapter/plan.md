@@ -19,8 +19,11 @@
 
 ## 进度与决定
 
+接续独立验收：W4 由 GPT-6.1 Sol high 在 `.claude/worktrees/foundation-verification`（`codex/foundation-verification`）负责，仅写本 task 的 `acceptance.md` 与 `evidence/W4-*`；同时承担 project-shell W3 的独立验收。共享 `JsonRpcPeer.dismissIncoming` 集成修复由主 Agent 写入 `src/core/json-rpc.ts`、`test/core/json-rpc.test.ts` 及 Codex 原生撤回调用处。
+
 - 2026-10-09 task 卡片就绪，状态 ready。
 - 2026-10-09 W1 因限流中断后续跑完成，合并到 `dev/v1`（`e680c2e`）；`pnpm-lock.yaml` 冲突以 `pnpm install --lockfile-only` 重新生成。干净克隆复核：类型检查通过，单元测试 desktop 53/53、agent-adapter 101/101。
 - 2026-10-09 W1 提出的问题 A-Q1～A-Q5（`specs/agent-adapter/spec.md` 第 5 节）按 2026-10-09 对话指示先按推荐实现、保持待确认：A-Q4（Codex 拒绝后交付文字的方式）由 W2 验证；A-Q5 按推荐加载全部 `settingSources` 并使用 `claude_code` 系统提示预设。与 session spec 第 4.1 节的不一致见 adapter spec 第 4.5 节，由 session-slice 实现时按 adapter 接口对齐。
 - 2026-10-09 启动 W2（Codex）与 W3（Claude）。
 - 2026-10-09 Codex 团队接续：原 Provider worker 无落盘实现，W2 / W3 从 `385adf0` 创建独立分支，按上述范围重新启动。用户限定 GPT-6 Astra 与 GPT-6.1 Sol 的 high / xhigh 配置（2026-10-09 对话确认）。
+- 2026-10-09 W2 / W3 已交付并分别合并于 `0176250` / `b04db17`；转独立验收。Codex 6 个真实 Astra high 回合验证流式、原 ID 恢复、同轮文字拒绝；精确 Stop 修正只有系统 fixture 证据，不能宣称真实复测通过。Claude 27 个模拟测试通过，真实成功回合受配额阻断。真实边界保留在各 worker 证据中。

@@ -15,8 +15,8 @@
 | W1 | spec 草稿（Opus 5.5 high） | `specs/session/spec.md`、`specs/chat/spec.md`、`specs/input/spec.md` | spec 草稿与未决问题 | — | done |
 | W2 | 参考应用调研与推荐修订（主 Agent 接续） | `specs/session/spec.md`、`specs/chat/spec.md`、`specs/input/spec.md`、`specs/navigation/spec.md`；本 task 的 `research.md` | 修订后的推荐（待确认） | W1 | done |
 | W3 | 共享 DTO / IPC 契约与接线准备（主 Agent） | `apps/desktop/src/shared/session/**`、`apps/desktop/src/shared/ipc/session.ts`；依赖 / 构建配置；主工作区的共享登记接线（待实现合并后） | 固定后端与界面并行边界 | W2、Adapter W1 | in_progress |
-| W4 | Session Manager（GPT-6 Astra xhigh，待分配槽位） | `apps/desktop/src/main/services/session/**`、`apps/desktop/src/main/ipc/session.ts`、Session 迁移文件；本 task 的 `evidence/W4-*` | 状态机、持久化、Adapter / Project 接入与测试 | W3、Project W2 接口 | todo |
-| W5 | Session / Chat / Input 界面（GPT-6.1 Sol xhigh，待分配槽位） | `apps/desktop/src/renderer/src/features/{session,chat,input}/**`、`apps/desktop/e2e/session.spec.ts`；本 task 的 `evidence/W5-*` | History、Conversation、草稿、等待与错误卡片、输入区与测试 | W3、Project W2 | todo |
+| W4 | Session Manager（GPT-6 Astra xhigh） | `apps/desktop/src/main/services/session/**`、`apps/desktop/src/main/ipc/session.ts`、Session 迁移文件；本 task 的 `evidence/W4-*` | 状态机、持久化、Adapter / Project 接入与测试 | W3、Project W2 接口 | in_progress |
+| W5 | Session / Chat / Input 界面（GPT-6.1 Sol xhigh） | `apps/desktop/src/renderer/src/features/{session,chat,input}/**`、`apps/desktop/e2e/session.spec.ts`；本 task 的 `evidence/W5-*` | History、Conversation、草稿、等待与错误卡片、输入区与测试 | W3、Project W2 | in_progress |
 | W6 | 独立验收（GPT-6.1 Sol high，待分配槽位） | 本 task 的 `acceptance.md`、`evidence/W6-*` | AC-02～AC-05 验收记录 | W4、W5 | todo |
 
 ## 进度与决定
@@ -27,3 +27,4 @@
 - 2026-10-09 先由 W3 固定共享契约，再让 W4 / W5 在独立 worktree 并行；主 Agent 统一共享注册与依赖变更，避免与 Project W2 重叠。下一批实现使用既有 Provider 契约，不等待真实 CLI 验证才开发产品状态机。
 - 2026-10-09 W3 共享 DTO / IPC 已落盘并通过 `pnpm typecheck`。桌面包增加 Adapter workspace 依赖；根脚本在类型检查、测试、启动 / 打包前构建 Adapter。契约位置为 `src/shared/session/types.ts`、`src/shared/ipc/session.ts`；共享登记在 W4 / W5 合并时统一接线。序列化 DTO 不携带 Runtime 句柄；对话按 sequence 分页与稳定 ID 更新，查看上下文与 opened 为独立调用。
 - 2026-10-09 W3 补充纯展示规则 `shared/session/presentation.ts`：单个状态、Project 注意力 / 计数、用户消息时间排序、本地日历分组与标题。6 项测试及类型检查通过。Session 关闭草稿与 Project §2.2.4 / PROJ-Q6 对齐为停止成功再关闭、失败保留（仍是待确认建议）。
+- 2026-10-09 用户继续执行；Provider 与壳层已集成至 `4ddc59e`。W4 在 `.claude/worktrees/session-runtime-resume`（`codex/session-runtime`）实现后端；W5 在 `.claude/worktrees/session-ui-resume`（`codex/session-ui`）实现界面；两个范围不重叠，共享契约与登记变更由主 Agent 接线。W4 提供可注入 Provider 的测试工厂；W5 的模拟 E2E 在最终接线后运行。

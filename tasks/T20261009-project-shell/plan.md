@@ -19,6 +19,8 @@
 
 ## 进度与决定
 
+接续独立验收：W3 由 GPT-6.1 Sol high 在 `.claude/worktrees/foundation-verification`（`codex/foundation-verification`）负责，仅写本 task 的 `acceptance.md` 与 `evidence/W3-*`；同时承担 agent-adapter W4 的独立验收，不改实现代码。
+
 - 2026-10-09 task 卡片为 draft，等待 spec 草稿。
 - 2026-10-09 W1 完成并合并到 `dev/v1`：`specs/project/spec.md`（PROJ-Q1～Q17）、`specs/navigation/spec.md`（NAV-Q1～Q13）。阻塞项 PROJ-Q1～Q3；待与 session-slice 的问题合并后一并提交人回答。发现：Rename 在 FR-NAV-003（P0）与 02 第 6 节 MVP 表（P1）优先级不一致（NAV-Q4）。
 - 2026-10-09 阻塞问题 PROJ-Q1～Q3 已回答；细化验收标准，task 转为 ready；启动 W2 实现。
@@ -26,3 +28,4 @@
 - 2026-10-09 W2 写入范围补充 `apps/desktop/e2e/app.spec.ts`：仅更新新增 project IPC / 壳层导致失效的骨架冒烟断言。Session 重复点击须发送 opened 信号，window focus 与 opened 分开（S-Q1 已确认）。
 - 2026-10-09 W2 范围补充 `features/app-info/app-info.test.tsx` 中的 app-only mock 类型，以适配扩展后的 StudioApi；不扩展产品功能。启动页使用产品内容，骨架技术信息不再作为用户首页。
 - 2026-10-09 W2 主进程 / 共享阶段提交 `598ab87` 已合并：Project 路径身份、持久化、共享状态规则、关闭 IPC、菜单与退出接口；worker 报告类型检查和 66 项单测通过。界面、既有测试适配和截图仍由 W2 后续提交；Session 后端可基于该接口开工。
+- 2026-10-09 W2 界面阶段 `b64065e` 已由 `4ddc59e` 合并：worker 报告 74 项单测、9 项 Electron E2E 通过，两种模式三个宽度截图已落盘。开始独立 W3 验收；Session / 工具 / Preview 仍按范围留槽位。
