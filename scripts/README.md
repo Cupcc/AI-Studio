@@ -25,6 +25,7 @@
 配置：[ci.yml](../.github/workflows/ci.yml)；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。所有分支 push、pull_request 和手动触发运行 `macOS arm64 checks`。
 
 - 环境：`macos-15`（arm64）、Node 24、根 `package.json` 的 `packageManager` 指定 pnpm；缓存 pnpm store，以 `pnpm-lock.yaml` 为 key。
+- E2E 前通过 Homebrew 安装 `displayplacer`，将 runner 虚拟屏幕设为 1920×1080，容纳 1024×640、1280×800、1440×900 三组布局检查。默认虚拟屏幕会将窗口高度限制到 684px；此步骤只修改临时 CI runner。
 - 依次执行 `pnpm install --frozen-lockfile`、`pnpm check:commit`、`pnpm test:e2e`、`pnpm package`、`pnpm smoke:packaged`。CI 设置 `HUSKY=0`，显式运行检查，保留依赖安装脚本以安装 Electron 与修复 PTY helper。
 - E2E 沿用模拟 Session Providers；原生检查覆盖 SQLite、PTY、login shell 和打包应用启动，不需要模型密钥或 CLI 登录。
 - 无论成功或失败，上传已产生的 `.runtime/desktop-e2e/` 与打包冒烟 JSON，保留 14 天。未签名应用仅验证打包，不自动发布。

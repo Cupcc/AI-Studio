@@ -46,6 +46,17 @@ jobs:
       - name: Typecheck and unit tests
         run: pnpm check:commit
 
+      - name: Configure desktop display for layout tests
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: |
+          brew install displayplacer
+          displayplacer list
+          ci_display_id="$(displayplacer list | awk '/Persistent screen id:/ && !found { print $4; found = 1 }')"
+          test -n "$ci_display_id"
+          displayplacer "id:$ci_display_id res:1920x1080 scaling:off origin:(0,0) degree:0"
+          displayplacer list
+
       - name: Electron E2E and native smoke
         run: pnpm test:e2e
 
