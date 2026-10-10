@@ -50,7 +50,7 @@ Tasks that need a record may use only `task.md`; add other files when they help.
 
 - The main agent lists workers in `plan.md` and assigns them before starting them; workers never claim work themselves.
 - Each worker has a declared write scope. Scopes must not overlap; overlapping work becomes a dependency and runs in sequence.
-- Workers that change code concurrently use separate git branches or worktrees.
+- Workers that change code concurrently each work in their own worktree, as defined in [CONTRIBUTING.md](../CONTRIBUTING.md) section 2.
 - Workers write only inside their scope and never edit `task.md` or `plan.md`.
 - A worker ends with a report to the main agent in this order: done; outputs (file paths); findings and pitfalls; not done; decisions needed from a human.
 - The main agent appends to the `plan.md` progress log at each milestone. Anything of lasting value also goes into `acceptance.md`, `report.md`, a spec, a decision, or a numbered doc.
