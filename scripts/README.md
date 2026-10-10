@@ -17,8 +17,21 @@
 
 - 类型检查和单元测试检查当前工作树，不是暂存区快照；部分暂存时应确保未暂存改动没有掩盖问题。检查沿用现有构建流程，会更新被 Git 忽略的构建输出。
 - 每次提交（含纯文档提交）都运行检查；不自动执行 E2E、打包、真实 CLI 或模型请求。目前没有源码 formatter / linter，因此不引入 lint-staged。
-- 本地 hooks 可被 `git commit --no-verify` 或 `HUSKY=0` 绕过，不是强制安全边界；本任务未配置 CI 或远端分支保护。CI 可用 `HUSKY=0 pnpm install --frozen-lockfile` 安装开发依赖，再显式运行 `pnpm check:commit`。
+- 本地 hooks 可被 `git commit --no-verify` 或 `HUSKY=0` 绕过，不是强制安全边界；远端 CI 见下节，尚未配置远端分支保护。
 - 配置文件纳入版本控制的是 `.husky/pre-commit`、`.husky/commit-msg` 与 `commitlint.config.cjs`；Husky 生成的 `.husky/_/` 自带忽略规则，无需提交。
+
+## GitHub Actions CI
+
+配置：[ci.yml](../.github/workflows/ci.yml)；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。所有分支 push、pull_request 和手动触发运行 `macOS arm64 checks`。
+
+- 环境：`macos-15`（arm64）、Node 24、根 `package.json` 的 `packageManager` 指定 pnpm；缓存 pnpm store，以 `pnpm-lock.yaml` 为 key。
+- 依次执行 `pnpm install --frozen-lockfile`、`pnpm check:commit`、`pnpm test:e2e`、`pnpm package`、`pnpm smoke:packaged`。CI 设置 `HUSKY=0`，显式运行检查，保留依赖安装脚本以安装 Electron 与修复 PTY helper。
+- E2E 沿用模拟 Session Providers；原生检查覆盖 SQLite、PTY、login shell 和打包应用启动，不需要模型密钥或 CLI 登录。
+- 无论成功或失败，上传已产生的 `.runtime/desktop-e2e/` 与打包冒烟 JSON，保留 14 天。未签名应用仅验证打包，不自动发布。
+- 工作流只有 `contents: read` 权限，30 分钟超时，同一分支 / PR 的新运行取消旧运行；外部 Actions 固定 commit SHA。
+- CI 不替代人工验收，未启用分支保护，也不检查历史提交信息。
+
+Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-images#available-images)；pnpm 版本读取方式依据：[pnpm/action-setup](https://github.com/pnpm/action-setup#version)。
 
 ## 开发前 CLI 校验
 
