@@ -27,7 +27,7 @@
 - 环境：`macos-15`（arm64）、Node 24、根 `package.json` 的 `packageManager` 指定 pnpm；缓存 pnpm store，以 `pnpm-lock.yaml` 为 key。
 - E2E 前通过 Homebrew 安装 `displayplacer`，将 runner 虚拟屏幕设为 1920×1080，容纳 1024×640、1280×800、1440×900 三组布局检查。默认虚拟屏幕会将窗口高度限制到 684px；此步骤只修改临时 CI runner。
 - 依次执行 `pnpm install --frozen-lockfile`、`pnpm check:commit`、`pnpm test:e2e`、`pnpm package`、`pnpm smoke:packaged`。CI 设置 `HUSKY=0`，显式运行检查，保留依赖安装脚本以安装 Electron 与修复 PTY helper。
-- E2E 沿用模拟 Session Providers；原生检查覆盖 SQLite、PTY、login shell 和打包应用启动，不需要模型密钥或 CLI 登录。
+- E2E 沿用模拟 Session Providers；原生检查覆盖 SQLite、PTY、login shell 和打包应用启动，不需要模型密钥或 CLI 登录。打包冒烟前在 runner 临时目录安装 Codex `0.161.0`、Claude Code `2.1.294`（仓库开发前校验基线），加入 runner 的 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
 - 无论成功或失败，上传已产生的 `.runtime/desktop-e2e/` 与打包冒烟 JSON，保留 14 天。未签名应用仅验证打包，不自动发布。
 - 工作流只有 `contents: read` 权限，30 分钟超时，同一分支 / PR 的新运行取消旧运行；外部 Actions 固定 commit SHA。
 - CI 不替代人工验收，未启用分支保护，也不检查历史提交信息。

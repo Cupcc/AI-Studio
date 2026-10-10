@@ -63,6 +63,21 @@ jobs:
       - name: Package unsigned macOS app
         run: pnpm package
 
+      - name: Install pinned CLIs for packaged discovery smoke
+        run: |
+          npm install --prefix "$RUNNER_TEMP/studio-cli" --no-audit --no-fund \
+            @openai/codex@0.161.0 @anthropic-ai/claude-code@2.1.294
+          ci_cli_bin="$RUNNER_TEMP/studio-cli/node_modules/.bin"
+          ci_node_bin="$(dirname "$(command -v node)")"
+          # LaunchServices starts with a minimal PATH. Configure the runner's
+          # login shells so the app must resolve these CLIs as it does in Finder.
+          # Keep $PATH literal for expansion when the login shell reads it.
+          # shellcheck disable=SC2016
+          printf '\nexport PATH="%s:%s:$PATH"\n' "$ci_cli_bin" "$ci_node_bin" \
+            | tee -a "$HOME/.bash_profile" "$HOME/.zprofile"
+          "$ci_cli_bin/codex" --version
+          "$ci_cli_bin/claude" --version
+
       - name: Packaged app smoke
         run: pnpm smoke:packaged
 

@@ -53,4 +53,5 @@ created: 2026-10-10
 - 重新授权后分支推送成功，首轮运行：[38010574348](https://github.com/Cupcc/AI-Studio/actions/runs/38010574348)。已通过冻结 lockfile 安装与 runner 架构检查。
 - E2E 修正：测试准备使用 `app.focus({ steal: true })` 并等待真实 `isFocused()`，恢复焦点后仍检查未读状态；Tab 定位兼容名称后的注意力描述，不修改产品行为。此前失败的 3 项本地定向回归全部通过（10.7 秒）。依据：[Electron app.focus](https://www.electronjs.org/docs/latest/api/app#appfocusoptions)。
 - 完整本地 E2E：24 / 24 通过（43.3 秒）。远端 [38010682733](https://github.com/Cupcc/AI-Studio/actions/runs/38010682733) 的 Session 测试全部通过，但默认虚拟屏幕将窗口限制为 1024×684，7 项尺寸相关测试失败；工作流增加 `displayplacer` 配置 1920×1080，保留全部原始尺寸断言。命令依据：[displayplacer](https://github.com/jakehilborn/displayplacer#usage)。
+- 远端 [38011063258](https://github.com/Cupcc/AI-Studio/actions/runs/38011063258) 完整 E2E 与打包通过；打包冒烟的 SQLite、PTY、login shell、Renderer 均通过，仅两个 CLI `found: false` 导致整体失败。CI 增加固定版本 CLI 安装与 runner login-shell 路径配置（Codex `0.161.0`、Claude Code `2.1.294`，来源：仓库开发前校验基线），不放宽冒烟断言、不登录、不调用模型。
 - 本记录是实现者自检，不是人工验收；本任务不标记 done。
