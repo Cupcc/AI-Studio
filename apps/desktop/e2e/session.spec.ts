@@ -59,7 +59,7 @@ test.beforeEach(async () => {
 })
 test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
 
-test('AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session, native tool row and completion', async () => {
+test('AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion', async () => {
   await newChat()
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('Unsent draft')
   expect(await sessions()).toHaveLength(0)
@@ -71,6 +71,9 @@ test('AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session, 
   await expect(workspace().locator('.transcript-agent')).not.toHaveCount(0)
   await expect(workspace().locator('.transcript-tool')).not.toHaveCount(0)
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  // Shell Spec section 5: a transcript shorter than the viewport starts at the top, not above the composer
+  const offset = await workspace().locator('.session-conversation__scroll').evaluate((node) => node.querySelector('.transcript-user')!.getBoundingClientRect().top - node.getBoundingClientRect().top)
+  expect(offset).toBeLessThanOrEqual(32)
   await expect(row(session.id).getByRole('img', { name: 'Completed Unread' })).toHaveCount(0)
   await screenshot('conversation-stream-completed')
 })

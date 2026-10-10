@@ -40,8 +40,8 @@
 .canvas-mode--session .conversation-pane__content > .session-conversation { max-width: none; margin: 0; }
 .session-conversation { height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
 .session-conversation__scroll { grid-area: 1 / 1; min-height: 0; display: flex; flex-direction: column; overflow: auto; overflow-anchor: none; }
-/* margin-top:auto keeps a short transcript at the bottom (like .feed-in) without clipping a long one */
-.session-conversation__transcript { --feed-gap: 14px; display: flex; flex-direction: column; flex: none; gap: var(--feed-gap); width: 100%; max-width: var(--conversation-max-width); margin: auto auto 0; padding: var(--space-6) var(--space-6) var(--space-2); }
+/* A short transcript starts at the top, like ChatGPT / Claude desktop (Shell Spec 第 5 节; replaces the prototype's bottom-anchored .feed-in) */
+.session-conversation__transcript { --feed-gap: 14px; display: flex; flex-direction: column; flex: none; gap: var(--feed-gap); width: 100%; max-width: var(--conversation-max-width); margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-2); }
 .session-conversation > .composer { grid-area: 2 / 1; }
 .conversation-latest { grid-area: 1 / 1; align-self: end; justify-self: center; margin-bottom: var(--space-3); padding: var(--space-1) var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-2); background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: 999px; box-shadow: var(--shadow-floating); z-index: 1; }
 .session-draft-intro { grid-area: 1 / 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: var(--space-1-5); padding: 0 40px; text-align: center; }

@@ -1,0 +1,22 @@
+$ npx playwright test e2e/session.spec.ts e2e/alignment.spec.ts --global-timeout=540000
+# branch task/conversation-layout (base ba69e13) with the uncommitted change; screen unlocked; simulated Session Providers
+
+Running 15 tests using 1 worker
+
+  ✓   1 e2e/alignment.spec.ts:105:5 › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (4.3s)
+  ✓   2 e2e/alignment.spec.ts:120:5 › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.2s)
+  ✓   3 e2e/alignment.spec.ts:130:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (2.3s)
+  ✓   4 e2e/alignment.spec.ts:148:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (2.8s)
+  ✓   5 e2e/alignment.spec.ts:159:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (2.6s)
+  ✓   6 e2e/session.spec.ts:62:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (3.2s)
+  ✓   7 e2e/session.spec.ts:81:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (1.0s)
+  ✓   8 e2e/session.spec.ts:95:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (2.7s)
+  ✓   9 e2e/session.spec.ts:109:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (1.7s)
+  ✓  10 e2e/session.spec.ts:131:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (3.1s)
+  ✓  11 e2e/session.spec.ts:156:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (2.7s)
+  ✓  12 e2e/session.spec.ts:174:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (1.3s)
+  ✓  13 e2e/session.spec.ts:186:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (2.6s)
+  ✓  14 e2e/session.spec.ts:186:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (2.0s)
+  ✓  15 e2e/session.spec.ts:220:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (4.0s)
+
+  15 passed (37.9s)
