@@ -1,6 +1,6 @@
 ---
 id: T20261009-project-view
-status: ready
+status: verifying
 fr: [FR-VIEW-001, FR-VIEW-002, FR-VIEW-003, FR-VIEW-004, FR-VIEW-005, FR-VIEW-006, FR-VIEW-007, FR-VIEW-008]
 ac: [AC-06]
 specs: [specs/project-view/spec.md]
@@ -11,19 +11,18 @@ created: 2026-10-09
 
 ## 目标
 
-实现 Project Knowledge → Structured Data → Rendering → Generated Project View 的链路，以及 Project View Mode 的左 Conversation、右 Preview 工作方式（FR-VIEW-001～FR-VIEW-008，AC-06）。
+把已确认的 DEC-04～07 落成 Project View 规格草稿，明确 Project Knowledge、声明式 Renderer、Preview、View Context 与普通 Session 的实现边界和后续实现顺序（FR-VIEW-001～FR-VIEW-008，AC-06）。
 
-本轮（[T20261009-v1-foundation-slice](../T20261009-v1-foundation-slice/task.md)）只做调研：把 [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 7 节中阻塞本 task 的待决事项整理为决定草稿，交人确认。实现放到后续轮次。
+本轮不实现代码；规格完成后由后续实现轮次交付 Knowledge 读取、默认 View、Preview 和 Session 接入。
 
 ## 范围
 
-- 本轮做：调研并起草以下决定，每项给出推荐方案、备选方案与放弃原因：
-  - 04 第 7 节第 1 项：Project Knowledge 存储格式；
-  - 第 2 项：是否存储在 Project 内部隐藏目录；
-  - 第 3 项：AI Generated View 的 HTML 渲染与安全沙箱（04 第 2 节：AI 生成的 HTML / JavaScript 不得获得 Node.js、文件系统或完整 IPC 权限）；
-  - 第 10 项：Project View Context 如何注入两种 CLI；
-  - 第 11 项：Project View 数据自动更新时机与权限边界。
-- 后续轮次做：Knowledge 存储与 Schema 校验、View Renderer、Preview 容器（空状态、只读、缩放、自动刷新、渲染失败保留上一版）、Project View Mode 布局与 New Chat、默认五个 View 的生成指令。
+- 本轮做：
+  - 编写 `specs/project-view/spec.md` 草稿，覆盖 FR-VIEW-001～008；
+  - 规划 Knowledge 存储 / Schema、声明式 Renderer、Preview 状态与刷新、View Context 注入、IPC 与 Session 接缝；
+  - 同步 `specs/README.md`、`tasks/T20261009-project-view/plan.md`、`report.md` 和 `docs/06. Development Roadmap.md`；
+  - 保留实现阶段的技术问题，不把未确认的产品行为写成已确认需求。
+- 后续轮次做：按规格实现 Knowledge 读取与校验、View Renderer、Preview 容器、Project View Mode 接入、View Context 注入、五类默认 View 与 AC-06 验证。
 - 不做：自定义 View 的创建入口（FR-VIEW-002，P1）留待 P0 完成后评估。
 
 ## 依据
@@ -35,13 +34,15 @@ created: 2026-10-09
 
 ## 验收标准
 
-本轮（调研）：
+本轮（规格草稿与同步）：
 
 - [x] 上述五项在 [07. Decisions](<../../docs/07. Decisions.md>) 中各有决定（DEC-04～07，2026-10-09 确认），引用依据，不新增产品需求。
 - [x] 推荐方案满足 FR-VIEW-004 数据与展示分离、FR-VIEW-006 不创建特殊 Project Chat、04 第 2 节渲染隔离。
 - [x] 无法由文档推导的产品取舍已列为 Q1～Q12 并由人确认，见“已确认事项”。
+- [x] `specs/project-view/spec.md` 覆盖 Knowledge、Renderer、Preview、View Context、接口事件、实现计划和验证清单。
+- [x] 模块索引、任务计划、任务报告和路线图进度已同步；规格仍保持“草稿”。
 
-实现阶段（后续轮次，届时细化）：AC-06 全部要求。
+实现阶段（后续轮次，届时细化）：AC-06 全部要求；当前任务等待人工审阅规格，确认后再进入代码实现轮次。
 
 ## 已确认事项
 
