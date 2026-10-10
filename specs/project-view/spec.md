@@ -8,14 +8,38 @@
 | 文档状态 | 草稿 |
 | 覆盖需求 | FR-VIEW-001～FR-VIEW-008 |
 | 相关验收 | AC-06；05 第 4 节的 Project Knowledge / View 数据分离与本地持久化专项 |
-| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 1、5、7、9 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
-| 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 2、5、7、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；T20261009-project-view；2026-10-10 起草 |
+| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、6、8、10 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
+| 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 3、6、1、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；T20261009-project-view；2026-10-10 起草 |
 
 > 本规格把已确认的 DEC-04～07 落成可实现的模块边界。
 
-来源简称：Project 指 [Project spec](../project/spec.md)；Session 指 [Session spec](../session/spec.md)。其余简称与标注约定见 [specs/README.md](../README.md) 第 2 节。
+来源简称：Project 指 [Project spec](../project/spec.md)；Session 指 [Session spec](../session/spec.md)。其余简称与标注约定见 [specs/README.md](../README.md) 第 3 节。
 
-## 1. 职责与边界
+## 1. 问题记录
+
+### 1.1 未决问题
+
+| 编号 | 问题 | 建议答案与依据 | 阻塞实现 |
+|---|---|---|---|
+| PV-Q8 | `ViewSnapshot` 是否同时推送完整 Knowledge 与 Definition，还是只推送渲染后的模型？ | 建议推送已校验的声明式快照，便于 Renderer 保持可测试和 last-good；不推送 Session 敏感区块。依据 DEC-05、04 第 3 节。 | 否，可在阶段 1～3 调整 |
+| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 建议只保存运行期比例，不扩展 Project `ui_state`；具体手势交给高保真设计确认。依据 FR-VIEW-005“支持缩放”、Project spec 状态边界。 | 否 |
+| PV-Q10 | `schemaVersion` 升级是否只支持同版本读取，还是提供迁移器？ | 建议 V1 只接受当前版本，未知版本进入 error 并保留 last-good；迁移器作为后续 task。依据 DEC-04 与本地文件可回退原则。 | 否 |
+| PV-Q11 | View Context 生成文本是否显示在 transcript 的可折叠区域，还是只作为用户消息元数据？ | 建议显示可折叠“当前 View”标签，底层保存 `view_context_attached` 和路径，不复制完整模板。依据 DEC-06、Input spec 上下文标签规则。 | 是：阶段 4 UI 与 transcript 结构 |
+| PV-Q12 | 默认 View 的内置 Definition 是否通过代码常量提供，还是作为应用资源 JSON 打包？ | 建议作为版本化应用资源 JSON，启动时解析并用同一 Schema 校验；便于视觉调整而不写入 Project。依据 FR-VIEW-001、DEC-05。 | 否 |
+
+### 1.2 已确认
+
+| 编号 | 问题 | 回答（确认日期） |
+|---|---|---|
+| PV-Q1 | Knowledge 是否放在 Project 内 `.ai-studio/`，并默认 Git 忽略？ | 是；每个 View 一份带 `schemaVersion` 的 JSON，`.gitignore` 内容为 `*`（2026-10-09，DEC-04）。 |
+| PV-Q2 | V1 是否采用受信组件声明式渲染，推迟自由 HTML / JavaScript？ | 是；自由 HTML 推迟到 P1 / 自定义 View（2026-10-09，DEC-05）。 |
+| PV-Q3 | View Context 是否首条消息前附加可移除的英文文本块？ | 是；不内联 Knowledge，移除后仍保留 `originViewId`（2026-10-09，DEC-06）。 |
+| PV-Q4 | 客户端是否只监视、校验和刷新，不自动生成或修复 Knowledge？ | 是；打开、回合结束和重新聚焦时补扫，渲染失败保留上一版（2026-10-09，DEC-07）。 |
+| PV-Q5 | 默认 View Definition 是否内置，Project 文件仅可覆盖？ | 是（2026-10-09，T20261009-project-view Q4）。 |
+| PV-Q6 | Overview 的 Session 摘要区块是否由客户端固定渲染？ | 是（2026-10-09，T20261009-project-view Q5）。 |
+| PV-Q7 | V1 文件上限是否暂定 256 KB、500 节点？ | 是，作为实现防护上限，渲染原型校准后如需调整需更新规格（2026-10-09，T20261009-project-view Q11）。 |
+
+## 2. 职责与边界
 
 - 负责：
   - 五个默认 View 的目录、标题、顺序和语义入口（FR-VIEW-001）。
@@ -31,7 +55,7 @@
   - Files、Diff、Browser、Terminal 的内容 → `specs/tools/spec.md`（后续任务）；Project View Mode 下它们只复用右侧区域切换契约。
   - 自定义 View 的创建入口和自由 HTML / JavaScript 渲染。自定义 View 为 P1；自由 HTML 按 DEC-05 推迟到后续方案。
 
-## 2. 行为细则
+## 3. 行为细则
 
 ### FR-VIEW-001 默认 Project Views
 
@@ -65,13 +89,13 @@
 
 ### FR-VIEW-003 View 内容动态生成
 
-#### 2.3.1 生成触发
+#### 3.3.1 生成触发
 
 1. 客户端从不自动发起 AI 生成，也不在 Knowledge 为空时自动创建隐藏 Session。
 2. Preview 检测到某个 View 的 Knowledge 缺失或无可渲染内容时，显示空状态和“生成 <View 名称>”入口。用户点击入口后，左侧草稿只填入可编辑的生成指令；用户仍需自己发送，发送流程完全复用普通 CLI Session（D-06、DEC-07）。
 3. View Context 标签默认附加在该草稿上。用户移除标签后，生成指令仍可发送，但不注入 View Context；Session 的 `origin_view_id` 仍记录创建来源（DEC-06）。
 
-#### 2.3.2 外部更新与补扫
+#### 3.3.2 外部更新与补扫
 
 客户端读取和校验以下文件；Knowledge 与 View Definition 的生成、修改由用户通过普通 CLI Session 或文件工具完成：
 
@@ -84,7 +108,7 @@
 
 文件监视是刷新触发器，不是事实来源；每次发布都以磁盘上的完整文件为准。更新不切换 View、Session、右侧 Preview / 工具，也不改变 Project 的 UI 状态（DEC-07）。
 
-#### 2.3.3 部分写入与刷新顺序
+#### 3.3.3 部分写入与刷新顺序
 
 1. 读取失败或 JSON 不完整时，短暂等待文件稳定后重读；在稳定窗口内不替换上一版成功快照。
 2. Knowledge 与 View Definition 可能由 Agent 分步写入。任一部分暂时无效时保留上一版成功渲染，等下一次补扫再尝试；不显示“知识已过期”或自动修复入口（Q9 已确认）。
@@ -92,7 +116,7 @@
 
 ### FR-VIEW-004 数据与展示分离
 
-#### 2.4.1 文件布局
+#### 3.4.1 文件布局
 
 Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户端在需要注入 View Context 前可以幂等写入自己的指南、Schema 和 `.gitignore` 文件；它不写入 Agent 生成的 Knowledge 或 View Definition（DEC-04；Q8 已确认）。
 
@@ -112,7 +136,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 2. 客户端读取 `.ai-studio/` 前解析 realpath，拒绝通过符号链接把 Project 外部文件作为 Knowledge / View Definition 载入（技术方案，待实现确认）。
 3. `.ai-studio/` 下未知文件忽略；隐藏目录不由 Files 工具默认展示，具体由 context-tools spec 决定。
 
-#### 2.4.2 事实与呈现
+#### 3.4.2 事实与呈现
 
 - Knowledge 只描述可以独立验证的事实：名称、状态、依赖、流程节点、Agent 配置引用和代码相对路径。
 - View Definition 只描述如何组织和呈现事实：受信组件、布局、排序、数据绑定、关系图方向和强调变体。
@@ -130,7 +154,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 ### FR-VIEW-006 Project View Conversation
 
 1. 左侧 Conversation 使用已有的普通 Session / New Chat 组件，不创建特殊 Project Chat、唯一 Project Session 或隐藏聊天记录。
-2. 从导航进入 View：左侧显示新草稿；草稿上方列出该 View 最近 3 条相关 Session（Shell Spec 第 7 节），点击某条在 View 左列打开该 Session。该动作不改变导航中当前 View 的 Selected 状态（P-A）。
+2. 从导航进入 View：左侧显示新草稿；草稿上方列出该 View 最近 3 条相关 Session（Shell Spec 第 8 节），点击某条在 View 左列打开该 Session。该动作不改变导航中当前 View 的 Selected 状态（P-A）。
 3. 从 Session History 打开在 View 中创建的 Session：进入普通 Conversation Mode；顶栏提供“在 View 中打开”入口，由 Navigation / Session 交互实现（D-02）。
 4. View 左列显示的 Session 满足 Session spec 的“正在查看”条件；完成或错误提醒的清除由 Session 模块处理，Project View 只提供当前显示 Session ID。
 5. View 中的 Session 仍按 Session History 的最近用户消息时间排序；Agent 输出或 Preview 更新不得移动列表。
@@ -152,9 +176,9 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 2. 关闭或切换 View 不停止 Session；Session 的运行、Needs Input、Error、Completed Unread 规则由 Session 模块负责。
 3. View 最近对话只按 `originViewId` 过滤已存在的 Session；已删除、跨 Project 或 origin 为空的 Session 不列入该区块。
 
-## 3. 状态与数据
+## 4. 状态与数据
 
-### 3.1 View 目录与文件快照
+### 4.1 View 目录与文件快照
 
 | 类型 | 字段 | 说明 |
 |---|---|---|
@@ -165,7 +189,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 
 单文件限制（Q11 已确认，作为 V1 防护上限）：Knowledge 或 View Definition 文件默认不超过 256 KB，单个组件树不超过 500 个节点。超过上限时该 View 进入校验错误并保留上一版，不截断、不执行部分 JSON；具体数值在渲染原型校准后若需调整，必须修改本规格与任务证据。
 
-### 3.2 声明式 Renderer 组件
+### 4.2 声明式 Renderer 组件
 
 V1 仅开放内置 Registry 中的受信组件（实现名称可调整）：
 
@@ -177,7 +201,7 @@ V1 仅开放内置 Registry 中的受信组件（实现名称可调整）：
 4. `diagram` 接收节点 / 边和布局方向，由 Renderer 计算布局；Agent 不提供 SVG 坐标或可执行绘图代码。
 5. Overview 的客户端 Session 区块使用独立 React 组件插槽，不进入 Agent 可编辑的 `root`，避免把 Session 标题、Needs Input 内容交给 View Definition 控制。
 
-### 3.3 Preview 状态
+### 4.3 Preview 状态
 
 | 状态 | 进入条件 | UI 行为 |
 |---|---|---|
@@ -189,7 +213,7 @@ V1 仅开放内置 Registry 中的受信组件（实现名称可调整）：
 
 `error` 不改变 Session 状态、不产生隐藏对话、不清除用户输入。下一次成功快照到达后自动回到 `ready`；错误详情应避免包含完整 Knowledge 内容或敏感 Session 文本。
 
-### 3.4 View Context
+### 4.4 View Context
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
@@ -208,9 +232,9 @@ Rules: update the relevant Knowledge and View Definition files when the user ask
 
 实际发送时模板文本由 Session / Adapter 组装，Renderer 不自行拼接、转义或决定 CLI 分支。对话记录保存“已附加 View Context”的可折叠元数据和用户文本；不把 Knowledge 内容复制进 transcript。
 
-## 4. 接口与事件
+## 5. 接口与事件
 
-### 4.1 Main Service
+### 5.1 Main Service
 
 建议新增 `ProjectViewService`（技术方案，待实现确认），放在 `apps/desktop/src/main/services/project-view/`：
 
@@ -224,7 +248,7 @@ Rules: update the relevant Knowledge and View Definition files when the user ask
 
 主进程服务负责真实路径、文件读取、Schema 校验、稳定读取、快照版本和安全错误；Renderer 不直接访问 `fs`、Shell 或 Project 目录。
 
-### 4.2 IPC 契约
+### 5.2 IPC 契约
 
 建议新增 `shared/ipc/project-view.ts`，按 DEC-02 登记到 `contracts.ts`、`main/ipc/index.ts`，参数均带 `projectId`：
 
@@ -238,7 +262,7 @@ Rules: update the relevant Knowledge and View Definition files when the user ask
 
 不提供“生成 View”或“写入 Knowledge”的 IPC；生成与修改仍通过普通 Session。若后续需要手动刷新，应先补充 FR 和 UX 决定，不能在本规格隐式加入按钮。
 
-### 4.3 Renderer Store 与组件
+### 5.3 Renderer Store 与组件
 
 建议新增 `apps/desktop/src/renderer/src/features/project-view/`：
 
@@ -253,14 +277,14 @@ Rules: update the relevant Knowledge and View Definition files when the user ask
 
 Project Shell 只负责把当前 `UiState.mainCanvas.view` 和 `viewRightArea` 传入；View feature 通过现有 `ShellIntegration` 调用 Session 的 `Conversation`、`ConversationHeader` 和输入区。所有 store 均以 `projectId` 为键，避免跨 Project 混淆（AC-01）。
 
-### 4.4 Session 接缝
+### 5.4 Session 接缝
 
 1. 从 View 草稿发送时，Renderer 把 `originViewId`、`viewContextAttached` 和已有 `contextItems` 传给 Session store；Session 创建 DTO 由 `CreateSessionRequest` 扩展相应可选字段（技术方案，待实现确认）。
 2. Session 主进程在创建前向 `ProjectViewService.buildContext` 取模板；若标记为 false 或 View 已失效，则不附加文本，但仍保存 `originViewId`。
 3. Adapter 接收统一的“View Context 文本块 + 用户文本”输入；Codex / Claude 的差异不暴露给 Renderer。首条消息完成后，服务将附加状态记录到 transcript 元数据，后续轮次不重复注入。
 4. Session 回合结束事件通知 `ProjectViewService` 补扫；Project 窗口聚焦事件也触发补扫。补扫失败不改变 Session 的成功 / Error 终态。
 
-### 4.5 Project / Navigation 接缝
+### 5.5 Project / Navigation 接缝
 
 | 调用方 | Project View 提供 | 调用方负责 |
 |---|---|---|
@@ -269,7 +293,7 @@ Project Shell 只负责把当前 `UiState.mainCanvas.view` 和 `viewRightArea` �
 | Session | `buildContext()`、按 View 查询最近对话的过滤条件、回合结束通知 | Session 状态、Conversation、原生 CLI 和 transcript |
 | Input | View Context 标签的可移除状态 | 通用输入区、Model Selector、Send / Stop |
 
-## 5. 实现计划
+## 6. 实现计划
 
 以下是后续实现轮次的顺序和写入范围。本轮只完成规格草稿与文档同步，不宣称代码交付。
 
@@ -300,39 +324,15 @@ Project Shell 只负责把当前 `UiState.mainCanvas.view` 和 `viewRightArea` �
 2. Preview 不拥有 Node.js、文件系统、Shell、凭据或任意 IPC 能力；Renderer 只接收已经校验的 DTO。
 3. 如果未来引入自由 HTML，必须另立 P1 规格和 Electron 沙箱原型，不能复用本阶段的声明式入口。
 
-## 6. 验证清单
+## 7. 验证清单
 
 | 场景 | 预期 | 依据 |
 |---|---|---|
 | 新 Project 无 Knowledge 进入 Overview | 显示空状态和生成入口；不创建 Session；客户端 Session 区块可显示 | FR-VIEW-003；AC-06；D-06 |
 | Architecture 中发送“重新整理支付模块架构” | 使用普通 CLI Session；左右布局保留；Agent 修改文件后 Preview 自动刷新 | FR-VIEW-005～008；AC-06 |
 | Agent 写入半个 JSON | 保留上一版成功 View，稳定读取后再尝试；不崩溃、不清空 Conversation | DEC-07 |
-| View Definition 含脚本、HTML 或未知组件 | 对应 View error；保留 last-good；不执行内容 | DEC-05；04 第 2 节 |
+| View Definition 含脚本、HTML 或未知组件 | 对应 View error；保留 last-good；不执行内容 | DEC-05；04 第 3 节 |
 | View Context 标签被移除 | 首条消息不附加 View Context；Session 仍记录 `originViewId` | DEC-06；FR-VIEW-007 |
 | 两个 Project 同时更新 | Renderer 按 `projectId:viewId` 隔离；切 Tab 不显示另一项目的 Preview 或 Session | FR-PROJ-002；AC-01 |
 | View Session 在后台完成 | 左侧 View 对话仍是普通 Session；提醒与清除遵循 Session spec，不由 Preview 改写 | D-05；FR-STATE-004～005 |
-| 客户端 / Agent 写入 `.ai-studio/` 外部 symlink | 拒绝载入；错误只影响该 View | 04 第 2 节；本 spec §2.4.1 |
-
-## 7. 问题记录
-
-### 7.1 已确认
-
-| 编号 | 问题 | 回答（确认日期） |
-|---|---|---|
-| PV-Q1 | Knowledge 是否放在 Project 内 `.ai-studio/`，并默认 Git 忽略？ | 是；每个 View 一份带 `schemaVersion` 的 JSON，`.gitignore` 内容为 `*`（2026-10-09，DEC-04）。 |
-| PV-Q2 | V1 是否采用受信组件声明式渲染，推迟自由 HTML / JavaScript？ | 是；自由 HTML 推迟到 P1 / 自定义 View（2026-10-09，DEC-05）。 |
-| PV-Q3 | View Context 是否首条消息前附加可移除的英文文本块？ | 是；不内联 Knowledge，移除后仍保留 `originViewId`（2026-10-09，DEC-06）。 |
-| PV-Q4 | 客户端是否只监视、校验和刷新，不自动生成或修复 Knowledge？ | 是；打开、回合结束和重新聚焦时补扫，渲染失败保留上一版（2026-10-09，DEC-07）。 |
-| PV-Q5 | 默认 View Definition 是否内置，Project 文件仅可覆盖？ | 是（2026-10-09，T20261009-project-view Q4）。 |
-| PV-Q6 | Overview 的 Session 摘要区块是否由客户端固定渲染？ | 是（2026-10-09，T20261009-project-view Q5）。 |
-| PV-Q7 | V1 文件上限是否暂定 256 KB、500 节点？ | 是，作为实现防护上限，渲染原型校准后如需调整需更新规格（2026-10-09，T20261009-project-view Q11）。 |
-
-### 7.2 未决问题
-
-| 编号 | 问题 | 建议答案与依据 | 阻塞实现 |
-|---|---|---|---|
-| PV-Q8 | `ViewSnapshot` 是否同时推送完整 Knowledge 与 Definition，还是只推送渲染后的模型？ | 建议推送已校验的声明式快照，便于 Renderer 保持可测试和 last-good；不推送 Session 敏感区块。依据 DEC-05、04 第 2 节。 | 否，可在阶段 1～3 调整 |
-| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 建议只保存运行期比例，不扩展 Project `ui_state`；具体手势交给高保真设计确认。依据 FR-VIEW-005“支持缩放”、Project spec 状态边界。 | 否 |
-| PV-Q10 | `schemaVersion` 升级是否只支持同版本读取，还是提供迁移器？ | 建议 V1 只接受当前版本，未知版本进入 error 并保留 last-good；迁移器作为后续 task。依据 DEC-04 与本地文件可回退原则。 | 否 |
-| PV-Q11 | View Context 生成文本是否显示在 transcript 的可折叠区域，还是只作为用户消息元数据？ | 建议显示可折叠“当前 View”标签，底层保存 `view_context_attached` 和路径，不复制完整模板。依据 DEC-06、Input spec 上下文标签规则。 | 是：阶段 4 UI 与 transcript 结构 |
-| PV-Q12 | 默认 View 的内置 Definition 是否通过代码常量提供，还是作为应用资源 JSON 打包？ | 建议作为版本化应用资源 JSON，启动时解析并用同一 Schema 校验；便于视觉调整而不写入 Project。依据 FR-VIEW-001、DEC-05。 | 否 |
+| 客户端 / Agent 写入 `.ai-studio/` 外部 symlink | 拒绝载入；错误只影响该 View | 04 第 3 节；本 spec §3.4.1 |

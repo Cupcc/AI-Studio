@@ -15,14 +15,14 @@ created: 2026-10-09
 
 ## 范围
 
-- 做：Files 目录树与“添加到对话”；Diff 的项目 / 本轮范围及不可用降级（FR-TOOL-002）；Browser（WebContentsView、地址栏、刷新、记忆上次地址）；Project 内轻量 Terminal Tabs（FR-TOOL-004）；轮次原生补丁的持久化与 Conversation 入口（04 第 7 节第 13 项）。
+- 做：Files 目录树与“添加到对话”；Diff 的项目 / 本轮范围及不可用降级（FR-TOOL-002）；Browser（WebContentsView、地址栏、刷新、记忆上次地址）；Project 内轻量 Terminal Tabs（FR-TOOL-004）；轮次原生补丁的持久化与 Conversation 入口（04 第 1 节第 13 项）。
 - 不做：完整 Source Control 工作台（[01. Product Definition](<../../docs/01. Product Definition.md>) 第 4 节非目标）。
 
 ## 依据
 
 - 功能：[02. Functional Requirements](<../../docs/02. Functional Requirements.md>) 第 5 节。
-- 界面：[03. UX Specification](<../../docs/03. UX Specification.md>) 第 5 节、D-08、D-13、P-B、P-C；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 5、8 节（组件修订 diff 待审阅）。
-- 技术：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节（xterm.js、node-pty、Monaco、Git CLI、WebContentsView）、第 4 节、第 7 节第 13 项。
+- 界面：[03. UX Specification](<../../docs/03. UX Specification.md>) 第 5 节、D-08、D-13、P-B、P-C；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节（组件修订 diff 待审阅）。
+- 技术：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3 节（xterm.js、node-pty、Monaco、Git CLI、WebContentsView）、第 5 节、第 1 节第 13 项。
 - 验收：[05. Acceptance Criteria](<../../docs/05. Acceptance Criteria.md>) AC-07。
 - 决定：[DEC-08、DEC-09](<../../docs/07. Decisions.md>)；2026-10-10 用户在参考 ChatGPT Desktop 的建议后回复“agree your advice, update doc”。[调研记录](research.md) 区分官方公开行为和待验证能力。
 
@@ -38,16 +38,12 @@ created: 2026-10-09
 | 问题 | 回答（确认日期） |
 |---|---|
 | Git Staged / Unstaged 等高级能力是否进入 MVP | 按 FR-TOOL-002 的基础只读范围执行，取舍见 DEC-08（2026-10-10 确认） |
-| 每轮修改文件的识别方式；非 Git 目录是否需要 Diff 基线 | 按 FR-TOOL-002 和 04 第 7 节第 13 项采用原生轮次记录；非 Git 不自建项目基线，能力验证见下节（2026-10-10 确认） |
+| 每轮修改文件的识别方式；非 Git 目录是否需要 Diff 基线 | 按 FR-TOOL-002 和 04 第 1 节第 13 项采用原生轮次记录；非 Git 不自建项目基线，能力验证见下节（2026-10-10 确认） |
 | Terminal 是否支持多实例 | 按 FR-TOOL-004 采用 Project 内轻量 Terminal Tabs，取舍见 DEC-09（2026-10-10 确认） |
-
-## 未决问题
-
-上述三项范围问题已回答；原生能力验证不能视为已通过，见下节。
 
 ## 待验证与实施准备
 
-- 按 04 第 7 节第 13 项验证 CLI 事件、覆盖范围、Claude Code 同等数据、非 Git 原生补丁与历史恢复；资料见 [research.md](research.md)。真实模型调用的授权和预算另行确定，本次仅更新文档。
+- 按 04 第 1 节第 13 项验证 CLI 事件、覆盖范围、Claude Code 同等数据、非 Git 原生补丁与历史恢复；资料见 [research.md](research.md)。真实模型调用的授权和预算另行确定，本次仅更新文档。
 - 创建 `specs/tools/spec.md`，细化 Files / Browser、Terminal 关闭及应用退出生命周期、轮次补丁存储和 Adapter 接口。现有 Adapter 实现任务不因此视为已覆盖本轮 Diff。
 - 现有交互原型 v01 / v02 尚未覆盖本次工具行为；Shell Spec v02 diff 待审阅，v01 保留作历史依据。
 

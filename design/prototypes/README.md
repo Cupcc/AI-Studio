@@ -2,6 +2,10 @@
 
 存放可交互原型、外部原型链接及操作说明。
 
+## 人工审阅入口
+
+- [v02 采用问题](../../tasks/T20261010-prototype-v02/task.md#未决问题)与[评审依据](../../tasks/T20261010-prototype-v02/task.md#签收)。
+
 ## 1. 场景覆盖
 
 | 场景 | 验证重点 | 依据 |
@@ -32,16 +36,16 @@
 - **操作步骤**：左下角“演示控制”列出 AC-01 ~ AC-07 的操作步骤，并可触发后台完成、后台请求确认、后台出错、CLI 未登录和重置。
 - **预置事件**：约 10 秒后“支付模块开发”在后台完成（AC-04）；约 25 秒后 admin-console 的 Session 请求确认，Tab 出现橙点（D-07）；约 40 秒后 landing-page 的 Session 完成。
 - **模拟数据**：所有 Project、Session、代码、Diff 与终端输出均为示例；Agent 回复由原型脚本生成，不调用真实 CLI。
-- **未实现**：真实目录选择与文件读取、Session Resume、图片附件、Terminal 多实例、窗口尺寸以外的平台差异、最终视觉参数（当前基线见 [Visual Direction](../visual-direction.md) 第 5 节）。
-- **工程工具差异**：项目 / 本轮 Diff 与 Terminal Tabs 的行为依据见 FR-TOOL-002、FR-TOOL-004，组件修订见 [Shell Spec v02](../components/shell-spec-v02.md) 第 5、8 节；现有原型 v01 / v02 均未覆盖，不作为这些能力的验收证据。
-- **与 spec 的关系**：原型确定布局、组件外观与交互示意；行为与 spec 不一致时以 spec 为准，例如窗口失焦时不视为正在查看（[session spec](../../specs/session/spec.md) S-Q1）；原型中不足一屏的对话贴底显示，已改为从顶部开始（[Shell Spec v01](../components/shell-spec-v01.md) 第 5 节，2026-10-10 确认）。
+- **未实现**：真实目录选择与文件读取、Session Resume、图片附件、Terminal 多实例、窗口尺寸以外的平台差异、最终视觉参数（当前基线见 [Visual Direction](../visual-direction.md) 第 1 节）。
+- **工程工具差异**：项目 / 本轮 Diff 与 Terminal Tabs 的行为依据见 FR-TOOL-002、FR-TOOL-004，组件修订见 [Shell Spec v02](../components/shell-spec-v02.md) 第 6、9 节；现有原型 v01 / v02 均未覆盖，不作为这些能力的验收证据。
+- **与 spec 的关系**：原型确定布局、组件外观与交互示意；行为与 spec 不一致时以 spec 为准，例如窗口失焦时不视为正在查看（[session spec](../../specs/session/spec.md) S-Q1）；原型中不足一屏的对话贴底显示，已改为从顶部开始（[Shell Spec v01](../components/shell-spec-v01.md) 第 6 节，2026-10-10 确认）。
 
 ### Studio 灰度交互原型 v02
 
 在 v01 基础上探索 Conversation 向 ChatGPT / Claude 桌面端对齐（[T20261010-prototype-v02](../../tasks/T20261010-prototype-v02/task.md)）。未改动的部分与 v01 相同，上节说明继续适用。
 
 - **变更**：
-  - 对话从顶部开始排列（已确认，见 [Shell Spec v01](../components/shell-spec-v01.md) 第 5 节）；
+  - 对话从顶部开始排列（已确认，见 [Shell Spec v01](../components/shell-spec-v01.md) 第 6 节）；
   - Agent 回复按 Markdown 渲染：标题、有序 / 无序列表、表格（数字列右对齐）、引用、行内代码、加粗、链接，代码块带语言标签、轻量语法高亮（ts / js / bash）、`diff` 增删行底色和“复制”按钮；用户消息仍为纯文本；
   - Session Mode 的新对话草稿：问候语、执行位置与输入框一起居中；顶栏只保留 CLI 标识与“新对话”；发送第一条消息后输入框回到底部；
   - 消息列与输入框同为 720 内容宽度，左右边缘对齐；Project View 左列同样对齐。

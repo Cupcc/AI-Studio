@@ -9,13 +9,18 @@ created: 2026-10-09
 
 # V1 地基与首个可用切片（总体拆分）
 
+## 签收
+
+- 状态：待人工签收；任务保持 `verifying`。
+- 审阅依据：[验收记录](acceptance.md)、[交付报告](report.md)。
+
 ## 目标
 
 把本轮范围拆成可并行执行的 task，并负责排期、集成与跨 task 接口对齐。本轮范围（2026-10-09 确认）：
 
-- 地基：macOS 应用骨架（[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节技术栈）与 CLI Adapter（04 第 3、4 节；[CLI Integration Preflight](../T20261008-cli-preflight/report.md) 第 5、6 节）。
+- 地基：macOS 应用骨架（[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3 节技术栈）与 CLI Adapter（04 第 4、5 节；[CLI Integration Preflight](../T20261008-cli-preflight/report.md) 第 5、6 节）。
 - 首个可用切片：Project 壳层与 Session 对话，实现 AC-01～AC-05 所涉行为；本轮只做实现与验收记录，签收另行进行。
-- Project View：本轮只调研 04 第 7 节相关待决事项并起草决定记录，交人确认。
+- Project View：本轮只调研 04 第 1 节相关待决事项并起草决定记录，交人确认。
 
 ## 范围
 
@@ -30,7 +35,7 @@ FR 按层归属：Adapter 层只负责 CLI 原生能力的统一与进程管理�
 |---|---|---|---|---|
 | [T20261009-app-skeleton](../T20261009-app-skeleton/task.md) | 1 | Electron 应用骨架、分层与 IPC、SQLite、node-pty、测试框架、GUI 启动环境 | — | ready |
 | [T20261009-agent-adapter](../T20261009-agent-adapter/task.md) | 1 | 统一事件模型、Codex / Claude Provider、Stop 与进程管理 | — | ready |
-| [T20261009-project-view](../T20261009-project-view/task.md) | 1（仅调研） | 04 第 7 节第 1、2、3、10、11 项的决定草稿 | — | draft |
+| [T20261009-project-view](../T20261009-project-view/task.md) | 1（仅调研） | 04 第 1 节第 1、2、3、10、11 项的决定草稿 | — | draft |
 | [T20261009-project-shell](../T20261009-project-shell/task.md) | 2 | 启动页、Project Tabs、状态恢复、左侧导航结构、右侧边栏容器 | app-skeleton | draft |
 | [T20261009-session-slice](../T20261009-session-slice/task.md) | 2 | Session 管理与状态、Session History、Conversation、输入区 | app-skeleton、agent-adapter；与 project-shell 有接口约定 | draft |
 | [T20261009-context-tools](../T20261009-context-tools/task.md) | 后续轮次 | Files、Diff、Browser、Terminal | project-shell | draft |
@@ -38,7 +43,7 @@ FR 按层归属：Adapter 层只负责 CLI 原生能力的统一与进程管理�
 ## 依据
 
 - 本轮范围、`main` 基线提交与分支开发方式、真实 CLI 限量调用：2026-10-09 对话确认。
-- 技术栈与分层：04 第 2 节；CLI 原生能力复用：04 第 3 节；Runtime 隔离与 Stop：04 第 4 节。
+- 技术栈与分层：04 第 3 节；CLI 原生能力复用：04 第 4 节；Runtime 隔离与 Stop：04 第 5 节。
 - Adapter 映射与剩余校验：[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 5、6 节。
 - 功能与验收：[02. Functional Requirements](<../../docs/02. Functional Requirements.md>)；[05. Acceptance Criteria](<../../docs/05. Acceptance Criteria.md>) AC-01～AC-05。
 - 界面：[03. UX Specification](<../../docs/03. UX Specification.md>)；[Shell Spec v01](../../design/components/shell-spec-v01.md)（探索中）；线框图 v02（已确认）。
@@ -49,8 +54,3 @@ FR 按层归属：Adapter 层只负责 CLI 原生能力的统一与进程管理�
 - [ ] 各子 task 分支合并到 `dev/v1` 后，安装、类型检查、单元测试与应用启动冒烟全部通过，命令记录在 `AGENTS.md`。
 - [ ] AC-01～AC-05 所涉行为可在 `dev/v1` 上演示，验收 worker 写出各子 task 的 `acceptance.md`（AC-01～AC-05）。
 - [ ] 需要人确认的决定与问题都已写入对应文档的未决问题或决定草稿。
-
-## 未决问题
-
-| 问题 | 回答（确认日期） |
-|---|---|

@@ -9,18 +9,27 @@
 | 状态 | 已确认（2026-10-09）：基于已确认线框图 v02 整理，随交互原型 v01 一并确认 |
 | 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02 |
 | 范围 | 窗口布局、区域尺寸、组件结构与交互状态 |
-| 不含 | 色值、字体、图标库等视觉参数：见 [Visual Direction](../visual-direction.md) 第 5 节 |
+| 不含 | 色值、字体、图标库等视觉参数：见 [Visual Direction](../visual-direction.md) 第 1 节 |
 
 本文件中的颜色仅用于区分状态语义，具体色值见交互原型 v01。尺寸单位为 px。
 
-## 1. 窗口与区域
+## 1. 待确认
 
-### 1.1 基准尺寸
+| 项目 | 说明 |
+|---|---|
+| 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 1 节 |
+| 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
+| Terminal 多实例 | 规格未定义；v01 按单实例设计 |
+| 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
+
+## 2. 窗口与区域
+
+### 2.1 基准尺寸
 
 - 设计基准窗口：1280×800；复核尺寸：1440×900。
 - 最小窗口：1024×640。
 
-### 1.2 区域尺寸
+### 2.2 区域尺寸
 
 | 区域 | 默认 | 范围 | 规则 |
 |---|---|---|---|
@@ -32,7 +41,7 @@
 | Project View Mode：Conversation 列 | 宽 440 | 360–560，可拖拽分隔线 | 宽度按 Project 记忆 |
 | Project View Mode：右侧区域 | 剩余宽度 | 最小 400 | Preview 与工具共享（UX P-B） |
 
-### 1.3 空间不足时
+### 2.3 空间不足时
 
 1. 先将右侧区域或右侧边栏压缩到最小宽度，再压缩 Conversation 到最小宽度；
 2. 不因空间不足自动折叠左侧导航或关闭右侧边栏，布局变化只由用户触发；
@@ -40,7 +49,7 @@
 
 按最小值核算：Project View Mode 为 248 + 360 + 400 = 1008，Session Mode 打开右侧边栏为 248 + 400 + 320 = 968，均不超过 1024。
 
-## 2. 顶栏
+## 3. 顶栏
 
 从左到右：窗口控制区 → 左侧导航折叠按钮 →（导航折叠时）New Chat 按钮 → Project Tabs → `+` → 右侧边栏按钮。
 
@@ -54,7 +63,7 @@
 
 首发平台为 macOS，窗口控制区位于左侧（2026-10-08 确认）。Windows / Linux 的窗口控制按钮位于右侧，此时右侧边栏按钮位于其左侧，作为后续平台适配参考。
 
-## 3. 左侧导航
+## 4. 左侧导航
 
 | 组件 | 尺寸 | 结构 | 状态 | 需求 |
 |---|---|---|---|---|
@@ -69,7 +78,7 @@
 
 Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session 不在 Session History 中重复高亮。
 
-## 4. 状态指示
+## 5. 状态指示
 
 | 状态 | 形态 | 尺寸 | 清除时机 | 需求 |
 |---|---|---|---|---|
@@ -81,7 +90,7 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 
 注意力优先级：Needs Input > Error > Completed Unread。Running 不显示在 Tab 与折叠按钮上。
 
-## 5. Conversation
+## 6. Conversation
 
 | 组件 | 结构与规则 | 需求 |
 |---|---|---|
@@ -97,7 +106,7 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 
 打开 Session 时直接定位到底部，不出现从顶部滚动到底部的过程。
 
-## 6. 输入区
+## 7. 输入区
 
 | 部分 | 规则 | 需求 |
 |---|---|---|
@@ -107,7 +116,7 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 | Model Selector | 位于输入区底行右侧，列出当前 Session CLI 支持的模型 | FR-INPUT-002 |
 | Send / Stop | 输入为空时 Send 禁用；Running 时变为 Stop；Running 期间能否排队发送遵循 CLI 原生能力 | FR-INPUT-001 |
 
-## 7. Project View
+## 8. Project View
 
 | 组件 | 结构与规则 | 需求 |
 |---|---|---|
@@ -119,7 +128,7 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 | Preview 空状态 | 说明 + “生成 <View 名称>”按钮；点击后把可编辑的生成指令填入左侧输入框 | FR-VIEW-003 |
 | Preview 渲染失败 | 保留上一版内容，顶部显示错误提示条 | UX D-06 |
 
-## 8. 右侧边栏与工具
+## 9. 右侧边栏与工具
 
 | 组件 | 结构与规则 | 需求 |
 |---|---|---|
@@ -129,7 +138,7 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 | Browser | 地址栏 + 刷新 + 页面区域；默认打开上次地址 | FR-TOOL-003 |
 | Terminal | 工作目录为 Project 目录，与 Agent Runtime 隔离 | FR-TOOL-004 |
 
-## 9. 页面级组件
+## 10. 页面级组件
 
 | 组件 | 结构与规则 | 需求 |
 |---|---|---|
@@ -139,7 +148,7 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 | 加载中 | Conversation 与 Preview 使用骨架行，不使用全屏遮罩 | — |
 | CLI 不可用 | 说明未安装或未登录，并给出安装 / 登录指引 | FR-CHAT-002 |
 
-## 10. 通用交互状态
+## 11. 通用交互状态
 
 | 状态 | 规则 |
 |---|---|
@@ -147,12 +156,3 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 | Selected | 背景加深，字重 500 |
 | Focus | 键盘导航时显示 2px 焦点环 |
 | Disabled | 降低对比度，并通过提示或说明文字给出原因 |
-
-## 11. 待确认
-
-| 项目 | 说明 |
-|---|---|
-| 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 5 节 |
-| 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
-| Terminal 多实例 | 规格未定义；v01 按单实例设计 |
-| 尺寸复核 | 第 1 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |

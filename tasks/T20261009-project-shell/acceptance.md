@@ -2,6 +2,11 @@
 
 > 写入者：W3（GPT-6.1 Sol high），未参与实现。验收日期：2026-10-09。状态：待人工签收；不据此标记 task 为 done。
 
+## 签收
+
+- 状态：待签收。
+- 人工确认日期：尚无。
+
 ## 结论与复核方式
 
 本 task 壳层范围内的 11 项标准通过。AC-01 的真实 Session / CLI / 工具内容不在本 task 范围，不能由占位页面测试认定完整产品验收通过。
@@ -13,16 +18,16 @@
 
 | 验收标准 | 来源 | 结论 | 证据 |
 |---|---|---|---|
-| 三目录同时打开、Tab 切换；Main Canvas 与右侧状态互不影响 | task 标准 1；AC-01；project §2.2.6 | 通过（View / 草稿；Session 占位的持久化另有单测） | [W3-e2e.log](evidence/W3-e2e.log) 三 Project 用例；`project-service.test.ts` 保存 / 重开三种 canvas；`shell.test.tsx` 三 Project 隔离 |
+| 三目录同时打开、Tab 切换；Main Canvas 与右侧状态互不影响 | task 标准 1；AC-01；project §3.2.6 | 通过（View / 草稿；Session 占位的持久化另有单测） | [W3-e2e.log](evidence/W3-e2e.log) 三 Project 用例；`project-service.test.ts` 保存 / 重开三种 canvas；`shell.test.tsx` 三 Project 隔离 |
 | 启动页 Tab、最近 Projects、单一 `+` 启动页、最后 Project 关闭后窗口保留、已打开目录转到既有 Tab | task 标准 2；FR-PROJ-001；D-09；PROJ-Q2 | 通过 | [W3-e2e.log](evidence/W3-e2e.log)；[可复跑脚本](evidence/W3-project.spec.ts) |
-| 符号链接 / 等价路径不重复，非目录 / 不存在 / 不可读不创建 Project | task 标准 3；project §2.1.3 | 通过 | [W3-e2e.log](evidence/W3-e2e.log) 路径用例含实际 chmod 不可读目录；`project-service.test.ts` 记录数断言与 macOS identity 分支 |
+| 符号链接 / 等价路径不重复，非目录 / 不存在 / 不可读不创建 Project | task 标准 3；project §3.1.3 | 通过 | [W3-e2e.log](evidence/W3-e2e.log) 路径用例含实际 chmod 不可读目录；`project-service.test.ts` 记录数断言与 macOS identity 分支 |
 | 重启恢复 Tab 集合 / 顺序 / 当前 Tab、重新打开恢复 canvas / 右侧状态；首次 Overview，目标缺失回落 | task 标准 4；FR-PROJ-003；PROJ-Q1/Q8 | 通过（Session 缺失通过注入接口检验） | [W3-e2e.log](evidence/W3-e2e.log) 真实重启 / 关闭再打开；`shell.test.tsx` 缺失 Session；`rules.test.ts` 未知 View / 损坏状态；`project-service.test.ts` 数据库 reopen |
 | Session / View 右侧状态分别保存，last_tool 共享，导航进入 View 显示 Preview | task 标准 5；PROJ-Q3 | 通过 | `rules.test.ts` 模式转换断言；`shell.test.tsx` 与 [W3-e2e.log](evidence/W3-e2e.log) 三 Project 模式 / 工具状态 |
 | 非当前 Tab 单一注意力点；Running 不显示；可替换 Session 数据源，更新不改变布局 | task 标准 6；FR-PROJ-002；D-07 | 通过（汇总由 Session 接口负责） | `integration.tsx` / `AttentionDot.tsx` / `TopBar.tsx` 审查；`shell.test.tsx` 非当前点、当前点隐藏与动态更新；[单测记录](../T20261009-agent-adapter/evidence/W4-unit.log) |
 | Running / Needs Input 关闭确认；确认才调用停止；失败保持 Tab | task 标准 7；FR-PROJ-002；D-10 | 通过（Session 停止接口为替身） | `close-flow.test.ts` 计数重查、只停目标 Project、失败 / 超时；`shell.test.tsx` 取消、焦点、重试后关闭；[单测记录](../T20261009-agent-adapter/evidence/W4-unit.log) |
 | New Chat、五个 Views、Sessions 容器 / 分隔线、当前 View 高亮、折叠入口与点、窗口级跨重启偏好 | task 标准 8；FR-NAV-001/002；D-14 | 通过 | [六张截图](#布局记录)；`shell.test.tsx` 折叠点 / 跨 Project；[W3-e2e.log](evidence/W3-e2e.log) 折叠重启恢复 |
-| 区域尺寸 / 范围 / 压缩顺序符合规格，1024 / 1280 / 1440 留证 | task 标准 9；Shell §1.2/1.3 | 通过 | [布局记录](#布局记录)；[W3-e2e.log](evidence/W3-e2e.log) 实测；`rules.test.ts` 560 首选宽压缩后不改保存值 |
-| Agent / 后台事件不切换 Workspace 的 Tab、canvas、工具 | task 标准 10；01 §8 原则21/22；project §2.3.1 | 通过（本 task 注意力接口事件） | `shell.test.tsx` attention 更新前后 windowState 不变；`store.ts` / `integration.tsx` 审查；focus 与 userOpenedSession 分离测试 |
+| 区域尺寸 / 范围 / 压缩顺序符合规格，1024 / 1280 / 1440 留证 | task 标准 9；Shell §2.2/2.3 | 通过 | [布局记录](#布局记录)；[W3-e2e.log](evidence/W3-e2e.log) 实测；`rules.test.ts` 560 首选宽压缩后不改保存值 |
+| Agent / 后台事件不切换 Workspace 的 Tab、canvas、工具 | task 标准 10；01 §8 原则21/22；project §3.3.1 | 通过（本 task 注意力接口事件） | `shell.test.tsx` attention 更新前后 windowState 不变；`store.ts` / `integration.tsx` 审查；focus 与 userOpenedSession 分离测试 |
 | Project 识别、保存 / 恢复、Tab 单测；三 Project / 重启 Playwright | task 标准 11；AC-01 | 通过 | [W3-typecheck.log](evidence/W3-typecheck.log)、[全 workspace 单测](../T20261009-agent-adapter/evidence/W4-unit.log)、[W3-e2e.log](evidence/W3-e2e.log) |
 
 ## 布局记录
@@ -51,8 +56,3 @@
 ## 复跑
 
 从仓库根运行 `pnpm --filter @ai-studio/desktop run build`，再运行 `pnpm --dir apps/desktop exec playwright test --config ../../tasks/T20261009-project-shell/evidence/W3-playwright.config.ts`。临时用户数据 / Project 在系统临时目录，测试结束清理。
-
-## 签收
-
-- 状态：待签收。
-- 人工确认日期：尚无。

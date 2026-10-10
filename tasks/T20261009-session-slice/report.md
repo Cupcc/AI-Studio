@@ -1,5 +1,21 @@
 # 结论：T20261009-session-slice
 
+## 需要回写的内容
+
+| 目标文档 | 内容 | 状态 |
+|---|---|---|
+| [Session spec](../../specs/session/spec.md) §4.2～4.5、§5 | 正式 DTO / IPC、五张 SQLite 表、稳定 ID 与分页、持久化 / Runtime / 查看边界 | 已回写草稿，待审阅 |
+| [chat spec](../../specs/chat/spec.md)、[input spec](../../specs/input/spec.md) §4 / §5 | 实际草稿存储与发送 / 模型 / 默认 CLI 接口 | 已回写草稿，待审阅 |
+| [Project spec](../../specs/project/spec.md) §3.3、§5、PROJ-Q11～12 | 默认 CLI 初始化、关闭释放、草稿与滚动归属 | 已回写推荐，待审阅 |
+| [desktop README](../../apps/desktop/README.md) §4 | Session 安装位置、退出顺序、模拟测试开关与前台测试串行要求 | 已回写 |
+
+## 遗留问题
+
+- 真实 CLI UI AC-02～AC-05 本轮均未运行；Claude 成功推理受配额阻断，Codex 精确 Stop 修正版与当前 `0.162.0` 兼容未真实复测，详见 [Adapter 验收](../T20261009-agent-adapter/acceptance.md)。
+- Project View / Context 工具仅接入点；结构化上下文注入、修改文件统计和真实附件不属于本轮。
+- Runtime dispose 的 diagnostic 与 OS 退出证明边界见 [W4 生命周期记录](evidence/W4-lifecycle-review.md)，宿主崩溃和未观察到的后代清理仍待专项验证。
+- 非阻塞产品推荐与各 spec 草稿仍待人审阅；人工签收尚未发生。
+
 ## 结论
 
 Session Manager、History、Conversation、CLI / Model 菜单、输入区与 Project 接线已集成到 `dev/v1`。正式独立结果见 [acceptance.md](acceptance.md)；模拟 Provider 的 UI 验证与真实 CLI 的限制分别记录，任务不标记 `done`。
@@ -24,19 +40,3 @@ Session Manager、History、Conversation、CLI / Model 菜单、输入区与 Pro
 | 秘密卡片答复迟到写已关闭数据库或清掉新轮草稿 | disposed / generation / Runtime / turn 身份守卫；W4 / W6 独立复验 |
 | 构建产物无法 require ESM Provider | Adapter 导出增加 default 条件；实际 Electron 启动与四入口 require 复核 |
 | macOS 恢复窗口后的迟到事件覆盖前台状态 | 所有窗口可见性 / 焦点事件合并后读取当前原生状态；不自动发 opened |
-
-## 需要回写的内容
-
-| 目标文档 | 内容 | 状态 |
-|---|---|---|
-| [Session spec](../../specs/session/spec.md) §3.2～3.5、§4 | 正式 DTO / IPC、五张 SQLite 表、稳定 ID 与分页、持久化 / Runtime / 查看边界 | 已回写草稿，待审阅 |
-| [chat spec](../../specs/chat/spec.md)、[input spec](../../specs/input/spec.md) §3 / §4 | 实际草稿存储与发送 / 模型 / 默认 CLI 接口 | 已回写草稿，待审阅 |
-| [Project spec](../../specs/project/spec.md) §2.3、§4、PROJ-Q11～12 | 默认 CLI 初始化、关闭释放、草稿与滚动归属 | 已回写推荐，待审阅 |
-| [desktop README](../../apps/desktop/README.md) §4 | Session 安装位置、退出顺序、模拟测试开关与前台测试串行要求 | 已回写 |
-
-## 遗留问题
-
-- 真实 CLI UI AC-02～AC-05 本轮均未运行；Claude 成功推理受配额阻断，Codex 精确 Stop 修正版与当前 `0.162.0` 兼容未真实复测，详见 [Adapter 验收](../T20261009-agent-adapter/acceptance.md)。
-- Project View / Context 工具仅接入点；结构化上下文注入、修改文件统计和真实附件不属于本轮。
-- Runtime dispose 的 diagnostic 与 OS 退出证明边界见 [W4 生命周期记录](evidence/W4-lifecycle-review.md)，宿主崩溃和未观察到的后代清理仍待专项验证。
-- 非阻塞产品推荐与各 spec 草稿仍待人审阅；人工签收尚未发生。

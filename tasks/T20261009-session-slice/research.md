@@ -1,5 +1,9 @@
 # Session 参考应用与接口恢复记录
 
+## 人工审阅入口
+
+产品建议的待决问题由负责 spec 维护：[Session](../../specs/session/spec.md#11-未决问题)、[New Chat](../../specs/chat/spec.md#1-未决问题)、[Input](../../specs/input/spec.md#11-未决问题)、[Navigation](../../specs/navigation/spec.md#11-未决问题)及 [Adapter](../../specs/agent-adapter/spec.md#1-未决问题)。
+
 日期：2026-10-09。W2 的原调研没有落盘，由接续主 Agent 完成。本文是研究记录，产品建议继续保留为草稿；依据为本 task 的 2026-10-09 对话指示。未进行登录态 UI 操作，以下外部观察来自官方文档，不把未证实的细节写成竞品事实。
 
 ## 1. 参考来源
@@ -26,14 +30,14 @@
 | I-Q6 模型 | 保持原生默认不覆盖、已有 Session 可选择下一轮模型、目录失败保留当前值、已下线模型提示并按草稿建议回退默认；实际 Provider 能力由测试确认 |
 | S-Q3～Q13 | 保持原建议：不迁移到新原生会话、绑定前失败可重试创建、空闲 Runtime 退出不报执行错误、退出确认后 Stop、异常中断保留错误、Stop 中禁止发送、保留只读卡片、墙钟耗时、不展示推理、不导入外部历史。S-Q6 仍待人确认，实现遵循此前“先按推荐”指示 |
 
-S-Q1、S-Q2、I-Q2 与 NAV-Q4 已确认，不因参考产品调整。特别是窗口重新前台不会清除提醒，再次点击当前 Session 必须触发“打开”信号；修正 navigation §2.3.9 的旧提案冲突。
+S-Q1、S-Q2、I-Q2 与 NAV-Q4 已确认，不因参考产品调整。特别是窗口重新前台不会清除提醒，再次点击当前 Session 必须触发“打开”信号；修正 navigation §3.3.9 的旧提案冲突。
 
 ## 3. 实现前接口对齐
 
-- Adapter 的可执行契约已经在 `packages/agent-adapter/src/provider.ts`、`events.ts`、`types.ts`，不再实现 session §4.1 的示意名字。Provider ID 使用 `BUILT_IN_PROVIDER_IDS` 的 `codex` / `claude-code`；界面名称为 Codex CLI / Claude Code。
+- Adapter 的可执行契约已经在 `packages/agent-adapter/src/provider.ts`、`events.ts`、`types.ts`，不再实现 session §5.1 的示意名字。Provider ID 使用 `BUILT_IN_PROVIDER_IDS` 的 `codex` / `claude-code`；界面名称为 Codex CLI / Claude Code。
 - `sendUserInput`、`respondToInput`、`replyWithText(text)`、`setModel(model | null)` 为正式方法；Running 输入能力为 `inputWhileRunning`，自由文字用 `freeTextAnswers` 与具体请求判断。
 - 只有回合事件有 `turnId`。Session 级原生 ID、标题、Runtime 事件按当前 Runtime 句柄与 generation 处理，不能因缺少 turnId 全部丢弃。
-- Stop 清理失败会产生 `turn.completed(outcome=interrupted, stop.cleanup=failed)` 与 `session.error`。Session Manager 应记录一个 Error，不能追加“已停止”成功行后再重复报错；以 `StopResult` 和 Adapter spec §4.5 对齐。
+- Stop 清理失败会产生 `turn.completed(outcome=interrupted, stop.cleanup=failed)` 与 `session.error`。Session Manager 应记录一个 Error，不能追加“已停止”成功行后再重复报错；以 `StopResult` 和 Adapter spec §5.5 对齐。
 - Product Running 必须在 Runtime 创建 / 恢复前落库并广播；不能等 `AgentSession.sendUserInput()` 完成才显示。
 - 查看上下文和“打开”操作是两个独立输入；窗口 focus 只更新前者。Needs Input 不因打开清除。
 

@@ -9,6 +9,11 @@ created: 2026-10-09
 
 # 安装项目开发 Skills
 
+## 签收
+
+- 状态：待人工签收；任务保持 `verifying`。
+- 审阅依据：[验收标准与自查结果](#验收标准)。
+
 ## 目标
 
 按用户 2026-10-09 对话指令，为本项目的 Claude Code CLI 和 Codex CLI 安装此前优先推荐的四个 Skills：vitest、frontend-design、vercel-react-best-practices、agent-browser。
@@ -22,7 +27,7 @@ created: 2026-10-09
 ## 依据
 
 - 用户 2026-10-09 对话指令：“install 优先推荐的4个，for claude cli and codex cli”。
-- [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节的 React、TypeScript、Vitest 技术栈；[设计索引](../../design/README.md) 第 3 节的高保真设计阶段。
+- [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3 节的 React、TypeScript、Vitest 技术栈；[设计索引](../../design/README.md) 第 3 节的高保真设计阶段。
 - 仓库 AGENTS.md 的任务记录和人工验收规则。
 
 ## 验收标准
@@ -30,10 +35,6 @@ created: 2026-10-09
 - [x] 四个 Skills 的完整资源安装到项目目录，来源和版本可追溯。（来源：用户安装指令）
 - [x] Codex 与 Claude Code 的发现目录均可读取同一份 SKILL.md，链接无断裂。（来源：用户指定两个 CLI）
 - [x] 记录使用方式与 agent-browser 工具依赖。（来源：用户安装指令）
-
-## 未决问题
-
-无。
 
 ## 进度与验证
 

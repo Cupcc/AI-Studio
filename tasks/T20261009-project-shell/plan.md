@@ -1,5 +1,9 @@
 # 执行计划：T20261009-project-shell
 
+## 人工审阅入口
+
+[待审阅规格](task.md#待审阅规格)；[签收依据](task.md#签收)。
+
 > 唯一写入者：本任务的主 Agent。Worker 不修改本文件，结果交回主 Agent 后由主 Agent 更新。
 
 ## 方案

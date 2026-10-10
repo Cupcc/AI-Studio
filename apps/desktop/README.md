@@ -1,6 +1,6 @@
 # apps/desktop
 
-AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈见 [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节；本目录由 [T20261009-app-skeleton](../../tasks/T20261009-app-skeleton/task.md) 建立。
+AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈见 [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3 节；本目录由 [T20261009-app-skeleton](../../tasks/T20261009-app-skeleton/task.md) 建立。
 
 相关决定（状态见各条目）：
 

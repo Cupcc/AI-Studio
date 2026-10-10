@@ -1,10 +1,14 @@
 # 调研记录：Project View 待决技术事项（W1）
 
-> 作者：W1（Sonnet 5.5）。日期：2026-10-09。范围：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 7 节第 1、2、3、10、11 项。本文是过程记录，不是决定；结论与推荐见 [07. Decisions](<../../docs/07. Decisions.md>) DEC-04～07（2026-10-09 由四份草稿精简合并）。没有进行任何真实模型调用。
+> 作者：W1（Sonnet 5.5）。日期：2026-10-09。范围：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 1 节第 1、2、3、10、11 项。本文是过程记录，不是决定；结论与推荐见 [07. Decisions](<../../docs/07. Decisions.md>) DEC-04～07（2026-10-09 由四份草稿精简合并）。没有进行任何真实模型调用。
 
-## 1. 产出与分工
+## 1. 未决问题汇总
 
-| 待决项（04 第 7 节） | 决定草稿 |
+本次方案问题与回答见 [task.md 的已确认事项](task.md#已确认事项)；规格草稿的待决问题见 [Project View spec 第 1.1 节](../../specs/project-view/spec.md#11-未决问题)，本轮人工审阅重点见 [report.md](report.md#decisions-needed-from-a-human)。
+
+## 2. 产出与分工
+
+| 待决项（04 第 1 节） | 决定草稿 |
 |---|---|
 | 第 1 项 Knowledge 存储格式；第 2 项是否放在 Project 内隐藏目录 | [DEC-04](<../../docs/07. Decisions.md>) |
 | 第 3 项 AI Generated View 渲染与安全沙箱 | [DEC-05](<../../docs/07. Decisions.md>) |
@@ -13,7 +17,7 @@
 
 任务卡建议第 10、11 项合写一份；这里拆成两份，因为注入方式（发送时发生一次）与刷新、权限（持续发生）可以分别确认，互不阻塞。
 
-## 2. 本机已验证的事实
+## 3. 本机已验证的事实
 
 环境：macOS 15.6 / arm64；Codex CLI 0.161.0；Claude Code CLI 2.1.295（06 记录的是 2.1.294，已随本机更新）；Claude Agent SDK 0.3.293（装在临时目录）；Node 26.10.0。验证脚本 [W1-view-probes.mjs](evidence/W1-view-probes.mjs)，结果 [W1-view-probes-results.json](evidence/W1-view-probes-results.json)。脚本在新的临时目录中建立夹具，不发送任何用户消息或 `turn/start`；`skills/list` 的结果会包含用户自己安装的 Skill，输出只保留夹具名称，不记录其余内容。
 
@@ -36,19 +40,19 @@
 
 未验证（需要模型调用或 Electron 原型）：多个 `text` 输入项合并为同一条用户消息的实际形态；`developerInstructions` 在 `thread/resume` 后是否保留；Claude hooks 的运行行为；iframe、自定义协议与 CSP 在 Electron 中的实际表现；WebContentsView 与 DOM 浮层的叠放关系；`fs.watch` 在 macOS 睡眠恢复后的丢事件情况。这些在决定草稿中以“待原型验证”标出。
 
-## 3. 比较与取舍的补充材料
+## 4. 比较与取舍的补充材料
 
 决定草稿的“备选方案”表给出放弃原因；这里记录没有放进草稿的细节。
 
-### 3.1 存储
+### 4.1 存储
 
 - 原型 `render.js` 用每个 View 一个 JSON 对象（`summary`、`layers`、`milestones`、`steps` 等）并由固定代码渲染，是示意；对应的结构化划分与本方案的“一个 View 一份 Knowledge 文件”一致，但原型把层级、分组写在数据里，正式 Schema 应把这类版面信息放到 View Definition。
 - “事实 / 展示”的判据：去掉所有样式、位置、图表类型后仍然成立的是事实（模块名称、依赖关系、里程碑状态、Agent 职责、业务步骤与代码映射）；与怎么摆、画成什么有关的是展示（分组方式、排序、方向、图表种类、强调色变体、折叠状态）。
 - Agent Team 的 Knowledge 只能是对 CLI 原生配置的描述与引用（路径指向 `AGENTS.md`、`.claude/agents/*` 等），不能成为新的 Agent Profile 标准（FR 第 3 节 Agent Team；原则 19）。实测 `thread/start` 返回的 `instructionSources` 可作为 Codex 已加载指令文件的权威来源，后续 Agent Team 的生成指令可以让 Agent 参考。
-- 文件锁：Agent 的文件工具（Codex 的补丁、Claude 的 Write / Edit）不经过客户端，客户端无法加锁；只能靠“一个 View 一个文件”缩小冲突面，靠指南要求“编辑前重读、局部修改”，靠 04 第 7 节第 7 项的总体冲突检测兜底。
+- 文件锁：Agent 的文件工具（Codex 的补丁、Claude 的 Write / Edit）不经过客户端，客户端无法加锁；只能靠“一个 View 一个文件”缩小冲突面，靠指南要求“编辑前重读、局部修改”，靠 04 第 1 节第 7 项的总体冲突检测兜底。
 - 符号链接：Agent 可以创建符号链接，客户端读取 `.ai-studio/` 时必须用 realpath 校验仍在项目内，否则可能把项目外文件当作 Knowledge 读入。
 
-### 3.2 渲染
+### 4.2 渲染
 
 - 为什么声明式更贴合 FR-VIEW-004：HTML 同时承载内容和呈现，Agent 倾向把事实直接写进 HTML，规格无法强制分离；声明式 View Definition 只能通过绑定引用 Knowledge，事实必须写在 Knowledge 里。
 - 关系图的版式质量：让 Agent 手写 SVG 坐标容易出现重叠与溢出；声明式只给节点和边，由渲染器自动布局，结果稳定。这是工程经验判断，未做对比实验。
@@ -58,21 +62,21 @@
 - Mermaid 等直接解析 Agent 文本的库有过多起注入类漏洞公告（升级修复，或改用其 `sandbox` 安全级别把渲染放进 iframe），不适合放在持有 preload 的主 Renderer 里；来源为第三方公告汇总，需要时再核对官方说明。
 - WebContentsView 与 DOM 叠放：Electron 文档只说明用 `contentView.addChildView` 添加、`setBounds` 定位，没有描述与窗口主 WebContents 的叠放；按原生子视图的一般行为，DOM 里的菜单、对话框和提示无法盖在它上面。这是推断，需要在应用骨架里用真实窗口确认。
 
-### 3.3 注入
+### 4.3 注入
 
 - Codex 的结构化输入里没有“文件引用”或“上下文块”类型。要给 Agent 一个 View 上下文，只有文本、`skill` 输入项、`thread/start` 的 `developerInstructions` 和低层的 `thread/inject_items`（追加原始 Responses 项，持久化并参与后续请求，属于低层接口）。
 - `text_elements` 的设计目的是让客户端在历史与恢复时还原“特殊元素”标记而不改变文字内容（源码注释）；可考虑为 View Context 文本块标出整段范围，使 Codex 历史自带标记。它是 Codex 专有，Claude 没有等价物，所以客户端仍须自己保存“这条消息附带了 View Context”。
 - Claude 的 hooks 可以每轮动态附加 `additionalContext`，适合“校验失败反馈”之类的动态内容；因为 Codex 没有已验证的等价物，没有作为主路径。
 - CLAUDE.md 只有在 `settingSources` 含 `project` 时才会加载，而 [CLI 校验报告](../T20261008-cli-preflight/report.md) 的校验为隔离而使用了空来源；这说明依赖原生指令文件还需要 Adapter 先确定配置加载边界（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节“原生 Skill / Rule / Context 加载”）。
 
-### 3.4 刷新与权限
+### 4.4 刷新与权限
 
 - 变更来源：Agent 通过 CLI 文件工具写入；用户也可能直接编辑文件；`git checkout` / `git clean` 等会在项目内批量改动目录，因此需要“启动扫描 + 监视 + 回合结束补扫 + 窗口重新获得焦点补扫”，不能只依赖监视事件。
 - 部分写入：文件工具并非原子写入，监视器可能读到半个 JSON，所以读取失败后要等待文件稳定再判错；多步更新中 Knowledge 与 View Definition 可能暂时不一致，也不应立刻报错。
 - 校验信任锚：校验永远使用应用内置 Schema；项目内 `schema/` 副本仅供 Agent 阅读，避免 Agent 改写 Schema 来“通过”校验。
 - Overview 的 Recent Sessions、Needs Input、Recently Completed 属客户端数据（UX 第 6 节），含 Session 标题，可能带敏感信息，不交给由 Agent 控制的渲染层；这也是第二层 HTML 方案不得获得客户端 Session 数据的原因。
 
-## 4. 对其他 task 的影响
+## 5. 对其他 task 的影响
 
 | task | 需要知道的事 |
 |---|---|
@@ -81,10 +85,6 @@
 | T20261009-app-skeleton | 需要为 Preview 预留自定义协议与 CSP 配置、主进程 IPC 的 `senderFrame` 校验、SQLite 里的 View 缓存表 |
 | T20261009-project-shell | 右侧区域的 Preview 容器；更新时不切换右侧内容（P-B） |
 | T20261009-context-tools | Files 树是否显示隐藏目录；Diff 在 `.ai-studio/` 默认忽略时不受影响 |
-
-## 5. 未决问题汇总
-
-每项的推荐答案与理由见对应草稿的“未决问题”。主 Agent 汇总给人的清单在 W1 最终报告中。
 
 ## 6. 复现
 

@@ -10,11 +10,11 @@
 | 日期 | 2026-10-08 |
 | 平台 | macOS 15.6（24G84），Apple Silicon / arm64 |
 | 状态 | 基础集成与 Codex 原生 Stop 清理路径已验证；产品 Adapter / Process Manager 待实现 |
-| 依据 | [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2、3、4、6、7 节；FR-CHAT-001～003、FR-SESSION-001～003、FR-STATE-001～006、FR-INPUT-001～002；AC-02、AC-03、AC-05 |
+| 依据 | [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3、4、5、7、1 节；FR-CHAT-001～003、FR-SESSION-001～003、FR-STATE-001～006、FR-INPUT-001～002；AC-02、AC-03、AC-05 |
 | 校验脚本 | [cli-preflight.mjs](../../scripts/cli-preflight.mjs)；补充复核使用 [codex-native-stop-check.mjs](evidence/codex-native-stop-check.mjs)，操作说明见 [scripts/README.md](../../scripts/README.md) |
 | 证据 | [逐项结果汇总](evidence/summary.json)；各轮筛选后的事件摘要见同目录；任务记录见 [T20261008-cli-preflight](task.md) |
 
-> 本报告于 2026-10-09 归入原任务。实测环境与结论保留 2026-10-08 的记录；长期技术约束见 [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2、4 节。
+> 本报告于 2026-10-09 归入原任务。实测环境与结论保留 2026-10-08 的记录；长期技术约束见 [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3、5 节。
 
 ## 1. 结论与开发准入
 
@@ -144,7 +144,7 @@
 - Codex 正常 Stop 推荐顺序：暂停当前 Session 的新任务提交 → `turn/interrupt` → 原生目标命令终止 → 确认退出 → 继续使用原 Session；清理失败或接口不可用时再进入独立 Runtime 终止与原 ID 恢复兜底。
 - 本轮 Stop 应关联 `turnId` / `itemId` 与 `processId`，通过 `terminate` 精确清理。`clean` 会停止该 Thread 全部后台命令，包括先前启动的服务，只能用于范围明确的整条 Thread 清理；本轮映射及服务保留尚未验证。
 - `clean` 的 `{}` 是操作提交回执，不是系统进程退出证明；原生列表清空与 `terminated: true` 也不能代替实际退出确认。须处理清理超时、失败、重复 Stop 和事件竞态。
-- Runtime 兜底可能停止同一 Session 先前启动的后台命令；采用共享 Runtime 时不能整体终止进程来兜底一个 Session。任何 Stop 都不得影响其他 Session 或用户 Terminal（FR-SESSION-003；Technical Requirements 第 4 节）。
+- Runtime 兜底可能停止同一 Session 先前启动的后台命令；采用共享 Runtime 时不能整体终止进程来兜底一个 Session。任何 Stop 都不得影响其他 Session 或用户 Terminal（FR-SESSION-003；Technical Requirements 第 5 节）。
 - Claude interrupt receipt 包含 `still_queued`；本次为空，未验证有排队消息时的 Stop 策略。
 - 原生 `idle` 不直接映射为列表文字；按 FR-STATE-006，无活动历史不显示状态。
 - UI 未读标记、查看行为和 Error 提醒清除由客户端管理，CLI 不能代替这些状态。

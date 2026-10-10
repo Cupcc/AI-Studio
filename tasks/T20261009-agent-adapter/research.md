@@ -4,7 +4,7 @@
 
 ## 1. 依据与资料
 
-- 文档：[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 3～6 节；04 第 1～4、6、7 节；02 Session、State、Input、Chat 各节；03 第 6 节；Shell Spec v01 第 5、6 节；session spec 第 4.1 节、input spec I-Q2 / I-Q3、chat spec C-Q5（并行起草，主 Agent 转达）。
+- 文档：[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 3～6 节；04 第 2～5、7、1 节；02 Session、State、Input、Chat 各节；03 第 6 节；Shell Spec v01 第 6、7 节；session spec 第 5.1 节、input spec I-Q2 / I-Q3、chat spec C-Q5（并行起草，主 Agent 转达）。
 - 预检脚本与证据：`scripts/cli-preflight.mjs`、`evidence/codex-native-stop-check.mjs` 及 `tasks/T20261008-cli-preflight/evidence/` 下筛选后的事件。
 - 协议形状（不调用模型）：
   - `codex app-server generate-ts --experimental`（本机 0.161.0）生成到临时目录：根目录 102 个、`v2/` 781 个类型文件。查阅了 `ServerRequest`、`ServerNotification`、`ClientRequest`、`ThreadItem`、`Turn`、`TurnError` / `CodexErrorInfo`、`CommandExecutionRequestApprovalParams`、`ToolRequestUserInputParams`、`ServerRequestResolvedNotification`、`TurnStartParams`、`TurnSteerParams`、`ThreadSettingsUpdateParams`、`Model`、`GetAccountResponse`。
@@ -41,11 +41,11 @@
 
 ### 3.3 Stop 完成 = 终态 + 清理
 
-`turn.completed(interrupted)` 在清理（或兜底）结束后才发出，`stop()` 的 Promise 同时完成。备选是收到原生 `interrupted` 就发终态、另发“清理完成”事件；否决原因：04 第 4 节第 1、5 条要求两者同时确认才算 Stop 完成，且上层只需关心一个事件（`stop.cleanup` 已给出清理结果），提交暂停也正好覆盖到清理结束。
+`turn.completed(interrupted)` 在清理（或兜底）结束后才发出，`stop()` 的 Promise 同时完成。备选是收到原生 `interrupted` 就发终态、另发“清理完成”事件；否决原因：04 第 5 节第 1、5 条要求两者同时确认才算 Stop 完成，且上层只需关心一个事件（`stop.cleanup` 已给出清理结果），提交暂停也正好覆盖到清理结束。
 
 ### 3.4 取消关联靠意图，竞态以原生成功为准
 
-记录取消意图之后到达的原生 `failed` / `interrupted` 一律视为 `interrupted`；若原生先以成功结束，则报告 `completed` 并跳过清理，避免终止正常完成的回合留下的后台命令（例如 Agent 有意启动的开发服务器）。与 session spec 第 2.12 节第 7 条一致。
+记录取消意图之后到达的原生 `failed` / `interrupted` 一律视为 `interrupted`；若原生先以成功结束，则报告 `completed` 并跳过清理，避免终止正常完成的回合留下的后台命令（例如 Agent 有意启动的开发服务器）。与 session spec 第 3.12 节第 7 条一致。
 
 ### 3.5 一个 `AgentSession` 对应一个 Runtime 生命周期
 
@@ -53,7 +53,7 @@ Runtime 意外退出即关闭该 Session，继续对话统一走 `resumeSession`
 
 ### 3.6 新旧 Runtime 不并行
 
-`RuntimeSlot` 串行化启动 / 替换；替换前必须拿到旧 Runtime 的退出证据（`TerminationReport.confirmed`），否则拒绝并不启动新进程。对应 04 第 4 节第 7 条。
+`RuntimeSlot` 串行化启动 / 替换；替换前必须拿到旧 Runtime 的退出证据（`TerminationReport.confirmed`），否则拒绝并不启动新进程。对应 04 第 5 节第 7 条。
 
 ### 3.7 进程退出证据
 
@@ -92,7 +92,7 @@ Runtime 意外退出即关闭该 Session，继续对话统一走 `resumeSession`
 2. 本机 Claude Code 已自动更新到 2.1.295，与预检记录不同；版本策略见 spec A-Q1。
 3. Runtime 以独立进程组启动（为了能整组终止且不波及宿主），代价是宿主崩溃时它们不会收到挂断信号；见 spec A-Q3。
 4. `withTimeout` 在超时时必须先拒绝再中止，否则“收到中止信号后正常结束”的工作会赢得竞争、掩盖超时（单元测试发现并修正）。
-5. 预检脚本中 Codex 的 `approvalsReviewer: 'user'`、只读沙箱、`developerInstructions` 以及 Claude 的空 `settingSources` 都是校验用设置，不能照搬为产品默认（spec 第 2.10 节）。
+5. 预检脚本中 Codex 的 `approvalsReviewer: 'user'`、只读沙箱、`developerInstructions` 以及 Claude 的空 `settingSources` 都是校验用设置，不能照搬为产品默认（spec 第 3.10 节）。
 
 ## 5. 留给 W2 / W3 与后续的验证
 

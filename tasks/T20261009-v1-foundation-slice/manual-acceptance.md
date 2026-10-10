@@ -2,27 +2,47 @@
 
 > 写入者：主 Agent。日期：2026-10-09。状态：草稿，供人逐项执行；执行结果在对话中告知主 Agent，由主 Agent 记录并办理签收。本清单不改变各子 task 的 [acceptance](acceptance.md) 结论。
 
+## 1. 记录结果与签收
+
+在对话中告诉主 Agent 结果即可，例如：
+
+> 第 3～5 部分全部通过，M-S5 不通过：绿点没有出现。第 6 部分 M-R1～R3 通过，Claude 额度不足，R4～R7 未执行。
+
+主 Agent 收到后：
+
+1. 把结果写入本清单各项，不通过的项附上现象，并按需整理成修复任务。
+2. 根据你的签收范围，在对应 task 的 `acceptance.md` 签收栏写上确认日期，把 task 改为 `done`。如果接受“模拟通过、真实 CLI 待补”的阶段性结论，也会把这一点写明。
+3. 同步 [V1 建设计划与进度](<../../docs/06. Development Roadmap.md>) 的模块状态和下一步。
+
+| 签收对象 | 主要依据 | 可签收条件 |
+|---|---|---|
+| [app-skeleton](../T20261009-app-skeleton/acceptance.md) | 第 3 部分 + 自动化证据 | M-A1、M-A2 通过 |
+| [project-shell](../T20261009-project-shell/acceptance.md) | 第 4 部分 | M-P1～M-P8 通过 |
+| [session-slice](../T20261009-session-slice/acceptance.md) | 第 5 部分；完整 AC 还需第 6 部分 | M-S1～M-S14 通过；第 6 部分是否作为签收前提由你决定 |
+| [agent-adapter](../T20261009-agent-adapter/acceptance.md) | 第 6 部分 + 自动化证据 | M-R1～M-R7 通过，或明确接受未覆盖边界 |
+| [v1-foundation-slice](acceptance.md) | 以上四项 | 四个子 task 已签收 |
+
 ## 怎么用
 
 本清单把阶段 1 已实现的范围拆成可以亲手操作的步骤：每项写明来源、操作步骤和预期结果，预期结果前有勾选框。逐项操作，符合就勾选；不符合就在该项下面写一句实际现象。
 
 | 部分 | 内容 | 对应 task | 模型调用 | 预计用时 |
 |---|---|---|---|---|
-| [第 1 部分](#1-准备) | 准备测试目录与启动方式 | — | 无 | 5 分钟 |
-| [第 2 部分](#2-应用窗口) | 窗口尺寸、窗口控制区、拖拽 | [app-skeleton](../T20261009-app-skeleton/task.md) | 无 | 5 分钟 |
-| [第 3 部分](#3-project-与导航ac-01) | 多 Project、启动页、恢复、导航、注意力点 | [project-shell](../T20261009-project-shell/task.md) | 无 | 20 分钟 |
-| [第 4 部分](#4-session模拟模式ac-02ac-05) | Session 全流程，使用模拟 CLI | [session-slice](../T20261009-session-slice/task.md) | 无 | 30 分钟 |
-| [第 5 部分](#5-真实-cliac-02ac-05-补验) | 真实 Codex / Claude Code 补验 | [agent-adapter](../T20261009-agent-adapter/task.md)、session-slice | **有，约 8～10 轮** | 30 分钟 |
-| [第 6 部分](#6-不在本次验收范围) | 不需要验收的内容 | — | — | — |
-| [第 7 部分](#7-记录结果与签收) | 反馈结果与签收方式 | 全部 | — | — |
+| [第 1 部分](#1-记录结果与签收) | 反馈结果与签收方式 | 全部 | — | — |
+| [第 2 部分](#2-准备) | 准备测试目录与启动方式 | — | 无 | 5 分钟 |
+| [第 3 部分](#3-应用窗口) | 窗口尺寸、窗口控制区、拖拽 | [app-skeleton](../T20261009-app-skeleton/task.md) | 无 | 5 分钟 |
+| [第 4 部分](#4-project-与导航ac-01) | 多 Project、启动页、恢复、导航、注意力点 | [project-shell](../T20261009-project-shell/task.md) | 无 | 20 分钟 |
+| [第 5 部分](#5-session模拟模式ac-02ac-05) | Session 全流程，使用模拟 CLI | [session-slice](../T20261009-session-slice/task.md) | 无 | 30 分钟 |
+| [第 6 部分](#6-真实-cliac-02ac-05-补验) | 真实 Codex / Claude Code 补验 | [agent-adapter](../T20261009-agent-adapter/task.md)、session-slice | **有，约 8～10 轮** | 30 分钟 |
+| [第 7 部分](#7-不在本次验收范围) | 不需要验收的内容 | — | — | — |
 
-第 2～4 部分不调用模型，可以随时执行。第 5 部分会消耗 CLI 额度：在应用里使用真实 CLI 跑完整流程，本轮还没有做过（见[总体验收](acceptance.md#未完成与签收)），是否执行由你决定。
+第 3～5 部分不调用模型，可以随时执行。第 6 部分会消耗 CLI 额度：在应用里使用真实 CLI 跑完整流程，本轮还没有做过（见[总体验收](acceptance.md#未完成与签收)），是否执行由你决定。
 
 自动化已覆盖的项目在“已有自动化”中注明。人工验收看的是：亲眼看到的行为是否符合预期，以及界面上能否理解。
 
-## 1. 准备
+## 2. 准备
 
-### 1.1 安装与构建
+### 2.1 安装与构建
 
 从仓库根运行（需要 Node >= 24、pnpm 12）：
 
@@ -32,7 +52,7 @@ pnpm --filter @ai-studio/agent-adapter run build
 pnpm --filter @ai-studio/desktop run build
 ```
 
-### 1.2 测试目录
+### 2.2 测试目录
 
 测试目录放在仓库外，以免 CLI 读到本仓库的 `AGENTS.md`：
 
@@ -45,12 +65,12 @@ chmod 000 ~/studio-acceptance/locked
 
 验收结束后，可运行 `chmod 755 ~/studio-acceptance/locked && rm -rf ~/studio-acceptance` 清理。
 
-### 1.3 两种启动方式
+### 2.3 两种启动方式
 
 | 方式 | 命令（仓库根） | 用途 | 数据目录 |
 |---|---|---|---|
-| 模拟模式 | `STUDIO_E2E_PROVIDERS=1 pnpm --dir apps/desktop exec electron . --studio-user-data-dir="$HOME/studio-acceptance/sim-data"` | 第 2～4 部分 | `~/studio-acceptance/sim-data`，与日常数据隔离 |
-| 真实模式 | `pnpm dev` | 第 5 部分 | `~/Library/Application Support/AI Developer Studio (Dev)` |
+| 模拟模式 | `STUDIO_E2E_PROVIDERS=1 pnpm --dir apps/desktop exec electron . --studio-user-data-dir="$HOME/studio-acceptance/sim-data"` | 第 3～5 部分 | `~/studio-acceptance/sim-data`，与日常数据隔离 |
+| 真实模式 | `pnpm dev` | 第 6 部分 | `~/Library/Application Support/AI Developer Studio (Dev)` |
 
 模拟模式下，Codex 和 Claude Code 都替换为模拟 CLI，不调用模型，模型列表只有 `E2E Codex` / `E2E Claude` 各一个。发送的消息里带下面的标记，就能触发对应场景：
 
@@ -65,13 +85,13 @@ chmod 000 ~/studio-acceptance/locked
 | `[e2e:secret]` | 提问卡片使用私密输入框 |
 | `[e2e:error]` | 第一次发送这条消息时失败；用相同文字重试则成功 |
 
-第 3、4 部分中提到“重启应用”时，都指用 `⌘Q` 退出后，再执行同一条模拟模式命令（数据目录不变）。
+第 4、5 部分中提到“重启应用”时，都指用 `⌘Q` 退出后，再执行同一条模拟模式命令（数据目录不变）。
 
-## 2. 应用窗口
+## 3. 应用窗口
 
 #### M-A1 窗口尺寸与窗口控制区
 
-来源：app-skeleton 验收标准 3；Shell Spec v01 第 1、2 节。已有自动化：`apps/desktop/e2e/app.spec.ts` 断言最小尺寸和按钮位置；系统窗口控制区没有截图证据（见 [app-skeleton 验收](../T20261009-app-skeleton/acceptance.md#3-窗口控制区)）。
+来源：app-skeleton 验收标准 3；Shell Spec v01 第 2、3 节。已有自动化：`apps/desktop/e2e/app.spec.ts` 断言最小尺寸和按钮位置；系统窗口控制区没有截图证据（见 [app-skeleton 验收](../T20261009-app-skeleton/acceptance.md#3-窗口控制区)）。
 
 1. 以模拟模式启动应用。
 2. 拖动窗口右下角，尽量缩小窗口。
@@ -83,7 +103,7 @@ chmod 000 ~/studio-acceptance/locked
 
 #### M-A2 缩小时不自动收起区域
 
-来源：project-shell 验收标准 9；Shell Spec v01 第 1.2、1.3 节。已有自动化：[布局记录](../T20261009-project-shell/acceptance.md#布局记录)中 1024 / 1280 / 1440 三种宽度的截图与测量。
+来源：project-shell 验收标准 9；Shell Spec v01 第 2.2、2.3 节。已有自动化：[布局记录](../T20261009-project-shell/acceptance.md#布局记录)中 1024 / 1280 / 1440 三种宽度的截图与测量。
 
 1. 打开一个 Project，打开右侧边栏（顶栏“右侧边栏”按钮）。
 2. 把窗口从较宽逐渐缩到最小宽度。
@@ -91,7 +111,7 @@ chmod 000 ~/studio-acceptance/locked
 - [ ] 左侧导航、Conversation 区、右侧边栏都还在，只是变窄；不会自动折叠或关闭任何区域。
 - [ ] 文字和按钮没有互相遮挡，也没有出现横向滚动条。
 
-## 3. Project 与导航（AC-01）
+## 4. Project 与导航（AC-01）
 
 以下均使用模拟模式。
 
@@ -110,7 +130,7 @@ chmod 000 ~/studio-acceptance/locked
 
 #### M-P2 同一目录不重复打开
 
-来源：FR-PROJ-001；project spec 2.1.3。
+来源：FR-PROJ-001；project spec 3.1.3。
 
 1. 在“新标签页”中通过“打开本地目录”再选一次 project-a。
 2. 再打开一个“新标签页”，选择 `~/studio-acceptance/link-a`（指向 project-a 的符号链接）。
@@ -119,7 +139,7 @@ chmod 000 ~/studio-acceptance/locked
 
 #### M-P3 无法打开的目录
 
-来源：FR-PROJ-001；project spec 2.1.3。
+来源：FR-PROJ-001；project spec 3.1.3。
 
 1. 在“新标签页”中选择 `~/studio-acceptance/locked`。
 2. 先在“最近打开”列表中留下 project-c：打开 project-c 后关闭它的标签。然后在终端执行 `mv ~/studio-acceptance/project-c ~/studio-acceptance/project-c-moved`，再看“最近打开”。
@@ -140,7 +160,7 @@ chmod 000 ~/studio-acceptance/locked
 
 - [ ] 每个 Project 回到自己的状态：project-a 显示 Architecture（右侧为 Preview），宽度保持；project-b 显示草稿，输入框里的文字还在，右侧为 Terminal；project-c 是首次打开时的 Overview。
 - [ ] 切换标签时，其他 Project 的状态没有跟着改变。
-- [ ] Preview 和 Terminal 显示的是“…将在这里显示”占位文字。这在本阶段属于正常（见第 6 部分）。
+- [ ] Preview 和 Terminal 显示的是“…将在这里显示”占位文字。这在本阶段属于正常（见第 7 部分）。
 
 #### M-P5 Session 与 Project View 的右侧状态分开保存
 
@@ -155,7 +175,7 @@ chmod 000 ~/studio-acceptance/locked
 
 #### M-P6 左侧导航与折叠
 
-来源：FR-NAV-001、FR-NAV-002；D-14；navigation spec 2.2、2.4。
+来源：FR-NAV-001、FR-NAV-002；D-14；navigation spec 3.2、3.4。
 
 1. 观察左侧导航。
 2. 点击“折叠导航”，切换到其他 Project，再重启应用。
@@ -183,7 +203,7 @@ chmod 000 ~/studio-acceptance/locked
 
 - [ ] 关闭最后一个 Project 后显示“新标签页”，窗口不会关闭。
 
-## 4. Session（模拟模式，AC-02～AC-05）
+## 5. Session（模拟模式，AC-02～AC-05）
 
 以下均使用模拟模式。打开 project-a 和 project-b。“A”“B”分别指 project-a 中的两个 Session。
 
@@ -304,7 +324,7 @@ chmod 000 ~/studio-acceptance/locked
 
 #### M-S10 打开位置与滚动
 
-来源：FR-SESSION-001；Shell Spec 第 5 节。已有自动化：[滚动截图](../T20261009-session-slice/evidence/W6-conversation-scroll-paused.png)。
+来源：FR-SESSION-001；Shell Spec 第 6 节。已有自动化：[滚动截图](../T20261009-session-slice/evidence/W6-conversation-scroll-paused.png)。
 
 1. 在同一条 Session 中连续发送 8～10 条普通消息，让内容超过一屏。
 2. 点到别的 Session，再点回来。
@@ -363,7 +383,7 @@ chmod 000 ~/studio-acceptance/locked
 
 #### M-S14 重启后的 Session 数据
 
-来源：FR-SESSION-002；session spec 2.1、2.14。已有自动化：重启 E2E；2,000 条摘要的重开测试。
+来源：FR-SESSION-002；session spec 3.1、3.14。已有自动化：重启 E2E；2,000 条摘要的重开测试。
 
 1. 留一条未查看的 Completed Unread，然后重启应用。
 
@@ -371,7 +391,7 @@ chmod 000 ~/studio-acceptance/locked
 - [ ] 未查看的绿点仍在，点击后消失。
 - [ ] 在旧 Session 里继续发送，可以正常完成。
 
-## 5. 真实 CLI（AC-02～AC-05 补验）
+## 6. 真实 CLI（AC-02～AC-05 补验）
 
 本部分会调用真实模型，是本轮唯一没覆盖的验收内容。需要事先知道：
 
@@ -415,7 +435,7 @@ chmod 000 ~/studio-acceptance/locked
 
 #### M-R5 Stop
 
-来源：FR-INPUT-001；04 第 4 节。
+来源：FR-INPUT-001；04 第 5 节。
 
 1. 用 Codex 发送“运行 `sleep 60`，结束后告诉我”。命令开始执行后（工具行在转圈）点击 Stop。
 2. 在同一 Session 发送“刚才的命令结束了吗？”。
@@ -443,7 +463,7 @@ chmod 000 ~/studio-acceptance/locked
 
 - [ ] Agent 能答出之前的请求，说明恢复的是同一个原生会话，不是新建的空会话。
 
-## 6. 不在本次验收范围
+## 7. 不在本次验收范围
 
 以下内容本阶段只有占位或尚未实现，请不要当作缺陷记录：
 
@@ -451,23 +471,3 @@ chmod 000 ~/studio-acceptance/locked
 - Files / Diff / Browser / Terminal 的工具内容，以及从 Files 添加上下文、AC-07。
 - 打包后应用的完整功能、签名与公证、Windows / Linux。
 - 视觉样式：当前是中性的临时 Token，尚未完成设计确认。
-
-## 7. 记录结果与签收
-
-在对话中告诉主 Agent 结果即可，例如：
-
-> 第 2～4 部分全部通过，M-S5 不通过：绿点没有出现。第 5 部分 M-R1～R3 通过，Claude 额度不足，R4～R7 未执行。
-
-主 Agent 收到后：
-
-1. 把结果写入本清单各项，不通过的项附上现象，并按需整理成修复任务。
-2. 根据你的签收范围，在对应 task 的 `acceptance.md` 签收栏写上确认日期，把 task 改为 `done`。如果接受“模拟通过、真实 CLI 待补”的阶段性结论，也会把这一点写明。
-3. 同步 [V1 建设计划与进度](<../../docs/06. Development Roadmap.md>) 的模块状态和下一步。
-
-| 签收对象 | 主要依据 | 可签收条件 |
-|---|---|---|
-| [app-skeleton](../T20261009-app-skeleton/acceptance.md) | 第 2 部分 + 自动化证据 | M-A1、M-A2 通过 |
-| [project-shell](../T20261009-project-shell/acceptance.md) | 第 3 部分 | M-P1～M-P8 通过 |
-| [session-slice](../T20261009-session-slice/acceptance.md) | 第 4 部分；完整 AC 还需第 5 部分 | M-S1～M-S14 通过；第 5 部分是否作为签收前提由你决定 |
-| [agent-adapter](../T20261009-agent-adapter/acceptance.md) | 第 5 部分 + 自动化证据 | M-R1～M-R7 通过，或明确接受未覆盖边界 |
-| [v1-foundation-slice](acceptance.md) | 以上四项 | 四个子 task 已签收 |

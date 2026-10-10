@@ -52,7 +52,7 @@ Electron 主进程探针（`require('node:sqlite')`，内存库建表、插入�
   - `apps/desktop/scripts/ensure-node-pty-helper.mjs`（postinstall）恢复可执行位；
   - `apps/desktop/scripts/after-pack.cjs`（electron-builder afterPack）在打包产物中再次设置并检查目标架构的 helper 存在。
 - 打包时 `asarUnpack: **/node_modules/node-pty/**`；node-pty 自身会把 `app.asar` 路径替换为 `app.asar.unpacked` 来定位 helper。
-- 主进程以 `await import('node-pty')` 懒加载，加载失败时返回错误而不是让应用崩溃（04 第 6 节稳定性）。
+- 主进程以 `await import('node-pty')` 懒加载，加载失败时返回错误而不是让应用崩溃（04 第 7 节稳定性）。
 
 ## 5. 安全与窗口
 

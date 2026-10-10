@@ -2,6 +2,12 @@
 
 AI Developer Studio V1.0 的设计工作区，用于保存设计资料、参考图片、界面方案和交互原型，逐步确定产品的视觉与操作体验。
 
+## 人工审阅入口
+
+- [组件修订的待确认项](components/shell-spec-v02.md#1-待确认)。
+- [交互原型 v02 的采用问题](../tasks/T20261010-prototype-v02/task.md#未决问题)与[评审依据](../tasks/T20261010-prototype-v02/task.md#签收)。
+- [视觉参数待确定项](visual-direction.md#1-高保真阶段待确定)。
+
 ## 1. 设计依据
 
 | 规格 | 用途 |
@@ -39,7 +45,7 @@ design/
 
 | 项目 | 采用版本 |
 |---|---|
-| 视觉方向 | [Visual Direction](visual-direction.md)；当前视觉参数见其第 5 节 |
+| 视觉方向 | [Visual Direction](visual-direction.md)；当前视觉参数见其第 1 节 |
 | 参考截图 | 尚无 |
 | 线框图 | v02，见 [wireframes](wireframes/README.md) |
 | 高保真界面 | 尚无 |

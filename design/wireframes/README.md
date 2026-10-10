@@ -26,5 +26,5 @@
 - 四组选项（P-A ~ P-D）的结论见 [UX Specification](<../../docs/03. UX Specification.md>) 第 10 节。
 - v02 同时示意左侧导航折叠（按钮在顶栏左侧，折叠后保留 New Chat 与注意力点），以及右侧边栏默认打开上次选择的工具。
 - 线框图同时示意其他已确认规则：New Chat 位置、Project Tab 注意力点、Needs Input 等待卡片、当前 View 作为上下文。
-- 窗口外观按 macOS 绘制（首发平台见 [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节）。
+- 窗口外观按 macOS 绘制（首发平台见 [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3 节）。
 - 架构、对话、文件与 Diff 均为示例数据。

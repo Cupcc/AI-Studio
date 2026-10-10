@@ -2,6 +2,12 @@
 
 > 写入者：W4（GPT-6.1 Sol high），未参与 Provider / 核心实现。日期：2026-10-09。状态：待人工签收；不能据此标记 task 为 done。
 
+## 签收
+
+- 状态：待签收。
+- 人工确认日期：尚无。
+- 需人决定：是否接受当前阶段的自动化通过与真实验证未覆盖边界；后续真实复测须由主 Agent 按已授权预算安排。
+
 ## 结论
 
 **部分通过：实现与本地自动化验收通过，真实 CLI 验收存在明确未覆盖。** 本次没有模型调用，也没有重跑真实推理集成套件；不能宣称 AC-02 / AC-03 / AC-05 完整通过。
@@ -21,18 +27,18 @@
 
 | 验收标准 | 来源 | 结论 | 证据与边界 |
 |---|---|---|---|
-| 两 Provider 同一接口创建、流式、Runtime 重启后原 ID 恢复 / 保留上下文；恢复失败不新建 | task 标准1；06 §4/5；04 §4.7 | 部分通过 | `provider-contract` / 两 Provider 单测与[最终单测](evidence/W4-final-unit.log)通过；W2 真实 Codex 原 ID / 上下文观察通过；Claude 真实成功流式 / 恢复受配额阻断，不能以模拟补齐 |
+| 两 Provider 同一接口创建、流式、Runtime 重启后原 ID 恢复 / 保留上下文；恢复失败不新建 | task 标准1；06 §4/5；04 §5.7 | 部分通过 | `provider-contract` / 两 Provider 单测与[最终单测](evidence/W4-final-unit.log)通过；W2 真实 Codex 原 ID / 上下文观察通过；Claude 真实成功流式 / 恢复受配额阻断，不能以模拟补齐 |
 | 提交即 Running，首片段前发出事件 | task 标准2；FR-STATE-001 | 通过（Adapter 事件规则） | SessionController 的同步 `turn.started`；两 Provider 与 core 在 CLI 未确认前断言 Running，见[最终单测](evidence/W4-final-unit.log) |
 | 增量与完整消息分开，正文不重复 | task 标准3；06 §5 | 通过（模拟协议 / SDK） | core / Codex / Claude partial+full、UUID 去重测试；审查 item ID 及全文替换映射。真实 Claude 仍未覆盖 |
 | 授权 / 问题统一等待事件、ID / 原生选项、独立多请求答复 / 解除 | task 标准4；FR-STATE-002；06 §6 | 通过（模拟；已修复两项撤回问题） | [W4-input-retirement.json](evidence/W4-input-retirement.json)、[W4-input-race.json](evidence/W4-input-race.json)、两 Provider / core 单测；真实 Claude 授权 / AskUserQuestion 未覆盖 |
 | completed / interrupted / failed 与耗时；取消不误报 Error | task 标准5；FR-STATE-003/007；06 §5 | 通过（模拟及 OS fixture） | [最终单测](evidence/W4-final-unit.log)覆盖 success+is_error、取消原生 error、终态竞态和耗时；[W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)中 Claude Stop 为 interrupted，续聊成功；真实 Claude 成功终态未覆盖 |
-| Codex 精确 Stop，系统退出证据、有限等待、独立 Runtime 兜底原 ID 恢复、重复 / 迟到守卫 | task 标准6；04 §4.1～7 | 部分通过 | [W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)独立实际 OS fixture确认当前轮两层进程退出、先前服务存活、Runtime 不重启、重复 Stop 一致；全部模拟异常分支通过。真实修正版未重测，W2 实测旧实现为 runtime_restarted，不能宣称精确 Stop 真 CLI 已通过 |
+| Codex 精确 Stop，系统退出证据、有限等待、独立 Runtime 兜底原 ID 恢复、重复 / 迟到守卫 | task 标准6；04 §5.1～5.7 | 部分通过 | [W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)独立实际 OS fixture确认当前轮两层进程退出、先前服务存活、Runtime 不重启、重复 Stop 一致；全部模拟异常分支通过。真实修正版未重测，W2 实测旧实现为 runtime_restarted，不能宣称精确 Stop 真 CLI 已通过 |
 | Claude interrupt 后本轮子进程退出，同 Session 可继续 | task 标准7；06 §4 | 部分通过 | Claude 模拟单测覆盖新后代退出、原 ID 重启、同 Runtime 续聊；独立 OS Runtime / SDK fixture 续聊通过。真实工具命令未启动，真实子进程 Stop 退出未验证 |
 | 一个 Session 的 Stop / 崩溃 / 兜底不影响其他；两 Provider 并发 | task 标准8；FR-SESSION-003；AC-03 Adapter 部分 | 部分通过 | [W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)实际进程证明 Codex Stop 时 Claude 与独立 Terminal 存活，Claude 崩溃时 Codex 仍 Running；两 Provider 各自的同时 Session 与兜底测试通过。真实两 CLI 推理并发未覆盖 |
 | 模型目录与同 Session 下一轮模型切换 | task 标准9；FR-INPUT-002；06 §6 | 部分通过 | 两 Provider 模拟测试覆盖目录、默认模型、Running 暂存 / 下一轮提交；[W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)SDK fixture next-turn model；W2 / W3 真实目录有历史观察，真实第二模型切换均未覆盖 |
 | 未安装 / 未登录 / 可用及原因分别报告 | task 标准10；UX §6 New Chat.4 | 通过 | [W4-availability.json](evidence/W4-availability.json)独立本机可用；两 Provider availability 单测覆盖未安装 / 未登录 / 版本 / 模型失败分别报告并剔除身份信息；[最终单测](evidence/W4-final-unit.log) |
 | 状态映射 / Stop 分支单测；真实证据筛选保存，不留认证或完整配置 | task 标准11；tasks/AGENTS Evidence | 通过（证据如实保留未通过） | [最终单测](evidence/W4-final-unit.log)181项；[W2-codex-results.json](evidence/W2-codex-results.json)、[W3-claude-results.json](evidence/W3-claude-results.json)明确失败 / 配额。检查本次输出仅含测试摘要、枚举、合成路径 / 文本、fixture与必要错误 |
-| spec 草稿含接口、事件、状态映射、Stop 与边界 | task 标准12 | 通过（草稿） | `4c66414` 的 [spec](../../specs/agent-adapter/spec.md) §2.11/2.12已完整描述实现与真实限制；§2.6 / 3.2 / 4描述核心流程与接口；A-Q问题保持待确认 |
+| spec 草稿含接口、事件、状态映射、Stop 与边界 | task 标准12 | 通过（草稿） | `4c66414` 的 [spec](../../specs/agent-adapter/spec.md) §3.11/3.12已完整描述实现与真实限制；§3.6 / 4.2 / 5描述核心流程与接口；A-Q问题保持待确认 |
 
 ## 缺陷与复核
 
@@ -66,9 +72,3 @@ W4 在 `4c66414` 复现：`replyWithText → turn/steer` 在途，原生撤回�
 - [W4-input-retirement.mjs](evidence/W4-input-retirement.mjs)：模拟传输原生撤回。
 - [W4-input-race.mjs](evidence/W4-input-race.mjs)：模拟异步文字答复失败 / 原生撤回竞态。
 - [W4-availability.mjs](evidence/W4-availability.mjs)：只读本机版本 / 登录，不读模型目录，不发消息。
-
-## 签收
-
-- 状态：待签收。
-- 人工确认日期：尚无。
-- 需人决定：是否接受当前阶段的自动化通过与真实验证未覆盖边界；后续真实复测须由主 Agent 按已授权预算安排。

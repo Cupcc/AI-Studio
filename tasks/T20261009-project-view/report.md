@@ -1,5 +1,12 @@
 # Project View 规格草稿报告
 
+## Decisions needed from a human
+
+规格正文没有新增产品范围；人工审阅时请重点确认：
+
+- 是否接受 PV-Q8～PV-Q12 的实现建议，尤其是 ViewSnapshot 的 IPC 形态、缩放持久化、Schema 版本策略、View Context transcript 展示方式和内置 Definition 的资源形式；
+- 是否签收本轮规格草稿，以及后续是否授权进入代码实现轮次；task 保持 `verifying`，等待人工审阅。
+
 ## Done
 
 已把 2026-10-09 已确认的 DEC-04～07 写成 Project View 模块规格草稿，并同步模块索引、任务计划和 V1 路线图。当前只完成文档与实现规划，没有修改应用代码，也没有把规格状态改为“已确认”。任务现处于 `verifying`，等待人工审阅。
@@ -33,10 +40,3 @@
 - 未实现 `ProjectViewService`、Schema、IPC、Renderer、Preview 或 View Context 注入代码。
 - 未创建 `specs/tools/spec.md`，四类工程工具仍按路线图单独推进。
 - 规格起草阶段未执行类型检查、单元测试、Electron E2E 或真实 CLI 验证；2026-10-10 提交归位时按仓库门禁执行类型检查与单元测试，当前交付仍是文档草稿。
-
-## Decisions needed from a human
-
-规格正文没有新增产品范围；人工审阅时请重点确认：
-
-- 是否接受 PV-Q8～PV-Q12 的实现建议，尤其是 ViewSnapshot 的 IPC 形态、缩放持久化、Schema 版本策略、View Context transcript 展示方式和内置 Definition 的资源形式；
-- 是否签收本轮规格草稿，以及后续是否授权进入代码实现轮次；task 保持 `verifying`，等待人工审阅。

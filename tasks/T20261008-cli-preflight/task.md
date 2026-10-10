@@ -11,6 +11,10 @@ created: 2026-10-08
 
 > 本任务早于 `tasks/` 规范执行。task.md 于 2026-10-08 依据 [CLI Integration Preflight](report.md) 和 [scripts/README.md](../../scripts/README.md) 补录。结论报告于 2026-10-09 归入本任务的 report.md；验收逐项结果见报告，未另写 acceptance.md。
 
+## 签收
+
+- 状态：待签收。人在对话中确认后，本任务标记为 done。
+
 ## 目标
 
 在启动 macOS 应用骨架和 CLI Adapter 开发前，用真实模型调用验证本机 Codex CLI 与 Claude Code CLI 能否满足 Session 创建、流式回复、恢复、授权与提问等待、取消和异常退出等集成需求。
@@ -22,7 +26,7 @@ created: 2026-10-08
 
 ## 依据
 
-- [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2、3、4、6、7 节。
+- [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3、4、5、7、1 节。
 - FR 与 AC 见文件头。
 - 校验脚本：[scripts/cli-preflight.mjs](../../scripts/cli-preflight.mjs)；原生 Stop 复核脚本：[evidence/codex-native-stop-check.mjs](evidence/codex-native-stop-check.mjs)。
 
@@ -44,12 +48,3 @@ created: 2026-10-08
 - [x] Codex 停止独立 Runtime 后恢复（兜底路径）
 
 后续必须完成的校验见 [report.md](report.md) 第 6 节，将拆为新的 task。
-
-## 未决问题
-
-| 问题 | 回答（确认日期） |
-|---|---|
-
-## 签收
-
-- 状态：待签收。人在对话中确认后，本任务标记为 done。

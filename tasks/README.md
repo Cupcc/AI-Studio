@@ -26,7 +26,7 @@ Tasks that need a record may use only `task.md`; add other files when they help.
 
 `draft` → `ready` → `in_progress` → `verifying` → `done`, or `blocked` at any point. Status lives in the `task.md` frontmatter and is changed only by the main agent.
 
-- `draft` → `ready`: no unanswered open questions. Humans answer in conversation; move each answered question from `未决问题` to `已确认事项` with its answer and date, and in the same change update every document that still shows it as pending (roadmap next steps, `04` section 7, decision status).
+- `draft` → `ready`: no unanswered open questions. Humans answer in conversation; move each answered question from `未决问题` to `已确认事项` with its answer and date, and in the same change update every document that still shows it as pending (roadmap next steps, `04` section 1, decision status).
 - `verifying` → `done`: only after a human signs off the acceptance result in conversation.
 - 标记 `done` 后，在同一次变更中按 Archiving 将任务目录移入归档。
 - There is no shared task index; parallel edits to one would conflict. Query frontmatter with `rg` instead.

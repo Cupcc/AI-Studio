@@ -2,6 +2,12 @@
 
 > 写入者：独立验收 W6（兼 Adapter W4、Project W3），未参与实现。日期：2026-10-09。状态：待人工签收；不据此标记 task 为 done。
 
+## 未完成与签收
+
+- Claude真实成功流式、Resume、模型切换、工具Stop受配额阻断。Codex六回合预算已耗尽，修正版精确Stop仅fixture / 模拟通过；当前安装0.162.0与历史 / 锁定协议0.161.0不同，没有当前真实兼容证明。真实两CLI并发、真实UI AC-02～05不能以模拟结果补齐。详见 [Adapter边界](../T20261009-agent-adapter/acceptance.md#未覆盖与边界)。
+- 最终打包 / 发布 / 签名公证、其他平台、宿主异常崩溃与未观察到的脱离后代不在本轮最终证据内。View / 工具内容仍按任务范围保持占位，不将区域导航通过算作其内容实现通过。
+- 人工签收日期：尚无。需人审阅阶段性验收、各spec推荐与Project View决定草稿；后续真实复测由主Agent安排已授权预算。未推送、未合main、未标done。
+
 ## 结论
 
 **部分通过：本轮实现与模拟自动化通过；真实 CLI AC-02～AC-05 未完成，完整产品 AC 尚未签收。** 最终代码基线为 `188bd1d`，文档与报告基线为 `e8c4812`。各实现 task 保持 `verifying`，spec 与决定草稿保持原状态。
@@ -25,15 +31,9 @@ FR / AC 来源：[02 FR](<../../docs/02. Functional Requirements.md>)、[05 AC](
 |---|---|---|
 | FR-PROJ-001～003、FR-NAV-001/002 | Project shell | app-skeleton；关闭停止 / Session摘要接入依赖Session |
 | FR-NAV-003、FR-CHAT-001～003、FR-SESSION-001～003、FR-STATE-001～007、FR-INPUT-001/002 | Session slice | app-skeleton、Adapter；与Project壳层共享明确接口 |
-| 无新增产品FR；可信IPC、数据库、构建 / 原生环境 | app-skeleton | 技术要求04 §2；独立骨架验收 |
+| 无新增产品FR；可信IPC、数据库、构建 / 原生环境 | app-skeleton | 技术要求04 §3；独立骨架验收 |
 | 上述Session / 输入FR的原生能力部分 | agent-adapter | 协议映射、事件、Stop / Runtime隔离；不承担UI状态清除 |
 
 task frontmatter列出的21个FR均有责任归属。Project View本轮仅调研，四份决定草稿分别为 [Knowledge存储](<../../docs/07. Decisions.md>)、[渲染](<../../docs/07. Decisions.md>)、[刷新](<../../docs/07. Decisions.md>)、[上下文](<../../docs/07. Decisions.md>)。Context工具与AC-06/07实现留待后续轮次。
 
 Session独立补充验证：真实SQLite重开2,000摘要 / 1,202 transcript、renderer异步竞态、关闭超时 / 迟到输入探针共5项；真实minimize/hide未读规则和2,000历史有界DOM共2项；实际Session聚合驱动Tab / 折叠点、关闭计数2 / 取消保持 / 仅目标停止共1项。日志与逐项截图见 [Session acceptance](../T20261009-session-slice/acceptance.md)。已发现实现缺陷均有修前 / 修后证据，没有剩余已复现的本地自动化阻断。
-
-## 未完成与签收
-
-- Claude真实成功流式、Resume、模型切换、工具Stop受配额阻断。Codex六回合预算已耗尽，修正版精确Stop仅fixture / 模拟通过；当前安装0.162.0与历史 / 锁定协议0.161.0不同，没有当前真实兼容证明。真实两CLI并发、真实UI AC-02～05不能以模拟结果补齐。详见 [Adapter边界](../T20261009-agent-adapter/acceptance.md#未覆盖与边界)。
-- 最终打包 / 发布 / 签名公证、其他平台、宿主异常崩溃与未观察到的脱离后代不在本轮最终证据内。View / 工具内容仍按任务范围保持占位，不将区域导航通过算作其内容实现通过。
-- 人工签收日期：尚无。需人审阅阶段性验收、各spec推荐与Project View决定草稿；后续真实复测由主Agent安排已授权预算。未推送、未合main、未标done。

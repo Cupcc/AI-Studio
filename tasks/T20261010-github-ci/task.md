@@ -9,6 +9,11 @@ created: 2026-10-10
 
 # 推送 GitHub 并配置 CI
 
+## 签收
+
+- 状态：待人工签收；任务保持 `verifying`。
+- 审阅依据：[验收标准与自查结果](#验收标准)。
+
 ## 目标
 
 将本地仓库推送到 `https://github.com/Cupcc/AI-Studio.git`，配置可重复执行的 GitHub Actions 检查。
@@ -22,7 +27,7 @@ created: 2026-10-10
 
 - 用户 2026-10-10 请求「git push https://github.com/Cupcc/AI-Studio.git,配置好ci」。
 - [仓库指南](../../AGENTS.md) 的开发命令、分支与提交约定。
-- [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节的首发 macOS 平台约束。
+- [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3 节的首发 macOS 平台约束。
 - [Acceptance Criteria](<../../docs/05. Acceptance Criteria.md>) 第 1 节：自动化检查不替代产品端到端人工验收。本任务不新增或变更 FR / AC。
 - E2E 修正保留 [AC-04](<../../docs/05. Acceptance Criteria.md>) 的完成提醒、进入后清除和展示最新内容断言，关联 FR-STATE-004/005、FR-SESSION-001。
 
@@ -38,10 +43,6 @@ created: 2026-10-10
 用户已授权推送到上述仓库并配置 CI（2026-10-10 确认）；实现结果尚待人工验收。
 
 用户完成 GitHub 重新授权并指示继续推送、处理 CI 失败项（2026-10-10 确认）。已验证新凭据包含 `workflow` scope。
-
-## 未决问题
-
-无。权限与测试环境阻塞均已解决；实现结果待人工验收。
 
 ## 最终验证
 

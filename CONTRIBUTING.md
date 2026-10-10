@@ -105,7 +105,3 @@ git worktree remove "../AI Stduio.worktrees/example"
 ## 6. 远端设置
 
 单人开发阶段暂不要求启用分支保护、强制 PR 或必需 approval；本次不修改 GitHub 设置。以后需要远端强制约束或引入协作者时再配置。CI 的执行内容与已部署状态由 [scripts/README.md](scripts/README.md) 负责记录。
-
-## 未决问题
-
-无。单人开发的简化方向已由后续更新指令确定，修订后的文档仍待 diff 审阅。
