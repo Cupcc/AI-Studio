@@ -15,11 +15,21 @@ const row = (id: string) => workspace().locator(`[data-session-row="${id}"]`)
 async function sessions(): Promise<SessionSummary[]> {
   return page.evaluate((id) => (window.studio as unknown as { session: SessionApi }).session.list({ projectId: id }), projectId)
 }
+async function focusWindow() {
+  // macOS can leave the application inactive even after BrowserWindow.focus().
+  await app.evaluate(({ app, BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0]!
+    win.show()
+    app.focus({ steal: true })
+    win.focus()
+  })
+  await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.isFocused())).toBe(true)
+}
 async function launch() {
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
-  await app.evaluate(({ BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; win.show(); win.focus() })
+  await focusWindow()
 }
 async function newChat(cli: 'codex' | 'claude-code' = 'codex') {
   await workspace().getByRole('button', { name: '选择 CLI', exact: true }).click()
@@ -83,6 +93,7 @@ test('AC-04 / FR-STATE-004/005: background completion shows a green dot; opening
   await newChat(); const a = await send('[e2e:delay] Background completion')
   await newChat('claude-code'); const b = await send('[e2e:slow] Current conversation')
   await expect(row(a.id).getByRole('img', { name: 'Completed Unread' })).toBeVisible()
+  await focusWindow()
   await row(a.id).locator('.session-row__open').click()
   await expect(row(a.id).getByRole('img', { name: 'Completed Unread' })).toHaveCount(0)
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
@@ -144,8 +155,7 @@ test('FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.blur())
   await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.isFocused())).toBe(false)
   await expect(row(session.id).getByRole('img', { name: 'Error', exact: true })).toBeVisible()
-  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.focus())
-  await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.isFocused())).toBe(true)
+  await focusWindow()
   await expect(row(session.id).getByRole('img', { name: 'Error', exact: true })).toBeVisible()
   await row(session.id).locator('.session-row__open').click()
   await expect(row(session.id).getByRole('img', { name: 'Error', exact: true })).toHaveCount(0)
@@ -218,7 +228,7 @@ test('FR-SESSION-001: opening starts at the bottom; scrolling up pauses followin
   expect(Math.abs(await scroll.evaluate((node) => node.scrollTop) - before)).toBeLessThanOrEqual(1)
   expect(await gap()).toBeGreaterThan(100)
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
-  await page.getByRole('tab', { name: 'Session Project', exact: true }).click()
+  await page.getByRole('tab', { name: /^Session Project(?:，.*)?$/ }).click()
   await expect(workspace().getByRole('button', { name: '回到最新 ↓' })).toBeVisible()
   expect(Math.abs(await scroll.evaluate((node) => node.scrollTop) - before)).toBeLessThanOrEqual(1)
   await screenshot('conversation-scroll-paused')
