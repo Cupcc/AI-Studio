@@ -46,7 +46,7 @@ created: 2026-10-09
 - [ ] 一个 Session 的 Stop、崩溃或兜底不影响同时运行的其他 Session（FR-SESSION-003；04 第 4 节第 7 条）；两个 Provider 的 Session 可并发运行（AC-03 的 Adapter 部分）。
 - [ ] 模型目录可读取；同一 Session 内切换模型后下一轮使用新模型（FR-INPUT-002；[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节“同 Session 模型切换”）。
 - [ ] 可用性检测分别报告未安装、未登录、可用三种情况及原因（UX Specification 第 6 节 New Chat 第 4 条）。
-- [ ] 单元测试覆盖上述状态映射与 Stop 分支；真实集成测试结果以筛选后的证据保存，不含认证信息、邮件地址或完整配置（`tasks/AGENTS.md` 证据规则）。
+- [ ] 单元测试覆盖上述状态映射与 Stop 分支；真实集成测试结果以筛选后的证据保存，不含认证信息、邮件地址或完整配置（`tasks/README.md` 证据规则）。
 - [ ] `specs/agent-adapter/spec.md` 草稿描述接口、事件、状态映射、Stop 流程与已知边界。
 
 ## 未决问题

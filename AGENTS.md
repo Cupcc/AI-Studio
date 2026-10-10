@@ -10,8 +10,8 @@ This file holds repository-wide rules only. Branch, commit, pull request, and me
 |---|---|---|
 | `docs/` | Numbered product and technical specifications, development roadmap, and decision log | `docs/00. Documentation Index.md` |
 | `specs/` | Long-lived module specs and their FR mapping | `specs/README.md` |
-| `tasks/` | Task records; applicability and organization are defined in the task protocol | `tasks/AGENTS.md` |
-| `templates/` | Templates for task, plan, acceptance, report, and spec documents | Used as described in `tasks/AGENTS.md` and `specs/README.md` |
+| `tasks/` | Task records; applicability and organization are defined in the task protocol | `tasks/README.md` |
+| `templates/` | Templates for task, plan, acceptance, report, and spec documents | Used as described in `tasks/README.md` and `specs/README.md` |
 | `design/` | Visual direction, references, wireframes, screens, components, and prototypes | `design/README.md` |
 | `apps/desktop/` | Electron + React + TypeScript desktop client (electron-vite) | `apps/desktop/README.md` |
 | `packages/` | Workspace packages without Electron dependencies, e.g. `packages/agent-adapter/` (CLI Adapter) | Module spec in `specs/` |
@@ -32,7 +32,7 @@ The review each area needs is defined in its index (see the table above).
 
 ## Working on Tasks
 
-Read `tasks/AGENTS.md` before creating or executing a task.
+Read `tasks/README.md` before creating or executing a task.
 
 ## Build, Test, and Development Commands
 
@@ -49,7 +49,7 @@ The repository is a pnpm workspace (`pnpm-workspace.yaml`); Node and pnpm versio
 
 Command options, outputs, and runtime conventions: `apps/desktop/README.md`. Git hooks, CI, and the real-CLI preflight (sends real model requests; not an application test): `scripts/README.md`. No formatter, linter, or coverage threshold is configured. Keep this list current when root scripts change.
 
-To locate a requirement, its acceptance references, and covering specs: `rg 'FR-PROJ-001|AC-01' docs specs`. Task queries and the evidence search exclusion: `tasks/AGENTS.md`. Quote paths containing spaces when reading individual files.
+To locate a requirement, its acceptance references, and covering specs: `rg 'FR-PROJ-001|AC-01' docs specs`. Task queries and the evidence search exclusion: `tasks/README.md`. Quote paths containing spaces when reading individual files.
 
 ## Writing Conventions
 

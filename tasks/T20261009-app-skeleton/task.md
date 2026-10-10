@@ -46,7 +46,7 @@ created: 2026-10-09
 - [ ] Renderer 中无法访问 Node.js、文件系统和 `ipcRenderer` 原始对象，只能调用 Preload 暴露的类型化 API；有测试或检查证明（04 第 2 节）。
 - [ ] SQLite 在主进程可读写，迁移可重复执行；数据库位于应用数据目录而非 Project 目录。
 - [ ] node-pty 在 Electron 主进程中启动 Shell 并收到输出；打包后的应用中同样可用（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节）。
-- [ ] 通过 `open` 启动打包后的应用时，能解析出用户登录 Shell 的 PATH，并找到 `codex` 与 `claude` 可执行文件；结果写入证据，不保存完整环境变量或凭据（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节；`tasks/AGENTS.md` 证据规则）。
+- [ ] 通过 `open` 启动打包后的应用时，能解析出用户登录 Shell 的 PATH，并找到 `codex` 与 `claude` 可执行文件；结果写入证据，不保存完整环境变量或凭据（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 6 节；`tasks/README.md` 证据规则）。
 - [ ] 影响其他模块的技术选择（SQLite 驱动、IPC 约定、目录约定）写成 `docs/decisions/` 下的决定草稿。
 
 ## 未决问题

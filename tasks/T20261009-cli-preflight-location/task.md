@@ -22,7 +22,7 @@ created: 2026-10-09
 ## 依据
 
 - [AGENTS.md](../../AGENTS.md)：Project Structure & Module Organization、Working on Tasks、Validation Guidelines。
-- [tasks/AGENTS.md](../AGENTS.md)：Files、Lifecycle、Evidence。
+- [tasks/README.md](../README.md)：Files、Lifecycle、Evidence。
 
 ## 验收标准
 

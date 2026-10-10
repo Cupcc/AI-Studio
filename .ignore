@@ -1,2 +1,3 @@
 # Excluded from default ripgrep / agent search; links and explicit reads still work.
 tasks/*/evidence/
+tasks/archive/*/evidence/

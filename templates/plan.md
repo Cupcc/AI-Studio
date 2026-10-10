@@ -1,6 +1,6 @@
 # 执行计划：<task id>
 
-<!-- 写入者与 Worker 规则见 tasks/AGENTS.md 的 Files、Parallel Workers。 -->
+<!-- 写入者与 Worker 规则见 tasks/README.md 的 Files、Parallel Workers。 -->
 
 ## 方案
 
@@ -16,6 +16,6 @@
 
 ## 进度与决定
 
-<!-- 每到一个节点追加一条，最新的在最下面；用于中断后接续，见 tasks/AGENTS.md 的 Recovery。 -->
+<!-- 每到一个节点追加一条，最新的在最下面；用于中断后接续，见 tasks/README.md 的 Recovery。 -->
 
-- YYYY-MM-DD HH:MM 
+- YYYY-MM-DD HH:MM

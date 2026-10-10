@@ -38,6 +38,6 @@ npx --yes agent-browser@0.38.2 --version
 
 上游说明里的 `agent-browser ...` 可使用 `npx --yes agent-browser@0.38.2 ...` 调用。Electron 验证连接应用的 CDP 调试端口；独立浏览器验证首次使用时需要下载浏览器（`npx --yes agent-browser@0.38.2 install`）。
 
-应用截图及日志先放 `.runtime/`，验收证据按 `tasks/AGENTS.md` 的规则保存。此次只验证工具启动及工作流读取，未启动应用或执行 UI 测试。
+应用截图及日志先放 `.runtime/`，验收证据按 `tasks/README.md` 的规则保存。此次只验证工具启动及工作流读取，未启动应用或执行 UI 测试。
 
 发现目录依据：[Codex 官方文档](https://learn.chatgpt.com/docs/build-skills)、[Claude Code 官方文档](https://code.claude.com/docs/en/skills)。安装记录：[任务](../../tasks/T20261009-install-dev-skills/task.md)。

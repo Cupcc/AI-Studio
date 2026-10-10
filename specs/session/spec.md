@@ -28,7 +28,7 @@
   - Tab 注意力点的渲染、关闭确认对话框的 UI、折叠按钮注意力点的渲染：Project 壳层（[T20261009-project-shell](../../tasks/T20261009-project-shell/task.md)）。
   - CLI 协议、进程管理、Stop 的资源清理细节：CLI Adapter（`specs/agent-adapter/spec.md`，并行起草中）。本文只以抽象接口描述所需能力（第 4.1 节）。
   - Project View Mode 的 Conversation 列与 View 上下文注入（[T20261009-project-view](../../tasks/T20261009-project-view/task.md)）；本文只定义该列中的 Session 如何计入“正在查看”。
-  - 轮次完成行中的“修改了 N 个文件”与 Diff 联动（依赖 04 第 7 节第 13 项与 context-tools task）。
+  - 轮次原生文件记录与 Diff 联动（依赖 FR-TOOL-002、04 第 7 节第 13 项与 [context-tools task](../../tasks/T20261009-context-tools/task.md)；组件修订见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 5、8 节）。
 
 ## 2. 行为细则
 
@@ -121,7 +121,7 @@
 1. 成功结束的轮在 Conversation 末尾追加完成行：`Worked for <时长> · Done`（FR-STATE-007；Shell Spec 第 5 节）。“Done”只表示这一轮结束。
 2. 时长：从用户提交到终态的墙钟时间，含等待用户答复的时间（建议，S-Q10）。格式建议：小于 1 分钟为 `48s`，小于 1 小时为 `2m 18s`，否则为 `1h 05m`。
 3. 用户停止的轮：建议显示同类行 `Worked for <时长> · 已停止`（S-Q9）。失败的轮以 Error 卡片结尾，不显示 Done。
-4. “修改了 N 个文件”及点击打开 Diff：本切片不做，完成行数据预留 `files_changed`（null 表示未知），由 context-tools 与 04 第 7 节第 13 项决定。
+4. 本切片尚未接入文件记录与 Diff。后续由 context-tools 按 FR-TOOL-002 和 04 第 7 节第 13 项接入本轮原生记录及持久化补丁；完成行进入该轮“本轮变更”，不可用时明确降级到“查看项目变更”。既有 `files_changed` 预留字段的 null 仍表示未知，不得显示为 0；具体事件和存储结构在工具实现时细化（2026-10-10 确认的行为来源见 FR-TOOL-002）。
 5. 完成行数据随对话记录持久化，重启后照常显示。
 
 ### 2.11 “正在查看”的定义

@@ -1,5 +1,5 @@
 /**
- * Best-effort redaction for evidence files and logs (tasks/AGENTS.md evidence rules:
+ * Best-effort redaction for evidence files and logs (tasks/README.md evidence rules:
  * no credentials, authentication responses or email addresses). Not applied to text
  * shown to the user in the app.
  */

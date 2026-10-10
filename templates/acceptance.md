@@ -1,6 +1,6 @@
 # 验收：<task id>
 
-<!-- 写入者与签收规则见 tasks/AGENTS.md 的 Files、Lifecycle。 -->
+<!-- 写入者与签收规则见 tasks/README.md 的 Files、Lifecycle。 -->
 
 | 验收标准 | 来源 | 结论 | 证据 |
 |---|---|---|---|

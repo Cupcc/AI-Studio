@@ -36,7 +36,7 @@
 1. 独立 workspace 包 `@ai-studio/agent-adapter`，ESM + 严格 TypeScript，不引用 Electron；在 Electron 主进程的 Node 中运行，以 Node 22 为 API 基线（`@types/node` 22 用于类型检查）。
 2. 依赖精确锁定：`@anthropic-ai/claude-agent-sdk` 为 [CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 2 节验证过的 `0.3.293`。
 3. 入口：`.`（接口与核心）、`./codex`（`CodexProvider`）、`./claude`（`ClaudeProvider` / `createClaudeProvider`）、`./testing`（测试工具）。根入口不加载 Claude SDK。
-4. 测试：`test` 只跑单元测试，不启动真实 CLI、不调用模型；`test:integration` 只有设置 `AI_STUDIO_REAL_CLI=1` 时运行真实 CLI 套件，否则跳过（任务 task.md 范围，2026-10-09 确认）。真实测试项目目录在系统临时目录下创建（`createScratchProject`），不在仓库内（`tasks/AGENTS.md` 证据规则）。
+4. 测试：`test` 只跑单元测试，不启动真实 CLI、不调用模型；`test:integration` 只有设置 `AI_STUDIO_REAL_CLI=1` 时运行真实 CLI 套件，否则跳过（任务 task.md 范围，2026-10-09 确认）。真实测试项目目录在系统临时目录下创建（`createScratchProject`），不在仓库内（`tasks/README.md` 证据规则）。
 5. 环境：本模块从不隐式读取 `process.env`。宿主传入 `ProviderEnvironment.env`（桌面应用解析出的登录 Shell 环境，[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 6 节；app-skeleton task）及可选的显式可执行文件路径。
 
 ### 2.2 Provider 接口与可用性检测
@@ -112,7 +112,7 @@
 ### 2.7 错误与终态（FR-STATE-003；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节）
 
 1. 归一错误码：`not_installed`、`unsupported_version`、`auth_required`、`spawn_failed`、`resume_failed`、`runtime_crashed`、`protocol_error`、`network_error`、`quota_exceeded`、`provider_error`、`timeout`、`stop_cleanup_failed`、`invalid_state`、`invalid_argument`、`unsupported`、`disposed`、`unknown`。认证、网络、配额三类对应 [CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 6 节尚未注入真实故障的项目，由 W2、W3 按原生错误映射并补测。
-2. 每个错误保留原生诊断 `native`（来源、原生代码、原生文本、结构化细节），供 Error 卡片“查看详情”（UX 第 6 节；Shell Spec 第 5 节）。界面显示的诊断不做脱敏；写入证据文件前使用 `redactSecrets` / `redactDeep`（`tasks/AGENTS.md` 证据规则）。
+2. 每个错误保留原生诊断 `native`（来源、原生代码、原生文本、结构化细节），供 Error 卡片“查看详情”（UX 第 6 节；Shell Spec 第 5 节）。界面显示的诊断不做脱敏；写入证据文件前使用 `redactSecrets` / `redactDeep`（`tasks/README.md` 证据规则）。
 3. 回合内 Runtime 意外退出：`runtime.exited`（`duringTurn = true`）→ 回合 `failed`（`runtime_crashed`，附退出码、信号、stderr 尾部）→ 未答复请求以 `runtime_exited` 取消 → Session 关闭。无回合时退出：`duringTurn = false`，不产生回合事件，Session 关闭；是否显示 Error 由上层决定（session spec S-Q5）。
 4. 驱动可报告不中断 Session 的错误（`session.error`），或不可恢复错误（`fatal`：当前回合失败、Session 关闭；若 Stop 进行中，回合仍以 `interrupted` 结束）。
 

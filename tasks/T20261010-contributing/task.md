@@ -23,7 +23,7 @@ created: 2026-10-10
 - 用户 2026-10-10 对话请求：规范协作并保持 main 历史整洁、线性；具体规则待 diff 审阅。
 - 用户 2026-10-10 后续说明「主要是我自己开发」，并在单人流程建议后指令「update doc」：按该建议精简文档。
 - [仓库指南](../../AGENTS.md) 的 Authorship & Review、Commit & Pull Request Guidelines：规则单一归属、人工审阅、Conventional Commits。
-- [Task Protocol](../AGENTS.md)：任务记录的适用范围与生命周期，不以实现者自检代替人工签收。
+- [Task Protocol](../README.md)：任务记录的适用范围与生命周期，不以实现者自检代替人工签收。
 - [脚本说明](../../scripts/README.md)：现有本地门禁与 CI 边界。此任务为仓库协作规范，不直接对应产品 FR / AC。
 
 ## 验收标准
@@ -38,7 +38,7 @@ created: 2026-10-10
 
 ## 实现与验证记录
 
-- 实现分支：`task/contributing`；交付 `CONTRIBUTING.md`，调整 `AGENTS.md` 与 `scripts/README.md` 的规则入口，并更新 `tasks/AGENTS.md` 的任务记录范围。
+- 实现分支：`task/contributing`；交付 `CONTRIBUTING.md`，调整 `AGENTS.md` 与 `scripts/README.md` 的规则入口，并更新任务协议的任务记录范围（现见 `tasks/README.md`）。
 - 首稿检查 4 份文档的本地链接与 Markdown 结构通过。后续按单人开发方向修订，撤下强制 PR 和远端保护配置清单；重新检查 5 份文档的 22 个本地链接、5 个表格与 41 个标题，全部通过。
 - `git diff --check` 通过；新增文件另外检查行尾空白和 Markdown 结构。
 - `main` 与 `origin/main` 均保留在 `b12a89b`；未执行提交、推送、合并、远端配置或历史重写。
