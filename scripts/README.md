@@ -2,7 +2,7 @@
 
 ## 本地 Commit 门禁
 
-依据：[仓库指南](../AGENTS.md) 的开发命令与提交约定（提交信息格式以该文件为准）；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
+依据：[仓库指南](../AGENTS.md) 的开发命令与 [贡献指南](../CONTRIBUTING.md) 第 3 节的提交约定；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
 
 根目录执行 `pnpm install` 时，`prepare` 自动通过 Husky 安装 hooks；已有依赖时可用 `pnpm prepare` 重新安装。Git 客户端的 PATH 必须能找到根 `package.json` 要求的 Node 与 pnpm。若 GUI 客户端找不到版本管理器安装的 Node / pnpm，按 [Husky 官方说明](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis) 配置用户级初始化文件，不在仓库硬编码个人路径。
 
@@ -29,7 +29,7 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 - E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
 - 无论成功或失败都上传已产生的 E2E 截图与打包冒烟 JSON。未签名应用仅验证打包，不自动发布。
 - 工作流只读仓库内容，外部 Actions 固定到 commit SHA。
-- CI 不替代人工验收，未启用分支保护，也不检查历史提交信息。
+- CI 不替代人工验收，未启用分支保护，也不检查历史提交信息。单人开发的远端设置约定见 [贡献指南](../CONTRIBUTING.md) 第 6 节。
 
 Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-images#available-images)；pnpm 版本读取方式依据：[pnpm/action-setup](https://github.com/pnpm/action-setup#version)。
 

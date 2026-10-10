@@ -1,6 +1,13 @@
 # Task Protocol
 
-Every unit of work lives in `tasks/T<YYYYMMDD>-<slug>/`; date-based IDs avoid collisions between parallel agents. Templates are in `templates/`.
+Complex or cross-session work lives in `tasks/T<YYYYMMDD>-<slug>/`; date-based IDs avoid collisions between parallel agents. Templates are in `templates/`.
+
+## When to Create a Task
+
+- Small, self-contained changes such as wording edits or localized fixes need no task directory when the diff and commit message adequately explain the work and validation.
+- Create or continue a task for work that spans sessions, introduces or revises product requirements or architectural decisions, needs several implementation or verification stages, or coordinates multiple workers. File count alone does not determine complexity.
+- Exemption from a task record does not waive the owning document's review rules or required checks. If a small change grows beyond these limits, add a task before continuing.
+- This scope follows the user's 2026-10-10 request to simplify the workflow for solo development; see [contributing task](T20261010-contributing/task.md).
 
 ## Files
 
@@ -13,7 +20,7 @@ Every unit of work lives in `tasks/T<YYYYMMDD>-<slug>/`; date-based IDs avoid co
 | `evidence/` | No | The worker that produced each file | Screenshots, logs, JSON | None; process record |
 | `report.md` | No | Main agent | Conclusions and write-backs to `docs/` or `specs/` | Each write-back follows the review rule of its target directory |
 
-Small tasks need only `task.md`. There are no handoff or subtask files: handoff content lands in the responsible file above or returns to the main agent, and subagents spawned inside a worker are not persisted.
+Tasks that need a record may use only `task.md`; add other files when they help. Solo work can record implementation notes and self-check results there without creating a separate plan, report, or acceptance file; self-checks are not independent verification. There are no handoff or subtask files: handoff content lands in the responsible file above or returns to the main agent, and subagents spawned inside a worker are not persisted.
 
 ## Lifecycle
 
@@ -40,7 +47,7 @@ Small tasks need only `task.md`. There are no handoff or subtask files: handoff 
 
 ## Recovery
 
-A new main agent resumes from `task.md` and the `plan.md` progress log alone. If that is not enough to continue, the log was not updated often enough.
+A new main agent resumes from `task.md` and, if present, the `plan.md` progress log alone. Single-file tasks keep their recovery notes in `task.md`. If that is not enough to continue, the record was not updated often enough.
 
 ## Evidence
 

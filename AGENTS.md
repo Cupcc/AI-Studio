@@ -2,7 +2,7 @@
 
 This repository contains the V1.0 specifications, design workspace, development records, and application source for AI Developer Studio, a desktop client built around local projects and CLI agent sessions.
 
-This file holds repository-wide rules only. Each directory's naming, metadata, status, and review rules live in the index listed below; read it before editing there.
+This file holds repository-wide rules only. Branch, commit, pull request, and merge rules live in [CONTRIBUTING.md](CONTRIBUTING.md); read it before starting work. Each directory's naming, metadata, status, and review rules live in the index listed below; read it before editing there.
 
 ## Project Structure & Module Organization
 
@@ -10,7 +10,7 @@ This file holds repository-wide rules only. Each directory's naming, metadata, s
 |---|---|---|
 | `docs/` | Numbered product and technical specifications, development roadmap, and decision log | `docs/00. Documentation Index.md` |
 | `specs/` | Long-lived module specs and their FR mapping | `specs/README.md` |
-| `tasks/` | Every unit of work, one directory per task | `tasks/AGENTS.md` |
+| `tasks/` | Task records; applicability and organization are defined in the task protocol | `tasks/AGENTS.md` |
 | `templates/` | Templates for task, plan, acceptance, report, and spec documents | Used as described in `tasks/AGENTS.md` and `specs/README.md` |
 | `design/` | Visual direction, references, wireframes, screens, components, and prototypes | `design/README.md` |
 | `apps/desktop/` | Electron + React + TypeScript desktop client (electron-vite) | `apps/desktop/README.md` |
@@ -63,6 +63,4 @@ Write in the existing Chinese prose with English product terminology such as Pro
 
 ## Commit & Pull Request Guidelines
 
-Use Conventional Commits: `<type>[optional scope][!]: <description>`. Common types include `docs`, `feat`, `fix`, `refactor`, `test`, and `chore`. Write concise imperative descriptions, e.g., `docs(requirements): clarify session completion behavior`. Mark breaking changes with `!` or a `BREAKING CHANGE:` footer.
-
-Agents work on branches or worktrees; `main` holds human-reviewed content. Commit messages and pull requests state what changed, why, and the affected FR/AC identifiers, because reviewers read that summary alongside the diff. Pull requests should also link relevant tasks or issues, describe validation performed, include screenshots for layout or interaction proposals, and call out unresolved decisions explicitly.
+Follow [CONTRIBUTING.md](CONTRIBUTING.md) for branch workflow, Conventional Commits, PR contents, human review, and merging into `main`. That document owns these rules and distinguishes proposed policy from enabled remote enforcement.
