@@ -33,9 +33,13 @@ created: YYYY-MM-DD
 
 ## 验收标准
 
-<!-- 每条注明来源；推导规则见 tasks/README.md 的 Writing task.md。 -->
+<!-- 每条注明来源；推导规则见 tasks/README.md 的 Writing task.md；场景与验证方式按 Acceptance 准备。 -->
 
 - [ ]
+
+| 场景与来源 | 前置条件与用户操作 | 预期结果 | 验证方式与环境 |
+|---|---|---|---|
+|  |  |  |  |
 
 ## 已确认事项
 
