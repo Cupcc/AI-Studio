@@ -11,10 +11,6 @@
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 5、6 节；线框图 v02（[design/wireframes](../../design/wireframes/README.md)） |
 | 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-INPUT-001～002、FR-STATE-002、FR-CHAT-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 4、6 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3、4 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 4、5、6 节 |
 
-> 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
->
-> “建议”表示文档未规定、由本草稿提出的做法；涉及产品行为且文档未决定的列入第 5 节，编号 I-Q*。
-
 ## 1. 职责与边界
 
 - 负责：
@@ -134,8 +130,6 @@ Shell Spec 第 6 节规定“Running 期间能否排队发送遵循 CLI 原生�
 | `capabilities.freeTextAnswers` 与 `replyWithText(text)` | 输入框回复 Needs Input；作用集合由 Adapter 取当前轮的待答复请求 | I-Q2；Adapter 正式契约 |
 
 ## 5. 问题记录
-
-人在对话中回答后，问题从 5.2 移到 5.1，编号不变。
 
 ### 5.1 已确认
 

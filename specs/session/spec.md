@@ -11,10 +11,6 @@
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 4、5、9 节；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；交互原型 v01（已确认，行为以本 spec 为准） |
 | 来源 | [01. Product Definition](<../../docs/01. Product Definition.md>) 第 6～8 节；[02. Functional Requirements](<../../docs/02. Functional Requirements.md>) 第 2 节；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6、7、8、10 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 1～6 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 3、5、6 节 |
 
-> 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
->
-> 本文中“建议”“提案”表示文档未规定、由本草稿提出的做法；标注“技术方案，待实现确认”的是不影响产品行为的实现选择；涉及产品行为且文档未决定的，列入第 5 节，编号 S-Q*。
-
 ## 1. 职责与边界
 
 - 负责：
@@ -362,8 +358,6 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 Renderer 在 `createRoot` 前一次安装 `installSessionIntegration()`，注册 History、Conversation / Header 与 CLI Menu 槽位，避免 React StrictMode 重复注册。模拟 Provider 仅在未打包且显式设置 `STUDIO_E2E_PROVIDERS=1` 时启用。
 
 ## 5. 问题记录
-
-人在对话中回答后，问题从 5.2 移到 5.1，编号不变。
 
 ### 5.1 已确认
 

@@ -11,10 +11,6 @@
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、3、7、9 节；线框图 v02（[design/wireframes](../../design/wireframes/README.md)） |
 | 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-CHAT-001～003、FR-VIEW-007、FR-NAV-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6 节 New Chat、第 10 节 D-01、D-11、D-15、P-A；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 5 节 Project、Session；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 |
 
-> 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
->
-> “建议”表示文档未规定、由本草稿提出的做法；涉及产品行为且文档未决定的列入第 5 节，编号 C-Q*。
-
 ## 1. 职责与边界
 
 - 负责：

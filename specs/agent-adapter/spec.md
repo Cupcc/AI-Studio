@@ -12,8 +12,6 @@
 | 来源 | [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 1～4、6、7 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 3～6 节；[01. Product Definition](<../../docs/01. Product Definition.md>) 第 8 节原则 19、20；任务 [T20261009-agent-adapter](../../tasks/T20261009-agent-adapter/task.md)；input spec I-Q2、session spec S-Q2（2026-10-09 确认） |
 | 设计记录 | [research.md](../../tasks/T20261009-agent-adapter/research.md) |
 
-> 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
->
 > 本文的类型名、方法名与 `packages/agent-adapter/src` 一致；字段的完整定义以代码为准，本文只写行为规则与约束。第 2.11、2.12 节记录已实现的 Provider 行为，并分别列明模拟测试与真实 CLI 验证的边界。
 
 ## 1. 职责与边界

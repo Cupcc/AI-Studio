@@ -18,10 +18,8 @@
 ## 2. 交付说明
 
 - 使用 [Visual Direction](../visual-direction.md) 与 [UX Specification](<../../docs/03. UX Specification.md>) 作为依据。
-- 图片旁保留对应源文件，或记录外部设计文件链接。
-- 说明画布尺寸、版本、状态、相关 FR / AC 和待确认问题。
+- 命名、源文件与记录内容按[设计索引](../README.md)第 5 节；采用的版本登记在其第 3 节。
 - Project View 中的示例数据标为演示内容，便于区分产品呈现与真实项目事实。
-- 已确认版本在 [设计索引](../README.md) 中登记。
 
 ## 3. 方案索引
 

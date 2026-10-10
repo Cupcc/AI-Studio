@@ -1,6 +1,6 @@
 ---
 id: TYYYYMMDD-slug
-status: draft        # draft | ready | in_progress | verifying | done | blocked
+status: draft        # 取值见 tasks/AGENTS.md 的 Lifecycle
 fr: []               # 本任务覆盖的 FR 编号
 ac: []               # 本任务对应的 AC 编号
 specs: []            # 相关模块 spec 路径
@@ -18,24 +18,24 @@ created: YYYY-MM-DD
 
 ## 依据
 
-<!-- 指向 FR / AC / spec / 决定的具体位置，不复制原文。 -->
+<!-- 写法见 tasks/AGENTS.md 的 Writing task.md。 -->
 
 ## 验收标准
 
-<!-- 从 AC 推导，可以更细，不能放宽；每条注明来源。 -->
+<!-- 每条注明来源；推导规则见 tasks/AGENTS.md 的 Writing task.md。 -->
 
 - [ ] 
 
 ## 已确认事项
 
-<!-- 人在对话中回答后，把问题从“未决问题”移到这里，写明回答和确认日期；影响其他模块的结论另写入 docs/07. Decisions.md。 -->
+<!-- 移入规则见 tasks/AGENTS.md 的 Lifecycle；需要记为决定的情形见 docs/07. Decisions.md 的规则。 -->
 
 | 问题 | 回答（确认日期） |
 |---|---|
 
 ## 未决问题
 
-<!-- 只放尚未回答的问题，等人在对话中回答，不自行假设。存在未决问题时，任务不能进入 ready；全部回答后写“无。”。 -->
+<!-- 只放尚未回答的问题；全部回答后写“无。”。 -->
 
 | 问题 | 推荐答案 |
 |---|---|

@@ -11,16 +11,6 @@
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、3、4、9、10 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
 | 来源 | 02 第 2 节 左侧导航；03 第 2、3、6、7、8、10 节；04 第 5、6 节；2026-10-09 起草，尚无对话确认 |
 
-> 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
-
-来源简称：01～05 指 `docs/` 下同编号文档；Shell 指 [Shell Spec v01](../../design/components/shell-spec-v01.md)（已确认（2026-10-09））。
-
-标注约定：
-
-- 无标注的规则直接来自所引来源。
-- **（提案）**：来源未规定、为让实现不必猜测而提出的行为，须经人确认；其中真正存在分歧的已列入第 5 节。
-- **（技术方案，待实现确认）**：非产品行为的实现选择，实现时可调整，不需要产品确认。
-
 ## 1. 职责与边界
 
 - 负责：
@@ -34,7 +24,7 @@
   - Session 状态的含义、来源、优先级与清除规则；Session 标题的来源（CLI 原生名称或客户端生成）；Rename 的持久化 → `specs/session/spec.md`。
   - Project View 的内容、Conversation 列、最近对话块、Preview → `specs/project-view/spec.md`（后续 task）。
   - Tab 条、窗口尺寸与压缩顺序、状态保存 → `specs/project/spec.md`。导航宽度 248 与折叠后为 0 引用其 2.4 节。
-  - 色值、字体、图标、圆角（Visual Direction 第 5 节，当前以交互原型 v01 为基线）。
+  - 色值、字体、图标、圆角（Visual Direction 第 5 节）。
 - V1 范围外（文档未要求，本 spec 不设计）：Session 搜索 / 过滤、删除 / 归档 Session（NAV-Q9）、拖拽排序、导航宽度拖拽、右键菜单、跨 Project 的统一列表（01 第 4 节）。
 
 ## 2. 行为细则
@@ -339,8 +329,6 @@
 | `attention.changed` | session → navigation / project | 注意力状态变化 |
 
 ## 5. 问题记录
-
-人在对话中回答后，问题从 5.2 移到 5.1，编号不变。
 
 ### 5.1 已确认
 

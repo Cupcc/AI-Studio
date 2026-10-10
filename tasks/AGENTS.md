@@ -1,17 +1,17 @@
 # Task Protocol
 
-Every unit of work lives in `tasks/T<YYYYMMDD>-<slug>/`. All task documents are written by AI agents; humans discuss in conversation and review. Templates are in `templates/`.
+Every unit of work lives in `tasks/T<YYYYMMDD>-<slug>/`; date-based IDs avoid collisions between parallel agents. Templates are in `templates/`.
 
 ## Files
 
-| File | Required | Single writer | Purpose |
-|---|---|---|---|
-| `task.md` | Yes | Planning or main agent | Goal, scope, FR/AC basis, acceptance criteria, open questions, status |
-| `research.md` | No | Assigned worker or main agent | Investigation findings; free form |
-| `plan.md` | No | The task's main agent only | Approach, workers table, progress and decisions log |
-| `acceptance.md` | No | Verification worker, never an implementer | Verdict per criterion with evidence links |
-| `evidence/` | No | The worker that produced each file | Screenshots, logs, JSON |
-| `report.md` | No | Main agent | Conclusions and write-backs to `docs/` or `specs/` |
+| File | Required | Single writer | Purpose | Human review |
+|---|---|---|---|---|
+| `task.md` | Yes | Planning or main agent | Goal, scope, FR/AC basis, acceptance criteria, open questions, status | Answer open questions and check scope |
+| `research.md` | No | Assigned worker or main agent | Investigation findings; free form | None; process record |
+| `plan.md` | No | The task's main agent only | Approach, workers table, progress and decisions log | None; process record |
+| `acceptance.md` | No | Verification worker, never an implementer | Verdict per criterion with evidence links | Sign off before the task becomes `done` |
+| `evidence/` | No | The worker that produced each file | Screenshots, logs, JSON | None; process record |
+| `report.md` | No | Main agent | Conclusions and write-backs to `docs/` or `specs/` | Each write-back follows the review rule of its target directory |
 
 Small tasks need only `task.md`. There are no handoff or subtask files: handoff content lands in the responsible file above or returns to the main agent, and subagents spawned inside a worker are not persisted.
 
@@ -27,7 +27,6 @@ Small tasks need only `task.md`. There are no handoff or subtask files: handoff 
 
 - Cite FR, AC, spec, or decision locations for every goal and criterion. Do not introduce requirements.
 - Derive acceptance criteria from `docs/05. Acceptance Criteria.md`; they may be stricter, never looser.
-- Put anything unclear under open questions; do not fill gaps with assumptions.
 - When one requirement becomes several tasks, a single planning agent does the split to avoid gaps, duplicates, and ID collisions.
 
 ## Parallel Workers

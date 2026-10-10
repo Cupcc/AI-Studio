@@ -16,12 +16,12 @@
 
 每个组件记录用途、结构、尺寸、颜色、字体、间距和适用的 Default / Hover / Selected / Focus / Disabled 状态，并引用相关 FR。
 
-当前视觉参数以[交互原型 v01](../prototypes/README.md) 为基线（2026-10-09 确认），高保真评审后可调整；设计方向见 [Visual Direction](../visual-direction.md)。
+视觉参数的当前基线见 [Visual Direction](../visual-direction.md) 第 5 节。
 
 ## 3. 组件索引
 
 | 规范 | 版本 | 状态 | 内容 |
 |---|---|---|---|
-| [Shell Layout & Components](shell-spec-v01.md) | v01 | 已确认（2026-10-09） | 窗口布局与区域尺寸、顶栏、左侧导航、状态指示、Conversation、输入区、Project View、右侧边栏、页面级组件；视觉参数以交互原型 v01 为当前基线 |
+| [Shell Layout & Components](shell-spec-v01.md) | v01 | 已确认（2026-10-09） | 窗口布局与区域尺寸、顶栏、左侧导航、状态指示、Conversation、输入区、Project View、右侧边栏、页面级组件 |
 
 新增规范时在此登记文件链接、版本与状态。

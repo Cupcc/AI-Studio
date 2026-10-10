@@ -10,31 +10,36 @@
 
 ## 1. 用途
 
-每个模块一份 `specs/<module>/spec.md`，长期维护，描述该模块当前应有的详细行为：状态机、边界情况、错误处理、数据字段、模块之间的接口和 UI 细节。
+每个模块一份 `specs/<module>/spec.md`，模块目录名用小写 kebab-case。spec 长期维护，描述该模块当前应有的详细行为：状态机、边界情况、错误处理、数据字段、模块之间的接口和 UI 细节。
 
 ## 2. 与 Functional Requirements 的分工
 
 - [02. Functional Requirements](<../docs/02. Functional Requirements.md>) 维护 FR 编号、需求陈述、优先级和 AC 追踪关系。
 - spec 承接细节，每一节以 FR 编号开头，只引用编号，不复制 02 的原文。
-- spec 与已确认的 02 冲突时，以 02 为准，并把冲突记入 spec 的未决问题。
+- spec 与 `docs/` 冲突时按[文档索引](<../docs/00. Documentation Index.md>)的冲突优先级处理，并把冲突记入 spec 的未决问题。
+- 来源简称：01～07 指 `docs/` 下同编号文档；Shell 指 [Shell Spec v01](../design/components/shell-spec-v01.md)。
+- 标注：无标注的规则直接来自所引来源。“建议”或 **（提案）** 表示来源未规定、为让实现不必猜测而提出的行为，须经人确认，真正存在分歧的列入未决问题；**（技术方案，待实现确认）** 表示不影响产品行为的实现选择，实现时可调整，不需要产品确认。
 
 ## 3. 修改规则
 
 - 新建的 spec 为 `草稿`，人在对话中确认后改为 `已确认（YYYY-MM-DD）`。
 - 已确认的 spec 只在 task 中修改，改动与对应代码放在同一分支，一起审阅。
+- 问题编号为 `<模块缩写>-Q<n>`（如 `S-Q1`、`NAV-Q1`）。人在对话中回答后，问题从“未决问题”移到“已确认”，写明回答和确认日期，编号不变。
 
 ## 4. 模块划分
 
+各 spec 的确认状态见其自身的 `文档状态`。
+
 | 模块目录 | 覆盖需求 | spec |
 |---|---|---|
-| `project/` | FR-PROJ-001～FR-PROJ-003 | [草稿](project/spec.md) |
-| `navigation/` | FR-NAV-001～FR-NAV-003 | [草稿](navigation/spec.md) |
-| `chat/` | FR-CHAT-001～FR-CHAT-003 | [草稿](chat/spec.md) |
-| `session/` | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007 | [草稿](session/spec.md) |
-| `input/` | FR-INPUT-001～FR-INPUT-002 | [草稿](input/spec.md) |
+| `project/` | FR-PROJ-001～FR-PROJ-003 | [spec.md](project/spec.md) |
+| `navigation/` | FR-NAV-001～FR-NAV-003 | [spec.md](navigation/spec.md) |
+| `chat/` | FR-CHAT-001～FR-CHAT-003 | [spec.md](chat/spec.md) |
+| `session/` | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007 | [spec.md](session/spec.md) |
+| `input/` | FR-INPUT-001～FR-INPUT-002 | [spec.md](input/spec.md) |
 | `project-view/` | FR-VIEW-001～FR-VIEW-008 | 未创建 |
 | `tools/` | FR-TOOL-001～FR-TOOL-004 | 未创建 |
-| `agent-adapter/` | 无 FR 前缀；承接 [04. Technical Requirements](<../docs/04. Technical Requirements.md>) 第 3、4 节与 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md) | [草稿](agent-adapter/spec.md) |
+| `agent-adapter/` | 无 FR 前缀；承接 [04. Technical Requirements](<../docs/04. Technical Requirements.md>) 第 3、4 节与 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md) | [spec.md](agent-adapter/spec.md) |
 
 ## 5. 未决问题
 

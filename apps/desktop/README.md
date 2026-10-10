@@ -2,7 +2,7 @@
 
 AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈见 [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节；本目录由 [T20261009-app-skeleton](../../tasks/T20261009-app-skeleton/task.md) 建立。
 
-相关决定（草稿）：
+相关决定（状态见各条目）：
 
 - [DEC-02](<../../docs/07. Decisions.md>)：进程边界、安全基线、类型化 IPC。
 - [DEC-03](<../../docs/07. Decisions.md>)：功能目录与写入范围。
@@ -10,19 +10,17 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 
 ## 1. 命令
 
-从仓库根目录执行（路径含空格亦可）：
+根命令列表见[仓库指南](../../AGENTS.md)的 Build, Test, and Development Commands。本节只补充桌面包相关的细节。
 
 桌面包通过 workspace 依赖 `@ai-studio/agent-adapter`。根命令会先构建该包；直接使用 `pnpm --filter @ai-studio/desktop …` 时，需先运行 `pnpm --filter @ai-studio/agent-adapter build`。
 
-| 命令 | 作用 |
+| 命令 | 桌面包细节 |
 |---|---|
-| `pnpm install` | 安装依赖；同时下载 Electron 二进制并修复 node-pty `spawn-helper` 的可执行位 |
-| `pnpm dev` | electron-vite 开发模式（Renderer 热更新） |
-| `pnpm typecheck` | 所有 workspace 包的类型检查 |
-| `pnpm test` | 所有 workspace 包的单元测试（本包为 Vitest） |
-| `pnpm test:e2e` | 构建后运行 Playwright Electron：原生依赖冒烟与使用模拟 Provider 的 Project / Session 流程，不调用模型 |
-| `pnpm package` | 构建并生成未签名的 macOS arm64 应用目录 `apps/desktop/dist/mac-arm64/` |
-| `pnpm smoke:packaged` | 以 `open` 启动打包应用执行原生依赖冒烟，每次默认使用独立临时 userData，保留供诊断；结果默认写入 `.runtime/desktop/packaged-smoke.json`；`-- --out <file>` 指定报告，`-- --user-data-dir <dir>` 显式指定测试数据目录 |
+| `pnpm install` | `postinstall` 下载 Electron 二进制并修复 node-pty `spawn-helper` 的可执行位 |
+| `pnpm dev` | electron-vite 开发模式，Renderer 热更新 |
+| `pnpm test:e2e` | 覆盖原生依赖冒烟（SQLite、PTY、CLI 发现）与使用模拟 Provider 的 Project / Session 流程；截图位置见第 4 节“自动化” |
+| `pnpm package` | 输出目录 `apps/desktop/dist/mac-arm64/` |
+| `pnpm smoke:packaged` | 以 `open` 启动打包应用，检查 SQLite、node-pty 与登录 Shell 环境解析。每次默认使用独立临时 userData，保留供诊断；结果默认写入 `.runtime/desktop/packaged-smoke.json`；`-- --out <file>` 指定报告，`-- --user-data-dir <dir>` 显式指定测试数据目录 |
 
 ## 2. 目录
 
@@ -43,7 +41,7 @@ src/
   main/smoke/                  --studio-smoke-output 冒烟模式
   renderer/src/app/            壳层组合（顶栏等）
   renderer/src/features/<feature>/  功能 UI、Zustand store、测试
-  renderer/src/styles/tokens.css    设计 Token（交互原型 v01 基线，高保真阶段可调整）
+  renderer/src/styles/tokens.css    设计 Token（取值依据见 design/visual-direction.md 第 5 节）
   renderer/src/styles/primitives.css  共享样式原语：按钮、图标按钮、弹层与菜单、状态点、悬停提示
 e2e/                           Playwright Electron 冒烟
 scripts/                       postinstall、afterPack、打包冒烟脚本

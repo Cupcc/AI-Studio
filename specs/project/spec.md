@@ -11,16 +11,6 @@
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 1、2、9、10 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
 | 来源 | 02 第 2 节 Project 管理；01 第 6、7、8 节；03 第 3、5、6、7、8、10 节；04 第 5、6 节；2026-10-09 起草，尚无对话确认 |
 
-> 文档状态取值：`草稿` / `已确认（YYYY-MM-DD）`。只有人在对话中明确确认后才能改为已确认。
-
-来源简称：01～05 指 `docs/` 下同编号文档；Shell 指 [Shell Spec v01](../../design/components/shell-spec-v01.md)（已确认（2026-10-09），其尺寸按线框图 v02 整理）。
-
-标注约定：
-
-- 无标注的规则直接来自所引来源。
-- **（提案）**：来源未规定、为让实现不必猜测而提出的行为，须经人确认；其中真正存在分歧的已列入第 5 节。
-- **（技术方案，待实现确认）**：非产品行为的实现选择，实现时可调整，不需要产品确认。
-
 ## 1. 职责与边界
 
 - 负责：
@@ -35,7 +25,7 @@
   - 左侧导航的内部行为（Project Views 列表、Session History、折叠）→ `specs/navigation/spec.md`。
   - Project View 的内容、Conversation 列的内部行为与 Preview → `specs/project-view/spec.md`（后续 task）。
   - Files / Diff / Browser / Terminal 的内容 → `specs/tools/spec.md`（后续 task）。
-  - 色值、字体、图标等视觉参数（Visual Direction 第 5 节，当前以交互原型 v01 为基线）。
+  - 色值、字体、图标等视觉参数（Visual Direction 第 5 节）。
 - V1 范围外（文档未要求，本 spec 不设计）：Tab 拖拽排序与拖出窗口（PROJ-Q10）、多窗口（PROJ-Q16）、Project 重命名与目录迁移（PROJ-Q5）。
 
 ## 2. 行为细则
@@ -376,8 +366,6 @@ Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级�
 | `viewing.changed` | project → session | 当前 Tab 或展示中的 Session 变化 |
 
 ## 5. 问题记录
-
-人在对话中回答后，问题从 5.2 移到 5.1，编号不变。
 
 ### 5.1 已确认
 

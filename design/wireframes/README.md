@@ -12,12 +12,7 @@
 
 ## 2. 文件说明
 
-保存可编辑源文件及便于查看的 PNG / SVG / PDF 导出。每份方案记录：
-
-- 版本、状态与画布尺寸；
-- 覆盖的场景与 FR / AC；
-- 布局说明和关键操作路径；
-- 待确认问题。
+保存可编辑源文件及便于查看的 PNG / SVG / PDF 导出。每份方案除[设计索引](../README.md)第 5 节的通用记录外，还说明布局和关键操作路径。
 
 ## 3. 方案索引
 
@@ -28,9 +23,8 @@
 
 说明：
 
-- 四组选项（P-A ~ P-D）的结论记录在 [UX Specification](<../../docs/03. UX Specification.md>) 第 10 节：P-A 选 A2，P-B 选 B1 并改为图标切换，P-C 合并为单一右侧边栏按钮，P-D 选 D2。
+- 四组选项（P-A ~ P-D）的结论见 [UX Specification](<../../docs/03. UX Specification.md>) 第 10 节。
 - v02 同时示意左侧导航折叠（按钮在顶栏左侧，折叠后保留 New Chat 与注意力点），以及右侧边栏默认打开上次选择的工具。
 - 线框图同时示意其他已确认规则：New Chat 位置、Project Tab 注意力点、Needs Input 等待卡片、当前 View 作为上下文。
-- 窗口外观按 macOS 绘制；首发平台待技术方案确认（Technical Requirements 第 7 节第 9 项）。
+- 窗口外观按 macOS 绘制（首发平台见 [Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2 节）。
 - 架构、对话、文件与 Diff 均为示例数据。
-- 画布链接默认私有，需由所有者在页面 Share 菜单中共享后他人才能访问。

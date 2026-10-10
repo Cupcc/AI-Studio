@@ -2,34 +2,33 @@
 
 ## 本地 Commit 门禁
 
-依据：[仓库指南](../AGENTS.md) 的开发命令与提交约定；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
+依据：[仓库指南](../AGENTS.md) 的开发命令与提交约定（提交信息格式以该文件为准）；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
 
-根目录执行 `pnpm install` 时，`prepare` 自动通过 Husky 安装 hooks；已有依赖时可用 `pnpm prepare` 重新安装。需要 Node >= 24、pnpm 12，Git 客户端的 PATH 也必须能找到它们。若 GUI 客户端找不到版本管理器安装的 Node / pnpm，按 [Husky 官方说明](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis) 配置用户级初始化文件，不在仓库硬编码个人路径。
+根目录执行 `pnpm install` 时，`prepare` 自动通过 Husky 安装 hooks；已有依赖时可用 `pnpm prepare` 重新安装。Git 客户端的 PATH 必须能找到根 `package.json` 要求的 Node 与 pnpm。若 GUI 客户端找不到版本管理器安装的 Node / pnpm，按 [Husky 官方说明](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis) 配置用户级初始化文件，不在仓库硬编码个人路径。
 
 | 时机 | 检查 | 手动执行 |
 |---|---|---|
 | `pre-commit` | 全 workspace 类型检查，然后运行单元测试；任一失败终止提交 | `pnpm check:commit` |
 | `commit-msg` | commitlint 检查 Conventional Commits | `pnpm commitlint --edit <提交信息文件>` |
 
-提交信息示例：`fix(session): preserve stop state`、`feat!: change session API`、`docs(tasks): 更新验收记录`。使用 `@commitlint/config-conventional` 的标准规则，放开主题大小写，并允许按仓库约定仅使用 `!` 或 `BREAKING CHANGE:` footer 标记破坏性变更。检查不会自动修改文件或暂存区。
+commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写，并允许只用 `!` 或只用 `BREAKING CHANGE:` footer 标记破坏性变更（[commitlint.config.cjs](../commitlint.config.cjs)）。检查不会自动修改文件或暂存区。
 
 边界：
 
 - 类型检查和单元测试检查当前工作树，不是暂存区快照；部分暂存时应确保未暂存改动没有掩盖问题。检查沿用现有构建流程，会更新被 Git 忽略的构建输出。
 - 每次提交（含纯文档提交）都运行检查；不自动执行 E2E、打包、真实 CLI 或模型请求。目前没有源码 formatter / linter，因此不引入 lint-staged。
-- 本地 hooks 可被 `git commit --no-verify` 或 `HUSKY=0` 绕过，不是强制安全边界；远端 CI 见下节，尚未配置远端分支保护。
+- 本地 hooks 可被 `git commit --no-verify` 或 `HUSKY=0` 绕过，不是强制安全边界；远端 CI 见下节。
 - 配置文件纳入版本控制的是 `.husky/pre-commit`、`.husky/commit-msg` 与 `commitlint.config.cjs`；Husky 生成的 `.husky/_/` 自带忽略规则，无需提交。
 
 ## GitHub Actions CI
 
-配置：[ci.yml](../.github/workflows/ci.yml)；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。所有分支 push、pull_request 和手动触发运行 `macOS arm64 checks`。
+配置：[ci.yml](../.github/workflows/ci.yml)，触发条件、runner、Node 版本、CLI 版本、超时、权限与产物保留期均以该文件为准；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。
 
-- 环境：`macos-15`（arm64）、Node 24、根 `package.json` 的 `packageManager` 指定 pnpm；缓存 pnpm store，以 `pnpm-lock.yaml` 为 key。
-- E2E 前通过 Homebrew 安装 `displayplacer`，将 runner 虚拟屏幕设为 1920×1080，容纳 1024×640、1280×800、1440×900 三组布局检查。默认虚拟屏幕会将窗口高度限制到 684px；此步骤只修改临时 CI runner。
-- 依次执行 `pnpm install --frozen-lockfile`、`pnpm check:commit`、`pnpm test:e2e`、`pnpm package`、`pnpm smoke:packaged`。CI 设置 `HUSKY=0`，显式运行检查，保留依赖安装脚本以安装 Electron 与修复 PTY helper。
-- E2E 沿用模拟 Session Providers；原生检查覆盖 SQLite、PTY、login shell 和打包应用启动，不需要模型密钥或 CLI 登录。打包冒烟前在 runner 临时目录安装 Codex `0.161.0`、Claude Code `2.1.294`（仓库开发前校验基线），加入 runner 的 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
-- 无论成功或失败，上传已产生的 `.runtime/desktop-e2e/` 与打包冒烟 JSON，保留 14 天。未签名应用仅验证打包，不自动发布。
-- 工作流只有 `contents: read` 权限，30 分钟超时，同一分支 / PR 的新运行取消旧运行；外部 Actions 固定 commit SHA。
+- 在 macOS arm64 runner 上按顺序运行根命令：冻结 lockfile 安装、`check:commit`、`test:e2e`、`package`、`smoke:packaged`。CI 设置 `HUSKY=0` 显式运行检查，保留依赖安装脚本以安装 Electron 与修复 PTY helper。
+- E2E 前用 `displayplacer` 放大 runner 的虚拟屏幕：默认屏幕会把窗口高度限制到 684px，容纳不下桌面端的布局检查尺寸。此步骤只修改临时 CI runner。
+- E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
+- 无论成功或失败都上传已产生的 E2E 截图与打包冒烟 JSON。未签名应用仅验证打包，不自动发布。
+- 工作流只读仓库内容，外部 Actions 固定到 commit SHA。
 - CI 不替代人工验收，未启用分支保护，也不检查历史提交信息。
 
 Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-images#available-images)；pnpm 版本读取方式依据：[pnpm/action-setup](https://github.com/pnpm/action-setup#version)。

@@ -37,16 +37,16 @@ design/
 
 ## 3. 当前采用的方案
 
-| 项目 | 当前状态 |
+| 项目 | 采用版本 |
 |---|---|
-| 视觉方向 | 当前基线采用交互原型 v01 的色值、字体、圆角与图标（2026-10-09 确认按 v01 对齐）；高保真阶段可调整 |
-| 参考截图 | 待收集 |
-| 线框图 | 已确认：v02（A2、B1 图标切换、单一右侧边栏、D2），见 [wireframes](wireframes/README.md) |
-| 高保真界面 | 待设计，尚无已确认版本 |
-| 组件规范 | 已确认（2026-10-09）：[Shell Spec v01](components/shell-spec-v01.md)（布局、尺寸与组件状态） |
-| 交互原型 | 已确认（2026-10-09）：[Studio 灰度交互原型 v01](prototypes/README.md)；桌面端按其对齐，见 [T20261009-prototype-alignment](../tasks/T20261009-prototype-alignment/task.md)。探索中：v02（Conversation 向 ChatGPT / Claude 对齐），见 [T20261010-prototype-v02](../tasks/T20261010-prototype-v02/task.md) |
+| 视觉方向 | [Visual Direction](visual-direction.md)；当前视觉参数见其第 5 节 |
+| 参考截图 | 尚无 |
+| 线框图 | v02，见 [wireframes](wireframes/README.md) |
+| 高保真界面 | 尚无 |
+| 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) |
+| 交互原型 | [Studio 灰度交互原型 v01](prototypes/README.md)；桌面端按其对齐，见 [T20261009-prototype-alignment](../tasks/T20261009-prototype-alignment/task.md) |
 
-方案确认后，在本节添加所采用版本的文件链接或原型链接。探索稿继续保留在对应目录。
+方案确认后，在本节添加所采用版本的文件链接或原型链接。各版本的状态、确认日期和探索中的版本只记录在对应目录索引；探索稿继续保留在对应目录。
 
 ## 4. 首批设计任务
 
@@ -67,3 +67,4 @@ design/
 - 新版本使用递增编号；已确认版本的调整保留旧文件并更新索引。
 - 设计说明标注相关 FR / AC、画布尺寸和待确认问题；尚未确定的内容明确标为待确认。
 - 外部设计工具中的文件记录访问链接；导出的预览图保存在对应目录，便于直接查看。
+- claude.ai 上的在线画布与原型默认私有，需由所有者在页面 Share 菜单中共享后他人才能访问。
