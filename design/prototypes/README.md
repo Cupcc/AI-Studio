@@ -23,6 +23,7 @@
 | 原型 | 版本 | 状态 | 入口 | 依据 |
 |---|---|---|---|---|
 | Studio 灰度交互原型 | v01 | 已确认（2026-10-09） | [在线原型](https://claude.ai/artifact/ANF4XoboMHvZjzn4tRT17c)；源文件 [studio-prototype-v01.html](studio-prototype-v01.html) + [studio-prototype-v01/](studio-prototype-v01/) | 线框图 v02；[Shell Spec v01](../components/shell-spec-v01.md)；AC-01 ~ AC-07 |
+| Studio 灰度交互原型 | v02 | 探索中 | [在线原型](https://claude.ai/artifact/7i4ULjj3vEo16mqqXYm5E1)；源文件 [studio-prototype-v02.html](studio-prototype-v02.html) + [studio-prototype-v02/](studio-prototype-v02/) | v01；[对照 ChatGPT / Claude 的候选调整](../../tasks/T20261010-conversation-layout/research.md) A1、A2、B1；FR-SESSION-001 |
 
 ### Studio 灰度交互原型 v01
 
@@ -34,3 +35,17 @@
 - **未实现**：真实目录选择与文件读取、Session Resume、图片附件、Terminal 多实例、窗口尺寸以外的平台差异、视觉参数为当前基线（2026-10-09 确认按 v01 对齐，高保真阶段可调整）。
 - **与 spec 的关系**：原型确定布局、组件外观与交互示意；行为与 spec 不一致时以 spec 为准，例如窗口失焦时不视为正在查看（[session spec](../../specs/session/spec.md) S-Q1）；原型中不足一屏的对话贴底显示，已改为从顶部开始（[Shell Spec v01](../components/shell-spec-v01.md) 第 5 节，2026-10-10 确认）。
 - **链接权限**：在线原型默认私有，需由所有者在页面 Share 菜单中共享后他人才能访问。
+
+### Studio 灰度交互原型 v02
+
+在 v01 基础上探索 Conversation 向 ChatGPT / Claude 桌面端对齐（[T20261010-prototype-v02](../../tasks/T20261010-prototype-v02/task.md)）。未改动的部分与 v01 相同，上节说明继续适用。
+
+- **变更**：
+  - 对话从顶部开始排列（已确认，见 [Shell Spec v01](../components/shell-spec-v01.md) 第 5 节）；
+  - Agent 回复按 Markdown 渲染：标题、有序 / 无序列表、表格（数字列右对齐）、引用、行内代码、加粗、链接，代码块带语言标签、轻量语法高亮（ts / js / bash）、`diff` 增删行底色和“复制”按钮；用户消息仍为纯文本；
+  - Session Mode 的新对话草稿：问候语、执行位置与输入框一起居中；顶栏只保留 CLI 标识与“新对话”；发送第一条消息后输入框回到底部；
+  - 消息列与输入框同为 720 内容宽度，左右边缘对齐；Project View 左列同样对齐。
+- **运行方式**：同 v01；本地查看时打开 `studio-prototype-v02.html`。
+- **起始画面**：my-saas 打开“运行测试并修复失败用例”（Markdown 示例）；landing-page 为新对话草稿（居中输入框）；admin-console 为 Overview。
+- **对比 v01**：“演示控制”顶部列出 v02 变更，“对比 v01”按钮切回 v01 的呈现，再点一次恢复。
+- **未改动**：Project View 左列的草稿（P-A，上方列出最近对话）、发送后的滚动跟随、消息复制等其他候选调整。

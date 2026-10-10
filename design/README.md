@@ -44,7 +44,7 @@ design/
 | 线框图 | 已确认：v02（A2、B1 图标切换、单一右侧边栏、D2），见 [wireframes](wireframes/README.md) |
 | 高保真界面 | 待设计，尚无已确认版本 |
 | 组件规范 | 已确认（2026-10-09）：[Shell Spec v01](components/shell-spec-v01.md)（布局、尺寸与组件状态） |
-| 交互原型 | 已确认（2026-10-09）：[Studio 灰度交互原型 v01](prototypes/README.md)；桌面端按其对齐，见 [T20261009-prototype-alignment](../tasks/T20261009-prototype-alignment/task.md) |
+| 交互原型 | 已确认（2026-10-09）：[Studio 灰度交互原型 v01](prototypes/README.md)；桌面端按其对齐，见 [T20261009-prototype-alignment](../tasks/T20261009-prototype-alignment/task.md)。探索中：v02（Conversation 向 ChatGPT / Claude 对齐），见 [T20261010-prototype-v02](../tasks/T20261010-prototype-v02/task.md) |
 
 方案确认后，在本节添加所采用版本的文件链接或原型链接。探索稿继续保留在对应目录。
 
