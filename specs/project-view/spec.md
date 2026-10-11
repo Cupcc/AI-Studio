@@ -19,13 +19,7 @@
 
 ### 1.1 未决问题
 
-| 编号 | 问题 | 建议答案与依据 | 阻塞实现 |
-|---|---|---|---|
-| PV-Q8 | `ViewSnapshot` 是否同时推送完整 Knowledge 与 Definition，还是只推送渲染后的模型？ | 建议推送已校验的声明式快照，便于 Renderer 保持可测试和 last-good；不推送 Session 敏感区块。依据 DEC-05、04 第 3 节。 | 否，可在阶段 1～3 调整 |
-| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 建议只保存运行期比例，不扩展 Project `ui_state`；具体手势交给高保真设计确认。依据 FR-VIEW-005“支持缩放”、Project spec 状态边界。 | 否 |
-| PV-Q10 | `schemaVersion` 升级是否只支持同版本读取，还是提供迁移器？ | 建议 V1 只接受当前版本，未知版本进入 error 并保留 last-good；迁移器作为后续 task。依据 DEC-04 与本地文件可回退原则。 | 否 |
-| PV-Q11 | View Context 生成文本是否显示在 transcript 的可折叠区域，还是只作为用户消息元数据？ | 建议显示可折叠“当前 View”标签，底层保存 `view_context_attached` 和路径，不复制完整模板。依据 DEC-06、Input spec 上下文标签规则。 | 是：阶段 4 UI 与 transcript 结构 |
-| PV-Q12 | 默认 View 的内置 Definition 是否通过代码常量提供，还是作为应用资源 JSON 打包？ | 建议作为版本化应用资源 JSON，启动时解析并用同一 Schema 校验；便于视觉调整而不写入 Project。依据 FR-VIEW-001、DEC-05。 | 否 |
+暂无。PV-Q8～PV-Q12 已采纳建议并移至“已确认”（2026-10-11）。
 
 ### 1.2 已确认
 
@@ -38,6 +32,11 @@
 | PV-Q5 | 默认 View Definition 是否内置，Project 文件仅可覆盖？ | 是（2026-10-09，T20261009-project-view Q4）。 |
 | PV-Q6 | Overview 的 Session 摘要区块是否由客户端固定渲染？ | 是（2026-10-09，T20261009-project-view Q5）。 |
 | PV-Q7 | V1 文件上限是否暂定 256 KB、500 节点？ | 是，作为实现防护上限，渲染原型校准后如需调整需更新规格（2026-10-09，T20261009-project-view Q11）。 |
+| PV-Q8 | `ViewSnapshot` 是否同时推送完整 Knowledge 与 Definition，还是只推送渲染后的模型？ | 采用已校验的声明式快照，包含完整 Knowledge 与 Definition，便于 Renderer 保持可测试和 last-good；不推送 Session 敏感区块（2026-10-11，依据 DEC-05、04 第 3 节）。 |
+| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 缩放比例只保存在当前 View 的运行期状态，不扩展 Project `ui_state`；具体手势交给高保真设计确认（2026-10-11，依据 FR-VIEW-005、Project spec 状态边界）。 |
+| PV-Q10 | `schemaVersion` 升级是否只支持同版本读取，还是提供迁移器？ | V1 只接受当前支持版本；未知版本进入 `error` 并保留 last-good，迁移器作为后续 task（2026-10-11，依据 DEC-04 与本地文件可回退原则）。 |
+| PV-Q11 | View Context 生成文本是否显示在 transcript 的可折叠区域，还是只作为用户消息元数据？ | 显示可折叠“当前 View”标签，底层保存 `view_context_attached` 与路径元数据，不复制完整模板（2026-10-11，依据 DEC-06、Input spec 上下文标签规则）。 |
+| PV-Q12 | 默认 View 的内置 Definition 是否通过代码常量提供，还是作为应用资源 JSON 打包？ | 作为版本化应用资源 JSON 打包，启动时解析并用同一 Schema 校验；不写入 Project，便于视觉调整（2026-10-11，依据 FR-VIEW-001、DEC-05）。 |
 
 ## 2. 职责与边界
 
@@ -69,7 +68,7 @@
 | `agent-team` | Agent Team | 展示项目使用的 Agent 及其职责 | Knowledge 对 CLI 原生配置的描述 |
 | `business-flow` | Business Flow | 表达业务流程及其与代码的映射 | Knowledge；声明式流程图 |
 
-1. 默认目录由应用内置，不依赖 Project 内存在的 View 文件。Project 内的 `views/<view-id>.view.json` 可以覆盖内置呈现定义；缺失时使用内置定义（2026-10-09 已确认，DEC-05 相关 Q4）。
+1. 默认目录由应用内置，不依赖 Project 内存在的 View 文件。内置 Definition 以版本化应用资源 JSON 打包，启动时解析并使用与 Project 文件相同的内置 Schema 校验；不写入 Project。Project 内的 `views/<view-id>.view.json` 可以覆盖内置呈现定义；缺失时使用内置定义（2026-10-09 已确认，DEC-05 相关 Q4；PV-Q12 于 2026-10-11 确认）。
 2. View 的标题、图标和顺序由内置目录提供；读取到未知 `view-id` 时不加入导航，保留诊断供开发日志使用（技术方案，待实现确认）。
 3. 进入 View 只改变 Main Canvas，不触发 Knowledge 生成、不创建 Session、不写入 Project 目录（FR-VIEW-007；D-01；DEC-07）。
 
@@ -111,14 +110,14 @@
 #### 3.3.3 部分写入与刷新顺序
 
 1. 读取失败或 JSON 不完整时，短暂等待文件稳定后重读；在稳定窗口内不替换上一版成功快照。
-2. Knowledge 与 View Definition 可能由 Agent 分步写入。任一部分暂时无效时保留上一版成功渲染，等下一次补扫再尝试；不显示“知识已过期”或自动修复入口（Q9 已确认）。
+2. Knowledge 与 View Definition 可能由 Agent 分步写入。任一部分暂时无效时保留上一版成功渲染，等下一次补扫再尝试；不显示“知识已过期”或自动修复入口（DEC-07；PV-Q4 已确认）。
 3. 多次文件事件合并为一次刷新；刷新结果带 `revision` 和 `updatedAt`，Renderer 只接受比当前更新的快照（技术方案，待实现确认）。
 
 ### FR-VIEW-004 数据与展示分离
 
 #### 3.4.1 文件布局
 
-Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户端在需要注入 View Context 前可以幂等写入自己的指南、Schema 和 `.gitignore` 文件；它不写入 Agent 生成的 Knowledge 或 View Definition（DEC-04；Q8 已确认）。
+Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户端在需要注入 View Context 前可以幂等写入自己的指南、Schema 和 `.gitignore` 文件；它不写入 Agent 生成的 Knowledge 或 View Definition（DEC-04；PV-Q1 已确认）。
 
 ```text
 .ai-studio/
@@ -132,7 +131,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
     └── <view-id>.view.json     # 呈现定义；可缺失，缺失时用内置定义
 ```
 
-1. `knowledge/<view-id>.json` 和 `views/<view-id>.view.json` 均为带 `schemaVersion` 的 JSON；Schema 由应用内置，Project 内副本不能改变校验规则。
+1. `knowledge/<view-id>.json` 和 `views/<view-id>.view.json` 均为带 `schemaVersion` 的 JSON；Schema 由应用内置，Project 内副本不能改变校验规则。V1 只接受当前支持的 `schemaVersion`；未知版本按校验错误处理并保留 last-good，不在本轮提供迁移器（PV-Q10，2026-10-11 确认）。
 2. 客户端读取 `.ai-studio/` 前解析 realpath，拒绝通过符号链接把 Project 外部文件作为 Knowledge / View Definition 载入（技术方案，待实现确认）。
 3. `.ai-studio/` 下未知文件忽略；隐藏目录不由 Files 工具默认展示，具体由 context-tools spec 决定。
 
@@ -148,7 +147,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 1. Project View Mode 的 Main Canvas 固定为左 Conversation、右 View Preview 的两列结构。尺寸、拖拽分隔线和右侧工具共用区域由 Project spec 统一定义。
 2. Preview 右侧区域顶部提供 Preview、Files、Diff、Browser、Terminal 的图标切换；同一时刻只显示一个内容。工具打开时替换 Preview，三列骨架不变；返回 Preview 的入口（含工具关闭 ×）见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)（P-B；2026-10-11 确认补充）。
 3. 刷新 Preview 不自动打开右侧区域、不把工具切回 Preview，也不改变 Conversation 列宽度。
-4. Preview 是只读区域，支持纵向滚动和二维内容缩放；修改必须通过左侧普通 CLI Session 完成。具体缩放手势和视觉参数由设计稿确定。
+4. Preview 是只读区域，支持纵向滚动和二维内容缩放；修改必须通过左侧普通 CLI Session 完成。缩放比例只保存在当前 View 的运行期状态，不写入 Project `ui_state`；具体缩放手势和视觉参数由设计稿确定（PV-Q9，2026-10-11 确认）。
 5. 通过导航进入 View 时，右侧默认为 Preview；从 Project Tab 切回或启动恢复时遵循 Project spec 保存的完整状态，不重新套用进入规则（D-15）。
 
 ### FR-VIEW-006 Project View Conversation
@@ -185,9 +184,9 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 | `ViewCatalogEntry` | `id`, `title`, `kind`, `order` | `kind` 为 `builtin` 或 `custom`；V1 只产生 builtin |
 | `KnowledgeDocument` | `schemaVersion`, `viewId`, `data` | `data` 是事实对象；应用按内置 Schema 校验 |
 | `ViewDefinition` | `schemaVersion`, `viewId`, `root`, `bindings` | `root` 为声明式组件树；`bindings` 只引用 Knowledge / 明确允许的客户端数据 |
-| `ViewSnapshot` | `projectId`, `viewId`, `catalog`, `knowledge`, `definition`, `revision`, `updatedAt` | 主进程发布给 Renderer 的不可变快照；缺失 definition 时已合并内置定义 |
+| `ViewSnapshot` | `projectId`, `viewId`, `catalog`, `knowledge`, `definition`, `revision`, `updatedAt` | 主进程发布给 Renderer 的完整、已校验的声明式不可变快照；缺失 definition 时已合并内置定义，不包含 Session 敏感区块（PV-Q8，2026-10-11 确认） |
 
-单文件限制（Q11 已确认，作为 V1 防护上限）：Knowledge 或 View Definition 文件默认不超过 256 KB，单个组件树不超过 500 个节点。超过上限时该 View 进入校验错误并保留上一版，不截断、不执行部分 JSON；具体数值在渲染原型校准后若需调整，必须修改本规格与任务证据。
+单文件限制（PV-Q7 已确认，作为 V1 防护上限）：Knowledge 或 View Definition 文件默认不超过 256 KB，单个组件树不超过 500 个节点。超过上限时该 View 进入校验错误并保留上一版，不截断、不执行部分 JSON；具体数值在渲染原型校准后若需调整，必须修改本规格与任务证据。
 
 ### 4.2 声明式 Renderer 组件
 
@@ -230,7 +229,7 @@ Relevant files: <relative paths>
 Rules: update the relevant Knowledge and View Definition files when the user asks to change this view; keep facts separate from presentation; do not add executable HTML or scripts.
 ```
 
-实际发送时模板文本由 Session / Adapter 组装，Renderer 不自行拼接、转义或决定 CLI 分支。对话记录保存“已附加 View Context”的可折叠元数据和用户文本；不把 Knowledge 内容复制进 transcript。
+实际发送时模板文本由 Session / Adapter 组装，Renderer 不自行拼接、转义或决定 CLI 分支。对话记录保存 `view_context_attached` 与 `view_context_paths` 的可折叠元数据和用户文本；不复制完整模板或 Knowledge 内容进 transcript（PV-Q11，2026-10-11 确认）。
 
 ## 5. 接口与事件
 
