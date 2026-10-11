@@ -31,7 +31,7 @@ created: 2026-10-09
   - Session History：日期分组、按最近用户消息排序、滚动、CLI 标识与状态点、Rename（FR-NAV-003；D-12；P-D）。
   - Conversation：打开即在底部、流式追加与跟随、工具活动行、轮次完成行、Needs Input 卡片、Error 卡片（FR-SESSION-001、FR-STATE-007；Shell Spec v01 第 6 节）。
   - 输入区：多行输入、Context / Attachment 入口（本轮只放入口与当前 View 标签位）、Model Selector、Send / Stop（FR-INPUT-001、FR-INPUT-002；Shell Spec v01 第 7 节）。
-- 不做：Project View Mode 中的 Conversation 列与 View 上下文注入（见 [T20261009-project-view](../T20261009-project-view/task.md)）；轮次完成行中“修改了 N 个文件”与 Diff 联动（依赖 [T20261009-context-tools](../T20261009-context-tools/task.md) 与 04 第 1 节第 13 项）；从 Files 添加文件到上下文。
+- 不做：Project View Mode 中的 Conversation 列与 View 上下文注入（见 [T20261009-project-view](../archive/T20261009-project-view/task.md)）；轮次完成行中“修改了 N 个文件”与 Diff 联动（依赖 [T20261009-context-tools](../T20261009-context-tools/task.md) 与 04 第 1 节第 13 项）；从 Files 添加文件到上下文。
 
 ## 依据
 

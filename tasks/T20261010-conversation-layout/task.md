@@ -28,7 +28,7 @@ created: 2026-10-10
   - e2e：短对话首条用户消息位于滚动区顶部。
 - 不做：
   - 打开 Session 定位到底部、流式跟随、“回到最新”（FR-SESSION-001；session spec 3.2 第 1～4 条），保持不变。
-  - Project View Mode 的 Conversation 列：尚未实现（[T20261009-project-view](../T20261009-project-view/task.md)），实现时沿用同一规则。
+  - Project View Mode 的 Conversation 列：尚未实现（[T20261009-project-view](../archive/T20261009-project-view/task.md)），实现时沿用同一规则。
   - [research.md](research.md) 中的其他候选调整。
 
 ## 依据

@@ -11,7 +11,8 @@ created: 2026-10-09
 
 ## 签收
 
-- 状态：待人工签收；任务保持 `verifying`。
+- 人工产品验收：[阶段 1 完整交付待验收](acceptance.md#人工功能验收)，已有部分范围的签收链接见该记录。
+- AI 收尾：任务保持 `verifying`；[总体验收](acceptance.md)记录的真实 CLI 等必要验证仍有缺口，不能仅因取消逐 task 人工签收而标为完成。按[任务协议](../README.md#lifecycle)复核所需证据后由 Main Agent 更新任务状态。
 - 审阅依据：[验收记录](acceptance.md)、[交付报告](report.md)。
 
 ## 目标
@@ -35,7 +36,7 @@ FR 按层归属：Adapter 层只负责 CLI 原生能力的统一与进程管理�
 |---|---|---|---|---|
 | [T20261009-app-skeleton](../T20261009-app-skeleton/task.md) | 1 | Electron 应用骨架、分层与 IPC、SQLite、node-pty、测试框架、GUI 启动环境 | — | ready |
 | [T20261009-agent-adapter](../T20261009-agent-adapter/task.md) | 1 | 统一事件模型、Codex / Claude Provider、Stop 与进程管理 | — | ready |
-| [T20261009-project-view](../T20261009-project-view/task.md) | 1（仅调研） | 04 第 1 节第 1、2、3、10、11 项的决定草稿 | — | draft |
+| [T20261009-project-view](../archive/T20261009-project-view/task.md) | 1（仅调研） | 04 第 1 节第 1、2、3、10、11 项的决定草稿 | — | draft |
 | [T20261009-project-shell](../T20261009-project-shell/task.md) | 2 | 启动页、Project Tabs、状态恢复、左侧导航结构、右侧边栏容器 | app-skeleton | draft |
 | [T20261009-session-slice](../T20261009-session-slice/task.md) | 2 | Session 管理与状态、Session History、Conversation、输入区 | app-skeleton、agent-adapter；与 project-shell 有接口约定 | draft |
 | [T20261009-context-tools](../T20261009-context-tools/task.md) | 后续轮次 | Files、Diff、Browser、Terminal | project-shell | draft |

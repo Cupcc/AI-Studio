@@ -23,10 +23,11 @@ This file holds repository-wide rules only. Branch, commit, pull request, and me
 All documents are drafted and maintained by AI agents. Humans communicate decisions in conversation and review changes.
 
 - A decision made in conversation takes effect only after it is written into the responsible document and the human has reviewed the diff. Record the confirmation date next to it, e.g. `（2026-10-08 确认）`.
-- Never mark a document confirmed, or a task `done`, without explicit human confirmation in conversation. Cite that confirmation in the commit message.
+- Never mark a document human-confirmed or a product delivery human-accepted without explicit human confirmation in conversation. Cite that confirmation in the commit message. Task completion and archiving are owned by the main agent under [Task Protocol](tasks/README.md#lifecycle); they do not imply human acceptance.
+- Humans decide product goals, scope, priorities, user-visible behavior, acceptance criteria, and material cost, compatibility or data-safety tradeoffs. AI agents handle implementation choices within that authority, technical review, verification and task closure. Judge the boundary by the decision's impact, not its directory. This division follows the user's 2026-10-11 confirmation “apply, update related docs”; the resulting policy diff remains subject to human review.
 - Never silently change confirmed content; present the change as a diff with a summary. Drafts may be revised freely.
 - Keep each fact in one document and link to it elsewhere. Indexes, templates, and summaries point to the owning document instead of restating its rules or status. Cite the source of every requirement: an upstream document section or a dated confirmation.
-- Record anything unclear as an open question (`未决问题`) instead of filling it with assumptions.
+- Record anything unclear as an open question (`未决问题`), with its owner and whether it blocks work. AI resolves technical questions within the authorized scope; product decisions go to the human. Do not present assumptions or AI decisions as human confirmation.
 
 The review each area needs is defined in its index (see the table above).
 

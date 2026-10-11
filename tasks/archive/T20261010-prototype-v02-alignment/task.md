@@ -22,7 +22,7 @@ created: 2026-10-10
   - 为 A1 所需的主进程能力补充安全策略：只允许 http(s) 链接交给系统浏览器；只放行剪贴板写入权限。
   - 单元测试、E2E 与 1024 / 1280 / 1440 三种宽度截图。
 - 不做：
-  - Project View 左列（尚未实现，[T20261009-project-view](../../T20261009-project-view/task.md)）；实现时沿用 Shell Spec v02 第 2.2、8 节，草稿不居中。
+  - Project View 左列（尚未实现，[T20261009-project-view](../../archive/T20261009-project-view/task.md)）；实现时沿用 Shell Spec v02 第 2.2、8 节，草稿不居中。
   - [候选调整](../../T20261010-conversation-layout/research.md)中的 A3、A4、B2～B6。
   - 启动页等其他位置的路径显示方式。
 

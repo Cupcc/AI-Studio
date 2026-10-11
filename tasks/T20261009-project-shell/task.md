@@ -30,7 +30,7 @@ created: 2026-10-09
   - 状态恢复：上次选中的 View 或 Session、右侧边栏展开状态与当前工具、宽度；首次进入为 Overview（FR-PROJ-003）。
   - 左侧导航：New Chat 位置、PROJECT VIEWS 区与默认五项、SESSIONS 区容器、分隔线、折叠（FR-NAV-001、FR-NAV-002；UX 第 8 节；D-14）。
   - 右侧边栏容器：开关、单一入口、按 Project 记忆宽度与上次工具，工具内容为占位（UX 第 5 节；D-13；P-C）。
-  - Project View 项点击后切换 Main Canvas 至对应 View 的占位页；Project View 实现见 [T20261009-project-view](../T20261009-project-view/task.md)。
+  - Project View 项点击后切换 Main Canvas 至对应 View 的占位页；Project View 实现见 [T20261009-project-view](../archive/T20261009-project-view/task.md)。
   - 临时视觉参数：在高保真评审前使用中性色占位 Token，集中定义，便于替换（[Visual Direction](../../design/visual-direction.md) 第 1 节）。
 - 不做：Session History 列表内容与 Session 状态来源、New Chat 草稿与 Session 创建（见 [T20261009-session-slice](../T20261009-session-slice/task.md)）；四类工具内容（见 [T20261009-context-tools](../T20261009-context-tools/task.md)）。
 

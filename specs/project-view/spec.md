@@ -5,11 +5,11 @@
 | 项目 | 内容 |
 |---|---|
 | 模块 | `project-view` |
-| 文档状态 | 草稿 |
+| 文档状态 | 已确认（2026-10-11） |
 | 覆盖需求 | FR-VIEW-001～FR-VIEW-008 |
 | 相关验收 | AC-06；05 第 4 节的 Project Knowledge / View 数据分离与本地持久化专项 |
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、6、8、10 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
-| 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 3、6、1、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；T20261009-project-view；2026-10-10 起草 |
+| 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 3、6、1、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；T20261009-project-view；2026-10-10 起草；用户明确“我都已经全部确定了”（2026-10-11 确认） |
 
 > 本规格把已确认的 DEC-04～07 落成可实现的模块边界。
 
