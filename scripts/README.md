@@ -1,5 +1,42 @@
 # 开发脚本与 Commit 门禁
 
+## 测试分层
+
+依据：用户在 2026-10-11 测试流程分析后回复「accept」，确认分层检查与去重方向；[实现任务](../tasks/archive/T20261011-test-workflow/task.md)。实现 diff 待审阅，未改变产品验收标准。
+
+| 场景 | 执行范围 |
+|---|---|
+| 开发迭代 | 先跑受影响文件／模块的测试；共享 IPC、数据库、Adapter 等跨模块变化扩大回归范围 |
+| 纯文档提交 | 暂存快照的 Markdown 本地链接回归检查；人工或 AI 补充表格／标题预览及负责索引要求的一致性检查 |
+| 代码、配置、未知路径提交 | 文档回归检查＋全 workspace 类型检查、脚本测试与单元测试 |
+| main push / 面向 main 的 PR | 文档与脚本检查；有代码、配置或未知路径变化时，补全量基础检查、E2E、打包及打包冒烟 |
+| 手动 CI | 强制完整自动化，不使用文档豁免 |
+| 功能／里程碑 | 按 [Task Protocol](../tasks/README.md#acceptance)执行交互、独立、真实 CLI 及人工验收；局部测试不能替代这些要求 |
+
+同一代码／依赖／配置基线的有效结果可引用；改动后重跑受影响检查。局部测试只用于开发反馈，不改变提交门禁。不要依赖 `--changed` 自动发现所有跨包、IPC 或动态加载关系。
+
+开发时从仓库根目录执行，例如：
+
+```sh
+# 每次 Adapter 源码或依赖变化后，先更新桌面测试依赖的构建产物。
+pnpm --filter @ai-studio/agent-adapter run build
+pnpm --filter @ai-studio/desktop exec vitest run --project renderer
+pnpm --filter @ai-studio/desktop exec vitest run src/main/services/project
+pnpm --filter @ai-studio/desktop run test:watch
+pnpm --filter @ai-studio/agent-adapter exec vitest run test/codex
+
+# 局部 E2E 仍重新构建当前源码；不运行真实模型请求。
+pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
+```
+
+### 文档检查边界
+
+- 文档快路径清单由 [check-scope.mjs](check-scope.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README，以及 docs / specs / tasks / templates / design 下的 `.md`。不全局豁免 `.md`；图片、HTML 原型、证据脚本等未知路径仍走完整基础检查。重命名按旧路径和新路径一起判定，空变更也不豁免。
+- [check-docs.mjs](check-docs.mjs) 解析 Markdown 与 GFM 表格，检查内联／引用式链接、图片目标、Markdown 标题锚点及显式 HTML id/name。跨文档扫描可发现删除文件、改标题造成的未修改文件入链损坏；代码示例中的伪链接不检查。
+- 本地 `check:docs` 默认比较 HEAD 与当前工作树（包含未忽略的未跟踪文件）；提交门禁比较 HEAD 与 Git 暂存快照，未暂存修复和未跟踪目标不能掩盖提交中的断链。
+- 只阻断相对基线新增的问题，历史问题按来源路径、链接和问题类型识别，不借本任务批量清理。`pnpm check:docs --base <commit> --head <commit>` 检查两个快照；`pnpm check:docs --base ''` 对当前工作树做完整审计，可能暴露历史问题。
+- 不访问外链，不检查 HTML 内 href、非 Markdown 文件锚点或文档内容语义，也不是 Markdown 排版 linter。表格／标题预览、移动后的旧路径搜索、FR/AC 一致性及确认规则仍按负责索引执行。
+
 ## 本地 Commit 门禁
 
 依据：[仓库指南](../AGENTS.md) 的开发命令与 [贡献指南](../CONTRIBUTING.md) 第 3 节的提交约定；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
@@ -8,7 +45,7 @@
 
 | 时机 | 检查 | 手动执行 |
 |---|---|---|
-| `pre-commit` | 全 workspace 类型检查，然后运行单元测试；任一失败终止提交 | `pnpm check:commit` |
+| `pre-commit` | 按暂存路径执行上述文档或完整基础检查；任一失败终止提交 | `pnpm check:commit` |
 | `commit-msg` | commitlint 检查 Conventional Commits | `pnpm commitlint --edit <提交信息文件>` |
 
 commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写，并允许只用 `!` 或只用 `BREAKING CHANGE:` footer 标记破坏性变更（[commitlint.config.cjs](../commitlint.config.cjs)）。检查不会自动修改文件或暂存区。
@@ -16,7 +53,7 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 边界：
 
 - 类型检查和单元测试检查当前工作树，不是暂存区快照；部分暂存时应确保未暂存改动没有掩盖问题。检查沿用现有构建流程，会更新被 Git 忽略的构建输出。
-- 每次提交（含纯文档提交）都运行检查；不自动执行 E2E、打包、真实 CLI 或模型请求。目前没有源码 formatter / linter，因此不引入 lint-staged。
+- 每次提交都经过门禁，纯文档不启动应用构建／测试；代码路径通过 `check:code` 只构建一次 Adapter 后执行全量基础检查。不自动执行 E2E、打包、真实 CLI 或模型请求。目前没有源码 formatter / linter，因此不引入 lint-staged。
 - 本地 hooks 可被 `git commit --no-verify` 或 `HUSKY=0` 绕过，不是强制安全边界；远端 CI 见下节。
 - 配置文件纳入版本控制的是 `.husky/pre-commit`、`.husky/commit-msg` 与 `commitlint.config.cjs`；Husky 生成的 `.husky/_/` 自带忽略规则，无需提交。
 
@@ -24,7 +61,10 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 
 配置：[ci.yml](../.github/workflows/ci.yml)，触发条件、runner、Node 版本、CLI 版本、超时、权限与产物保留期均以该文件为准；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。
 
-- 在 macOS arm64 runner 上按顺序运行根命令：冻结 lockfile 安装、`check:commit`、`test:e2e`、`package`、`smoke:packaged`。CI 设置 `HUSKY=0` 显式运行检查，保留依赖安装脚本以安装 Electron 与修复 PTY helper。
+- 仅 main push、面向 main 的 PR 与手动触发运行；任务分支备份 push 不再与 PR 重复。main 合入后的验证针对新基线，仍保留。
+- Ubuntu 的 scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照判定，运行脚本测试与文档回归检查。这里只安装根工具依赖并禁用安装脚本，不下载 Electron。缺失／无效比较基线、空 diff 和手动触发均强制应用检查；无基线时文档以 HEAD 为基线，不声称完成历史文档审计。
+- 应用 job 在 macOS arm64 runner 冻结 lockfile 安装并执行 `check:code`，然后桌面构建一次，依次执行包内 `test:e2e:built`、`package:built` 及根 `smoke:packaged`。Adapter 在基础检查时构建一次，桌面产物仅在本 job、同一代码基线内复用，不跨运行缓存构建输出。独立根命令继续自动构建。
+- CI 设置 `HUSKY=0` 显式运行检查；应用 job 保留依赖安装脚本以安装 Electron 与修复 PTY helper。
 - E2E 前用 `displayplacer` 放大 runner 的虚拟屏幕：默认屏幕会把窗口高度限制到 684px，容纳不下桌面端的布局检查尺寸。此步骤只修改临时 CI runner。
 - E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
 - 无论成功或失败都上传已产生的 E2E 截图与打包冒烟 JSON。未签名应用仅验证打包，不自动发布。
@@ -32,6 +72,8 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 - CI 不替代人工验收，未启用分支保护，也不检查历史提交信息。单人开发的远端设置约定见 [贡献指南](../CONTRIBUTING.md) 第 6 节。
 
 Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-images#available-images)；pnpm 版本读取方式依据：[pnpm/action-setup](https://github.com/pnpm/action-setup#version)。
+
+事件与分支过滤依据：[GitHub workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)。本次配置在本地验证；远端部署与运行结果见实现任务，不以配置已修改等同远端 CI 已通过。
 
 ## 开发前 CLI 校验
 

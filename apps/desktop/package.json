@@ -14,7 +14,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "electron-vite build && playwright test",
+    "test:e2e:built": "playwright test",
     "package": "electron-vite build && electron-builder --mac --arm64 --dir",
+    "package:built": "electron-builder --mac --arm64 --dir",
     "smoke:packaged": "node scripts/packaged-smoke.mjs"
   },
   "dependencies": {

@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -17,8 +19,50 @@ env:
   HUSKY: '0'
 
 jobs:
+  scope:
+    name: Documentation and change scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      app: ${{ steps.scope.outputs.app }}
+    steps:
+      - name: Checkout complete comparison history
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@f520eceda224fe1a4aed5a2a27a194379a409996 # v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Determine required checks
+        id: scope
+        run: node scripts/check-scope.mjs
+
+      - name: Install documentation and script-test dependencies only
+        run: pnpm --filter ai-developer-studio install --frozen-lockfile --ignore-scripts
+
+      - name: Test workflow scripts
+        run: pnpm test:scripts
+
+      - name: Check documentation regressions
+        env:
+          CHECK_BASE: ${{ steps.scope.outputs.base }}
+        # No baseline (manual / first push): the full app job is mandatory.
+        # Compare docs to HEAD in that case; an exhaustive audit is a separate command.
+        run: pnpm check:docs --base "${CHECK_BASE:-HEAD}" --head HEAD
+
   desktop:
     name: macOS arm64 checks
+    needs: scope
+    if: needs.scope.outputs.app == 'true'
     runs-on: macos-15
     timeout-minutes: 30
     steps:
@@ -44,7 +88,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck and unit tests
-        run: pnpm check:commit
+        run: pnpm check:code
+
+      - name: Build desktop once for E2E and packaging
+        run: pnpm --filter @ai-studio/desktop run build
 
       - name: Configure desktop display for layout tests
         env:
@@ -58,10 +105,10 @@ jobs:
           displayplacer list
 
       - name: Electron E2E and native smoke
-        run: pnpm test:e2e
+        run: pnpm --filter @ai-studio/desktop run test:e2e:built
 
       - name: Package unsigned macOS app
-        run: pnpm package
+        run: pnpm --filter @ai-studio/desktop run package:built
 
       - name: Install pinned CLIs for packaged discovery smoke
         run: |

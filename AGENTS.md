@@ -43,8 +43,11 @@ The repository is a pnpm workspace (`pnpm-workspace.yaml`); Node and pnpm versio
 - `pnpm install`: install dependencies, the Electron binary, and local Git hooks.
 - `pnpm dev`: start the desktop app in development mode.
 - `pnpm typecheck`: type-check every workspace package.
-- `pnpm test`: run every package's unit tests (Vitest); no real CLI or model calls.
-- `pnpm check:commit`: type-check and run unit tests; also run by the `pre-commit` hook.
+- `pnpm test`: run workflow-script tests and every package's unit tests (Vitest); no real CLI or model calls.
+- `pnpm test:scripts`: test documentation checks and workflow scope selection only.
+- `pnpm check:docs`: check local Markdown link regressions against HEAD; options and manual review boundaries are in `scripts/README.md`.
+- `pnpm check:code`: build the Adapter once, type-check all packages and run all script/unit tests regardless of the changed files.
+- `pnpm check:commit`: check staged documentation and select documentation-only or full basic checks; also run by the `pre-commit` hook. Scope rules are in `scripts/README.md`.
 - `pnpm test:e2e`: build the desktop app and run Playwright Electron tests with simulated Session Providers; no model calls.
 - `pnpm package`: build an unsigned macOS arm64 app directory.
 - `pnpm smoke:packaged`: launch the packaged app and check its native dependencies.

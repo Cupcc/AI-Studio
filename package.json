@@ -7,12 +7,15 @@
   },
   "scripts": {
     "prepare": "husky",
-    "check:commit": "pnpm typecheck && pnpm test",
+    "check:commit": "node scripts/check-commit.mjs",
+    "check:code": "pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck && pnpm test:scripts && pnpm -r --if-present run test",
+    "check:docs": "node scripts/check-docs.mjs",
+    "test:scripts": "vitest run --config scripts/vitest.config.mjs",
     "commitlint": "commitlint",
     "dev": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run dev",
     "build": "pnpm -r --if-present run build",
     "typecheck": "pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck",
-    "test": "pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run test",
+    "test": "pnpm --filter @ai-studio/agent-adapter run build && pnpm test:scripts && pnpm -r --if-present run test",
     "test:e2e": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run test:e2e",
     "package": "pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run package",
     "smoke:packaged": "pnpm --filter @ai-studio/desktop run smoke:packaged"
@@ -20,6 +23,12 @@
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
     "@commitlint/config-conventional": "21.2.3",
-    "husky": "9.1.7"
+    "github-slugger": "2.0.0",
+    "husky": "9.1.7",
+    "mdast-util-to-string": "4.0.0",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "unified": "11.0.5",
+    "vitest": "5.0.1"
   }
 }
