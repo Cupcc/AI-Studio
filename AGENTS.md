@@ -34,6 +34,8 @@ The review each area needs is defined in its index (see the table above).
 
 Read `tasks/README.md` before creating or executing a task.
 
+AI 执行任务最后，注意检查并更新相关文档，避免文档漂移。
+
 ## Build, Test, and Development Commands
 
 The repository is a pnpm workspace (`pnpm-workspace.yaml`); Node and pnpm versions are pinned by `engines` and `packageManager` in the root `package.json`. Dependency build scripts must be allow-listed under `allowBuilds` in `pnpm-workspace.yaml`. Run commands from the repository root; paths containing spaces are supported.
@@ -50,12 +52,6 @@ The repository is a pnpm workspace (`pnpm-workspace.yaml`); Node and pnpm versio
 Command options, outputs, and runtime conventions: `apps/desktop/README.md`. Git hooks, CI, and the real-CLI preflight (sends real model requests; not an application test): `scripts/README.md`. No formatter, linter, or coverage threshold is configured. Keep this list current when root scripts change.
 
 To locate a requirement, its acceptance references, and covering specs: `rg 'FR-PROJ-001|AC-01' docs specs`. Task queries and the evidence search exclusion: `tasks/README.md`. Quote paths containing spaces when reading individual files.
-
-## Writing Conventions
-
-有实际需要人类决策、确认、审阅或签收的内容时，将其放在文档开头：紧接标题、frontmatter（如有）和文档信息表（如有），先列未决问题与待签收事项，再进入正文。不为没有待决事项的文档添加“未决问题”等空章节，也不保留只写“无”的占位；已回答的问题移入确认记录。分散在正文中的提案在顶部提供对应章节链接，问题与答案仍只在负责文档维护。调整顺序后按阅读顺序重新排列章节编号，并同步正文引用、跨文档引用、锚点及“见下节”等位置引用；问题编号、FR / AC / DEC 编号、确认日期和状态保持不变。模板中的可选区块在无内容时删除（依据：用户 2026-10-10 对话请求及后续纠正；本次 diff 待审阅）。
-
-Write in the existing Chinese prose with English product terminology such as Project, Session, Project View, and Project Knowledge (defined in `docs/01. Product Definition.md` section 7). Use Markdown headings, short lists, and tables for structured content; match surrounding list indentation and avoid tabs. Preserve each document's metadata table; when section numbers change, update every reference to them.
 
 ## Validation Guidelines
 
