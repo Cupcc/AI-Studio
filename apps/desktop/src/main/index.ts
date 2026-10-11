@@ -6,6 +6,7 @@ import { projectContract } from '@shared/ipc/project'
 import { S } from '@shared/project/strings'
 import { installProjectMenu } from './menu/project-menu'
 import { projectShellFor } from './services/project'
+import { projectViewsFor } from './services/project-view'
 import { createQuitFlow } from './services/project/quit-flow'
 import { registerIpc } from './ipc'
 import { emit } from './ipc/registry'
@@ -56,6 +57,7 @@ function openWindow(hidden = false): BrowserWindow {
     url: devServerUrl ?? APP_ENTRY_URL,
     hidden
   })
+  win.on('focus', () => { if (core) projectViewsFor(core).refreshAll() })
   if (!hidden && process.platform === 'darwin') {
     // Keep the renderer and its draft/tool state alive while the macOS window
     // is closed; sessions continue until an explicit application quit.

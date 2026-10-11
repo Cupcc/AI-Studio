@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "viewId": "overview",
+  "root": {
+    "type": "stack",
+    "children": [
+      {
+        "type": "text",
+        "bind": "summary",
+        "props": {
+          "title": "Project Summary"
+        }
+      },
+      {
+        "type": "metric",
+        "bind": "progress",
+        "props": {
+          "title": "Overall Progress"
+        }
+      },
+      {
+        "type": "callout",
+        "bind": "focus",
+        "props": {
+          "title": "Current Focus"
+        }
+      },
+      {
+        "type": "list",
+        "bind": "stack",
+        "props": {
+          "title": "技术栈"
+        }
+      },
+      {
+        "type": "text",
+        "bind": "architecture",
+        "props": {
+          "title": "Architecture Summary"
+        }
+      },
+      {
+        "type": "text",
+        "bind": "agents",
+        "props": {
+          "title": "Agent Summary"
+        }
+      }
+    ]
+  },
+  "bindings": {
+    "summary": "data.summary",
+    "progress": "data.progress",
+    "focus": "data.focus",
+    "stack": "data.stack",
+    "architecture": "data.architecture",
+    "agents": "data.agents"
+  }
+}

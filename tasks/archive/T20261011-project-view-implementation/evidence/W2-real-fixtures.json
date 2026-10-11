@@ -1,0 +1,124 @@
+{
+  "Codex Payment": {
+    "README.md": "# Payment fixture\n\nThis isolated project is for Project View AC-06 verification. Payment architecture has API validation, payment orchestration, and an in-memory store. Read src/payment to determine facts. A request to reorganize architecture means update Architecture Knowledge and, only if necessary, its View Definition under .ai-studio using the client's GUIDE and schemas. Do not refactor source, install packages, use the network, or touch paths outside this project. Prefer the built-in definition; write complete valid JSON. This fixture contains no real customer data or secrets.\n",
+    "src/payment/api.ts": "import { createPayment } from './service'\nexport function postPayment(input: { orderId: string; amountCents: number }) {\n  if (!input.orderId || input.amountCents <= 0) throw new Error('Invalid payment')\n  return createPayment(input.orderId, input.amountCents)\n}\n",
+    "src/payment/service.ts": "import { savePayment } from './store'\nexport function createPayment(orderId: string, amountCents: number) {\n  const payment = { id: `payment-${orderId}`, orderId, amountCents, status: 'pending' }\n  savePayment(payment)\n  return payment\n}\n",
+    "src/payment/store.ts": "type Payment = { id: string; orderId: string; amountCents: number; status: string }\nconst payments = new Map<string, Payment>()\nexport function savePayment(payment: Payment) { payments.set(payment.id, payment) }\nexport function findPayment(id: string) { return payments.get(id) }\n",
+    ".ai-studio/knowledge/architecture.json": {
+      "schemaVersion": 1,
+      "viewId": "architecture",
+      "data": {
+        "summary": "支付模块由 API 校验、支付编排和内存存储组成。请求经校验后创建 pending 状态的支付记录并写入内存 Map。 AC06-CODEX-R2",
+        "graph": {
+          "nodes": [
+            {
+              "id": "api",
+              "name": "支付 API",
+              "path": "src/payment/api.ts"
+            },
+            {
+              "id": "service",
+              "name": "支付服务",
+              "path": "src/payment/service.ts"
+            },
+            {
+              "id": "store",
+              "name": "支付存储",
+              "path": "src/payment/store.ts"
+            }
+          ],
+          "edges": [
+            {
+              "from": "api",
+              "to": "service",
+              "label": "校验后调用"
+            },
+            {
+              "from": "service",
+              "to": "store",
+              "label": "保存支付记录"
+            }
+          ]
+        },
+        "modules": [
+          {
+            "name": "支付 API",
+            "responsibility": "接收订单号与分金额；校验订单号非空且金额大于 0，然后调用支付服务。",
+            "path": "src/payment/api.ts"
+          },
+          {
+            "name": "支付服务",
+            "responsibility": "按订单创建 pending 状态的支付记录，生成 payment-<orderId> 标识，交给存储并返回记录。",
+            "path": "src/payment/service.ts"
+          },
+          {
+            "name": "支付存储",
+            "responsibility": "使用进程内 Map 按支付 ID 保存记录，并提供按 ID 查询。",
+            "path": "src/payment/store.ts"
+          }
+        ]
+      }
+    }
+  },
+  "Claude Payment": {
+    "README.md": "# Payment fixture\n\nThis isolated project is for Project View AC-06 verification. Payment architecture has API validation, payment orchestration, and an in-memory store. Read src/payment to determine facts. A request to reorganize architecture means update Architecture Knowledge and, only if necessary, its View Definition under .ai-studio using the client's GUIDE and schemas. Do not refactor source, install packages, use the network, or touch paths outside this project. Prefer the built-in definition; write complete valid JSON. This fixture contains no real customer data or secrets.\n",
+    "src/payment/api.ts": "import { createPayment } from './service'\nexport function postPayment(input: { orderId: string; amountCents: number }) {\n  if (!input.orderId || input.amountCents <= 0) throw new Error('Invalid payment')\n  return createPayment(input.orderId, input.amountCents)\n}\n",
+    "src/payment/service.ts": "import { savePayment } from './store'\nexport function createPayment(orderId: string, amountCents: number) {\n  const payment = { id: `payment-${orderId}`, orderId, amountCents, status: 'pending' }\n  savePayment(payment)\n  return payment\n}\n",
+    "src/payment/store.ts": "type Payment = { id: string; orderId: string; amountCents: number; status: string }\nconst payments = new Map<string, Payment>()\nexport function savePayment(payment: Payment) { payments.set(payment.id, payment) }\nexport function findPayment(id: string) { return payments.get(id) }\n",
+    ".ai-studio/knowledge/architecture.json": {
+      "schemaVersion": 1,
+      "viewId": "architecture",
+      "data": {
+        "summary": "支付模块由三层组成：api 负责入参校验并转发，service 负责创建支付单，store 以内存 Map 保存支付单。调用链为 postPayment → createPayment → savePayment，当前没有持久化和外部支付渠道对接。 AC06-CLAUDE-R2",
+        "graph": {
+          "nodes": [
+            {
+              "id": "api",
+              "name": "api",
+              "path": "src/payment/api.ts"
+            },
+            {
+              "id": "service",
+              "name": "service",
+              "path": "src/payment/service.ts"
+            },
+            {
+              "id": "store",
+              "name": "store",
+              "path": "src/payment/store.ts"
+            }
+          ],
+          "edges": [
+            {
+              "from": "api",
+              "to": "service",
+              "label": "createPayment(orderId, amountCents)"
+            },
+            {
+              "from": "service",
+              "to": "store",
+              "label": "savePayment(payment)"
+            }
+          ]
+        },
+        "modules": [
+          {
+            "name": "api",
+            "responsibility": "postPayment 校验 orderId 非空且 amountCents > 0，不合法时抛出 'Invalid payment'，合法时调用 createPayment",
+            "path": "src/payment/api.ts"
+          },
+          {
+            "name": "service",
+            "responsibility": "createPayment 生成 id 为 payment-<orderId>、status 为 pending 的支付单并保存，返回该支付单",
+            "path": "src/payment/service.ts"
+          },
+          {
+            "name": "store",
+            "responsibility": "进程内 Map（以支付单 id 为键）的内存存储，提供 savePayment 与 findPayment；findPayment 当前无调用方",
+            "path": "src/payment/store.ts"
+          }
+        ]
+      }
+    }
+  }
+}

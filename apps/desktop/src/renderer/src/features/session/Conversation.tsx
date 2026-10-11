@@ -18,11 +18,14 @@ export function ConversationHeader({ project, canvas }: ShellSlotProps) {
     <span className="session-header__title">{sessionId ? summary?.title ?? '正在加载对话…' : '新对话'}</span>
     {sessionId && <span className="session-header__cli muted">{cliName(summary?.cli ?? null)}</span>}
     {origin && <><span className="session-header__from muted">· 来自 {VIEW_NAMES[origin as ViewId] ?? origin}</span>
-      <button className="link-button" disabled={!DEFAULT_VIEW_IDS.includes(origin as ViewId)} onClick={() => useProjectShell.getState().enterView(project.id, origin as ViewId)} title={origin}>在 View 中打开</button></>}
+      <button className="link-button" disabled={!DEFAULT_VIEW_IDS.includes(origin as ViewId)} onClick={() => {
+        useProjectShell.getState().enterView(project.id, origin as ViewId)
+        useProjectShell.getState().setViewConversation(project.id, { kind: 'session', sessionId: sessionId! })
+      }} title={origin}>在 View 中打开</button></>}
   </>
 }
 
-function SessionConversation({ sessionId, projectId, active }: { sessionId: string; projectId: string; active: boolean }) {
+export function SessionConversation({ sessionId, projectId, active }: { sessionId: string; projectId: string; active: boolean }) {
   const conversation = useSessions((s) => s.conversations[sessionId]), latestRequest = useSessions((s) => s.latestRequests[sessionId] ?? 0)
   const summary = useSessions((s) => s.summaries[sessionId]), openError = useSessions((s) => s.errors[`open:${sessionId}`])
   const ref = useRef<HTMLDivElement>(null), contentRef = useRef<HTMLDivElement>(null)

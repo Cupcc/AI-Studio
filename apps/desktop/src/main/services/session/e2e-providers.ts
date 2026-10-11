@@ -1,5 +1,7 @@
 import type { AgentProvider, InputRequestInit, ResumeSessionOptions, SessionSink, TurnContext } from '@ai-studio/agent-adapter'
 import { FakeProvider } from '@ai-studio/agent-adapter/testing'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 /** `[e2e:markdown]` reply covering the Markdown range of Shell Spec v02 §6 (content mirrors prototype v02). */
 export const E2E_MARKDOWN_REPLY = [
@@ -57,7 +59,7 @@ export function createE2eProviders(): AgentProvider[] {
         return super.resumeSession(options)
       }
     }
-    return new E2eProvider(cli, {
+    const provider: E2eProvider = new E2eProvider(cli, {
       displayName: cli === 'codex' ? 'Codex' : 'Claude Code',
       models: [
         { id: cli === 'codex' ? 'e2e-codex' : 'e2e-claude', displayName: cli === 'codex' ? 'E2E Codex' : 'E2E Claude', isDefault: true },
@@ -80,6 +82,24 @@ export function createE2eProviders(): AgentProvider[] {
           }), 160)
           schedule(turn, () => sink.itemDelta(turn.turnId, `${turn.turnId}:message`, 'text', '正在处理模拟请求…'), 80)
           if (input.text.includes('[e2e:slow]')) return
+          if (input.text.includes('Current Project View: Architecture') && input.text.includes('重新整理支付模块架构')) {
+            const cwd = provider.sessions.find(session => session.controller.activeTurn?.turnId === turn.turnId)?.options.cwd
+            schedule(turn, () => {
+              if (!cwd) return
+              const directory = join(cwd, '.ai-studio/knowledge')
+              mkdirSync(directory, { recursive: true })
+              writeFileSync(join(directory, 'architecture.json'), JSON.stringify({
+                schemaVersion: 1, viewId: 'architecture',
+                data: {
+                  summary: '支付模块架构已整理',
+                  graph: { nodes: [{ id: 'api', name: 'Payment API', path: 'src/payment/api.ts' }, { id: 'service', name: 'Payment Service', path: 'src/payment/service.ts' }, { id: 'store', name: 'Payment Store', path: 'src/payment/store.ts' }], edges: [{ from: 'api', to: 'service', label: 'validate' }, { from: 'service', to: 'store', label: 'persist' }] },
+                  modules: [{ name: 'Payment API', responsibility: '校验与入口', path: 'src/payment/api.ts' }, { name: 'Payment Service', responsibility: '支付编排', path: 'src/payment/service.ts' }, { name: 'Payment Store', responsibility: '本地持久化', path: 'src/payment/store.ts' }]
+                }
+              }))
+              complete(run, '已通过普通模拟 CLI Session 更新 Architecture Knowledge。')
+            }, 600)
+            return
+          }
           if (input.text.includes('[e2e:error]') && !failures.has(input.text)) {
             failures.add(input.text)
             schedule(turn, () => sink.nativeTurnEnded(turn.turnId, { status: 'failed', error: { code: 'provider_error', message: '模拟执行失败', retryable: true, native: { source: 'e2e', message: '这是一条模拟错误详情' } } }), 400)
@@ -113,5 +133,6 @@ export function createE2eProviders(): AgentProvider[] {
         }
       }
     })
+    return provider
   })
 }

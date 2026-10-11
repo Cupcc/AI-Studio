@@ -62,10 +62,15 @@ export function createProjectFeature(core: Pick<CoreServices, 'database'>, deps:
   const openPath = async (path: string) => {
     const result = projects.openPath(path)
     if (result.ok && result.created) await shell.sessionPort().initializeProject?.(result.project.id)
+    if (result.ok) shell.views?.open(result.project.id)
     return result
   }
   return defineHandlers(projectContract, {
-    bootstrap: { parse: noInput, handle: () => projects.bootstrap() },
+    bootstrap: { parse: noInput, handle: () => {
+      const result = projects.bootstrap()
+      for (const project of result.projects) shell.views?.open(project.id)
+      return result
+    } },
     openDirectory: {
       parse: noInput,
       handle: async (_req, ctx) => {

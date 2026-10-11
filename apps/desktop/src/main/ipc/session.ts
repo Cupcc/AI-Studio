@@ -5,6 +5,8 @@ import type { AgentProvider, InputResponse } from '@ai-studio/agent-adapter'
 import { sessionContract, SESSION_MESSAGE_MAX_LENGTH, SESSION_TITLE_MAX_LENGTH } from '@shared/ipc/session'
 import type { ComposerDraft, ContextItem, DraftKey, SessionCli } from '@shared/session/types'
 import { SESSION_CLIS } from '@shared/session/types'
+import { catalogEntry } from '@shared/project-view/defaults'
+import { projectViewsFor } from '../services/project-view'
 import type { CoreServices } from '../services/core'
 import { projectShellFor } from '../services/project'
 import { SessionService } from '../services/session/session-service'
@@ -48,8 +50,10 @@ function draftKey(raw: unknown): DraftKey {
   const value = expectRecord(raw)
   const projectId = id(value.projectId, 'projectId')
   if (value.kind === 'new_chat') {
-    expectOnlyKeys(value, ['kind', 'projectId'])
-    return { kind: 'new_chat', projectId }
+    expectOnlyKeys(value, ['kind', 'projectId', 'viewId'])
+    const viewId = value.viewId === undefined ? undefined : id(value.viewId, 'viewId')
+    if (viewId) catalogEntry(viewId)
+    return { kind: 'new_chat', projectId, ...(viewId ? { viewId } : {}) }
   }
   if (value.kind === 'session') {
     expectOnlyKeys(value, ['kind', 'projectId', 'sessionId'])
@@ -106,7 +110,10 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     isForeground: options.isForeground ?? isSessionWindowForeground,
     summaryChanged: change => core.broadcast(sessionContract.events.summaryChanged, change),
     transcriptChanged: change => core.broadcast(sessionContract.events.transcriptChanged, change),
-    providersChanged: providers => core.broadcast(sessionContract.events.providersChanged, providers)
+    providersChanged: providers => core.broadcast(sessionContract.events.providersChanged, providers),
+    buildViewContext: (projectId, viewId) => projectViewsFor(core).buildContext(projectId, viewId, true),
+    turnEnded: projectId => { void projectViewsFor(core).refresh(projectId) },
+    onProjectClosed: projectId => projectViewsFor(core).close(projectId)
   })
   shell.setSessionPort(service)
   void service.getProviders().catch(() => {})
@@ -122,8 +129,9 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     },
     create: {
       parse: raw => {
-        const value = record(raw, ['projectId', 'cli', 'model', 'originViewId', 'text', 'contextItems'])
-        return { projectId: id(value.projectId, 'projectId'), cli: cli(value.cli), model: model(value.model), originViewId: value.originViewId == null ? null : id(value.originViewId, 'originViewId'), text: text(value.text), contextItems: context(value.contextItems) }
+        const value = record(raw, ['projectId', 'cli', 'model', 'originViewId', 'viewContextAttached', 'text', 'contextItems'])
+        if (value.viewContextAttached !== undefined && typeof value.viewContextAttached !== 'boolean') throw new IpcValidationError('Invalid viewContextAttached')
+        return { projectId: id(value.projectId, 'projectId'), cli: cli(value.cli), model: model(value.model), originViewId: value.originViewId == null ? null : id(value.originViewId, 'originViewId'), viewContextAttached: value.viewContextAttached as boolean | undefined, text: text(value.text), contextItems: context(value.contextItems) }
       },
       handle: request => service.create(request)
     },

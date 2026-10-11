@@ -4,7 +4,7 @@ import { projectSessionState } from '@shared/session/presentation'
 import { sessionApi } from './api'
 
 export const emptyDraft = (): ComposerDraft => ({ cli: null, model: null, text: '', contextItems: [] })
-export const draftId = (key: DraftKey): string => key.kind === 'new_chat' ? `${key.projectId}:draft` : `${key.projectId}:session:${key.sessionId}`
+export const draftId = (key: DraftKey): string => key.kind === 'new_chat' ? (key.viewId ? `${key.projectId}:view:${key.viewId}:draft` : `${key.projectId}:draft`) : `${key.projectId}:session:${key.sessionId}`
 export const cliName = (cli: SessionCli | null): string => cli === 'codex' ? 'Codex CLI' : cli === 'claude-code' ? 'Claude Code' : '选择 CLI'
 
 export interface ConversationState {
@@ -183,7 +183,7 @@ export const useSessions = create<SessionStore>()((set, get) => ({
         const provider = get().providers.find((p) => p.cli === draft.cli)
         if (!draft.cli || provider?.status !== 'available') throw new Error(provider?.reason ?? '请选择已安装并已登录的 CLI')
         const startedAt = revision
-        const created = await sessionApi().create({ projectId: key.projectId, cli: draft.cli, model: draft.model, text: draft.text, contextItems: draft.contextItems, originViewId })
+        const created = await sessionApi().create({ projectId: key.projectId, cli: draft.cli, model: draft.model, text: draft.text, contextItems: draft.contextItems, originViewId, viewContextAttached: !!originViewId && draft.contextItems.some(item => item.type === 'view' && item.viewId === originViewId) })
         result = acceptSummaryIfFresh(created, startedAt)
       } else {
         const session = get().summaries[key.sessionId]
@@ -193,7 +193,7 @@ export const useSessions = create<SessionStore>()((set, get) => ({
         result = get().summaries[key.sessionId] ?? null
       }
       // Do not erase text typed while the request was being accepted.
-      if (get().drafts[id] === draft) get().updateDraft(key, { text: '', contextItems: [] })
+      if (get().drafts[id] === draft) get().updateDraft(key, { text: '', contextItems: key.kind === 'new_chat' && key.viewId ? [{ type: 'view', viewId: key.viewId }] : [] })
     })
     return ok ? result : null
   },

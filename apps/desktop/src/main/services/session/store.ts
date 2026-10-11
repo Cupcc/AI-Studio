@@ -77,7 +77,7 @@ export class SessionStore {
   }
 
   private draftKey(key: DraftKey): string {
-    return key.kind === 'new_chat' ? `project:${key.projectId}` : `session:${key.sessionId}`
+    return key.kind === 'new_chat' ? (key.viewId ? `project:${key.projectId}:view:${key.viewId}` : `project:${key.projectId}`) : `session:${key.sessionId}`
   }
 
   getDraft(key: DraftKey): ComposerDraft | null {

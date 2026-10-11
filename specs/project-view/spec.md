@@ -299,9 +299,21 @@ Project Shell 只负责把当前 `UiState.mainCanvas.view` 和 `viewRightArea` �
 | Session | `buildContext()`、按 View 查询最近对话的过滤条件、回合结束通知 | Session 状态、Conversation、原生 CLI 和 transcript |
 | Input | View Context 标签的可移除状态 | 通用输入区、Model Selector、Send / Stop |
 
-## 6. 实现计划
+## 6. 实现计划与落地记录
 
-以下是后续实现轮次的顺序和写入范围。本轮只完成规格草稿与文档同步，不宣称代码交付。
+以下阶段由 [T20261011-project-view-implementation](../../tasks/archive/T20261011-project-view-implementation/task.md) 按用户 2026-10-11 实现请求推进；验证与未覆盖项见该任务的 [acceptance.md](../../tasks/archive/T20261011-project-view-implementation/acceptance.md)，模拟通过不等于真实 AC-06 或人工验收通过。
+
+### 2026-10-11 技术落地
+
+由 Main Agent 在本规格授权范围内决定，代码与本次 diff 一起审阅，不标为人工确认：
+
+- 内置定义及可读 JSON Schema 位于 `apps/desktop/src/shared/project-view/resources/`；`schema.ts` 执行严格字段、版本、绑定、相对路径与大小/深度校验。项目 Schema 副本不参与信任判断。绑定语法为 `data.field.subfield`；组件字段为 `type / bind / props / children`，不支持表达式。
+- 每个项目根目录监视 `.ai-studio` 创建，目录存在后递归监视该目录；100ms 合并事件和稳定读取，最多三次尝试。Project 关闭取消发布并释放 watcher；目录移动/不可读只形成局部 Preview 错误。焦点与回合终态补扫不影响 Session 终态。
+- realpath 边界检查叠加符号链接组件拒绝、文件描述符 `O_NOFOLLOW`、有界读取；初始化客户端辅助文件前检查目标，并拒绝硬链接写入。Knowledge / Definition 不由客户端创建或修复。
+- 组件树与单图节点上限均为 500；图超限报错，不截断。Diagram 接受 `nodes: [{id,name,path?}]` 与 `edges: [{from,to,label?}]`，坐标由 Renderer 计算。所有文本均为 React 文本，不发网络请求。
+- `getSnapshot` 与两个事件均返回带 revision 的 `ViewState`（status、snapshot、error），snapshot 为完整声明式数据。IPC 错误不带原始 JSON/绝对路径。
+- View 草稿扩展普通 `new_chat` 键的可选 `viewId`，按项目/View 独立持久化；首条附加状态和路径存入已有 Session/Transcript JSON，无数据库迁移。英文模板仅存在发送时内存，后续轮次与恢复不重复注入。
+- Preview 暂用可访问的 − / 比例重置 / + 控件实现 50%～200% 缩放；比例只存运行期，手势与高保真视觉仍按 PV-Q9。Overview Session 摘要独立于 Renderer；`lastOutcome` 元数据使已读的最近完成 Session 仍可展示。
 
 | 阶段 | 主要写入范围 | 交付 / 验证 | 依赖 |
 |---|---|---|---|

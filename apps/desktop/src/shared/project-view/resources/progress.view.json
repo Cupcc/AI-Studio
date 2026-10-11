@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "viewId": "progress",
+  "root": {
+    "type": "stack",
+    "children": [
+      {
+        "type": "metric",
+        "bind": "summary",
+        "props": {
+          "title": "Overall Progress"
+        }
+      },
+      {
+        "type": "timeline",
+        "bind": "stages",
+        "props": {
+          "title": "阶段"
+        }
+      },
+      {
+        "type": "list",
+        "bind": "items",
+        "props": {
+          "title": "进展"
+        }
+      }
+    ]
+  },
+  "bindings": {
+    "summary": "data.summary",
+    "stages": "data.stages",
+    "items": "data.items"
+  }
+}

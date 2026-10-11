@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "viewId": "business-flow",
+  "root": {
+    "type": "stack",
+    "children": [
+      {
+        "type": "text",
+        "bind": "summary",
+        "props": {
+          "title": "Business Flow"
+        }
+      },
+      {
+        "type": "diagram",
+        "bind": "graph",
+        "props": {
+          "direction": "vertical"
+        }
+      },
+      {
+        "type": "table",
+        "bind": "steps",
+        "props": {
+          "columns": [
+            "name",
+            "trigger",
+            "result",
+            "path"
+          ]
+        }
+      }
+    ]
+  },
+  "bindings": {
+    "summary": "data.summary",
+    "graph": "data.graph",
+    "steps": "data.steps"
+  }
+}

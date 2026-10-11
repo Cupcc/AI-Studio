@@ -26,6 +26,9 @@ export interface SessionSummary {
   titleSource: 'client' | 'native' | 'user'
   model: string | null
   originViewId: string | null
+  viewContextAttached?: boolean
+  viewContextPaths?: string[]
+  lastOutcome?: 'completed' | 'interrupted' | 'failed'
   activity: SessionActivity
   stopping: boolean
   errorUnseen: boolean
@@ -48,7 +51,7 @@ interface TranscriptBase {
 }
 
 export type TranscriptItem = TranscriptBase & (
-  | { kind: 'user_message'; text: string; contextItems: ContextItem[]; redacted?: boolean }
+  | { kind: 'user_message'; text: string; contextItems: ContextItem[]; redacted?: boolean; viewContextAttached?: boolean; viewContextPaths?: string[] }
   | { kind: 'agent_message'; text: string; complete: boolean; nativeItemId: string }
   | { kind: 'tool_activity'; item: ItemSnapshot }
   | { kind: 'input_request'; request: InputRequest; resolution: InputResolution | null; redacted?: boolean }
@@ -83,7 +86,7 @@ export interface ModelCatalogResult {
 
 /** Project draft and per-Session composer text have independent storage keys. */
 export type DraftKey =
-  | { projectId: string; kind: 'new_chat' }
+  | { projectId: string; kind: 'new_chat'; viewId?: string }
   | { projectId: string; kind: 'session'; sessionId: string }
 
 export interface ComposerDraft {
@@ -103,6 +106,7 @@ export interface CreateSessionRequest extends SessionMessage {
   cli: SessionCli
   model?: string | null
   originViewId?: string | null
+  viewContextAttached?: boolean
 }
 
 export interface SessionViewing {

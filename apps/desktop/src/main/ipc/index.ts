@@ -3,6 +3,7 @@
 import { contracts } from '@shared/ipc/contracts'
 import type { CoreServices } from '../services/core'
 import { createAppFeature } from './app'
+import { createProjectViewFeature } from './project-view'
 import { createProjectFeature } from './project'
 import { createSessionFeature, type SessionFeatureOptions } from './session'
 import { registerFeatureHandlers, type FeatureHandlers, type MainIpc } from './registry'
@@ -11,6 +12,7 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
   return [
     createAppFeature(core),
     createProjectFeature(core),
+    createProjectViewFeature(core),
     createSessionFeature(core, sessionOptions)
   ]
 }

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "viewId": "agent-team",
+  "root": {
+    "type": "stack",
+    "children": [
+      {
+        "type": "text",
+        "bind": "summary",
+        "props": {
+          "title": "Agent Team"
+        }
+      },
+      {
+        "type": "table",
+        "bind": "agents",
+        "props": {
+          "columns": [
+            "name",
+            "role",
+            "path"
+          ]
+        }
+      },
+      {
+        "type": "list",
+        "bind": "instructions",
+        "props": {
+          "title": "Instructions & Skills"
+        }
+      }
+    ]
+  },
+  "bindings": {
+    "summary": "data.summary",
+    "agents": "data.agents",
+    "instructions": "data.instructions"
+  }
+}

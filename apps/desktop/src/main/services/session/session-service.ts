@@ -7,6 +7,7 @@ import { SESSION_MESSAGE_MAX_LENGTH, TRANSCRIPT_PAGE_SIZE } from '@shared/ipc/se
 import type { ProjectService } from '../project/project-service'
 import type { MainSessionPort } from '../project/session-port'
 import { SessionStore } from './store'
+import { VIEW_CATALOG, type ViewContext } from '@shared/project-view/types'
 
 type RequestItem = Extract<TranscriptItem, { kind: 'input_request' }>
 type ItemBody = TranscriptItem extends infer T ? T extends TranscriptItem ? Omit<T, 'id' | 'sessionId' | 'turnId' | 'sequence' | 'at'> : never : never
@@ -16,6 +17,7 @@ interface ActiveTurn {
   model: string | null
   adapterId?: string
   message: SessionMessage
+  viewContext?: ViewContext
   pending: Map<string, RequestItem>
   items: Map<string, TranscriptItem>
   answering: boolean
@@ -43,6 +45,9 @@ export interface SessionServiceOptions {
   summaryChanged?(change: SessionSummaryChange): void
   transcriptChanged?(change: TranscriptChange): void
   providersChanged?(providers: ProviderSummary[]): void
+  buildViewContext?(projectId: string, viewId: string): ViewContext
+  turnEnded?(projectId: string): void
+  onProjectClosed?(projectId: string): void
   /** Queried at event time, so stale renderer focus reports cannot mark work read. */
   isForeground?(senderId: number): boolean
   now?: () => number
@@ -149,11 +154,14 @@ export class SessionService implements MainSessionPort {
     this.project(request.projectId)
     const available = (await this.getProviders()).find(p => p.cli === request.cli)
     if (available?.status !== 'available') throw new Error(available?.reason ?? 'CLI 不可用')
+    const attach = !!request.originViewId && request.viewContextAttached === true && VIEW_CATALOG.some(view => view.id === request.originViewId)
+    const viewContext = attach ? this.options.buildViewContext?.(request.projectId, request.originViewId!) : undefined
     const at = this.now()
     const summary: SessionSummary = {
       id: this.newId(), projectId: request.projectId, cli: request.cli, nativeSessionId: null,
       title: initialSessionTitle(request.text), titleSource: 'client', model: request.model ?? null,
       originViewId: request.originViewId ?? null, activity: 'none', stopping: false,
+      viewContextAttached: !!viewContext, viewContextPaths: viewContext?.paths ?? [],
       errorUnseen: false, completionUnread: false, status: null, createdAt: at, updatedAt: at, lastUserMessageAt: at
     }
     const entry: Entry = { summary, sequence: 1, generation: 0, secrets: new Set() }
@@ -162,8 +170,8 @@ export class SessionService implements MainSessionPort {
     try {
       this.options.store.transaction(() => {
         this.options.store.saveSummary(summary)
-        this.begin(entry, request)
-        this.options.store.deleteDraft({ projectId: request.projectId, kind: 'new_chat' })
+        this.begin(entry, request, viewContext)
+        this.options.store.deleteDraft({ projectId: request.projectId, kind: 'new_chat', ...(request.originViewId ? { viewId: request.originViewId } : {}) })
       })
     } catch (error) {
       this.entries.delete(summary.id)
@@ -179,17 +187,18 @@ export class SessionService implements MainSessionPort {
     this.options.store.transaction(() => this.begin(entry, message))
   }
 
-  private begin(entry: Entry, message: SessionMessage): void {
+  private begin(entry: Entry, message: SessionMessage, viewContext?: ViewContext): void {
     const at = this.now()
     const turn: ActiveTurn = {
       id: this.newId(), at, model: entry.summary.model,
       message: { text: message.text, contextItems: message.contextItems ?? [] },
+      viewContext,
       pending: new Map(), items: new Map(), answering: false
     }
     entry.turn = turn
     Object.assign(entry.summary, { activity: 'running', stopping: false, errorUnseen: false, completionUnread: false, lastUserMessageAt: at })
     this.options.store.startTurn(turn.id, entry.summary.id, at, turn.model, this.scrub(entry, turn.message))
-    this.append(entry, { kind: 'user_message', text: message.text, contextItems: message.contextItems ?? [] })
+    this.append(entry, { kind: 'user_message', text: message.text, contextItems: message.contextItems ?? [], viewContextAttached: !!viewContext, viewContextPaths: viewContext?.paths ?? [] })
     this.clearComposer(entry)
     this.publish(entry)
     // Always defer startup past acceptance; stop/close may arrive before environment/runtime exists.
@@ -233,7 +242,7 @@ export class SessionService implements MainSessionPort {
       }
       await runtime.setModel(turn.model)
       if (entry.turn !== turn || entry.summary.stopping) return
-      const result = await runtime.sendUserInput({ text: turn.message.text })
+      const result = await runtime.sendUserInput({ text: turn.viewContext ? `${turn.viewContext.text}\n\n${turn.message.text}` : turn.message.text })
       // turn.started is synchronous; a whole turn can finish before this Promise resolves.
       if (entry.turn === turn && !turn.adapterId) {
         turn.adapterId = result.turnId
@@ -391,6 +400,7 @@ export class SessionService implements MainSessionPort {
       this.flushDisk()
       this.options.store.endTurn(turn.id, outcome, this.now())
       entry.summary.activity = 'none'
+      entry.summary.lastOutcome = outcome
       entry.summary.stopping = false
       entry.summary.errorUnseen = outcome === 'failed' && !this.isViewed(entry)
       entry.summary.completionUnread = outcome === 'completed' && !this.isViewed(entry)
@@ -402,6 +412,8 @@ export class SessionService implements MainSessionPort {
       this.publish(entry)
     })
     if (outcome === 'failed') this.retire(entry)
+    // Preview scanning cannot alter this turn's terminal outcome.
+    try { this.options.turnEnded?.(entry.summary.projectId) } catch { /* local preview diagnostics only */ }
   }
 
   private cancelRequests(entry: Entry, reason: 'turn_stopping' | 'turn_ended'): void {
@@ -653,6 +665,7 @@ export class SessionService implements MainSessionPort {
       await Promise.all(entries.map(entry => entry.retiring))
       for (const [sender, context] of this.viewing) if (context.projectId === projectId) this.viewing.delete(sender)
       this.closed.add(projectId)
+      this.options.onProjectClosed?.(projectId)
       this.flushDisk()
     } finally {
       // This outer lock spans the interval between Stop and idle Runtime release.
@@ -763,7 +776,7 @@ export class SessionService implements MainSessionPort {
     const entry = this.validateDraftKey(key)
     this.closed.delete(key.projectId)
     const saved = (entry && this.volatileDrafts.get(entry.summary.id)) || this.options.store.getDraft(key)
-    return saved ?? { cli: entry?.summary.cli ?? await this.getDefaultCli(key.projectId), model: entry?.summary.model ?? null, text: '', contextItems: [] }
+    return saved ?? { cli: entry?.summary.cli ?? await this.getDefaultCli(key.projectId), model: entry?.summary.model ?? null, text: '', contextItems: key.kind === 'new_chat' && key.viewId ? [{ type: 'view', viewId: key.viewId }] : [] }
   }
 
   saveDraft(key: DraftKey, draft: ComposerDraft): void {

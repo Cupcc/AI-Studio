@@ -52,7 +52,14 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
       setNotice(`模型 ${name} 已不可用，本轮使用 CLI 默认。`)
     }
     const created = await useSessions.getState().sendComposer(draftKey, originViewId)
-    if (created && draftKey.kind === 'new_chat') useProjectShell.getState().openSession(draftKey.projectId, created.id)
+    if (created && draftKey.kind === 'new_chat') {
+      const shell = useProjectShell.getState()
+      const canvas = shell.uiStates[draftKey.projectId]?.mainCanvas
+      // A late acceptance must not pull the user back from another View.
+      if (draftKey.viewId) {
+        if (canvas?.mode === 'view' && canvas.viewId === draftKey.viewId && canvas.conversation.kind === 'draft') shell.setViewConversation(draftKey.projectId, { kind: 'session', sessionId: created.id })
+      } else shell.openSession(draftKey.projectId, created.id)
+    }
   }
   const knownModels = catalog?.models.filter((item) => !item.hidden || item.id === model) ?? []
   const nativeDefault = knownModels.find((item) => item.isDefault)
@@ -78,7 +85,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
         {contextMenu && <div className="composer__context-menu popover"><button className="menu-item" disabled>从 Files 添加文件</button><p className="menu-item__sub">暂不支持添加附件</p></div>}
       </div>
       <div className="composer__tags">{draft?.contextItems.map((context, index) => <span className="composer__tag" key={`${context.type}:${index}`}>
-        <Icon name={context.type === 'view' ? 'preview' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? VIEW_NAMES[context.viewId as ViewId] ?? context.viewId : context.path.split('/').at(-1)}</span>
+        <Icon name={context.type === 'view' ? 'preview' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? `当前 View · ${VIEW_NAMES[context.viewId as ViewId] ?? context.viewId}` : context.path.split('/').at(-1)}</span>
         <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : context.path}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}><Icon name="close" size={10} /></button>
       </span>)}</div>
       <span className="composer__models-wrap"><select className="composer__models" aria-label="Model Selector" title={catalog?.error ?? (session && session.activity !== 'none' ? '选择的模型从下一轮开始生效' : '当前 CLI 的模型')} value={model ?? ''} disabled={!cli || !catalog || !!catalog.error || !!(session && pending[`model:${session.id}`])} onChange={(event) => {

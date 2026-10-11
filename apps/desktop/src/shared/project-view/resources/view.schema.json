@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "viewId",
+    "root",
+    "bindings"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "viewId": {
+      "type": "string"
+    },
+    "root": {
+      "$ref": "#/$defs/node"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^data\\.[a-zA-Z0-9_.-]+$"
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "stack",
+            "grid",
+            "section",
+            "text",
+            "metric",
+            "badge",
+            "list",
+            "table",
+            "timeline",
+            "diagram",
+            "callout",
+            "empty"
+          ]
+        },
+        "bind": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "props": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "type": "string",
+              "maxLength": 160,
+              "pattern": "^[^<>]*$"
+            },
+            "variant": {
+              "enum": [
+                "default",
+                "muted",
+                "accent"
+              ]
+            },
+            "direction": {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ]
+            },
+            "columns": {
+              "type": "array",
+              "maxItems": 20,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-]+$"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "description": "Application additionally enforces 256 KiB, 500 components, depth 32, safe binding segments and references. Bindings read this View's Knowledge only; no expressions, HTML, CSS, scripts, network or Session data."
+}

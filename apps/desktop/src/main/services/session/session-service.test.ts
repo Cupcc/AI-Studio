@@ -23,7 +23,7 @@ const question = (secret = false): InputRequestInit => ({
   kind: 'question', nativeType: 'test', questions: [{ id: 'q', prompt: 'Answer?', multiSelect: false, allowFreeText: true, secret, options: [] }]
 })
 
-function harness(codex = new FakeProvider('codex')) {
+function harness(codex = new FakeProvider('codex'), buildViewContext?: import('./session-service').SessionServiceOptions['buildViewContext']) {
   const db = new DatabaseSync(':memory:')
   db.exec('PRAGMA foreign_keys=ON')
   runMigrations(db, [coreAppMeta, projectCore, sessionCore])
@@ -37,7 +37,8 @@ function harness(codex = new FakeProvider('codex')) {
   const build = () => new SessionService({
     store, projects, providers: [codex, claude], environment: async () => ({ env: { PATH: '/usr/bin' } }),
     now: () => clock.now, isForeground: () => clock.foreground,
-    transcriptChanged: event => changes.push(...event.items)
+    transcriptChanged: event => changes.push(...event.items),
+    buildViewContext
   })
   let service = build()
   cleanups.push(async () => { await service.dispose().catch(() => {}); if (db.isOpen) db.close() })
@@ -49,6 +50,42 @@ function harness(codex = new FakeProvider('codex')) {
 }
 
 describe('Session state, persistence and native continuity · AC-02–05 / FR-STATE-001–007', () => {
+  it.each(['codex', 'claude-code'] as const)('attaches View Context once for %s, stores metadata but never its template, and retains detached origin', async cli => {
+    const text = 'Current Project View: Architecture\nRelevant files: .ai-studio/knowledge/architecture.json\nRules: keep facts separate.'
+    let calls = 0
+    const h = harness(new FakeProvider('codex'), (_project, viewId) => { calls++; return { originViewId: viewId, paths: ['.ai-studio/knowledge/architecture.json'], text } })
+    const session = await h.service.create({ projectId: 'p', cli, text: '重新整理支付模块架构。', originViewId: 'architecture', viewContextAttached: true })
+    await tick()
+    const native = (cli === 'codex' ? h.codex : h.claude).sessions[0]!
+    expect(JSON.stringify(native.driver.callsTo('startTurn'))).toContain('Current Project View')
+    expect(h.items(session.id)[0]).toMatchObject({ text: '重新整理支付模块架构。', viewContextAttached: true, viewContextPaths: ['.ai-studio/knowledge/architecture.json'] })
+    expect(JSON.stringify(h.items(session.id))).not.toContain('Rules: keep')
+    expect(h.store.lastTurn(session.id)!.message).not.toContain('Current Project View')
+    native.controller.sink.nativeTurnEnded(native.controller.activeTurn!.turnId, { status: 'completed' })
+    h.service.send(session.id, { text: '第二轮' }); await tick()
+    expect(native.driver.callsTo('startTurn')).toHaveLength(2)
+    expect(JSON.stringify(native.driver.callsTo('startTurn')[1])).not.toContain('Current Project View')
+    expect(calls).toBe(1)
+    native.controller.sink.nativeTurnEnded(native.controller.activeTurn!.turnId, { status: 'completed' })
+    await h.restart()
+    h.service.send(session.id, { text: '恢复后继续' }); await tick()
+    const resumed = (cli === 'codex' ? h.codex : h.claude).sessions.at(-1)!
+    expect('nativeSessionId' in resumed.options).toBe(true)
+    expect(JSON.stringify(resumed.driver.callsTo('startTurn'))).not.toContain('Current Project View')
+    expect(calls).toBe(1)
+    const detached = await h.service.create({ projectId: 'p', cli, text: '普通请求', originViewId: 'architecture', viewContextAttached: false })
+    expect(detached.originViewId).toBe('architecture'); expect(detached.viewContextAttached).toBe(false)
+    expect(calls).toBe(1)
+  })
+  it('isolates View drafts and preserves removed labels across reload', async () => {
+    const h = harness(), key = { projectId: 'p', kind: 'new_chat' as const, viewId: 'architecture' }
+    const initial = await h.service.getDraft(key)
+    expect(initial.contextItems).toEqual([{ type: 'view', viewId: 'architecture' }])
+    h.service.saveDraft(key, { ...initial, text: 'Keep me', contextItems: [] })
+    expect((await h.service.getDraft(key)).contextItems).toEqual([])
+    expect((await h.service.getDraft({ ...key, viewId: 'progress' })).text).toBe('')
+    expect((await h.service.getDraft({ projectId: 'p', kind: 'new_chat' })).text).toBe('')
+  })
   it('accepts into Running before runtime startup and handles instant completion before send resolves', async () => {
     const gate = deferred<AgentSession>()
     class DelayedProvider extends FakeProvider {

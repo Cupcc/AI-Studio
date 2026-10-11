@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "viewId": "architecture",
+  "root": {
+    "type": "stack",
+    "children": [
+      {
+        "type": "text",
+        "bind": "summary",
+        "props": {
+          "title": "Architecture"
+        }
+      },
+      {
+        "type": "diagram",
+        "bind": "graph",
+        "props": {
+          "direction": "horizontal"
+        }
+      },
+      {
+        "type": "table",
+        "bind": "modules",
+        "props": {
+          "title": "模块",
+          "columns": [
+            "name",
+            "responsibility",
+            "path"
+          ]
+        }
+      }
+    ]
+  },
+  "bindings": {
+    "summary": "data.summary",
+    "graph": "data.graph",
+    "modules": "data.modules"
+  }
+}

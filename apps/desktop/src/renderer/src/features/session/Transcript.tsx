@@ -68,7 +68,8 @@ export function InputRequestCard({ item }: { item: Extract<TranscriptItem, { kin
 
 export function Transcript({ item }: { item: TranscriptItem }) {
   if (item.kind === 'user_message') return <article className="transcript-user" data-transcript-id={item.id}>
-    {item.contextItems.length > 0 && <div className="transcript-user__context">{item.contextItems.map((context, index) => <span key={index}>{context.type === 'view' ? context.viewId : context.path}</span>)}</div>}
+    {item.viewContextAttached && <details className="transcript-user__context"><summary>当前 View</summary><ul>{item.viewContextPaths?.map(path => <li key={path}><code>{path}</code></li>)}</ul></details>}
+    {item.contextItems.length > 0 && <div className="transcript-user__context">{item.contextItems.filter(context => context.type !== 'view' || !item.viewContextAttached).map((context, index) => <span key={index}>{context.type === 'view' ? context.viewId : context.path}</span>)}</div>}
     <p>{item.redacted ? '••••••（私密回复不保存）' : item.text}</p>
   </article>
   if (item.kind === 'agent_message') return <article className="transcript-agent" data-transcript-id={item.id}><AgentMarkdown text={item.text} />{!item.complete && <span className="sr-only">正在输出</span>}</article>
