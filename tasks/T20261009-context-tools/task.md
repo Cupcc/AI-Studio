@@ -21,7 +21,7 @@ created: 2026-10-09
 ## 依据
 
 - 功能：[02. Functional Requirements](<../../docs/02. Functional Requirements.md>) 第 5 节。
-- 界面：[03. UX Specification](<../../docs/03. UX Specification.md>) 第 5 节、D-08、D-13、P-B、P-C；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节（组件修订 diff 待审阅）。
+- 界面：[03. UX Specification](<../../docs/03. UX Specification.md>) 第 5 节、D-08、D-13、P-B、P-C；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节（已确认，2026-10-11，见其文档信息）。
 - 技术：[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 3 节（xterm.js、node-pty、Monaco、Git CLI、WebContentsView）、第 5 节、第 1 节第 13 项。
 - 验收：[05. Acceptance Criteria](<../../docs/05. Acceptance Criteria.md>) AC-07。
 - 决定：[DEC-08、DEC-09](<../../docs/07. Decisions.md>)；2026-10-10 用户在参考 ChatGPT Desktop 的建议后回复“agree your advice, update doc”。[调研记录](research.md) 区分官方公开行为和待验证能力。
@@ -40,12 +40,14 @@ created: 2026-10-09
 | Git Staged / Unstaged 等高级能力是否进入 MVP | 按 FR-TOOL-002 的基础只读范围执行，取舍见 DEC-08（2026-10-10 确认） |
 | 每轮修改文件的识别方式；非 Git 目录是否需要 Diff 基线 | 按 FR-TOOL-002 和 04 第 1 节第 13 项采用原生轮次记录；非 Git 不自建项目基线，能力验证见下节（2026-10-10 确认） |
 | Terminal 是否支持多实例 | 按 FR-TOOL-004 采用 Project 内轻量 Terminal Tabs，取舍见 DEC-09（2026-10-10 确认） |
+| 关闭仍在运行进程的 Terminal Tab 时是否确认？ | 在面板内确认“结束并关闭 / 取消”；收起面板不确认，只有关闭 Tab 才确认（[原型 v03](../T20261011-prototype-v03/task.md) Q4，2026-10-11 确认）。起草 `specs/tools/spec.md` 时写入 |
+| 关闭最后一个 Terminal Tab 后显示什么？ | 显示“没有打开的终端”空状态和“新建终端”，不自动收起面板（[原型 v03](../T20261011-prototype-v03/task.md) Q5，2026-10-11 确认）。起草 `specs/tools/spec.md` 时写入 |
 
 ## 待验证与实施准备
 
 - 按 04 第 1 节第 13 项验证 CLI 事件、覆盖范围、Claude Code 同等数据、非 Git 原生补丁与历史恢复；资料见 [research.md](research.md)。真实模型调用的授权和预算另行确定，本次仅更新文档。
 - 创建 `specs/tools/spec.md`，细化 Files / Browser、Terminal 关闭及应用退出生命周期、轮次补丁存储和 Adapter 接口。现有 Adapter 实现任务不因此视为已覆盖本轮 Diff。
-- 现有交互原型 v01 / v02 尚未覆盖本次工具行为；Shell Spec v02 diff 待审阅，v01 保留作历史依据。
+- 交互原型 v01 / v02 尚未覆盖本次工具行为；[v03](../../design/prototypes/README.md#studio-灰度交互原型-v03)（探索中，[T20261011-prototype-v03](../T20261011-prototype-v03/task.md)）已做出项目 / 本轮 Diff 与 Terminal Tabs 供评审。Shell Spec v02 已确认（2026-10-11），v01 保留作历史依据。
 
 ## 执行记录
 

@@ -19,7 +19,11 @@
 
 ### 1.1 未决问题
 
-暂无。PV-Q8～PV-Q12 已采纳建议并移至“已确认”（2026-10-11）。
+PV-Q8～PV-Q12 已采纳建议并移至“已确认”（2026-10-11）。
+
+| 编号 | 问题 | 推荐答案 |
+|---|---|---|
+| PV-Q13 | Preview 缩放的比例范围与步长？ | 50%～200%，每次 10%，与[原型 v03](../../tasks/T20261011-prototype-v03/task.md)一致；高保真阶段如需调整再改本条 |
 
 ### 1.2 已确认
 
@@ -33,7 +37,7 @@
 | PV-Q6 | Overview 的 Session 摘要区块是否由客户端固定渲染？ | 是（2026-10-09，T20261009-project-view Q5）。 |
 | PV-Q7 | V1 文件上限是否暂定 256 KB、500 节点？ | 是，作为实现防护上限，渲染原型校准后如需调整需更新规格（2026-10-09，T20261009-project-view Q11）。 |
 | PV-Q8 | `ViewSnapshot` 是否同时推送完整 Knowledge 与 Definition，还是只推送渲染后的模型？ | 采用已校验的声明式快照，包含完整 Knowledge 与 Definition，便于 Renderer 保持可测试和 last-good；不推送 Session 敏感区块（2026-10-11，依据 DEC-05、04 第 3 节）。 |
-| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 缩放比例只保存在当前 View 的运行期状态，不扩展 Project `ui_state`；具体手势交给高保真设计确认（2026-10-11，依据 FR-VIEW-005、Project spec 状态边界）。 |
+| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 缩放比例只保存在当前 View 的运行期状态，不扩展 Project `ui_state`；具体手势交给高保真设计确认（2026-10-11，依据 FR-VIEW-005、Project spec 状态边界）。控件与手势已按[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q1 确认（2026-10-11），见 FR-VIEW-005 第 4 条。 |
 | PV-Q10 | `schemaVersion` 升级是否只支持同版本读取，还是提供迁移器？ | V1 只接受当前支持版本；未知版本进入 `error` 并保留 last-good，迁移器作为后续 task（2026-10-11，依据 DEC-04 与本地文件可回退原则）。 |
 | PV-Q11 | View Context 生成文本是否显示在 transcript 的可折叠区域，还是只作为用户消息元数据？ | 显示可折叠“当前 View”标签，底层保存 `view_context_attached` 与路径元数据，不复制完整模板（2026-10-11，依据 DEC-06、Input spec 上下文标签规则）。 |
 | PV-Q12 | 默认 View 的内置 Definition 是否通过代码常量提供，还是作为应用资源 JSON 打包？ | 作为版本化应用资源 JSON 打包，启动时解析并用同一 Schema 校验；不写入 Project，便于视觉调整（2026-10-11，依据 FR-VIEW-001、DEC-05）。 |
@@ -147,7 +151,10 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 1. Project View Mode 的 Main Canvas 固定为左 Conversation、右 View Preview 的两列结构。尺寸、拖拽分隔线和右侧工具共用区域由 Project spec 统一定义。
 2. Preview 右侧区域顶部提供 Preview、Files、Diff、Browser、Terminal 的图标切换；同一时刻只显示一个内容。工具打开时替换 Preview，三列骨架不变；返回 Preview 的入口（含工具关闭 ×）见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)（P-B；2026-10-11 确认补充）。
 3. 刷新 Preview 不自动打开右侧区域、不把工具切回 Preview，也不改变 Conversation 列宽度。
-4. Preview 是只读区域，支持纵向滚动和二维内容缩放；修改必须通过左侧普通 CLI Session 完成。缩放比例只保存在当前 View 的运行期状态，不写入 Project `ui_state`；具体缩放手势和视觉参数由设计稿确定（PV-Q9，2026-10-11 确认）。
+4. Preview 是只读区域，支持纵向滚动和二维内容缩放；修改必须通过左侧普通 CLI Session 完成。缩放比例只保存在当前 View 的运行期状态，不写入 Project `ui_state`（PV-Q9，2026-10-11 确认）。缩放入口（[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q1，2026-10-11 确认）：
+   - 右侧区域顶栏常驻缩放控件“− 比例 +”，点击比例恢复 100%；右侧区域变窄时只保留比例；
+   - 焦点在 Preview 内时可用 ⌘ + / − / 0；Preview 内 ⌘ / Ctrl + 滚轮或触控板捏合；
+   - 比例范围与步长见 PV-Q13。
 5. 通过导航进入 View 时，右侧默认为 Preview；从 Project Tab 切回或启动恢复时遵循 Project spec 保存的完整状态，不重新套用进入规则（D-15）。
 
 ### FR-VIEW-006 Project View Conversation
@@ -195,9 +202,9 @@ V1 仅开放内置 Registry 中的受信组件（实现名称可调整）：
 `stack`、`grid`、`section`、`text`、`metric`、`badge`、`list`、`table`、`timeline`、`diagram`、`callout`、`empty`。
 
 1. 组件属性是有限 JSON 值或受限枚举；不得出现函数、事件处理器、任意 CSS、`style` 字符串、HTML 字符串、脚本、网络 URL 或动态模块名。
-2. 文本通过 React 文本节点输出；不得使用 `dangerouslySetInnerHTML`。链接只允许指向 Project 内相对路径或由客户端提供的安全外部链接策略（技术方案，待实现确认）。
+2. 文本通过 React 文本节点输出；不得使用 `dangerouslySetInnerHTML`。链接只允许指向 Project 内相对路径或由客户端提供的安全外部链接策略（技术方案，待实现确认）。Project 内相对路径由用户点击后在 Files 中定位：目录展开，文件选中；属于用户主动打开工具，不由 Agent 触发（[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q3，2026-10-11 确认；UX 第 5 节）。
 3. `bindings` 使用受限路径读取数据，不执行 JavaScript 表达式；绑定缺失显示组件级空状态，不使整个 Preview 崩溃。
-4. `diagram` 接收节点 / 边和布局方向，由 Renderer 计算布局；Agent 不提供 SVG 坐标或可执行绘图代码。
+4. `diagram` 接收节点 / 边和布局方向，由 Renderer 计算布局；Agent 不提供 SVG 坐标或可执行绘图代码。关系图宽于 Preview 时在图内横向滚动，不自动缩小，避免节点文字过小（[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q2，2026-10-11 确认）。
 5. Overview 的客户端 Session 区块使用独立 React 组件插槽，不进入 Agent 可编辑的 `root`，避免把 Session 标题、Needs Input 内容交给 View Definition 控制。
 
 ### 4.3 Preview 状态
@@ -205,7 +212,7 @@ V1 仅开放内置 Registry 中的受信组件（实现名称可调整）：
 | 状态 | 进入条件 | UI 行为 |
 |---|---|---|
 | `empty` | Knowledge 缺失、为空或没有可渲染内容 | 空状态 + “生成 <View 名称>”入口；不自动发起 Session |
-| `loading` | 首次读取或正在刷新，且没有上一版成功快照 | Preview 内显示轻量加载状态，保留 Conversation |
+| `loading` | 首次读取或正在刷新，且没有上一版成功快照 | 读取超过 200 ms 才在 Preview 内显示骨架，之前不显示内容，避免快速读取时闪烁（[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q6，2026-10-11 确认）；保留 Conversation |
 | `ready` | Knowledge 与 Definition 校验通过且 Renderer 成功 | 显示只读 View 和最近更新时间 |
 | `stale` | 正在刷新但已有上一版成功快照 | 继续显示上一版，可显示轻量“更新中”标记；不改变布局 |
 | `error` | 稳定读取、Schema、绑定或 Renderer 失败 | 保留上一版成功 View；若无上一版显示错误空状态和可复制摘要 |
