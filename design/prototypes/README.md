@@ -39,7 +39,7 @@
 - **未实现**：真实目录选择与文件读取、Session Resume、图片附件、Terminal 多实例、窗口尺寸以外的平台差异、最终视觉参数（当前基线见 [Visual Direction](../visual-direction.md) 第 1 节）。
 - **工程工具差异**：项目 / 本轮 Diff 与 Terminal Tabs 的行为依据见 FR-TOOL-002、FR-TOOL-004，组件修订见 [Shell Spec v02](../components/shell-spec-v02.md) 第 6、9 节；现有原型 v01 / v02 均未覆盖，不作为这些能力的验收证据。
 - **与 spec 的关系**：原型确定布局、组件外观与交互示意；行为与 spec 不一致时以 spec 为准，例如窗口失焦时不视为正在查看（[session spec](../../specs/session/spec.md) S-Q1）；原型中不足一屏的对话贴底显示，已改为从顶部开始（[Shell Spec v01](../components/shell-spec-v01.md) 第 6 节，2026-10-10 确认）。
-- **对齐后的组件修订**：2026-10-11 确认的组件尺寸与选中字重见 [Shell Spec v02](../components/shell-spec-v02.md) 第 3、4、11 节；View Mode 工具关闭入口见其第 8 节。原型源文件保留，复验截图见[对齐验收](../../tasks/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)。
+- **对齐后的组件修订**：2026-10-11 确认并签收的组件尺寸与选中字重见 [Shell Spec v02](../components/shell-spec-v02.md) 第 3、4、11 节；View Mode 工具关闭入口见其第 8 节。原型源文件保留，复验截图见[归档验收](../../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)。
 
 ### Studio 灰度交互原型 v02
 

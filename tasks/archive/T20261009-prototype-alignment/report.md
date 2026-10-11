@@ -2,23 +2,23 @@
 
 ## 待人决定
 
-- 原有 input spec I-Q1 的问题、建议与回答统一在[负责规格](../../specs/input/spec.md#11-未决问题)维护。
-- 路线图所列三个界面问题已于 2026-10-11 在对话中确认，规格回写见下表；本次 diff 与[复验结果](acceptance.md#6-2026-10-11-复验)待审阅，任务尚未签收。
+- 原有 input spec I-Q1 的问题、建议与回答统一在[负责规格](../../../specs/input/spec.md#11-未决问题)维护。
+- 路线图所列三个界面问题已于 2026-10-11 在对话中确认并随本任务签收，规格回写见下表；复验结果见[验收记录](acceptance.md#6-2026-10-11-复验)。
 
 ## 需要回写的内容
 
 | 目标文档 | 内容 | 状态 |
 |---|---|---|
-| [docs/06. Development Roadmap.md](<../../docs/06. Development Roadmap.md>) | 复跑进度、历史失败与签收条件 | 本轮回写，待审阅 |
-| [apps/desktop/README.md](../../apps/desktop/README.md) | `tokens.css` 不再标为临时；登记 `primitives.css` | 已回写（`c9cf37c`） |
-| [Shell Spec v02](../../design/components/shell-spec-v02.md) §3、§4、§11 | 按 2026-10-11 对话确认统一当前尺寸与 Session 选中字重 | 已回写，diff 待审阅；v01 保留历史文件 |
-| [UX §5](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)；Shell Spec v02 §8 | 按 2026-10-11 对话确认补充 View 工具关闭入口 | 已回写，diff 待审阅 |
-| [原型说明](../../design/prototypes/README.md)、[组件索引](../../design/components/README.md)、Project / Navigation / Project View spec | 链接负责规则，清理重复的旧参数与过时入口说明 | 已同步，diff 待审阅 |
+| [docs/06. Development Roadmap.md](<../../../docs/06. Development Roadmap.md>) | 复跑进度、历史失败与签收条件 | 已回写并签收（2026-10-11） |
+| [apps/desktop/README.md](../../../apps/desktop/README.md) | `tokens.css` 不再标为临时；登记 `primitives.css` | 已回写（`c9cf37c`） |
+| [Shell Spec v02](../../../design/components/shell-spec-v02.md) §3、§4、§11 | 按 2026-10-11 对话确认统一当前尺寸与 Session 选中字重 | 已回写并签收（2026-10-11）；v01 保留历史文件 |
+| [UX §5](<../../../docs/03. UX Specification.md#5-context-panel-交互模型>)；Shell Spec v02 §8 | 按 2026-10-11 对话确认补充 View 工具关闭入口 | 已回写并签收（2026-10-11） |
+| [原型说明](../../../design/prototypes/README.md)、[组件索引](../../../design/components/README.md)、Project / Navigation / Project View spec | 链接负责规则，清理重复的旧参数与过时入口说明 | 已同步并签收（2026-10-11） |
 
 ## 遗留问题
 
 - 已在屏幕解锁后复跑；修复后的完整 E2E、针对性重复和实际 Electron 交互均通过，历史失败与复验见[验收第 6.3 节](acceptance.md#63-间歇失败与修复复验)。
-- 上下文 chip、“来自 <View>”顶栏与 View 左侧的输入区目前没有可达的产品路径，只有 W2 注入 DOM 的检查；由 [T20261009-context-tools](../T20261009-context-tools/task.md)、[T20261009-project-view](../T20261009-project-view/task.md) 实现时复核。
+- 上下文 chip、“来自 <View>”顶栏与 View 左侧的输入区目前没有可达的产品路径，只有 W2 注入 DOM 的检查；由 [T20261009-context-tools](../../T20261009-context-tools/task.md)、[T20261009-project-view](../../T20261009-project-view/task.md) 实现时复核。
 - `session.css` 中仍有组件内部尺寸使用像素字面量（与此前做法一致），高保真阶段调整视觉参数前可再收拢为 Token。
 - 原型 v01 自身在 1024 宽度下右侧区域会溢出窗口；应用遵循 Shell Spec §2.3，不以原型为准。
 

@@ -4,7 +4,7 @@
 
 ## 未覆盖与边界
 
-- 当前总体结论：本任务已实现范围通过，待人工签收。修复后的完整 E2E、针对性重复及实际 Electron 交互均通过，见[第 6 节](#6-2026-10-11-复验)。
+- 当前总体结论：本任务已实现范围通过，用户已于 2026-10-11 签收。修复后的完整 E2E、针对性重复及实际 Electron 交互均通过，见[第 6 节](#6-2026-10-11-复验)。
 - 本轮仅验收 main 上的 v01 对齐与已确认的短对话从顶部排列；另一个 worktree 中的交互原型 v02 对齐不在本轮代码基线内。
 - 使用模拟 Provider；真实 CLI、工具内容、View 内容与 macOS 原生窗口控制仍按[第 5 节](#5-未覆盖与边界)列明边界。
 
@@ -12,14 +12,14 @@
 
 | 问题 | 背景 | 建议 |
 |---|---|---|
-| input spec I-Q1 | 问题、推荐与确认状态统一维护在 [input spec 第 1.1 节](../../specs/input/spec.md#11-未决问题) | 在负责规格确认；本轮保留实现 |
+| input spec I-Q1 | 问题、推荐与确认状态统一维护在 [input spec 第 1.1 节](../../../specs/input/spec.md#11-未决问题) | 在负责规格确认；本轮保留实现 |
 
-三个界面决定已于 2026-10-11 在对话中回答，已确认规则见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)和 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 3、4、8、11 节；本次规格 diff 待审阅。
+三个界面决定已于 2026-10-11 在对话中回答并随本任务签收，已确认规则见 [UX 第 5 节](<../../../docs/03. UX Specification.md#5-context-panel-交互模型>)和 [Shell Spec v02](../../../design/components/shell-spec-v02.md) 第 3、4、8、11 节。
 
 ## 签收
 
-- 状态：待签收
-- 签收：待人工审阅规格 diff、截图与边界后签收。本轮三个界面选择不等同于任务签收。
+- 状态：已签收（2026-10-11）
+- 签收：用户已审阅规格 diff、截图与边界并明确“签收”。三个界面选择与本任务验收结果一并接受；真实 CLI、未实现的 View / 工具内容仍不在本任务范围内。
 
 ## 验收说明
 
@@ -27,7 +27,7 @@
 
 验证方法：
 
-1. 新增 [alignment.spec.ts](../../apps/desktop/e2e/alignment.spec.ts)，在 1024×640、1280×800、1440×900 三种内容尺寸下驱动界面进入各状态，等 `innerWidth/innerHeight` 与窗口一致后截图，并断言 Shell Spec v01 第 2 节的布局不变量（结果见 [W3-layout-metrics.json](evidence/W3-layout-metrics.json)）。
+1. 新增 [alignment.spec.ts](../../../apps/desktop/e2e/alignment.spec.ts)，在 1024×640、1280×800、1440×900 三种内容尺寸下驱动界面进入各状态，等 `innerWidth/innerHeight` 与窗口一致后截图，并断言 Shell Spec v01 第 2 节的布局不变量（结果见 [W3-layout-metrics.json](evidence/W3-layout-metrics.json)）。
 2. 用本机 Chrome 在同一状态、同一尺寸下运行原型，逐张目视对照（原型截图 `evidence/W3-proto-*-1280.png`）。
 3. 对同一状态下的原型与应用元素读取计算样式（尺寸、内边距、圆角、颜色、字体、阴影），逐组比较，结果见 [W3-style-probe-compare.txt](evidence/W3-style-probe-compare.txt)：85 组中 46 组完全一致，36 组有差异（第 4 节逐类归因），3 组为原型或应用在该状态下不存在的元素。探针脚本是 `.runtime/` 下的临时文件，未保留；原始数据见 `W3-style-probe-proto.json`、`W3-style-probe-app.json`。
 
@@ -120,7 +120,7 @@
 | C10 | 轮次完成行 | 范围外 | “Worked for … · Done”样式与原型一致（12px、淡色）；“修改了 N 个文件”链接归 T20261009-context-tools |
 | C11 | Needs Input 卡片 | 对齐 | [应用](evidence/W3-needs-input-1280.png) / [原型](evidence/W3-proto-needs-input-1280.png)：探针中橙色浅底与边框、标题橙点、命令框、主 / 次按钮、右侧“也可以在下方直接回复”均一致。保留：主按钮为 Adapter 标记的选项，否则第一个（W2，新增单测）。卡片根元素字号 13 对原型 14，但原型卡片内每个文字节点都自带字号，视觉无差别 |
 | C12 | Error 卡片 | 对齐 | [应用](evidence/W3-error-1280.png) / [原型](evidence/W3-proto-error-details-1280.png)：红色浅底与边框、红点标题、“重试”主按钮、“查看详情 / 收起详情”按钮一致；详情内容是 Provider 的原始 JSON，高度不同属内容差异 |
-| C13 | 输入区 | 对齐（有保留差异） | 探针：输入框（圆角 16、内边距、阴影）、文本框、底行、`+`、圆形发送按钮一致；模型选择保留原生下拉，收起外观为“文字 + chevron”。保留差异：Needs Input 且输入为空时按钮显示 Stop（[input spec](../../specs/input/spec.md) I-Q1），原型显示禁用的 Send（[应用](evidence/W3-needs-input-1280.png) / [原型](evidence/W3-proto-needs-input-1280.png)）；占位文案（“向 Codex CLI 发送消息…”“回复 Agent…”）与原型不同，可访问名称未变 |
+| C13 | 输入区 | 对齐（有保留差异） | 探针：输入框（圆角 16、内边距、阴影）、文本框、底行、`+`、圆形发送按钮一致；模型选择保留原生下拉，收起外观为“文字 + chevron”。保留差异：Needs Input 且输入为空时按钮显示 Stop（[input spec](../../../specs/input/spec.md) I-Q1），原型显示禁用的 Send（[应用](evidence/W3-needs-input-1280.png) / [原型](evidence/W3-proto-needs-input-1280.png)）；占位文案（“向 Codex CLI 发送消息…”“回复 Agent…”）与原型不同，可访问名称未变 |
 | C14 | 上下文标签 | 对齐（W2 证据） | [W2-composer-chips-tool-group-1280.png](evidence/W2-composer-chips-tool-group-1280.png)：带图标的 chip，24px 高、圆角 6，可移除；目前没有产品入口，W2 用注入 DOM 检查，W3 未复现。两类 chip 都带 ×，符合 Shell Spec §7“可单独移除”，原型的 View chip 没有 × |
 | C15 | 右侧区域顶栏（Session Mode） | 对齐 | 探针：图标按钮、选中态一致；[W3-session-sidebar-1280](evidence/W3-session-sidebar-1280.png)：工具图标在左、当前工具名、右侧关闭 |
 | C16 | 右侧区域顶栏（View Mode） | 对齐（布局）；保留差异 | [W3-view-tool-1280](evidence/W3-view-tool-1280.png)：标题在左，右侧 Preview 图标、分隔线、四个工具图标，探针一致。“示例数据”“已更新 · 时间”归 T20261009-project-view。额外的工具关闭 × 已于 2026-10-11 确认保留，行为见 UX 第 5 节；复验见第 6 节 |

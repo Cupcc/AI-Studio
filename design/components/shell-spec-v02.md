@@ -6,16 +6,16 @@
 |---|---|
 | 产品 | AI Developer Studio |
 | 版本 | v02 |
-| 状态 | 草稿：继承 v01；工程工具行为已于 2026-10-10 确认，本版 diff 待审阅 |
-| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/T20261009-context-tools/task.md) 的 2026-10-10 确认；用户 2026-10-11 对话确认的 v01 对齐界面决定，证据见[复验记录](../../tasks/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验) |
+| 状态 | 已确认（2026-10-11）：继承 v01；工程工具行为已于 2026-10-10 确认，本版 v01 对齐修订随任务签收 |
+| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/T20261009-context-tools/task.md) 的 2026-10-10 确认；用户 2026-10-11 对话确认的 v01 对齐界面决定，证据见[归档复验记录](../../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验) |
 | 范围 | 窗口布局、区域尺寸、组件结构与交互状态 |
 | 不含 | 色值、字体、图标库等视觉参数：见 [Visual Direction](../visual-direction.md) 第 1 节 |
 
-## 1. 待确认
+## 1. 已确认与待确认
 
 | 项目 | 说明 |
 |---|---|
-| 本轮对齐修订 | 第 3、4、8、11 节依据用户 2026-10-11 对话确认补充；本次 diff 待审阅 |
+| 本轮对齐修订 | 第 3、4、8、11 节依据用户 2026-10-11 对话确认补充，并于 2026-10-11 随任务签收 |
 | 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 1 节 |
 | 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
 | 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
