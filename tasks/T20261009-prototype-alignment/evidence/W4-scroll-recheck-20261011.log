@@ -1,0 +1,11 @@
+
+Running 2 tests using 1 worker
+
+(node:94881) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/session.spec.ts:220:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (4.5s)
+(node:94964) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 e2e/session.spec.ts:220:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (3.9s)
+
+  2 passed (9.0s)

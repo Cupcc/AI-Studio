@@ -1,0 +1,31 @@
+$ pnpm typecheck && pnpm test
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck
+$ tsc -p tsconfig.build.json
+Scope: 2 of 3 workspace projects
+$ tsc -p tsconfig.json --noEmit
+$ tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.e2e.json
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run test
+$ tsc -p tsconfig.build.json
+Scope: 2 of 3 workspace projects
+$ vitest run
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/prototype-v01-acceptance/packages/agent-adapter
+
+
+ Test Files  15 passed (15)
+      Tests  181 passed (181)
+   Start at  08:08:06
+   Duration  2.60s (tests 82%, transform 14%, import 4%, worker 1%)
+
+$ vitest run
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/prototype-v01-acceptance/apps/desktop
+
+
+ Test Files  21 passed (21)
+      Tests  133 passed (133)
+   Start at  08:08:09
+   Duration  2.38s (tests 40%, transform 24%, environment 23%, import 13%, worker 1%)
+
+    Isolate  21 workers spawned · ~216ms startup each (spawn + environment, per file)
+             at least ~288ms faster with isolate: false — reuses workers across files instead of one per file

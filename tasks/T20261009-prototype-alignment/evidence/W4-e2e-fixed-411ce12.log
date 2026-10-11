@@ -1,0 +1,64 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run test:e2e
+$ tsc -p tsconfig.build.json
+$ electron-vite build && playwright test
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 47 modules transformed.
+rendering chunks...
+out/main/index.js  120.32 kB
+✓ built in 188ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 7 modules transformed.
+rendering chunks...
+out/preload/index.js  4.95 kB
+✓ built in 13ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 66 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                                              0.85 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff    13.14 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-CB9ihrfo.woff    13.16 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2   14.71 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2   14.89 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff    22.10 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2   22.59 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff    23.88 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff    23.92 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2   24.18 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2   24.25 kB
+../../out/renderer/assets/index-COVGTIca.css                              40.94 kB
+../../out/renderer/assets/index-Vi0TFc0M.js                              763.15 kB
+✓ built in 1.10s
+
+Running 24 tests using 1 worker
+
+(node:4666) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/alignment.spec.ts:105:5 › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (4.9s)
+  ✓   2 e2e/alignment.spec.ts:120:5 › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (2.0s)
+  ✓   3 e2e/alignment.spec.ts:130:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (2.3s)
+  ✓   4 e2e/alignment.spec.ts:148:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (2.9s)
+  ✓   5 e2e/alignment.spec.ts:159:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (2.6s)
+  ✓   6 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (55ms)
+  ✓   7 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (38ms)
+  ✓   8 e2e/app.spec.ts:78:5 › renderer has no Node.js, require or raw ipcRenderer (4ms)
+  ✓   9 e2e/app.spec.ts:119:5 › typed preload API works and main validates input (10ms)
+  ✓  10 e2e/app.spec.ts:140:5 › new windows and foreign navigation are denied (511ms)
+  ✓  11 e2e/app.spec.ts:152:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (837ms)
+  ✓  12 e2e/project.spec.ts:47:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (2.2s)
+  ✓  13 e2e/project.spec.ts:105:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (961ms)
+  ✓  14 e2e/project.spec.ts:124:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (753ms)
+  ✓  15 e2e/session.spec.ts:62:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (3.3s)
+  ✓  16 e2e/session.spec.ts:81:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (1.2s)
+  ✓  17 e2e/session.spec.ts:95:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (2.9s)
+  ✓  18 e2e/session.spec.ts:109:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (1.9s)
+  ✓  19 e2e/session.spec.ts:131:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (3.3s)
+  ✓  20 e2e/session.spec.ts:156:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (2.5s)
+  ✓  21 e2e/session.spec.ts:174:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (1.4s)
+  ✓  22 e2e/session.spec.ts:186:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (2.6s)
+  ✓  23 e2e/session.spec.ts:186:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (2.0s)
+  ✓  24 e2e/session.spec.ts:220:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (3.9s)
+
+  24 passed (46.1s)

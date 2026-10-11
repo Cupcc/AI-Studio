@@ -2,38 +2,36 @@
 
 ## 待人决定
 
-| # | 问题 | 现状 | 依据 |
-|---|---|---|---|
-| 1 | View Mode 打开工具时，右上角的“关闭右侧工具”按钮保留还是移除？ | 保留（移除属于行为变化） | 原型与 Shell Spec §8 均无；§9 仅为 Session Mode 边栏规定关闭按钮 |
-| 2 | Shell Spec 与原型的尺寸差异以哪一方为准？Tab 关闭按钮 16×16 / 18×18，`+` 28×32 / 30×32，导航分组标题 28 / 30.5，日期分组 24 / 28.5，CLI 菜单宽 260 / 225 | Tab 关闭与 `+` 按原型；分组标题、日期分组与 CLI 菜单按 Shell Spec | Shell Spec §3、§4；原型 v01 样式表 |
-| 3 | Session 行选中时字重为 400 还是 500？ | 400（原型 `.srow.on`） | Shell Spec §11 写“字重 500” |
-| 4 | Needs Input 且输入为空时显示 Stop 还是禁用的 Send？ | Stop（按推荐实现） | [input spec](../../specs/input/spec.md) I-Q1，原有未决问题；原型显示禁用的 Send |
+- 原有 input spec I-Q1 的问题、建议与回答统一在[负责规格](../../specs/input/spec.md#11-未决问题)维护。
+- 路线图所列三个界面问题已于 2026-10-11 在对话中确认，规格回写见下表；本次 diff 与[复验结果](acceptance.md#6-2026-10-11-复验)待审阅，任务尚未签收。
 
 ## 需要回写的内容
 
 | 目标文档 | 内容 | 状态 |
 |---|---|---|
-| [docs/06. Development Roadmap.md](<../../docs/06. Development Roadmap.md>) | 文档信息“进度依据”、下一步 1 改为签收与复跑、Project 管理行的剩余工作 | 已回写，待审阅 |
+| [docs/06. Development Roadmap.md](<../../docs/06. Development Roadmap.md>) | 复跑进度、历史失败与签收条件 | 本轮回写，待审阅 |
 | [apps/desktop/README.md](../../apps/desktop/README.md) | `tokens.css` 不再标为临时；登记 `primitives.css` | 已回写（`c9cf37c`） |
-| [design/components/shell-spec-v01.md](../../design/components/shell-spec-v01.md) §1 | “尺寸复核”可改为已在应用中按三种宽度复核，链接本任务验收 | 待人确认后回写（已确认文档） |
-| 同上 §3、§4、§11 | 与原型不一致的尺寸与选中字重，按[待人决定](#待人决定)的回答修改 spec 或实现 | 待人决定 |
+| [Shell Spec v02](../../design/components/shell-spec-v02.md) §3、§4、§11 | 按 2026-10-11 对话确认统一当前尺寸与 Session 选中字重 | 已回写，diff 待审阅；v01 保留历史文件 |
+| [UX §5](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)；Shell Spec v02 §8 | 按 2026-10-11 对话确认补充 View 工具关闭入口 | 已回写，diff 待审阅 |
+| [原型说明](../../design/prototypes/README.md)、[组件索引](../../design/components/README.md)、Project / Navigation / Project View spec | 链接负责规则，清理重复的旧参数与过时入口说明 | 已同步，diff 待审阅 |
 
 ## 遗留问题
 
-- 屏幕解锁后复跑 `pnpm test:e2e`，通过后验收标准 3 转为通过。
+- 已在屏幕解锁后复跑；修复后的完整 E2E、针对性重复和实际 Electron 交互均通过，历史失败与复验见[验收第 6.3 节](acceptance.md#63-间歇失败与修复复验)。
 - 上下文 chip、“来自 <View>”顶栏与 View 左侧的输入区目前没有可达的产品路径，只有 W2 注入 DOM 的检查；由 [T20261009-context-tools](../T20261009-context-tools/task.md)、[T20261009-project-view](../T20261009-project-view/task.md) 实现时复核。
 - `session.css` 中仍有组件内部尺寸使用像素字面量（与此前做法一致），高保真阶段调整视觉参数前可再收拢为 Token。
 - 原型 v01 自身在 1024 宽度下右侧区域会溢出窗口；应用遵循 Shell Spec §2.3，不以原型为准。
 
 ## 结论
 
-桌面端界面已按交互原型 v01 对齐，实现位于分支 `task/prototype-alignment`（基于 `main` `969850a`），等待人签收。独立验收见 [acceptance.md](acceptance.md)：
+桌面端界面已按交互原型 v01 对齐，原实现来自 `task/prototype-alignment`（基于 `969850a`），现已在 main。2026-10-11 修复后复验基线为 `411ce12`，本任务已实现范围通过，等待人签收。独立验收见 [acceptance.md](acceptance.md)：
 
 - 差异清单中标为“本任务”的各项均已对齐，或按 Shell Spec / 行为 spec 保留差异并注明原因；独立复核未发现偏差。
 - 1024 / 1280 / 1440 三种宽度下 Session Mode、Project View Mode、Needs Input、Error 的截图与原型对照完成；17 个“状态 × 宽度”组合的 Shell Spec §2 布局不变量全部通过。
 - 字体随应用打包，CSP 未放开；只保留浅色主题。
 - `pnpm typecheck`、`pnpm test`（Adapter 181、desktop 133）通过；测试只新增 2 项单测，没有放宽断言或改动可访问名称。
-- 完整 `pnpm test:e2e` **尚未在本分支跑通**：验证期间屏幕锁定，窗口无法获得焦点，依赖焦点的 4 项 Session 用例失败或挂起。同一锁屏条件下，基线 `969850a` 与本分支的 `session.spec.ts` 结果完全相同（4 项失败、6 项通过），其余 E2E（含新增 5 项）通过，没有回归迹象。需在解锁屏幕后复跑一次，预期 24 项。
+- 修复后 `pnpm check:commit` 通过（Adapter 181、desktop 134，共 315 项单测），完整 `pnpm test:e2e` 24/24，曾失败的两条场景重复 6/6；实际 Electron 界面操作中滚动、resize、恢复跟随均保持 gap=0。历史 23/24 失败仍保留在验收证据中，Completed Unread 单次失败未再复现，未虚构其原因。
+- 三个界面问题已回答并形成规格 diff；本次用户选择不等同于最终签收，也不表示尚未实现的 View / 工具内容已通过验收。
 
 ## 变更
 

@@ -143,9 +143,9 @@
 | 组件 | 尺寸与结构 | 状态 | 来源 |
 |---|---|---|---|
 | Project Tab | 高 32，最大宽 200；内容依次为注意力点（仅非当前 Tab）、Project 名称（单行，超出截断）、关闭按钮 | Default / Hover / Selected / Focus | Shell 第 3 节；FR-PROJ-002 |
-| 关闭按钮 | 16×16，×；当前 Tab 常显，其他 Tab 悬停时显示（键盘聚焦到 Tab 时也应显示，提案） | Default / Hover / Focus | Shell 第 3 节 |
+| 关闭按钮 | 尺寸见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 3 节；×，当前 Tab 常显，其他 Tab 悬停时显示（键盘聚焦到 Tab 时也应显示，提案） | Default / Hover / Focus | Shell Spec v02 第 3 节（2026-10-11 确认） |
 | 注意力点 | 7px 圆点，色同对应 Session 状态色 | — | Shell 第 5 节 |
-| `+` 按钮 | 28×32，紧随最后一个 Tab | Default / Hover / Focus | Shell 第 3 节；D-09 |
+| `+` 按钮 | 尺寸见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 3 节；紧随最后一个 Tab | Default / Hover / Focus | Shell Spec v02 第 3 节（2026-10-11 确认）；D-09 |
 
 - 名称截断：单行，尾部省略号；悬停显示完整名称与路径的提示（提案，用于区分同名目录，PROJ-Q9）。
 - Tab 过多、宽度不足时的收缩与溢出规则文档未规定，见 PROJ-Q9。

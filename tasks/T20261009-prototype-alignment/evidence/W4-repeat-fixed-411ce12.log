@@ -1,0 +1,17 @@
+
+Running 6 tests using 1 worker
+
+(node:6445) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/session.spec.ts:62:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (3.6s)
+  ✓  2 e2e/session.spec.ts:220:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (3.9s)
+(node:6622) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 e2e/session.spec.ts:62:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (2.9s)
+  ✓  4 e2e/session.spec.ts:220:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (3.8s)
+(node:6691) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 e2e/session.spec.ts:62:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (3.3s)
+  ✓  6 e2e/session.spec.ts:220:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (3.9s)
+
+  6 passed (22.3s)

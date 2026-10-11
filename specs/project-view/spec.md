@@ -146,7 +146,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 ### FR-VIEW-005 左右布局
 
 1. Project View Mode 的 Main Canvas 固定为左 Conversation、右 View Preview 的两列结构。尺寸、拖拽分隔线和右侧工具共用区域由 Project spec 统一定义。
-2. Preview 右侧区域顶部提供 Preview、Files、Diff、Browser、Terminal 的图标切换；同一时刻只显示一个内容。工具打开时替换 Preview，三列骨架不变；点击 Preview 图标或顶栏右侧边栏按钮回到 Preview（P-B）。
+2. Preview 右侧区域顶部提供 Preview、Files、Diff、Browser、Terminal 的图标切换；同一时刻只显示一个内容。工具打开时替换 Preview，三列骨架不变；返回 Preview 的入口（含工具关闭 ×）见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)（P-B；2026-10-11 确认补充）。
 3. 刷新 Preview 不自动打开右侧区域、不把工具切回 Preview，也不改变 Conversation 列宽度。
 4. Preview 是只读区域，支持纵向滚动和二维内容缩放；修改必须通过左侧普通 CLI Session 完成。具体缩放手势和视觉参数由设计稿确定。
 5. 通过导航进入 View 时，右侧默认为 Preview；从 Project Tab 切回或启动恢复时遵循 Project spec 保存的完整状态，不重新套用进入规则（D-15）。

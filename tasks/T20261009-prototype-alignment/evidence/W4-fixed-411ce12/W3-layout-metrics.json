@@ -1,0 +1,300 @@
+[
+  {
+    "state": "session-sidebar",
+    "width": 1024,
+    "height": 640,
+    "innerWidth": 1024,
+    "document": 1024,
+    "workspace": 1024,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 400,
+    "right": 376,
+    "column": 400,
+    "composer": 352
+  },
+  {
+    "state": "session-sidebar",
+    "width": 1280,
+    "height": 800,
+    "innerWidth": 1280,
+    "document": 1280,
+    "workspace": 1280,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 632,
+    "right": 400,
+    "column": 632,
+    "composer": 584
+  },
+  {
+    "state": "session-sidebar",
+    "width": 1440,
+    "height": 900,
+    "innerWidth": 1440,
+    "document": 1440,
+    "workspace": 1440,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 792,
+    "right": 400,
+    "column": 720,
+    "composer": 720
+  },
+  {
+    "state": "view-overview",
+    "width": 1024,
+    "height": 640,
+    "innerWidth": 1024,
+    "document": 1024,
+    "workspace": 1024,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 376,
+    "right": 400,
+    "column": null,
+    "composer": null
+  },
+  {
+    "state": "view-overview",
+    "width": 1280,
+    "height": 800,
+    "innerWidth": 1280,
+    "document": 1280,
+    "workspace": 1280,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 440,
+    "right": 592,
+    "column": null,
+    "composer": null
+  },
+  {
+    "state": "view-overview",
+    "width": 1440,
+    "height": 900,
+    "innerWidth": 1440,
+    "document": 1440,
+    "workspace": 1440,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 440,
+    "right": 752,
+    "column": null,
+    "composer": null
+  },
+  {
+    "state": "view-tool",
+    "width": 1024,
+    "height": 640,
+    "innerWidth": 1024,
+    "document": 1024,
+    "workspace": 1024,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 376,
+    "right": 400,
+    "column": null,
+    "composer": null
+  },
+  {
+    "state": "view-tool",
+    "width": 1280,
+    "height": 800,
+    "innerWidth": 1280,
+    "document": 1280,
+    "workspace": 1280,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 440,
+    "right": 592,
+    "column": null,
+    "composer": null
+  },
+  {
+    "state": "view-tool",
+    "width": 1440,
+    "height": 900,
+    "innerWidth": 1440,
+    "document": 1440,
+    "workspace": 1440,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48,
+      48
+    ],
+    "conversation": 440,
+    "right": 752,
+    "column": null,
+    "composer": null
+  },
+  {
+    "state": "needs-input",
+    "width": 1024,
+    "height": 640,
+    "innerWidth": 1024,
+    "document": 1024,
+    "workspace": 1024,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48
+    ],
+    "conversation": 776,
+    "right": null,
+    "column": 720,
+    "composer": 720
+  },
+  {
+    "state": "needs-input",
+    "width": 1280,
+    "height": 800,
+    "innerWidth": 1280,
+    "document": 1280,
+    "workspace": 1280,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48
+    ],
+    "conversation": 1032,
+    "right": null,
+    "column": 720,
+    "composer": 720
+  },
+  {
+    "state": "needs-input",
+    "width": 1440,
+    "height": 900,
+    "innerWidth": 1440,
+    "document": 1440,
+    "workspace": 1440,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48
+    ],
+    "conversation": 1192,
+    "right": null,
+    "column": 720,
+    "composer": 720
+  },
+  {
+    "state": "needs-input-question",
+    "width": 1280,
+    "height": 800,
+    "innerWidth": 1280,
+    "document": 1280,
+    "workspace": 1280,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48
+    ],
+    "conversation": 1032,
+    "right": null,
+    "column": 720,
+    "composer": 720
+  },
+  {
+    "state": "error",
+    "width": 1024,
+    "height": 640,
+    "innerWidth": 1024,
+    "document": 1024,
+    "workspace": 1024,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48
+    ],
+    "conversation": 776,
+    "right": null,
+    "column": 720,
+    "composer": 720
+  },
+  {
+    "state": "error",
+    "width": 1280,
+    "height": 800,
+    "innerWidth": 1280,
+    "document": 1280,
+    "workspace": 1280,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48
+    ],
+    "conversation": 1032,
+    "right": null,
+    "column": 720,
+    "composer": 720
+  },
+  {
+    "state": "error",
+    "width": 1440,
+    "height": 900,
+    "innerWidth": 1440,
+    "document": 1440,
+    "workspace": 1440,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48
+    ],
+    "conversation": 1192,
+    "right": null,
+    "column": 720,
+    "composer": 720
+  },
+  {
+    "state": "draft",
+    "width": 1280,
+    "height": 800,
+    "innerWidth": 1280,
+    "document": 1280,
+    "workspace": 1280,
+    "topbar": 40,
+    "nav": 248,
+    "headers": [
+      48
+    ],
+    "conversation": 1032,
+    "right": null,
+    "column": null,
+    "composer": 720
+  }
+]

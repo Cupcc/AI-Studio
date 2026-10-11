@@ -49,7 +49,7 @@ design/
 | 参考截图 | 尚无 |
 | 线框图 | v02，见 [wireframes](wireframes/README.md) |
 | 高保真界面 | 尚无 |
-| 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) 基线；工具行为修订见 [Shell Spec v02](components/shell-spec-v02.md)（状态见组件索引） |
+| 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) 基线；工具行为与原型对齐后的组件修订见 [Shell Spec v02](components/shell-spec-v02.md)（状态见组件索引） |
 | 交互原型 | [Studio 灰度交互原型 v01](prototypes/README.md)；桌面端按其对齐，见 [T20261009-prototype-alignment](../tasks/T20261009-prototype-alignment/task.md) |
 
 方案确认后，在本节添加所采用版本的文件链接或原型链接。各版本的状态、确认日期和探索中的版本只记录在对应目录索引；探索稿继续保留在对应目录。

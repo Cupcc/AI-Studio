@@ -7,21 +7,22 @@
 | 产品 | AI Developer Studio |
 | 版本 | v02 |
 | 状态 | 草稿：继承 v01；工程工具行为已于 2026-10-10 确认，本版 diff 待审阅 |
-| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/T20261009-context-tools/task.md) 的 2026-10-10 确认 |
+| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/T20261009-context-tools/task.md) 的 2026-10-10 确认；用户 2026-10-11 对话确认的 v01 对齐界面决定，证据见[复验记录](../../tasks/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验) |
 | 范围 | 窗口布局、区域尺寸、组件结构与交互状态 |
 | 不含 | 色值、字体、图标库等视觉参数：见 [Visual Direction](../visual-direction.md) 第 1 节 |
-
-本文件中的颜色仅用于区分状态语义，具体色值见交互原型 v01。尺寸单位为 px。
-
-本版从 [v01](shell-spec-v01.md) 继承布局与节号，仅调整第 6、9 节的 Diff 与 Terminal 内容，并移除第 1 节已解决的 Terminal 实例问题。v01 保留作历史依据；交互原型 v01 / v02 尚未实现本次工具行为，原型 v02 的 Conversation 探索不因本文件版本号相同而获得确认。
 
 ## 1. 待确认
 
 | 项目 | 说明 |
 |---|---|
+| 本轮对齐修订 | 第 3、4、8、11 节依据用户 2026-10-11 对话确认补充；本次 diff 待审阅 |
 | 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 1 节 |
 | 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
 | 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
+
+本文件中的颜色仅用于区分状态语义，具体色值见交互原型 v01。尺寸单位为 px。
+
+本版从 [v01](shell-spec-v01.md) 继承布局与节号，调整第 6、9 节的 Diff 与 Terminal 内容，并移除第 1 节已解决的 Terminal 实例问题。第 3、4、11 节按 2026-10-11 确认统一组件尺寸与 Session 选中字重，第 8 节补充工具关闭入口。v01 保留作历史依据；交互原型 v01 / v02 尚未实现本次工具行为，原型 v02 的 Conversation 探索不因本文件版本号相同而获得确认。
 
 ## 2. 窗口与区域
 
@@ -58,8 +59,8 @@
 |---|---|---|---|---|
 | 导航折叠按钮 | 30×28 | 侧栏图标；导航折叠且当前 Project 有需关注的 Session 时，右上角显示 7px 注意力点 | Default / Hover / Focus | UX D-14 |
 | Project Tab | 高 32，最大宽 200 | 注意力点（仅非当前 Tab）+ Project 名称（单行截断）+ 关闭按钮 | Default / Hover / Selected / Focus | FR-PROJ-002 |
-| Tab 关闭按钮 | 16×16 | ×；当前 Tab 常显，其他 Tab 悬停时显示 | Default / Hover / Focus | FR-PROJ-002 |
-| `+` 按钮 | 28×32 | 在新 Tab 中打开启动页 | Default / Hover / Focus | UX D-09 |
+| Tab 关闭按钮 | 18×18（2026-10-11 确认） | ×；当前 Tab 常显，其他 Tab 悬停时显示 | Default / Hover / Focus | FR-PROJ-002 |
+| `+` 按钮 | 30×32（2026-10-11 确认） | 在新 Tab 中打开启动页 | Default / Hover / Focus | UX D-09 |
 | 右侧边栏按钮 | 30×28 | 侧栏图标；展开时为 Selected | Default / Hover / Selected / Focus | UX P-C |
 
 首发平台为 macOS，窗口控制区位于左侧（2026-10-08 确认）。Windows / Linux 的窗口控制按钮位于右侧，此时右侧边栏按钮位于其左侧，作为后续平台适配参考。
@@ -78,6 +79,8 @@
 | ⋯ 菜单 | 宽 160 | V1 仅含 Rename，点击后标题原位变为输入框，Enter 确认，Esc 取消 | Default / Hover | FR-NAV-003 |
 
 Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session 不在 Session History 中重复高亮。
+
+区域标题、日期分组标题与 CLI 菜单采用上表数值（2026-10-11 确认），替代原型 v01 的 30.5、28.5、225。
 
 ## 5. 状态指示
 
@@ -124,6 +127,7 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 | Conversation 列顶栏 | 草稿：“新对话 · <View 名称>”；对话中：CLI 标识 + Session 标题 + 新建对话按钮 | UX P-A |
 | 最近对话块 | 草稿上方显示该 View 最近 3 条对话（按最近用户消息排序）；更早的对话在 Session History 中查找 | UX P-A |
 | 右侧区域顶栏 | 当前内容名称 + 更新时间 + 图标切换组：Preview ｜ Files、Diff、Browser、Terminal | UX P-B |
+| 工具关闭入口 | 工具打开时，图标切换组右侧保留“关闭右侧工具”×；行为见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>) | UX 第 5 节；2026-10-11 确认 |
 | 图标提示 | 悬停 500ms 后在图标下方显示名称 | UX P-B |
 | Preview 容器 | 只读，可滚动与缩放；显示“已更新 · 时间”；示例数据标注“示例数据” | FR-VIEW-003；UX D-06 |
 | Preview 空状态 | 说明 + “生成 <View 名称>”按钮；点击后把可编辑的生成指令填入左侧输入框 | FR-VIEW-003 |
@@ -154,6 +158,6 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 | 状态 | 规则 |
 |---|---|
 | Hover | 背景轻微加深，不改变尺寸与布局 |
-| Selected | 背景加深，字重 500 |
+| Selected | 背景加深；Session 项保持字重 400，靠背景区分选中态（2026-10-11 确认）；其他组件字重 500 |
 | Focus | 键盘导航时显示 2px 焦点环 |
 | Disabled | 降低对比度，并通过提示或说明文字给出原因 |
