@@ -10,6 +10,7 @@ import { SessionHistory, historyRows, visibleHistoryRows } from './SessionHistor
 import { Composer } from '../input/Composer'
 import { CliMenu } from '../chat/CliMenu'
 import { InputRequestCard } from './Transcript'
+import { Conversation } from './Conversation'
 import { useProjectShell } from '../project/store'
 
 const initial = useSessions.getState(), shellInitial = useProjectShell.getState()
@@ -110,6 +111,54 @@ describe('Session IPC store · FR-SESSION/STATE · AC-02–05', () => {
     expect(await useSessions.getState().sendComposer(key)).toBeNull()
     expect(api.create).not.toHaveBeenCalled(); expect(useSessions.getState().drafts[draftId(key)]!.text).toBe('Keep this')
     expect(useSessions.getState().errors[draftId(key)]).toContain('请先登录')
+  })
+})
+
+describe('Conversation scrolling · FR-SESSION-001', () => {
+  it('keeps following when a queued latest scroll arrives after the composer shrinks the viewport; user scrolling still pauses it', async () => {
+    const observers: { notify: () => void; targets: Set<Element> }[] = []
+    vi.stubGlobal('ResizeObserver', class {
+      targets = new Set<Element>()
+      constructor(callback: () => void) { observers.push({ notify: callback, targets: this.targets }) }
+      observe(target: Element) { this.targets.add(target) }
+      disconnect() { this.targets.clear() }
+    })
+    useSessions.setState({ summaries: { s: summary() }, providers })
+    const view = render(<Conversation project={project} canvas={{ mode: 'session', sessionId: 's' }} active />)
+    const scroll = screen.getByLabelText('对话记录')
+    let height = 1000, viewport = 400, top = 0
+    Object.defineProperties(scroll, {
+      scrollHeight: { get: () => height }, clientHeight: { get: () => viewport },
+      scrollTop: { get: () => top, set: (value: number) => { top = Math.max(0, Math.min(value, height - viewport)) } }
+    })
+    await waitFor(() => expect(top).toBe(600))
+    const resize = () => act(() => { for (const observer of observers) if (observer.targets.has(scroll)) observer.notify() })
+
+    top = 180; fireEvent.scroll(scroll)
+    fireEvent.click(screen.getByRole('button', { name: '回到最新 ↓' }))
+    expect(top).toBe(600)
+    // The latest scroll is queued by the browser. Composer autosizing then
+    // reduces clientHeight before that event and before ResizeObserver delivery.
+    viewport = 250; fireEvent.scroll(scroll)
+    expect(screen.queryByRole('button', { name: '回到最新 ↓' })).toBeNull()
+    resize()
+    expect(top).toBe(750)
+    const item: TranscriptItem = { id: 'next', sessionId: 's', turnId: 't2', at: 1, sequence: 1, kind: 'agent_message', nativeItemId: 'a2', text: 'Second turn', complete: true }
+    height = 1300
+    act(() => useSessions.setState((state) => ({ conversations: { s: { ...state.conversations.s!, items: [item] } } })))
+    expect(top).toBe(1050)
+
+    top = 630; fireEvent.scroll(scroll)
+    expect(screen.getByRole('button', { name: '回到最新 ↓' })).toBeTruthy()
+    viewport = 400; resize()
+    expect(top).toBe(630)
+    view.rerender(<Conversation project={project} canvas={{ mode: 'session', sessionId: 's' }} active={false} />)
+    view.rerender(<Conversation project={project} canvas={{ mode: 'session', sessionId: 's' }} active />)
+    expect(top).toBe(630)
+    fireEvent.click(screen.getByRole('button', { name: '回到最新 ↓' }))
+    expect(top).toBe(900)
+    viewport = 250; resize()
+    expect(top).toBe(1050)
   })
 })
 

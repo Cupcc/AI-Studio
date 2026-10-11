@@ -27,6 +27,7 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
   const summary = useSessions((s) => s.summaries[sessionId]), openError = useSessions((s) => s.errors[`open:${sessionId}`])
   const ref = useRef<HTMLDivElement>(null), contentRef = useRef<HTMLDivElement>(null)
   const following = useRef(true)
+  const lastScrollTop = useRef(0)
   const [away, setAway] = useState(!following.current), [positioned, setPositioned] = useState(false)
   const previousLatestRequest = useRef(latestRequest)
   const prepend = useRef<{ height: number; top: number } | null>(null)
@@ -34,7 +35,7 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
   function latest() {
     const node = ref.current
     if (!node) return
-    following.current = true; node.scrollTop = node.scrollHeight; setAway(false)
+    following.current = true; node.scrollTop = node.scrollHeight; lastScrollTop.current = node.scrollTop; setAway(false)
   }
   async function older() {
     const node = ref.current
@@ -56,20 +57,30 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
       node.scrollTop = prepend.current.top + node.scrollHeight - prepend.current.height
       prepend.current = null
     } else if (following.current) node.scrollTop = node.scrollHeight
+    lastScrollTop.current = node.scrollTop
     setAway(!following.current)
     previousLatestRequest.current = latestRequest
   }, [conversation?.items, conversation?.loaded, conversation?.loading, active, latestRequest, positioned])
   useEffect(() => {
-    const content = contentRef.current
-    if (!content) return
+    const content = contentRef.current, node = ref.current
+    if (!content || !node) return
     const observer = new ResizeObserver(() => { if (active && following.current && positioned) latest() })
     observer.observe(content)
+    // Composer autosizing and window resizing change the viewport independently
+    // of transcript growth, so following must respond to both sizes.
+    observer.observe(node)
     return () => observer.disconnect()
   }, [active, positioned])
   return <div className="session-conversation">
     <div ref={ref} className="session-conversation__scroll" aria-label="对话记录" tabIndex={0} onScroll={(event) => {
       if (!active || !positioned || prepend.current) return
       const node = event.currentTarget
+      const moved = node.scrollTop !== lastScrollTop.current
+      lastScrollTop.current = node.scrollTop
+      // A queued programmatic scroll can arrive after the viewport shrinks.
+      // Its larger bottom gap is not a user scroll; leave following enabled
+      // so the resize observer can restore the latest position.
+      if (following.current && !moved) return
       following.current = node.scrollHeight - node.scrollTop - node.clientHeight < 48
       setAway(!following.current)
       if (node.scrollTop < 80 && !following.current) void older()
