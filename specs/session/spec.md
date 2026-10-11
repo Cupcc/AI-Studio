@@ -8,7 +8,7 @@
 | 文档状态 | 草稿 |
 | 覆盖需求 | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007；关联 FR-PROJ-002（关闭时停止当前一轮、Tab 注意力点数据） |
 | 相关验收 | AC-02、AC-03、AC-04、AC-05；05 第 4 节专项测试中的 Session Resume、错误恢复、大量 Session 性能、Needs Input / Error 清除规则、Project Tab 注意力点、关闭 Project 确认、Stop |
-| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 5、6、10 节；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；交互原型 v01（已确认，行为以本 spec 为准） |
+| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 5、6、10 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6 节（Agent 消息 Markdown、代码块）；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；交互原型 v01、v02（已确认，行为以本 spec 为准） |
 | 来源 | [01. Product Definition](<../../docs/01. Product Definition.md>) 第 6～8 节；[02. Functional Requirements](<../../docs/02. Functional Requirements.md>) 第 2 节；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6、7、8、10 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2～7 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 3、5、6 节 |
 
 ## 1. 问题记录
@@ -87,7 +87,7 @@
 2. 定位到底部时，末尾的 Needs Input 卡片或 Error 卡片完整可见（AC-05；UX 第 6 节）。
 3. 流式输出逐段追加；用户位于底部时自动跟随；向上滚动后停止跟随并显示“回到最新”（Shell Spec 第 6 节）。
 4. 切换 Project Tab 后返回、或在同一 Project 内从其他 View 返回同一 Session 时：离开时处于底部（跟随中）的，返回后定位到最新位置；离开时已向上滚动的，恢复离开时的位置并显示“回到最新”（建议；依据 UX D-15“恢复离开时的完整状态”，与 FR-STATE-005“点击进入最新位置”在点击路径上一致）。
-5. 对话记录条目（Shell Spec 第 6 节）：用户消息、Agent 消息、工具活动行、Needs Input 卡片、Error 卡片、轮次完成行。条目定义见第 4.4 节。是否显示 CLI 的推理 / 思考内容见 S-Q12。
+5. 对话记录条目（Shell Spec 第 6 节）：用户消息、Agent 消息、工具活动行、Needs Input 卡片、Error 卡片、轮次完成行。条目定义见第 4.4 节。是否显示 CLI 的推理 / 思考内容见 S-Q12。Agent 消息按 Markdown 渲染，用户消息保持纯文本；渲染范围、代码块和链接规则见 Shell Spec v02 第 6 节（交互原型 v02，2026-10-10 确认）。流式输出期间按已到达的文本渲染，未闭合的代码块显示到当前末尾。
 6. 主画布顶栏显示 CLI 标识、Session 标题、CLI 名称；Session 的 `origin_view_id` 不为空时，显示来源 View 和“在 View 中打开”入口（UX 第 6 节 Session 打开；D-02）。Project View Mode 尚未实现前，该入口按壳层提供的导航接口跳转到该 View 的占位页。
 7. 输入区固定在对话区域下方（FR-SESSION-001），可立即输入（UX 第 6 节 Session 打开第 4 项），细节见 input spec。
 8. 性能：打开 Session 和切换 Session 不等待 CLI；大量历史 Session 时只加载列表所需元数据（04 第 7 节性能）。
@@ -299,7 +299,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | 类型 | 内容 | 来源 |
 |---|---|---|
 | `user_message` | 文本、附带的上下文项（View、文件，见 input spec）、发送时间 | 用户发送 |
-| `agent_message` | 完整文本；流式期间为增量拼接，完成时以完整消息校正，正文不重复（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节文本追加行） | Adapter |
+| `agent_message` | 完整文本（Markdown 原文，展示时渲染，见第 3.2 节第 5 条）；流式期间为增量拼接，完成时以完整消息校正，正文不重复（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节文本追加行） | Adapter |
 | `tool_activity` | 动作类别（Read / Edit / Run / 其他）、单行摘要、进行中 / 完成 / 失败 | Adapter |
 | `input_request` | 请求 ID、类型（授权 / 提问）、CLI 原生内容与选项、结果（已答复及所选项 / 文字回复 / 已停止 / 已失效） | Adapter + 用户 |
 | `error` | 摘要、原生诊断详情、是否可重试 | Adapter / Session Manager |

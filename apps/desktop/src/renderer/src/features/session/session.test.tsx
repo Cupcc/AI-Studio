@@ -10,11 +10,11 @@ import { SessionHistory, historyRows, visibleHistoryRows } from './SessionHistor
 import { Composer } from '../input/Composer'
 import { CliMenu } from '../chat/CliMenu'
 import { InputRequestCard } from './Transcript'
-import { Conversation } from './Conversation'
+import { Conversation, ConversationHeader } from './Conversation'
 import { useProjectShell } from '../project/store'
 
 const initial = useSessions.getState(), shellInitial = useProjectShell.getState()
-const project = { id: 'p', name: 'Project', canonicalPath: '/tmp/project', localPath: '/tmp/project', createdAt: '', lastOpenedAt: '' }
+const project = { id: 'p', name: 'Project', canonicalPath: '/tmp/project', localPath: '/tmp/project', displayPath: '/tmp/project', createdAt: '', lastOpenedAt: '' }
 const key = { projectId: 'p', kind: 'new_chat' as const }
 const summary = (patch: Partial<SessionSummary> = {}): SessionSummary => ({ id: 's', projectId: 'p', cli: 'codex', nativeSessionId: 'native', title: 'Build feature', titleSource: 'client', model: null, originViewId: null, activity: 'none', stopping: false, errorUnseen: false, completionUnread: false, status: null, createdAt: Date.now(), updatedAt: Date.now(), lastUserMessageAt: Date.now(), ...patch })
 const providers: ProviderSummary[] = ['codex', 'claude-code'].map((cli) => ({ cli: cli as ProviderSummary['cli'], displayName: cli, status: 'available', reason: null, version: '1', compatibility: 'tested', checkedAt: 0, capabilities: { nativeSessionIdTiming: 'on_create', inputWhileRunning: 'none', questionRequests: true, freeTextAnswers: { questions: true, approvals: false }, nativeTitle: false, runtimeRecovery: true } }))
@@ -222,6 +222,23 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     await waitFor(() => expect(useSessions.getState().drafts[draftId(key)]?.cli).toBe('claude-code'))
     expect(useSessions.getState().defaultCli[project.id]).toBe('codex')
     expect(dismiss).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('New chat draft · FR-CHAT-001 · Shell Spec v02 §6', () => {
+  it('centres the greeting, the CLI and ~ path with the composer, and keeps only the CLI badge and 新对话 in the header', async () => {
+    const home = { ...project, name: 'my-saas', localPath: '/Users/me/Projects/my-saas', displayPath: '~/Projects/my-saas' }
+    await useSessions.getState().loadProject('p')
+    useSessions.getState().updateDraft(key, { cli: 'claude-code' })
+    const { container } = render(<><ConversationHeader project={home} canvas={{ mode: 'draft' }} active /><Conversation project={home} canvas={{ mode: 'draft' }} active /></>)
+    const draft = container.querySelector('.session-draft')!
+    expect(draft.querySelector('h2')?.textContent).toBe('今天要在 my-saas 中做什么？')
+    expect(draft.querySelector('.session-draft__greeting p')?.textContent).toBe('Claude Code 会直接在 ~/Projects/my-saas 中执行')
+    expect(draft.querySelector(':scope > .composer')).toBeTruthy()
+    expect(screen.getByLabelText('Claude Code').textContent).toBe('CC')
+    expect(screen.getByText('新对话')).toBeTruthy()
+    expect(container.querySelector('.session-header__cli')).toBeNull()
+    expect(container.textContent).not.toContain('发送第一条消息后创建 Session')
   })
 })
 

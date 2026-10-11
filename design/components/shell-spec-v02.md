@@ -6,8 +6,8 @@
 |---|---|
 | 产品 | AI Developer Studio |
 | 版本 | v02 |
-| 状态 | 已确认（2026-10-11）：继承 v01；工程工具行为已于 2026-10-10 确认，本版 v01 对齐修订随任务签收 |
-| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/T20261009-context-tools/task.md) 的 2026-10-10 确认；用户 2026-10-11 对话确认的 v01 对齐界面决定，证据见[归档复验记录](../../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验) |
+| 状态 | 已确认（2026-10-11）：继承 v01；工程工具行为已于 2026-10-10 确认，本版 v01 对齐修订与交互原型 v02 的 Conversation 修订随各自任务签收 |
+| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/T20261009-context-tools/task.md) 的 2026-10-10 确认；用户 2026-10-11 对话确认的 v01 对齐界面决定，证据见[归档复验记录](../../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)；[交互原型 v02](../prototypes/README.md#studio-灰度交互原型-v02) 与[其采用确认](../../tasks/archive/T20261010-prototype-v02/task.md#已确认事项)（2026-10-10） |
 | 范围 | 窗口布局、区域尺寸、组件结构与交互状态 |
 | 不含 | 色值、字体、图标库等视觉参数：见 [Visual Direction](../visual-direction.md) 第 1 节 |
 
@@ -16,13 +16,14 @@
 | 项目 | 说明 |
 |---|---|
 | 本轮对齐修订 | 第 3、4、8、11 节依据用户 2026-10-11 对话确认补充，并于 2026-10-11 随任务签收 |
+| Conversation 修订 | 第 2.2、6、7 节依据交互原型 v02 的 2026-10-10 确认补充，并于 2026-10-11 随 [v02 对齐任务](../../tasks/archive/T20261010-prototype-v02-alignment/task.md)签收 |
 | 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 1 节 |
 | 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
 | 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
 
-本文件中的颜色仅用于区分状态语义，具体色值见交互原型 v01。尺寸单位为 px。
+本文件中的颜色仅用于区分状态语义，具体色值见交互原型 v01；代码块高亮色见交互原型 v02。尺寸单位为 px。
 
-本版从 [v01](shell-spec-v01.md) 继承布局与节号，调整第 6、9 节的 Diff 与 Terminal 内容，并移除第 1 节已解决的 Terminal 实例问题。第 3、4、11 节按 2026-10-11 确认统一组件尺寸与 Session 选中字重，第 8 节补充工具关闭入口。v01 保留作历史依据；交互原型 v01 / v02 尚未实现本次工具行为，原型 v02 的 Conversation 探索不因本文件版本号相同而获得确认。
+本版从 [v01](shell-spec-v01.md) 继承布局与节号，调整第 6、9 节的 Diff 与 Terminal 内容，并移除第 1 节已解决的 Terminal 实例问题。第 3、4、11 节按 2026-10-11 确认统一组件尺寸与 Session 选中字重，第 8 节补充工具关闭入口。第 2.2、6、7 节按交互原型 v02（2026-10-10 确认）修订消息列宽度、Agent 消息、代码块、新对话草稿与输入区位置。v01 保留作历史依据；交互原型 v01 / v02 尚未实现本次工具行为。
 
 ## 2. 窗口与区域
 
@@ -38,9 +39,9 @@
 | 顶栏（Project Tab Bar） | 高 40 | 固定 | 所有模式一致 |
 | 左侧导航 | 宽 248 | 固定；折叠后为 0 | 折叠状态为窗口级偏好（UX D-14） |
 | 主画布顶栏 | 高 48 | 固定 | 显示当前 Session 或 View 信息 |
-| Session Mode：Conversation 正文 | 最大宽 720，居中 | 最小 400 | 区域随窗口伸缩，正文不超过 720 |
+| Session Mode：Conversation 正文 | 最大宽 720，居中 | 最小 400 | 区域随窗口伸缩，正文不超过 720；消息列与输入框内容宽度相同，左右边缘对齐 |
 | Session Mode：右侧边栏 | 宽 400 | 320–560，可拖拽 | 宽度按 Project 记忆 |
-| Project View Mode：Conversation 列 | 宽 440 | 360–560，可拖拽分隔线 | 宽度按 Project 记忆 |
+| Project View Mode：Conversation 列 | 宽 440 | 360–560，可拖拽分隔线 | 宽度按 Project 记忆；消息列与输入框左右边缘对齐 |
 | Project View Mode：右侧区域 | 剩余宽度 | 最小 400 | Preview 与工具共享（UX P-B） |
 
 ### 2.3 空间不足时
@@ -98,8 +99,9 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 
 | 组件 | 结构与规则 | 需求 |
 |---|---|---|
-| 用户消息 | 右对齐气泡，最大宽 80% | FR-SESSION-001 |
-| Agent 消息 | 左对齐正文，无气泡 | FR-SESSION-001 |
+| 用户消息 | 右对齐气泡，最大宽 80%；纯文本，不渲染 Markdown | FR-SESSION-001 |
+| Agent 消息 | 左对齐正文，无气泡；按 Markdown 渲染：标题、列表（含嵌套）、表格（标注右对齐的列使用等宽数字，过宽时表格内横向滚动）、引用、分隔线、行内代码、加粗、链接、代码块。原始 HTML 按原文显示，图片与数学公式不渲染；链接只接受 http(s)，点击后用系统浏览器打开 | FR-SESSION-001 |
+| 代码块 | 浅底圆角容器；顶部一行为语言标签（未标注时为 text）与“复制”按钮，复制成功后短暂显示“已复制”；正文等宽字体，不换行，过宽时横向滚动；关键字、字符串、数字使用三种低饱和色，注释为灰色，颜色只出现在代码块内；`diff` 的增删行整行加底色 | FR-SESSION-001 |
 | 工具活动行 | 等宽字体，浅底；每行一个动作，如 Read / Edit / Run | FR-STATE-001 |
 | 轮次完成行 | `Worked for 2m 18s · Done` 后可附本轮原生记录的文件数；点击打开该轮“本轮变更”，定位对应文件。原生记录不可用时显示“本轮变更不可用”及“查看项目变更”，不显示虚假的 0 | FR-STATE-007、FR-TOOL-002 |
 | Needs Input 卡片 | 橙色点 + “等待你的确认” + CLI 原生内容 + 选项按钮（一个主按钮，其余为次按钮）+ “也可以在下方直接回复”；答复后变为只读记录，显示所选项 | FR-STATE-002；UX D-03 |
@@ -110,10 +112,13 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 
 打开 Session 时直接定位到底部，不出现从顶部滚动到底部的过程。
 
+Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”；问候语“今天要在 <Project> 中做什么？”、一行“<CLI 名称> 会直接在 <目录> 中执行”（主目录缩写为 `~`）与输入框作为一组，在画布中部略高于中线处居中。发送第一条消息后进入 Session，输入框回到底部，消息从顶部开始。Project View 左列的草稿不居中，见第 8 节（FR-CHAT-001；交互原型 v02，2026-10-10 确认）。
+
 ## 7. 输入区
 
 | 部分 | 规则 | 需求 |
 |---|---|---|
+| 位置与宽度 | 固定在 Conversation 下方，内容宽度与消息列相同（第 2.2 节）；Session Mode 新对话草稿中与问候语一起居中（第 6 节） | FR-SESSION-001、FR-CHAT-001 |
 | 文本输入 | 多行，自动增高至 8 行后滚动；Enter 发送，Shift+Enter 换行 | FR-INPUT-001 |
 | `+` | 打开 Context / Attachment 菜单 | FR-INPUT-001 |
 | 上下文标签 | 当前 View、从 Files 添加的文件；可单独移除 | FR-VIEW-007、FR-TOOL-001 |

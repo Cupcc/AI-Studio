@@ -30,6 +30,21 @@ export function createSenderPolicy(devServerUrl?: string): (url: string) => bool
   }
 }
 
+/** Links opened from the renderer go to the system browser, http(s) only (Shell Spec v02 §6). */
+export function externalLinkUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : null
+  } catch {
+    return null
+  }
+}
+
+/** The single permission exception: sanitized clipboard writes from the renderer origin (code block copy). */
+export function isPermissionAllowed(permission: string, requestingUrl: string, rendererOrigin: string): boolean {
+  return permission === 'clipboard-sanitized-write' && originOf(requestingUrl) === rendererOrigin
+}
+
 /** Resolves a request path under `root`, or null if it would escape it. */
 export function resolveAppAsset(root: string, pathname: string): string | null {
   let decoded: string

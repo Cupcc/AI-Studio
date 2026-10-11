@@ -1,6 +1,38 @@
 import type { AgentProvider, InputRequestInit, ResumeSessionOptions, SessionSink, TurnContext } from '@ai-studio/agent-adapter'
 import { FakeProvider } from '@ai-studio/agent-adapter/testing'
 
+/** `[e2e:markdown]` reply covering the Markdown range of Shell Spec v02 §6 (content mirrors prototype v02). */
+export const E2E_MARKDOWN_REPLY = [
+  '失败的 3 个用例都来自金额单位：`toChargeAmount` 返回以元为单位的小数，而 Stripe 要求以分为单位的**整数**。',
+  '',
+  '### 修改',
+  '',
+  '- `services/payment/amount.ts`：改为按分计算；',
+  '  - 边界用例：`0.1 + 0.2`、`19.99`',
+  '- `services/payment/amount.test.ts`：补充 3 个用例。',
+  '',
+  '```ts',
+  'export function toChargeAmount(price: number) {',
+  '  // 按最小货币单位计算，避免浮点误差',
+  '  return Math.round(price * 100)',
+  '}',
+  '```',
+  '',
+  '### 测试结果',
+  '',
+  '| 测试集 | 通过 | 失败 |',
+  '|---|---:|---:|',
+  '| payment | 24 | 0 |',
+  '| auth | 18 | 0 |',
+  '',
+  '```diff',
+  '-  res.redirect(nextUrl)',
+  '+  await writeSession(res, user)',
+  '```',
+  '',
+  '> 取消流程参考了 [Stripe 文档](https://docs.stripe.com/billing/subscriptions/cancel)。'
+].join('\n')
+
 /** Explicitly injected by the development entry point; never chosen by runtime fallback. */
 export function createE2eProviders(): AgentProvider[] {
   return (['codex', 'claude-code'] as const).map(cli => {
@@ -10,8 +42,8 @@ export function createE2eProviders(): AgentProvider[] {
       const timer = setTimeout(() => { if (!turn.signal.aborted) callback() }, delay)
       turn.signal.addEventListener('abort', () => clearTimeout(timer), { once: true })
     }
-    const complete = (run: { turn: TurnContext; sink: SessionSink }) => {
-      run.sink.itemCompleted(run.turn.turnId, { itemId: `${run.turn.turnId}:message`, kind: 'assistant_message', status: 'completed', text: '模拟回复已完成。可以继续同一个 Session。' })
+    const complete = (run: { turn: TurnContext; sink: SessionSink }, text = '模拟回复已完成。可以继续同一个 Session。') => {
+      run.sink.itemCompleted(run.turn.turnId, { itemId: `${run.turn.turnId}:message`, kind: 'assistant_message', status: 'completed', text })
       run.sink.nativeTurnEnded(run.turn.turnId, { status: 'completed', model: cli === 'codex' ? 'e2e-codex' : 'e2e-claude' })
     }
     const approval: InputRequestInit = {
@@ -68,6 +100,7 @@ export function createE2eProviders(): AgentProvider[] {
             }, null), 200)
             return
           }
+          if (input.text.includes('[e2e:markdown]')) { schedule(turn, () => complete(run, E2E_MARKDOWN_REPLY), 300); return }
           schedule(turn, () => complete(run), input.text.includes('[e2e:delay]') ? 1800 : 500)
         },
         onRespond(record) {

@@ -2,7 +2,9 @@
  * Design tokens.
  *
  * Visual values follow the confirmed interactive prototype v01
- * (design/prototypes/studio-prototype-v01.html, confirmed 2026-10-09) and may
+ * (design/prototypes/studio-prototype-v01.html, confirmed 2026-10-09); the
+ * Markdown, code block and new-chat draft values follow prototype v02
+ * (studio-prototype-v02.html, confirmed 2026-10-10). Values may
  * be revised at the high-fidelity stage (design/visual-direction.md §5). Keep
  * every visual value here so that a revision touches one file. Layout sizes
  * follow Shell Spec v01 §1–2. V1 has a single light theme (Product
@@ -56,6 +58,9 @@
   --dialog-padding: 20px 22px;
   --placeholder-padding: 40px;
   --send-size: 28px;
+  --draft-gap: 22px;
+  --draft-offset: 12vh;
+  --code-block-header-height: 32px;
   --disabled-opacity: .4;
   --tooltip-delay: 500ms;
   --tooltip-offset: 6px;
@@ -78,6 +83,7 @@
   --radius-dialog: 14px;
   --radius-button: 8px;
   --radius-tip: 5px;
+  --radius-code: 10px;
 
   /* Spacing */
   --space-0: 2px;
@@ -104,6 +110,7 @@
   --font-size-heading: 16px;
   --font-size-lg: 17px;
   --font-size-title: 22px;
+  --font-size-markdown-heading: 15.5px;
   --heading-letter-spacing: .06em;
 
   /* Colour */
@@ -133,6 +140,14 @@
   --color-error-bg: #fef6f5;
   --color-error-border: #f1d0cc;
   --color-link: #1d4ed8;
+  --color-link-underline: rgba(29, 78, 216, .35);
+  --color-diff-add-bg: #e9f6ed;
+  --color-diff-del-bg: #fbecea;
+  /* Code highlighting, only inside code blocks (prototype v02 open question, confirmed 2026-10-10) */
+  --color-code-keyword: #7c3a8f;
+  --color-code-string: #2f6b45;
+  --color-code-number: #9a5512;
+  --color-code-comment: #8a8a84;
   --color-focus-ring: #2563eb;
   --color-focus-ring-soft: #2563eb2e;
   --color-primary: #1d1d1b;

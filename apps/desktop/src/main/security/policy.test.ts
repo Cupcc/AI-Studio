@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { APP_ENTRY_URL, createSenderPolicy, originOf, resolveAppAsset } from './policy'
+import { APP_ENTRY_URL, APP_ORIGIN, createSenderPolicy, externalLinkUrl, isPermissionAllowed, originOf, resolveAppAsset } from './policy'
 
 describe('sender policy', () => {
   it('trusts only the app origin in production', () => {
@@ -21,6 +21,25 @@ describe('sender policy', () => {
   it('computes origins for custom schemes', () => {
     expect(originOf('app://studio/a/b')).toBe('app://studio')
     expect(originOf('not a url')).toBeNull()
+  })
+})
+
+describe('external links and permissions · Shell Spec v02 §6 · DEC-02', () => {
+  it('hands only http(s) links to the system browser', () => {
+    expect(externalLinkUrl('https://docs.stripe.com/billing?x=1#a')).toBe('https://docs.stripe.com/billing?x=1#a')
+    expect(externalLinkUrl('HTTP://Example.com')).toBe('http://example.com/')
+    for (const url of ['javascript:alert(1)', 'file:///etc/passwd', 'app://studio/index.html', 'mailto:a@b.c', 'src/a.ts', '']) {
+      expect(externalLinkUrl(url)).toBeNull()
+    }
+  })
+
+  it('grants only sanitized clipboard writes, and only to the renderer origin', () => {
+    expect(isPermissionAllowed('clipboard-sanitized-write', APP_ENTRY_URL, APP_ORIGIN)).toBe(true)
+    expect(isPermissionAllowed('clipboard-sanitized-write', APP_ORIGIN, APP_ORIGIN)).toBe(true)
+    expect(isPermissionAllowed('clipboard-sanitized-write', 'https://example.com/', APP_ORIGIN)).toBe(false)
+    for (const permission of ['clipboard-read', 'media', 'notifications', 'openExternal', 'geolocation']) {
+      expect(isPermissionAllowed(permission, APP_ENTRY_URL, APP_ORIGIN)).toBe(false)
+    }
   })
 })
 

@@ -16,7 +16,7 @@ created: 2026-10-10
 
 ## 目标
 
-2026-10-10 在对话中确认：Conversation 与 ChatGPT / Claude 桌面端保持一致，首条消息位于顶部，而不是贴在输入区上方。原型 v01 的 `.feed-in` 使用 `justify-content: flex-end`，桌面端按原型对齐时照搬为 `margin: auto auto 0`，导致内容不足一屏时整段对话贴底、上方留大片空白（对照 [T20261009-prototype-alignment 截图](../T20261009-prototype-alignment/evidence/W3-session-sidebar-1280.png)）。
+2026-10-10 在对话中确认：Conversation 与 ChatGPT / Claude 桌面端保持一致，首条消息位于顶部，而不是贴在输入区上方。原型 v01 的 `.feed-in` 使用 `justify-content: flex-end`，桌面端按原型对齐时照搬为 `margin: auto auto 0`，导致内容不足一屏时整段对话贴底、上方留大片空白（对照 [T20261009-prototype-alignment 截图](../archive/T20261009-prototype-alignment/evidence/W3-session-sidebar-1280.png)）。
 
 其他向 ChatGPT / Claude 对齐的候选调整见 [research.md](research.md)，逐项确认后另行建任务。
 

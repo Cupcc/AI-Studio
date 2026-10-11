@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { DEFAULT_VIEW_IDS, type ViewId } from '@shared/project/types'
 import { VIEW_NAMES } from '@shared/project/strings'
 import type { ShellSlotProps } from '../project/integration'
@@ -16,7 +16,7 @@ export function ConversationHeader({ project, canvas }: ShellSlotProps) {
   return <>
     {(summary?.cli ?? draft?.cli) && <CliBadge cli={(summary?.cli ?? draft?.cli)!} />}
     <span className="session-header__title">{sessionId ? summary?.title ?? '正在加载对话…' : '新对话'}</span>
-    <span className="session-header__cli muted">{cliName(summary?.cli ?? draft?.cli ?? null)}{!sessionId && ' · 发送第一条消息后创建 Session'}</span>
+    {sessionId && <span className="session-header__cli muted">{cliName(summary?.cli ?? null)}</span>}
     {origin && <><span className="session-header__from muted">· 来自 {VIEW_NAMES[origin as ViewId] ?? origin}</span>
       <button className="link-button" disabled={!DEFAULT_VIEW_IDS.includes(origin as ViewId)} onClick={() => useProjectShell.getState().enterView(project.id, origin as ViewId)} title={origin}>在 View 中打开</button></>}
   </>
@@ -28,7 +28,7 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
   const ref = useRef<HTMLDivElement>(null), contentRef = useRef<HTMLDivElement>(null)
   const following = useRef(true)
   const lastScrollTop = useRef(0)
-  const [away, setAway] = useState(!following.current), [positioned, setPositioned] = useState(false)
+  const [away, setAway] = useState(!following.current), [positioned, setPositioned] = useState(false), [gutter, setGutter] = useState(0)
   const previousLatestRequest = useRef(latestRequest)
   const prepend = useRef<{ height: number; top: number } | null>(null)
   useEffect(() => { void useSessions.getState().loadConversation(sessionId) }, [sessionId])
@@ -61,6 +61,16 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
     setAway(!following.current)
     previousLatestRequest.current = latestRequest
   }, [conversation?.items, conversation?.loaded, conversation?.loading, active, latestRequest, positioned])
+  // Classic scrollbars reserve a gutter on both edges of the feed; the composer gets the same inset so their edges stay aligned (Shell Spec v02 §2.2).
+  useLayoutEffect(() => {
+    const node = ref.current
+    if (!node) return
+    const measure = () => setGutter((node.offsetWidth - node.clientWidth) / 2)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
   useEffect(() => {
     const content = contentRef.current, node = ref.current
     if (!content || !node) return
@@ -71,7 +81,7 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
     observer.observe(node)
     return () => observer.disconnect()
   }, [active, positioned])
-  return <div className="session-conversation">
+  return <div className="session-conversation" style={{ '--scrollbar-gutter': `${gutter}px` } as CSSProperties}>
     <div ref={ref} className="session-conversation__scroll" aria-label="对话记录" tabIndex={0} onScroll={(event) => {
       if (!active || !positioned || prepend.current) return
       const node = event.currentTarget
@@ -102,8 +112,16 @@ function SessionConversation({ sessionId, projectId, active }: { sessionId: stri
 
 export function Conversation({ project, canvas, active }: ShellSlotProps) {
   if (canvas.mode === 'session') return <SessionConversation key={canvas.sessionId} projectId={project.id} sessionId={canvas.sessionId} active={active} />
+  return <NewChatDraft project={project} active={active} />
+}
+
+/** Session Mode draft: greeting and composer centred together; after the first send the Session layout takes over (Shell Spec v02 §6). */
+function NewChatDraft({ project, active }: Pick<ShellSlotProps, 'project' | 'active'>) {
+  const cli = useSessions((s) => s.drafts[`${project.id}:draft`]?.cli ?? null)
   return <div className="session-conversation session-conversation--draft">
-    <div className="session-draft-intro"><h2>在 {project.name} 中开始新的对话</h2><p>Agent 会直接在 {project.localPath} 中执行</p></div>
-    <Composer draftKey={{ projectId: project.id, kind: 'new_chat' }} active={active} />
+    <div className="session-draft">
+      <div className="session-draft__greeting"><h2>今天要在 {project.name} 中做什么？</h2><p>{cli ? cliName(cli) : 'Agent'} 会直接在 {project.displayPath} 中执行</p></div>
+      <Composer draftKey={{ projectId: project.id, kind: 'new_chat' }} active={active} />
+    </div>
   </div>
 }

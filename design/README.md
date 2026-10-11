@@ -5,7 +5,6 @@ AI Developer Studio V1.0 的设计工作区，用于保存设计资料、参考�
 ## 人工审阅入口
 
 - [组件修订确认记录](components/shell-spec-v02.md#1-已确认与待确认)。
-- [交互原型 v02 的采用问题](../tasks/T20261010-prototype-v02/task.md#未决问题)与[评审依据](../tasks/T20261010-prototype-v02/task.md#签收)。
 - [视觉参数待确定项](visual-direction.md#1-高保真阶段待确定)。
 
 ## 1. 设计依据
@@ -49,8 +48,8 @@ design/
 | 参考截图 | 尚无 |
 | 线框图 | v02，见 [wireframes](wireframes/README.md) |
 | 高保真界面 | 尚无 |
-| 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) 基线；工具行为与原型对齐后的已确认组件修订见 [Shell Spec v02](components/shell-spec-v02.md) |
-| 交互原型 | [Studio 灰度交互原型 v01](prototypes/README.md)；桌面端按其对齐，见[已归档任务](../tasks/archive/T20261009-prototype-alignment/task.md) |
+| 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) 基线；工具行为、原型 v01 对齐后的组件修订与原型 v02 的 Conversation 修订均已确认，见 [Shell Spec v02](components/shell-spec-v02.md) |
+| 交互原型 | [Studio 灰度交互原型 v02](prototypes/README.md)（Conversation 部分替代 v01，其余继承 v01）；桌面端按 v01 对齐见[已归档任务](../tasks/archive/T20261009-prototype-alignment/task.md)，按 v02 对齐见 [T20261010-prototype-v02-alignment](../tasks/archive/T20261010-prototype-v02-alignment/task.md)（2026-10-11 签收） |
 
 方案确认后，在本节添加所采用版本的文件链接或原型链接。各版本的状态、确认日期和探索中的版本只记录在对应目录索引；探索稿继续保留在对应目录。
 

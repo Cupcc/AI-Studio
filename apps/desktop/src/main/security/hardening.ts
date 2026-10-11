@@ -1,8 +1,9 @@
 // Electron-level hardening: app:// protocol for the renderer, no new
-// windows, no navigation away from the app, no webviews, no permissions.
-import { app, net, protocol, session } from 'electron'
+// windows (http(s) links go to the system browser), no navigation away from
+// the app, no webviews, and no permissions except sanitized clipboard writes.
+import { app, net, protocol, session, shell } from 'electron'
 import { pathToFileURL } from 'node:url'
-import { APP_HOST, APP_SCHEME, originOf, resolveAppAsset } from './policy'
+import { APP_HOST, APP_SCHEME, externalLinkUrl, isPermissionAllowed, originOf, resolveAppAsset } from './policy'
 
 /** Must run before `app.whenReady()`. */
 export function registerAppScheme(): void {
@@ -24,7 +25,11 @@ export function handleAppProtocol(rendererDir: string): void {
 
 export function installWebContentsGuards(allowedOrigin: string): void {
   app.on('web-contents-created', (_event, contents) => {
-    contents.setWindowOpenHandler(() => ({ action: 'deny' }))
+    contents.setWindowOpenHandler(({ url }) => {
+      const external = externalLinkUrl(url)
+      if (external) void shell.openExternal(external)
+      return { action: 'deny' }
+    })
     const blockForeign = (event: { preventDefault(): void }, url: string): void => {
       if (originOf(url) !== allowedOrigin) event.preventDefault()
     }
@@ -34,7 +39,11 @@ export function installWebContentsGuards(allowedOrigin: string): void {
   })
 }
 
-export function denyAllPermissions(): void {
-  session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
-  session.defaultSession.setPermissionCheckHandler(() => false)
+export function installPermissionPolicy(rendererOrigin: string): void {
+  session.defaultSession.setPermissionRequestHandler((_wc, permission, callback, details) =>
+    callback(isPermissionAllowed(permission, details.requestingUrl, rendererOrigin))
+  )
+  session.defaultSession.setPermissionCheckHandler((_wc, permission, requestingOrigin) =>
+    isPermissionAllowed(permission, requestingOrigin, rendererOrigin)
+  )
 }

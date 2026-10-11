@@ -1,4 +1,5 @@
-/* Session area, aligned to interactive prototype v01 (design/prototypes/studio-prototype-v01.html): .cli .spin .srow .grp .more .ren .hdr .feed .mu .ma .tool .doneln .card .cmd .compose .input .irow .chip .model .send .draft-empty.
+/* Session area, aligned to interactive prototype v01 (design/prototypes/studio-prototype-v01.html): .cli .spin .srow .grp .more .ren .hdr .feed .mu .ma .tool .doneln .card .cmd .compose .input .irow .chip .model .send;
+   and to prototype v02 (studio-prototype-v02.html, confirmed 2026-10-10): .feed-in width, .ma Markdown, .cb code blocks, .draft-c centred draft.
    Shared primitives (.primary-button .secondary-button .icon-button .link-button .text-button .popover .menu-* [data-tip] .sr-only) are in styles/primitives.css; only feature-scoped modifiers live here. */
 
 /* CLI badge and Running spinner */
@@ -38,20 +39,25 @@
 
 /* Conversation: feed above, composer below; the feed is a grid row so "回到最新" anchors to the composer's top edge */
 .canvas-mode--session .conversation-pane__content > .session-conversation { max-width: none; margin: 0; }
-.session-conversation { height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
-.session-conversation__scroll { grid-area: 1 / 1; min-height: 0; display: flex; flex-direction: column; overflow: auto; overflow-anchor: none; }
-/* A short transcript starts at the top, like ChatGPT / Claude desktop (Shell Spec 第 5 节; replaces the prototype's bottom-anchored .feed-in) */
-.session-conversation__transcript { --feed-gap: 14px; display: flex; flex-direction: column; flex: none; gap: var(--feed-gap); width: 100%; max-width: var(--conversation-max-width); margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-2); }
-.session-conversation > .composer { grid-area: 2 / 1; }
+/* --feed-max-width: column, skeleton and load error add their side padding outside the 720 content width, so their edges line up with the composer box (Shell Spec v02 §2.2) */
+.session-conversation { --feed-max-width: calc(var(--conversation-max-width) + 2 * var(--space-6)); height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+/* both-edges: a classic (always-shown) scrollbar must not shift the column off the composer's centre */
+.session-conversation__scroll { grid-area: 1 / 1; min-height: 0; display: flex; flex-direction: column; overflow: auto; overflow-anchor: none; scrollbar-gutter: stable both-edges; }
+/* A short transcript starts at the top, like ChatGPT / Claude desktop (Shell Spec 第 6 节; replaces the prototype's bottom-anchored .feed-in) */
+.session-conversation__transcript { --feed-gap: 14px; display: flex; flex-direction: column; flex: none; gap: var(--feed-gap); width: 100%; max-width: var(--feed-max-width); margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-2); }
+.session-conversation > .composer { grid-area: 2 / 1; padding-inline: calc(var(--space-6) + var(--scrollbar-gutter, 0px)); }
 .conversation-latest { grid-area: 1 / 1; align-self: end; justify-self: center; margin-bottom: var(--space-3); padding: var(--space-1) var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-2); background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: 999px; box-shadow: var(--shadow-floating); z-index: 1; }
-.session-draft-intro { grid-area: 1 / 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: var(--space-1-5); padding: 0 40px; text-align: center; }
-.session-draft-intro h2 { margin: 0; font-size: var(--font-size-lg); font-weight: 500; text-wrap: balance; }
-.session-draft-intro p { margin: 0; font-size: var(--font-size-sm); color: var(--color-text-muted); overflow-wrap: anywhere; }
-.conversation-skeleton { flex: none; width: 100%; max-width: var(--conversation-max-width); margin: 0 auto; padding: var(--space-8) var(--space-6); display: grid; gap: 14px; }
+/* New chat draft: greeting and composer centred together, slightly above the middle (Shell Spec v02 §6) */
+.session-draft { grid-area: 1 / 1 / -1 / -1; min-height: 0; display: flex; flex-direction: column; justify-content: safe center; gap: var(--draft-gap); padding-bottom: var(--draft-offset); overflow: auto; }
+.session-draft__greeting { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: 0 40px; text-align: center; }
+.session-draft__greeting h2 { margin: 0; font-size: var(--font-size-title); font-weight: 500; letter-spacing: -.01em; text-wrap: balance; }
+.session-draft__greeting p { margin: 0; font-size: var(--font-size-note); color: var(--color-text-muted); overflow-wrap: anywhere; }
+.session-draft > .composer { padding-block: 0; }
+.conversation-skeleton { flex: none; width: 100%; max-width: var(--feed-max-width); margin: 0 auto; padding: var(--space-8) var(--space-6); display: grid; gap: 14px; }
 .conversation-skeleton span { height: 16px; background: var(--color-surface-soft); border-radius: var(--radius-sm); }
 .conversation-skeleton span:nth-child(2) { width: 75%; }
 .conversation-skeleton span:last-child { width: 40%; }
-.conversation-load-error { flex: none; width: 100%; max-width: var(--conversation-max-width); margin: 0 auto; padding: var(--space-4) var(--space-6); font-size: var(--font-size-md); color: var(--color-error); }
+.conversation-load-error { flex: none; width: 100%; max-width: var(--feed-max-width); margin: 0 auto; padding: var(--space-4) var(--space-6); font-size: var(--font-size-md); color: var(--color-error); }
 .conversation-older { align-self: center; padding: var(--space-1) var(--space-2-5); font-size: var(--font-size-sm); color: var(--color-text-muted); border-radius: var(--radius-sm); }
 .conversation-working { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--font-size-md); color: var(--color-text-muted); }
 
@@ -59,7 +65,6 @@
 .transcript-user { align-self: flex-end; max-width: 80%; padding: var(--space-2-5) 14px; background: var(--color-surface-soft); border-radius: var(--radius-bubble); font-size: var(--font-size-body); line-height: 1.55; }
 .transcript-user p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .transcript-user__context { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); margin-bottom: var(--space-1); font-size: var(--font-size-xs); color: var(--color-text-muted); }
-.transcript-text { font-size: var(--font-size-body); line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 .transcript-tool { padding: 7px var(--space-2-5); font: var(--font-size-sm)/1.65 var(--font-mono); color: var(--color-text-3); background: var(--color-surface-sub); border: 1px solid var(--color-border-soft); border-radius: var(--radius-button); }
 .transcript-tool > summary { display: flex; align-items: center; gap: var(--space-2); cursor: pointer; overflow-wrap: anywhere; }
 .transcript-tool > :not(summary) { margin: var(--space-1-5) 0 0; }
@@ -68,6 +73,43 @@
 .transcript-tool:has(+ .transcript-tool) { padding-bottom: 0; border-bottom-color: transparent; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .transcript-tool + .transcript-tool { margin-top: calc(-1 * var(--feed-gap) - 1px); padding-top: 0; border-top-color: transparent; border-top-left-radius: 0; border-top-right-radius: 0; }
 .transcript-turn-end { margin: 0; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+
+/* Agent reply Markdown (prototype v02 .ma); user messages stay plain text */
+.markdown { min-width: 0; font-size: var(--font-size-body); line-height: 1.7; overflow-wrap: anywhere; }
+.markdown > *, .markdown blockquote > * { margin: 0; }
+.markdown > * + *, .markdown blockquote > * + * { margin-top: var(--space-2-5); }
+.markdown > * + :is(h3, h4) { margin-top: 18px; }
+.markdown h3 { font-size: var(--font-size-markdown-heading); font-weight: 600; line-height: 1.45; }
+.markdown h4 { font-size: var(--font-size-body); font-weight: 600; line-height: 1.5; }
+.markdown :is(ul, ol) { margin: 0; padding-left: 22px; }
+.markdown li + li, .markdown li > :is(ul, ol, p + p) { margin-top: var(--space-1); }
+.markdown li > p { margin: 0; }
+.markdown li::marker { color: var(--color-text-muted); }
+.markdown strong { font-weight: 600; }
+.markdown a { color: var(--color-link); text-decoration: underline; text-decoration-color: var(--color-link-underline); text-underline-offset: 2px; }
+.markdown :not(pre) > code { padding: 2px 5px; font: var(--font-size-note)/1 var(--font-mono); background: var(--color-surface-soft); border: 1px solid var(--color-border-soft); border-radius: 5px; }
+.markdown blockquote { padding-left: var(--space-3); color: var(--color-text-3); border-left: 2px solid var(--color-border-strong); }
+.markdown hr { height: 1px; border: 0; background: var(--color-border); }
+.markdown-table { width: fit-content; max-width: 100%; overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-code); }
+.markdown table { min-width: 280px; border-collapse: collapse; font-size: var(--font-size-md); line-height: 1.5; }
+.markdown th { font-weight: 600; text-align: left; background: var(--color-surface-sub); }
+.markdown :is(th, td) { padding: 7px var(--space-4); border-bottom: 1px solid var(--color-border-soft); white-space: nowrap; }
+.markdown tr:last-child td { border-bottom: 0; }
+.markdown .is-numeric { text-align: right; font-variant-numeric: tabular-nums; }
+.code-block { overflow: hidden; background: var(--color-surface-sub); border: 1px solid var(--color-border); border-radius: var(--radius-code); }
+.code-block__header { display: flex; align-items: center; justify-content: space-between; height: var(--code-block-header-height); padding: 0 var(--space-1-5) 0 var(--space-3); font: var(--font-size-caption)/1 var(--font-mono); color: var(--color-text-muted); border-bottom: 1px solid var(--color-border-soft); }
+.code-block__copy { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 var(--space-2); font: var(--font-size-sm) var(--font-sans); color: var(--color-text-3); border-radius: var(--radius-sm); }
+.code-block__copy:hover { color: var(--color-text); }
+.code-block pre { margin: 0; padding: var(--space-2-5) 14px; overflow-x: auto; font: var(--font-size-note)/1.7 var(--font-mono); color: var(--color-text-2); white-space: pre; overflow-wrap: normal; }
+.code-block pre code { font: inherit; }
+.code-block__line { display: block; margin: 0 -14px; padding: 0 14px; }
+.code-block__line--add { background: var(--color-diff-add-bg); }
+.code-block__line--del { background: var(--color-diff-del-bg); }
+.code-block__line--hunk { color: var(--color-text-muted); }
+.code-block :is(.hljs-keyword, .hljs-literal) { color: var(--color-code-keyword); }
+.code-block :is(.hljs-string, .hljs-regexp) { color: var(--color-code-string); }
+.code-block .hljs-number { color: var(--color-code-number); }
+.code-block .hljs-comment { color: var(--color-code-comment); font-style: italic; }
 
 /* Needs Input and Error cards (.card.need / .card.past / .card.err) */
 .request-card, .transcript-error { display: flex; flex-direction: column; gap: var(--space-2-5); padding: 14px 16px; border: 1px solid; border-radius: var(--radius-card); font-size: var(--font-size-md); line-height: 1.5; overflow-wrap: anywhere; }

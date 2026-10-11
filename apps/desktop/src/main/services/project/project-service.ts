@@ -3,6 +3,8 @@
 // small statements and are applied immediately, so there is nothing to flush
 // on tab close or quit (spec §2.3.4 allows this).
 import { randomUUID } from 'node:crypto'
+import { homedir } from 'node:os'
+import { sep } from 'node:path'
 import type { DatabaseSync } from 'node:sqlite'
 import { normalizeWindowState, openProjectIds } from '@shared/project/tabs'
 import type {
@@ -35,11 +37,19 @@ interface ProjectRow {
   created_at: string
 }
 
-function toRecord(row: ProjectRow): ProjectRecord {
+/** Shortens a path under the home directory to `~/…` for display (Shell Spec v02 §6 draft). */
+export function tildePath(path: string, home: string): string {
+  if (!home || home === sep) return path
+  const base = home.endsWith(sep) ? home.slice(0, -1) : home
+  return path === base ? '~' : path.startsWith(base + sep) ? `~${path.slice(base.length)}` : path
+}
+
+function toRecord(row: ProjectRow, home: string): ProjectRecord {
   return {
     id: row.id,
     name: row.name,
     localPath: row.local_path,
+    displayPath: tildePath(row.local_path, home),
     canonicalPath: row.canonical_path,
     createdAt: row.created_at,
     lastOpenedAt: row.last_opened_at
@@ -57,6 +67,8 @@ function parseJson(text: string): unknown {
 export interface ProjectServiceOptions {
   now?: () => Date
   newId?: () => string
+  /** For `displayPath`; defaults to the user's home directory. */
+  homeDir?: string
 }
 
 export interface ProjectService {
@@ -88,6 +100,7 @@ export function createProjectService(
 ): ProjectService {
   const now = () => (options.now?.() ?? new Date()).toISOString()
   const newId = options.newId ?? randomUUID
+  const home = options.homeDir ?? homedir()
 
   const row = (id: ProjectId): ProjectRow | undefined =>
     database().prepare('SELECT * FROM projects WHERE id = ?').get(id) as ProjectRow | undefined
@@ -132,7 +145,7 @@ export function createProjectService(
       .all(limit) as unknown as ProjectRow[]
     return rows.map((r) => {
       const check = inspectDirectory(r.canonical_path)
-      return { project: toRecord(r), status: check.ok ? 'ok' : check.reason }
+      return { project: toRecord(r, home), status: check.ok ? 'ok' : check.reason }
     })
   }
 
@@ -148,7 +161,7 @@ export function createProjectService(
           `UPDATE projects SET last_opened_at = ?, hidden_from_recent = 0, dev = ?, ino = ? WHERE id = ?`
         ).run(at, inspected.identity.dev, inspected.identity.ino, existing.id)
         const updated = requireRow(existing.id)
-        return { ok: true, project: toRecord(updated), uiState: getUiState(existing.id), created: false }
+        return { ok: true, project: toRecord(updated, home), uiState: getUiState(existing.id), created: false }
       }
       const id = newId()
       const uiState = defaultUiState()
@@ -166,12 +179,12 @@ export function createProjectService(
         at,
         at
       )
-      return { ok: true, project: toRecord(requireRow(id)), uiState, created: true }
+      return { ok: true, project: toRecord(requireRow(id), home), uiState, created: true }
     },
 
     getProject(id) {
       const r = row(id)
-      return r ? toRecord(r) : null
+      return r ? toRecord(r, home) : null
     },
 
     getUiState,
@@ -205,7 +218,7 @@ export function createProjectService(
     bootstrap() {
       const windowState = loadWindowState()
       const ids = openProjectIds(windowState)
-      const projects = ids.map((id) => toRecord(requireRow(id)))
+      const projects = ids.map((id) => toRecord(requireRow(id), home))
       const uiStates = Object.fromEntries(ids.map((id) => [id, getUiState(id)]))
       return { windowState, projects, uiStates, recent: listRecent() }
     },

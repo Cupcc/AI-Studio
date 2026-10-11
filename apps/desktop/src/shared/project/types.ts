@@ -46,6 +46,8 @@ export interface ProjectRecord {
   name: string
   /** Path as first selected by the user (display only). */
   localPath: string
+  /** `localPath` with the home directory shortened to `~` (display only). */
+  displayPath: string
   /** Symlink-resolved absolute path; CLI working directory. */
   canonicalPath: string
   createdAt: string

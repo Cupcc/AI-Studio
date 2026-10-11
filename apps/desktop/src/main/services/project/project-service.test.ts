@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { openDatabase, type StudioDatabase } from '../database/database'
 import { migrations } from '../database/migrations'
-import { createProjectService, type ProjectService } from './project-service'
+import { createProjectService, tildePath, type ProjectService } from './project-service'
 import { placeOpenedProject } from '@shared/project/tabs'
 
 let dir: string, database: StudioDatabase, projects: ProjectService
@@ -21,6 +21,23 @@ function open(name = 'project') {
   if (!result.ok) throw new Error(result.reason)
   return result
 }
+describe('display path · Shell Spec v02 §6 draft', () => {
+  it('shortens the home directory to ~ only at a path boundary', () => {
+    expect(tildePath('/Users/me/Projects/my-saas', '/Users/me')).toBe('~/Projects/my-saas')
+    expect(tildePath('/Users/me', '/Users/me/')).toBe('~')
+    expect(tildePath('/Users/meow/x', '/Users/me')).toBe('/Users/meow/x')
+    expect(tildePath('/opt/project', '/Users/me')).toBe('/opt/project')
+    expect(tildePath('/opt/project', '/')).toBe('/opt/project')
+  })
+
+  it('returns displayPath with each record', () => {
+    projects = createProjectService(() => database.db, { homeDir: dir })
+    const opened = open('Home Project')
+    expect(opened.project.displayPath).toBe('~/Home Project')
+    expect(projects.getProject(opened.project.id)?.displayPath).toBe('~/Home Project')
+  })
+})
+
 describe('Project persistence and identity · FR-PROJ-001/003 · AC-01', () => {
   it('reuses symlinks and equivalent paths without writing into a Project', () => {
     const a = open('Project With Spaces')

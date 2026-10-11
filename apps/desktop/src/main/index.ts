@@ -12,8 +12,8 @@ import { emit } from './ipc/registry'
 import { parseLaunchOptions } from './launch-options'
 import { APP_ENTRY_URL, APP_ORIGIN, createSenderPolicy, originOf } from './security/policy'
 import {
-  denyAllPermissions,
   handleAppProtocol,
+  installPermissionPolicy,
   installWebContentsGuards,
   registerAppScheme
 } from './security/hardening'
@@ -71,7 +71,7 @@ let disposeIpc: (() => Promise<void>) | null = null
 
 /** Runs after `ready`: protocol, permissions, core services and IPC. */
 function startRuntime(): void {
-  denyAllPermissions()
+  installPermissionPolicy(rendererOrigin)
   handleAppProtocol(join(__dirname, '../renderer'))
   core = createCoreServices({
     userDataDir: app.getPath('userData'),

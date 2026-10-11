@@ -1,0 +1,227 @@
+[
+  {
+    "state": "session-sidebar",
+    "width": 1024,
+    "height": 640,
+    "column": 370,
+    "composer": 322,
+    "edges": [
+      287,
+      609,
+      287,
+      609
+    ]
+  },
+  {
+    "state": "session-sidebar",
+    "width": 1280,
+    "height": 800,
+    "column": 602,
+    "composer": 554,
+    "edges": [
+      287,
+      841,
+      287,
+      841
+    ]
+  },
+  {
+    "state": "session-sidebar",
+    "width": 1440,
+    "height": 900,
+    "column": 762,
+    "composer": 714,
+    "edges": [
+      287,
+      1001,
+      287,
+      1001
+    ]
+  },
+  {
+    "state": "markdown",
+    "width": 1024,
+    "height": 640,
+    "column": 746,
+    "composer": 698,
+    "edges": [
+      287,
+      985,
+      287,
+      985
+    ]
+  },
+  {
+    "state": "markdown",
+    "width": 1280,
+    "height": 800,
+    "column": 768,
+    "composer": 720,
+    "edges": [
+      404,
+      1124,
+      404,
+      1124
+    ]
+  },
+  {
+    "state": "markdown",
+    "width": 1440,
+    "height": 900,
+    "column": 768,
+    "composer": 720,
+    "edges": [
+      484,
+      1204,
+      484,
+      1204
+    ]
+  },
+  {
+    "state": "view-overview",
+    "width": 1024,
+    "height": 640,
+    "column": null,
+    "composer": null,
+    "edges": null
+  },
+  {
+    "state": "view-overview",
+    "width": 1280,
+    "height": 800,
+    "column": null,
+    "composer": null,
+    "edges": null
+  },
+  {
+    "state": "view-overview",
+    "width": 1440,
+    "height": 900,
+    "column": null,
+    "composer": null,
+    "edges": null
+  },
+  {
+    "state": "view-tool",
+    "width": 1024,
+    "height": 640,
+    "column": null,
+    "composer": null,
+    "edges": null
+  },
+  {
+    "state": "view-tool",
+    "width": 1280,
+    "height": 800,
+    "column": null,
+    "composer": null,
+    "edges": null
+  },
+  {
+    "state": "view-tool",
+    "width": 1440,
+    "height": 900,
+    "column": null,
+    "composer": null,
+    "edges": null
+  },
+  {
+    "state": "needs-input",
+    "width": 1024,
+    "height": 640,
+    "column": 746,
+    "composer": 698,
+    "edges": [
+      287,
+      985,
+      287,
+      985
+    ]
+  },
+  {
+    "state": "needs-input",
+    "width": 1280,
+    "height": 800,
+    "column": 768,
+    "composer": 720,
+    "edges": [
+      404,
+      1124,
+      404,
+      1124
+    ]
+  },
+  {
+    "state": "needs-input",
+    "width": 1440,
+    "height": 900,
+    "column": 768,
+    "composer": 720,
+    "edges": [
+      484,
+      1204,
+      484,
+      1204
+    ]
+  },
+  {
+    "state": "needs-input-question",
+    "width": 1280,
+    "height": 800,
+    "column": 768,
+    "composer": 720,
+    "edges": [
+      404,
+      1124,
+      404,
+      1124
+    ]
+  },
+  {
+    "state": "error",
+    "width": 1024,
+    "height": 640,
+    "column": 746,
+    "composer": 698,
+    "edges": [
+      287,
+      985,
+      287,
+      985
+    ]
+  },
+  {
+    "state": "error",
+    "width": 1280,
+    "height": 800,
+    "column": 768,
+    "composer": 720,
+    "edges": [
+      404,
+      1124,
+      404,
+      1124
+    ]
+  },
+  {
+    "state": "error",
+    "width": 1440,
+    "height": 900,
+    "column": 768,
+    "composer": 720,
+    "edges": [
+      484,
+      1204,
+      484,
+      1204
+    ]
+  },
+  {
+    "state": "draft",
+    "width": 1280,
+    "height": 800,
+    "column": null,
+    "composer": 720,
+    "edges": null
+  }
+]

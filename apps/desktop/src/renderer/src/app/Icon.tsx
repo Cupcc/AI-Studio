@@ -23,7 +23,10 @@ const paths: Record<string, ReactNode> = {
   progress: <path d="M3 13V9M8 13V5M13 13V3" />,
   architecture: <><rect x="5" y="2" width="6" height="3.5" rx="1" /><rect x="2" y="10.5" width="5" height="3.5" rx="1" /><rect x="9" y="10.5" width="5" height="3.5" rx="1" /><path d="M8 5.5V8M4.5 10.5V8h7v2.5" /></>,
   'agent-team': <path d="M6 7.7a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4zM2 13c.5-2.3 2-3.5 4-3.5s3.5 1.2 4 3.5M10.5 3.6a2.2 2.2 0 0 1 0 4M12 9.8c1 .5 1.7 1.6 2 3.2" />,
-  'business-flow': <><circle cx="3.5" cy="8" r="1.5" /><circle cx="12.5" cy="8" r="1.5" /><path d="M5 8h5.5M8.5 6l2 2-2 2" /></>
+  'business-flow': <><circle cx="3.5" cy="8" r="1.5" /><circle cx="12.5" cy="8" r="1.5" /><path d="M5 8h5.5M8.5 6l2 2-2 2" /></>,
+  // Prototype v02 code block copy button
+  copy: <><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" /><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5" /></>,
+  check: <path d="M3 8.5l3.2 3L13 4.5" />
 }
 
 export function Icon({ name, size = 16 }: { name: string; size?: number }) {

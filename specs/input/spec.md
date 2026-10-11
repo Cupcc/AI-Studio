@@ -8,7 +8,7 @@
 | 文档状态 | 草稿 |
 | 覆盖需求 | FR-INPUT-001～FR-INPUT-002；关联 FR-STATE-002（在输入框答复 Needs Input）、FR-SESSION-001（输入区固定在对话下方） |
 | 相关验收 | AC-02、AC-05；05 第 4 节专项测试中的 Model Selector、Stop |
-| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 6、7 节；线框图 v02（[design/wireframes](../../design/wireframes/README.md)） |
+| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 6、7 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 2.2、6、7 节（宽度对齐、草稿居中）；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；交互原型 v02 |
 | 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-INPUT-001～002、FR-STATE-002、FR-CHAT-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 4、6 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 4、5 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 4、5、6 节 |
 
 ## 1. 问题记录
@@ -53,7 +53,7 @@
 
 #### 布局
 
-1. 输入区固定在 Conversation 下方，与 Conversation 正文同宽（最大 720，Shell Spec 第 2.2 节），草稿、Conversation Mode、Project View Conversation 列共用同一组件。
+1. 输入区固定在 Conversation 下方，内容宽度与消息列相同、左右边缘对齐（最大 720，Shell Spec v02 第 2.2 节）；Session Mode 新对话草稿中与问候语一起居中，发送第一条消息后回到底部（Shell Spec v02 第 6 节；交互原型 v02，2026-10-10 确认）。草稿、Conversation Mode、Project View Conversation 列共用同一组件。
 2. 上部为多行文本输入；底行从左到右：`+`（Context / Attachment）、上下文标签、（右侧）Model Selector、Send / Stop（Shell Spec 第 7 节；UX 第 4 节示意图）。
 3. 打开 Session 或草稿时输入框获得焦点，可立即输入（UX 第 6 节 Session 打开第 4 项；FR-CHAT-001 第 1 项）。
 

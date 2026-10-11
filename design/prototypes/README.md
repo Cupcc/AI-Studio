@@ -2,10 +2,6 @@
 
 存放可交互原型、外部原型链接及操作说明。
 
-## 人工审阅入口
-
-- [v02 采用问题](../../tasks/T20261010-prototype-v02/task.md#未决问题)与[评审依据](../../tasks/T20261010-prototype-v02/task.md#签收)。
-
 ## 1. 场景覆盖
 
 | 场景 | 验证重点 | 依据 |
@@ -26,8 +22,8 @@
 
 | 原型 | 版本 | 状态 | 入口 | 依据 |
 |---|---|---|---|---|
-| Studio 灰度交互原型 | v01 | 已确认（2026-10-09） | [在线原型](https://claude.ai/artifact/ANF4XoboMHvZjzn4tRT17c)；源文件 [studio-prototype-v01.html](studio-prototype-v01.html) + [studio-prototype-v01/](studio-prototype-v01/) | 线框图 v02；[Shell Spec v01](../components/shell-spec-v01.md)；AC-01 ~ AC-07 |
-| Studio 灰度交互原型 | v02 | 探索中 | [在线原型](https://claude.ai/artifact/7i4ULjj3vEo16mqqXYm5E1)；源文件 [studio-prototype-v02.html](studio-prototype-v02.html) + [studio-prototype-v02/](studio-prototype-v02/) | v01；[对照 ChatGPT / Claude 的候选调整](../../tasks/T20261010-conversation-layout/research.md) A1、A2、B1；FR-SESSION-001 |
+| Studio 灰度交互原型 | v01 | 已确认（2026-10-09），保留作历史依据；Conversation 部分由 v02 替代 | [在线原型](https://claude.ai/artifact/ANF4XoboMHvZjzn4tRT17c)；源文件 [studio-prototype-v01.html](studio-prototype-v01.html) + [studio-prototype-v01/](studio-prototype-v01/) | 线框图 v02；[Shell Spec v01](../components/shell-spec-v01.md)；AC-01 ~ AC-07 |
+| Studio 灰度交互原型 | v02 | 已确认（2026-10-10） | [在线原型](https://claude.ai/artifact/7i4ULjj3vEo16mqqXYm5E1)；源文件 [studio-prototype-v02.html](studio-prototype-v02.html) + [studio-prototype-v02/](studio-prototype-v02/) | v01；[对照 ChatGPT / Claude 的候选调整](../../tasks/T20261010-conversation-layout/research.md) A1、A2、B1；FR-SESSION-001 |
 
 ### Studio 灰度交互原型 v01
 
@@ -43,7 +39,7 @@
 
 ### Studio 灰度交互原型 v02
 
-在 v01 基础上探索 Conversation 向 ChatGPT / Claude 桌面端对齐（[T20261010-prototype-v02](../../tasks/T20261010-prototype-v02/task.md)）。未改动的部分与 v01 相同，上节说明继续适用。
+在 v01 基础上让 Conversation 向 ChatGPT / Claude 桌面端对齐（[T20261010-prototype-v02](../../tasks/archive/T20261010-prototype-v02/task.md)），2026-10-10 评审通过、全部采用，规则写入 [Shell Spec v02](../components/shell-spec-v02.md) 第 2.2、6、7 节；桌面端实现见 [T20261010-prototype-v02-alignment](../../tasks/archive/T20261010-prototype-v02-alignment/task.md)（2026-10-11 签收）。未改动的部分与 v01 相同，上节说明继续适用。
 
 - **变更**：
   - 对话从顶部开始排列（已确认，见 [Shell Spec v01](../components/shell-spec-v01.md) 第 6 节）；
@@ -53,4 +49,5 @@
 - **运行方式**：同 v01；本地查看时打开 `studio-prototype-v02.html`。
 - **起始画面**：my-saas 打开“运行测试并修复失败用例”（Markdown 示例）；landing-page 为新对话草稿（居中输入框）；admin-console 为 Overview。
 - **对比 v01**：“演示控制”顶部列出 v02 变更，“对比 v01”按钮切回 v01 的呈现，再点一次恢复。
-- **未改动**：Project View 左列的草稿（P-A，上方列出最近对话）、发送后的滚动跟随、消息复制等其他候选调整。
+- **未改动**：Project View 左列的草稿（P-A，上方列出最近对话；确认不居中）、发送后的滚动跟随、消息复制等其他候选调整。
+- **与确认结果的差异**：原型的 Markdown 解析为手写示意，不支持嵌套列表；确认范围包含嵌套列表，以 Shell Spec 为准（2026-10-10 确认）。

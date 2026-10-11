@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { InputRequest, InputResolution, InputResponse, TranscriptItem } from '@shared/session/types'
 import { formatWorkedFor } from '@shared/session/presentation'
+import { AgentMarkdown } from './Markdown'
 import { useSessions } from './store'
 
 function resolutionText(request: InputRequest, resolution: InputResolution, redacted?: boolean): string {
@@ -70,7 +71,7 @@ export function Transcript({ item }: { item: TranscriptItem }) {
     {item.contextItems.length > 0 && <div className="transcript-user__context">{item.contextItems.map((context, index) => <span key={index}>{context.type === 'view' ? context.viewId : context.path}</span>)}</div>}
     <p>{item.redacted ? '••••••（私密回复不保存）' : item.text}</p>
   </article>
-  if (item.kind === 'agent_message') return <article className="transcript-agent" data-transcript-id={item.id}><div className="transcript-text">{item.text}</div>{!item.complete && <span className="sr-only">正在输出</span>}</article>
+  if (item.kind === 'agent_message') return <article className="transcript-agent" data-transcript-id={item.id}><AgentMarkdown text={item.text} />{!item.complete && <span className="sr-only">正在输出</span>}</article>
   if (item.kind === 'tool_activity') {
     const tool = item.item
     const label = tool.activity?.label ?? tool.command?.command ?? tool.tool?.name ?? tool.text ?? tool.nativeType ?? '工具活动'

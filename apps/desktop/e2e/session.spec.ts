@@ -71,11 +71,46 @@ test('AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session f
   await expect(workspace().locator('.transcript-agent')).not.toHaveCount(0)
   await expect(workspace().locator('.transcript-tool')).not.toHaveCount(0)
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
-  // Shell Spec section 5: a transcript shorter than the viewport starts at the top, not above the composer
+  // Shell Spec section 6: a transcript shorter than the viewport starts at the top, not above the composer
   const offset = await workspace().locator('.session-conversation__scroll').evaluate((node) => node.querySelector('.transcript-user')!.getBoundingClientRect().top - node.getBoundingClientRect().top)
   expect(offset).toBeLessThanOrEqual(32)
   await expect(row(session.id).getByRole('img', { name: 'Completed Unread' })).toHaveCount(0)
   await screenshot('conversation-stream-completed')
+})
+
+test('AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser', async () => {
+  await newChat(); await send('[e2e:markdown] Explain the failing tests')
+  const reply = workspace().locator('.transcript-agent .markdown')
+  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(reply.getByRole('heading', { level: 4, name: '修改' })).toBeVisible()
+  await expect(reply.locator('ul > li > ul > li')).toContainText('边界用例')
+  await expect(reply.getByRole('cell', { name: '24' })).toHaveClass('is-numeric')
+  await expect(reply.locator('.code-block__header > span:first-child')).toHaveText(['ts', 'diff'])
+  await expect(reply.locator('.code-block .hljs-keyword').first()).toHaveText('export')
+  await expect(reply.locator('.code-block__line--add')).toHaveText('+  await writeSession(res, user)')
+  await expect(workspace().locator('.transcript-user')).toHaveText('[e2e:markdown] Explain the failing tests')
+
+  // The copy button writes the code source to the system clipboard; restore whatever was there before.
+  const previous = await app.evaluate(({ clipboard }) => clipboard.readText())
+  try {
+    await reply.getByRole('button', { name: '复制代码' }).first().click()
+    await expect(reply.getByRole('button', { name: '复制代码' }).first()).toHaveText('已复制')
+    expect(await app.evaluate(({ clipboard }) => clipboard.readText())).toBe('export function toChargeAmount(price: number) {\n  // 按最小货币单位计算，避免浮点误差\n  return Math.round(price * 100)\n}')
+  } finally {
+    await app.evaluate(({ clipboard }, text) => clipboard.writeText(text), previous)
+  }
+
+  // http(s) links go to the system browser (stubbed here); the app window neither navigates nor opens a window.
+  await app.evaluate(({ shell }) => {
+    const opened: string[] = []; (globalThis as { __opened?: string[] }).__opened = opened
+    shell.openExternal = async (url: string) => { opened.push(url) }
+  })
+  const url = page.url()
+  await reply.getByRole('link', { name: 'Stripe 文档' }).click()
+  await expect.poll(() => app.evaluate(() => (globalThis as { __opened?: string[] }).__opened)).toEqual(['https://docs.stripe.com/billing/subscriptions/cancel'])
+  expect(page.url()).toBe(url)
+  expect(app.windows()).toHaveLength(1)
+  await screenshot('markdown-reply')
 })
 
 test('AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session', async () => {

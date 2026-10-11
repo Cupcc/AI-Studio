@@ -8,7 +8,7 @@
 | 文档状态 | 草稿 |
 | 覆盖需求 | FR-CHAT-001～FR-CHAT-003；关联 FR-VIEW-007（只记录 `origin_view_id`）、FR-NAV-003（Session 命名） |
 | 相关验收 | AC-02、AC-03；05 第 4 节专项测试中的 New Chat 草稿 |
-| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 3、4、8、10 节；线框图 v02（[design/wireframes](../../design/wireframes/README.md)） |
+| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 3、4、8、10 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6 节（新对话草稿）；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；交互原型 v02 |
 | 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-CHAT-001～003、FR-VIEW-007、FR-NAV-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6 节 New Chat、第 10 节 D-01、D-11、D-15、P-A；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 6 节 Project、Session；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 |
 
 ## 1. 未决问题
@@ -52,7 +52,7 @@
    2. 可用时调用 session 模块创建 Session：`cli_type` = 草稿 CLI，`model` = 草稿中选择的模型（未选择则为空，使用 CLI 原生默认），`origin_view_id` = 草稿所在 View（Conversation Mode 草稿为空），首条消息与上下文项一并提交。
    3. Session 立即出现在 Session History（今天分组顶部），Main Canvas 从草稿切换为该 Session 的 Conversation，进入 Running（FR-STATE-001）。
    4. 此后 CLI 已锁定（FR-CHAT-003）。CLI 实际调用失败（例如登录状态检测通过但调用失败，[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节末条）时，Session 已存在，显示 Error，规则见 session spec 第 3.7 节。
-4. 草稿顶栏：建议显示“新对话 · <CLI 名称>”（Shell Spec 第 8 节 Project View 草稿为“新对话 · <View 名称>”，Conversation Mode 草稿未规定；文案以高保真为准）。
+4. Conversation Mode 草稿：顶栏显示 CLI 标识与“新对话”；画布中部显示问候语“今天要在 <Project> 中做什么？”和一行“<CLI 名称> 会直接在 <目录> 中执行”（主目录缩写为 `~`），与输入框一起居中；发送第一条消息后输入框回到底部（Shell Spec v02 第 6 节；交互原型 v02，2026-10-10 确认）。Project View 草稿的顶栏为“新对话 · <View 名称>”，布局不居中（Shell Spec 第 8 节）。
 5. 草稿的保留与离开（建议，C-Q1）：
    - 每个 Project 最多保留一份 Conversation Mode 草稿（文本、CLI、模型）。
    - 离开草稿（点击 Session、View 或切换 Tab）不丢弃草稿；切换 Tab 返回时恢复离开时的完整状态，包括草稿（D-15）。

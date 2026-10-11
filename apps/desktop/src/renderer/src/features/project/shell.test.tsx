@@ -8,7 +8,7 @@ import { registerShellIntegration, type RendererSessionPort } from './integratio
 import { useProjectShell } from './store'
 
 const initial = useProjectShell.getState()
-const projects = ['a', 'b', 'c'].map((id) => ({ id, name: id, canonicalPath: `/projects/${id}`, localPath: `/projects/${id}`, createdAt: '', lastOpenedAt: '' }))
+const projects = ['a', 'b', 'c'].map((id) => ({ id, name: id, canonicalPath: `/projects/${id}`, localPath: `/projects/${id}`, displayPath: `/projects/${id}`, createdAt: '', lastOpenedAt: '' }))
 const bootstrap = (): ShellBootstrap => ({
   projects, recent: [],
   windowState: { tabs: projects.map((p) => ({ kind: 'project', id: `project:${p.id}`, projectId: p.id })), currentTabId: 'project:a', navCollapsed: false },
