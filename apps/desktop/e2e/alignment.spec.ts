@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
 import type { FeatureBridge } from '../src/shared/ipc/contract'
 import type { sessionContract } from '../src/shared/ipc/session'
+import type { settingsContract } from '../src/shared/ipc/settings'
 import type { SessionSummary } from '../src/shared/session/types'
 
 // T20261009-prototype-alignment (W3): captures the aligned shell at the three review widths
@@ -11,14 +12,18 @@ import type { SessionSummary } from '../src/shared/session/types'
 // covered by the other specs; this file only drives the UI into each visual state.
 // T20261010-prototype-v02-alignment adds the prototype v02 states: Markdown reply, centred
 // new chat draft, and message column edges equal to the composer edges (Shell Spec v02 §2.2).
+// T20261012-settings-theme runs the layout states in both appearances (Shell Spec v02 §12): glass, the
+// default, adds an 8px gutter right of and below the canvas; solid keeps the original geometry.
 type SessionApi = FeatureBridge<typeof sessionContract>
+type SettingsApi = FeatureBridge<typeof settingsContract>
+type Theme = 'glass' | 'solid'
 const appDir = join(__dirname, '..')
 const evidence = process.env.STUDIO_E2E_EVIDENCE_DIR ?? join(appDir, '../../.runtime/desktop-e2e/screenshots/alignment')
 const SIZES = [{ width: 1024, height: 640 }, { width: 1280, height: 800 }, { width: 1440, height: 900 }] as const
 const BASE = { width: 1280, height: 800 }
 type Layout = { state: string; width: number; height: number; [metric: string]: number | string | number[] | null }
 const metrics: Layout[] = []
-let dir: string, app: ElectronApplication, page: Page, projectId: string
+let dir: string, app: ElectronApplication, page: Page, projectId: string, theme: Theme = 'glass'
 
 const workspace = () => page.locator('.project-workspace:not([hidden])')
 const row = (id: string) => workspace().locator(`[data-session-row="${id}"]`)
@@ -60,7 +65,13 @@ async function snap(state: string, width: number) {
   await page.mouse.move(2, 2)
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   mkdirSync(evidence, { recursive: true })
-  await page.screenshot({ path: join(evidence, `W3-${state}-${width}.png`) })
+  await page.screenshot({ path: join(evidence, `W3-${state}-${theme}-${width}.png`) })
+}
+/** Test preparation: the settings dialog itself is covered by settings.spec.ts. */
+async function useTheme(next: Theme) {
+  theme = next
+  await page.evaluate((t) => (window.studio as unknown as { settings: SettingsApi }).settings.setTheme({ theme: t }), next)
+  await expect(page.locator('html')).toHaveAttribute('data-theme', next)
 }
 /** Shell Spec v01 section 1 invariants for the visible Project workspace. */
 async function assertLayout(state: string, kind: 'session' | 'session-sidebar' | 'view', size: { width: number; height: number }) {
@@ -81,7 +92,7 @@ async function assertLayout(state: string, kind: 'session' | 'session-sidebar' |
       })()
     }
   })
-  metrics.push({ state, ...size, ...m })
+  metrics.push({ state, theme, ...size, ...m })
   expect(m.document).toBeLessThanOrEqual(m.innerWidth)
   expect(m.workspace).toBe(m.innerWidth)
   expect(m.topbar).toBe(40)
@@ -105,6 +116,7 @@ async function atEachWidth(state: string, kind: 'session' | 'session-sidebar' | 
 }
 
 test.beforeEach(async () => {
+  theme = 'glass'
   dir = mkdtempSync(join(tmpdir(), 'studio alignment ')); await launch()
   await openProject('Session Project')
   projectId = await workspace().getAttribute('data-project-id') ?? ''
@@ -115,6 +127,9 @@ test.afterAll(() => {
   mkdirSync(evidence, { recursive: true })
   writeFileSync(join(evidence, 'W3-layout-metrics.json'), JSON.stringify(metrics, null, 2) + '\n')
 })
+
+for (const each of ['glass', 'solid'] as const) test.describe(`${each} appearance`, () => {
+test.beforeEach(async () => { await useTheme(each) })
 
 test('FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440', async () => {
   await newChat()
@@ -136,10 +151,12 @@ test('FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges al
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
   await expect(workspace().locator('.code-block')).toHaveCount(2)
   await atEachWidth('markdown', 'session')
-  const edges = metrics.filter((m) => m.state === 'markdown').map((m) => m.edges)
+  const edges = metrics.filter((m) => m.state === 'markdown' && m.theme === each).map((m) => m.edges)
   expect(edges.every(Boolean)).toBe(true)
-  // 1440 wide, navigation 248: the 720 column is centred in the canvas at 484 / 1204, like prototype v02
-  expect((edges.at(-1) as number[]).slice(0, 2)).toEqual([484, 1204])
+  // 1440 wide, navigation 248: the 720 column is centred in the canvas at 484 / 1204, like prototype v02;
+  // the glass gutter narrows the canvas by 8, moving the centre 4 to the left
+  const shift = each === 'glass' ? 4 : 0
+  expect((edges.at(-1) as number[]).slice(0, 2)).toEqual([484 - shift, 1204 - shift])
 })
 
 test('FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440', async () => {
@@ -150,6 +167,7 @@ test('FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a select
   await workspace().getByRole('button', { name: 'Files', exact: true }).click()
   await expect(workspace().getByRole('button', { name: 'Files', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await atEachWidth('view-tool', 'view')
+})
 })
 
 test('FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280', async () => {

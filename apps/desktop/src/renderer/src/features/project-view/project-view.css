@@ -24,7 +24,7 @@
 .view-node th, .view-node td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); vertical-align: top; }
 .view-node th { font-weight: 500; color: var(--color-text-muted); }
 .view-diagram { overflow: auto; }
-.view-diagram rect { fill: var(--color-surface); stroke: var(--color-border-strong); }
+.view-diagram rect { fill: var(--color-diagram-node); stroke: var(--color-diagram-stroke); }
 .view-diagram text { font-family: var(--font-sans); font-size: var(--font-size-md); fill: var(--color-text); }
 .view-diagram .view-diagram__path { font-size: var(--font-size-xs); fill: var(--color-text-muted); }
 .view-diagram__edge { fill: none; stroke: var(--color-text-muted); }

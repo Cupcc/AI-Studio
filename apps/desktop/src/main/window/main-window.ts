@@ -2,7 +2,9 @@
 // 1024×640 minimum, macOS traffic lights on the left inside a 40px top bar.
 import { BrowserWindow } from 'electron'
 import { appContract } from '@shared/ipc/app'
+import type { AppearanceState } from '@shared/ipc/settings'
 import { emit } from '../ipc/registry'
+import { windowAppearanceOptions } from './appearance'
 import { observeWindowForeground } from './foreground'
 
 export const WINDOW_DEFAULT_SIZE = { width: 1280, height: 800 } as const
@@ -15,6 +17,8 @@ export interface MainWindowOptions {
   url: string
   /** Keep the window hidden (smoke mode). */
   hidden?: boolean
+  /** Appearance at creation, so the first frame already shows it (FR-SET-002). */
+  appearance: Pick<AppearanceState, 'effective' | 'dark'>
 }
 
 export function createMainWindow(options: MainWindowOptions): BrowserWindow {
@@ -26,6 +30,7 @@ export function createMainWindow(options: MainWindowOptions): BrowserWindow {
     title: 'AI Developer Studio',
     titleBarStyle: 'hidden',
     trafficLightPosition: TRAFFIC_LIGHT_POSITION,
+    ...windowAppearanceOptions(options.appearance),
     webPreferences: {
       preload: options.preloadPath,
       contextIsolation: true,

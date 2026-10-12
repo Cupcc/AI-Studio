@@ -62,7 +62,7 @@
 .conversation-working { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--font-size-md); color: var(--color-text-muted); }
 
 /* Messages, tool activity, turn end */
-.transcript-user { align-self: flex-end; max-width: 80%; padding: var(--space-2-5) 14px; background: var(--color-surface-soft); border-radius: var(--radius-bubble); font-size: var(--font-size-body); line-height: 1.55; }
+.transcript-user { align-self: flex-end; max-width: 80%; padding: var(--space-2-5) 14px; background: var(--color-bubble); box-shadow: var(--shadow-bubble); border-radius: var(--radius-bubble); font-size: var(--font-size-body); line-height: 1.55; }
 .transcript-user p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .transcript-user__context { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); margin-bottom: var(--space-1); font-size: var(--font-size-xs); color: var(--color-text-muted); }
 .transcript-tool { padding: 7px var(--space-2-5); font: var(--font-size-sm)/1.65 var(--font-mono); color: var(--color-text-3); background: var(--color-surface-sub); border: 1px solid var(--color-border-soft); border-radius: var(--radius-button); }
@@ -90,13 +90,13 @@
 .markdown :not(pre) > code { padding: 2px 5px; font: var(--font-size-note)/1 var(--font-mono); background: var(--color-surface-soft); border: 1px solid var(--color-border-soft); border-radius: 5px; }
 .markdown blockquote { padding-left: var(--space-3); color: var(--color-text-3); border-left: 2px solid var(--color-border-strong); }
 .markdown hr { height: 1px; border: 0; background: var(--color-border); }
-.markdown-table { width: fit-content; max-width: 100%; overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-code); }
+.markdown-table { width: fit-content; max-width: 100%; overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-code); box-shadow: var(--shadow-panel); }
 .markdown table { min-width: 280px; border-collapse: collapse; font-size: var(--font-size-md); line-height: 1.5; }
 .markdown th { font-weight: 600; text-align: left; background: var(--color-surface-sub); }
 .markdown :is(th, td) { padding: 7px var(--space-4); border-bottom: 1px solid var(--color-border-soft); white-space: nowrap; }
 .markdown tr:last-child td { border-bottom: 0; }
 .markdown .is-numeric { text-align: right; font-variant-numeric: tabular-nums; }
-.code-block { overflow: hidden; background: var(--color-surface-sub); border: 1px solid var(--color-border); border-radius: var(--radius-code); }
+.code-block { overflow: hidden; background: var(--color-surface-sub); border: 1px solid var(--color-border); border-radius: var(--radius-code); box-shadow: var(--shadow-panel); }
 .code-block__header { display: flex; align-items: center; justify-content: space-between; height: var(--code-block-header-height); padding: 0 var(--space-1-5) 0 var(--space-3); font: var(--font-size-caption)/1 var(--font-mono); color: var(--color-text-muted); border-bottom: 1px solid var(--color-border-soft); }
 .code-block__copy { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 var(--space-2); font: var(--font-size-sm) var(--font-sans); color: var(--color-text-3); border-radius: var(--radius-sm); }
 .code-block__copy:hover { color: var(--color-text); }
@@ -139,9 +139,9 @@
 .question-option small { display: block; font-size: var(--font-size-sm); color: var(--color-text-muted); }
 
 /* Composer (.compose > .input > textarea + .irow); no top border, box capped at the 720 reading width */
-.composer { flex: 0 0 auto; width: 100%; padding: var(--space-3) var(--space-6) var(--space-5); background: var(--color-surface); }
+.composer { flex: 0 0 auto; width: 100%; padding: var(--space-3) var(--space-6) var(--space-5); background: var(--color-pane); }
 .composer > * { max-width: var(--conversation-max-width); margin-left: auto; margin-right: auto; }
-.composer__box { display: flex; flex-direction: column; gap: var(--space-2-5); padding: 12px var(--space-2-5) var(--space-2-5) 14px; background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-input); box-shadow: var(--shadow-input); }
+.composer__box { display: flex; flex-direction: column; gap: var(--space-2-5); padding: 12px var(--space-2-5) var(--space-2-5) 14px; background: var(--color-input); border: 1px solid var(--color-border-strong); border-radius: var(--radius-input); box-shadow: var(--shadow-input); }
 .composer__box:focus-within { border-color: var(--color-border-focus); }
 .composer textarea { display: block; width: 100%; min-height: 22px; max-height: 176px; padding: 0; font: inherit; font-size: var(--font-size-body); line-height: 1.55; color: var(--color-text); background: transparent; border: 0; outline: none; resize: none; overflow-y: auto; }
 .composer textarea::placeholder { color: var(--color-placeholder); }

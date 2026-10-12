@@ -1,21 +1,21 @@
 /* Shell chrome of the confirmed prototype v01: top bar, navigation, canvas headers, right area,
    launcher and close dialog. Shared primitives (buttons, popovers, tooltips) are in styles/primitives.css. */
-.shell { display: flex; flex-direction: column; height: 100vh; min-width: var(--window-min-width); min-height: var(--window-min-height); background: var(--color-surface); }
-.shell__body { flex: 1; min-height: 0; overflow: hidden; background: var(--color-surface); }
+.shell { display: flex; flex-direction: column; height: 100vh; min-width: var(--window-min-width); min-height: var(--window-min-height); background: var(--color-window); }
+.shell__body { flex: 1; min-height: 0; overflow: hidden; background: var(--color-window); }
 
 /* Top bar and Project Tabs (browser-style: the selected tab is white and joins the content below) */
-.topbar { display: flex; align-items: flex-end; flex: 0 0 var(--topbar-height); height: var(--topbar-height); gap: var(--space-0); padding: 0 var(--space-2-5) 0 0; background: var(--color-surface-chrome); border-bottom: 1px solid var(--color-border); -webkit-app-region: drag; user-select: none; }
+.topbar { display: flex; align-items: flex-end; flex: 0 0 var(--topbar-height); height: var(--topbar-height); gap: var(--space-0); padding: 0 var(--space-2-5) 0 0; background: var(--color-topbar); border-bottom: 1px solid var(--color-topbar-line); -webkit-app-region: drag; user-select: none; }
 .topbar__traffic-lights { flex: 0 0 var(--traffic-lights-width); align-self: stretch; }
 .topbar > .icon-button { align-self: center; }
 .topbar__nav, .topbar__new-chat { margin-right: var(--space-1-5); }
-.topbar__nav .attention-dot { position: absolute; top: var(--attention-offset); right: var(--attention-offset); box-shadow: var(--attention-ring) var(--color-surface-chrome); }
+.topbar__nav .attention-dot { position: absolute; top: var(--attention-offset); right: var(--attention-offset); box-shadow: var(--attention-ring) var(--color-attention-ring); }
 .topbar__tabs { display: flex; align-items: flex-end; gap: var(--space-0); flex: 0 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .topbar__tabs::-webkit-scrollbar { display: none; }
-.topbar__add { display: grid; place-items: center; flex: 0 0 var(--tab-add-width); width: var(--tab-add-width); height: var(--tab-height); border-radius: var(--radius-button) var(--radius-button) 0 0; color: var(--color-text-3); }
+.topbar__add { display: grid; place-items: center; flex: 0 0 var(--tab-add-width); width: var(--tab-add-width); height: var(--tab-height); border-radius: var(--radius-tab); color: var(--color-text-3); }
 .topbar__drag-space { flex: 1; min-width: var(--space-4); align-self: stretch; }
-.project-tab { display: flex; align-items: center; gap: var(--space-1); flex: 0 1 auto; min-width: var(--tab-min-width); max-width: var(--tab-max-width); height: var(--tab-height); padding: 0 var(--space-1-5) 0 var(--space-1); border-radius: var(--radius-button) var(--radius-button) 0 0; font-size: var(--font-size-md); color: var(--color-text-3); }
+.project-tab { display: flex; align-items: center; gap: var(--space-1); flex: 0 1 auto; min-width: var(--tab-min-width); max-width: var(--tab-max-width); height: var(--tab-height); padding: 0 var(--space-1-5) 0 var(--space-1); border-radius: var(--radius-tab); font-size: var(--font-size-md); color: var(--color-text-3); }
 .project-tab:hover { background: var(--color-hover); }
-.project-tab.is-selected { background: var(--color-surface); color: var(--color-text); }
+.project-tab.is-selected { background: var(--color-tab-selected); box-shadow: var(--shadow-tab-selected); color: var(--color-text); }
 .project-tab__activate { display: flex; align-items: center; gap: var(--space-2); flex: 1; min-width: 0; height: var(--tab-inner-height); padding: 0 var(--space-1) 0 var(--space-2); border-radius: var(--radius-sm); background: none; }
 .project-tab__label { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .project-tab__close { display: grid; place-items: center; flex: 0 0 var(--tab-close-size); width: var(--tab-close-size); height: var(--tab-close-size); border-radius: var(--radius-xs); color: var(--color-placeholder); opacity: 0; }
@@ -27,9 +27,9 @@
 /* Left navigation */
 .project-workspace { display: flex; height: 100%; min-width: 0; }
 .project-workspace[hidden] { display: none; }
-.navigation { position: relative; display: flex; flex-direction: column; flex: 0 0 var(--nav-width); width: var(--nav-width); min-height: 0; padding: var(--space-3) var(--space-2-5) 0; background: var(--color-surface-sub); border-right: 1px solid var(--color-border); }
+.navigation { position: relative; display: flex; flex-direction: column; flex: 0 0 var(--nav-width); width: var(--nav-width); min-height: 0; padding: var(--space-3) var(--space-2-5) 0; background: var(--color-nav); border-right: 1px solid var(--color-nav-line); }
 .navigation__new-chat { position: relative; flex: none; margin-bottom: var(--space-2-5); }
-.split-button { display: flex; align-items: center; height: var(--new-chat-height); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); font-size: var(--font-size-md); }
+.split-button { display: flex; align-items: center; height: var(--new-chat-height); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-control); box-shadow: var(--shadow-control); font-size: var(--font-size-md); }
 .split-button__main { display: flex; align-items: center; gap: var(--space-2); flex: 1; min-width: 0; height: 100%; padding: 0 var(--space-2-5); border-radius: calc(var(--radius-lg) - 1px) 0 0 calc(var(--radius-lg) - 1px); }
 .split-button__badge { display: inline-flex; margin-left: auto; }
 .split-button__more { display: grid; place-items: center; flex: 0 0 var(--new-chat-more-width); width: var(--new-chat-more-width); height: 100%; border-left: 1px solid var(--color-border-soft); border-radius: 0 calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0; color: var(--color-text-3); }
@@ -43,12 +43,15 @@
 .navigation__view span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .navigation__divider { flex: 0 0 1px; height: 1px; margin: var(--space-2-5) var(--space-1-5); background: var(--color-border); }
 .navigation__sessions { flex: 1; min-height: 0; overflow: auto; }
+/* Fixed bottom row: settings entry, like ChatGPT Desktop (FR-SET-001; Shell Spec v02 §4) */
+.navigation__footer { flex: none; padding: var(--space-1-5) 0 var(--space-2-5); }
 .navigation__empty { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); padding: var(--space-1-5) var(--space-2-5); font-size: var(--font-size-note); color: var(--color-text-muted); }
 .navigation__empty p { margin: 0; }
 .navigation__empty .text-button { font-size: var(--font-size-note); }
 
 /* Canvas: conversation column and headers (prototype .hdr: 48px, soft bottom border) */
-.canvas-mode { display: flex; flex: 1; min-width: 0; height: 100%; }
+/* The canvas is the glass theme's frosted layer; in white the tokens make it plain (Shell Spec v02 §12) */
+.canvas-mode { display: flex; flex: 1; min-width: 0; height: calc(100% - var(--canvas-gutter)); margin: 0 var(--canvas-gutter) 0 0; background: var(--color-canvas); border-radius: var(--radius-canvas); box-shadow: var(--shadow-canvas); }
 .conversation-pane { position: relative; display: flex; flex-direction: column; flex: 1; min-width: var(--session-conversation-min-width); }
 .canvas-mode--view .conversation-pane { flex: 0 0 var(--pane-width); width: var(--pane-width); min-width: var(--view-conversation-min-width); }
 .canvas-header { display: flex; flex: 0 0 var(--canvas-header-height); align-items: center; gap: var(--space-2-5); height: var(--canvas-header-height); min-width: 0; padding: 0 var(--space-3) 0 var(--space-5); border-bottom: 1px solid var(--color-border-soft); font-size: var(--font-size-md); }
@@ -57,12 +60,12 @@
 .canvas-mode--session .conversation-pane__content > * { max-width: var(--conversation-max-width); margin-left: auto; margin-right: auto; }
 
 /* Right area: Session Mode sidebar and Project View Mode area (white with a tool, preview colour with Preview) */
-.right-pane { position: relative; flex: 0 0 var(--pane-width); width: var(--pane-width); min-width: var(--sidebar-min-width); background: var(--color-surface); border-left: 1px solid var(--color-border); }
+.right-pane { position: relative; flex: 0 0 var(--pane-width); width: var(--pane-width); min-width: var(--sidebar-min-width); background: var(--color-pane); border-left: 1px solid var(--color-border); }
 .canvas-mode--view .right-pane { flex: 1; width: auto; min-width: var(--view-right-min-width); }
-.right-area { display: flex; flex-direction: column; height: 100%; background: var(--color-surface); }
+.right-area { display: flex; flex-direction: column; height: 100%; background: var(--color-pane); }
 .right-area--preview { background: var(--color-surface-preview); }
 .right-area__header { gap: var(--space-0); padding: 0 var(--space-2) 0 var(--space-2-5); }
-.right-area--view .right-area__header { gap: var(--space-2-5); padding: 0 var(--space-3) 0 var(--space-5); background: var(--color-surface); border-bottom-color: var(--color-border); }
+.right-area--view .right-area__header { gap: var(--space-2-5); padding: 0 var(--space-3) 0 var(--space-5); background: var(--color-pane); border-bottom-color: var(--color-border); }
 .right-area__title { margin-left: var(--space-2); font-weight: 500; }
 .right-area--view .right-area__title { margin-left: 0; font-weight: 600; }
 .tool-switcher { display: flex; align-items: center; gap: var(--space-0); }
@@ -79,7 +82,7 @@
 .canvas-placeholder p { margin: 0; max-width: var(--placeholder-text-width); font-size: var(--font-size-sm); line-height: 1.6; }
 
 /* Launcher (prototype .launch) */
-.launcher { display: flex; height: 100%; overflow: auto; padding: var(--space-8) var(--space-6); background: var(--color-surface-sub); }
+.launcher { display: flex; height: calc(100% - var(--canvas-gutter)); margin: 0 var(--canvas-gutter); overflow: auto; padding: var(--space-8) var(--space-6); background: var(--color-launcher); border-radius: var(--radius-canvas); box-shadow: var(--shadow-canvas); }
 .launcher__content { display: flex; flex-direction: column; gap: var(--launcher-gap); width: var(--launcher-content-width); max-width: 100%; margin: auto; }
 .launcher h1 { margin: 0; font-size: var(--font-size-title); font-weight: 600; }
 .launcher__intro p { margin: var(--space-1) 0 0; }
@@ -101,8 +104,13 @@
 
 /* Close confirmation dialog (prototype .scrim / .dlg) */
 .modal-backdrop { position: fixed; inset: 0; display: grid; place-items: center; background: var(--color-backdrop); z-index: var(--z-modal); }
-.confirm-dialog { display: flex; flex-direction: column; gap: var(--space-3); width: var(--dialog-width); max-width: calc(100% - var(--space-8)); padding: var(--dialog-padding); background: var(--color-surface); border-radius: var(--radius-dialog); box-shadow: var(--shadow-dialog); }
+.confirm-dialog { display: flex; flex-direction: column; gap: var(--space-3); width: var(--dialog-width); max-width: calc(100% - var(--space-8)); padding: var(--dialog-padding); background: var(--color-floating); -webkit-backdrop-filter: var(--backdrop-floating); backdrop-filter: var(--backdrop-floating); border-radius: var(--radius-dialog); box-shadow: var(--shadow-dialog); }
 .confirm-dialog h2 { margin: 0; font-size: var(--font-size-heading); font-weight: 600; }
 .confirm-dialog p, .confirm-dialog li { margin: 0; font-size: var(--font-size-dialog-body); line-height: 1.6; color: var(--color-text-3); }
 .confirm-dialog ul { margin: 0; padding-left: var(--space-5); }
 .confirm-dialog__actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-1-5); }
+
+/* Glass theme geometry (Shell Spec v02 §12); its colours, radii and gutter are tokens.
+   Tabs no longer join the canvas (a gutter sits between), so they become centred pills. */
+:root[data-theme="glass"] :is(.topbar, .topbar__tabs) { align-items: center; }
+:root[data-theme="glass"] .project-workspace > .canvas-mode:first-child { margin-left: var(--canvas-gutter); }

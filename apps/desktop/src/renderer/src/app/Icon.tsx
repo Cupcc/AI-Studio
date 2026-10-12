@@ -26,7 +26,10 @@ const paths: Record<string, ReactNode> = {
   'business-flow': <><circle cx="3.5" cy="8" r="1.5" /><circle cx="12.5" cy="8" r="1.5" /><path d="M5 8h5.5M8.5 6l2 2-2 2" /></>,
   // Prototype v02 code block copy button
   copy: <><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" /><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5" /></>,
-  check: <path d="M3 8.5l3.2 3L13 4.5" />
+  check: <path d="M3 8.5l3.2 3L13 4.5" />,
+  // Settings (FR-SET-001): gear entry and the "外观" category
+  settings: <><circle cx="8" cy="8" r="2" /><path d="M8 1.8v1.7M8 12.5v1.7M14.2 8h-1.7M3.5 8H1.8M12.4 3.6l-1.2 1.2M4.8 11.2l-1.2 1.2M12.4 12.4l-1.2-1.2M4.8 4.8L3.6 3.6" /><circle cx="8" cy="8" r="4.5" /></>,
+  appearance: <><circle cx="8" cy="8" r="5.5" /><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor" stroke="none" /></>
 }
 
 export function Icon({ name, size = 16 }: { name: string; size?: number }) {

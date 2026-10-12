@@ -24,6 +24,8 @@ import { runRendererSmoke } from './smoke/renderer-smoke'
 import { createMainWindow } from './window/main-window'
 import { createShutdownHandler } from './shutdown'
 import { createE2eProviders } from './services/session/e2e-providers'
+import { settingsFor } from './services/settings'
+import { installWindowAppearance } from './window/appearance'
 
 const launch = parseLaunchOptions(process.argv)
 const devServerUrl = !app.isPackaged ? process.env.ELECTRON_RENDERER_URL : undefined
@@ -55,7 +57,8 @@ function openWindow(hidden = false): BrowserWindow {
   const win = createMainWindow({
     preloadPath: join(__dirname, '../preload/index.js'),
     url: devServerUrl ?? APP_ENTRY_URL,
-    hidden
+    hidden,
+    appearance: core ? settingsFor(core).appearance() : { effective: 'solid', dark: false }
   })
   win.on('focus', () => { if (core) projectViewsFor(core).refreshAll() })
   if (!hidden && process.platform === 'darwin') {
@@ -86,6 +89,7 @@ function startRuntime(): void {
     ? createE2eProviders()
     : launch.smokeOutput ? [] : undefined
   disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl), { providers })
+  installWindowAppearance(core)
   if (!launch.smokeOutput) {
     const shell = projectShellFor(core)
     shell.quitFlow = createQuitFlow({

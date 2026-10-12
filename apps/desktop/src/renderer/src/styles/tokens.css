@@ -7,8 +7,14 @@
  * (studio-prototype-v02.html, confirmed 2026-10-10). Values may
  * be revised at the high-fidelity stage (design/visual-direction.md §5). Keep
  * every visual value here so that a revision touches one file. Layout sizes
- * follow Shell Spec v01 §1–2. V1 has a single light theme (Product
- * Definition principle 23).
+ * follow Shell Spec v01 §1–2. Appearances (Product Definition principle 23;
+ * FR-SET-002, 2026-10-12): theme solid or glass × colour mode light or dark.
+ *   :root                                      solid, light (prototypes v01–v03)
+ *   :root[data-theme="glass"]                  glass, light (prototype v04, layer "适中")
+ *   :root[data-scheme="dark"]                  dark colours of the solid theme
+ *   :root[data-theme="glass"][data-scheme="dark"]  glass, dark
+ * Dark values have no prototype; they are proposals (specs/settings/spec.md SET-Q7).
+ * Glass geometry that is not a value lives in app/shell.css (Shell Spec v02 §12).
  */
 :root {
   color-scheme: light;
@@ -55,6 +61,12 @@
   --launcher-content-width: 460px;
   --launcher-gap: 18px;
   --dialog-width: 420px;
+  --settings-dialog-width: 640px;
+  --settings-dialog-height: 520px;
+  --settings-categories-width: 160px;
+  --theme-preview-height: 96px;
+  --glass-swatch-size: 28px;
+  --glass-color-width: 52px;
   --dialog-padding: 20px 22px;
   --placeholder-padding: 40px;
   --send-size: 28px;
@@ -84,6 +96,8 @@
   --radius-button: 8px;
   --radius-tip: 5px;
   --radius-code: 10px;
+  --radius-tab: var(--radius-button) var(--radius-button) 0 0;
+  --radius-canvas: 0px;
 
   /* Spacing */
   --space-0: 2px;
@@ -160,4 +174,251 @@
   --shadow-popover: 0 10px 30px rgba(0, 0, 0, .10);
   --shadow-dialog: 0 20px 50px rgba(0, 0, 0, .18);
   --shadow-floating: 0 4px 14px rgba(0, 0, 0, .12);
+
+  /* What each container paints (Shell Spec v02 §12). White: the opaque surfaces above;
+     glass overrides these to let the window material through. */
+  --color-window: var(--color-surface);
+  --color-topbar: var(--color-surface-chrome);
+  --color-topbar-line: var(--color-border);
+  --color-nav: var(--color-surface-sub);
+  --color-nav-line: var(--color-border);
+  --color-canvas: var(--color-surface);
+  --color-launcher: var(--color-surface-sub);
+  --color-pane: var(--color-surface);
+  --color-control: var(--color-surface);
+  --color-tab-selected: var(--color-surface);
+  --color-bubble: var(--color-surface-soft);
+  --color-input: var(--color-surface);
+  --color-floating: var(--color-surface);
+  --color-diagram-node: var(--color-surface);
+  --color-diagram-stroke: var(--color-border-strong);
+  --color-attention-ring: var(--color-surface-chrome);
+  --shadow-tab-selected: none;
+  --shadow-control: none;
+  --shadow-bubble: none;
+  --shadow-panel: none;
+  --shadow-canvas: none;
+  --backdrop-floating: none;
+  --canvas-gutter: 0px;
+
+  /* Settings theme sketches: each theme's own colours, shown in either theme */
+  --preview-frame: rgba(0, 0, 0, .1);
+  --preview-solid-bar: #efeeeb;
+  --preview-solid-nav: #f7f7f5;
+  --preview-solid-canvas: #ffffff;
+  --preview-solid-ink: #e6e5e0;
+  --preview-solid-input: #d9d8d3;
+  --preview-glass-tint: rgba(244, 244, 242, .5);
+  --preview-glass-canvas: rgba(255, 255, 255, .42);
+  --preview-glass-ink: rgba(255, 255, 255, .85);
+  --preview-glass-input: rgba(255, 255, 255, .9);
 }
+
+/* Glass appearance (prototype v04, content layer "适中"; FR-SET-002, 2026-10-12). The window is the macOS
+   material; the canvas is a lighter frosted layer; panels are translucent white; lines, hovers and soft fills
+   are translucent black, so everything reads as one material. Secondary text keeps >= 4.5:1 on the glass. */
+:root[data-theme="glass"] {
+  --color-surface: rgba(255, 255, 255, .7);
+  --color-surface-sub: rgba(255, 255, 255, .42);
+  --color-surface-chrome: transparent;
+  --color-surface-soft: rgba(0, 0, 0, .045);
+  --color-surface-preview: transparent;
+  --color-hover: rgba(0, 0, 0, .04);
+  --color-selected: rgba(0, 0, 0, .07);
+  --color-border: rgba(0, 0, 0, .08);
+  --color-border-strong: rgba(0, 0, 0, .13);
+  --color-border-soft: rgba(0, 0, 0, .05);
+  --color-border-focus: rgba(0, 0, 0, .22);
+  --color-text: #0d0d0d;
+  --color-text-2: #262626;
+  --color-text-3: #505050;
+  --color-text-muted: #575757;
+  --color-placeholder: #7a7a7a;
+  --color-running: #505050;
+  --color-running-track: rgba(0, 0, 0, .14);
+  --color-needs-input-bg: rgba(255, 244, 222, .72);
+  --color-needs-input-border: rgba(217, 119, 6, .3);
+  --color-error-bg: rgba(254, 236, 233, .72);
+  --color-error-border: rgba(220, 38, 38, .22);
+  --color-diff-add-bg: rgba(22, 163, 74, .13);
+  --color-diff-del-bg: rgba(220, 38, 38, .1);
+  --color-primary-hover: #333333;
+  --color-send-disabled: rgba(0, 0, 0, .16);
+  --color-tooltip: #0d0d0d;
+  --color-backdrop: rgba(0, 0, 0, .2);
+
+  --color-window: transparent;
+  --color-topbar: transparent;
+  --color-topbar-line: transparent;
+  --color-nav: transparent;
+  --color-nav-line: transparent;
+  --color-canvas: rgba(255, 255, 255, .26);
+  --color-launcher: var(--color-canvas);
+  --color-pane: transparent;
+  --color-control: rgba(255, 255, 255, .6);
+  --color-tab-selected: rgba(255, 255, 255, .8);
+  --color-bubble: rgba(255, 255, 255, .78);
+  --color-input: rgba(255, 255, 255, .84);
+  --color-floating: rgba(255, 255, 255, .82);
+  --color-diagram-node: rgba(255, 255, 255, .88);
+  --color-diagram-stroke: rgba(0, 0, 0, .18);
+  --color-attention-ring: rgba(236, 236, 240, .95);
+  --shadow-input: 0 1px 2px rgba(0, 0, 0, .04), 0 8px 24px rgba(0, 0, 0, .07);
+  --shadow-tab-selected: 0 0 0 .5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .08);
+  --shadow-control: 0 1px 2px rgba(0, 0, 0, .03);
+  --shadow-bubble: 0 0 0 1px rgba(0, 0, 0, .04), 0 1px 2px rgba(0, 0, 0, .04);
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, .03);
+  --shadow-canvas: inset 0 0 0 1px rgba(255, 255, 255, .4), 0 0 0 1px rgba(0, 0, 0, .05), 0 8px 24px rgba(0, 0, 0, .05);
+  --shadow-popover: 0 0 0 .5px rgba(0, 0, 0, .05), 0 12px 36px rgba(0, 0, 0, .14);
+  --shadow-dialog: 0 0 0 .5px rgba(0, 0, 0, .08), 0 24px 60px rgba(0, 0, 0, .2);
+  --backdrop-floating: blur(28px) saturate(1.8);
+  --canvas-gutter: 8px;
+  --radius-canvas: 12px;
+  --radius-tab: 9px;
+  --radius-dialog: 16px;
+}
+
+/* Dark colours (FR-SET-002 colour mode, 2026-10-12; values are proposals, SET-Q7). Neutral greys as in
+   ChatGPT Desktop's dark mode; text and status colours keep >= 4.5:1 on the surfaces. Container tokens
+   derive from these, so this block alone is the solid theme in dark. */
+:root[data-scheme="dark"] {
+  color-scheme: dark;
+  --color-surface: #212121;
+  --color-surface-sub: #1a1a1a;
+  --color-surface-chrome: #171717;
+  --color-surface-soft: #2f2f2f;
+  --color-surface-preview: #1c1c1c;
+  --color-hover: #2b2b2b;
+  --color-selected: #343434;
+  --color-border: #333333;
+  --color-border-strong: #444444;
+  --color-border-soft: #2a2a2a;
+  --color-border-focus: #5c5c5c;
+  --color-text: #ececec;
+  --color-text-2: #d4d4d4;
+  --color-text-3: #b0b0b0;
+  --color-text-muted: #9a9a9a;
+  --color-placeholder: #7c7c7c;
+  --color-running: #b0b0b0;
+  --color-running-track: #3d3d3d;
+  --color-needs-input: #f59e0b;
+  --color-needs-input-bg: #2a2114;
+  --color-needs-input-border: #5a4318;
+  --color-completed: #22c55e;
+  --color-error: #f05252;
+  --color-error-bg: #2b1a1a;
+  --color-error-border: #5c2626;
+  --color-link: #8ab4f8;
+  --color-link-underline: rgba(138, 180, 248, .4);
+  --color-diff-add-bg: #1b3324;
+  --color-diff-del-bg: #3b1f1f;
+  --color-code-keyword: #c792ea;
+  --color-code-string: #a5d6a7;
+  --color-code-number: #f2b872;
+  --color-code-comment: #7c7c7c;
+  --color-focus-ring: #4d8eff;
+  --color-focus-ring-soft: rgba(77, 142, 255, .28);
+  --color-primary: #ececec;
+  --color-primary-hover: #ffffff;
+  --color-on-primary: #171717;
+  --color-send-disabled: #4a4a4a;
+  --color-tooltip: #ececec;
+  --color-backdrop: rgba(0, 0, 0, .5);
+  --shadow-input: 0 1px 2px rgba(0, 0, 0, .3);
+  --shadow-popover: 0 10px 30px rgba(0, 0, 0, .45);
+  --shadow-dialog: 0 20px 50px rgba(0, 0, 0, .6);
+  --shadow-floating: 0 4px 14px rgba(0, 0, 0, .4);
+
+  --preview-frame: rgba(255, 255, 255, .12);
+  --preview-solid-bar: #171717;
+  --preview-solid-nav: #1a1a1a;
+  --preview-solid-canvas: #212121;
+  --preview-solid-ink: #3a3a3a;
+  --preview-solid-input: #4a4a4a;
+  --preview-glass-tint: rgba(22, 22, 24, .5);
+  --preview-glass-canvas: rgba(255, 255, 255, .08);
+  --preview-glass-ink: rgba(255, 255, 255, .22);
+  --preview-glass-input: rgba(255, 255, 255, .18);
+}
+
+/* Glass in dark: the material turns dark with the mode (measured about #2c2b29); panels become translucent white
+   over it and the canvas a slightly darker frosted layer. Muted text keeps >= 4.5:1 even over a lighter #404040. */
+:root[data-theme="glass"][data-scheme="dark"] {
+  --color-surface: rgba(255, 255, 255, .07);
+  --color-surface-sub: rgba(255, 255, 255, .04);
+  --color-surface-chrome: transparent;
+  --color-surface-soft: rgba(255, 255, 255, .07);
+  --color-surface-preview: transparent;
+  --color-hover: rgba(255, 255, 255, .06);
+  --color-selected: rgba(255, 255, 255, .1);
+  --color-border: rgba(255, 255, 255, .09);
+  --color-border-strong: rgba(255, 255, 255, .15);
+  --color-border-soft: rgba(255, 255, 255, .06);
+  --color-border-focus: rgba(255, 255, 255, .3);
+  --color-text: #f2f2f2;
+  --color-text-2: #dcdcdc;
+  --color-text-3: #c4c4c4;
+  --color-text-muted: #b0b0b0;
+  --color-placeholder: #8f8f8f;
+  --color-running: #c4c4c4;
+  --color-running-track: rgba(255, 255, 255, .16);
+  --color-needs-input-bg: rgba(245, 158, 11, .12);
+  --color-needs-input-border: rgba(245, 158, 11, .35);
+  --color-error-bg: rgba(240, 82, 82, .12);
+  --color-error-border: rgba(240, 82, 82, .32);
+  --color-diff-add-bg: rgba(34, 197, 94, .16);
+  --color-diff-del-bg: rgba(240, 82, 82, .16);
+  --color-send-disabled: rgba(255, 255, 255, .18);
+  --color-tooltip: #f2f2f2;
+  --color-backdrop: rgba(0, 0, 0, .4);
+
+  --color-canvas: rgba(20, 20, 22, .35);
+  --color-control: rgba(255, 255, 255, .07);
+  --color-tab-selected: rgba(255, 255, 255, .14);
+  --color-bubble: rgba(255, 255, 255, .1);
+  --color-input: rgba(38, 38, 40, .78);
+  --color-floating: rgba(40, 40, 42, .8);
+  --color-diagram-node: rgba(48, 48, 50, .92);
+  --color-diagram-stroke: rgba(255, 255, 255, .22);
+  --color-attention-ring: rgba(40, 40, 44, .95);
+  --shadow-input: 0 1px 2px rgba(0, 0, 0, .25), 0 8px 24px rgba(0, 0, 0, .3);
+  --shadow-tab-selected: 0 0 0 .5px rgba(255, 255, 255, .12), 0 1px 3px rgba(0, 0, 0, .3);
+  --shadow-control: 0 1px 2px rgba(0, 0, 0, .2);
+  --shadow-bubble: 0 0 0 1px rgba(255, 255, 255, .05);
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, .2);
+  --shadow-canvas: inset 0 0 0 1px rgba(255, 255, 255, .06), 0 0 0 1px rgba(0, 0, 0, .25), 0 8px 24px rgba(0, 0, 0, .25);
+  --shadow-popover: 0 0 0 .5px rgba(255, 255, 255, .1), 0 12px 36px rgba(0, 0, 0, .5);
+  --shadow-dialog: 0 0 0 .5px rgba(255, 255, 255, .12), 0 24px 60px rgba(0, 0, 0, .6);
+}
+
+/* Glass background colours (user request 2026-10-12; palette and default confirmed 2026-10-12, specs/settings/spec.md SET-Q5).
+   Aurora and mint are prototype v04's sample wallpapers A and B. Any element with data-glass-color gets its
+   --glass-wall: <html> for the window, and the settings previews and swatches for themselves. */
+:root {
+  --glass-wall-aurora: radial-gradient(34% 44% at 9% 14%, #a9c1f2, transparent 72%), radial-gradient(32% 44% at 16% 76%, #d3bff0, transparent 72%), radial-gradient(38% 46% at 50% 38%, #c4d3f6, transparent 72%), radial-gradient(36% 46% at 88% 18%, #b9dced, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f4c6b2, transparent 72%), radial-gradient(30% 40% at 48% 100%, #efcde3, transparent 72%), #e3e5ee;
+  --glass-wall-mint: radial-gradient(34% 44% at 9% 14%, #bfe3cd, transparent 72%), radial-gradient(32% 44% at 16% 76%, #b6d5ea, transparent 72%), radial-gradient(38% 46% at 50% 38%, #f0e1b6, transparent 72%), radial-gradient(36% 46% at 88% 18%, #cbe5be, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f2cda6, transparent 72%), radial-gradient(30% 40% at 48% 100%, #c6e0e6, transparent 72%), #e6e9e4;
+  --glass-wall-sunset: radial-gradient(34% 44% at 9% 14%, #f6c9b4, transparent 72%), radial-gradient(32% 44% at 16% 76%, #f2c2d6, transparent 72%), radial-gradient(38% 46% at 50% 38%, #f7dcc0, transparent 72%), radial-gradient(36% 46% at 88% 18%, #e3c6ee, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f5d3a8, transparent 72%), radial-gradient(30% 40% at 48% 100%, #f0c4c4, transparent 72%), #efe6e3;
+  --glass-wall-haze: radial-gradient(34% 44% at 9% 14%, #c9d3df, transparent 72%), radial-gradient(32% 44% at 16% 76%, #d5d9e3, transparent 72%), radial-gradient(38% 46% at 50% 38%, #cfd8e2, transparent 72%), radial-gradient(36% 46% at 88% 18%, #c4d5e0, transparent 72%), radial-gradient(40% 48% at 84% 88%, #dcd8d4, transparent 72%), radial-gradient(30% 40% at 48% 100%, #d2dbe4, transparent 72%), #e2e5e9;
+  /* 'none': only the native material; the swatch and preview show a plain grey stand-in */
+  --glass-wall-none: #dedede;
+  --glass-wall: var(--glass-wall-aurora);
+  /* Over the wall, as in v04: the glass tint, then a faint grain so blurred gradients do not band */
+  --glass-tint: rgba(244, 244, 242, .62);
+  --glass-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* < 1 lets a little of the desktop through the colour, so the window still reads as glass */
+  --glass-wall-opacity: .85;
+}
+/* Dark glass walls: the same hues, deep, under a dark tint */
+:root[data-scheme="dark"] {
+  --glass-wall-aurora: radial-gradient(34% 44% at 9% 14%, #2b3f73, transparent 72%), radial-gradient(32% 44% at 16% 76%, #43306b, transparent 72%), radial-gradient(38% 46% at 50% 38%, #2c3d72, transparent 72%), radial-gradient(36% 46% at 88% 18%, #1f4a5c, transparent 72%), radial-gradient(40% 48% at 84% 88%, #5c3a33, transparent 72%), radial-gradient(30% 40% at 48% 100%, #4d2d47, transparent 72%), #15171e;
+  --glass-wall-mint: radial-gradient(34% 44% at 9% 14%, #1f4a36, transparent 72%), radial-gradient(32% 44% at 16% 76%, #1d3c55, transparent 72%), radial-gradient(38% 46% at 50% 38%, #4d4424, transparent 72%), radial-gradient(36% 46% at 88% 18%, #2a4a2a, transparent 72%), radial-gradient(40% 48% at 84% 88%, #533a22, transparent 72%), radial-gradient(30% 40% at 48% 100%, #1f4549, transparent 72%), #141815;
+  --glass-wall-sunset: radial-gradient(34% 44% at 9% 14%, #5a3326, transparent 72%), radial-gradient(32% 44% at 16% 76%, #552a45, transparent 72%), radial-gradient(38% 46% at 50% 38%, #5a4128, transparent 72%), radial-gradient(36% 46% at 88% 18%, #452c57, transparent 72%), radial-gradient(40% 48% at 84% 88%, #5a3e22, transparent 72%), radial-gradient(30% 40% at 48% 100%, #522c30, transparent 72%), #1b1514;
+  --glass-wall-haze: radial-gradient(34% 44% at 9% 14%, #2c3646, transparent 72%), radial-gradient(32% 44% at 16% 76%, #343a47, transparent 72%), radial-gradient(38% 46% at 50% 38%, #2f3a47, transparent 72%), radial-gradient(36% 46% at 88% 18%, #283946, transparent 72%), radial-gradient(40% 48% at 84% 88%, #3d3a35, transparent 72%), radial-gradient(30% 40% at 48% 100%, #313c49, transparent 72%), #181a1e;
+  --glass-wall-none: #2c2c2e;
+  --glass-tint: rgba(22, 22, 24, .55);
+}
+[data-glass-color="aurora"] { --glass-wall: var(--glass-wall-aurora); }
+[data-glass-color="mint"] { --glass-wall: var(--glass-wall-mint); }
+[data-glass-color="sunset"] { --glass-wall: var(--glass-wall-sunset); }
+[data-glass-color="haze"] { --glass-wall: var(--glass-wall-haze); }
+[data-glass-color="none"] { --glass-wall: var(--glass-wall-none); }

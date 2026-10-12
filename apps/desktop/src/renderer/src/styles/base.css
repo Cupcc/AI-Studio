@@ -14,7 +14,7 @@ body,
 body {
   font: var(--font-size-body)/1.5 var(--font-sans);
   color: var(--color-text);
-  background: var(--color-surface);
+  background: var(--color-window);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -58,3 +58,11 @@ button:where(:disabled) {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
+
+/* Glass background colour (FR-SET-002; SET-Q5). Like prototype v04, the wall is painted once and blurred,
+   then the glass tint and grain lie over it; here all of it sits on the native window material.
+   'none' leaves the material alone. */
+:root[data-theme="glass"]:not([data-glass-color="none"]) body::before,
+:root[data-theme="glass"]:not([data-glass-color="none"]) body::after { content: ""; position: fixed; z-index: -1; pointer-events: none; }
+:root[data-theme="glass"]:not([data-glass-color="none"]) body::before { inset: -80px; background: var(--glass-wall); filter: blur(40px) saturate(1.8); opacity: var(--glass-wall-opacity); }
+:root[data-theme="glass"]:not([data-glass-color="none"]) body::after { inset: 0; background: var(--glass-grain), var(--glass-tint); }

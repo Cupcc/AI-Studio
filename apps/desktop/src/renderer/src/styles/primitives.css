@@ -26,7 +26,7 @@
 .is-selected { background: var(--color-selected); color: var(--color-text); }
 
 /* Popovers and menus (prototype .pop, .pg, .mi, .sub, .r, .popdiv) */
-.popover { position: absolute; z-index: var(--z-popover); min-width: var(--menu-min-width); padding: var(--space-1-5); background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: var(--radius-card); box-shadow: var(--shadow-popover); }
+.popover { position: absolute; z-index: var(--z-popover); min-width: var(--menu-min-width); padding: var(--space-1-5); background: var(--color-floating); -webkit-backdrop-filter: var(--backdrop-floating); backdrop-filter: var(--backdrop-floating); border: 1px solid var(--color-border-strong); border-radius: var(--radius-card); box-shadow: var(--shadow-popover); }
 .menu-heading { margin: 0; padding: var(--space-1-5) var(--space-2-5) var(--space-1); font-size: var(--font-size-xs); color: var(--color-text-muted); }
 .menu-item { display: flex; align-items: center; gap: var(--space-2); width: 100%; min-height: var(--menu-item-height); padding: var(--space-1) var(--space-2-5); border-radius: var(--radius-md); font-size: var(--font-size-md); }
 .menu-item:disabled { background: none; color: var(--color-placeholder); opacity: 1; }

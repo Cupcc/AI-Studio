@@ -1,0 +1,63 @@
+/* Settings (FR-SET-001, FR-SET-002; Shell Spec v02 §4 and §12). The backdrop is the shell's .modal-backdrop;
+   the navigation entry reuses .navigation__view. */
+.settings-dialog { display: flex; flex-direction: column; width: var(--settings-dialog-width); height: var(--settings-dialog-height); max-width: calc(100% - var(--space-8)); max-height: calc(100% - var(--space-8)); overflow: hidden; background: var(--color-floating); -webkit-backdrop-filter: var(--backdrop-floating); backdrop-filter: var(--backdrop-floating); border-radius: var(--radius-dialog); box-shadow: var(--shadow-dialog); }
+.settings-dialog__header { display: flex; flex: 0 0 var(--canvas-header-height); align-items: center; justify-content: space-between; height: var(--canvas-header-height); padding: 0 var(--space-3) 0 var(--space-5); border-bottom: 1px solid var(--color-border-soft); }
+.settings-dialog__header h2 { margin: 0; font-size: var(--font-size-heading); font-weight: 600; }
+.settings-dialog__body { display: flex; flex: 1; min-height: 0; }
+.settings-dialog__categories { flex: 0 0 var(--settings-categories-width); padding: var(--space-3) var(--space-2-5); border-right: 1px solid var(--color-border-soft); }
+.settings-category { display: flex; align-items: center; gap: var(--space-2-5); width: 100%; height: var(--nav-row-height); padding: 0 var(--space-2-5); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-2); }
+.settings-category > svg { color: var(--color-text-muted); }
+.settings-category.is-selected { font-weight: 500; }
+.settings-category.is-selected > svg { color: var(--color-text); }
+.settings-dialog__content { flex: 1; min-width: 0; overflow: auto; padding: var(--space-5) var(--space-6); }
+.settings-dialog__content h3 { margin: 0 0 var(--space-3); font-size: var(--font-size-md); font-weight: 600; }
+.settings-dialog__content .settings-dialog__subheading { margin-top: var(--space-5); }
+.settings-note { margin: var(--space-3) 0 0; font-size: var(--font-size-sm); line-height: 1.6; color: var(--color-text-muted); }
+.settings-note--notice { padding: var(--space-2) var(--space-2-5); color: var(--color-text-2); background: var(--color-needs-input-bg); border: 1px solid var(--color-needs-input-border); border-radius: var(--radius-sm); }
+.settings-dialog__content .error-message { margin-top: var(--space-2); }
+
+/* Colour mode: a segmented radio group */
+.mode-options { display: inline-flex; gap: var(--space-0); padding: var(--space-0); border: 1px solid var(--color-border); border-radius: var(--radius-button); }
+.mode-option { height: var(--button-small-height); padding: 0 var(--space-3); font-size: var(--font-size-md); color: var(--color-text-3); border-radius: var(--radius-sm); }
+.mode-option.is-checked { font-weight: 500; color: var(--color-text); background: var(--color-selected); }
+
+/* Theme radio cards: the checked card has a 2px outline (1px border + 1px ring) and a check */
+.theme-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.theme-option { display: flex; flex-direction: column; gap: var(--space-1-5); min-width: 0; padding: var(--space-2) var(--space-2) var(--space-2-5); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); }
+.theme-option:hover:not(:disabled) { background: var(--color-surface); border-color: var(--color-border-strong); }
+.theme-option.is-checked { border-color: var(--color-text); box-shadow: 0 0 0 1px var(--color-text); }
+.theme-option__name { display: flex; align-items: center; gap: var(--space-1-5); padding: var(--space-0) var(--space-1) 0; font-size: var(--font-size-md); font-weight: 500; }
+.theme-option__badge { padding: 0 var(--space-1); font-size: var(--font-size-xs); font-weight: 400; color: var(--color-text-muted); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xs); }
+.theme-option__check { display: inline-flex; margin-left: auto; color: var(--color-text); }
+.theme-option__hint { padding: 0 var(--space-1); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+
+/* Theme sketches use each theme's own colours (tokens --preview-*), whichever theme is showing */
+.theme-preview { position: relative; display: block; height: var(--theme-preview-height); overflow: hidden; border: 1px solid var(--preview-frame); border-radius: var(--radius-lg); }
+.theme-preview > span, .theme-preview__canvas > span { position: absolute; display: block; }
+.theme-preview__bar { top: 0; left: 0; right: 0; height: 14px; }
+.theme-preview__nav { top: 14px; bottom: 0; left: 0; width: 28%; }
+.theme-preview__canvas { top: 14px; bottom: 0; left: 28%; right: 0; }
+.theme-preview__bubble { top: 10px; right: 10px; width: 38%; height: 10px; border-radius: 5px; }
+.theme-preview__line { top: 28px; left: 12%; width: 60%; height: 5px; border-radius: 3px; box-shadow: 0 9px 0 var(--preview-line-2, transparent); }
+.theme-preview__input { bottom: 9px; left: 12%; right: 12%; height: 14px; border-radius: 6px; }
+.theme-preview--solid { background: var(--preview-solid-canvas); }
+.theme-preview--solid .theme-preview__bar { background: var(--preview-solid-bar); }
+.theme-preview--solid .theme-preview__nav { background: var(--preview-solid-nav); border-right: 1px solid var(--preview-solid-ink); }
+.theme-preview--solid .theme-preview__canvas { background: var(--preview-solid-canvas); }
+.theme-preview--solid .theme-preview__bubble, .theme-preview--solid .theme-preview__line { --preview-line-2: var(--preview-solid-ink); background: var(--preview-solid-ink); }
+.theme-preview--solid .theme-preview__input { border: 1px solid var(--preview-solid-input); }
+.theme-preview--glass { background: var(--glass-wall); }
+.theme-preview--glass::before { content: ""; position: absolute; inset: 0; background: var(--preview-glass-tint); }
+.theme-preview--glass .theme-preview__canvas { right: 4px; bottom: 4px; background: var(--preview-glass-canvas); border-radius: 5px; }
+.theme-preview--glass .theme-preview__bubble, .theme-preview--glass .theme-preview__line { --preview-line-2: var(--preview-glass-ink); background: var(--preview-glass-ink); }
+.theme-preview--glass .theme-preview__input { background: var(--preview-glass-input); }
+
+/* Glass background swatches (SET-Q5): a radio group of round swatches with names */
+.glass-colors { display: flex; flex-wrap: wrap; gap: var(--space-2-5); }
+.glass-color { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); width: var(--glass-color-width); padding: var(--space-1) 0; border-radius: var(--radius-md); }
+.glass-color:hover:not(:disabled) { background: var(--color-hover); }
+/* The swatch shows the colour itself, without the glass tint */
+.glass-color__swatch { width: var(--glass-swatch-size); height: var(--glass-swatch-size); border-radius: 50%; background: var(--glass-wall); box-shadow: inset 0 0 0 1px var(--preview-frame); }
+.glass-color.is-checked .glass-color__swatch { box-shadow: inset 0 0 0 1px var(--preview-frame), 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text); }
+.glass-color__name { font-size: var(--font-size-sm); color: var(--color-text-3); }
+.glass-color.is-checked .glass-color__name { color: var(--color-text); font-weight: 500; }

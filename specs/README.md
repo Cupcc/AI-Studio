@@ -47,4 +47,5 @@
 | `input/` | FR-INPUT-001～FR-INPUT-002 | [spec.md](input/spec.md) |
 | `project-view/` | FR-VIEW-001～FR-VIEW-008 | [spec.md](project-view/spec.md) |
 | `tools/` | FR-TOOL-001～FR-TOOL-004 | [spec.md](tools/spec.md) |
+| `settings/` | FR-SET-001～FR-SET-002 | [spec.md](settings/spec.md) |
 | `agent-adapter/` | 无 FR 前缀；承接 [04. Technical Requirements](<../docs/04. Technical Requirements.md>) 第 4、5 节与 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md) | [spec.md](agent-adapter/spec.md) |

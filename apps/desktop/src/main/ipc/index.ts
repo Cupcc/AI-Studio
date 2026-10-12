@@ -6,6 +6,7 @@ import { createAppFeature } from './app'
 import { createProjectViewFeature } from './project-view'
 import { createProjectFeature } from './project'
 import { createSessionFeature, type SessionFeatureOptions } from './session'
+import { createSettingsFeature } from './settings'
 import { registerFeatureHandlers, type FeatureHandlers, type MainIpc } from './registry'
 
 export function createFeatures(core: CoreServices, sessionOptions: SessionFeatureOptions = {}): FeatureHandlers[] {
@@ -13,7 +14,8 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
     createAppFeature(core),
     createProjectFeature(core),
     createProjectViewFeature(core),
-    createSessionFeature(core, sessionOptions)
+    createSessionFeature(core, sessionOptions),
+    createSettingsFeature(core)
   ]
 }
 

@@ -6,6 +6,7 @@ import { defaultUiState } from '@shared/project/ui-state'
 import { App } from '../../app/App'
 import { registerShellIntegration, type RendererSessionPort } from './integration'
 import { useProjectShell } from './store'
+import { useSettings } from '../settings/store'
 
 const initial = useProjectShell.getState()
 const projects = ['a', 'b', 'c'].map((id) => ({ id, name: id, canonicalPath: `/projects/${id}`, localPath: `/projects/${id}`, displayPath: `/projects/${id}`, createdAt: '', lastOpenedAt: '' }))
@@ -164,5 +165,19 @@ describe('Project shell · FR-PROJ/NAV · AC-01', () => {
     await mount()
     expect(useProjectShell.getState().uiStates.a).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'overview' }, lastTool: 'diff' })
     expect(useProjectShell.getState().uiStates.b).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'architecture', conversation: { kind: 'draft' } } })
+  })
+
+  it('FR-SET-001: the settings dialog makes the shell inert, and a quit confirmation takes precedence', async () => {
+    await mount()
+    act(() => useSettings.getState().openDialog())
+    expect(screen.getByRole('dialog', { name: '设置' })).toBeTruthy()
+    expect(document.querySelector('.shell')!.hasAttribute('inert')).toBe(true)
+    act(() => useProjectShell.setState({ quitRequest: { sessions: 1, projects: 1 } }))
+    expect(screen.queryByRole('dialog', { name: '设置' })).toBeNull()
+    expect(screen.getByRole('dialog', { name: '退出 AI Developer Studio？' })).toBeTruthy()
+    act(() => useProjectShell.setState({ quitRequest: null }))
+    expect(screen.getByRole('dialog', { name: '设置' })).toBeTruthy()
+    act(() => useSettings.getState().closeDialog())
+    expect(document.querySelector('.shell')!.hasAttribute('inert')).toBe(false)
   })
 })

@@ -111,7 +111,7 @@ test('renderer has no Node.js, require or raw ipcRenderer', async () => {
     global: 'undefined',
     ipcRenderer: 'undefined',
     electron: 'undefined',
-    studioKeys: ['app', 'project', 'session', 'projectView'],
+    studioKeys: ['app', 'project', 'session', 'projectView', 'settings'],
     appKeys: ['getInfo', 'onWindowFocusChanged', 'ping']
   })
 })

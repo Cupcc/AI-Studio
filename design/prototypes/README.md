@@ -24,8 +24,8 @@
 |---|---|---|---|---|
 | Studio 灰度交互原型 | v01 | 已确认（2026-10-09），保留作历史依据；Conversation 部分由 v02 替代 | [在线原型](https://claude.ai/artifact/ANF4XoboMHvZjzn4tRT17c)；源文件 [studio-prototype-v01.html](studio-prototype-v01.html) + [studio-prototype-v01/](studio-prototype-v01/) | 线框图 v02；[Shell Spec v01](../components/shell-spec-v01.md)；AC-01 ~ AC-07 |
 | Studio 灰度交互原型 | v02 | 已确认（2026-10-10） | [在线原型](https://claude.ai/artifact/7i4ULjj3vEo16mqqXYm5E1)；源文件 [studio-prototype-v02.html](studio-prototype-v02.html) + [studio-prototype-v02/](studio-prototype-v02/) | v01；[对照 ChatGPT / Claude 的候选调整](../../tasks/T20261010-conversation-layout/research.md) A1、A2、B1；FR-SESSION-001 |
-| Studio 灰度交互原型 | v03 | 探索中：Q1～Q6 已确认（2026-10-11），其余变更待评审 | [在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)；源文件 [studio-prototype-v03.html](studio-prototype-v03.html) + [studio-prototype-v03/](studio-prototype-v03/) | v02；[Project View spec](../../specs/project-view/spec.md) §4.2～4.4；FR-TOOL-002、FR-TOOL-004；[T20261011-prototype-v03](../../tasks/T20261011-prototype-v03/task.md) |
-| Studio 灰度交互原型 | v04 | 探索中：外观候选“统一毛玻璃”，待评审 | 在线原型待发布；源文件 [studio-prototype-v04.html](studio-prototype-v04.html) + [studio-prototype-v04/](studio-prototype-v04/) | v03；用户 2026-10-11～12 对话要求；[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md) |
+| Studio 灰度交互原型 | v03 | 探索中：Q1～Q6 已确认（2026-10-11），其余变更待评审；外观保留为“纯色”主题的浅色外观（2026-10-12 确认） | [在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)；源文件 [studio-prototype-v03.html](studio-prototype-v03.html) + [studio-prototype-v03/](studio-prototype-v03/) | v02；[Project View spec](../../specs/project-view/spec.md) §4.2～4.4；FR-TOOL-002、FR-TOOL-004；[T20261011-prototype-v03](../../tasks/T20261011-prototype-v03/task.md) |
+| Studio 灰度交互原型 | v04 | 外观已采用为默认的“毛玻璃”主题，浓淡固定为适中（2026-10-12 确认）；布局与交互同 v03 | 在线原型待发布；源文件 [studio-prototype-v04.html](studio-prototype-v04.html) + [studio-prototype-v04/](studio-prototype-v04/) | v03；用户 2026-10-11～12 对话要求；[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md) |
 
 ### Studio 灰度交互原型 v01
 
@@ -77,7 +77,8 @@
 
 v03 的副本，只换外观，用于和 v03 的白色原样式并排对比（[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md)）。布局、交互、数据与演示场景同 v03，上节说明继续适用；两份 HTML 的差异只在样式表末尾的 `.skin-glass` 一节及版本标识。
 
-- **变更**（待评审）：外观“统一毛玻璃”，参考 ChatGPT Desktop 的侧边栏。
+- **结论**：2026-10-12 用户确认 v03 与 v04 都保留，作为纯色（原“白色”）与毛玻璃两种主题，默认毛玻璃，内容层浓淡固定为适中，在新增的设置中切换；颜色模式另可选浅色 / 深色，深色无原型（[DEC-12](<../../docs/07. Decisions.md#dec-12-外观主题与设置>)；桌面端实现见 [T20261012-settings-theme](../../tasks/archive/T20261012-settings-theme/task.md)）。原型中的浓淡切换仅用于演示；示例壁纸 A / B 在桌面端成为可选的毛玻璃背景颜色（2026-10-12 用户要求并确认色板）。
+- **变更**：外观“统一毛玻璃”，参考 ChatGPT Desktop 的侧边栏。
   - 整个窗口是同一种毛玻璃，透出窗口后方的桌面并模糊，颜色随壁纸变化。顶栏、左侧导航和内容区四周的 8px 边距直接在玻璃上。
   - Conversation、右侧区域 / 边栏和启动页是叠在玻璃上的一层更浅的磨砂（圆角），浓淡分通透 / 适中 / 柔和三档，默认适中。
   - 消息气泡、代码块、表格、输入框、View 组件和工具面板是半透明白色面板；分隔线、Hover、选中和浅色底是半透明叠色。
