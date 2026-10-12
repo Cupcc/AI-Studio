@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">AI Developer Studio — 玻璃工作台</title>
+  <desc id="desc">蓝紫桃色圆角玻璃底座，两层磨砂工作区面板与深灰终端符号。可编辑矢量重绘版本。</desc>
+  <defs>
+    <linearGradient id="tile-base" x1="176" y1="104" x2="846" y2="930" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B3CEFA"/>
+      <stop offset=".48" stop-color="#CEC9F0"/>
+      <stop offset="1" stop-color="#F6C7B7"/>
+    </linearGradient>
+    <radialGradient id="ice" cx="0" cy="0" r="1" gradientTransform="translate(820 208) rotate(128) scale(699 661)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C7F0F7"/>
+      <stop offset="1" stop-color="#C7F0F7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lavender" cx="0" cy="0" r="1" gradientTransform="translate(215 773) rotate(-36) scale(593 559)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B69AF0"/>
+      <stop offset="1" stop-color="#B69AF0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="peach" cx="0" cy="0" r="1" gradientTransform="translate(897 894) rotate(-140) scale(584 483)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFCAB4"/>
+      <stop offset="1" stop-color="#FFD5C2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="512" y1="94" x2="512" y2="932" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity=".96"/>
+      <stop offset=".5" stop-color="white" stop-opacity=".36"/>
+      <stop offset="1" stop-color="white" stop-opacity=".8"/>
+    </linearGradient>
+    <linearGradient id="rear-glass" x1="480" y1="210" x2="706" y2="690" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D3EEFF" stop-opacity=".86"/>
+      <stop offset=".48" stop-color="#B9D9F3" stop-opacity=".68"/>
+      <stop offset="1" stop-color="#E0DAF4" stop-opacity=".85"/>
+    </linearGradient>
+    <linearGradient id="front-glass" x1="280" y1="298" x2="710" y2="804" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6F7FF" stop-opacity=".93"/>
+      <stop offset=".48" stop-color="#EAF1FA" stop-opacity=".82"/>
+      <stop offset="1" stop-color="#F6E6E4" stop-opacity=".88"/>
+    </linearGradient>
+    <radialGradient id="front-lavender" cx="0" cy="0" r="1" gradientTransform="translate(275 744) rotate(-40) scale(463 343)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C8B5EB" stop-opacity=".65"/>
+      <stop offset="1" stop-color="#D7CAEF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glyph" x1="363" y1="420" x2="583" y2="684" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#363635"/>
+      <stop offset="1" stop-color="#252525"/>
+    </linearGradient>
+    <filter id="panel-shadow" x="-25%" y="-25%" width="150%" height="165%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="22" stdDeviation="19" flood-color="#514573" flood-opacity=".25"/>
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#FFFFFF" flood-opacity=".36"/>
+    </filter>
+    <filter id="glyph-shadow" x="-15%" y="-15%" width="130%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="white" flood-opacity=".9"/>
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#393546" flood-opacity=".12"/>
+    </filter>
+    <clipPath id="tile-clip">
+      <rect x="80" y="92" width="866" height="840" rx="194"/>
+    </clipPath>
+    <clipPath id="front-clip">
+      <rect x="177" y="295" width="616" height="498" rx="78"/>
+    </clipPath>
+  </defs>
+  <g id="glass-base" clip-path="url(#tile-clip)">
+    <rect x="80" y="92" width="866" height="840" fill="url(#tile-base)"/>
+    <rect x="80" y="92" width="866" height="840" fill="url(#ice)"/>
+    <rect x="80" y="92" width="866" height="840" fill="url(#lavender)"/>
+    <rect x="80" y="92" width="866" height="840" fill="url(#peach)"/>
+    <rect x="83" y="95" width="860" height="834" rx="191" stroke="url(#rim)" stroke-width="4"/>
+    <rect x="88" y="100" width="850" height="824" rx="187" stroke="white" stroke-opacity=".28" stroke-width="2"/>
+    <g id="rear-workspace" filter="url(#panel-shadow)">
+      <rect x="295" y="207" width="563" height="461" rx="68" fill="url(#rear-glass)"/>
+      <rect x="297" y="209" width="559" height="457" rx="66" stroke="url(#rim)" stroke-width="3"/>
+      <path d="M318 259C323 231 340 214 369 214H784C816 214 838 237 843 266" stroke="white" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <g id="front-workspace" filter="url(#panel-shadow)">
+      <rect x="177" y="295" width="616" height="498" rx="78" fill="url(#front-glass)"/>
+      <g clip-path="url(#front-clip)">
+        <rect x="177" y="295" width="616" height="498" fill="url(#front-lavender)"/>
+      </g>
+      <rect x="179" y="297" width="612" height="494" rx="76" stroke="url(#rim)" stroke-width="4"/>
+      <rect x="184" y="302" width="602" height="484" rx="71" stroke="white" stroke-opacity=".3" stroke-width="2"/>
+    </g>
+    <g id="terminal-glyph" filter="url(#glyph-shadow)" stroke="url(#glyph)" stroke-linecap="round" stroke-linejoin="round">
+      <path id="chevron" d="M335 439L443 546L335 650" stroke-width="57"/>
+      <path id="cursor" d="M500 643H641" stroke-width="43"/>
+    </g>
+  </g>
+</svg>

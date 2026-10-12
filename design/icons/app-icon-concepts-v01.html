@@ -1,0 +1,159 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Developer Studio 图标方案</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a glass window, as in prototype v04: wallpaper behind, one frosted layer, three concept columns, then the Dock. */
+:root{
+  --wall:radial-gradient(34% 44% at 9% 14%,#a9c1f2,transparent 72%),radial-gradient(32% 44% at 16% 76%,#d3bff0,transparent 72%),radial-gradient(38% 46% at 50% 38%,#c4d3f6,transparent 72%),radial-gradient(36% 46% at 88% 18%,#b9dced,transparent 72%),radial-gradient(40% 48% at 84% 88%,#f4c6b2,transparent 72%),radial-gradient(30% 40% at 48% 100%,#efcde3,transparent 72%),#e3e5ee;
+  --tint:rgba(244,244,242,.62);
+  --layer:rgba(255,255,255,.26); --panel:rgba(255,255,255,.7); --panel-2:rgba(255,255,255,.45);
+  --line:rgba(0,0,0,.08); --line-2:rgba(0,0,0,.13); --sel:rgba(0,0,0,.07);
+  --fg:#0d0d0d; --fg-2:#262626; --fg-3:#505050; --fg-4:#575757;
+  --dock:rgba(255,255,255,.4); --desk-dark:#1d1e24;
+  --sans:"IBM Plex Sans","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --wall:radial-gradient(34% 44% at 9% 14%,#3a4f86,transparent 72%),radial-gradient(32% 44% at 16% 76%,#55437e,transparent 72%),radial-gradient(38% 46% at 50% 38%,#34416e,transparent 72%),radial-gradient(36% 46% at 88% 18%,#2d5a6c,transparent 72%),radial-gradient(40% 48% at 84% 88%,#6e4a52,transparent 72%),radial-gradient(30% 40% at 48% 100%,#5a3f66,transparent 72%),#24252b;
+  --tint:rgba(40,39,37,.62); --layer:rgba(255,255,255,.05); --panel:rgba(255,255,255,.08); --panel-2:rgba(255,255,255,.05);
+  --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.16); --sel:rgba(255,255,255,.12);
+  --fg:#f2f2f2; --fg-2:#dcdcdc; --fg-3:#b0b0b0; --fg-4:#a8a8a8; --dock:rgba(255,255,255,.12); --desk-dark:#141519;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --wall:radial-gradient(34% 44% at 9% 14%,#3a4f86,transparent 72%),radial-gradient(32% 44% at 16% 76%,#55437e,transparent 72%),radial-gradient(38% 46% at 50% 38%,#34416e,transparent 72%),radial-gradient(36% 46% at 88% 18%,#2d5a6c,transparent 72%),radial-gradient(40% 48% at 84% 88%,#6e4a52,transparent 72%),radial-gradient(30% 40% at 48% 100%,#5a3f66,transparent 72%),#24252b;
+  --tint:rgba(40,39,37,.62); --layer:rgba(255,255,255,.05); --panel:rgba(255,255,255,.08); --panel-2:rgba(255,255,255,.05);
+  --line:rgba(255,255,255,.09); --line-2:rgba(255,255,255,.16); --sel:rgba(255,255,255,.12);
+  --fg:#f2f2f2; --fg-2:#dcdcdc; --fg-3:#b0b0b0; --fg-4:#a8a8a8; --dock:rgba(255,255,255,.12); --desk-dark:#141519;
+  color-scheme:dark}
+
+html{background:#e3e5ee}
+body{position:relative;isolation:isolate;min-height:100vh;background:#e3e5ee;color:var(--fg);font:14px/1.6 var(--sans);-webkit-font-smoothing:antialiased;padding:16px;box-sizing:border-box;overflow-x:hidden}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body,:root:not([data-theme="light"]){background:#24252b}}
+:root[data-theme="dark"] body,:root[data-theme="dark"]{background:#24252b}
+body::before{content:"";position:fixed;inset:-80px;z-index:-2;background:var(--wall);filter:blur(40px) saturate(1.8)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:var(--tint)}
+
+.win{max-width:1120px;margin:0 auto;border-radius:16px;background:var(--layer);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 0 0 1px var(--line),0 8px 24px rgba(0,0,0,.05);padding:clamp(20px,4vw,40px);display:flex;flex-direction:column;gap:36px}
+header{display:flex;flex-direction:column;gap:8px;max-width:68ch}
+.eyebrow{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-4)}
+h1{margin:0;font-size:clamp(22px,3vw,28px);font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:0;color:var(--fg-3)}
+h2{margin:0;font-size:15px;font-weight:600}
+
+.concepts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.concepts{grid-template-columns:1fr}}
+.c{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.c.pick{box-shadow:0 0 0 2px var(--fg)}
+.c .hero{display:grid;place-items:center;aspect-ratio:1;max-width:100%;border-radius:10px;background:var(--panel-2);position:relative}
+.c .hero img{width:78%;height:auto}
+.mode{position:absolute;top:8px;right:8px;display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:2px}
+.mode button{font:12px var(--sans);color:var(--fg-3);background:none;border:0;border-radius:6px;padding:3px 8px;cursor:pointer}
+.mode button[aria-pressed="true"]{background:var(--sel);color:var(--fg)}
+.mode button:focus-visible,.choose:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+.c .ttl{display:flex;align-items:baseline;gap:8px}
+.c .ttl b{font:500 12px var(--mono);color:var(--fg-4)}
+.c p{margin:0;color:var(--fg-2);font-size:13.5px}
+.c ul{margin:0;padding-left:18px;color:var(--fg-3);font-size:12.5px;display:flex;flex-direction:column;gap:3px}
+.sizes{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:12px;border-radius:10px;background:var(--panel-2);overflow-x:auto}
+.sizes figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px;flex:none}
+.sizes figcaption{font:11px var(--mono);color:var(--fg-4);font-variant-numeric:tabular-nums}
+.choose{margin-top:auto;height:32px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);font:13px var(--sans);color:var(--fg);cursor:pointer}
+.c.pick .choose{background:var(--fg);color:var(--panel);border-color:var(--fg)}
+:root .c.pick .choose{color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .c.pick .choose{color:#0d0d0d}}
+:root[data-theme="dark"] .c.pick .choose{color:#0d0d0d}
+
+.docks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.docks{grid-template-columns:1fr}}
+.desk{border-radius:14px;min-height:200px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:16px;position:relative;overflow:hidden;min-width:0}
+.desk.l{background:linear-gradient(135deg,#c9d6f3,#ead7ef 55%,#f5d9cb)}
+.desk.d{background:linear-gradient(135deg,#1f2a44,#2a2238 55%,#3a2a2c)}
+.desk .lbl{position:absolute;top:12px;left:14px;font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.desk.l .lbl{color:#4a4a4a} .desk.d .lbl{color:#c8c8c8}
+.dock{display:flex;gap:10px;align-items:flex-end;padding:8px 10px;border-radius:22px;max-width:100%;overflow-x:auto;box-sizing:border-box}
+.desk.l .dock{background:rgba(255,255,255,.38);box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),0 0 0 .5px rgba(0,0,0,.12),0 10px 30px rgba(0,0,0,.12)}
+.desk.d .dock{background:rgba(40,40,46,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 0 0 .5px rgba(0,0,0,.6),0 10px 30px rgba(0,0,0,.4)}
+.dock img{width:52px;height:52px;flex:none}
+.dock .gen{width:42px;height:42px;margin:5px;border-radius:10px;flex:none}
+.desk.l .gen{background:linear-gradient(#fdfdfd,#e8e8ea);box-shadow:0 2px 4px rgba(0,0,0,.18)}
+.desk.d .gen{background:linear-gradient(#55555c,#3a3a40);box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.dock .cur{position:relative}
+.dock .cur::after{content:"";position:absolute;left:50%;bottom:-6px;width:4px;height:4px;border-radius:50%;transform:translateX(-50%)}
+.desk.l .cur::after{background:#333} .desk.d .cur::after{background:#ddd}
+
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 24px;font-size:13px;color:var(--fg-3)}
+@media (max-width:860px){.notes{grid-template-columns:1fr}}
+.notes div{min-width:0}
+.notes b{color:var(--fg);font-weight:600;display:block;margin-bottom:2px}
+code{font:12px var(--mono);background:var(--sel);border-radius:4px;padding:1px 4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<main class="win">
+  <header>
+    <span class="eyebrow">App icon concepts v01 · 探索稿</span>
+    <h1>AI Developer Studio 图标方案 v01</h1>
+    <p>沿用交互原型 v04 的“统一毛玻璃”外观：壁纸 A 的蓝、淡紫、杏色渐变经模糊后作底，其上叠半透明白色磨砂面板，图形用与界面正文相同的近黑色 #0d0d0d。三个方案都按 macOS 图标网格绘制（1024 画布，824 圆角方形主体）。</p>
+  </header>
+
+  <section class="concepts" id="concepts">
+    <article class="c" data-k="a">
+      <div class="hero"><img alt="方案 A：对话气泡中的命令行提示符" data-light="app-icon-bubble-v01.svg" data-dark="app-icon-bubble-v01-dark.svg" src="app-icon-bubble-v01.svg"><div class="mode" role="group" aria-label="颜色模式"><button aria-pressed="true" data-m="light">浅色</button><button aria-pressed="false" data-m="dark">深色</button></div></div>
+      <div class="ttl"><h2>对话中的命令行</h2><b>A</b></div>
+      <p>磨砂对话气泡里放一个 <code>&gt;_</code> 提示符：和本地 CLI Agent 对话，是产品的主要入口。</p>
+      <ul><li>辨识度依赖气泡外形，小尺寸最清楚</li><li>与 Terminal、iTerm 的符号相近，靠气泡区分</li></ul>
+      <div class="sizes"><figure><img src="app-icon-bubble-v01.svg" width="96" height="96" alt=""><figcaption>96</figcaption></figure><figure><img src="app-icon-bubble-v01.svg" width="48" height="48" alt=""><figcaption>48</figcaption></figure><figure><img src="app-icon-bubble-v01.svg" width="32" height="32" alt=""><figcaption>32</figcaption></figure><figure><img src="app-icon-bubble-v01.svg" width="16" height="16" alt=""><figcaption>16</figcaption></figure></div>
+      <button class="choose" type="button">选这个</button>
+    </article>
+    <article class="c" data-k="b">
+      <div class="hero"><img alt="方案 B：缩小的 Project View 窗口" data-light="app-icon-window-v01.svg" data-dark="app-icon-window-v01-dark.svg" src="app-icon-window-v01.svg"><div class="mode" role="group" aria-label="颜色模式"><button aria-pressed="true" data-m="light">浅色</button><button aria-pressed="false" data-m="dark">深色</button></div></div>
+      <div class="ttl"><h2>Project View 缩影</h2><b>B</b></div>
+      <p>一扇磨砂窗口：左侧是 Conversation 的提示符，右侧是 Preview 面板里的 Overview 格子与进度条。</p>
+      <ul><li>最直接地讲出“对话 + 项目视图”</li><li>细节多，32 以下只剩色块，需另画小尺寸版本</li></ul>
+      <div class="sizes"><figure><img src="app-icon-window-v01.svg" width="96" height="96" alt=""><figcaption>96</figcaption></figure><figure><img src="app-icon-window-v01.svg" width="48" height="48" alt=""><figcaption>48</figcaption></figure><figure><img src="app-icon-window-v01.svg" width="32" height="32" alt=""><figcaption>32</figcaption></figure><figure><img src="app-icon-window-v01.svg" width="16" height="16" alt=""><figcaption>16</figcaption></figure></div>
+      <button class="choose" type="button">选这个</button>
+    </article>
+    <article class="c" data-k="c">
+      <div class="hero"><img alt="方案 C：层叠玻璃面板上的提示符与星形光标" data-light="app-icon-layers-v01.svg" data-dark="app-icon-layers-v01-dark.svg" src="app-icon-layers-v01.svg"><div class="mode" role="group" aria-label="颜色模式"><button aria-pressed="true" data-m="light">浅色</button><button aria-pressed="false" data-m="dark">深色</button></div></div>
+      <div class="ttl"><h2>层叠玻璃</h2><b>C</b></div>
+      <p>三层磨砂面板对应多个 Project 与 Session；最前一层是提示符，光标换成四角星，表示 AI 在这里工作。</p>
+      <ul><li>最贴近 v04 的“玻璃上再叠一层磨砂”</li><li>四角星是常见的 AI 符号，独特性一般</li></ul>
+      <div class="sizes"><figure><img src="app-icon-layers-v01.svg" width="96" height="96" alt=""><figcaption>96</figcaption></figure><figure><img src="app-icon-layers-v01.svg" width="48" height="48" alt=""><figcaption>48</figcaption></figure><figure><img src="app-icon-layers-v01.svg" width="32" height="32" alt=""><figcaption>32</figcaption></figure><figure><img src="app-icon-layers-v01.svg" width="16" height="16" alt=""><figcaption>16</figcaption></figure></div>
+      <button class="choose" type="button">选这个</button>
+    </article>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <h2>放进 Dock</h2>
+    <div class="docks">
+      <div class="desk l"><span class="lbl">浅色桌面</span><div class="dock"><span class="gen"></span><img class="cur" src="app-icon-bubble-v01.svg" alt="方案 A"><img src="app-icon-window-v01.svg" alt="方案 B"><img src="app-icon-layers-v01.svg" alt="方案 C"></div></div>
+      <div class="desk d"><span class="lbl">深色桌面</span><div class="dock"><span class="gen"></span><img class="cur" src="app-icon-bubble-v01-dark.svg" alt="方案 A 深色"><img src="app-icon-window-v01-dark.svg" alt="方案 B 深色"><img src="app-icon-layers-v01-dark.svg" alt="方案 C 深色"></div></div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div><b>深色版本</b>同样的色相压暗、偏冷，底色接近 v04 毛玻璃深色的原生材质；面板改为低透明度白色，图形改为浅色。macOS 26 起可在 Icon Composer 中提供浅色、深色与着色三种外观。</div>
+    <div><b>选定之后</b>只深化一个方案：调整小尺寸（16、32）的笔画与留白，导出 <code>icon.icns</code> 放入桌面端 <code>build/</code>，并在 design 目录登记版本与确认日期。</div>
+  </section>
+</main>
+
+<script>
+document.querySelectorAll('.c').forEach(function(c){
+  var hero=c.querySelector('.hero img'), smalls=c.querySelectorAll('.sizes img');
+  c.querySelectorAll('.mode button').forEach(function(b){
+    b.addEventListener('click',function(){
+      var m=b.dataset.m, src=hero.dataset[m];
+      c.querySelectorAll('.mode button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+      hero.src=src; smalls.forEach(function(i){i.src=src});
+      c.querySelector('.sizes').style.background=m==='dark'?'#1d1e24':'';
+    });
+  });
+  c.querySelector('.choose').addEventListener('click',function(){
+    var on=!c.classList.contains('pick');
+    document.querySelectorAll('.c').forEach(function(x){x.classList.remove('pick');x.querySelector('.choose').textContent='选这个'});
+    if(on){c.classList.add('pick');c.querySelector('.choose').textContent='已选（在对话中确认）'}
+  });
+});
+</script>

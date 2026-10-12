@@ -28,6 +28,7 @@ design/
 ├── references/               # 参考截图、灵感图片和参考说明
 ├── wireframes/               # 布局草图、线框图和流程图
 ├── screens/                  # 高保真界面图及可编辑源文件
+├── icons/                    # 应用图标、矢量源文件与效果图
 ├── components/               # 组件规范与状态示例
 └── prototypes/               # 可交互原型或原型链接
 ```
@@ -38,6 +39,7 @@ design/
 | 参考资料 | [references/README.md](references/README.md) |
 | 线框图与流程 | [wireframes/README.md](wireframes/README.md) |
 | 高保真界面 | [screens/README.md](screens/README.md) |
+| 应用图标 | [icons/README.md](icons/README.md) |
 | 组件规范 | [components/README.md](components/README.md) |
 | 交互原型 | [prototypes/README.md](prototypes/README.md) |
 
