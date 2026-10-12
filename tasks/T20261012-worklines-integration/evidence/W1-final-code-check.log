@@ -1,0 +1,39 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck && pnpm test:scripts && pnpm -r --if-present run test
+$ tsc -p tsconfig.build.json
+Scope: 2 of 3 workspace projects
+$ tsc -p tsconfig.json --noEmit
+$ tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.e2e.json
+$ vitest run --config scripts/vitest.config.mjs
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/worklines-integration
+
+
+ Test Files  1 passed (1)
+      Tests  36 passed (36)
+   Start at  07:52:51
+   Duration  2.55s (tests 95%, import 4%, transform 1%)
+
+Scope: 2 of 3 workspace projects
+$ vitest run
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/worklines-integration/packages/agent-adapter
+
+
+ Test Files  15 passed (15)
+      Tests  184 passed (184)
+   Start at  07:52:54
+   Duration  2.55s (tests 82%, transform 13%, import 4%)
+
+$ vitest run
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/worklines-integration/apps/desktop
+
+
+ Test Files  29 passed (29)
+      Tests  203 passed (203)
+   Start at  07:52:56
+   Duration  2.75s (environment 35%, tests 32%, transform 17%, import 15%, worker 1%)
+
+    Isolate  29 workers spawned · ~271ms startup each (spawn + environment, per file)
+             at least ~602ms faster with isolate: false — reuses workers across files instead of one per file
+

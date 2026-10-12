@@ -63,3 +63,15 @@ git diff --check: exit 0
 - 要求：用可区分编辑的版本或快照保护持久化草稿，或由 Renderer 成功后的清空写入决定删除；追加相同内容再编辑回归。
 - 修复：Main Agent 移除主进程按内容等值清除草稿；由 Renderer 在 exact submitted snapshot 未被编辑时清空，并持久化其变更。
 - 独立复验：使用 Vite 加载实际源码，内存 SQLite、模拟 FakeProvider gate、实际 SessionService；发出 A 后按顺序 `saveDraft(B)`、`saveDraft(A)` 再放行 acknowledgement。实际 `persistedDraft=A`，用户消息只有 `start` 与已接收 A；最终代码中无按值删稿路径，Renderer 对象身份保护仍保留。已解决。
+
+## Main Agent 集成自检（2026-10-13）
+
+本节为 Main 自检，不改变上文独立 Review Agent 的范围或结论。功能代码基线 `bdf4e80`；文档收尾 diff 另计。上述 10 个独立评审文件与 `19cb08b` 完全相同，沿用既有独立评审；没有发送真实 CLI / 模型请求。
+
+- `pnpm check:docs --base origin/main --head HEAD`：新增链接问题 0、历史 4 项；`pnpm check:code`：类型检查通过，脚本 36、Adapter 184、desktop 203 项通过，[日志](evidence/W1-final-code-check.log)。
+- `pnpm test:e2e`：macOS arm64，构建后的 Electron 44.4.5，模拟 Provider；37 / 37 通过，[日志](evidence/W1-final-e2e.log)。覆盖两种主题、AC-08 模拟系统状态以及既有 Project / Session / Project View 回归。
+- 通过 `agent-browser` CDP 9339 操作实际构建应用、1280 × 800：点击打开 Project、选择 Codex CLI、发送 `[e2e:slow]` 合成消息；Running 中追加成功消息，正文新增该消息，输入清空、回合继续运行；[成功截图](evidence/W1-running-steer-success.png)拍摄于随后填入失败场景文本、尚未发送时。
+- Running 中发送 `[e2e:steer-error]`：显示模拟拒绝错误，输入框保留原文，正文不增加失败消息，原回合继续运行；[失败截图](evidence/W1-running-steer-error.png)。随后点击 Stop，显示“已停止”，失败草稿仍保留；[停止截图](evidence/W1-running-steer-stopped.png)。Main 已实际查看三张截图，消息、输入及反馈可见，无遮挡。
+- 测试准备仅使用模拟 Provider、临时独立 userData / Project，并替换原生目录选择器返回该临时 Project；待验收发送、追加、失败及 Stop 均通过用户可见按钮和输入执行。未注入 Session 状态。
+
+设置任务免做项、一般 Running 追加的真实兼容性及 Claude queue 未覆盖范围仍由各原任务跟踪。集成提交和分支清理不代表新增人工功能验收。

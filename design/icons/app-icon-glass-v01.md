@@ -2,7 +2,7 @@
 
 - 状态：探索中，待人工审阅；2026-10-12。
 - 需求来源：用户 2026-10-12 对话「基于 worktree v04 原型设计风格，设计应用 icon」。本次交付为图标设计稿，不涉及 FR / AC 行为变更。
-- 视觉来源：`feat/settings-theme` worktree，提交 `c38171e`，`design/prototypes/studio-prototype-v04.html` 的 `.skin-glass` 样式、默认壁纸 A 和适中内容层。读取时该 worktree 无未提交修改；与 `worklines-integration` 中的 v04 HTML 内容相同。主 checkout 尚无 v04，故记录分支与提交定位来源。
+- 视觉来源：`feat/settings-theme` worktree，提交 `c38171e`，`design/prototypes/studio-prototype-v04.html` 的 `.skin-glass` 样式、默认壁纸 A 和适中内容层。读取时该 worktree 无未提交修改；与 `worklines-integration` 中的 v04 HTML 内容相同。设计时主 checkout 尚无 v04，故记录分支与提交定位来源；2026-10-13 整合后可直接查看[已保留的 v04 原型](../prototypes/studio-prototype-v04.html)。
 - 交付：[透明 PNG](app-icon-glass-v01.png)、[可编辑 SVG](app-icon-glass-v01.svg)、[浅深背景及尺寸预览](app-icon-glass-v01-preview.png)、[Dock 浅深模式效果图](app-icon-glass-v01-in-dock.png)。PNG 由内置 image_gen 生成；SVG 为依照 PNG 手工重绘的矢量版本，玻璃渐变与阴影近似原稿，非像素级转换。
 - 实际画布：1254 × 1254px，带 alpha 通道；生成工具返回尺寸与提示词中的目标尺寸不同。
 - SVG 画布：1024 × 1024，透明背景，使用路径、渐变和滤镜；无嵌入位图、字体或外部资源依赖。依照用户 2026-10-12 对话要求统一移入 `design/icons/` 并补充 SVG。
