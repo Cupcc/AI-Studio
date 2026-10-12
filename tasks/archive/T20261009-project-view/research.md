@@ -50,6 +50,8 @@
 - “事实 / 展示”的判据：去掉所有样式、位置、图表类型后仍然成立的是事实（模块名称、依赖关系、里程碑状态、Agent 职责、业务步骤与代码映射）；与怎么摆、画成什么有关的是展示（分组方式、排序、方向、图表种类、强调色变体、折叠状态）。
 - Agent Team 的 Knowledge 只能是对 CLI 原生配置的描述与引用（路径指向 `AGENTS.md`、`.claude/agents/*` 等），不能成为新的 Agent Profile 标准（FR 第 3 节 Agent Team；原则 19）。实测 `thread/start` 返回的 `instructionSources` 可作为 Codex 已加载指令文件的权威来源，后续 Agent Team 的生成指令可以让 Agent 参考。
 - 文件锁：Agent 的文件工具（Codex 的补丁、Claude 的 Write / Edit）不经过客户端，客户端无法加锁；只能靠“一个 View 一个文件”缩小冲突面，靠指南要求“编辑前重读、局部修改”，靠 04 第 1 节第 7 项的总体冲突检测兜底。
+
+> 2026-10-11 范围更正（用户「accept all,update docs」确认，DEC-11）：上一条是历史调研假设，其中“总体冲突检测兜底”不再适用，不能作为实现或数据安全保证。现行边界见 [01 第 4 节](<../../../docs/01. Product Definition.md#4-v1-非目标范围>)；分文件、稳定读取及 last-good 仅缩小冲突面或保护展示，不防止共享目录的写入覆盖。
 - 符号链接：Agent 可以创建符号链接，客户端读取 `.ai-studio/` 时必须用 realpath 校验仍在项目内，否则可能把项目外文件当作 Knowledge 读入。
 
 ### 4.2 渲染

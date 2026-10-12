@@ -9,6 +9,10 @@ created: 2026-10-09
 
 # CLI Adapter 首阶段
 
+## 2026-10-11 原生能力对齐补充
+
+按 [DEC-13](<../../docs/07. Decisions.md#dec-13-原生-cli-能力对齐>) 与[对齐任务](../T20261011-native-cli-parity/task.md)，A-Q1 / A-Q2 / A-Q5 的产品方向及 A-Q3 的技术方案已回写 spec；运行中发送、原生能力接入和崩溃清理仍需实现及验证。本任务保持 `verifying`；历史验收不改记通过，真实调用须先明确预算。
+
 ## 签收
 
 - 状态：待人工签收；任务保持 `verifying`。

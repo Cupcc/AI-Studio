@@ -41,7 +41,7 @@ Knowledge / Definition 内置 Schema、五类 JSON 默认定义、安全读取�
 - [x] 真实 CLI 版本/账号可用性/调用范围及受影响链路证据，见 [真实验收](evidence/W2-real-verification.md)。指定模型各两轮完成，预算耗尽。
 - [x] 更新负责文档与实现约定；归档后的链接、表格、探针路径及检查结果见 [收尾记录](evidence/W1-closure.md)。
 
-人工产品验收：待人工验收。技术自检/独立评审不替代人工验收。
+人工产品验收结论与范围见 [acceptance.md](acceptance.md#人工功能验收)。
 
 ## 进度与恢复
 
@@ -60,10 +60,14 @@ Knowledge / Definition 内置 Schema、五类 JSON 默认定义、安全读取�
 
 ## 剩余边界
 
-本任务无未解决的技术阻断。原生系统目录选择器、打包应用与人工产品验收未覆盖；非 AC-06 的真实 CLI 专项不因本次验证改变结论。功能验收入口及范围由 [acceptance.md](acceptance.md) 负责。分支集成情况见下。
+本任务无未解决的技术阻断。原生系统目录选择器、打包应用未覆盖；非 AC-06 的真实 CLI 专项不因本次验证改变结论。功能验收入口及范围由 [acceptance.md](acceptance.md) 负责。分支集成情况见下。
 
 ## 2026-10-11 分支集成
 
 用户授权“commit all，执行所有分支的并入”。Main Agent 将本分支 rebase 到包含治理修订的 main，保留主目录已确认的规格来源和精简后的路线图，合入本分支当前实现、独立验收及归档证据。冲突只涉及路线图与规格来源；与原始 `746d409` 比较，`apps/desktop/src`、`apps/desktop/e2e` 和 `packages` 无差异，原独立界面及真实 CLI 证据的代码范围继续有效。本次不新增真实模型调用或人工验收结论。两个同目标过程提交整理为一个实现提交，按 CONTRIBUTING 仅快进合入。
 
 历史限制来源：[Adapter 验收](../../T20261009-agent-adapter/acceptance.md#未覆盖与边界)。历史预算与失败证据不变；本次新授权不扩展 AC-02～05 的补验范围。
+
+## 2026-10-11 人工功能验收记录
+
+用户确认“PV-Q13 采纳答案，进行 Project View 人工功能验收。验收通过。update doc”。Main Agent 将 PV-Q13 移至规格已确认事项，并更新 [人工功能验收](acceptance.md#人工功能验收)、报告及路线图；本次仅更新文档，不新增运行验证。任务保持 `done` 与归档状态。

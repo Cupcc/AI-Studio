@@ -64,6 +64,10 @@ W4 在 `4c66414` 复现：`replyWithText → turn/steer` 在途，原生撤回�
 6. A-Q1 / A-Q2 / A-Q3 / A-Q5 尚未人工确认。两个 Provider `inputWhileRunning=none`；Claude 结构化附件前置 unsupported；这些边界已在草稿中明示。
 7. 此 task 不验 UI Session 状态机、SQLite / IPC 持久化、Completed Unread / 查看清除或真实 Project 关闭；完整 AC 需 session-slice 联合验收。
 
+### 2026-10-11 原生能力对齐更新
+
+本记录以上述独立验收基线为准：当时两个 Provider 的 `inputWhileRunning=none` 是代码基线事实，不是产品结论。随后按用户确认的原生 CLI 对齐原则，Codex Adapter 已接入原生 `turn/steer` 并将能力报告为 `steer`；该修改尚未经过新的独立验收与真实 `0.162.0` 兼容验证。Claude 原生排队、UI / IPC 路径及其他对话能力仍待实现和补验，不能据本段把 AC-02 / AC-03 / AC-05 记为通过。见 [对齐任务](../T20261011-native-cli-parity/task.md)。
+
 ## 证据复跑
 
 从仓库根先运行 `pnpm --filter @ai-studio/agent-adapter run build`，再用 Node 运行：

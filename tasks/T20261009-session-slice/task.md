@@ -9,6 +9,10 @@ created: 2026-10-09
 
 # Session 对话切片
 
+## 2026-10-11 原生能力对齐补充
+
+按 [DEC-13](<../../docs/07. Decisions.md#dec-13-原生-cli-能力对齐>) 与[对齐任务](../T20261011-native-cli-parity/task.md)，I-Q3 已确认按各 CLI 原生能力支持运行中输入，C-Q5 与 Adapter A-Q1 对齐；其他原生对话接入缺口不得作为产品禁用规则。本任务须补齐 Adapter → IPC → 持久化 → UI 并完成独立真实验收；仍保持 `verifying`，不因文档更新认定功能已交付。
+
 ## 签收
 
 - 状态：待人工签收；任务保持 `verifying`。

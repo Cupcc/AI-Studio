@@ -123,7 +123,7 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 | `+` | 打开 Context / Attachment 菜单 | FR-INPUT-001 |
 | 上下文标签 | 当前 View、从 Files 添加的文件；可单独移除 | FR-VIEW-007、FR-TOOL-001 |
 | Model Selector | 位于输入区底行右侧，列出当前 Session CLI 支持的模型 | FR-INPUT-002 |
-| Send / Stop | 输入为空时 Send 禁用；Running 时变为 Stop；Running 期间能否排队发送遵循 CLI 原生能力 | FR-INPUT-001 |
+| Send / Stop | 输入为空时 Send 禁用；Running 时保留 Stop，并按 CLI 原生能力提供追加／排队发送；两者同时可用时不得用单一按钮隐藏发送 | FR-INPUT-001、input I-Q3 |
 
 ## 8. Project View
 

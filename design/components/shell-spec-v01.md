@@ -13,6 +13,8 @@
 
 本文件中的颜色仅用于区分状态语义，具体色值见交互原型 v01。尺寸单位为 px。
 
+> 历史边界注释（2026-10-11 确认，DEC-11）：第 6 节“修改了 N 个文件”与第 9 节 Diff 保留作 v01 设计记录，不再作为现行变更归因依据；项目 / 本轮范围、原生记录覆盖边界与不可用降级以 [FR-TOOL-002](<../../docs/02. Functional Requirements.md#fr-tool-002-diff-viewer>) 和 [Shell Spec v02](shell-spec-v02.md#6-conversation) 为准，不承诺由客户端归因全部修改。
+
 ## 1. 待确认
 
 | 项目 | 说明 |
@@ -114,7 +116,7 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 | `+` | 打开 Context / Attachment 菜单 | FR-INPUT-001 |
 | 上下文标签 | 当前 View、从 Files 添加的文件；可单独移除 | FR-VIEW-007、FR-TOOL-001 |
 | Model Selector | 位于输入区底行右侧，列出当前 Session CLI 支持的模型 | FR-INPUT-002 |
-| Send / Stop | 输入为空时 Send 禁用；Running 时变为 Stop；Running 期间能否排队发送遵循 CLI 原生能力 | FR-INPUT-001 |
+| Send / Stop | 输入为空时 Send 禁用；Running 时保留 Stop，并按 CLI 原生能力提供追加／排队发送；两者同时可用时不得用单一按钮隐藏发送 | FR-INPUT-001、input I-Q3 |
 
 ## 8. Project View
 

@@ -19,17 +19,17 @@
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
-| I-Q1 | Needs Input 时 Send / Stop 按钮显示哪一个？Shell Spec 第 7 节只规定“Running 时变为 Stop”，UX 第 6 节要求此时可在输入框回复 | 输入为空时显示 Stop（可取消整轮），输入非空时显示 Send（发送回复）。这样既能回复也能停止，且不新增按钮 | 否（可按推荐实现，确认后调整成本低） | |
-| I-Q3 | Running 中是否允许发送（排队）？ | 本切片不支持：Running 中 Enter 不发送，输入保留；待 Adapter 报告并验证排队能力（包括 Stop 时排队消息的处理，[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 `still_queued`）后再开启。依据：Shell Spec 第 7 节“遵循 CLI 原生能力” | 否 | |
+| I-Q1 | Needs Input 时 Send / Stop 按钮如何同时保持原生操作？ | 输入为空时显示 Stop；输入非空时同时保留 Send 与 Stop，Send 回复等待请求，Stop 取消整轮。布局可合并视觉位置，但不得隐藏任一原生操作 | 否；技术与交互细化 | 依据原则 24（2026-10-11）；diff 待审阅 |
 | I-Q4 | 本轮 `+` 菜单是否显示尚不可用的“从 Files 添加文件”？ | 显示并禁用，说明“Files 工具完成后可用”；Files 上线后启用。也可本轮隐藏菜单只保留按钮，请确认 | 否 | |
 | I-Q5 | 已有 Session 中未发送的文本在切换 Session / Project、重启应用时是否保留？ | 保留，切换时恢复，并由 Session 独立持久化至 session_drafts；与 chat spec C-Q1 草稿规则一致，秘密问题输入例外见 §4 | 否 | |
-| I-Q6 | 模型选择细节：默认值的显示、Running 期间能否切换、已保存的模型下线时怎么办？ | 未选择显示 CLI 原生默认并标注“默认”，不传覆盖；Running / Needs Input 期间可切换，下一轮生效；已下线模型标注不可用，下一轮回退 CLI 默认并提示一次。依据：FR-INPUT-002；01 第 8 节原则 20；agent-adapter task“下一轮使用新模型” | 否 | |
+| I-Q6 | 模型选择细节与原生兼容性如何呈现？ | 未选择时沿用 CLI 默认；模型选择和生效时机按原生能力接入。模型不在目录中不等于不可调用，显示目录／调用的实际结果；不得由产品擅自换成默认模型。具体接口与显示由 AI 核对，依据 FR-INPUT-002、01 第 8 节原则 20、24 | 否；技术与交互细化，不阻塞原生能力接入 | |
 
 ### 1.2 已确认
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
 | I-Q2 | 在输入框输入的回复对 CLI 意味着什么？有多个未答复请求时作用于哪一个？ | 只有一个未答复请求且该请求原生接受自由文本（如提问）时，文字作为该请求的答案；其他情况下，所有未答复请求按“拒绝并附该文字为说明”解决（Claude `canUseTool` 拒绝可附说明；Codex 拒绝后由 Adapter 把文字作为用户消息交给 Agent，具体方式待 Adapter 验证）。对话中显示为用户消息 | 是：涉及 Adapter 接口，须在 Needs Input 实现前确认 | 采纳建议（2026-10-09 确认）；Codex 拒绝后交付文字的具体方式由 Adapter 验证 |
+| I-Q3 | Running 中是否允许发送？ | 按各 CLI 原生能力接入，保留 Codex 当前回合追加与 Claude 后续回合排队的差异；消息归属及 Stop 对队列的行为由 Adapter 验证并如实呈现 | 产品问题已解决；实现与验证待完成 | 依据 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>)（2026-10-11 确认）；不再采用“本切片不支持”作为产品决定，diff 待审阅 |
 
 ## 2. 职责与边界
 
@@ -39,11 +39,11 @@
   - 在输入框中答复 Needs Input（UX 第 6 节“输入框保持可用，用户也可以直接输入回复”）。
   - Model Selector 的内容、默认值与切换时机（FR-INPUT-002）。
   - 已有 Session 中未发送文本的保留。
+  - FR-INPUT-001 中原生 CLI 支持的必要对话控制（如推理强度）：按原则 24 接入，具体版本／协议能力由 Adapter 验证，未接入项作为实现缺口。
 - 不负责：
   - 发送、答复、Stop、切换模型之后的 Session 状态变化：见 [specs/session/spec.md](../session/spec.md) 第 4.1 节。
   - 草稿的创建与 CLI 选择：见 [specs/chat/spec.md](../chat/spec.md)。
   - 从 Files 添加文件到上下文（FR-TOOL-001，[tools spec](../tools/spec.md#fr-tool-001-files)）；当前 View 作为上下文的注入方式（04 第 1 节第 10 项，Project View task）。本轮只提供入口与标签位。Files 的查看动作不自动添加标签；显式添加面向当前 Project 的 Session / 草稿，沿用本模块发送通道（DEC-10，2026-10-12 确认）。
-  - FR-INPUT-001 中“后续 CLI 支持的其他必要控制”（如推理强度）：本轮不做。
 
 ## 3. 行为细则
 
@@ -76,25 +76,27 @@
 
 依据：Shell Spec 第 7 节；04 第 5 节第 1 条；UX 第 6 节 Needs Input 呈现；FR-STATE-003。
 
-控件为同一位置的单个按钮，状态如下：
+控件按下表提供操作；Running 时发送与 Stop 均须可访问，不再以“同一位置的单个按钮”限制原生发送能力（I-Q3）。具体布局由实现与交互验收确定。
 
 | Session / 草稿状态 | 输入为空 | 输入非空 |
 |---|---|---|
 | 草稿，CLI 可用 | Send 禁用 | Send |
 | 草稿，CLI 不可用 | Send 禁用，草稿内显示原因（chat spec） | Send 禁用 |
 | 无状态 / Completed Unread / Error | Send 禁用 | Send（Error 后发送会先恢复 CLI Conversation，FR-STATE-003） |
-| Running | Stop | Stop；Running 中能否提交见 I-Q3 |
+| Running | Stop | 按原生能力 Send（追加／排队），同时保留 Stop 入口；见 I-Q3 |
 | Stop 进行中 | “停止中”，禁用 | 同左；输入框仍可编辑（session spec S-Q8） |
 | Needs Input | Stop（I-Q1） | Send，作为对等待请求的回复（I-Q1、I-Q2） |
 
 1. 输入为空时 Send 禁用（Shell Spec 第 7 节）。
-2. Running 时变为 Stop（Shell Spec 第 7 节）；点击 Stop 的效果见 session spec 第 3.12 节。
+2. Running 时提供 Stop；有可发送输入时同时提供原生发送操作（I-Q3，优先于旧 Shell 的单按钮示意）。点击 Stop 的效果见 session spec 第 3.12 节；排队处理须与原生能力核对，不能自行丢弃已接收消息。
 3. 输入框在任何状态下都可编辑，包括 Running、Needs Input、Stop 进行中（UX 第 6 节“输入框保持可用”）。
 4. 发送后立即进入 Running，不等待 CLI 首个输出（FR-STATE-001；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节）。
 
 #### Running 中发送
 
-Shell Spec 第 7 节规定“Running 期间能否排队发送遵循 CLI 原生能力”。Adapter 按 CLI 报告 `capabilities.inputWhileRunning`（Adapter spec §5.5）。Claude 的排队消息在 Stop 时如何处理尚未验证（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 `still_queued`）。建议本切片先实现 `none` 分支：Running 中 Enter 不发送，按钮保持 Stop，输入内容保留到本轮结束后由用户发送（I-Q3）。
+按 I-Q3 与 FR-INPUT-001，运行中发送是必须接入的原生能力。Codex 当前回合追加与 Claude 后续回合排队分别呈现；发送接收确认后再清空对应输入，失败保留内容，排队接受不显示为已执行。回合结束、Stop 与继续发送的竞态应依原生语义处理，不自行重放、丢弃或合并排队消息。
+
+当前 Adapter 的 `capabilities.inputWhileRunning` 已建模 `none` / `steer` / `queue`，Codex 已接入原生 `steer`；Claude 的排队能力尚未建模，UI 和 IPC 仍需贯通并验证。Claude Stop 后队列行为仍待真实验证（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 `still_queued`），不能以此长期禁止 Running 中发送。跟踪见[对齐任务](../../tasks/T20261011-native-cli-parity/task.md)。
 
 #### 在输入框答复 Needs Input
 
@@ -114,7 +116,7 @@ Shell Spec 第 7 节规定“Running 期间能否排队发送遵循 CLI 原生�
 5. 已有 Session：切换模型写入 `Session.model`，从下一轮开始生效；Running 或 Needs Input 期间也可切换，不影响进行中的轮（建议，I-Q6）。切换后不在对话中插入提示行（建议）。
 6. 恢复：Session 恢复原生会话时按 `Session.model` 重新应用模型选择（04 第 5 节第 6 条“以原 thread.id、cwd 和配置恢复”）。
 7. 目录读取失败：Model Selector 显示当前值并禁用，悬停说明原因；不影响发送（使用当前或默认模型）。
-8. 已保存的模型不在当前目录中（CLI 升级后下线）：建议显示该模型名并标注不可用，下一轮回退到 CLI 默认并提示一次（I-Q6）。
+8. 已保存的模型不在当前目录中：保留用户选择并说明目录未列出；只有实际原生结果证明不可用时才报告对应错误。客户端不擅自换成默认模型，原生若有回退则如实显示实际使用模型；用户可主动重新选择（I-Q6；01 第 8 节原则 24）。
 9. 模型目录可读取不代表每个模型都有访问权限（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 2 节末段）；选择后调用失败按 Error 处理。
 
 ## 4. 状态与数据
@@ -146,5 +148,5 @@ Shell Spec 第 7 节规定“Running 期间能否排队发送遵循 CLI 原生�
 |---|---|---|
 | `listModels(cli)` → `[{id, displayName, isDefault}]` | Model Selector；草稿阶段可用 | 不得为读取目录创建原生会话（chat spec 第 5.2 节） |
 | `setModel` / 发送时携带模型 | 下一轮生效 | [CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 6 节未验证同 Session 切换 |
-| `capabilities.inputWhileRunning` | Running 中发送；本切片为 `none` | I-Q3；Adapter 正式契约 |
+| `capabilities.inputWhileRunning` | Running 中发送；Adapter 报告并执行 `steer` / `queue` 原生语义，确不支持才为 `none` | I-Q3 已确认；Adapter 须保留 steer / queue 差异 |
 | `capabilities.freeTextAnswers` 与 `replyWithText(text)` | 输入框回复 Needs Input；作用集合由 Adapter 取当前轮的待答复请求 | I-Q2；Adapter 正式契约 |
