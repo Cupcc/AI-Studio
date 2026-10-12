@@ -187,7 +187,7 @@ export const useSessions = create<SessionStore>()((set, get) => ({
         result = acceptSummaryIfFresh(created, startedAt)
       } else {
         const session = get().summaries[key.sessionId]
-        if (session?.stopping || session?.activity === 'running') throw new Error('当前一轮仍在运行，输入已保留')
+        if (session?.stopping) throw new Error('当前一轮正在停止，输入已保留')
         if (session?.activity === 'needs_input') await sessionApi().replyWithText({ sessionId: key.sessionId, text: draft.text })
         else await sessionApi().send({ sessionId: key.sessionId, text: draft.text, contextItems: draft.contextItems })
         result = get().summaries[key.sessionId] ?? null

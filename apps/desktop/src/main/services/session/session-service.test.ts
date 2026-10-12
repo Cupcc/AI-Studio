@@ -50,6 +50,34 @@ function harness(codex = new FakeProvider('codex'), buildViewContext?: import('.
 }
 
 describe('Session state, persistence and native continuity · AC-02–05 / FR-STATE-001–007', () => {
+  it('awaits steering, retains failures and newer drafts, and records accepted input on its original turn after completion', async () => {
+    const gate = deferred<void>()
+    const h = harness(new FakeProvider('codex', { capabilities: { inputWhileRunning: 'steer' }, behavior: { onSteer: () => gate.promise } }))
+    const session = await h.create(); await tick()
+    const key = { projectId: 'p', kind: 'session' as const, sessionId: session.id }
+    const draft = { cli: 'codex' as const, model: null, text: 'additional input', contextItems: [] }
+    h.service.saveDraft(key, draft)
+    const originalTurn = h.items(session.id)[0]!.turnId
+    const send = h.service.send(session.id, { text: draft.text })
+    expect(() => h.service.send(session.id, { text: 'duplicate' })).toThrow('正在提交')
+    await tick()
+    expect(h.items(session.id).filter(item => item.kind === 'user_message')).toHaveLength(1)
+    h.service.saveDraft(key, { ...draft, text: 'newer draft' })
+    const runtime = h.native().controller
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'completed' })
+    gate.resolve(); await send
+    expect(h.items(session.id).filter(item => item.kind === 'user_message').at(-1)).toMatchObject({ text: draft.text, turnId: originalTurn })
+    expect((await h.service.getDraft(key)).text).toBe('newer draft')
+    expect(h.native().driver.callsTo('startTurn')).toHaveLength(1)
+
+    h.service.send(session.id, { text: 'next turn' }); await tick()
+    h.native().driver.behavior.onSteer = () => { throw new Error('native rejected') }
+    h.service.saveDraft(key, draft)
+    await expect(h.service.send(session.id, { text: draft.text })).rejects.toThrow('native rejected')
+    expect((await h.service.getDraft(key)).text).toBe(draft.text)
+    expect(h.items(session.id).filter(item => item.kind === 'user_message' && item.text === draft.text)).toHaveLength(1)
+  })
+
   it.each(['codex', 'claude-code'] as const)('attaches View Context once for %s, stores metadata but never its template, and retains detached origin', async cli => {
     const text = 'Current Project View: Architecture\nRelevant files: .ai-studio/knowledge/architecture.json\nRules: keep facts separate.'
     let calls = 0

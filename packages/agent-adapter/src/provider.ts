@@ -128,9 +128,11 @@ export interface ProviderCapabilities {
   nativeSessionIdTiming: 'on_create' | 'after_first_input';
   /**
    * Whether `sendUserInput` is accepted while a turn runs (Shell Spec §6 "follows the CLI").
-   * `steer` adds the input to the running turn. V1 providers report `none` until verified (I-Q3).
+   * `steer` adds the input to the running turn. `queue` starts a later native turn when the
+   * provider exposes that distinction. Providers must report their native behavior, not a
+   * product-wide intersection of capabilities (I-Q3 / Product Definition principle 24).
    */
-  inputWhileRunning: 'none' | 'steer';
+  inputWhileRunning: 'none' | 'steer' | 'queue';
   /** Whether question requests (multiple choice / free text) are surfaced, beyond approvals. */
   questionRequests: boolean;
   /**

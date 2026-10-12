@@ -24,8 +24,10 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const running = session?.activity === 'running', needsInput = session?.activity === 'needs_input'
   const stopping = session?.stopping || (session && pending[`stop:${session.id}`])
   const busy = !!pending[id] || !!(session && pending[`model:${session.id}`])
+  const supportsRunningInput = running && !!provider && provider.capabilities.inputWhileRunning !== 'none'
   const stopButton = running || (needsInput && !text.trim())
-  const canSend = !!draft && !!text.trim() && !unavailable && !running && !stopping && !busy
+  const canSend = !!draft && !!text.trim() && !unavailable && (!running || !!supportsRunningInput) && !stopping && !busy
+  const runningSend = !!supportsRunningInput && !!text.trim() && !stopping && !busy
   useEffect(() => { void useSessions.getState().loadDraft(draftKey) }, [id])
   useEffect(() => { if (cli) void useSessions.getState().loadModels(draftKey.projectId, cli) }, [cli, draftKey.projectId])
   useEffect(() => { if (active && draft) input.current?.focus() }, [id, active, !!draft])
@@ -97,6 +99,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
         {knownModels.map((item) => <option key={item.id} value={item.id}>{item.displayName}</option>)}
         {model && !knownModels.some((item) => item.id === model) && <option value={model}>{model}{modelMissing ? '（不可用）' : ''}</option>}
       </select><Icon name="chevron" size={12} /></span>
+      {runningSend && <button className="composer__send" aria-label="Send" disabled={!canSend} onClick={() => void send()}><Icon name="arrow-up" size={14} /></button>}
       <button className={`composer__send ${stopButton ? 'is-stop' : ''} ${stopping || busy ? 'is-busy' : ''}`} aria-label={stopping ? '停止中…' : stopButton ? 'Stop' : busy ? '发送中…' : 'Send'} data-tip={stopButton ? (stopping ? '停止中…' : '停止') : undefined} data-tip-align="end" disabled={stopButton ? !!stopping : !canSend} onClick={() => { if (stopButton && session) void useSessions.getState().stop(session.id); else void send() }}>
         {stopping || busy ? <span className="session-spinner session-spinner--inverse" aria-hidden="true" /> : <Icon name={stopButton ? 'stop' : 'arrow-up'} size={14} />}
       </button>

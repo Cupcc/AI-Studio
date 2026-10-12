@@ -34,6 +34,16 @@ beforeEach(() => {
 afterEach(async () => { cleanup(); await flushSessionDrafts(); await useProjectShell.getState().flush(); disposers.forEach((off) => off()); vi.unstubAllGlobals() })
 
 describe('Session IPC store · FR-SESSION/STATE · AC-02–05', () => {
+  it('keeps running input and reports a rejected native send', async () => {
+    const runningKey = { projectId: 'p', kind: 'session' as const, sessionId: 's' }
+    useSessions.setState({ summaries: { s: summary({ activity: 'running', status: 'running' }) } })
+    useSessions.getState().updateDraft(runningKey, { cli: 'codex', text: 'Keep this input' })
+    vi.mocked(api.send).mockRejectedValue(new Error('native rejected'))
+    expect(await useSessions.getState().sendComposer(runningKey)).toBeNull()
+    expect(useSessions.getState().drafts[draftId(runningKey)]!.text).toBe('Keep this input')
+    expect(useSessions.getState().errors[draftId(runningKey)]).toContain('native rejected')
+  })
+
   it('merges streamed item snapshots by stable id and does not lose events arriving during tail-page loading', async () => {
     disposers.push(watchSessionEvents())
     let resolvePage!: (value: Awaited<ReturnType<SessionApi['getConversation']>>) => void
@@ -178,14 +188,16 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     await waitFor(() => expect(useSessions.getState().drafts[draftId(key)]!.text).toBe(''))
     expect(api.saveDraft).toHaveBeenLastCalledWith(expect.objectContaining({ draft: expect.objectContaining({ text: '' }) }))
   })
-  it('keeps Running input editable, sends no queued messages, and routes nonempty Needs Input text to replyWithText', async () => {
+  it('keeps Running input editable, sends native steer input, and routes Needs Input text to replyWithText', async () => {
     const sessionKey = { projectId: 'p', kind: 'session' as const, sessionId: 's' }
-    useSessions.setState({ summaries: { s: summary({ activity: 'running', status: 'running' }) }, drafts: { [draftId(sessionKey)]: { ...emptyDraft(), text: 'Later' } } })
+    useSessions.setState({ providers: [{ ...providers[0]!, capabilities: { ...providers[0]!.capabilities, inputWhileRunning: 'steer' } }], summaries: { s: summary({ activity: 'running', status: 'running' }) }, drafts: { [draftId(sessionKey)]: { ...emptyDraft(), text: 'Later' } } })
     render(<Composer draftKey={sessionKey} active />)
     const input = screen.getByRole('textbox', { name: '消息' })
     expect(input.hasAttribute('disabled')).toBe(false); fireEvent.keyDown(input, { key: 'Enter' })
-    expect(api.send).not.toHaveBeenCalled(); expect(screen.getByRole('button', { name: 'Stop' })).toBeTruthy()
+    await waitFor(() => expect(api.send).toHaveBeenCalledWith({ sessionId: 's', text: 'Later', contextItems: [] })); expect(screen.getByRole('button', { name: 'Stop' })).toBeTruthy()
+    await waitFor(() => expect(useSessions.getState().pending[draftId(sessionKey)]).toBe(false))
     act(() => useSessions.setState({ summaries: { s: summary({ activity: 'needs_input', status: 'needs_input' }) } }))
+    fireEvent.change(input, { target: { value: 'Later' } })
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
     await waitFor(() => expect(api.replyWithText).toHaveBeenCalledWith({ sessionId: 's', text: 'Later' }))
   })

@@ -23,6 +23,7 @@ interface ActiveTurn {
   answering: boolean
   startup?: Promise<void>
   stop?: Promise<void>
+  sending?: boolean
 }
 interface Entry {
   summary: SessionSummary
@@ -180,11 +181,41 @@ export class SessionService implements MainSessionPort {
     return { ...summary }
   }
 
-  send(sessionId: string, message: SessionMessage): void {
+  send(sessionId: string, message: SessionMessage): void | Promise<void> {
     const entry = this.entry(sessionId)
     this.validateMessage(message)
+    if (this.disposed || this.quitting || this.closing.has(entry.summary.projectId) || this.closed.has(entry.summary.projectId)) throw new Error('Project 正在关闭')
+    if (entry.turn && entry.summary.activity === 'running' && !entry.summary.stopping) {
+      const capability = this.provider(entry.summary.cli).capabilities.inputWhileRunning
+      if (capability === 'none') throw new Error('当前 CLI 不支持运行中发送')
+      if (entry.turn.sending) throw new Error('输入正在提交')
+      entry.turn.sending = true
+      const task = this.sendWhileRunning(entry, message)
+      this.background.add(task)
+      return task.finally(() => this.background.delete(task))
+    }
     this.ensureCanSubmit(entry)
     this.options.store.transaction(() => this.begin(entry, message))
+  }
+
+  private async sendWhileRunning(entry: Entry, message: SessionMessage): Promise<void> {
+    const turn = entry.turn
+    if (!turn) throw new Error('CLI 运行时尚未就绪')
+    try {
+      await turn.startup
+      const runtime = entry.runtime
+      if (!runtime || entry.turn !== turn || entry.summary.stopping || runtime.state !== 'running') throw new Error('当前一轮已结束或正在停止，输入已保留')
+      const result = await runtime.sendUserInput({ text: message.text })
+      if (result.turnId !== turn.adapterId) throw new Error('CLI 返回了不同的回合，输入已保留')
+      this.options.store.transaction(() => {
+        // Native completion/Stop can arrive before the steering acknowledgement.
+        this.append(entry, { kind: 'user_message', text: message.text, contextItems: message.contextItems ?? [] }, turn.id)
+        entry.summary.lastUserMessageAt = this.now()
+        // Renderer clears its exact submitted snapshot after this acknowledgement
+        // and persists that change. Equal text can belong to a newly edited draft.
+        this.publish(entry)
+      })
+    } finally { turn.sending = false }
   }
 
   private begin(entry: Entry, message: SessionMessage, viewContext?: ViewContext): void {
@@ -809,8 +840,8 @@ export class SessionService implements MainSessionPort {
     this.options.summaryChanged?.({ session: { ...entry.summary }, project: this.getProjectState(entry.summary.projectId) })
   }
 
-  private append(entry: Entry, body: ItemBody): TranscriptItem {
-    const item = { ...body, id: this.newId(), sessionId: entry.summary.id, turnId: entry.turn?.id ?? null, sequence: entry.sequence++, at: this.now() } as TranscriptItem
+  private append(entry: Entry, body: ItemBody, turnId = entry.turn?.id ?? null): TranscriptItem {
+    const item = { ...body, id: this.newId(), sessionId: entry.summary.id, turnId, sequence: entry.sequence++, at: this.now() } as TranscriptItem
     this.writeItem(entry, item)
     return item
   }

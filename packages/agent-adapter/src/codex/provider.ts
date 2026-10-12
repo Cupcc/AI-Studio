@@ -15,7 +15,7 @@ import { CodexDriver, type CodexProviderOptions, type DriverDependencies } from 
 import { CODEX_PROTOCOL_VERSION, CodexConnection } from './connection.js';
 import { codexError } from './errors.js';
 
-export const CODEX_CAPABILITIES: ProviderCapabilities = Object.freeze({ nativeSessionIdTiming: 'on_create', inputWhileRunning: 'none',
+export const CODEX_CAPABILITIES: ProviderCapabilities = Object.freeze({ nativeSessionIdTiming: 'on_create', inputWhileRunning: 'steer',
   questionRequests: true, freeTextAnswers: { questions: true, approvals: false }, nativeTitle: true, runtimeRecovery: true });
 
 /** Injection seams for simulated transports and OS process tables; production defaults use the shared core. */

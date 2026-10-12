@@ -76,6 +76,35 @@ describe('Codex Provider lifecycle / FR-CHAT-002, FR-CHAT-003, AC-02', () => {
     ] });
   });
 
+  it.each(['completed', 'stopped'] as const)('retains steering acknowledgement when the native turn is %s first', async outcome => {
+    const h = setup(); const session = await h.session();
+    await h.start(session);
+    const turn = session.activeTurn!;
+    h.servers[0]!.handle('turn/steer', async () => {
+      if (outcome === 'completed') h.complete(session);
+      else await session.stop();
+      return { turnId: turn.nativeTurnId };
+    });
+    await expect(session.sendUserInput({ text: 'additional input' })).resolves.toEqual({ turnId: turn.turnId });
+    expect(session.state).toBe('idle');
+    expect(h.servers[0]!.received.filter(request => request.method === 'turn/start')).toHaveLength(1);
+  });
+
+  it('delivers running input through native turn/steer without opening another turn', async () => {
+    const h = setup(); const session = await h.session();
+    await h.start(session);
+    const nativeTurnId = session.activeTurn!.nativeTurnId!;
+    h.servers[0]!.handle('turn/steer', (params) => {
+      expect(params).toMatchObject({ threadId: session.nativeSessionId, expectedTurnId: nativeTurnId,
+        input: [{ type: 'text', text: 'continue with tests', text_elements: [] }] });
+      return { turnId: nativeTurnId };
+    });
+    expect(await session.sendUserInput({ text: 'continue with tests' })).toEqual({ turnId: session.activeTurn!.turnId });
+    expect(h.servers[0]!.received.filter((request) => request.method === 'turn/start')).toHaveLength(1);
+    expect(h.servers[0]!.received.filter((request) => request.method === 'turn/steer')).toHaveLength(1);
+    h.complete(session);
+  });
+
   it.each([
     ['unauthorized', 'auth_required'], ['usageLimitExceeded', 'quota_exceeded'], ['rateLimitExceeded', 'quota_exceeded'],
     [{ httpConnectionFailed: { httpStatusCode: 503 } }, 'network_error'], [{ httpConnectionFailed: { httpStatusCode: 401 } }, 'auth_required'], ['other', 'provider_error'],

@@ -7,7 +7,7 @@ import type { RuntimeHandle, RuntimeSpawnOptions } from '../core/runtime-process
 import type { ProcessLister } from '../core/process-probe.js';
 import type { IncomingRequest, JsonRpcNotification } from '../core/json-rpc.js';
 import { resolveTimeouts } from '../core/timeouts.js';
-import { withTimeout } from '../core/async.js';
+import { deferred, withTimeout, type Deferred } from '../core/async.js';
 import { CodexConnection } from './connection.js';
 import { codexError, turnError } from './errors.js';
 import { answerRequest, mapItem, mapRequest, nativeInput, type NativeInputRef } from './mapping.js';
@@ -41,6 +41,7 @@ export class CodexDriver implements SessionDriver {
   private desiredModel: string | undefined;
   private pendingTurn: string | undefined;
   private nativeTurn: string | undefined;
+  private nativeTurnReady: { turnId: string; deferred: Deferred<string> } | undefined;
   private actualModel: string | undefined;
   private readonly turnModels = new Map<string, string>();
   private readonly deferredNotifications: JsonRpcNotification[] = [];
@@ -151,6 +152,10 @@ export class CodexDriver implements SessionDriver {
     const connection = this.requireConnection();
     this.pendingTurn = turn.turnId;
     this.nativeTurn = undefined;
+    const nativeTurnReady = deferred<string>();
+    // Starting can fail without any steering caller waiting on this promise.
+    void nativeTurnReady.promise.catch(() => {});
+    this.nativeTurnReady = { turnId: turn.turnId, deferred: nativeTurnReady };
     this.deferredNotifications.length = 0;
     try {
       await this.tracker!.begin(turn.turnId, turn.signal);
@@ -166,10 +171,29 @@ export class CodexDriver implements SessionDriver {
       this.bindTurn(turn.turnId, response.turn.id);
       if (response.turn.status !== 'inProgress') this.end(turn.turnId, response.turn);
     } catch (error) {
+      nativeTurnReady.reject(error);
       throw codexError(error, 'turn/start');
     } finally {
       if (this.pendingTurn === turn.turnId) this.pendingTurn = undefined;
+      if (this.nativeTurnReady?.turnId === turn.turnId && !nativeTurnReady.settled) {
+        nativeTurnReady.reject(adapterError('invalid_state', 'Codex turn ended before it could accept steering input'));
+      }
     }
+  }
+
+  async steerTurn(turn: TurnContext, input: UserInput): Promise<void> {
+    const ready = this.nativeTurnReady;
+    const nativeId = this.nativeTurn && ready?.turnId === turn.turnId ? this.nativeTurn
+      : ready?.turnId === turn.turnId ? await withTimeout(() => ready.deferred.promise, this.timeouts.requestMs, 'Codex turn steering') : undefined;
+    if (!nativeId) throw adapterError('invalid_state', 'Codex has no active native turn to steer');
+    turn.signal.throwIfAborted();
+    // Completion/Stop aborts the turn, but a sent input still needs its native
+    // acknowledgement. The connection bounds this request by requestMs and
+    // rejects it when the runtime closes.
+    const response = await this.requireConnection().request('turn/steer', {
+      threadId: this.requireThread(), expectedTurnId: nativeId, input: nativeInput(input),
+    });
+    if (response.turnId !== nativeId) throw adapterError('protocol_error', 'Codex steering returned a different turn id');
   }
 
   async interruptTurn(stop: StopContext): Promise<void> {
@@ -282,6 +306,7 @@ export class CodexDriver implements SessionDriver {
     if (typeof nativeId !== 'string' || !nativeId) throw adapterError('protocol_error', 'Codex omitted the turn id');
     if (this.nativeTurn && this.nativeTurn !== nativeId) throw adapterError('protocol_error', 'Codex changed the active turn id');
     this.nativeTurn = nativeId;
+    if (this.nativeTurnReady?.turnId === turnId) this.nativeTurnReady.deferred.resolve(nativeId);
     this.sink.bindNativeTurnId(turnId, nativeId);
     const buffered = this.deferredNotifications.splice(0);
     for (const notification of buffered) this.notification(notification);

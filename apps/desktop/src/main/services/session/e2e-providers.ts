@@ -65,8 +65,11 @@ export function createE2eProviders(): AgentProvider[] {
         { id: cli === 'codex' ? 'e2e-codex' : 'e2e-claude', displayName: cli === 'codex' ? 'E2E Codex' : 'E2E Claude', isDefault: true },
         { id: 'e2e-alternate', displayName: 'E2E Alternate' }
       ],
-      capabilities: { nativeTitle: true },
+      capabilities: { nativeTitle: true, inputWhileRunning: cli === 'codex' ? 'steer' : 'none' },
       behavior: {
+        onSteer(_turn, input) {
+          if (input.text.includes('[e2e:steer-error]')) throw new Error('模拟追加失败，输入已保留')
+        },
         onStartTurn(turn, input, sink) {
           const run = { turn, sink, remaining: 0 }
           runs.set(turn.turnId, run)
