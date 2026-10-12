@@ -13,7 +13,7 @@ created: 2026-10-11
 
 - 状态：Q1～Q6 已确认（2026-10-11），v03 其余变更待人工评审 [在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)；任务保持 `verifying`。
 - 审阅依据：下方未决问题、[验收标准](#验收标准)与[原型说明](../../design/prototypes/README.md#studio-灰度交互原型-v03)。
-- Q1、Q2、Q3、Q6 已写入 [Project View spec](../../specs/project-view/spec.md)；Q4、Q5 记入[工程工具任务](../T20261009-context-tools/task.md#已确认事项)，起草 `specs/tools/spec.md` 时写入。整体采用后再更新 Shell Spec，并另建任务实现到桌面端。
+- Q1、Q2、Q3、Q6 已写入 [Project View spec](../../specs/project-view/spec.md)；Q4、Q5 已于 2026-10-12 写入 [工具规格 TOOLS-Q4](../../specs/tools/spec.md#12-已确认原则)，依据仍为本任务的 2026-10-11 确认。整体采用后再更新 Shell Spec，并另建任务实现到桌面端。
 
 ## 未决问题
 

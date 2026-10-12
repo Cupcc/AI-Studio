@@ -75,6 +75,7 @@ scripts/                       postinstall、afterPack、打包冒烟脚本
 - 数据库：`<userData>/studio.sqlite3`（开发模式 userData 为 `AI Developer Studio (Dev)`），通过 `core.database()` 获取。新增表 = `src/main/services/database/migrations/<YYYYMMDDNN>_<feature>_<name>.ts` + `migrations/index.ts` 一行。
 - 启动环境：Finder 启动的应用只有最小 PATH。需要启动 CLI 或 Shell 时使用 `await core.shellEnv.get()` 返回的 `env`（登录 + 交互 Shell 解析，10 秒超时后回退到启动环境，`source` 字段标明来源）。
 - PTY：只在主进程 `services/` 中创建；node-pty 需懒加载并处理加载失败（参考 `services/pty/pty-smoke.ts`）。
+- 工程工具的后续实现遵循 [工具规格](../../specs/tools/spec.md) 与 [DEC-10](<../../docs/07. Decisions.md#dec-10-工程工具实现原则>)：Project 服务持有 PTY / 输出及 Browser 实例，Renderer 隐藏 / 卸载只解除显示订阅；文件读取、Git 查询和网页权限经限定 IPC 管理。本轮仅更新文档，当前仍为工具占位内容及 PTY 冒烟。
 - 启动参数：`--studio-user-data-dir=<abs>` 用于测试隔离数据；`--studio-smoke-output=<abs>` 运行冒烟并退出。
 - Adapter 为 ESM workspace 包；Electron 主进程构建当前为 CJS，包的 `exports` 同时提供 `import` 与 `default` 条件，供支持同步 ESM require 的 Node / Electron 加载。新增公共子路径需一并保留这两个条件，E2E 启动门禁覆盖实际构建产物。
 - Session：`sessionCore` 迁移登记后创建 `createSessionFeature`，注册 Project 的主进程 SessionPort；Renderer 在 `createRoot` 前一次调用 `installSessionIntegration()`。退出前完成草稿 / 壳层 flush、Session 停止与 Runtime 释放；Renderer 确认路径先 flush，原生确认路径先 Stop 再 flush。最终统一等待功能与 IPC 清理后关闭数据库。

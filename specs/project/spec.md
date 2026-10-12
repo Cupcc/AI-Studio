@@ -55,7 +55,7 @@
   - New Chat 草稿、Default CLI 的取值与设置规则、CLI 菜单 → `specs/chat/spec.md`。
   - 左侧导航的内部行为（Project Views 列表、Session History、折叠）→ `specs/navigation/spec.md`。
   - Project View 的内容、Conversation 列的内部行为与 Preview → `specs/project-view/spec.md`（后续 task）。
-  - Files / Diff / Browser / Terminal 的内容 → `specs/tools/spec.md`（后续 task）。
+  - Files / Diff / Browser / Terminal 的内容与资源生命周期 → [tools spec](../tools/spec.md)；工具内容待实现。
   - 色值、字体、图标等视觉参数（Visual Direction 第 1 节）。
 - V1 范围外（文档未要求，本 spec 不设计）：Tab 拖拽排序与拖出窗口（PROJ-Q10）、多窗口（PROJ-Q16）、Project 重命名与目录迁移（PROJ-Q5）。
 
@@ -383,6 +383,7 @@ Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级�
 
 - project-view 读取 `ui_state.main_canvas` 中 `view` 分支，写入左列 `conversation`、`view_right_area`；使用 `view_conversation_width`。
 - tools 读取 `sidebar_open`、`view_right_area`、`last_tool`、`sidebar_width`，写入 `last_tool`；右侧边栏容器（开关、图标切换、宽度拖拽）由本 task 提供，工具内容为占位（task 范围）。
+- 工具实例与缓存按 [tools spec](../tools/spec.md#4-状态与接口) 管理；壳层隐藏 / 卸载内容时不能销毁用户 PTY 或丢失输出状态，Project 的可信关闭流程负责调用工具清理。壳层不持有历史补丁或网页权限（DEC-10，2026-10-12 确认）。
 - 两者都通过本模块的 `updateUiState(project_id, patch)` 写入，由本模块统一落盘（3.3.4）；不得各自存储同一事实。
 
 ### 5.6 事件小结

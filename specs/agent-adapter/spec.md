@@ -36,7 +36,7 @@
   - 产品注意力状态：Running / Needs Input / Error / Completed Unread / 无状态的显示与清除，“正在查看”判定，Project 注意力汇总。
   - Session 排序、标题生成与 Rename、对话记录与 Session 元数据的持久化（SQLite）。原生会话 ID 由本模块以事件报告，持久化由上层负责。
   - IPC、UI、“Worked for … · Done”的文案与格式（本模块只提供时长）。
-  - 文件变更归因与 Diff（04 第 1 节第 13 项）、Project View Context 注入（04 第 1 节第 10 项）。
+  - 文件变更归因与 Diff（04 第 1 节第 13 项；显示与持久化见 [tools spec](../tools/spec.md#fr-tool-002-diff)）、Project View Context 注入（04 第 1 节第 10 项）。后续原生补丁接缝须保留 Thread / Turn 与完成状态，区分聚合更新和缺失能力；不以工作区前后差集伪造原生记录。DEC-10（2026-10-12 确认）不表示这些事件已接入或真实覆盖已验证。
   - Error 卡片“重试”的编排（S-Q2）：本模块只保证“恢复后再发送”是一条干净路径（第 3.3 节）。
 
 ## 3. 行为细则

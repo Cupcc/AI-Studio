@@ -15,6 +15,7 @@ AI Developer Studio V1.0 的设计工作区，用于保存设计资料、参考�
 | [Functional Requirements](<../docs/02. Functional Requirements.md>) | 功能行为与稳定的 FR 编号 |
 | [UX Specification](<../docs/03. UX Specification.md>) | 页面结构、交互规则与视觉约束 |
 | [Acceptance Criteria](<../docs/05. Acceptance Criteria.md>) | 核心场景与 FR ↔ AC 追踪 |
+| [Context 工具规格](../specs/tools/spec.md) | 四工具内容、加载 / 异常、生命周期与状态边界；规格状态见该文件 |
 
 设计资料引用这些规格。涉及功能或交互行为的调整，应同步更新负责该主题的规格文档。
 

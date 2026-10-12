@@ -1,6 +1,6 @@
 # 工程工具参考与验证边界
 
-调研日期：2026-10-10。对应 FR-TOOL-002、FR-TOOL-004、04 第 1 节第 13 项。产品选择以 [DEC-08、DEC-09](<../../docs/07. Decisions.md>) 及负责需求为准；本文记录公开资料，不代表本项目实现验证通过。
+调研日期：2026-10-10；四项工具补充调研于 2026-10-12。对应 FR-TOOL-001～004、04 第 1 节第 13 项。产品与技术选择以 [DEC-08～10](<../../docs/07. Decisions.md>) 及负责需求为准；本文记录公开资料，不代表本项目实现验证通过。
 
 ## 1. ChatGPT Desktop 公开行为
 
@@ -33,3 +33,29 @@
 - 保存的轮次补丁能否在重启后恢复，以及后续工作区修改是否不影响历史查看。
 
 无可用原生数据时使用 FR-TOOL-002 的降级行为；不借用 Project Diff 伪造本轮结果。本次未调用真实模型、未执行应用测试。
+
+## 4. 四项工具补充调研（2026-10-12）
+
+### 4.1 ChatGPT Desktop 与 Claude Desktop
+
+ChatGPT 的 [Browser 官方文档](https://learn.chatgpt.com/docs/browser) 说明用户与 Agent 可以共享本地网页视图，并通过页面标注回到对话；内嵌 Browser 的 profile 与日常浏览器分离。[本地环境文档](https://learn.chatgpt.com/docs/environments/local-environment) 描述当前 checkout 的 Diff 和行内评论、Git 操作。与本项目有关的实现启发是“共享页面、单独控制权限”和“明确 Diff 所属工作区”，内部嵌入组件与历史 Diff 算法仍未公开。
+
+[Claude Desktop Code 文档](https://code.claude.com/docs/en/desktop) 公开了会话中的文件、Diff、Browser 和多终端面板；Diff 使用文件列表和单文件内容，可批量提交逐行评论；Browser 可通过 `.claude/launch.json` 配置开发服务器并自动验证页面。文件编辑器在磁盘内容变化时提供冲突反馈。其工具按 Session 组织、自动打开预览等行为与本项目 Project 级资源及用户主动控制不同，不能照搬。
+
+### 4.2 开源源码与组件
+
+| 参考 | 本轮确认的实现方式 | 本项目采用 / 验证边界 |
+|---|---|---|
+| [VS Code ExplorerService](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/files/browser/explorerService.ts) | ExplorerModel 持有树状态；文件事件通过 scheduler 合并后刷新受影响内容，聚焦补扫 | 采用惰性加载与事件刷新；展开 / 选择状态独立于刷新 |
+| [GitHub Desktop diff.ts](https://github.com/desktop/desktop/blob/development/app/src/lib/git/diff.ts) | 已跟踪文件比较 HEAD；新增 / 未跟踪文件使用 `--no-index` 与空文件比较，差异退出码 1 可为成功；关闭外部 diff 和颜色，使用机器格式 | 项目 Diff 必须另行发现未跟踪文件。该实现重命名分支有 index 基线限制，不能整段照搬；本项目仍须遵守 HEAD 最终差异 |
+| [Void 代码指南](https://github.com/voideditor/void/blob/main/VOID_CODEBASE_GUIDE.md) | URI 对应 text model；DiffZone / DiffArea 支持编辑期间刷新和取消 | 可参考显示模型；本项目外部 CLI 原生 patch 不等同客户端自己掌握完整编辑历史。仓库已归档，作为历史参考 |
+| [Electron WebContentsView](https://www.electronjs.org/docs/latest/api/web-contents-view)、[webview 提示](https://www.electronjs.org/docs/latest/api/webview-tag) | 主进程持有独立 webContents / bounds；官方建议新实现考虑 WebContentsView 等替代 `<webview>` | 保留已选 WebContentsView；实例、权限和布局由主进程管理 |
+| [Wave Terminal](https://github.com/wavetermdev/waveterm) | tree API 确认终端封装、controller、shell 执行和 WebView 的代码入口 | 原始文件抓取超时，未完成实现核查；不作为进程 / 输出恢复正确性的证据 |
+
+开源项目代码复用仍需逐项核对许可证。上表描述源码 / 文档线索，不表示依赖已接入或本地能力已通过验证。
+
+## 5. 本项目采用与确认
+
+用户于 2026-10-12 回复「accept above suggetions, update all related docs」，接受保留工具技术栈、文件树惰性加载与文件刷新、资源独立于面板、历史 Diff 不使用当前文件伪造原文等建议。采用原则由 [DEC-10](<../../docs/07. Decisions.md#dec-10-工程工具实现原则>) 记录，具体行为归 [工具规格](../../specs/tools/spec.md)，不在调研记录重复维护需求。
+
+规格定稿仍需处理 Browser 扩展范围；原生 patch 覆盖、Monaco 历史显示、PTY 输出恢复和 WebContentsView 隔离必须验证。仅有历史 patch 时直接展示保存补丁；PTY 与屏幕状态由服务持有并可重新附着；这两项是本轮建议特别要求避免的数据失真和生命周期缺口。

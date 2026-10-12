@@ -42,7 +42,7 @@
 - 不负责：
   - 发送、答复、Stop、切换模型之后的 Session 状态变化：见 [specs/session/spec.md](../session/spec.md) 第 4.1 节。
   - 草稿的创建与 CLI 选择：见 [specs/chat/spec.md](../chat/spec.md)。
-  - 从 Files 添加文件到上下文（FR-TOOL-001，context-tools task）；当前 View 作为上下文的注入方式（04 第 1 节第 10 项，Project View task）。本轮只提供入口与标签位。
+  - 从 Files 添加文件到上下文（FR-TOOL-001，[tools spec](../tools/spec.md#fr-tool-001-files)）；当前 View 作为上下文的注入方式（04 第 1 节第 10 项，Project View task）。本轮只提供入口与标签位。Files 的查看动作不自动添加标签；显式添加面向当前 Project 的 Session / 草稿，沿用本模块发送通道（DEC-10，2026-10-12 确认）。
   - FR-INPUT-001 中“后续 CLI 支持的其他必要控制”（如推理强度）：本轮不做。
 
 ## 3. 行为细则

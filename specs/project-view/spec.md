@@ -55,7 +55,7 @@ PV-Q8～PV-Q12 已采纳建议并移至“已确认”（2026-10-11）。
   - Project 的打开、Tab、`ui_state` 持久化、左右区域尺寸及 Project 间隔离 → [Project spec](../project/spec.md)。
   - Session 生命周期、Conversation 内容、状态提醒、CLI Runtime、首条消息创建 → [Session spec](../session/spec.md)、[Chat spec](../chat/spec.md)、[Agent Adapter spec](../agent-adapter/spec.md)。
   - 输入区的通用布局、Model Selector、Send / Stop → [Input spec](../input/spec.md)。本模块只提供 View Context 标签和创建参数。
-  - Files、Diff、Browser、Terminal 的内容 → `specs/tools/spec.md`（后续任务）；Project View Mode 下它们只复用右侧区域切换契约。
+  - Files、Diff、Browser、Terminal 的内容 → [tools spec](../tools/spec.md)；Project View Mode 下它们复用右侧区域切换契约，切换内容不释放工具的 Project 级资源（DEC-10，2026-10-12 确认）。工具内容尚未实现。
   - 自定义 View 的创建入口和自由 HTML / JavaScript 渲染。自定义 View 为 P1；自由 HTML 按 DEC-05 推迟到后续方案。
 
 ## 3. 行为细则
