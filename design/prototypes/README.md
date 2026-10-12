@@ -25,6 +25,7 @@
 | Studio 灰度交互原型 | v01 | 已确认（2026-10-09），保留作历史依据；Conversation 部分由 v02 替代 | [在线原型](https://claude.ai/artifact/ANF4XoboMHvZjzn4tRT17c)；源文件 [studio-prototype-v01.html](studio-prototype-v01.html) + [studio-prototype-v01/](studio-prototype-v01/) | 线框图 v02；[Shell Spec v01](../components/shell-spec-v01.md)；AC-01 ~ AC-07 |
 | Studio 灰度交互原型 | v02 | 已确认（2026-10-10） | [在线原型](https://claude.ai/artifact/7i4ULjj3vEo16mqqXYm5E1)；源文件 [studio-prototype-v02.html](studio-prototype-v02.html) + [studio-prototype-v02/](studio-prototype-v02/) | v01；[对照 ChatGPT / Claude 的候选调整](../../tasks/T20261010-conversation-layout/research.md) A1、A2、B1；FR-SESSION-001 |
 | Studio 灰度交互原型 | v03 | 探索中：Q1～Q6 已确认（2026-10-11），其余变更待评审 | [在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)；源文件 [studio-prototype-v03.html](studio-prototype-v03.html) + [studio-prototype-v03/](studio-prototype-v03/) | v02；[Project View spec](../../specs/project-view/spec.md) §4.2～4.4；FR-TOOL-002、FR-TOOL-004；[T20261011-prototype-v03](../../tasks/T20261011-prototype-v03/task.md) |
+| Studio 灰度交互原型 | v04 | 探索中：外观候选“统一毛玻璃”，待评审 | 在线原型待发布；源文件 [studio-prototype-v04.html](studio-prototype-v04.html) + [studio-prototype-v04/](studio-prototype-v04/) | v03；用户 2026-10-11～12 对话要求；[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md) |
 
 ### Studio 灰度交互原型 v01
 
@@ -71,3 +72,18 @@
 - **演示控制**：顶部“v03 变更”按 Project View / Diff / Terminal 分组，提供跳转、组件清单、当前 View 的 Knowledge / Definition（含大小与节点数）和 Preview 写入模拟；原 v02 的“对比 v01”已移除。
 - **未实现**：View Definition 的覆盖文件只在 Architecture 拆分示例中出现；Agent 对其他 View 的修改只更新时间，不改变内容；Browser、Files 行为同 v02；Terminal 命令为模拟输出。
 - **与 spec 的关系**：原型把绑定路径直接写在组件的 `bind` 属性上，spec §4.1 中 `ViewDefinition.bindings` 的形状可据此细化；校验规则只示意未知组件、禁止属性和 HTML / 脚本 / 网络地址值，以 spec 为准。
+
+### Studio 灰度交互原型 v04
+
+v03 的副本，只换外观，用于和 v03 的白色原样式并排对比（[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md)）。布局、交互、数据与演示场景同 v03，上节说明继续适用；两份 HTML 的差异只在样式表末尾的 `.skin-glass` 一节及版本标识。
+
+- **变更**（待评审）：外观“统一毛玻璃”，参考 ChatGPT Desktop 的侧边栏。
+  - 整个窗口是同一种毛玻璃，透出窗口后方的桌面并模糊，颜色随壁纸变化。顶栏、左侧导航和内容区四周的 8px 边距直接在玻璃上。
+  - Conversation、右侧区域 / 边栏和启动页是叠在玻璃上的一层更浅的磨砂（圆角），浓淡分通透 / 适中 / 柔和三档，默认适中。
+  - 消息气泡、代码块、表格、输入框、View 组件和工具面板是半透明白色面板；分隔线、Hover、选中和浅色底是半透明叠色。
+  - Project Tab 改为胶囊形（高 32 不变），当前 Tab 为浅色凸起胶囊；菜单、对话框和演示控制面板是模糊背景的毛玻璃。
+  - 文字改为中性灰，次要文字加深一档，玻璃上的对比度不低于 5.2:1。
+- **与已确认基线的差异**：整体底色不再是白色（[Product Definition](<../../docs/01. Product Definition.md>) 第 8 章原则 23、[Visual Direction](../visual-direction.md) 第 2 节）；Project Tab 形状（[Shell Spec v02](../components/shell-spec-v02.md) 第 3 节）；内容区边距，1024 宽度时 Conversation 由 375 变为 367，仍不小于 360（Shell Spec v02 第 2 节）；灰色板由暖中性灰改为中性灰（Visual Direction 第 1 节）。模糊半径、透明度与色值是原型取值，不是最终视觉参数。
+- **运行方式**：同 v01；本地查看时打开 `studio-prototype-v04.html`，与 `studio-prototype-v03.html` 对比。
+- **演示控制**：顶部“v04 变更”说明外观并提供内容层浓淡与示例壁纸 A / B；其下为沿用的 v03 变更与验收场景。
+- **未实现**：浏览器中没有真实桌面，原型以示例壁纸代替窗口后方的内容，并把模糊后的壁纸画成一层静态背景；真实的跟随桌面与其他窗口变化、窗口失焦时的变暗需在桌面端用 macOS 原生 vibrancy 实现。
