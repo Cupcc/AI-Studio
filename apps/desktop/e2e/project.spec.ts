@@ -10,6 +10,12 @@ async function launch() {
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
+  // Geometry below uses the default glass theme, independent of the host setting.
+  await app.evaluate(({ nativeTheme }) => {
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => false })
+    nativeTheme.emit('updated')
+  })
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass')
 }
 async function pickDirectory(path: string, expectedError?: string) {
   // Replace only the native chooser; validation, identity, IPC and UI remain real.

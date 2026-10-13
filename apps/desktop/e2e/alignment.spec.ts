@@ -35,7 +35,12 @@ async function launch() {
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
-  await app.evaluate(({ BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; win.show(); win.focus() })
+  await app.evaluate(({ BrowserWindow, nativeTheme }) => {
+    const win = BrowserWindow.getAllWindows()[0]!; win.show(); win.focus()
+    // Layout fixtures select the theme independently of host accessibility settings.
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => false })
+    nativeTheme.emit('updated')
+  })
 }
 async function openProject(name: string) {
   const path = join(dir, name); mkdirSync(path)

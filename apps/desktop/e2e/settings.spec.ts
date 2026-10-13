@@ -17,6 +17,8 @@ async function launch() {
   await expect(page.getByTestId('topbar')).toBeVisible()
   await app.evaluate(({ BrowserWindow, nativeTheme }) => {
     const win = BrowserWindow.getAllWindows()[0]!; win.setContentSize(1280, 800); win.show(); win.focus()
+    // CI runners may enable Reduce transparency; each test starts with it off.
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => false })
     const state = globalThis as { studioSystemDark?: boolean }
     Object.defineProperty(nativeTheme, 'shouldUseDarkColors', { configurable: true, get: () => nativeTheme.themeSource === 'dark' || (nativeTheme.themeSource === 'system' && state.studioSystemDark === true) })
     nativeTheme.emit('updated')

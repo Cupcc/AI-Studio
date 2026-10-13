@@ -36,3 +36,6 @@ created: 2026-10-12
 - 2026-10-13 基础检查：文档新增链接问题 0（历史 4 项）；类型检查、脚本 36、Adapter 184、desktop 203 项测试通过。最终功能基线 `bdf4e80` 的独立评审所覆盖 10 个文件与 `19cb08b` 完全相同（`git diff` 无输出），沿用既有独立结论。完整 Electron 回归与 Main 界面操作正在执行；远端 CI、归档与清理完成后收尾。
 
 - 2026-10-13 完整 Electron 回归 37 / 37 通过；Main 已完成模拟 Codex Running 成功追加、拒绝保留草稿及 Stop 界面操作，并查看三张截图。自检证据见 [acceptance.md](acceptance.md#main-agent-集成自检2026-10-13)。待推送、CI 与工作线清理。
+
+- 2026-10-13：快进并普通推送 `edbc3ae` 到 main；删除 6 个其他本地分支、2 个附加 worktree 及空父目录，远端只有 main。旧设置分支代码已核对并完整整合；原分支 / stash 历史备份于本地 git-ignored `.runtime/git-cleanup/pre-cleanup-20261013.bundle`，已有 stash 保留作恢复。
+- 首轮 [CI 38324962723](https://github.com/Cupcc/AI-Studio/actions/runs/38324962723) 的基础检查通过，Electron 为 29 / 37；8 个失败均与预期 glass、实际 solid 及其几何 / 颜色差异有关。`appearanceOf` 在系统降低透明度开启时正确降级，三个测试文件未统一关闭系统 fixture；补齐 `nativeTheme.prefersReducedTransparency=false` 并发出 updated，专门的降低透明度场景仍在测试中开启 / 关闭。不修改产品代码或真实系统设置。等待复验及新 CI。
