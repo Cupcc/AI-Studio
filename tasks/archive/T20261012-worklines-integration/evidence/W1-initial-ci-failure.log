@@ -1,0 +1,266 @@
+macOS arm64 checks	Electron E2E and native smoke	﻿2026-10-13T00:01:11.4717300Z ##[group]Run pnpm --filter @ai-studio/desktop run test:e2e:built
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:11.4718460Z ^[[36;1mpnpm --filter @ai-studio/desktop run test:e2e:built^[[0m
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:11.4850140Z shell: /bin/bash -e {0}
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:11.4850420Z env:
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:11.4850670Z   CI: true
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:11.4850940Z   HUSKY: 0
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:11.4851210Z   PNPM_HOME: /Users/runner/setup-pnpm/node_modules/.bin
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:11.4851550Z ##[endgroup]
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:11.6351760Z $ playwright test
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:12.5374320Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:12.5375000Z Running 37 tests using 1 worker
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:12.5375670Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:22.9462650Z   ✘   1 e2e/alignment.spec.ts:134:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (9.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:30.1307290Z   ✘   2 e2e/alignment.spec.ts:149:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (6.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:37.9102370Z   ✘   3 e2e/alignment.spec.ts:162:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (7.0s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:45.5036910Z   ✓   4 e2e/alignment.spec.ts:134:5 › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (6.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:49.3954290Z   ✓   5 e2e/alignment.spec.ts:149:5 › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (3.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:53.0367480Z   ✓   6 e2e/alignment.spec.ts:162:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (3.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:01:57.2826090Z   ✓   7 e2e/alignment.spec.ts:173:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (4.2s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:02.1158500Z   ✓   8 e2e/alignment.spec.ts:191:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (4.8s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:07.3363990Z   ✓   9 e2e/alignment.spec.ts:202:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (5.2s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:08.0552640Z   ✓  10 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (45ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:08.1341220Z   ✓  11 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (68ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:08.1547020Z   ✓  12 e2e/app.spec.ts:78:5 › renderer has no Node.js, require or raw ipcRenderer (8ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:08.1716560Z   ✓  13 e2e/app.spec.ts:119:5 › typed preload API works and main validates input (17ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:08.7085290Z   ✓  14 e2e/app.spec.ts:140:5 › new windows and foreign navigation are denied (526ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:20.8089450Z   ✓  15 e2e/app.spec.ts:152:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (11.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:27.4511110Z   ✓  16 e2e/project-view.spec.ts:21:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (6.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:29.8807330Z   ✓  17 e2e/project-view.spec.ts:63:5 › removed View label sends without creating helpers, and each View has an independent draft (2.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:32.4324910Z   ✘  18 e2e/project.spec.ts:47:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (2.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:34.7759680Z   ✓  19 e2e/project.spec.ts:108:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (1.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:36.0204750Z   ✓  20 e2e/project.spec.ts:127:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (1.2s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:39.5108550Z   ✓  21 e2e/session.spec.ts:62:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (3.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:42.0093540Z   ✓  22 e2e/session.spec.ts:81:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser (2.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:43.8075140Z   ✓  23 e2e/session.spec.ts:116:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (1.8s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:47.5160990Z   ✓  24 e2e/session.spec.ts:130:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (3.7s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:49.9129610Z   ✓  25 e2e/session.spec.ts:144:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (2.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:53.7590180Z   ✓  26 e2e/session.spec.ts:166:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (3.8s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:56.6891250Z   ✓  27 e2e/session.spec.ts:191:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (2.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:02:58.5707870Z   ✓  28 e2e/session.spec.ts:209:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (1.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:01.6701000Z   ✓  29 e2e/session.spec.ts:221:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (3.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:04.3245050Z   ✓  30 e2e/session.spec.ts:221:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (2.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:08.7589550Z   ✓  31 e2e/session.spec.ts:255:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (4.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:14.6946330Z   ✘  32 e2e/settings.spec.ts:62:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode (5.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:17.1265410Z   ✓  33 e2e/settings.spec.ts:80:5 › FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one dialog; ×, Esc and outside close it (2.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:24.7136600Z   ✘  34 e2e/settings.spec.ts:107:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart (7.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:26.3428150Z   ✘  35 e2e/settings.spec.ts:164:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material (1.3s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:28.8564080Z   ✓  36 e2e/settings.spec.ts:193:5 › FR-SET-002 · AC-08: "Reduce transparency" shows solid with a note, and glass returns when it is off (2.2s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6296000Z   ✘  37 e2e/settings.spec.ts:208:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist (1.8s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6396750Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6497600Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6598800Z [ELIFECYCLE] Command failed with exit code 1.
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6599940Z   1) e2e/alignment.spec.ts:134:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6633760Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6637030Z     Error: expect(locator).toHaveAttribute(expected) failed
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6637380Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6637570Z     Locator:  locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6638710Z     Expected: "glass"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6639310Z     Received: "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6639730Z     Timeout:  5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6639840Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6639940Z     Call log:
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6640360Z       - Expect "toHaveAttribute" locator('html') with timeout 5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6640850Z       - waiting for locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6641540Z         14 × locator resolved to <html lang="en" data-theme="solid" data-scheme="light" data-glass-color="aurora">…</html>
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6642600Z            - unexpected value "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6642820Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6642830Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6642890Z       72 |   theme = next
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6645710Z       73 |   await page.evaluate((t) => (window.studio as unknown as { settings: SettingsApi }).settings.setTheme({ theme: t }), next)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6646560Z     > 74 |   await expect(page.locator('html')).toHaveAttribute('data-theme', next)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6647160Z          |                                      ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6647520Z       75 | }
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6648110Z       76 | /** Shell Spec v01 section 1 invariants for the visible Project workspace. */
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6649070Z       77 | async function assertLayout(state: string, kind: 'session' | 'session-sidebar' | 'view', size: { width: number; height: number }) {
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6649970Z         at useTheme (/Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/alignment.spec.ts:74:38)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6650860Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/alignment.spec.ts:132:31
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6651290Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6651890Z     Error Context: ../../.runtime/desktop-e2e/test-results/alignment-glass-appearance-1f5c9-ebar-tool-at-1024-1280-1440/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6652420Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6653360Z     Error Context: ../../.runtime/desktop-e2e/test-results/alignment-glass-appearance-1f5c9-ebar-tool-at-1024-1280-1440/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6653900Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6654810Z   2) e2e/alignment.spec.ts:149:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6655410Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6655740Z     Error: expect(locator).toHaveAttribute(expected) failed
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6655970Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6656110Z     Locator:  locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6656500Z     Expected: "glass"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6656840Z     Received: "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6657130Z     Timeout:  5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6657350Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6657480Z     Call log:
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6657900Z       - Expect "toHaveAttribute" locator('html') with timeout 5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6658470Z       - waiting for locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6659200Z         14 × locator resolved to <html lang="en" data-theme="solid" data-scheme="light" data-glass-color="aurora">…</html>
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6659890Z            - unexpected value "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6660060Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6660070Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6660230Z       72 |   theme = next
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6660900Z       73 |   await page.evaluate((t) => (window.studio as unknown as { settings: SettingsApi }).settings.setTheme({ theme: t }), next)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6661680Z     > 74 |   await expect(page.locator('html')).toHaveAttribute('data-theme', next)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6662210Z          |                                      ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6662530Z       75 | }
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6663050Z       76 | /** Shell Spec v01 section 1 invariants for the visible Project workspace. */
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6663810Z       77 | async function assertLayout(state: string, kind: 'session' | 'session-sidebar' | 'view', size: { width: number; height: number }) {
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6664520Z         at useTheme (/Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/alignment.spec.ts:74:38)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6665240Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/alignment.spec.ts:132:31
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6665610Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6666050Z     Error Context: ../../.runtime/desktop-e2e/test-results/alignment-glass-appearance-9c095--composer-at-1024-1280-1440/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6666520Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6666950Z     Error Context: ../../.runtime/desktop-e2e/test-results/alignment-glass-appearance-9c095--composer-at-1024-1280-1440/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6667360Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6668090Z   3) e2e/alignment.spec.ts:162:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6668830Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6669240Z     Error: expect(locator).toHaveAttribute(expected) failed
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6669500Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6669650Z     Locator:  locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6669940Z     Expected: "glass"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6670270Z     Received: "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6670560Z     Timeout:  5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6670660Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6670710Z     Call log:
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6671110Z       - Expect "toHaveAttribute" locator('html') with timeout 5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6671530Z       - waiting for locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6672210Z         14 × locator resolved to <html lang="en" data-theme="solid" data-scheme="light" data-glass-color="aurora">…</html>
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6672790Z            - unexpected value "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6672990Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6672990Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6673120Z       72 |   theme = next
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6673710Z       73 |   await page.evaluate((t) => (window.studio as unknown as { settings: SettingsApi }).settings.setTheme({ theme: t }), next)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6674390Z     > 74 |   await expect(page.locator('html')).toHaveAttribute('data-theme', next)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6674890Z          |                                      ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6675150Z       75 | }
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6675570Z       76 | /** Shell Spec v01 section 1 invariants for the visible Project workspace. */
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6676320Z       77 | async function assertLayout(state: string, kind: 'session' | 'session-sidebar' | 'view', size: { width: number; height: number }) {
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6677090Z         at useTheme (/Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/alignment.spec.ts:74:38)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6677980Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/alignment.spec.ts:132:31
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6678670Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6679210Z     Error Context: ../../.runtime/desktop-e2e/test-results/alignment-glass-appearance-2c428-cted-tool-at-1024-1280-1440/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6679690Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6680230Z     Error Context: ../../.runtime/desktop-e2e/test-results/alignment-glass-appearance-2c428-cted-tool-at-1024-1280-1440/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6680710Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6681240Z   4) e2e/project.spec.ts:47:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6681610Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6681860Z     Error: expect(received).toBe(expected) // Object.is equality
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6682120Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6682240Z     Expected: 8
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6682460Z     Received: 0
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6682540Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6683030Z       74 |   // 1024 − nav 248 − right minimum 400; the default glass appearance also leaves its 8px canvas gutter (Shell Spec v02 §12)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6683910Z       75 |   const gutter = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-gutter')))
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6684520Z     > 76 |   expect(gutter).toBe(8)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6684730Z          |                  ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6685170Z       77 |   expect(view1024.conversation).toBe(376 - gutter); expect(view1024.right).toBe(400)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6685810Z       78 |   await capture('view', 1280, 800); await capture('view', 1440, 900)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6686190Z       79 |   await page.getByRole('tab', { name: 'Beta' }).click()
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6686760Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/project.spec.ts:76:18
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6687100Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6687580Z     Error Context: ../../.runtime/desktop-e2e/test-results/project-FR-PROJ-001-003-FR-215e2--tools-layouts-and-relaunch/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6688050Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6688540Z   5) e2e/settings.spec.ts:62:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6689270Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6689480Z     Error: expect(locator).toHaveAttribute(expected) failed
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6689890Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6690010Z     Locator:  locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6690330Z     Expected: "glass"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6690540Z     Received: "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6690790Z     Timeout:  5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6690910Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6690960Z     Call log:
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6691220Z       - Expect "toHaveAttribute" locator('html') with timeout 5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6691510Z       - waiting for locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6692040Z         14 × locator resolved to <html lang="en" data-theme="solid" data-scheme="light" data-glass-color="aurora">…</html>
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6692460Z            - unexpected value "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6692590Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6692600Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6692650Z       61 |
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6693200Z       62 | test('FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode', async () => {
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6693780Z     > 63 |   await expect(html()).toHaveAttribute('data-theme', 'glass')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6694270Z          |                        ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6694820Z       64 |   expect(await app.evaluate(({ nativeTheme }) => nativeTheme.themeSource)).toBe('system')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6695380Z       65 |   await expect(html()).toHaveAttribute('data-scheme', 'light')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6696440Z       66 |   await expect(html()).toHaveAttribute('data-glass-color', 'aurora')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6697080Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/settings.spec.ts:63:24
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6697360Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6697920Z     Error Context: ../../.runtime/desktop-e2e/test-results/settings-FR-SET-002-·-AC-0-da8fd-r-following-the-system-mode/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6698320Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6698780Z   6) e2e/settings.spec.ts:107:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6699210Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6699470Z     Error: expect(locator).toHaveAttribute(expected) failed
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6699670Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6699730Z     Locator:  locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6700030Z     Expected: "glass"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6700300Z     Received: "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6700510Z     Timeout:  5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6700690Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6700850Z     Call log:
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6701130Z       - Expect "toHaveAttribute" locator('html') with timeout 5000ms
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6701490Z       - waiting for locator('html')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6702200Z         14 × locator resolved to <html lang="en" data-theme="solid" data-scheme="light" data-glass-color="aurora">…</html>
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6702700Z            - unexpected value "solid"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6702890Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6702890Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6704040Z       130 |   await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6704790Z       131 |   await themeRadio('毛玻璃').click()
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6705330Z     > 132 |   await expect(html()).toHaveAttribute('data-theme', 'glass')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6705700Z           |                        ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6706120Z       133 |   await expect.poll(windowBackground).toBe(TRANSPARENT)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6706460Z       134 | })
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6706610Z       135 |
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6707540Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/settings.spec.ts:132:24
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6708090Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6708690Z     Error Context: ../../.runtime/desktop-e2e/test-results/settings-FR-SET-002-·-AC-0-b2b96--was-and-survives-a-restart/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6709100Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6709610Z   7) e2e/settings.spec.ts:164:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6710450Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6710700Z     Error: expect(received).toContain(expected) // indexOf
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6711200Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6711390Z     Expected substring: "rgb(169, 193, 242)"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6711700Z     Received string:    "none"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6711820Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6712000Z       170 |     await colorRadio(name).click()
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6712360Z       171 |     await expect(html()).toHaveAttribute('data-glass-color', color)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6713430Z     > 172 |     expect(await page.evaluate(() => getComputedStyle(document.body, '::before').backgroundImage)).toContain(`rgb(${rgb})`)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6714140Z           |                                                                                                    ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6714490Z       173 |     await page.keyboard.press('Escape')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6714850Z       174 |     contrast[color] = await mutedContrast()
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6715170Z       175 |     await snap(`glass-${color}-1280`)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6715700Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/settings.spec.ts:172:100
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6716040Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6716660Z     Error Context: ../../.runtime/desktop-e2e/test-results/settings-FR-SET-002-·-AC-0-cb282-le-none-leaves-the-material/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6717160Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6717820Z   8) e2e/settings.spec.ts:208:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6718240Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6718420Z     Error: expect(received).toBe(expected) // Object.is equality
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6718620Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6718790Z     Expected: "rgb(242, 242, 242)"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6719150Z     Received: "rgb(236, 236, 236)"
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6719280Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6719430Z       225 |   await setSystemDark(false)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6719870Z       226 |   await expect(html()).toHaveAttribute('data-scheme', 'dark')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6720410Z     > 227 |   expect(await page.evaluate(() => getComputedStyle(document.body).color)).toBe('rgb(242, 242, 242)')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6720960Z           |                                                                            ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6721400Z       228 |   const contrast: Record<string, number> = {}
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6721990Z       229 |   for (const name of ['极光', '无'] as const) {
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6722460Z       230 |     await colorRadio(name).click(); await page.keyboard.press('Escape')
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6723100Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/settings.spec.ts:227:76
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6723450Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6724020Z     Error Context: ../../.runtime/desktop-e2e/test-results/settings-FR-SET-002-·-AC-0-ae766-d-apply-at-once-and-persist/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6724510Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6724570Z   8 failed
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6725380Z     e2e/alignment.spec.ts:134:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6726510Z     e2e/alignment.spec.ts:149:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6727570Z     e2e/alignment.spec.ts:162:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6728470Z     e2e/project.spec.ts:47:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6729430Z     e2e/settings.spec.ts:62:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6730260Z     e2e/settings.spec.ts:107:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6731700Z     e2e/settings.spec.ts:164:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6732680Z Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6732870Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6733180Z   × "pnpm recursive run" failed in /Users/runner/work/AI-Studio/AI-Studio/
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6733540Z   │ apps/desktop
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6733680Z 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6734200Z     e2e/settings.spec.ts:208:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist 
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6734770Z   29 passed (2.3m)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-13T00:03:30.6751820Z ##[error]Process completed with exit code 1.

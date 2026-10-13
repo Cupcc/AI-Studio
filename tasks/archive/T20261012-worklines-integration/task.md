@@ -1,6 +1,6 @@
 ---
 id: T20261012-worklines-integration
-status: verifying
+status: done
 fr: [FR-INPUT-001, FR-SET-001, FR-SET-002]
 ac: [AC-02, AC-08]
 specs: [specs/input/spec.md, specs/agent-adapter/spec.md, specs/settings/spec.md]
@@ -11,7 +11,7 @@ created: 2026-10-12
 
 ## 目标与授权
 
-用户 2026-10-12 对话要求「整理工作，提交所有工作线，并合并到main」。按 [贡献指南](../../CONTRIBUTING.md)整理现存工作、验证、提交、快进合入并推送；不把提交或合入记为人工功能验收。
+用户 2026-10-12 对话要求「整理工作，提交所有工作线，并合并到main」。按 [贡献指南](../../../CONTRIBUTING.md)整理现存工作、验证、提交、快进合入并推送；不把提交或合入记为人工功能验收。
 
 ## 工作线与恢复
 
@@ -24,9 +24,9 @@ created: 2026-10-12
 ## 验收标准
 
 - [x] 所有现存修改按目标提交，重复内容与合并冲突处理完毕，工作区干净（贡献指南第 3、5 节）。
-- [x] Codex 运行中发送错误能传回 Renderer 并保留草稿，消息与原生回合关联；跨模块增量由独立 Review Agent 复核（FR-INPUT-001；[任务协议](../README.md#验收范围与独立性)）。
+- [x] Codex 运行中发送错误能传回 Renderer 并保留草稿，消息与原生回合关联；跨模块增量由独立 Review Agent 复核（FR-INPUT-001；[任务协议](../../README.md#验收范围与独立性)）。
 - [x] 最终基线完成文档检查、提交门禁、必要 Electron 回归与界面操作；设置任务已有免做项继续按 `T20261012-settings-theme` 的授权记录执行（随该工作线合入）。
-- [ ] main 只快进合入、普通推送，检查远端 CI；合入 worktree 收尾，相关任务和证据更新（贡献指南第 5 节）。
+- [x] main 只快进合入、普通推送，检查远端 CI；合入 worktree 收尾，相关任务和证据更新（贡献指南第 5 节）。
 
 ## 执行记录
 
@@ -39,3 +39,10 @@ created: 2026-10-12
 
 - 2026-10-13：快进并普通推送 `edbc3ae` 到 main；删除 6 个其他本地分支、2 个附加 worktree 及空父目录，远端只有 main。旧设置分支代码已核对并完整整合；原分支 / stash 历史备份于本地 git-ignored `.runtime/git-cleanup/pre-cleanup-20261013.bundle`，已有 stash 保留作恢复。
 - 首轮 [CI 38324962723](https://github.com/Cupcc/AI-Studio/actions/runs/38324962723) 的基础检查通过，Electron 为 29 / 37；8 个失败均与预期 glass、实际 solid 及其几何 / 颜色差异有关。`appearanceOf` 在系统降低透明度开启时正确降级，三个测试文件未统一关闭系统 fixture；补齐 `nativeTheme.prefersReducedTransparency=false` 并发出 updated，专门的降低透明度场景仍在测试中开启 / 关闭。不修改产品代码或真实系统设置。等待复验及新 CI。
+
+## Main Agent 收尾（2026-10-13）
+
+- Main Agent 核对全部验收标准完成；独立 Review Agent cli-review 的代码范围保持原样，结论继续有效；Main 的本轮界面操作与完整回归见验收记录。
+- 最终代码 / 测试基线 `a61d15e`，本地 37 / 37 Electron 与提交门禁通过；[CI 38325722763](https://github.com/Cupcc/AI-Studio/actions/runs/38325722763) 全部通过，含远端基础检查、Electron 回归、macOS arm64 打包与打包冒烟。首轮失败及修复证据均保留。
+- 已普通推送 main，无新增 merge commit、无 main 历史改写；6 个其他本地分支、2 个附加 worktree 和空父目录均已清理。远端仅 main；恢复备份及旧 stash 保留。本次收尾将任务整体移入 archive，修正相对链接，后续归档提交不改变已通过的产品 / 测试代码。
+- 状态 done 仅表示本次整合和清理交付完成。原任务中的真实 CLI 补验、线上原型发布、深色提案及人工功能验收仍由原记录跟踪，未因本次提交 / 清理扩展接受范围。

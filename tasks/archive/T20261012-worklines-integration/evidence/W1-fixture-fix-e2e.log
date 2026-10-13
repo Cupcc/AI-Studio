@@ -1,0 +1,88 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run test:e2e
+$ tsc -p tsconfig.build.json
+$ electron-vite build && playwright test
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 67 modules transformed.
+rendering chunks...
+out/main/index.js  160.00 kB
+✓ built in 257ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 9 modules transformed.
+rendering chunks...
+out/preload/index.js  5.78 kB
+✓ built in 13ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 537 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                                                0.85 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff      13.14 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-CB9ihrfo.woff      13.16 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2     14.71 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2     14.89 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff      22.10 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2     22.59 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff      23.88 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff      23.92 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2     24.18 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2     24.25 kB
+../../out/renderer/assets/index-B3ArLWct.css                                74.63 kB
+../../out/renderer/assets/index-Bu5ikEyH.js                              1,520.59 kB
+✓ built in 1.48s
+
+Running 37 tests using 1 worker
+
+(node:53431) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/alignment.spec.ts:139:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (5.4s)
+  ✓   2 e2e/alignment.spec.ts:154:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (2.7s)
+  ✓   3 e2e/alignment.spec.ts:167:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (2.9s)
+  ✓   4 e2e/alignment.spec.ts:139:5 › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (3.5s)
+  ✓   5 e2e/alignment.spec.ts:154:5 › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (1.9s)
+  ✓   6 e2e/alignment.spec.ts:167:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.2s)
+  ✓   7 e2e/alignment.spec.ts:178:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (3.3s)
+  ✓   8 e2e/alignment.spec.ts:196:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (3.5s)
+  ✓   9 e2e/alignment.spec.ts:207:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (4.1s)
+  ✓  10 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (65ms)
+  ✓  11 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (38ms)
+  ✓  12 e2e/app.spec.ts:78:5 › renderer has no Node.js, require or raw ipcRenderer (3ms)
+  ✓  13 e2e/app.spec.ts:119:5 › typed preload API works and main validates input (9ms)
+  ✓  14 e2e/app.spec.ts:140:5 › new windows and foreign navigation are denied (507ms)
+  ✓  15 e2e/app.spec.ts:152:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (1.7s)
+  ✓  16 e2e/project-view.spec.ts:21:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (4.7s)
+  ✓  17 e2e/project-view.spec.ts:63:5 › removed View label sends without creating helpers, and each View has an independent draft (1.8s)
+  ✓  18 e2e/project.spec.ts:53:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (4.0s)
+  ✓  19 e2e/project.spec.ts:114:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (994ms)
+  ✓  20 e2e/project.spec.ts:133:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (698ms)
+  ✓  21 e2e/session.spec.ts:62:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (3.5s)
+  ✓  22 e2e/session.spec.ts:81:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser (2.0s)
+  ✓  23 e2e/session.spec.ts:116:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (1.4s)
+  ✓  24 e2e/session.spec.ts:130:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (3.1s)
+  ✓  25 e2e/session.spec.ts:144:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (2.4s)
+  ✓  26 e2e/session.spec.ts:166:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (3.5s)
+  ✓  27 e2e/session.spec.ts:191:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (3.0s)
+  ✓  28 e2e/session.spec.ts:209:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (1.4s)
+  ✓  29 e2e/session.spec.ts:221:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (3.0s)
+  ✓  30 e2e/session.spec.ts:221:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (2.4s)
+  ✓  31 e2e/session.spec.ts:255:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (4.2s)
+  ✓  32 e2e/settings.spec.ts:64:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode (1.8s)
+  ✓  33 e2e/settings.spec.ts:82:5 › FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one dialog; ×, Esc and outside close it (1.3s)
+  ✓  34 e2e/settings.spec.ts:109:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart (1.6s)
+[settings] muted text contrast on light glass {
+  aurora: 5.231356187895973,
+  mint: 5.311580537141599,
+  sunset: 5.327427342966648,
+  haze: 5.394035157464956
+}
+  ✓  35 e2e/settings.spec.ts:166:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material (4.8s)
+  ✓  36 e2e/settings.spec.ts:195:5 › FR-SET-002 · AC-08: "Reduce transparency" shows solid with a note, and glass returns when it is off (1.0s)
+[settings] muted text contrast in dark {
+  'glass-极光': 7.161864337493318,
+  'glass-无': 4.780845517969554,
+  solid: 6.05631572140189
+}
+  ✓  37 e2e/settings.spec.ts:210:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist (2.6s)
+
+  37 passed (1.5m)

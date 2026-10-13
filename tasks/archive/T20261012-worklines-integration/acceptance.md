@@ -2,8 +2,8 @@
 
 ## 未覆盖与边界
 
-- 本记录仅负责 Codex Running 中发送的 Adapter、SessionService、Renderer store 与 Composer 跨模块独立技术评审；不代表整条工作线集成已完成。
-- 使用模拟 Provider / Codex JSON-RPC transport，不调用真实 CLI 或模型、不占用 Electron 窗口。实际 Electron 操作与截图由 Main Agent 验证；一般 Running 追加的真实兼容性及 Claude queue 路径继续由[原生能力对齐任务](../T20261011-native-cli-parity/task.md)跟踪。
+- 2026-10-12 独立评审部分仅负责 Codex Running 中发送的 Adapter、SessionService、Renderer store 与 Composer 跨模块独立技术评审；独立评审本身不代表整条工作线集成完成；本轮集成自检及收尾见末节。
+- 使用模拟 Provider / Codex JSON-RPC transport，不调用真实 CLI 或模型、不占用 Electron 窗口。实际 Electron 操作与截图由 Main Agent 验证；一般 Running 追加的真实兼容性及 Claude queue 路径继续由[原生能力对齐任务](../../T20261011-native-cli-parity/task.md)跟踪。
 - 人工产品验收沿用负责功能的任务记录；本次技术评审、提交或合并均不代表人工功能验收。
 
 ## AI 结论与运行环境
@@ -75,3 +75,13 @@ git diff --check: exit 0
 - 测试准备仅使用模拟 Provider、临时独立 userData / Project，并替换原生目录选择器返回该临时 Project；待验收发送、追加、失败及 Stop 均通过用户可见按钮和输入执行。未注入 Session 状态。
 
 设置任务免做项、一般 Running 追加的真实兼容性及 Claude queue 未覆盖范围仍由各原任务跟踪。集成提交和分支清理不代表新增人工功能验收。
+
+### CI 环境差异及 fixture 复验
+
+首轮 [CI 38324962723](https://github.com/Cupcc/AI-Studio/actions/runs/38324962723) 在 `edbc3ae` 的文档及基础检查通过；Electron 29 / 37，8 项失败见[日志](evidence/W1-initial-ci-failure.log)。下载的失败上下文在 settings 颜色 / 模式场景明确显示“系统已开启‘降低透明度’，当前显示为纯色外观”，证实 runner 系统状态与本地不同。
+
+Main 在 `a61d15e` 仅补齐 alignment / project / settings 测试的系统 fixture：默认模拟 `prefersReducedTransparency=false` 并发送 updated；专门的系统降低透明度场景仍执行开启、反馈及关闭恢复。产品源码、确认行为及上文独立评审的 10 个文件均不变。该提交门禁通过（类型检查、36 + 184 + 203 项），完整 Electron 复验 37 / 37 通过，见[复验日志](evidence/W1-fixture-fix-e2e.log)。远端复验由 [CI 38325722763](https://github.com/Cupcc/AI-Studio/actions/runs/38325722763) 执行。
+
+## 集成收尾结论（Main Agent，2026-10-13）
+
+整合与清理范围通过。最终代码 / 测试基线 `a61d15e` 的 [CI 38325722763](https://github.com/Cupcc/AI-Studio/actions/runs/38325722763) 全部通过，含文档、基础检查、37 项 Electron、macOS arm64 打包和打包冒烟。后续任务归档仅改变记录路径和文档；产品代码及既有独立评审范围不变。main 已推送、其他 6 个本地分支与 2 个附加 worktree 已删除；备份及旧 stash 保留。Main 核对完成条件后归档，不记为人工产品验收。
