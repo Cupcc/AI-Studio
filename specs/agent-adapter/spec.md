@@ -182,6 +182,17 @@
 6. Running / Stopping 中改模型先暂存，下一轮提交前调用 `Query.setModel`；空闲时立即设置。Provider 目录探测不发送消息，使用 `persistSession:false` 调用 `supportedModels()` 后关闭。Stop 前后按本轮后代身份取得退出证明；`still_queued` 若仍含本轮输入，或清理无法确认，走旧 Runtime 退出后原 ID 恢复。没有原生 ID 时不以新建代替恢复。
 7. 验证边界：27 项 Claude 模拟测试覆盖上述行为；本机 CLI `2.1.295` 的 executable / version / login 与模型目录探测通过，目录读取前后 transcript 文件集合无新增。真实成功流式、Rule / Skill、恢复、模型切换、命令 Stop / 继续被 session quota（`rate_limit` / `quota_exceeded`）阻断，没有通过。不得用模拟结果代替 AC-02 / AC-03 / AC-05 的真实验收。采样前已脱离的后代、外部 MCP 进程树与宿主崩溃清理仍未验证。
 
+### 3.13 工程工具接缝
+
+FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026-10-13 确认）。本节是接口准备，尚未实现或运行验证；逻辑契约以 [Tools §4.1、§4.2](../tools/spec.md#4-状态与接口) 为准。
+
+- 文件输入：Codex 已有 file → mention 映射，但桌面 Session 尚未转交 attachments；Claude 当前拒绝结构化附件。后续分别核对原生文件 / 文本引用方式并接通，覆盖普通发送和原生支持的运行中输入；不把当前 unsupported 固化为产品禁止，不静默丢弃引用或声称已发送。
+- 轮次数据：Codex 当前 fileChange 映射仅保留路径 / 类型，尚未转交 patch，未接入 turn/diff/updated。先验证锁定版本的聚合更新、完成状态、非 Git 和 Shell 修改覆盖，再输出带来源与原生身份的记录。Claude 独立核对同等数据及缺失原因，不假设两者一致。
+- 事件接收核对 Runtime 代次、Thread / Turn 归属及修订；Adapter 报告 unknown / empty / unavailable / failed 的依据，应用 Session 负责持久化与 App Turn 关联，Adapter 不读当前工作区伪造历史。
+- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。真实调用范围与预算另行确定，本轮只更新文档。
+
+本地审阅依据及官方接口来源见 [工程工具调研 §9](../../tasks/T20261009-context-tools/research.md#9-开发准备审阅2026-10-13)。
+
 ## 4. 状态与数据
 
 ### 4.1 Adapter 级 Session 状态

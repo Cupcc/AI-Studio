@@ -58,7 +58,7 @@ ChatGPT 的 [Browser 官方文档](https://learn.chatgpt.com/docs/browser) 说�
 
 用户于 2026-10-12 回复「accept above suggetions, update all related docs」，接受保留工具技术栈、文件树惰性加载与文件刷新、资源独立于面板、历史 Diff 不使用当前文件伪造原文等建议。采用原则由 [DEC-10](<../../docs/07. Decisions.md#dec-10-工程工具实现原则>) 记录，具体行为归 [工具规格](../../specs/tools/spec.md)，不在调研记录重复维护需求。
 
-规格定稿仍需处理 Browser 扩展范围；原生 patch 覆盖、Monaco 历史显示、PTY 输出恢复和 WebContentsView 隔离必须验证。仅有历史 patch 时直接展示保存补丁；PTY 与屏幕状态由服务持有并可重新附着；这两项是本轮建议特别要求避免的数据失真和生命周期缺口。
+Browser 首轮范围已按 2026-10-13 的 DEC-14 处理，扩展另行评估；原生 patch 覆盖、Monaco 历史显示、PTY 输出恢复和 WebContentsView 隔离仍必须验证。仅有历史 patch 时直接展示保存补丁；PTY 与屏幕状态由服务持有并可重新附着；这两项是建议中特别要求避免的数据失真和生命周期缺口。
 
 以下保留另一工作线的同期详细调研；其中“建议”是调研时的状态，当前采用结论见上节与工具规格。
 
@@ -112,4 +112,25 @@ Void 的公开代码说明其编辑状态以 URI 对应的 text model 为中心�
 
 以上结论是实现建议；尚未代表本项目代码已经实现，也未替代 AC-07 的应用交互验收。Claude Desktop 和 ChatGPT Desktop 的内部实现仍不可见，只引用其公开行为。
 
-未决问题：Browser 外站范围、权限和 profile 持久化由人决定，阻塞相应行为的规格定稿，不阻塞本次调研；历史 patch 的显示方式、PTY 输出恢复与关闭清理由 AI 在既有范围内设计并验证。未启动工具实现任务、未发送真实模型请求。
+本节调研时的 Browser 未决范围已于 2026-10-13 按工具规格 Q1、Q5、Q6 分别处理，当前依据见 DEC-14；历史建议不作为新的待确认入口。历史 patch、PTY 屏幕恢复与关闭接口仍待实现验证。
+
+## 9. 开发准备审阅（2026-10-13）
+
+只读代码基线 4de166a。用户随后回复「accept all, not dev, update all docs」，采用结论归 DEC-14、FR 与模块规格；本节保留观察和资料来源，不代表运行验证。
+
+| 观察 | 本地依据 | 影响 |
+|---|---|---|
+| 文件标签尚未转交 Provider | session-service.ts 的普通发送及运行中追加只构造 text；Codex mapping.ts 有 mention 映射，Claude provider.ts 对附件前置返回 unsupported | Files / Input / Session / Adapter 必须一并贯通，不能用标签显示作为验收 |
+| 轮次补丁未贯通 | Codex mapping.ts 的 fileChange 仅保留路径和类型；driver.ts 未接入 turn/diff/updated | 先准备原生事件、存储关联及缺失语义 |
+| 关闭只统计 Session | project/close-flow.ts 查询 Running / Needs Input，无用户 Terminal 计数 | 补齐终端确认和独立资源清理 |
+| PTY 只有基础冒烟 | main/services/pty/pty-smoke.ts | 不代表产品终端屏幕恢复、多实例或退出通过 |
+| agent-browser 不在本次 PATH | 执行 skills get core 返回 command not found | 正式 UI 验收前核对安装与 PATH；本次以网页读取核对官方资料 |
+
+核对的官方资料：
+
+- [Codex App Server](https://learn.chatgpt.com/docs/app-server)：turn/diff/updated 提供最新聚合 unified diff，fileChange 提供路径 / 类型 / patch；文档能力不代表锁定本地版本已验证。
+- [Electron WebContentsView](https://www.electronjs.org/docs/latest/api/web-contents-view) 与 [安全指南](https://www.electronjs.org/docs/latest/tutorial/security)：保持独立渲染上下文，并显式管理导航及权限；不通过关闭 webSecurity 解决预览问题。
+- [Electron session](https://www.electronjs.org/docs/latest/api/session)：分区可与应用主页面分离；采用内存分区、地址另行保存的设计仍需实际验证。
+- [xterm.js flow control](https://xtermjs.org/docs/guides/flowcontrol/)：需要输出流量控制及消费确认；文本缓存不能单独证明屏幕恢复正确。
+
+本轮未修改应用、未执行真实 CLI / PTY / Browser 功能测试，未取得新的额度或模型预算。未来场景由 task.md 维护。

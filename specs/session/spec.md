@@ -22,7 +22,7 @@
 | S-Q3 | 原生会话无法恢复时，可提供哪些原生恢复／分支入口？ | 报告原生错误；按原则 24 核对并接入 CLI 支持的恢复／分支操作，不再因旧文档未列入口而一律排除。显式新建或分支须显示为新会话，不得暗中替换原 Session ID（04 第 5 节第 7 条） | 否；技术能力核对，具体未接入项如实记录 | |
 | S-Q4 | 首条消息后原生 ID 尚未产生就失败（如 Claude 在 `system/init` 前退出），下一次发送是创建新的原生会话吗？ | 是。此时不存在原生会话，创建不违反 1:1；一旦绑定 ID 便不再新建。依据：01 第 7 节；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 3 节 Claude 初始化时序 | 否 | |
 | S-Q5 | 没有进行中的轮时 Runtime 退出，是否显示 Error？ | 不显示，只标记离线，下一次发送时恢复。FR-STATE-003 的 Error 用于提醒执行出错，空闲退出不影响用户工作；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节已验证进程终止后可按原 ID 恢复 | 否 | |
-| S-Q6 | 退出应用时有 Running / Needs Input Session：是否确认？关闭窗口是否等于退出？ | 退出前显示与关闭 Tab 相同语义的确认（受影响 Session 总数），确认后停止全部当前一轮并在有限时间内清理后退出。关闭最后一个窗口：建议按 macOS 惯例应用继续运行、Session 继续执行，从 Dock 重新打开窗口。依据：FR-PROJ-002 / D-10 类比；文档未规定 | 否（退出流程实现前需确认） | |
+| S-Q6（剩余部分） | 关闭最后一个窗口是否等于退出？ | 沿用现有建议：应用继续运行、Session 继续执行，从 Dock 重开窗口；本轮未单独确认此旧问题 | 否；沿用既有实现 | 退出时合并确认的部分已由 FR-PROJ-002 / DEC-14 于 2026-10-13 确认，见 §3.14 |
 | S-Q7 | 应用异常退出（崩溃、强制退出）时进行中的轮，下次启动如何显示？ | 显示 Error（“应用退出时本轮未完成”），以便发现中断的工作；经确认的正常退出则显示“已停止”行、无提醒。依据：FR-STATE-003；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节只有成功终态产生 Completed Unread | 否 | |
 | S-Q8 | Stop 进行中（等待清理完成）如何显示？ | 列表仍显示 Running；Stop 控件变为禁用的“停止中”；暂停新提交（04 第 5 节第 1 条）。不新增列表状态 | 否 | |
 | S-Q9 | 用户停止的轮是否显示完成行？ | 显示 `Worked for <时长> · 已停止`；失败的轮只显示 Error 卡片。依据：FR-STATE-007“或同等语义形式” | 否 | |
@@ -148,7 +148,7 @@
 1. 成功结束的轮在 Conversation 末尾追加完成行：`Worked for <时长> · Done`（FR-STATE-007；Shell Spec 第 6 节）。“Done”只表示这一轮结束。
 2. 时长：从用户提交到终态的墙钟时间，含等待用户答复的时间（建议，S-Q10）。格式建议：小于 1 分钟为 `48s`，小于 1 小时为 `2m 18s`，否则为 `1h 05m`。
 3. 用户停止的轮：建议显示同类行 `Worked for <时长> · 已停止`（S-Q9）。失败的轮以 Error 卡片结尾，不显示 Done。
-4. 本切片尚未接入文件记录与 Diff。后续由 context-tools 按 FR-TOOL-002 和 04 第 1 节第 13 项接入本轮原生记录及持久化补丁；完成行进入该轮“本轮变更”，不可用时明确降级到“查看项目变更”。既有 `files_changed` 预留字段的 null 仍表示未知，不得显示为 0；事件关联、历史显示与存储接缝见 [tools spec](../tools/spec.md#fr-tool-002-diff)。聚合通知按 Session / 原生 Thread / Turn 替换并保存最终记录；历史 patch 不由当前工作区重建原文（DEC-10，2026-10-12 确认）。具体 schema 待工具实现验证。
+4. 本切片尚未接入文件记录与 Diff。后续由 context-tools 按 FR-TOOL-002 和 04 第 1 节第 13 项接入本轮原生记录及持久化补丁；完成行进入该轮“本轮变更”，不可用时明确降级到“查看项目变更”。既有 `files_changed` 预留字段的 null 仍表示未知，不得显示为 0。关联、来源、可用状态、修订和存储契约由 [Tools §4.2](../tools/spec.md#42-轮次补丁契约) 负责；Session 将 Adapter 记录绑定到 App Turn 并持久化，Tools 消费保存内容，旧历史不按当前工作区回填。该契约为 2026-10-13 文档准备，代码与迁移尚未实现和验证。
 5. 完成行数据随对话记录持久化，重启后照常显示。
 
 ### 3.11 “正在查看”的定义
@@ -190,19 +190,21 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 
 ### 3.13 关闭 Project（FR-PROJ-002 关闭部分）
 
+2026-10-13 补充（DEC-14）：Project 关闭 / 应用退出的 Session 与 Terminal 合并确认由 [Project §3.2.4](../project/spec.md#324-关闭-tab-与确认) 负责；本模块仍只停止自身回合、释放 CLI Runtime，用户终端由 Tools 单独清理。下列 Session 规则不表示“没有活动 Session 就无需检查工具资源”。
+
 依据：FR-PROJ-002；UX 第 6 节 Project 关闭；D-10；Shell Spec 第 10 节关闭确认对话框；project-shell task“与 session-slice 的接口”。
 
-1. 壳层关闭 Tab 前向本模块查询该 Project 中处于 Running 或 Needs Input 的 Session 数量（Stop 进行中的计入 Running）。为 0 时直接关闭；大于 0 时由壳层显示确认对话框并显示该数量。
+1. 壳层关闭 Tab 前向本模块查询 Running / Needs Input Session 数量（Stop 进行中的计入 Running），并与 Tools 的未退出 Terminal 计数合并。是否确认与关闭由 Project §3.2.4 统一判断，不能仅凭 Session 数量为 0 直接关闭。
 2. 用户确认后，壳层调用本模块停止该 Project 全部活动 Session 的当前一轮，规则同第 3.12 节。CLI Conversation 与对话记录保留，重新打开 Project 后可继续（FR-PROJ-002）。
-3. 与负责关闭流程的 project spec §3.2.4 / PROJ-Q6 对齐：确认后由主进程停止，Tab 在停止成功后关闭；停止失败 / 超时保留 Tab，并显示重试与取消。Stop 成功、Project 关闭后释放该 Project 所有 Runtime（建议，待确认；04 第 5 节第 5 条要求有限等待）。
+3. 与 Project §3.2.4 对齐：本模块停止活动回合并释放所属 Runtime，报告成功 / 失败；Project 还须等待 Tools 清理结果才可移除 Tab。失败 / 超时保留 Tab、诊断与重试 / 取消入口（2026-10-13 确认，DEC-14；有限等待遵循 04 第 5 节）。
 4. 关闭后保留各 Session 的 Error、Completed Unread 标记，重新打开 Project 后照常显示（持久化，第 4.5 节）。Stop 兜底失败产生的 Error 同样在重新打开后可见。
 5. 关闭期间 Stop 尚未完成时用户重新打开该 Project：相关 Session 显示 Running 直至 Stop 完成。
 
 ### 3.14 应用退出与再次启动
 
-文档只规定了关闭 Tab（FR-PROJ-002），未规定退出应用。以下为建议（S-Q6、S-Q7）：
+退出时的合并确认已由 FR-PROJ-002 / DEC-14 确认；窗口后台行为与异常重启显示的旧提案仍按 S-Q6、S-Q7 标记，不因本次工具准备自动确认：
 
-1. 退出应用（Cmd+Q 等）时如存在 Running 或 Needs Input 的 Session，显示与关闭 Tab 相同语义的确认，说明受影响的 Session 总数；确认后停止全部当前一轮，在有限等待时间内完成清理后退出；对话保留。
+1. 退出应用（Cmd+Q 等）按 FR-PROJ-002 / Project §3.2.4 合并检查活动 Session 与未退出 Terminal；本模块只提供 Session 计数、停止和 Runtime 清理。确认后由主进程汇总清理结果，全部成功才退出；失败保留诊断与重试；对话保留（2026-10-13 确认，DEC-14）。
 2. 关闭窗口是否等同退出应用（macOS 惯例是应用继续运行）待确认，见 S-Q6。
 3. 正常退出与异常退出后的清理按 [04 第 5 节的责任边界](<../../docs/04. Technical Requirements.md#退出与异常清理责任边界>) 执行，由 Adapter 管理受管进程、核对退出并保留失败诊断；不承诺任何异常退出都即时零残留。异常后归属检查由 Adapter A-Q3 承接，不改变本节第 4、5 条的 Session 恢复行为（2026-10-11 确认，DEC-11）。
 4. 再次启动时：持久化记录中仍为 Running / Needs Input 的 Session（异常退出导致）一律结束该轮：活动状态置为无，未答复卡片失效。异常退出建议显示 Error（“应用退出时本轮未完成”），以便用户发现中断的工作；经确认的正常退出显示“已停止”完成行、无提醒（S-Q7）。
@@ -369,6 +371,8 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | Project 目录路径 | 作为 CLI cwd |
 
 ### 5.4 与 chat、input 模块
+
+FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../tools/spec.md#41-文件引用契约)（2026-10-13 确认准备方向）。Session 是输入转交与记录的负责方：普通发送及运行中追加 / 排队均须传递经主进程校验的引用，不能只将 contextItems 存入用户消息；不同 Provider 的转换由 Adapter 承接，原生接收失败回报 Input。现有代码仅发送文本的缺口由工程工具任务推进，不标记为已实现。
 
 正式 IPC 契约为 [`shared/ipc/session.ts`](../../apps/desktop/src/shared/ipc/session.ts)，Preload 暴露 `window.studio.session`，主进程校验字段和可信发送方。参数与结果均为可序列化 DTO，不携带 Runtime 句柄。
 

@@ -70,7 +70,8 @@
 
 1. `+` 打开 Context / Attachment 菜单（Shell Spec 第 7 节）。本轮菜单只放“从 Files 添加文件”一项，在 Files 工具可用前禁用并说明原因（建议，I-Q4）。
 2. 上下文标签位：显示当前 View 与从 Files 添加的文件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。本轮实现标签位与数据结构 `context_items: [{type: 'view', viewId} | {type: 'file', path}]`；Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。
-3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。
+3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
+4. 本轮接口准备包含 Files 添加动作与当前草稿 / Session 身份绑定，以及文件删除、路径失效、切换 Project 后异步结果的处理。现有 Session 发送仍仅传文本，文件标签数据结构不代表链路已接通；实现与验证由工程工具任务负责，尚未开始。
 
 #### Send / Stop
 
