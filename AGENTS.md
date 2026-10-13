@@ -31,6 +31,19 @@ All documents are drafted and maintained by AI agents. Humans communicate decisi
 
 The review each area needs is defined in its index (see the table above).
 
+## Recommendations
+
+Every suggestion, plan, review, and answer, whether about product, design, process, documentation, or code, aims at the best option for the project's goals, judged by current best practice. The existing setup and the user's instructions are inputs to weigh, not the limit of what to consider; the user may not know a better option exists.
+
+- Give a clear recommended decision with its reasons and main tradeoffs, not just a list of options.
+- When the existing setup or an instruction falls short of a better option in a way that matters, say so before acting: name the better option, why it fits this project, and what switching would cost. Do not silently inherit the current approach or carry out an instruction you believe is worse. If the existing approach holds up, keep it and say why briefly.
+- The decision boundary in Authorship & Review still applies: within AI authority, choose the best option directly; for human-owned decisions or an explicit instruction, give the recommendation, then follow the human's final decision.
+- If you follow a weaker option for consistency, scope, or a confirmed decision, label it as a constraint, not as the best option.
+- Base best-practice claims on current official documentation or well-established sources, and cite them when the choice matters; check fast-moving tooling instead of relying on memory.
+- Recommend a change only for a concrete benefit. When implementing, follow existing conventions and raise improvements separately instead of mixing them into unrelated work.
+
+This rule follows the user's 2026-10-13 requests; the wording remains subject to human review.
+
 ## Working on Tasks
 
 Read `tasks/README.md` before creating or executing a task.
