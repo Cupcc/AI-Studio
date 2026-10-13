@@ -15,8 +15,16 @@ async function launch() {
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
-  await app.evaluate(({ BrowserWindow, nativeTheme }) => {
+  await app.evaluate(({ app: mainApp, BrowserWindow, nativeTheme }) => {
     const win = BrowserWindow.getAllWindows()[0]!; win.setContentSize(1280, 800); win.show(); win.focus()
+    // Observe calls while still setting the real native icon; do not replace the Dock behaviour.
+    if (mainApp.dock) {
+      const setIcon = mainApp.dock.setIcon.bind(mainApp.dock)
+      mainApp.dock.setIcon = (image) => {
+        (globalThis as { studioDockIcon?: string }).studioDockIcon = typeof image === 'string' ? image : undefined
+        setIcon(image)
+      }
+    }
     // CI runners may enable Reduce transparency; each test starts with it off.
     Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => false })
     const state = globalThis as { studioSystemDark?: boolean }
@@ -38,6 +46,7 @@ const modeRadio = (name: '跟随系统' | '浅色' | '深色') => dialog().getBy
 const colorRadio = (name: string) => dialog().getByRole('radiogroup', { name: '毛玻璃背景' }).getByRole('radio', { name, exact: true })
 /** Native window background: getBackgroundColor() drops alpha, so the glass window's transparent colour reads #000000. */
 const windowBackground = () => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.getBackgroundColor().toUpperCase())
+const dockIconName = () => app.evaluate(() => (globalThis as { studioDockIcon?: string }).studioDockIcon?.split('/').at(-1))
 const TRANSPARENT = '#000000', SOLID_LIGHT = '#FFFFFF', SOLID_DARK = '#212121'
 async function menuSettings() {
   await app.evaluate(({ Menu }) => Menu.getApplicationMenu()!.items[0]!.submenu!.items.find((item) => item.label === '设置…')!.click())
@@ -216,9 +225,11 @@ test('FR-SET-002 · AC-08: the colour mode follows the system by default; light 
   // Following the system: the OS switching to dark switches the window, without a restart.
   await setSystemDark(true)
   await expect(html()).toHaveAttribute('data-scheme', 'dark')
+  if (process.platform === 'darwin') await expect.poll(dockIconName).toBe('icon-dark.png')
   await snap('settings-dialog-glass-dark')
   await setSystemDark(false)
   await expect(html()).toHaveAttribute('data-scheme', 'light')
+  if (process.platform === 'darwin') await expect.poll(dockIconName).toBe('icon.png')
 
   // Forced dark: native UI follows (themeSource), and the OS no longer matters.
   await modeRadio('深色').click()
@@ -226,6 +237,7 @@ test('FR-SET-002 · AC-08: the colour mode follows the system by default; light 
   expect(await app.evaluate(({ nativeTheme }) => nativeTheme.themeSource)).toBe('dark')
   await setSystemDark(false)
   await expect(html()).toHaveAttribute('data-scheme', 'dark')
+  if (process.platform === 'darwin') await expect.poll(dockIconName).toBe('icon-dark.png')
   expect(await page.evaluate(() => getComputedStyle(document.body).color)).toBe('rgb(242, 242, 242)')
   const contrast: Record<string, number> = {}
   for (const name of ['极光', '无'] as const) {
@@ -250,5 +262,6 @@ test('FR-SET-002 · AC-08: the colour mode follows the system by default; light 
   await modeRadio('浅色').click()
   await expect(html()).toHaveAttribute('data-scheme', 'light')
   await expect.poll(windowBackground).toBe(SOLID_LIGHT)
+  if (process.platform === 'darwin') await expect.poll(dockIconName).toBe('icon.png')
   expect(await app.evaluate(({ nativeTheme }) => nativeTheme.themeSource)).toBe('light')
 })

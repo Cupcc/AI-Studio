@@ -26,6 +26,8 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 
 ## 2. 目录
 
+`build/` 保存纳入 Git 的打包输入资源，区别于生成产物目录 `dist/`。`build/icon.png` / `build/icon-dark.png` 为浅色 / 深色图标，来源与采用记录见[图标索引](../../design/icons/README.md#本机采用)。macOS 打包时由 electron-builder 将浅色版转换为应用包图标，并通过 `extraResources` 将两张 PNG 复制到 `Contents/Resources/icons/`。开发和打包应用运行时，`window/appearance.ts` 在 ready 后读取已保存的颜色模式，并通过 `app.dock.setIcon` 按 `AppearanceState.dark` 更新 Dock 图标；开发读取 `build/`，打包读取 `process.resourcesPath/icons/`。动态切换范围见[外观规格](../../specs/settings/spec.md#fr-set-002-外观主题)。更新设计稿后须同步这两个文件，再重启开发应用或重新打包。
+
 ```text
 src/
   shared/ipc/contract.ts       IPC 契约原语（defineContract / invoke / event）

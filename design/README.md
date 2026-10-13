@@ -51,6 +51,7 @@ design/
 | 参考截图 | 尚无 |
 | 线框图 | v02，见 [wireframes](wireframes/README.md) |
 | 高保真界面 | 尚无 |
+| 应用图标 | 本机采用的版本与确认范围见[图标索引](icons/README.md#本机采用) |
 | 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) 基线；工具行为、原型 v01 对齐后的组件修订与原型 v02 的 Conversation 修订均已确认，见 [Shell Spec v02](components/shell-spec-v02.md)；外观主题与设置见其第 12 节（2026-10-12 确认，diff 待审阅） |
 | 外观主题 | 毛玻璃（默认）取自交互原型 v04，纯色（浅色）取自 v03，均保留；颜色模式默认跟随系统，深色取值为提案（2026-10-12 确认，[DEC-12](<../docs/07. Decisions.md#dec-12-外观主题与设置>)）；见 [prototypes](prototypes/README.md#3-原型索引) |
 | 交互原型 | [Studio 灰度交互原型 v02](prototypes/README.md)（Conversation 部分替代 v01，其余继承 v01）；桌面端按 v01 对齐见[已归档任务](../tasks/archive/T20261009-prototype-alignment/task.md)，按 v02 对齐见 [T20261010-prototype-v02-alignment](../tasks/archive/T20261010-prototype-v02-alignment/task.md)（2026-10-11 签收） |

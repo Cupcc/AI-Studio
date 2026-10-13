@@ -12,6 +12,12 @@ files:
   # node-pty sources and other platforms' binaries are not needed at runtime.
   - "!**/node_modules/node-pty/{deps,src,third_party,scripts,typings,binding.gyp}"
   - "!**/node_modules/node-pty/prebuilds/win32-*/**"
+extraResources:
+  - from: build
+    to: icons
+    filter:
+      - icon.png
+      - icon-dark.png
 asar: true
 # Native binaries (pty.node, spawn-helper) must live outside the asar archive.
 asarUnpack:
@@ -27,6 +33,7 @@ electronFuses:
   onlyLoadAppFromAsar: true
   grantFileProtocolExtraPrivileges: false
 mac:
+  icon: build/icon.png
   target:
     - target: dir
       arch: [arm64]

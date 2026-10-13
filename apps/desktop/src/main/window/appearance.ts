@@ -3,6 +3,7 @@
 // page; solid removes the material and paints the window in the mode's colour.
 // The colour mode itself reaches the material through nativeTheme.themeSource.
 import { app, BrowserWindow, nativeTheme, type BrowserWindowConstructorOptions } from 'electron'
+import { join } from 'node:path'
 import { settingsContract, type AppearanceState } from '@shared/ipc/settings'
 import type { CoreServices } from '../services/core'
 import { settingsFor } from '../services/settings'
@@ -34,6 +35,13 @@ export function applyWindowAppearance(win: Pick<BrowserWindow, 'isDestroyed' | '
   }
 }
 
+/** Dock appearance follows the app's colour mode, including a forced light/dark choice. */
+function applyDockAppearance(look: Pick<AppearanceState, 'dark'>): void {
+  if (process.platform !== 'darwin' || !app.dock) return
+  const directory = app.isPackaged ? join(process.resourcesPath, 'icons') : join(app.getAppPath(), 'build')
+  app.dock.setIcon(join(directory, look.dark ? 'icon-dark.png' : 'icon.png'))
+}
+
 /**
  * Keeps every window and renderer on the current appearance: applies the
  * material after each change and re-reads the system state (dark colours,
@@ -43,10 +51,13 @@ export function applyWindowAppearance(win: Pick<BrowserWindow, 'isDestroyed' | '
 export function installWindowAppearance(core: Pick<CoreServices, 'database' | 'broadcast'>): void {
   const settings = settingsFor(core)
   settings.subscribe((state) => {
+    applyDockAppearance(state)
     for (const win of BrowserWindow.getAllWindows()) applyWindowAppearance(win, state)
     core.broadcast(settingsContract.events.appearanceChanged, state)
   })
   const refresh = () => settings.refreshSystem()
   nativeTheme.on('updated', refresh)
   app.on('browser-window-focus', refresh)
+  // Apply the saved mode before opening the first window, including on a dark restart.
+  applyDockAppearance(settings.appearance())
 }
