@@ -32,6 +32,8 @@ interface Entry {
   runtime?: AgentSession
   unsubscribe?: () => void
   retiring?: Promise<void>
+  retiredRuntime?: AgentSession
+  retirementPending?: boolean
   turn?: ActiveTurn
   secrets: Set<string>
   secretComposer?: boolean
@@ -48,11 +50,12 @@ export interface SessionServiceOptions {
   providersChanged?(providers: ProviderSummary[]): void
   buildViewContext?(projectId: string, viewId: string): ViewContext
   turnEnded?(projectId: string): void
-  onProjectClosed?(projectId: string): void
   /** Queried at event time, so stale renderer focus reports cannot mark work read. */
   isForeground?(senderId: number): boolean
   now?: () => number
   newId?: () => string
+  /** Trusted cross-feature gate spans tool cleanup as well as Session Stop. */
+  canOperate?(projectId: string): boolean
 }
 
 /** Owns application turns; Adapter owns native turns, requests and process cleanup. */
@@ -125,7 +128,7 @@ export class SessionService implements MainSessionPort {
   }
 
   private ensureCanSubmit(entry: Entry): void {
-    if (this.disposed || this.quitting || this.closing.has(entry.summary.projectId) || this.closed.has(entry.summary.projectId)) throw new Error('Project 正在关闭')
+    if (this.disposed || this.quitting || this.closing.has(entry.summary.projectId) || this.closed.has(entry.summary.projectId) || this.options.canOperate?.(entry.summary.projectId) === false) throw new Error('Project 正在关闭')
     if (entry.turn || entry.summary.stopping) throw new Error('当前一轮尚未结束')
   }
 
@@ -184,7 +187,7 @@ export class SessionService implements MainSessionPort {
   send(sessionId: string, message: SessionMessage): void | Promise<void> {
     const entry = this.entry(sessionId)
     this.validateMessage(message)
-    if (this.disposed || this.quitting || this.closing.has(entry.summary.projectId) || this.closed.has(entry.summary.projectId)) throw new Error('Project 正在关闭')
+    if (this.disposed || this.quitting || this.closing.has(entry.summary.projectId) || this.closed.has(entry.summary.projectId) || this.options.canOperate?.(entry.summary.projectId) === false) throw new Error('Project 正在关闭')
     if (entry.turn && entry.summary.activity === 'running' && !entry.summary.stopping) {
       const capability = this.provider(entry.summary.cli).capabilities.inputWhileRunning
       if (capability === 'none') throw new Error('当前 CLI 不支持运行中发送')
@@ -238,6 +241,9 @@ export class SessionService implements MainSessionPort {
 
   private async start(entry: Entry, turn: ActiveTurn): Promise<void> {
     try {
+      // A failed release retains its exact handle; retry cleanup before creating
+      // another Runtime, rather than awaiting a permanently rejected promise.
+      if (entry.retiredRuntime && !entry.retirementPending) this.retire(entry)
       await entry.retiring
       if (entry.turn !== turn) return
       if (entry.summary.stopping) return
@@ -456,14 +462,19 @@ export class SessionService implements MainSessionPort {
   }
 
   private retire(entry: Entry): void {
-    const runtime = entry.runtime
-    if (!runtime) return
-    entry.runtime = undefined
-    entry.unsubscribe?.()
-    entry.unsubscribe = undefined
-    entry.generation++
-    const previous = entry.retiring
-    entry.retiring = Promise.resolve(previous).then(() => runtime.dispose())
+    const runtime = entry.runtime ?? entry.retiredRuntime
+    if (!runtime || entry.retirementPending) return
+    if (entry.runtime) {
+      entry.runtime = undefined
+      entry.unsubscribe?.()
+      entry.unsubscribe = undefined
+      entry.generation++
+    }
+    entry.retiredRuntime = runtime
+    entry.retirementPending = true
+    entry.retiring = Promise.resolve().then(() => runtime.dispose()).then(() => {
+      if (entry.retiredRuntime === runtime) entry.retiredRuntime = undefined
+    }).finally(() => { entry.retirementPending = false })
     // Keep rejection observable by next submit/close without creating an unhandled rejection.
     void entry.retiring.catch(() => {})
   }
@@ -653,6 +664,13 @@ export class SessionService implements MainSessionPort {
 
   getBlockingSessionCounts(projectId: string) { return this.getProjectState(projectId).counts }
 
+  activeSessions(projectId?: string) {
+    return [...this.entries.values()]
+      .filter(entry => (projectId === undefined || entry.summary.projectId === projectId) &&
+        (entry.turn || entry.summary.activity !== 'none' || entry.summary.stopping))
+      .map(entry => ({ kind: 'session' as const, id: entry.summary.id, projectId: entry.summary.projectId, title: entry.summary.title }))
+  }
+
   activeTurnCountAll() {
     const entries = [...this.entries.values()].filter(entry => entry.turn)
     return { sessions: entries.length, projects: new Set(entries.map(entry => entry.summary.projectId)).size }
@@ -693,10 +711,14 @@ export class SessionService implements MainSessionPort {
       if (result.failed.length) throw new Error(result.failed.map(item => item.reason).join('; '))
       const entries = [...this.entries.values()].filter(entry => entry.summary.projectId === projectId)
       for (const entry of entries) this.retire(entry)
-      await Promise.all(entries.map(entry => entry.retiring))
+      const results = await Promise.allSettled([
+        ...entries.map(entry => entry.retiring),
+        ...[...this.providers.values()].map(provider => provider.releaseRuntimes(this.project(projectId).canonicalPath))
+      ])
+      const failed = results.filter(result => result.status === 'rejected')
+      if (failed.length) throw new AggregateError(failed.map(result => result.reason), 'Project Runtime 释放失败')
       for (const [sender, context] of this.viewing) if (context.projectId === projectId) this.viewing.delete(sender)
       this.closed.add(projectId)
-      this.options.onProjectClosed?.(projectId)
       this.flushDisk()
     } finally {
       // This outer lock spans the interval between Stop and idle Runtime release.
@@ -712,6 +734,26 @@ export class SessionService implements MainSessionPort {
       this.quitting = false
       throw new Error(`${failed.length} 个 Session 停止失败`)
     }
+  }
+
+  cancelQuit(): void { if (!this.disposed) this.quitting = false }
+  projectCloseCancelled(projectId: string): void { this.closed.delete(projectId) }
+
+  async releaseAllRuntimes(): Promise<void> {
+    // Model probes and background sends own Runtimes that the Provider release below ends.
+    // Waiting for them first would let a probe's full timeout consume the quit bound (W8-F7);
+    // they are still awaited afterwards so no late work outlives the release.
+    const background = Promise.allSettled([...this.background])
+    for (const entry of this.entries.values()) this.retire(entry)
+    // Unlike final dispose, quit preparation must surface failures to the UI
+    // and retain exact handles for a cancelled quit or cleanup retry.
+    const results = await Promise.allSettled([
+      ...[...this.entries.values()].map(entry => entry.retiring),
+      ...[...this.providers.values()].map(provider => provider.releaseRuntimes())
+    ])
+    await background
+    const failed = results.filter(result => result.status === 'rejected')
+    if (failed.length) throw new AggregateError(failed.map(result => result.reason), `${failed.length} 个 Runtime 释放失败`)
   }
 
   async getProviders(force = false): Promise<ProviderSummary[]> {
@@ -747,7 +789,7 @@ export class SessionService implements MainSessionPort {
     const task = (async (): Promise<ModelCatalogResult> => {
       try {
         const environment = await this.options.environment()
-        if (this.quitting || this.disposed) return { models: [], error: '应用正在退出' }
+        if (this.quitting || this.disposed || this.closing.has(projectId) || this.closed.has(projectId) || this.options.canOperate?.(projectId) === false) return { models: [], error: 'Project 正在关闭或应用正在退出' }
         const models = await this.provider(cli).listModels({ environment, cwd: project.canonicalPath, signal: this.discoveryAbort.signal })
         const result = { models: models.filter(model => !model.hidden), error: null }
         this.catalogs.set(`${projectId}:${cli}`, result)

@@ -192,7 +192,7 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
   watchEvents() {
     const unsub = [
       studio().app.onWindowFocusChanged(({ focused }) => get().setForeground(focused)),
-      studio().project.onQuitRequested((request) => set({ quitRequest: request })),
+      studio().project.onQuitRequested((request) => set({ quitRequest: request, quitting: false })),
       studio().project.onFlushRequested(() => {
         void get().flush().then(() => studio().project.stateFlushed())
       }),
@@ -208,7 +208,15 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
     ]
     return () => unsub.forEach((off) => off())
   },
-  async confirmQuit() { set({ quitting: true }); await get().flush(); await studio().project.confirmQuit() },
+  async confirmQuit() {
+    if (get().quitting) return
+    set({ quitting: true })
+    try { await get().flush(); await studio().project.confirmQuit() }
+    catch (error) {
+      const request = get().quitRequest
+      if (request) set({ quitting: false, quitRequest: { ...request, failures: [String(error)] } })
+    }
+  },
   cancelQuit() { if (!get().quitting) { set({ quitRequest: null }); void studio().project.cancelQuit() } },
   async flush() { await shellIntegration().session.flush?.(); await writes }
 }))

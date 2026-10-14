@@ -3,7 +3,7 @@
 // The session module registers its implementation with
 // `projectShellFor(core).setSessionPort(port)`; until then the stub reports
 // no active sessions.
-import type { BlockingSessionCounts, QuitRequest, StopProjectResult } from '@shared/project/types'
+import type { BlockingSessionCounts, ClosingResource, QuitRequest, StopProjectResult } from '@shared/project/types'
 
 export interface MainSessionPort {
   /** Capture the initial default CLI at Project creation, before the open reply. */
@@ -12,10 +12,16 @@ export interface MainSessionPort {
   stopProjectTurns(projectId: string): Promise<StopProjectResult>
   /** Release idle Runtime handles after the Project Tab has passed Stop checks. */
   projectClosed?(projectId: string): Promise<void>
+  projectCloseCancelled?(projectId: string): void
   /** Running (including stopping) and Needs Input sessions across all Projects. */
   activeTurnCountAll(): QuitRequest | Promise<QuitRequest>
+  activeSessions?(projectId?: string): ClosingResource[]
   /** Stops every current turn; resolves when cleanup finished or gave up. */
   stopAllTurns(): Promise<void>
+  /** Reversible quit preparation; reject until all idle/retired handles are released. */
+  releaseAllRuntimes?(): Promise<void>
+  /** A failed/cancelled application quit must allow retained Projects to accept work. */
+  cancelQuit?(): void
 }
 
 export const stubMainSessionPort: MainSessionPort = {

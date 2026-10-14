@@ -6,13 +6,17 @@ import { projectContract } from './project'
 import { sessionContract } from './session'
 import { projectViewContract } from './project-view'
 import { settingsContract } from './settings'
+import { browserContract } from './browser'
+import { terminalContract } from './terminal'
 
 export const contracts = [
   appContract,
   projectContract,
   sessionContract,
   projectViewContract,
-  settingsContract
+  settingsContract,
+  browserContract,
+  terminalContract
 ] as const
 
 /** Type of `window.studio` as exposed by the preload bridge. */

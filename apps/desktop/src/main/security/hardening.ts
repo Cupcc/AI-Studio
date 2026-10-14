@@ -1,7 +1,7 @@
 // Electron-level hardening: app:// protocol for the renderer, no new
 // windows (http(s) links go to the system browser), no navigation away from
 // the app, no webviews, and no permissions except sanitized clipboard writes.
-import { app, net, protocol, session, shell } from 'electron'
+import { net, protocol, session, shell, type WebContents } from 'electron'
 import { pathToFileURL } from 'node:url'
 import { APP_HOST, APP_SCHEME, externalLinkUrl, isPermissionAllowed, originOf, resolveAppAsset } from './policy'
 
@@ -23,20 +23,21 @@ export function handleAppProtocol(rendererDir: string): void {
   })
 }
 
-export function installWebContentsGuards(allowedOrigin: string): void {
-  app.on('web-contents-created', (_event, contents) => {
-    contents.setWindowOpenHandler(({ url }) => {
-      const external = externalLinkUrl(url)
-      if (external) void shell.openExternal(external)
-      return { action: 'deny' }
-    })
-    const blockForeign = (event: { preventDefault(): void }, url: string): void => {
-      if (originOf(url) !== allowedOrigin) event.preventDefault()
-    }
-    contents.on('will-navigate', blockForeign)
-    contents.on('will-redirect', blockForeign)
-    contents.on('will-attach-webview', (event) => event.preventDefault())
+/** Install only on the explicitly owned app Renderer, before its first load. */
+export function installWebContentsGuards(contents: WebContents, allowedOrigin: string): void {
+  // WebContentsView also reports type='window'. Ownership, not type, defines
+  // the trusted app Renderer; preview pages install their separate policy.
+  contents.setWindowOpenHandler(({ url }) => {
+    const external = externalLinkUrl(url)
+    if (external) void shell.openExternal(external)
+    return { action: 'deny' }
   })
+  const blockForeign = (event: { preventDefault(): void }, url: string): void => {
+    if (originOf(url) !== allowedOrigin) event.preventDefault()
+  }
+  contents.on('will-navigate', blockForeign)
+  contents.on('will-redirect', blockForeign)
+  contents.on('will-attach-webview', (event) => event.preventDefault())
 }
 
 export function installPermissionPolicy(rendererOrigin: string): void {

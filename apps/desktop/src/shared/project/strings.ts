@@ -79,17 +79,23 @@ export const S = {
 
   // Close and quit confirmation (D-10; PROJ-Q6, PROJ-Q7)
   closeTitle: (name: string) => `关闭 ${name}？`,
-  closeBody: (n: number) => `${n} 个对话仍在运行或等待你的输入。当前一轮将停止，对话记录会保留。`,
+  closeBody: (n: number, terminals = 0) => [
+    n ? `${n} 个对话仍在运行或等待你的输入。当前一轮将停止，对话记录会保留。` : '',
+    terminals ? `${terminals} 个终端尚未退出，终端及其运行的命令将结束。` : ''
+  ].filter(Boolean).join(' '),
   closeConfirm: '关闭并停止',
   cancel: '取消',
   stopping: '正在停止…',
-  stopFailedTitle: '部分对话未能停止',
-  stopFailedBody: '以下对话的当前一轮未能停止，Project 保持打开。',
+  stopFailedTitle: '部分资源未能停止',
+  stopFailedBody: '以下资源未能完成清理，Project 保持打开。请检查原因后重试。',
   stopTimeout: '停止超时',
   retry: '重试',
   quitTitle: `退出 ${PRODUCT_NAME}？`,
-  quitBody: (sessions: number, projects: number) =>
-    `${projects} 个 Project 中有 ${sessions} 个对话仍在运行或等待你的输入。当前一轮将停止，对话记录会保留。`,
+  quitBody: (sessions: number, projects: number, terminals = 0) =>
+    `${projects} 个 Project 中有${sessions ? ` ${sessions} 个活动对话` : ''}${sessions && terminals ? '及' : ''}${terminals ? ` ${terminals} 个未退出终端` : ''}。`
+    + `${[sessions ? '对话当前一轮将停止，历史保留' : '', terminals ? '终端及其运行的命令将结束' : ''].filter(Boolean).join('；')}。`,
+  quitFailedTitle: '退出未完成',
+  quitFailedBody: '部分资源未能清理，应用保持打开。请检查原因后重试。',
   quitConfirm: '停止并退出',
 
   // Application menu (PROJ-Q17)

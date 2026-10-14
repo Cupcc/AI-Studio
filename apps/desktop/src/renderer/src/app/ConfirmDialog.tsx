@@ -1,6 +1,15 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { S } from '@shared/project/strings'
 import { useProjectShell } from '../features/project/store'
+import type { ClosingResource } from '@shared/project/types'
+
+function ResourceList({ resources }: { resources?: ClosingResource[] }) {
+  const projects = useProjectShell(state => state.projects)
+  if (!resources?.length) return null
+  return <ul>{resources.map(item => <li key={`${item.kind}:${item.id}`}>
+    {projects[item.projectId]?.name} · {item.kind === 'terminal' ? 'Terminal' : 'Session'} · {item.title || item.id}
+  </li>)}</ul>
+}
 
 function Modal({ title, children, busy, confirmLabel, danger = true, onCancel, onConfirm }: {
   title: string; children: ReactNode; busy: boolean; confirmLabel: string; danger?: boolean; onCancel(): void; onConfirm(): void
@@ -28,11 +37,16 @@ function Modal({ title, children, busy, confirmLabel, danger = true, onCancel, o
 }
 export function ConfirmDialogs() {
   const shell = useProjectShell(), close = shell.closeDialog, quit = shell.quitRequest
-  if (quit) return <Modal title={S.quitTitle} busy={shell.quitting} confirmLabel={S.quitConfirm} onCancel={shell.cancelQuit} onConfirm={() => void shell.confirmQuit()}><p>{S.quitBody(quit.sessions, quit.projects)}</p></Modal>
+  if (quit) return <Modal title={quit.failures?.length ? S.quitFailedTitle : S.quitTitle} busy={shell.quitting} confirmLabel={quit.failures?.length ? S.retry : S.quitConfirm} onCancel={shell.cancelQuit} onConfirm={() => void shell.confirmQuit()}>
+    <p>{quit.failures?.length ? S.quitFailedBody : S.quitBody(quit.sessions, quit.projects, quit.terminals)}</p>
+    <ResourceList resources={quit.resources} />
+    {quit.failures?.length ? <ul role="alert">{quit.failures.map((reason, index) => <li key={index}>{reason}</li>)}</ul> : null}
+  </Modal>
   if (!close) return null
   const failed = close.failed.length > 0
   return <Modal title={failed ? S.stopFailedTitle : S.closeTitle(shell.projects[close.projectId]!.name)} busy={close.stopping} confirmLabel={failed ? S.retry : S.closeConfirm} danger={!failed} onCancel={shell.cancelClose} onConfirm={() => void shell.requestClose(close.tabId, true)}>
-    <p>{failed ? S.stopFailedBody : S.closeBody(close.counts.running + close.counts.needsInput)}</p>
+    <p>{failed ? S.stopFailedBody : S.closeBody(close.counts.running + close.counts.needsInput, close.counts.terminals)}</p>
+    <ResourceList resources={close.counts.resources} />
     {failed && <ul>{close.failed.map((failure, i) => <li key={i}>{failure.sessionId}{failure.sessionId ? '：' : ''}{failure.reason}</li>)}</ul>}
   </Modal>
 }

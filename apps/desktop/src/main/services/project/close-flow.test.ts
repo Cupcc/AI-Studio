@@ -52,11 +52,12 @@ describe('application quit · PROJ-Q7/S-Q6 recommendation', () => {
     const flow = createQuitFlow({ getPort: () => stubMainSessionPort, askRenderer: () => true, askNative: async () => false, quit, flushState: () => flush })
     flow.onBeforeQuit({ preventDefault: prevent })
     expect(prevent).toHaveBeenCalledOnce(); expect(quit).not.toHaveBeenCalled()
-    release(); await flush; await Promise.resolve()
-    expect(quit).toHaveBeenCalledOnce(); expect(flow.state).toBe('approved')
+    release(); await flush
+    await vi.waitFor(() => expect(quit).toHaveBeenCalledOnce()); expect(flow.state).toBe('approved')
   })
   it('separates cancel from stopping all turns and allows the approved second quit', async () => {
-    const session = { ...port(), activeTurnCountAll: () => ({ sessions: 2, projects: 1 }), stopAllTurns: vi.fn(async () => {}) }
+    let active = 2
+    const session = { ...port(), activeTurnCountAll: () => ({ sessions: active, projects: active ? 1 : 0 }), stopAllTurns: vi.fn(async () => { active = 0 }) }
     const ask = vi.fn(() => true), quit = vi.fn(), prevent = vi.fn()
     const flow = createQuitFlow({ getPort: () => session, askRenderer: ask, askNative: async () => false, quit })
     flow.onBeforeQuit({ preventDefault: prevent }); await Promise.resolve(); await Promise.resolve()

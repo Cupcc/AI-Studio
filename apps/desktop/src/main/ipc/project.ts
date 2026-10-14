@@ -100,12 +100,17 @@ export function createProjectFeature(core: Pick<CoreServices, 'database'>, deps:
           throw new IpcValidationError(error instanceof Error ? error.message : 'patch is invalid')
         }
       },
-      handle: ({ projectId, patch }) => projects.updateUiState(projectId, patch)
+      handle: ({ projectId, patch }) => {
+        const state = projects.updateUiState(projectId, patch)
+        shell.toolsChanged?.()
+        return state
+      }
     },
     saveWindowState: {
       parse: parseWindowState,
       handle: (state) => {
         projects.saveWindowState(state)
+        shell.toolsChanged?.()
       }
     },
     closeProject: {

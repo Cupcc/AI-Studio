@@ -71,8 +71,13 @@ test('renders from app://studio with a draggable 40px top bar', async () => {
   })
   expect(style).toEqual({ region: 'drag', height: 40, top: 0, left: 0 })
   const csp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content')
-  expect(csp).toContain("script-src 'self'")
-  expect(csp).not.toContain('unsafe-inline')
+  const directives = new Map((csp ?? '').split(';').map(part => part.trim().split(/\s+/)).filter(([name]) => name).map(([name, ...values]) => [name, values] as const))
+  expect(directives.get('script-src')).toEqual(["'self'"])
+  expect(directives.get('style-src')).toEqual(["'self'"])
+  // The only relaxations (xterm runtime <style> elements and style attributes, DEC-02): no other directive may allow inline content.
+  expect(directives.get('style-src-elem')).toEqual(["'self'", "'unsafe-inline'"])
+  expect(directives.get('style-src-attr')).toEqual(["'unsafe-inline'"])
+  expect([...directives].filter(([, values]) => values.includes("'unsafe-inline'")).map(([name]) => name).sort()).toEqual(['style-src-attr', 'style-src-elem'])
 })
 
 test('renderer has no Node.js, require or raw ipcRenderer', async () => {
@@ -111,7 +116,7 @@ test('renderer has no Node.js, require or raw ipcRenderer', async () => {
     global: 'undefined',
     ipcRenderer: 'undefined',
     electron: 'undefined',
-    studioKeys: ['app', 'project', 'session', 'projectView', 'settings'],
+    studioKeys: ['app', 'project', 'session', 'projectView', 'settings', 'browser', 'terminal'],
     appKeys: ['getInfo', 'onWindowFocusChanged', 'ping']
   })
 })
@@ -165,6 +170,7 @@ test('smoke mode: SQLite, node-pty and login env work in the Electron main proce
     const report = JSON.parse(readFileSync(output, 'utf8'))
     expect(report.sqlite).toMatchObject({ ok: true, driver: 'node:sqlite', dbInsideUserData: true, secondRunApplied: 0, readBack: true })
     expect(report.pty).toMatchObject({ ok: true, receivedMarker: true, exitCode: 0 })
+    expect(report.terminalScreen).toMatchObject({ ok: true, serializedMarker: true, emulatorStateVersion: 1, xtermVersion: '6.0.0' })
     expect(report.shellEnv).toMatchObject({ ok: true, source: 'login-shell' })
     expect(report.renderer).toMatchObject({ ok: true, origin: 'app://studio', topBarRendered: true, nodeGlobalsAbsent: true, preloadApiWorks: true })
     // Report must stay sanitized: no environment dump.

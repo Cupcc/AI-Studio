@@ -6,6 +6,8 @@ import type { AppearanceState } from '@shared/ipc/settings'
 import { emit } from '../ipc/registry'
 import { windowAppearanceOptions } from './appearance'
 import { observeWindowForeground } from './foreground'
+import { installWebContentsGuards } from '../security/hardening'
+import { originOf } from '../security/policy'
 
 export const WINDOW_DEFAULT_SIZE = { width: 1280, height: 800 } as const
 export const WINDOW_MIN_SIZE = { width: 1024, height: 640 } as const
@@ -44,6 +46,9 @@ export function createMainWindow(options: MainWindowOptions): BrowserWindow {
       spellcheck: false
     }
   })
+  const rendererOrigin = originOf(options.url)
+  if (!rendererOrigin) throw new Error('Invalid app Renderer origin')
+  installWebContentsGuards(win.webContents, rendererOrigin)
   if (!options.hidden) win.once('ready-to-show', () => win.show())
   observeWindowForeground(win, (focused) => emit(win.webContents, appContract.events.windowFocusChanged, { focused }))
   void win.loadURL(options.url)

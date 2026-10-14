@@ -15,7 +15,6 @@ import { APP_ENTRY_URL, APP_ORIGIN, createSenderPolicy, originOf } from './secur
 import {
   handleAppProtocol,
   installPermissionPolicy,
-  installWebContentsGuards,
   registerAppScheme
 } from './security/hardening'
 import { createCoreServices, type CoreServices } from './services/core'
@@ -26,6 +25,8 @@ import { createShutdownHandler } from './shutdown'
 import { createE2eProviders } from './services/session/e2e-providers'
 import { settingsFor } from './services/settings'
 import { installWindowAppearance } from './window/appearance'
+import { terminalFor } from './services/terminal'
+import { browserFor } from './services/browser'
 
 const launch = parseLaunchOptions(process.argv)
 const devServerUrl = !app.isPackaged ? process.env.ELECTRON_RENDERER_URL : undefined
@@ -61,6 +62,10 @@ function openWindow(hidden = false): BrowserWindow {
     appearance: core ? settingsFor(core).appearance() : { effective: 'solid', dark: false }
   })
   win.on('focus', () => { if (core) projectViewsFor(core).refreshAll() })
+  const senderId = win.webContents.id
+  const detachTerminals = () => { if (core) terminalFor(core).detachOwner(senderId) }
+  win.webContents.on('destroyed', detachTerminals)
+  win.webContents.on('render-process-gone', detachTerminals)
   if (!hidden && process.platform === 'darwin') {
     // Keep the renderer and its draft/tool state alive while the macOS window
     // is closed; sessions continue until an explicit application quit.
@@ -94,6 +99,7 @@ function startRuntime(): void {
     const shell = projectShellFor(core)
     shell.quitFlow = createQuitFlow({
       getPort: shell.sessionPort,
+      getTools: shell.toolPort,
       quit: () => app.quit(),
       flushState: () => {
         const win = BrowserWindow.getAllWindows()[0]
@@ -111,8 +117,12 @@ function startRuntime(): void {
         emit(win.webContents, projectContract.events.quitRequested, request); return true
       },
       askNative: async (request) => {
-        const result = await dialog.showMessageBox({ type: 'question', title: S.quitTitle, message: S.quitBody(request.sessions, request.projects), buttons: [S.cancel, S.quitConfirm], defaultId: 0, cancelId: 0 })
-        return result.response === 1
+        browserFor(core!).setOverlayBlocked(true)
+        try {
+          const detail = [...(request.resources ?? []).map(resource => `${shell.projects.getProject(resource.projectId)?.name ?? resource.projectId} · ${resource.kind === 'terminal' ? 'Terminal' : 'Session'} · ${resource.title}`), ...(request.failures ?? [])].join('\n')
+          const result = await dialog.showMessageBox({ type: 'question', title: request.failures?.length ? S.quitFailedTitle : S.quitTitle, message: request.failures?.length ? S.quitFailedBody : S.quitBody(request.sessions, request.projects, request.terminals), detail, buttons: [S.cancel, request.failures?.length ? S.retry : S.quitConfirm], defaultId: 0, cancelId: 0 })
+          return result.response === 1
+        } finally { browserFor(core!).setOverlayBlocked(false) }
       },
       onError: (error) => console.error('[project] quit failed', error)
     })
@@ -151,7 +161,6 @@ async function runSmokeAndQuit(output: string): Promise<void> {
 }
 
 registerAppScheme()
-installWebContentsGuards(rendererOrigin)
 
 if (launch.smokeOutput) {
   const output = launch.smokeOutput

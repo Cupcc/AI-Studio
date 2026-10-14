@@ -105,6 +105,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
   const shell = projectShellFor(core)
   const service = new SessionService({
     store: new SessionStore(core.database().db), projects: shell.projects,
+    canOperate: id => !shell.isProjectClosing(id) && !shell.isQuitting(),
     providers: options.providers ?? [new CodexProvider(), new ClaudeProvider()],
     environment: async () => ({ env: (await core.shellEnv.get()).env }),
     isForeground: options.isForeground ?? isSessionWindowForeground,
@@ -112,8 +113,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     transcriptChanged: change => core.broadcast(sessionContract.events.transcriptChanged, change),
     providersChanged: providers => core.broadcast(sessionContract.events.providersChanged, providers),
     buildViewContext: (projectId, viewId) => projectViewsFor(core).buildContext(projectId, viewId, true),
-    turnEnded: projectId => { void projectViewsFor(core).refresh(projectId) },
-    onProjectClosed: projectId => projectViewsFor(core).close(projectId)
+    turnEnded: projectId => { void projectViewsFor(core).refresh(projectId) }
   })
   shell.setSessionPort(service)
   void service.getProviders().catch(() => {})

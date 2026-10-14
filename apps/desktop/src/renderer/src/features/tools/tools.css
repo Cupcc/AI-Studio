@@ -1,0 +1,37 @@
+.runtime-tool { display: flex; flex-direction: column; height: 100%; min-height: 0; color: var(--color-text); background: var(--color-pane); }
+.runtime-tool__empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-5); color: var(--color-text-muted); text-align: center; overflow: auto; }
+.runtime-tool__empty h2 { margin: 0; color: var(--color-text-2); font-size: var(--font-size-heading); font-weight: 500; }
+.runtime-tool__empty p { margin: 0; max-width: var(--placeholder-text-width); font-size: var(--font-size-md); overflow-wrap: anywhere; }
+.runtime-tool__error { flex: none; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-error-border); background: var(--color-error-bg); color: var(--color-text-2); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.terminal-tabs { display: flex; flex: none; align-items: center; min-height: var(--tab-height); padding: var(--space-1) var(--space-2); gap: var(--space-1); border-bottom: 1px solid var(--color-border); }
+.terminal-tabs__list { display: flex; flex: 1; min-width: 0; overflow: auto; gap: var(--space-1); }
+.terminal-tab { display: flex; flex: none; align-items: center; max-width: var(--tab-max-width); border-radius: var(--radius-sm); font-size: var(--font-size-sm); }
+.terminal-tab > [role="tab"] { display: flex; align-items: center; min-width: 0; height: var(--tab-inner-height); gap: var(--space-1-5); padding: 0 var(--space-2); border-radius: inherit; }
+.terminal-tab > [role="tab"] > span:first-of-type { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.terminal-tab.is-selected > [role="tab"] { font-weight: 500; }
+.terminal-tab__state { color: var(--color-text-muted); font-size: var(--font-size-xs); white-space: nowrap; }
+.terminal-tab__close { display: flex; align-items: center; justify-content: center; width: var(--tab-close-size); height: var(--tab-close-size); margin-right: var(--space-1); border-radius: var(--radius-xs); }
+.terminal-panel { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
+/* The wrapper owns the padding. xterm opens into the unpadded host: FitAddon reads the host's computed width and height,
+   which for a border-box element include its padding, so padding on the host made the grid about a row too tall (W5-F5).
+   `overflow: clip` (not `hidden`) creates no scroll container, so a focused helper textarea can never scroll the grid. */
+.terminal-screen { flex: 1; display: flex; min-height: 0; padding: var(--space-2); overflow: clip; }
+.terminal-screen__host { flex: 1; min-width: 0; min-height: 0; overflow: clip; }
+.terminal-screen__host > .xterm { height: 100%; }
+/* theme.background is opaque (xterm's base for reverse video and the cursor glyph, terminal-theme.ts), but the pane stays
+   transparent so the glass shows through. xterm paints `.xterm-viewport` from xterm.css (#000) and sets an inline
+   `background-color` on `.xterm-scrollable-element` from theme.background (Viewport.ts, CSSOM, not blocked by the CSP);
+   only an !important author rule outranks that inline value. Nothing else paints the terminal's default background. */
+.terminal-screen__host .xterm .xterm-viewport { scrollbar-width: thin; }
+.terminal-screen__host .xterm .xterm-viewport,
+.terminal-screen__host .xterm .xterm-scrollable-element { background-color: transparent !important; }
+.terminal-exit { flex: none; padding: var(--space-1-5) var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-muted); border-top: 1px solid var(--color-border); }
+.terminal-confirm, .browser-external { flex: none; padding: var(--space-3); border-bottom: 1px solid var(--color-border-strong); background: var(--color-floating); }
+.terminal-confirm p, .browser-external p { margin: 0 0 var(--space-2); font-size: var(--font-size-md); }
+.terminal-confirm__actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-3); }
+.browser-toolbar { display: flex; align-items: center; flex: none; gap: var(--space-1); padding: var(--space-2); border-bottom: 1px solid var(--color-border); }
+.browser-address { width: 0; min-width: 0; flex: 1; height: var(--button-height); padding: 0 var(--space-2); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); background: var(--color-control); color: var(--color-text); font: var(--font-size-sm) var(--font-sans); }
+.browser-address::placeholder { color: var(--color-placeholder); }
+.browser-preview { position: relative; flex: 1; display: flex; min-height: 0; min-width: 0; overflow: hidden; }
+.browser-loading { flex: none; padding: var(--space-1) var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.browser-external__url { color: var(--color-text-muted); overflow-wrap: anywhere; }

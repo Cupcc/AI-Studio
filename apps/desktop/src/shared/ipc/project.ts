@@ -57,7 +57,7 @@ export const projectContract = defineContract('project', {
   events: {
     menuCommand: event<MenuCommandPayload>('project:menu-command'),
     flushRequested: event<void>('project:flush-requested'),
-    /** ⌘Q while sessions are active: the renderer shows the confirmation. */
+    /** ⌘Q with active Sessions or unexited Terminals, including cleanup failures. */
     quitRequested: event<QuitRequest>('project:quit-requested')
   }
 })

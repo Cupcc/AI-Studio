@@ -450,6 +450,47 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     expect(h.codex.sessions).toHaveLength(2)
   })
 
+  it('retains the same idle Runtime after a rejected release and retries its cleanup', async () => {
+    const h = harness()
+    const session = await h.create(); await tick()
+    const { controller: runtime, driver } = h.native()
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'completed' })
+    // Inject at the Driver boundary so the real SessionController's strict, shared
+    // release applies: Session retirement and Provider.releaseRuntimes share one attempt.
+    const originalDispose = driver.dispose.bind(driver)
+    let attempts = 0
+    driver.dispose = async () => {
+      attempts++
+      if (attempts === 1) throw new Error('transient idle cleanup failure')
+      await originalDispose()
+    }
+    expect(await closeProjectWithSessions(h.service, 'p', true, 100)).toMatchObject({ status: 'failed' })
+    expect(attempts).toBe(1)
+    expect(await closeProjectWithSessions(h.service, 'p', true, 100)).toEqual({ status: 'closed' })
+    expect(attempts).toBe(2)
+    h.service.list('p')
+    h.service.send(session.id, { text: 'reopened after retry' }); await tick()
+    expect(h.summary(session.id).status).toBe('running')
+    expect(h.codex.sessions).toHaveLength(2)
+  })
+
+  it('does not hold quit preparation behind an in-flight model probe: the Provider release ends it', async () => {
+    const probe = deferred<Awaited<ReturnType<FakeProvider['listModels']>>>()
+    class ProbeProvider extends FakeProvider {
+      override listModels() { return probe.promise }
+      override async releaseRuntimes(cwd?: string) { probe.resolve([]); await super.releaseRuntimes(cwd) }
+    }
+    const h = harness(new ProbeProvider('codex'))
+    await h.create(); await tick()
+    const models = h.service.getModels('codex', 'p'); await tick()
+    const outcome = await Promise.race([
+      h.service.releaseAllRuntimes().then(() => 'released'),
+      new Promise<string>(resolve => setTimeout(() => resolve('blocked behind the probe'), 500))
+    ])
+    expect(outcome).toBe('released')
+    await models
+  })
+
   it('keeps a timed-out close locked only until its actual Stop settles, then allows retained Tab work', async () => {
     const cleanup = deferred<{ status: 'confirmed'; scope: 'turn' }>()
     const h = harness(new FakeProvider('codex', { behavior: { cleanup: () => cleanup.promise } }))

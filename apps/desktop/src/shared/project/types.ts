@@ -93,12 +93,23 @@ export interface QuitRequest {
   /** Running + Needs Input sessions across all Projects. */
   sessions: number
   projects: number
+  terminals?: number
+  resources?: ClosingResource[]
+  failures?: string[]
+}
+
+/** Names and identities shown in one Project / application close confirmation. */
+export interface ClosingResource {
+  kind: 'session' | 'terminal'
+  id: string
+  projectId: ProjectId
+  title: string
 }
 
 /** Highest-priority attention of a Project (Needs Input > Error > Completed Unread). */
 export type ProjectAttention = 'needs_input' | 'error' | 'completed_unread' | null
 
-export interface BlockingSessionCounts { running: number; needsInput: number }
+export interface BlockingSessionCounts { running: number; needsInput: number; terminals?: number; resources?: ClosingResource[] }
 export interface StopProjectResult {
   stopped: SessionId[]
   failed: { sessionId: SessionId; reason: string }[]

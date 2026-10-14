@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSyn
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { closeTestApp } from './quit'
 
 const appDir = join(__dirname, '..')
 const evidence = process.env.STUDIO_E2E_EVIDENCE_DIR ?? join(appDir, '../../.runtime/desktop-e2e/screenshots')
@@ -48,7 +49,7 @@ async function capture(mode: string, width: number, height: number) {
 test.beforeEach(async () => {
   dir = mkdtempSync(join(tmpdir(), 'studio projects ')); mkdirSync(evidence, { recursive: true }); await launch()
 })
-test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
+test.afterEach(async () => { if (app) await closeTestApp(app, page); rmSync(dir, { recursive: true, force: true }) })
 
 test('FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch', async () => {
   const paths = ['Alpha', 'Beta', 'Gamma'].map((name) => { const p = join(dir, name); mkdirSync(p); return p })
@@ -75,6 +76,7 @@ test('FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, t
   await workspace().getByRole('button', { name: 'Progress', exact: true }).click()
   await page.getByRole('tab', { name: 'Alpha' }).click()
   await expect(workspace().getByRole('button', { name: 'Architecture', exact: true })).toHaveAttribute('aria-current', 'page')
+  await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
   await expect(workspace().getByRole('button', { name: 'Terminal', exact: true })).toHaveAttribute('aria-pressed', 'true')
   const view1024 = await capture('view', 1024, 640)
   // 1024 − nav 248 − right minimum 400; the default glass appearance also leaves its 8px canvas gutter (Shell Spec v02 §12)
@@ -92,7 +94,7 @@ test('FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, t
   expect(boot.uiStates[gamma.id]).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'progress' }, viewRightArea: 'preview' })
   await page.getByRole('button', { name: '折叠导航' }).click()
   await expect(workspace().locator('.navigation')).toHaveCount(0)
-  await app.close(); await launch()
+  await closeTestApp(app, page); await launch()
   await expect(page.getByRole('tab', { name: 'Beta' })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('tab')).toHaveCount(3)
   await expect(page.getByRole('button', { name: '展开导航' })).toBeVisible()
@@ -100,13 +102,19 @@ test('FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, t
   await page.getByRole('button', { name: '展开导航' }).click()
   await page.getByRole('tab', { name: 'Alpha' }).click()
   await expect(workspace().getByRole('button', { name: 'Architecture', exact: true })).toHaveAttribute('aria-current', 'page')
+  await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
   await page.getByRole('button', { name: '关闭 Alpha', exact: true }).click()
+  await page.getByRole('button', { name: '关闭并停止', exact: true }).click()
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
   await expect(page.getByRole('button', { name: /^Alpha/ })).toBeVisible()
   await page.getByRole('button', { name: /^Alpha/ }).click()
   await expect(workspace().getByRole('button', { name: 'Architecture', exact: true })).toHaveAttribute('aria-current', 'page')
   await expect(workspace().getByRole('button', { name: 'Terminal', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  for (const name of ['Alpha', 'Beta', 'Gamma']) await page.getByRole('button', { name: `关闭 ${name}`, exact: true }).click()
+  await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
+  for (const name of ['Alpha', 'Beta', 'Gamma']) {
+    await page.getByRole('button', { name: `关闭 ${name}`, exact: true }).click()
+    if (name === 'Alpha') await page.getByRole('button', { name: '关闭并停止', exact: true }).click()
+  }
   await expect(page.getByRole('heading', { name: 'AI Developer Studio' })).toBeVisible()
   await expect(page.getByRole('tab', { name: '新标签页' })).toHaveCount(1)
 })

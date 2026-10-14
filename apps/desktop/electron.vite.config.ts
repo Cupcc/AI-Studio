@@ -12,6 +12,15 @@ export const CSP_PRODUCTION = [
   "default-src 'none'",
   "script-src 'self'",
   "style-src 'self'",
+  // xterm.js injects <style> elements at runtime and has no nonce support, so
+  // the Terminal loses its fonts, colors and cursor without this. Only elements
+  // are relaxed: scripts stay strict and img/font/connect stay 'self', so CSS
+  // cannot load external resources (DEC-02 exception, W5-F3).
+  "style-src-elem 'self' 'unsafe-inline'",
+  // xterm also writes `style` attributes (setAttribute) for 24-bit colors and for
+  // minimumContrastRatio adjustments; without this they are silently dropped
+  // (W5-F6, W5-F9; user, 2026-10-14: relax the restriction, features first).
+  "style-src-attr 'unsafe-inline'",
   "img-src 'self' data:",
   "font-src 'self'",
   "connect-src 'self'",

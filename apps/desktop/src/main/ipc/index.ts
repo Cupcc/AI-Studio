@@ -7,15 +7,31 @@ import { createProjectViewFeature } from './project-view'
 import { createProjectFeature } from './project'
 import { createSessionFeature, type SessionFeatureOptions } from './session'
 import { createSettingsFeature } from './settings'
+import { createBrowserFeature } from './browser'
+import { createTerminalFeature } from './terminal'
+import { projectShellFor } from '../services/project'
+import { terminalFor } from '../services/terminal'
+import { browserFor } from '../services/browser'
 import { registerFeatureHandlers, type FeatureHandlers, type MainIpc } from './registry'
 
 export function createFeatures(core: CoreServices, sessionOptions: SessionFeatureOptions = {}): FeatureHandlers[] {
+  const terminal = terminalFor(core), browser = browserFor(core), shell = projectShellFor(core)
+  shell.toolsChanged = () => browser.syncVisibility()
+  shell.setToolPort({
+    activeTerminals: projectId => terminal.activeTerminals(projectId).map(item => ({
+      kind: 'terminal' as const, id: item.terminalId, projectId: item.projectId, title: item.title
+    })),
+    closeProject: async projectId => { await terminal.closeProject(projectId); await browser.close(projectId) },
+    closeAll: async () => { await terminal.closeAll(); await browser.closeAll() }
+  })
   return [
     createAppFeature(core),
     createProjectFeature(core),
     createProjectViewFeature(core),
     createSessionFeature(core, sessionOptions),
-    createSettingsFeature(core)
+    createSettingsFeature(core),
+    createBrowserFeature(core),
+    createTerminalFeature(core)
   ]
 }
 
