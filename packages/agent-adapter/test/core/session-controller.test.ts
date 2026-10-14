@@ -684,6 +684,110 @@ describe('SessionController: runtime exit, native ids, isolation', () => {
 });
 
 describe('SessionController: subscription and dispose', () => {
+  it('propagates driver cleanup failure and retries on the same closed handle', async () => {
+    const { controller, driver, recorder } = makeSession();
+    const cleanup = vi.spyOn(driver, 'dispose').mockRejectedValueOnce(new Error('still alive')).mockResolvedValue(undefined);
+    const first = controller.dispose();
+    expect(controller.dispose()).toBe(first);
+    await expect(first).rejects.toThrow('still alive');
+    expect(controller.state).toBe('closed');
+    expect(await controller.closed).toBe('disposed');
+    await controller.dispose();
+    await controller.dispose();
+    expect(cleanup).toHaveBeenCalledTimes(2);
+    expect(recorder.ofType('session.closed')).toHaveLength(1);
+  });
+
+  it('does not duplicate actual cleanup after its bounded observer times out', async () => {
+    const { controller, driver } = makeSession({ timeouts: { disposeMs: 10 } });
+    let release!: () => void;
+    const cleanup = vi.spyOn(driver, 'dispose').mockImplementation(() => new Promise<void>((resolve) => { release = resolve; }));
+    await expect(controller.dispose()).rejects.toMatchObject({ code: 'timeout' });
+    const retry = controller.dispose();
+    release();
+    await retry;
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles background cleanup rejection without losing explicit retry', async () => {
+    const { controller, driver, sink } = makeSession();
+    const cleanup = vi.spyOn(driver, 'dispose').mockRejectedValueOnce(new Error('background failure')).mockResolvedValue(undefined);
+    sink.fatal({ code: 'runtime_crashed', message: 'crashed' });
+    await flush();
+    await controller.dispose();
+    expect(cleanup).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports unconfirmed cleanup as a diagnostic and never as an unhandled rejection', async () => {
+    const unhandled: unknown[] = [];
+    const watch = (reason: unknown) => unhandled.push(reason);
+    process.on('unhandledRejection', watch);
+    try {
+      const { controller, driver, sink, recorder } = makeSession();
+      vi.spyOn(driver, 'dispose').mockRejectedValue(new Error('exit unconfirmed'));
+      sink.fatal({ code: 'runtime_crashed', message: 'crashed' });
+      await expect(controller.dispose()).rejects.toThrow('exit unconfirmed');
+      await expect(controller.dispose()).rejects.toThrow('exit unconfirmed');
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(unhandled).toEqual([]);
+      expect(recorder.ofType('diagnostic').some((event) => event.message.includes('exit unconfirmed'))).toBe(true);
+    } finally {
+      process.off('unhandledRejection', watch);
+    }
+  });
+
+  it('finalizes an active turn once when cleanup stays unconfirmed, then retries only the driver', async () => {
+    const { controller, driver, recorder } = makeSession();
+    const cleanup = vi.spyOn(driver, 'dispose').mockRejectedValueOnce(new Error('exit unconfirmed')).mockResolvedValue(undefined);
+    await startTurn(controller);
+    await expect(controller.dispose()).rejects.toThrow('exit unconfirmed');
+    expect(controller.state).toBe('closed');
+    await controller.dispose();
+    expect(cleanup).toHaveBeenCalledTimes(2);
+    expect(recorder.ofType('turn.completed')).toHaveLength(1);
+    expect(recorder.ofType('session.closed')).toHaveLength(1);
+    expect(driver.callsTo('interruptTurn')).toHaveLength(1);
+  });
+
+  it('resolves released only once the driver confirmed, whichever attempt succeeded first', async () => {
+    const { controller, driver, sink, recorder } = makeSession();
+    const cleanup = vi.spyOn(driver, 'dispose').mockRejectedValueOnce(new Error('exit unconfirmed')).mockResolvedValue(undefined);
+    let released = false;
+    void controller.released.then(() => { released = true; });
+    sink.fatal({ code: 'runtime_crashed', message: 'crashed' });
+    await flush();
+    expect(controller.state).toBe('closed');
+    expect(released).toBe(false);
+    // The explicit retry is the attempt that confirms; the event stream is only cut by dispose() itself.
+    sink.diagnostic({ kind: 'warning', message: 'still delivered' });
+    expect(recorder.ofType('diagnostic').some((event) => event.message === 'still delivered')).toBe(true);
+    await controller.dispose();
+    await flush();
+    expect(released).toBe(true);
+    expect(cleanup).toHaveBeenCalledTimes(2);
+    sink.diagnostic({ kind: 'warning', message: 'after dispose' });
+    expect(recorder.ofType('diagnostic').some((event) => event.message === 'after dispose')).toBe(false);
+  });
+
+  it('emits dispose events after the runtime release (runtime exit first), and still closes before reporting a failure', async () => {
+    const order: string[] = [];
+    const ok = makeSession();
+    vi.spyOn(ok.driver, 'dispose').mockImplementation(async () => { order.push('driver.dispose'); });
+    ok.controller.subscribe((event) => { order.push(event.type); });
+    await ok.controller.dispose();
+    expect(order).toEqual(['driver.dispose', 'session.state', 'session.closed']);
+    expect(ok.controller.state).toBe('closed');
+
+    const failing = makeSession();
+    vi.spyOn(failing.driver, 'dispose').mockRejectedValue(new Error('exit unconfirmed'));
+    const events: string[] = [];
+    failing.controller.subscribe((event) => { events.push(event.type); });
+    await expect(failing.controller.dispose()).rejects.toThrow('exit unconfirmed');
+    expect(events).toContain('session.closed');
+    expect(events.filter((type) => type === 'session.closed')).toHaveLength(1);
+    expect(await failing.controller.closed).toBe('disposed');
+  });
+
   it('buffers events emitted before the first subscription', async () => {
     const { controller, sink } = makeSession({ subscribe: false });
     sink.nativeSessionId('thread-1');

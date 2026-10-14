@@ -59,17 +59,18 @@ export class CodexDriver implements SessionDriver {
   ) {
     this.timeouts = resolveTimeouts(options.timeouts);
     this.desiredModel = options.overrides?.model;
+    const terminate = { graceMs: this.timeouts.terminateGraceMs, killWaitMs: this.timeouts.killWaitMs };
     this.slot = new RuntimeSlot(async (generation) => {
       this.operationSignal?.throwIfAborted();
       if (this.disposed) throw adapterError('disposed', 'Codex Session is disposed');
       const runtime = await dependencies.runtimeFactory({ command: executable, args: ['app-server', '--listen', 'stdio://'],
-        cwd: options.cwd, env: options.environment.env, label: 'codex app-server', generation, lister: dependencies.processLister });
+        cwd: options.cwd, env: options.environment.env, label: 'codex app-server', generation, lister: dependencies.processLister, terminate });
       if (this.operationSignal?.aborted || this.disposed) {
-        await runtime.terminate({ graceMs: this.timeouts.terminateGraceMs, killWaitMs: this.timeouts.killWaitMs });
+        await runtime.terminate(terminate);
         throw adapterError('disposed', 'Runtime startup was cancelled');
       }
       return runtime;
-    }, { graceMs: this.timeouts.terminateGraceMs, killWaitMs: this.timeouts.killWaitMs });
+    }, terminate);
   }
 
   async initialize(resumeId?: string): Promise<void> {
@@ -81,7 +82,9 @@ export class CodexDriver implements SessionDriver {
         await this.openThread(resumeId, signal);
       }, this.timeouts.startupMs, 'Codex startup');
     } catch (error) {
-      await this.dispose();
+      // An unconfirmed cleanup must not mask the startup cause; the exact handle stays retained
+      // by the Provider and by this driver for the next dispose / releaseRuntimes call.
+      await this.dispose().catch(() => {});
       if (resumeId) throw adapterError('resume_failed', `Cannot resume the requested Codex thread: ${codexError(error, 'thread/resume').message}`,
         { cause: error, native: codexError(error, 'thread/resume').native });
       throw codexError(error, 'startup');
@@ -271,14 +274,22 @@ export class CodexDriver implements SessionDriver {
   listModels(): Promise<ModelInfo[]> { return this.requireConnection().models(); }
 
   dispose(): Promise<void> {
-    this.disposal ??= (async () => {
-      this.disposed = true;
-      this.detach();
-      try {
-        const report = await this.slot.shutdown();
-        if (report && !report.confirmed) this.sink.error(adapterError('stop_cleanup_failed', 'Codex Runtime disposal could not confirm all processes exited').info);
-      } catch (error) { this.sink.error(codexError(error, 'dispose', 'stop_cleanup_failed').info); }
-    })();
+    if (!this.disposal) {
+      const pending = (async () => {
+        this.disposed = true;
+        this.detach();
+        try {
+          const report = await this.slot.shutdown();
+          if (report && !report.confirmed) throw adapterError('stop_cleanup_failed', 'Codex Runtime disposal could not confirm all processes exited');
+        } catch (error) {
+          const failure = codexError(error, 'dispose', 'stop_cleanup_failed');
+          this.sink.error(failure.info);
+          throw failure;
+        }
+      })();
+      this.disposal = pending;
+      void pending.catch(() => { if (this.disposal === pending) this.disposal = undefined; });
+    }
     return this.disposal;
   }
 

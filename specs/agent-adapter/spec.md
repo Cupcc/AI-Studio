@@ -81,7 +81,7 @@
 4. 恢复失败必须明确报告：能立即判断的，`resumeSession` 以 `resume_failed` 拒绝；只能在首条消息时发现的（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节：Claude 无效 ID 返回错误结果），该回合以 `failed` + `resume_failed` 结束，Session 关闭。任何情况下都不回退为新建原生会话。
 5. Session 关闭（`state = closed`，事件 `session.closed`）后不可再用。原因：`disposed`、`runtime_exited`、`resume_failed`、`stop_failed`、`fatal_error`。继续该对话的唯一途径是 `resumeSession`。
 6. 错误后的继续与“重试”（FR-STATE-003；S-Q2，2026-10-09 确认）：上层调用 `ensureSession(provider, 当前句柄, { nativeSessionId, … })` 得到可用 Session——仍可用则复用；已关闭且有原生 ID 则恢复（失败时拒绝，不新建）；没有原生 ID 时才新建（对应 session spec S-Q4，待确认）。随后由上层用 `sendUserInput` 重新发送失败那一轮的用户消息。本模块从不自动重发输入，也不重跑已取消的命令（04 第 5 节第 7 条）。
-7. `AgentProvider.dispose()` 是关机操作：停止该 Provider 全部活动 Session 的当前一轮、清理受管 Runtime 并核对退出结果，失败时保留诊断；`ProviderRegistry.shutdownAll()` 对所有 Provider 执行（session spec 第 3.14 节第 3 条）。职责遵循 [04 第 5 节](<../../docs/04. Technical Requirements.md#退出与异常清理责任边界>)；返回值不证明零残留（第 3.6 节第 9 条）。宿主异常退出后的归属检查与清理见 A-Q3（2026-10-11 确认，DEC-11）。
+7. `AgentProvider.dispose()` 是关机操作：停止该 Provider 全部活动 Session 的当前一轮、清理受管 Runtime 并核对退出结果，退出未确认时拒绝并可重试，契约见第 3.6 节第 9 条；`ProviderRegistry.shutdownAll()` 对所有 Provider 逐一尝试，任一未确认即在全部尝试后以 `AggregateError` 拒绝，不吞掉失败（session spec 第 3.14 节第 3 条）。职责遵循 [04 第 5 节](<../../docs/04. Technical Requirements.md#退出与异常清理责任边界>)。宿主异常退出后的归属检查与清理见 A-Q3（2026-10-11 确认，DEC-11）。
 
 ### 3.4 回合与事件（FR-STATE-001、FR-STATE-007）
 
@@ -129,7 +129,11 @@
 6. Stop 期间 Runtime 意外退出视为该回合的终态（`interrupted`），进入兜底恢复；Provider 不支持兜底时 Session 以 `runtime_exited` 关闭，回合仍不报错。
 7. 任何 Stop、清理或兜底只作用于本 Session 的 Runtime 及其后代进程，不触及其他 Session、Project 或用户 Terminal（第 7 条；FR-SESSION-003）。
 8. `dispose()` 对活动回合先执行 Stop（有限等待），超时则强制以 `interrupted`（`stop.cleanup = failed`）结束该回合，再终止 Runtime。
-9. 2026-10-09 实现复查边界：`dispose(): Promise<void>` 为不抛错的释放接口，driver 清理错误或超时会转成 diagnostic；调用返回不能单独作为操作系统确认所有进程退出的证明。精确 Stop 的退出证据来自 `StopResult` 与进程身份检查；空闲 Runtime 释放和异常宿主退出的保证仍需后续真实验证。各 phase 的超时相加不等于整个应用固定时限，见 [W4 生命周期复查](../../tasks/T20261009-session-slice/evidence/W4-lifecycle-review.md)。
+9. 退出与关闭的清理证明（2026-10-13 W5-F2；所服务的需求是 FR-PROJ-002 的关闭 Project / 退出应用：清理失败保留诊断和重试入口，不静默宣称已关闭，见 [02 功能需求](<../../docs/02. Functional Requirements.md>)（2026-10-13 确认，DEC-14）；来源：用户 2026-10-13 推进运行时工具阶段的指示、任务 [T20261009-context-tools](../../tasks/T20261009-context-tools/task.md)；取代 2026-10-09 的“不抛错、仅记 diagnostic”契约；本条 diff 待审阅）：
+   - `AgentSession.dispose()` 关闭 Session 并核对 Runtime 释放。退出或清理未确认（driver 拒绝、`confirmed = false`、超过 `disposeMs`）时拒绝，不再只记 diagnostic 后 resolve；保留精确进程句柄，即使 `state` 已为 `closed` 也可在同一句柄上再次调用重试，超时后仍在进行的清理由重试共享，不重复发起，也不回退为新建原生会话（`ensureSession` 因此在旧退出未确认时不启动替换 Runtime）。进行中的调用共享同一次尝试，成功后再调用为无操作；任一次尝试（含自行关闭后的后台释放与显式重试）确认释放后，Provider 即不再跟踪该 Session。事件顺序：确认成功时与旧实现一致（Runtime 的退出事件先于 `session.state` / `session.closed`）；未确认时先关闭并发出这两个事件，再拒绝。
+   - `AgentProvider.releaseRuntimes(cwd?)` 严格、可重试地释放该 Provider 拥有的全部受管 Runtime，包括失败或迟到的启动、可用性与模型探测启动的 Runtime，不销毁 Provider。可选的规范 `cwd`（须与 `createSession` 传入的字符串一致）只释放该 Project 的 Runtime。任一退出未确认时以 `AggregateError` 拒绝，未确认的句柄继续保留，下一次调用重试；仅在释放进行期间以 `invalid_state` 拒绝同范围的新启动（含 `listModels` 与可用性的模型探测），结束后（含失败）恢复。`AgentProvider.dispose()` 是关机，沿用同一严格路径并可重试，调用方丢弃其 Promise 也不产生未处理拒绝。失败的 `releaseRuntimes()` 会对同一句柄再终止一次（Session 驱动一次、Provider 一次），Provider 使用该 Runtime 启动时登记的 Session 终止参数（`terminateGraceMs` / `killWaitMs`），未登记的探测使用默认值。`releaseRuntimes()` 会等待进行中的 Runtime 启动结算（迟到的句柄须被登记后才能终止），启动工厂永不结算时它没有上界且持续拒绝同 `cwd` 的新启动（其他 Project 不受影响）；真实的 `RuntimeProcess.start` 总会收到 spawn 或 error，因此生产路径基本不可达。桌面端在 Project 关闭与退出准备处以 10 s 上限包住该调用：到期按失败处理、不批准关闭或退出，Adapter 侧的释放继续进行，结算前不会重复发起。
+   - `createSession` / `resumeSession` 启动失败时保持原启动错误；其清理若未确认，句柄留在 Provider，由 `releaseRuntimes()` 报告并重试。模型探测同理：目录请求失败时保持原目录错误（清理未确认的句柄仍被保留）；取得目录但清理未确认时整体拒绝（`stop_cleanup_failed`），句柄保留。
+   - 边界：成功返回表示精确句柄已有退出证据（`confirmed`：Runtime 退出，且已记录的后代与同组成员按 pid + 启动时间核对均退出，同组无存活成员，见第 3.9 节第 2 条），进程探测失败不算确认；不证明零残留。精确 Stop 的退出证据仍来自 `StopResult` 与进程身份检查。上述拒绝、保留与重试已有模拟测试（假驱动、假 Runtime）覆盖；采样前已脱离的后代、外部 MCP 进程树、真实 CLI 与异常宿主退出的保证仍需后续真实验证。各 phase 的超时相加不等于整个应用固定时限，见 [W4 生命周期复查](../../tasks/T20261009-session-slice/evidence/W4-lifecycle-review.md)。
 
 ### 3.7 错误与终态（FR-STATE-003；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节）
 
@@ -147,7 +151,7 @@
 ### 3.9 并发与隔离（FR-SESSION-003；04 第 3、5、7 节）
 
 1. 首阶段每个活动 Session 一个独立 Runtime（`RuntimeProcess`），以新进程组（`detached`）启动；组终止只作用于该 Runtime。
-2. 终止流程：先记录后代进程快照（Runtime 退出后后代会被重新挂到 launchd，之后无法再按父子关系找回）→ 向进程组发 SIGTERM → 宽限期后对仍存活的组成员与快照中的后代按身份（pid + 启动时间）发 SIGKILL → 以系统进程列表确认全部退出。只有确认后才算 `confirmed`。按身份发信号，进程号被复用时不会误杀。
+2. 终止流程：先记录进程快照（Runtime 退出后后代会被重新挂到 launchd，之后无法再按父子关系找回）。Runtime 运行期间，ppid 链后代与 `pgid` 等于其 pid 的同组成员（含已被重新挂到 launchd 的孤儿）都按身份（pid + 启动时间）记录；Runtime 退出的瞬间再列出一次仍存活的同组成员：此时进程组号被成员占用、不会被回收，所列成员必属本 Runtime。→ 向进程组发 SIGTERM → 宽限期后对仍存活的组成员与记录在案的进程按身份发 SIGKILL → 以系统进程列表确认全部退出；同组仍有存活成员时不得 `confirmed`。Runtime 退出之后才首次出现的同组成员，只有在某个已记录成员仍存活于该组（存活成员使组号不会被回收）时才被收编；退出瞬间的列表失败时，仅在当前没有任何进程占用该 pid 时才按组收编。退出后不再向 `-pid` 发送组信号（该组号可能已属无关进程，包括 `processLike().kill()`）。按身份发信号，进程号被复用时不会误杀。
 3. 一个 Session 的崩溃、Stop 或兜底不影响其他 Session：每个 Session 有独立的控制器、事件流和 Runtime；事件监听器抛出的异常被隔离，不会破坏状态机；stdio 管道错误（如崩溃后的 EPIPE）在 Runtime 内部吸收，不会成为宿主进程的未捕获异常。
 4. Codex 与 Claude Session 可同时运行（AC-03 的 Adapter 部分）；同一 Provider 的多个 Session 互不共享 Runtime。
 
@@ -246,7 +250,8 @@ FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026
 | `checkAvailability(options)` | 第 3.2 节；不可用不抛错，以报告表达 |
 | `listModels(options)` | 不创建原生会话 |
 | `createSession(options)` / `resumeSession(options)` | 第 3.3 节；`options`：`cwd`、`environment`、可选 `overrides`、`timeouts`、`providerOptions` |
-| `dispose()` | 关机：处置全部活动 Session，尝试终止 Runtime；不抛错契约及退出证明边界见 §3.6 |
+| `releaseRuntimes(cwd?)` | 严格、可重试地释放全部受管 Runtime，可按 Project 规范 `cwd` 限定；不销毁 Provider；未确认以 `AggregateError` 拒绝，契约见 §3.6 第 9 条 |
+| `dispose()` | 关机：处置全部活动 Session 并核对 Runtime 退出，走同一严格路径；未确认则拒绝并可重试，契约及退出证明边界见 §3.6 第 9 条 |
 
 ### 5.2 `AgentSession`
 
@@ -259,7 +264,7 @@ FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026
 | `replyWithText(text)` → `{ disposition, requestIds }` | 输入框回复（I-Q2） |
 | `stop()` → `StopResult` | 第 3.6 节 |
 | `setModel(model \| null)`、`listModels()` | 第 3.8 节 |
-| `dispose()` | 幂等 |
+| `dispose()` | 关闭并核对 Runtime 释放；未确认则拒绝、保留句柄并可重试，进行中与已成功的调用幂等（§3.6 第 9 条） |
 
 辅助：`ensureSession`（第 3.3 节第 6 条）、`ProviderRegistry`（`register` / `get` / `list` / `shutdownAll`）。
 
@@ -294,11 +299,11 @@ Provider 不直接实现 `AgentSession`，而是为每个 Session 提供一个�
 | `cleanupAfterInterrupt?` | 终止本轮进程并给出退出证据 |
 | `recoverRuntime?` | 兜底：经 `RuntimeSlot.replace()` 重启并以原 ID 恢复，报告 `sink.nativeSessionId` |
 | `respondToInput` / `declineInputsWithText` / `cancelInput?` | 答复、输入框拒绝、非 Stop 情形的原生释放 |
-| `setModel` / `listModels` / `dispose` | dispose 须幂等且不抛错 |
+| `setModel` / `listModels` / `dispose` | dispose 须在退出确认后才 resolve，未确认则 reject；进行中的调用合并，成功后为无操作，失败后在同一句柄上重试（§3.6 第 9 条） |
 
 驱动通过 `SessionSink` 报告原生活动：原生 ID、原生回合 ID 绑定与反查、条目与增量、等待请求（返回 `undefined` 时须原生拒绝）、原生撤回、原生终态、模型变化、原生标题、Runtime 启动 / 退出、错误、诊断。驱动不得在构造函数中调用 sink。
 
-共享核心（Provider 必须复用，不自行实现）：`RuntimeProcess` / `RuntimeSlot`、`JsonRpcPeer` 与行传输、进程探测（`listDescendants`、`findAlive`、`waitForExit`、`signalProcesses`）、`resolveExecutable` / `execBounded` / `parseVersion`、`buildAvailabilityReport`、`AsyncQueue`（Streaming Input）、`LiveSessions`（关机跟踪）、`redactSecrets`。测试工具见 `./testing`：联动的内存传输与脚本化 JSON-RPC 服务端、`FakeRuntime`、`EventRecorder`、`ScriptedDriver`、`FakeProvider`（也可供 Session Manager 测试使用）。
+共享核心（Provider 必须复用，不自行实现）：`RuntimeProcess` / `RuntimeSlot`、`JsonRpcPeer` 与行传输、进程探测（`listDescendants`、`findAlive`、`waitForExit`、`signalProcesses`）、`resolveExecutable` / `execBounded` / `parseVersion`、`buildAvailabilityReport`、`AsyncQueue`（Streaming Input）、`LiveSessions`（Session 跟踪与释放）、`RuntimeResources`（Provider 拥有的 Runtime 句柄，含迟到启动与探测）、`redactSecrets`。测试工具见 `./testing`：联动的内存传输与脚本化 JSON-RPC 服务端、`FakeRuntime`、`EventRecorder`、`ScriptedDriver`、`FakeProvider`（也可供 Session Manager 测试使用）。
 
 ### 5.5 与 session spec 第 5.1 节的对齐
 
@@ -318,6 +323,6 @@ Provider 不直接实现 `AgentSession`，而是为每个 Session 提供一个�
 | `capabilities`：Running 中提交、自由文本答复、原生名称 | `inputWhileRunning`、`freeTextAnswers`、`nativeTitle` | `inputWhileRunning` 按原生行为报告 `none` / `steer` / `queue`；Codex 已接入 `steer`，Claude 式排队仍待建模与验证（I-Q3） |
 | 可用性：已安装、版本、已登录、原因；版本不受支持 | 一致，`unsupported_version` 为第三种不可用原因 | 按 C-Q5 / A-Q1，仅有证据的会话集成不兼容才禁用，未验证不等于不支持 |
 | `listModels` 不创建原生会话 | 一致 | Claude 真实目录探测未新增 transcript，见第 3.12 节 |
-| `shutdownAll()` 清理受管进程并记录结果 | `ProviderRegistry.shutdownAll()` | 责任边界见 04 §5；返回不证明零残留（§3.6）；宿主异常退出见 A-Q3 |
+| `shutdownAll()` 清理受管进程并记录结果 | `ProviderRegistry.shutdownAll()` | 责任边界见 04 §5；任一未确认以 `AggregateError` 拒绝，成功不证明零残留（§3.6 第 9 条）；宿主异常退出见 A-Q3 |
 | 事件携带 Session 句柄与 turn ID | 信封 `sessionId`；回合事件 `turnId` | Session 级事件（原生 ID、标题、Runtime、模型）无 turn ID |
 | 轮记录中的实际模型（第 4.3 节） | `turn.completed.model`（CLI 提供时） | — |

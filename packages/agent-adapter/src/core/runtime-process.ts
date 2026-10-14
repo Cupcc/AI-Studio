@@ -28,6 +28,11 @@ export interface RuntimeSpawnOptions {
   /** Bounded stderr capture. Default 64 KiB. */
   stderrLimitBytes?: number;
   lister?: ProcessLister;
+  /**
+   * Waits the owner uses when it terminates this Runtime. A Provider's strict release reuses them
+   * for its own re-termination of the same handle instead of falling back to the defaults.
+   */
+  terminate?: TerminateOptions;
 }
 
 export interface TerminateOptions {
@@ -94,6 +99,11 @@ export interface RuntimeHandle {
 
 const DEFAULT_STDERR_LIMIT = 64 * 1024;
 
+/** Live members of the process group `leader` other than the leader itself. */
+function groupMembers(processes: readonly ProcessInfo[], leader: number): ProcessInfo[] {
+  return processes.filter((member) => member.pgid === leader && member.pid !== leader && !isZombie(member));
+}
+
 /**
  * One isolated CLI runtime process (04 §2: one runtime per active session). Spawned as the
  * leader of its own process group so termination never reaches the host or other sessions.
@@ -114,6 +124,9 @@ export class RuntimeProcess implements RuntimeHandle {
   private transport: LineTransport | undefined;
   private terminating: Promise<TerminationReport> | undefined;
   private lastSnapshot: ProcessInfo[] = [];
+  /** Members of this Runtime's process group listed the instant the leader exited. */
+  private exitSnapshot: Promise<void> | undefined;
+  private exitSnapshotFailed = false;
 
   private constructor(child: ChildProcess, options: RuntimeSpawnOptions) {
     this.child = child;
@@ -146,6 +159,15 @@ export class RuntimeProcess implements RuntimeHandle {
       const tail = this.stderrTail();
       if (tail) info.stderrTail = tail;
       this.exitRecord = info;
+      if (child.pid !== undefined) {
+        const leader = child.pid;
+        // While any member lives, the kernel cannot recycle the group id, so members listed now
+        // belong to this Runtime. Members first seen later may belong to a recycled id.
+        this.exitSnapshot = (async () => this.lister.list())().then(
+          (processes) => this.rememberSnapshot(groupMembers(processes, leader)),
+          () => { this.exitSnapshotFailed = true; },
+        );
+      }
       exit.resolve(info);
       this.exitStream.emit(info);
       this.exitStream.dispose();
@@ -269,7 +291,9 @@ export class RuntimeProcess implements RuntimeHandle {
     if (pid === undefined || !this.running) return [];
     const processes = await this.lister.list();
     const snapshot = descendantsIn(processes, pid, false);
-    this.rememberSnapshot(snapshot);
+    // Orphans (re-parented, still in this group) are owned while the leader runs; remember them
+    // too so they stay identifiable after the leader exits. The return value stays the ppid chain.
+    this.rememberSnapshot([...snapshot, ...groupMembers(processes, pid)]);
     return snapshot;
   }
 
@@ -288,8 +312,28 @@ export class RuntimeProcess implements RuntimeHandle {
   }
 
   terminate(options: TerminateOptions = {}): Promise<TerminationReport> {
-    this.terminating ??= this.runTermination(options);
+    if (!this.terminating) {
+      // Pending and confirmed attempts are shared; an unconfirmed one is dropped so the next call
+      // retries on this same handle (the exit record and recorded descendants are kept).
+      const pending = this.runTermination(options);
+      this.terminating = pending;
+      void pending.then((report) => {
+        if (!report.confirmed && this.terminating === pending) this.terminating = undefined;
+      }, () => {
+        if (this.terminating === pending) this.terminating = undefined;
+      });
+    }
     return this.terminating;
+  }
+
+  /** Waits for exit or `ms`, whichever is first, and never leaves the losing timer behind. */
+  private async exitedWithin(ms: number): Promise<void> {
+    const timer = new AbortController();
+    try {
+      await Promise.race([this.exited, sleep(ms, timer.signal)]);
+    } finally {
+      timer.abort();
+    }
   }
 
   private rememberSnapshot(snapshot: ProcessInfo[]): void {
@@ -312,18 +356,19 @@ export class RuntimeProcess implements RuntimeHandle {
         // Snapshot failure must not block termination; verification below still uses the group.
       }
     }
-    const descendants = [...this.lastSnapshot];
 
     let forced = false;
     if (this.running) {
       this.signalGroup('SIGTERM');
-      await Promise.race([this.exited, sleep(graceMs)]);
+      await this.exitedWithin(graceMs);
     }
-    let survivors = await this.collectSurvivors(descendants);
+    let verification = await this.collectSurvivors();
+    let survivors = verification.survivors;
     if (this.running || survivors.length > 0) {
       forced = true;
-      this.signalGroup('SIGKILL');
-      for (const p of survivors) {
+      // An exited group's numeric id may already belong to an unrelated process.
+      if (this.running) this.signalGroup('SIGKILL');
+      for (const p of verification.verified ? survivors : []) {
         try {
           process.kill(p.pid, 'SIGKILL');
         } catch {
@@ -331,48 +376,62 @@ export class RuntimeProcess implements RuntimeHandle {
         }
       }
       const deadline = Date.now() + killWaitMs;
-      await Promise.race([this.exited, sleep(killWaitMs)]);
-      survivors = await this.collectSurvivors(descendants);
+      await this.exitedWithin(killWaitMs);
+      verification = await this.collectSurvivors();
+      survivors = verification.survivors;
       while (survivors.length > 0 && Date.now() < deadline) {
         await sleep(50);
-        survivors = await this.collectSurvivors(descendants);
+        verification = await this.collectSurvivors();
+        survivors = verification.survivors;
       }
     }
     const exit = this.exitRecord;
     return {
       exit,
       forced,
-      descendants,
+      descendants: [...this.lastSnapshot],
       survivors,
-      confirmed: exit !== undefined && survivors.length === 0 && pid !== undefined,
+      confirmed: verification.verified && exit !== undefined && survivors.length === 0 && pid !== undefined,
       elapsedMs: Date.now() - started,
     };
   }
 
-  private async collectSurvivors(descendants: readonly ProcessInfo[]): Promise<ProcessInfo[]> {
+  /**
+   * Recorded processes (pid + start time) and members of this Runtime's own process group that are
+   * still alive. Group members are adopted only while the group provably still belongs to us:
+   * the leader runs, a recorded member is alive in it (a live member keeps the id from being
+   * recycled), or the exit-time listing failed and no process owns the leader's pid now.
+   * A confirmed exit therefore never coexists with a live member of the Runtime's own group.
+   */
+  private async collectSurvivors(): Promise<{ survivors: ProcessInfo[]; verified: boolean }> {
     const pid = this.child.pid;
-    if (pid === undefined) return [];
+    if (pid === undefined) return { survivors: [], verified: false };
+    await this.exitSnapshot;
+    const recorded = [...this.lastSnapshot];
     let processes: ProcessInfo[];
     try {
       processes = await this.lister.list();
     } catch {
-      return [...descendants];
+      return { survivors: recorded, verified: false };
     }
     const result = new Map<string, ProcessInfo>();
-    for (const alive of await findAlive(descendants.map(identityOf), { list: async () => processes })) {
-      result.set(`${alive.pid}@${alive.startedAt}`, alive);
+    const alive = await findAlive(recorded.map(identityOf), { list: async () => processes });
+    for (const member of alive) result.set(`${member.pid}@${member.startedAt}`, member);
+    const owned = this.running
+      || alive.some((member) => member.pgid === pid)
+      || (this.exitSnapshotFailed && !processes.some((member) => member.pid === pid));
+    if (owned) {
+      for (const member of groupMembers(processes, pid)) result.set(`${member.pid}@${member.startedAt}`, member);
     }
-    for (const member of processes) {
-      if (member.pgid === pid && member.pid !== pid && !isZombie(member)) {
-        result.set(`${member.pid}@${member.startedAt}`, member);
-      }
-    }
-    return [...result.values()];
+    const survivors = [...result.values()];
+    this.rememberSnapshot(survivors);
+    return { survivors, verified: true };
   }
 
   private signalGroup(signal: NodeJS.Signals): boolean {
     const pid = this.child.pid;
-    if (pid === undefined) return false;
+    // After the leader exited its numeric id may belong to an unrelated process group.
+    if (pid === undefined || !this.running) return false;
     try {
       process.kill(-pid, signal);
       return true;

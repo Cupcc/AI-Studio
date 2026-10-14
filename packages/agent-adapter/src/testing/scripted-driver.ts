@@ -209,8 +209,10 @@ export class FakeProvider implements AgentProvider {
 
   /** Shutdown: disposes every live session (see `AgentProvider.dispose`). */
   async dispose(): Promise<void> {
-    await this.live.disposeAll();
+    await this.releaseRuntimes();
   }
+
+  releaseRuntimes(cwd?: string): Promise<void> { return this.live.disposeAll(cwd); }
 
   private build(options: CreateSessionOptions | ResumeSessionOptions, expectedNativeSessionId?: string): FakeSessionRecord {
     let driver!: ScriptedDriver;
@@ -229,7 +231,7 @@ export class FakeProvider implements AgentProvider {
     );
     const record = { controller, driver, options };
     this.sessions.push(record);
-    this.live.add(controller);
+    this.live.add(controller, options.cwd);
     return record;
   }
 }

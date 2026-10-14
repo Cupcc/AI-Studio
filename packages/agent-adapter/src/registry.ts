@@ -27,8 +27,14 @@ export class ProviderRegistry {
     return [...this.providers.values()];
   }
 
-  /** App quit: disposes every provider, which disposes all of its live sessions and runtimes. */
+  /**
+   * App quit: disposes every provider, which disposes all of its live sessions and runtimes. Every
+   * provider is attempted; rejects with an AggregateError (one entry per provider) when any exit
+   * stays unconfirmed, so a final shutdown never reports success over a surviving Runtime.
+   */
   async shutdownAll(): Promise<void> {
-    await Promise.allSettled([...this.providers.values()].map((provider) => provider.dispose()));
+    const results = await Promise.allSettled([...this.providers.values()].map((provider) => provider.dispose()));
+    const errors = results.filter((result) => result.status === 'rejected').map((result) => result.reason);
+    if (errors.length) throw new AggregateError(errors, 'Provider shutdown failed');
   }
 }

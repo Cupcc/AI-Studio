@@ -105,7 +105,11 @@ export interface SessionDriver {
   cancelInput?(record: PendingInputRecord, reason: CancelReason): Promise<void> | void;
   setModel(model: string | null): Promise<void>;
   listModels(): Promise<ModelInfo[]>;
-  /** Terminates the runtime and releases resources. Must be idempotent and must not throw. */
+  /**
+   * Terminates the runtime and resolves only once its exit is confirmed; rejects when it is not.
+   * Must coalesce pending calls, treat a settled success as a no-op, and retry on the same exact
+   * runtime handle after a rejection (never by pid, never by starting another runtime).
+   */
   dispose(): Promise<void>;
 }
 
@@ -208,6 +212,7 @@ export class SessionController implements AgentSession {
   private closeError: AdapterErrorInfo | undefined;
   private title: string | undefined;
   private readonly closedSignal = deferred<SessionCloseReason>();
+  private readonly releasedSignal = deferred<void>();
   private disposing: Promise<void> | undefined;
   private driverDisposal: Promise<void> | undefined;
   private readonly now: () => number;
@@ -264,6 +269,15 @@ export class SessionController implements AgentSession {
   /** Resolves with the close reason once the session is closed (used for shutdown tracking). */
   get closed(): Promise<SessionCloseReason> {
     return this.closedSignal.promise;
+  }
+
+  /**
+   * Resolves once the driver confirmed that its runtime is released, whichever attempt succeeded
+   * first (background release after a self-close, or an explicit `dispose()` retry). Never rejects;
+   * it stays pending while release is unconfirmed or the session is still live.
+   */
+  get released(): Promise<void> {
+    return this.releasedSignal.promise;
   }
 
   /** Events emitted before the first subscription are buffered and replayed to it. */
@@ -427,8 +441,23 @@ export class SessionController implements AgentSession {
     return this.driver.listModels();
   }
 
+  /**
+   * Closes the session and verifies that its runtime was released. Pending calls share one attempt
+   * and a settled success is a no-op. Unconfirmed cleanup rejects and keeps the exact driver
+   * handle, so calling `dispose()` again retries it even when `state` is already `closed`.
+   */
   dispose(): Promise<void> {
-    this.disposing ??= this.runDispose();
+    if (!this.disposing) {
+      // Run synchronously (state closes at once) but publish the shared promise first, so a
+      // listener that calls dispose() while events are emitted joins this attempt.
+      const attempt = deferred<void>();
+      const pending = attempt.promise;
+      this.disposing = pending;
+      this.runDispose().then(attempt.resolve, attempt.reject);
+      void pending.catch(() => {
+        if (this.disposing === pending) this.disposing = undefined;
+      });
+    }
     return this.disposing;
   }
 
@@ -706,7 +735,8 @@ export class SessionController implements AgentSession {
     if (previous !== 'closed') this.emit('session.state', { state: 'closed', previous });
     this.emit('session.closed', { reason, ...(error ? { error } : {}) });
     this.closedSignal.resolve(reason);
-    if (reason !== 'disposed') void this.disposeDriver();
+    // Logical closure is not exit evidence. Keep the driver available for explicit retries.
+    if (reason !== 'disposed') void this.disposeDriver().catch(() => {});
   }
 
   private async runDispose(): Promise<void> {
@@ -717,8 +747,9 @@ export class SessionController implements AgentSession {
         // Fall through: the runtime is terminated below regardless.
       }
     }
+    let previous: SessionRuntimeState | undefined;
     if (this.guard.state !== 'closed') {
-      const previous = this.guard.close();
+      previous = this.guard.close();
       const turn = this.active;
       if (turn) {
         turn.nativeEnd.resolve();
@@ -727,24 +758,30 @@ export class SessionController implements AgentSession {
           stop: { requestedAt: turn.stop?.requestedAt ?? this.now(), completedAt: this.now(), cleanup: 'failed' },
         });
       }
+    }
+    try {
       await this.disposeDriver();
-      this.completeClose('disposed', previous);
-    } else {
-      await this.disposeDriver();
+    } finally {
+      // Events follow the runtime's exit (runtime.exited, then session.state / session.closed). A
+      // release that stays unconfirmed still closes the session before the rejection is reported.
+      if (previous !== undefined) this.completeClose('disposed', previous);
     }
     this.flushToNowhere();
     this.events.dispose();
   }
 
   private disposeDriver(): Promise<void> {
-    this.driverDisposal ??= (async () => {
-      try {
-        await withTimeout(() => this.driver.dispose(), this.timeouts.disposeMs, 'Driver dispose');
-      } catch (error) {
+    if (!this.driverDisposal) {
+      // Cache the actual operation, not its bounded observer: timeout must not start a
+      // second cleanup while the first one is still running.
+      const pending = (async () => this.driver.dispose())();
+      this.driverDisposal = pending;
+      void pending.then(() => this.releasedSignal.resolve(), (error: unknown) => {
+        if (this.driverDisposal === pending) this.driverDisposal = undefined;
         this.diagnostic('warning', `Driver dispose failed: ${toAdapterError(error).message}`);
-      }
-    })();
-    return this.driverDisposal;
+      });
+    }
+    return withTimeout(() => this.driverDisposal!, this.timeouts.disposeMs, 'Driver dispose');
   }
 
   private flushToNowhere(): void {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ProviderRegistry } from '../../src/registry.js';
 import { ensureSession } from '../../src/session-helpers.js';
 import { EventRecorder, FakeProvider } from '../../src/testing/index.js';
@@ -38,6 +38,21 @@ describe('provider contract via FakeProvider', () => {
     expect(reused).toEqual({ session: created.session, action: 'reused' });
   });
 
+  it('ensureSession starts no replacement while the closed session exit is unconfirmed, and resumes after a retry', async () => {
+    const provider = new FakeProvider('codex');
+    const first = await provider.createSession(base);
+    const nativeId = first.nativeSessionId!;
+    const cleanup = vi.spyOn(provider.sessions[0]!.driver, 'dispose').mockRejectedValue(new Error('exit unconfirmed'));
+    provider.sessions[0]!.controller.sink.runtimeExited({ generation: 1, code: null, signal: 'SIGKILL', expected: false, exitedAt: 1 });
+    await expect(ensureSession(provider, first, { ...base, nativeSessionId: nativeId })).rejects.toThrow('exit unconfirmed');
+    expect(provider.sessions).toHaveLength(1);
+    cleanup.mockResolvedValue(undefined);
+    const { session, action } = await ensureSession(provider, first, { ...base, nativeSessionId: nativeId });
+    expect(action).toBe('resumed');
+    expect(session.nativeSessionId).toBe(nativeId);
+    expect(provider.sessions).toHaveLength(2);
+  });
+
   it('rejects resume with resume_failed and never creates a new native session', async () => {
     const provider = new FakeProvider('codex');
     await expect(ensureSession(provider, undefined, { ...base, nativeSessionId: 'unknown-thread' })).rejects.toMatchObject({
@@ -62,6 +77,43 @@ describe('provider contract via FakeProvider', () => {
     expect(codex.sessions[0]!.driver.disposed).toBe(true);
     expect(claude.sessions[0]!.driver.disposed).toBe(true);
     expect(await (a as SessionController).closed).toBe('disposed');
+  });
+
+  it('shutdownAll attempts every provider and rejects instead of reporting success over an unconfirmed exit', async () => {
+    const registry = new ProviderRegistry();
+    const codex = new FakeProvider('codex');
+    const claude = new FakeProvider('claude-code');
+    registry.register(codex);
+    registry.register(claude);
+    await codex.createSession(base);
+    await claude.createSession(base);
+    const failure = new Error('exit unconfirmed');
+    const cleanup = vi.spyOn(codex.sessions[0]!.driver, 'dispose').mockRejectedValueOnce(failure).mockResolvedValue(undefined);
+    const attempt = registry.shutdownAll();
+    await expect(attempt).rejects.toBeInstanceOf(AggregateError);
+    await expect(attempt).rejects.toMatchObject({ errors: [expect.objectContaining({ errors: [failure] })] });
+    expect(claude.sessions[0]!.driver.disposed).toBe(true);
+    await registry.shutdownAll();
+    expect(cleanup).toHaveBeenCalledTimes(2);
+  });
+
+  it('releaseRuntimes is strict, retryable on the same session handle and limited to one Project', async () => {
+    const provider = new FakeProvider('codex');
+    const a = await provider.createSession({ ...base, cwd: '/tmp/project a' });
+    const b = await provider.createSession({ ...base, cwd: '/tmp/project b' });
+    const cleanup = vi.spyOn(provider.sessions[0]!.driver, 'dispose').mockRejectedValueOnce(new Error('exit unconfirmed')).mockResolvedValue(undefined);
+    await expect(provider.releaseRuntimes('/tmp/project a')).rejects.toBeInstanceOf(AggregateError);
+    expect(a.state).toBe('closed');
+    expect(b.state).toBe('idle');
+    expect(provider.sessions[1]!.driver.disposed).toBe(false);
+    await provider.releaseRuntimes('/tmp/project a');
+    expect(cleanup).toHaveBeenCalledTimes(2);
+    expect(provider.sessions).toHaveLength(2);
+    await provider.releaseRuntimes('/tmp/project a');
+    expect(cleanup).toHaveBeenCalledTimes(2);
+    await provider.releaseRuntimes();
+    expect(b.state).toBe('closed');
+    expect(provider.sessions[1]!.driver.disposed).toBe(true);
   });
 
   it('reports availability through the shared summary', async () => {

@@ -118,6 +118,13 @@ describe('Codex Stop / 04 §4.1–7, FR-SESSION-003, AC-03', () => {
     expect(h.runtimes).toHaveLength(1); expect(session.state).toBe('closed');
     expect(recorder.last('turn.completed')).toMatchObject({ outcome: 'interrupted', stop: { cleanup: 'failed' } });
     expect(recorder.last('session.error')).toMatchObject({ error: { code: 'stop_cleanup_failed' } });
+    // Strict release contract (W5-F2): the closed Session still owns the unconfirmed Runtime, so the
+    // Provider keeps rejecting until exit is proven instead of reporting a best-effort success.
+    await expect(h.provider.releaseRuntimes()).rejects.toBeInstanceOf(AggregateError);
+    expect(h.runtimes).toHaveLength(1);
+    h.runtimes[0]!.terminateBehavior = 'exit';
+    await h.provider.releaseRuntimes();
+    await h.provider.dispose();
   });
 
   it('closes explicitly when Runtime replacement cannot resume the original thread', async () => {

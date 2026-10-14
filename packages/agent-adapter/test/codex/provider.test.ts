@@ -3,12 +3,182 @@ import { EventRecorder } from '../../src/testing/event-recorder.js';
 import { ScriptedRpcError } from '../../src/testing/fake-transport.js';
 import { Harness, approval, model, options } from './harness.js';
 import { CodexProvider } from '../../src/codex/index.js';
+import { deferred } from '../../src/core/async.js';
 
 const harnesses: Harness[] = [];
 const setup = () => { const harness = new Harness(); harnesses.push(harness); return harness; };
 afterEach(async () => { await Promise.all(harnesses.splice(0).map((h) => h.provider.dispose())); });
 
 describe('Codex Provider lifecycle / FR-CHAT-002, FR-CHAT-003, AC-02', () => {
+  it('rejects unconfirmed runtime disposal and retries the exact runtime', async () => {
+    const h = setup();
+    const session = await h.session();
+    const runtime = h.runtimes[0]!;
+    runtime.terminateBehavior = 'hang';
+    await expect(session.dispose()).rejects.toMatchObject({ code: 'stop_cleanup_failed' });
+    expect(h.runtimes).toHaveLength(1);
+    runtime.terminateBehavior = 'exit';
+    await Promise.all([session.dispose(), session.dispose()]);
+    expect(runtime.terminateCalls).toHaveLength(2);
+    expect(h.runtimes).toHaveLength(1);
+    await session.dispose();
+    expect(runtime.terminateCalls).toHaveLength(2);
+  });
+
+  it('rejects Provider.releaseRuntimes with an AggregateError while exit is unconfirmed and retries the same handle', async () => {
+    const h = setup();
+    const session = await h.session();
+    const runtime = h.runtimes[0]!;
+    runtime.terminateBehavior = 'hang';
+    const failed = h.provider.releaseRuntimes();
+    await expect(failed).rejects.toBeInstanceOf(AggregateError);
+    await expect(failed).rejects.toMatchObject({ errors: expect.arrayContaining([expect.objectContaining({ code: 'stop_cleanup_failed' })]) });
+    expect(session.state).toBe('closed');
+    expect(runtime.running).toBe(true);
+    runtime.terminateBehavior = 'exit';
+    await h.provider.releaseRuntimes();
+    expect(runtime.running).toBe(false);
+    expect(h.runtimes).toHaveLength(1);
+    const calls = runtime.terminateCalls.length;
+    await h.provider.releaseRuntimes();
+    expect(runtime.terminateCalls).toHaveLength(calls);
+  });
+
+  it('drops a session from the tracked set once an explicit dispose retry confirmed its release', async () => {
+    const h = setup();
+    const session = await h.session();
+    const tracked = () => (h.provider as unknown as { live: { size: number } }).live.size;
+    h.runtimes[0]!.terminateBehavior = 'hang';
+    await expect(session.dispose()).rejects.toMatchObject({ code: 'stop_cleanup_failed' });
+    expect(tracked()).toBe(1);
+    h.runtimes[0]!.terminateBehavior = 'exit';
+    await session.dispose();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(tracked()).toBe(0);
+  });
+
+  it('retries a Provider release with the terminate waits the Session was configured with', async () => {
+    const h = setup();
+    const session = await h.session({ timeouts: { ...options.timeouts, terminateGraceMs: 3, killWaitMs: 4 } });
+    const runtime = h.runtimes[0]!;
+    runtime.terminateBehavior = 'hang';
+    await expect(session.dispose()).rejects.toBeInstanceOf(Error);
+    await expect(h.provider.releaseRuntimes()).rejects.toBeInstanceOf(AggregateError);
+    expect(runtime.terminateCalls.length).toBeGreaterThan(1);
+    expect(runtime.terminateCalls.every((call) => call.graceMs === 3 && call.killWaitMs === 4)).toBe(true);
+    runtime.terminateBehavior = 'exit';
+    await h.provider.releaseRuntimes();
+  });
+
+  it('limits releaseRuntimes(cwd) to that Project without touching another Project or disposing the Provider', async () => {
+    const h = setup();
+    const a = await h.session({ cwd: '/tmp/project a' });
+    const b = await h.session({ cwd: '/tmp/project b' });
+    h.runtimes[1]!.terminateBehavior = 'hang';
+    await h.provider.releaseRuntimes('/tmp/project a');
+    expect(a.state).toBe('closed');
+    expect(h.runtimes[0]!.running).toBe(false);
+    expect(b.state).toBe('idle');
+    expect(h.runtimes[1]!.terminateCalls).toHaveLength(0);
+    expect((await h.session({ cwd: '/tmp/project a' })).state).toBe('idle');
+    await expect(h.provider.releaseRuntimes('/tmp/project b')).rejects.toBeInstanceOf(AggregateError);
+    expect(b.state).toBe('closed');
+    expect(h.runtimes[1]!.running).toBe(true);
+    h.runtimes[1]!.terminateBehavior = 'exit';
+    await h.provider.releaseRuntimes('/tmp/project b');
+    expect(h.runtimes[1]!.running).toBe(false);
+    expect(h.runtimes[2]!.running).toBe(true);
+  });
+
+  it('keeps Provider.dispose() strict: it rejects while exit is unconfirmed and retries the same handle', async () => {
+    const h = setup();
+    await h.session();
+    const runtime = h.runtimes[0]!;
+    runtime.terminateBehavior = 'hang';
+    await expect(h.provider.releaseRuntimes()).rejects.toBeInstanceOf(AggregateError);
+    const first = h.provider.dispose();
+    expect(h.provider.dispose()).toBe(first);
+    await expect(first).rejects.toBeInstanceOf(AggregateError);
+    await expect(h.session()).rejects.toMatchObject({ code: 'disposed' });
+    runtime.terminateBehavior = 'exit';
+    await h.provider.dispose();
+    expect(runtime.running).toBe(false);
+    expect(h.runtimes).toHaveLength(1);
+    const calls = runtime.terminateCalls.length;
+    await h.provider.dispose();
+    expect(runtime.terminateCalls).toHaveLength(calls);
+  });
+
+  it('keeps the startup error but retains an unconfirmed failed-startup Runtime for release', async () => {
+    const h = setup();
+    h.configure = (server, runtime) => {
+      runtime.terminateBehavior = 'hang';
+      server.handle('thread/start', () => { throw new Error('thread start failed'); });
+    };
+    const error = await h.session().then(() => undefined, (reason: unknown) => reason);
+    expect(error).toMatchObject({ code: 'provider_error', message: expect.stringContaining('thread start failed') });
+    expect(h.runtimes).toHaveLength(1);
+    expect(h.runtimes[0]!.running).toBe(true);
+    await expect(h.provider.releaseRuntimes()).rejects.toBeInstanceOf(AggregateError);
+    h.runtimes[0]!.terminateBehavior = 'exit';
+    await h.provider.releaseRuntimes();
+    expect(h.runtimes[0]!.running).toBe(false);
+    expect(h.runtimes).toHaveLength(1);
+  });
+
+  it('waits for a late Runtime startup, releases it, and rejects new startups only while releasing', async () => {
+    const h = setup();
+    const gate = deferred<void>();
+    const factory = h.dependencies.runtimeFactory!;
+    let requested = 0;
+    h.dependencies.runtimeFactory = async (spawn) => { requested++; await gate.promise; return factory(spawn); };
+    const creating = h.session().then(() => undefined, (reason: unknown) => reason);
+    await vi.waitFor(() => expect(requested).toBe(1));
+    let released = false;
+    const release = h.provider.releaseRuntimes().then(() => { released = true; });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(released).toBe(false);
+    await expect(h.session()).rejects.toMatchObject({ code: 'invalid_state' });
+    expect(requested).toBe(1);
+    gate.resolve();
+    await release;
+    expect(await creating).toBeInstanceOf(Error);
+    expect(h.runtimes).toHaveLength(1);
+    expect(h.runtimes[0]!.running).toBe(false);
+    expect((await h.session()).state).toBe('idle');
+    expect(h.runtimes).toHaveLength(2);
+  });
+
+  it('retains an unconfirmed model-probe Runtime and releases that exact handle later', async () => {
+    const h = setup();
+    h.configure = (_server, runtime) => { runtime.terminateBehavior = 'hang'; };
+    await expect(h.provider.listModels({ environment: options.environment, cwd: '/tmp/probe project' })).rejects.toMatchObject({ code: 'stop_cleanup_failed' });
+    const runtime = h.runtimes[0]!;
+    expect(runtime.running).toBe(true);
+    await h.provider.releaseRuntimes('/tmp/another project');
+    expect(runtime.terminateCalls).toHaveLength(1);
+    await expect(h.provider.releaseRuntimes('/tmp/probe project')).rejects.toBeInstanceOf(AggregateError);
+    expect(runtime.terminateCalls).toHaveLength(2);
+    runtime.terminateBehavior = 'exit';
+    await h.provider.releaseRuntimes();
+    expect(runtime.running).toBe(false);
+    expect(h.runtimes).toHaveLength(1);
+  });
+
+  it('keeps the model-catalog error when the probe cleanup is also unconfirmed, and still retains the handle', async () => {
+    const h = setup();
+    h.configure = (server, runtime) => { server.handle('model/list', () => { throw new Error('catalog unavailable'); }); runtime.terminateBehavior = 'hang'; };
+    const failure = await h.provider.listModels({ environment: options.environment }).catch((error: unknown) => error);
+    expect(failure).toMatchObject({ message: expect.stringContaining('catalog unavailable') });
+    expect(failure).not.toMatchObject({ code: 'stop_cleanup_failed' });
+    const runtime = h.runtimes[0]!;
+    expect(runtime.running).toBe(true);
+    await expect(h.provider.releaseRuntimes()).rejects.toBeInstanceOf(AggregateError);
+    runtime.terminateBehavior = 'exit';
+    await h.provider.releaseRuntimes();
+    expect(runtime.running).toBe(false);
+  });
+
   it('uses native defaults, supplied environment and one Runtime per Session', async () => {
     const h = setup();
     const a = await h.session();

@@ -9,6 +9,7 @@ import { execBounded, parseVersion, resolveExecutable } from '../core/exec.js';
 import { RuntimeProcess, type RuntimeHandle } from '../core/runtime-process.js';
 import { defaultProcessLister } from '../core/process-probe.js';
 import { LiveSessions } from '../core/live-sessions.js';
+import { RuntimeResources } from '../core/runtime-resources.js';
 import { SessionController } from '../core/session-controller.js';
 import { withTimeout } from '../core/async.js';
 import { CodexDriver, type CodexProviderOptions, type DriverDependencies } from './driver.js';
@@ -29,17 +30,19 @@ export class CodexProvider implements AgentProvider {
   readonly displayName = 'Codex';
   readonly capabilities = CODEX_CAPABILITIES;
   private readonly live = new LiveSessions();
+  private readonly resources = new RuntimeResources();
   private readonly dependencies: DriverDependencies;
   private readonly resolve;
   private readonly exec;
-  private readonly opening = new Set<Promise<AgentSession>>();
-  private readonly probes = new Set<Promise<ModelInfo[]>>();
   private readonly lifetime = new AbortController();
   private disposed = false;
   private disposal: Promise<void> | undefined;
 
   constructor(dependencies: CodexProviderDependencies = {}) {
-    this.dependencies = { runtimeFactory: dependencies.runtimeFactory ?? RuntimeProcess.start, processLister: dependencies.processLister ?? defaultProcessLister };
+    this.dependencies = {
+      runtimeFactory: options => this.resources.start(options, dependencies.runtimeFactory ?? RuntimeProcess.start),
+      processLister: dependencies.processLister ?? defaultProcessLister,
+    };
     this.resolve = dependencies.resolveExecutable ?? resolveExecutable;
     this.exec = dependencies.exec ?? execBounded;
   }
@@ -100,31 +103,42 @@ export class CodexProvider implements AgentProvider {
   private open(options: CreateSessionOptions, resumeId?: string): Promise<AgentSession> {
     this.assertLive();
     const extras = validateOptions(options);
-    const operation = (async () => {
+    return (async () => {
       const executable = await this.executable(options.environment);
       this.assertLive();
+      this.resources.assertOpen(options.cwd);
       let driver!: CodexDriver;
       const session = new SessionController({ providerId: this.id, capabilities: this.capabilities, timeouts: options.timeouts,
         expectedNativeSessionId: resumeId, initialModel: options.overrides?.model }, (sink) => {
         driver = new CodexDriver(sink, options, extras, executable.path, this.dependencies); return driver;
       });
-      this.live.add(session);
+      this.live.add(session, options.cwd);
       try {
         await driver.initialize(resumeId);
         if (this.disposed || session.state === 'closed') throw adapterError('disposed', 'Provider closed during Session startup');
         return session;
-      } catch (error) { await session.dispose(); throw error; }
+      } catch (error) {
+        // Never let an unconfirmed cleanup mask the startup failure: the session stays tracked
+        // and `releaseRuntimes()` / `dispose()` keep retrying it.
+        await session.dispose().catch(() => {});
+        throw error;
+      }
     })();
-    this.opening.add(operation);
-    void operation.then(() => this.opening.delete(operation), () => this.opening.delete(operation));
-    return operation;
   }
 
   dispose(): Promise<void> {
     this.disposed = true;
     this.lifetime.abort(adapterError('disposed', 'Codex Provider is disposed'));
-    this.disposal ??= (async () => { await this.live.disposeAll(); await Promise.allSettled([...this.opening, ...this.probes]); await this.live.disposeAll(); })();
+    if (!this.disposal) {
+      const pending = this.releaseRuntimes();
+      this.disposal = pending;
+      void pending.catch(() => { if (this.disposal === pending) this.disposal = undefined; });
+    }
     return this.disposal;
+  }
+
+  releaseRuntimes(cwd?: string): Promise<void> {
+    return this.resources.release(cwd, () => this.live.disposeAll(cwd));
   }
 
   private assertLive(): void { if (this.disposed) throw adapterError('disposed', 'Codex Provider is disposed'); }
@@ -134,21 +148,16 @@ export class CodexProvider implements AgentProvider {
     return found;
   }
 
-  private probeModels(environment: ProviderEnvironment, cwd = tmpdir(), signal?: AbortSignal, timeoutMs = 30_000): Promise<ModelInfo[]> {
-    const operation = this.runProbeModels(environment, cwd, signal, timeoutMs);
-    this.probes.add(operation);
-    void operation.then(() => this.probes.delete(operation), () => this.probes.delete(operation));
-    return operation;
-  }
-
-  private async runProbeModels(environment: ProviderEnvironment, cwd: string, signal: AbortSignal | undefined, timeoutMs: number): Promise<ModelInfo[]> {
+  private async probeModels(environment: ProviderEnvironment, cwd = tmpdir(), signal?: AbortSignal, timeoutMs = 30_000): Promise<ModelInfo[]> {
     this.assertLive();
     signal?.throwIfAborted();
     const executable = await this.executable(environment);
     let runtime: RuntimeHandle | undefined;
     let connection: CodexConnection | undefined;
+    let catalog: ModelInfo[] | undefined;
+    let failure: { error: unknown } | undefined;
     try {
-      return await withTimeout(async (bounded) => {
+      catalog = await withTimeout(async (bounded) => {
         const combined = AbortSignal.any([this.lifetime.signal, bounded, ...(signal ? [signal] : [])]);
         combined.throwIfAborted();
         runtime = await this.dependencies.runtimeFactory({ command: executable.path, args: ['app-server', '--listen', 'stdio://'],
@@ -158,13 +167,16 @@ export class CodexProvider implements AgentProvider {
         await connection.initialize(combined);
         return connection.models(combined);
       }, timeoutMs, 'Codex model catalog');
-    } finally {
-      connection?.peer.close();
-      if (runtime) {
-        const report = await runtime.terminate();
-        if (!report.confirmed) throw adapterError('stop_cleanup_failed', 'Model catalog Runtime exit was not confirmed');
-      }
+    } catch (error) { failure = { error }; }
+    connection?.peer.close();
+    if (runtime) {
+      // An unconfirmed cleanup must not replace the catalog error; the handle stays retained
+      // and `releaseRuntimes()` reports and retries it.
+      const report = await runtime.terminate().catch((error: unknown) => { failure ??= { error }; return undefined; });
+      if (report && !report.confirmed && !failure) throw adapterError('stop_cleanup_failed', 'Model catalog Runtime exit was not confirmed');
     }
+    if (failure) throw failure.error;
+    return catalog!;
   }
 }
 

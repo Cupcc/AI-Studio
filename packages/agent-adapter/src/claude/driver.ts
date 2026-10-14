@@ -76,7 +76,9 @@ export class ClaudeDriver implements SessionDriver {
         } finally { startupSignal.removeEventListener('abort', abort); }
       }, this.timeouts.startupMs, 'Claude initialization', signal);
     } catch (error) {
-      await this.dispose();
+      // An unconfirmed cleanup must not mask the startup cause; the exact handle stays retained
+      // by the Provider and by this driver for the next dispose / releaseRuntimes call.
+      await this.dispose().catch(() => {});
       throw toAdapterError(error, this.nativeId ? 'resume_failed' : 'spawn_failed');
     }
   }
@@ -101,6 +103,7 @@ export class ClaudeDriver implements SessionDriver {
         const started = (this.deps.startRuntime ?? RuntimeProcess.start)({
           command: spawn.command, args: spawn.args, cwd: spawn.cwd ?? this.options.cwd,
           env: spawn.env, generation, label: 'Claude Code', lister: this.deps.processLister,
+          terminate: { graceMs: this.timeouts.terminateGraceMs, killWaitMs: this.timeouts.killWaitMs },
         }).then(async (runtime) => {
           state.runtime = runtime;
           runtime.onExit((info) => this.sink.runtimeExited({ ...info, expected: state.closing || this.closed }));
@@ -301,7 +304,14 @@ export class ClaudeDriver implements SessionDriver {
     const models = await withTimeout(() => this.current().query!.supportedModels(), this.timeouts.requestMs, 'Claude model catalog');
     return models.map((model) => ({ id: model.value, displayName: model.displayName, description: model.description }));
   }
-  dispose(): Promise<void> { this.disposal ??= this.close(); return this.disposal; }
+  dispose(): Promise<void> {
+    if (!this.disposal) {
+      const pending = this.close();
+      this.disposal = pending;
+      void pending.catch(() => { if (this.disposal === pending) this.disposal = undefined; });
+    }
+    return this.disposal;
+  }
   private async close(): Promise<void> {
     this.closed = true;
     for (const tracking of this.processes.values()) if (tracking.timer) clearInterval(tracking.timer);
@@ -309,13 +319,17 @@ export class ClaudeDriver implements SessionDriver {
     if (state) { state.closing = true; state.permissions.close(); }
     try {
       const report = await this.slot.shutdown();
-      if (report && !report.confirmed) this.sink.diagnostic({ kind: 'warning', message: 'Claude runtime exit could not be verified' });
-      if (state?.runtime && state.runtime !== this.slot.current) await state.runtime.terminate();
-    } catch {
+      if (report && !report.confirmed) throw adapterError('stop_cleanup_failed', 'Claude runtime exit could not be verified');
+      if (state?.runtime && state.runtime !== this.slot.current) {
+        const extra = await state.runtime.terminate();
+        if (!extra.confirmed) throw adapterError('stop_cleanup_failed', 'Claude pending runtime exit could not be verified');
+      }
+    } catch (error) {
       this.sink.diagnostic({ kind: 'warning', message: 'Claude runtime shutdown failed' });
+      throw error;
     } finally {
       state?.input.end();
-      try { state?.query?.close(); } catch { /* dispose is best effort and never throws */ }
+      try { state?.query?.close(); } catch { /* Runtime verification above remains authoritative. */ }
     }
   }
   private current(): RuntimeState {

@@ -168,8 +168,19 @@ export interface AgentProvider {
    */
   resumeSession(options: ResumeSessionOptions): Promise<AgentSession>;
   /**
+   * Strict, retryable release of every managed runtime this provider owns, including runtimes of
+   * failed/late startups and availability / model probes. The optional canonical `cwd` (the exact
+   * string passed to `createSession`) limits it to one Project. Does not dispose the provider.
+   * Rejects with an `AggregateError` when any exit is unconfirmed; unconfirmed handles stay
+   * retained and the next call retries them. New startups in the same scope are rejected with
+   * `invalid_state` only while a release is running.
+   */
+  releaseRuntimes(cwd?: string): Promise<void>;
+  /**
    * Shutdown: disposes every live session this provider created (stopping active turns and
-   * terminating runtimes with exit verification), then releases provider resources.
+   * terminating runtimes with exit verification), then releases provider resources. Uses the
+   * strict `releaseRuntimes()` path: rejects when an exit is unconfirmed and can be called again
+   * to retry; the provider rejects new work from the first call on.
    */
   dispose(): Promise<void>;
 }
@@ -212,6 +223,7 @@ export interface AgentSession {
   /** Applies to subsequent turns (`null` = CLI default). */
   setModel(model: string | null): Promise<void>;
   listModels(): Promise<ModelInfo[]>;
-  /** Stops an active turn, terminates the runtime and closes the session. Idempotent. */
+  /** Closes the session and verifies runtime release. Pending/successful calls are idempotent;
+   * failed cleanup rejects and can be retried on this same handle, even when state is closed. */
   dispose(): Promise<void>;
 }

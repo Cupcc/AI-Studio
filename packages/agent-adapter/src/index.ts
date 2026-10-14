@@ -36,6 +36,7 @@ export {
 export type { ExitVerification, ProcessIdentity, ProcessInfo, ProcessLister } from './core/process-probe.js';
 export { redactDeep, redactSecrets } from './core/redact.js';
 export { RuntimeProcess } from './core/runtime-process.js';
+export { RuntimeResources } from './core/runtime-resources.js';
 export type {
   ChildProcessLike,
   RuntimeHandle,

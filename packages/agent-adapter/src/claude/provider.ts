@@ -4,6 +4,8 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 import { buildAvailabilityReport, failed, ok, skipped } from '../availability.js';
 import { execBounded, parseVersion, resolveExecutable } from '../core/exec.js';
 import { LiveSessions } from '../core/live-sessions.js';
+import { RuntimeResources } from '../core/runtime-resources.js';
+import { RuntimeProcess } from '../core/runtime-process.js';
 import { SessionController } from '../core/session-controller.js';
 import { adapterError, toAdapterError } from '../errors.js';
 import type { AgentProvider, AgentSession, AvailabilityOptions, AvailabilityReport, CheckResult, CreateSessionOptions,
@@ -23,10 +25,13 @@ export class ClaudeProvider implements AgentProvider {
   readonly displayName = 'Claude Code';
   readonly capabilities = CLAUDE_CAPABILITIES;
   private readonly sessions = new LiveSessions();
+  private readonly resources = new RuntimeResources();
   private readonly dependencies;
   private disposed = false;
+  private disposal: Promise<void> | undefined;
   constructor(dependencies: ClaudeProviderDependencies = {}) {
-    this.dependencies = { ...dependencies, query: dependencies.query ?? query };
+    this.dependencies = { ...dependencies, query: dependencies.query ?? query,
+      startRuntime: (options: Parameters<typeof RuntimeProcess.start>[0]) => this.resources.start(options, dependencies.startRuntime ?? RuntimeProcess.start) };
   }
 
   async checkAvailability(options: AvailabilityOptions): Promise<AvailabilityReport> {
@@ -77,7 +82,16 @@ export class ClaudeProvider implements AgentProvider {
   async listModels(options: { environment: ProviderEnvironment; cwd?: string; signal?: AbortSignal }): Promise<ModelInfo[]> {
     this.assertOpen();
     const { session, driver } = await this.open({ cwd: options.cwd ?? tmpdir(), environment: options.environment }, undefined, true, options.signal);
-    try { return await driver.listModels(); } finally { await session.dispose(); }
+    let models: ModelInfo[];
+    try {
+      models = await driver.listModels();
+    } catch (error) {
+      // An unconfirmed cleanup must not replace the catalog error; the handle stays retained.
+      await session.dispose().catch(() => {});
+      throw error;
+    }
+    await session.dispose(); // strict: a catalog obtained over an unconfirmed exit is still a failure
+    return models;
   }
   async createSession(options: CreateSessionOptions): Promise<AgentSession> { return (await this.open(options)).session; }
   async resumeSession(options: ResumeSessionOptions): Promise<AgentSession> {
@@ -86,7 +100,20 @@ export class ClaudeProvider implements AgentProvider {
     }
     return (await this.open(options, options.nativeSessionId)).session;
   }
-  async dispose(): Promise<void> { this.disposed = true; await this.sessions.disposeAll(); }
+  releaseRuntimes(cwd?: string): Promise<void> {
+    return this.resources.release(cwd, () => this.sessions.disposeAll(cwd));
+  }
+  dispose(): Promise<void> {
+    this.disposed = true;
+    if (!this.disposal) {
+      const pending = this.releaseRuntimes();
+      this.disposal = pending;
+      // A caller that drops the promise must not create an unhandled rejection; callers that
+      // await it still see the failure, and the next call retries.
+      void pending.catch(() => { if (this.disposal === pending) this.disposal = undefined; });
+    }
+    return this.disposal;
+  }
 
   private async open(options: SessionOptionsBase, nativeId?: string, probeOnly = false, signal?: AbortSignal) {
     this.assertOpen();
@@ -96,17 +123,23 @@ export class ClaudeProvider implements AgentProvider {
     });
     if (!executable) throw adapterError('not_installed', 'Claude Code executable was not found');
     this.assertOpen();
+    this.resources.assertOpen(options.cwd);
     let driver!: ClaudeDriver;
     const session = new ClaudeSession({ providerId: this.id, capabilities: this.capabilities,
       expectedNativeSessionId: nativeId, initialModel: options.overrides?.model, timeouts: options.timeouts,
     }, (sink) => driver = new ClaudeDriver(sink, options, executable.path, extras, this.dependencies, nativeId, probeOnly));
-    this.sessions.add(session);
+    this.sessions.add(session, options.cwd);
     try {
       await driver.initialize(signal);
       this.assertOpen();
       if (session.state === 'closed') throw adapterError(nativeId ? 'resume_failed' : 'spawn_failed', 'Claude closed during startup');
       return { session, driver };
-    } catch (error) { await session.dispose(); throw error; }
+    } catch (error) {
+      // Never let an unconfirmed cleanup mask the startup failure: the session stays tracked
+      // and `releaseRuntimes()` / `dispose()` keep retrying it.
+      await session.dispose().catch(() => {});
+      throw error;
+    }
   }
   private assertOpen(): void { if (this.disposed) throw adapterError('disposed', 'Claude provider is disposed'); }
   private missing(error: Parameters<typeof failed>[0]): AvailabilityReport {
