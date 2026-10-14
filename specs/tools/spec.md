@@ -6,12 +6,12 @@
 |---|---|
 | 模块 | `tools` |
 | 文档状态 | 已确认（2026-10-13） |
-| 确认范围 | 用户接受本轮审阅建议「accept all, not dev, update all docs」；技术契约为 AI 细化、待实现验证，本次 diff 待审阅；不代表开发授权或功能验收 |
+| 确认范围 | 用户接受本轮审阅建议「accept all, not dev, update all docs」；技术契约为 AI 细化、待实现验证，本次 diff 待审阅；不代表开发授权或功能验收；§5.1 为运行时开发阶段的 AI 技术决定（2026-10-13），不是人工产品确认，diff 待审阅；运行时开发授权见 §5 |
 | 覆盖需求 | FR-TOOL-001～FR-TOOL-004；文件上下文关联 FR-INPUT-001 |
 | 相关验收 | AC-07；Project 状态隔离关联 AC-01 |
 | 相关设计 | [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节 |
 | 来源 | [02 第 5 节](<../../docs/02. Functional Requirements.md#5-context-panel-与工程工具>)；[03 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)；[04 第 3、5 节及事项 13](<../../docs/04. Technical Requirements.md>)；用户 2026-10-12 对话「accept above suggetions, update all related docs」 |
-| 实施记录 | [工程工具任务](../../tasks/T20261009-context-tools/task.md)；本规格不表示工具内容已实现 |
+| 实施记录 | [工程工具任务](../../tasks/T20261009-context-tools/task.md)、[运行时执行计划](../../tasks/T20261009-context-tools/plan.md)及[验收记录](../../tasks/T20261009-context-tools/acceptance.md)；实现与验收状态以任务为准 |
 
 ## 1. 问题与决定
 
@@ -127,4 +127,14 @@ FR-TOOL-001～004、AC-07：实现前记录正常、异常和回归场景，至�
 
 原生轮次事件及非 Git 能力必须在锁定 CLI 版本验证；真实调用使用另行授权的范围 / 预算，模拟不替代真实结果。规格起草与本次确认不代表 AC-07 已通过；进度由 [06](<../../docs/06. Development Roadmap.md#33-工程工具>) 及工程工具任务负责。
 
-本轮仅更新文档，不执行探针、应用开发或模型调用（2026-10-13 明确指令）。可执行场景、未来阶段顺序与启动条件由 [工程工具任务](../../tasks/T20261009-context-tools/task.md) 维护；本规格确认不授权开始这些阶段。
+此前文档准备仅更新文档（2026-10-13 指令）；后续用户「推进运行时工具的开发。agents并发」授权 Terminal / Browser 及其生命周期接缝实施。真实模型调用范围 / 预算仍未确定。阶段与当前验证由 [工程工具任务](../../tasks/T20261009-context-tools/task.md) 维护，不将运行时阶段通过等同四工具 AC-07 完成。
+
+### 5.1 运行时实现细化
+
+FR-TOOL-003 / 004、FR-PROJ-002：以下为主 Agent 在上述开发授权内的技术决定（2026-10-13），不是新增人工产品确认。
+
+- Terminal：主进程 `@xterm/headless` + SerializeAddon 持有屏幕，1000 行回滚；UI 按需加载 xterm。输出分 16 KiB chunk，256 / 64 KiB 水位控制 PTY 暂停 / 恢复；attach 返回屏幕与流序号，快照写入完的首个 ACK 启动增量，迟到的 attachment 不能退订新的显示。屏幕解析背压与 Renderer ACK 背压独立；隐藏或 Renderer 崩溃解除显示订阅，主进程屏幕继续更新。实例上限为 16 / Project、32 / 应用，超限明确反馈；不自动重跑跨重启的命令。屏幕检查点（emulator state schema 1）绑定锁定的 `@xterm/*` 版本（xterm 6.0.0 的私有结构），升级须重跑 ANSI 差分验证（含逐单元格属性 / 链接与将来 VT 状态）。xterm 在运行时注入 `<style>`，生产 CSP 因此对 `style-src-elem` 放宽（DEC-02 例外，用户 2026-10-13 确认），并因 24 位色与 `minimumContrastRatio` 经 `style` 属性写入而对 `style-src-attr` 放宽（用户 2026-10-14 确认），E2E 断言这些样式在构建后的应用里真实生效。配色（AI 技术决定，2026-10-13，待人工审阅）：每种外观方案（浅 / 深）使用显式 xterm 调色板，不依赖 xterm 默认值；ANSI 0–15 对该方案的名义背景及毛玻璃实测最差背景均 ≥ 4.5:1，默认文字 ≥ 7:1，选区文字 ≥ 4.5:1，光标与反色可读；毛玻璃下视口保持透明。代价：浅色方案的 ANSI 色比常见终端更深，“白 / 黑”在浅 / 深方案中分别是深灰 / 浅灰，经典的前景 / 背景配对对比度偏低；毛玻璃下选区与背景的区分度低于 3:1。xterm 的 `minimumContrastRatio` 取 5.5，使 ANSI / 24 位色背景上及程序自带颜色的文字按单元格调整到可读（xterm 按不透明名义背景计算，毛玻璃浅色的真实像素更暗，取 4.5 时实测仅 3.7–4.3:1，W5-F12）；已知代价：反显文字实测约 5.4–6.1:1，低于调色板默认的 14–19:1，块颜色保留（W5-F13，已记录）；固定比值不能覆盖壁纸比实测更暗的毛玻璃（亮度 0.65 约需 6.75）；具体取值与测算见 `terminal-theme.ts` 及其测试，真实窗口的实测结果见[验收记录](../../tasks/T20261009-context-tools/acceptance.md)。
+- Browser：每个 Project / 实例代次独立内存分区，导航只接受 HTTP / HTTPS localhost、127/8 或 `::1`；页面的普通网络子资源不受顶层回环限制。地址单独保存在 `app_meta`，无登录状态持久化；窗口恢复时未被选中的后台 Project 不创建 view、不加载已保存地址，首次选中并显示 Browser 后才创建实例并恢复上次地址。应用公共导航 guards 只用于应用窗口，预览 view 自己处理导航、新窗口、权限及下载；Shell 切换及窗口事件先校验显隐，DOM 弹层和原生退出提示均遮挡 / 移除 view。
+- 生命周期：Session Stop 与 Tools 端口分开；Project / 退出合并列出 Session 与 Terminal。确认后等待准确归属清理，失败 / 超时不批准关闭或退出；保留底层实际清理锁，拒绝新 Session / PTY / Browser 操作，直至清理 settled。退出批准前依次停止回合、清理工具，再可逆地释放全部空闲 / 已退役 Session Runtime，任一失败拒绝退出、应用保持打开并可重试；退出失败取消后可继续使用保留的 Project；不把退出通知等同受管资源已清理。
+
+接口登记在 `shared/ipc/browser.ts`、`shared/ipc/terminal.ts`；Project 关闭通过 `MainToolPort` 组合，不提供通用 fs / shell / execute IPC。具体验证与已知边界由验收记录维护。

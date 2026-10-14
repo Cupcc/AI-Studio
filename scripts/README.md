@@ -66,7 +66,7 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 - 应用 job 在 macOS arm64 runner 冻结 lockfile 安装并执行 `check:code`，然后桌面构建一次，依次执行包内 `test:e2e:built`、`package:built` 及根 `smoke:packaged`。Adapter 在基础检查时构建一次，桌面产物仅在本 job、同一代码基线内复用，不跨运行缓存构建输出。独立根命令继续自动构建。
 - CI 设置 `HUSKY=0` 显式运行检查；应用 job 保留依赖安装脚本以安装 Electron 与修复 PTY helper。
 - E2E 前用 `displayplacer` 放大 runner 的虚拟屏幕：默认屏幕会把窗口高度限制到 684px，容纳不下桌面端的布局检查尺寸。此步骤只修改临时 CI runner。
-- E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
+- E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录；`runtime-tools.spec.ts` 另使用真实本地 Shell / PTY 与回环 HTTP fixture（外站跳转只验证提示，不访问外网）。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
 - 无论成功或失败都上传已产生的 E2E 截图与打包冒烟 JSON。未签名应用仅验证打包，不自动发布。
 - 工作流只读仓库内容，外部 Actions 固定到 commit SHA。
 - CI 不替代人工验收，未启用分支保护，也不检查历史提交信息。单人开发的远端设置约定见 [贡献指南](../CONTRIBUTING.md) 第 6 节。

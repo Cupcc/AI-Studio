@@ -1,0 +1,2598 @@
+{
+ "generatedAt": "2026-10-14T00:51:16.741Z",
+ "baseline": "HEAD 2223dad + docs-only working tree; apps/desktop built 2026-10-14 08:39:04 via pnpm --filter @ai-studio/desktop build",
+ "method": "screencapture -x -o -l<windowId> (app window only, DPR 1); W5-measure-r3.mjs with W5-terminal-probe-r4.js (WCAG 2.x). nominal = computed fg vs measured background median; measured = farthest pixel vs background median.",
+ "cells": [
+  {
+   "cell": "gl-light",
+   "description": "glass + follow-system (system Light) + aurora",
+   "attrs": {
+    "theme": "glass",
+    "scheme": "light",
+    "glassColor": "aurora"
+   },
+   "plainRowContrast": {
+    "min": 13.32,
+    "max": 16.44,
+    "n": 15
+   },
+   "plainRowWorstBg": {
+    "min": 11.16,
+    "max": 16,
+    "n": 15
+   },
+   "scrolledPlainRowContrast": {
+    "min": 15.94,
+    "max": 16.41,
+    "n": 34
+   },
+   "cursorActive": {
+    "label": "cursor",
+    "box": {
+     "x": 711.42,
+     "y": 551,
+     "w": 7.22,
+     "h": 19
+    },
+    "inner": "#0d0d0d",
+    "ring": "#ecedf0",
+    "innerLum": 0.004,
+    "ringLum": 0.8469,
+    "contrast": 16.6
+   },
+   "selectionActive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.28,
+      "h": 19
+     },
+     "inner": "#718db0",
+     "ring": "#e9ecf1",
+     "innerLum": 0.257,
+     "ringLum": 0.8367,
+     "contrast": 2.89,
+     "selectedText": {
+      "bg": "#718db0",
+      "ink": "#0d0d0d",
+      "contrastMeasured": 5.68,
+      "nominalFg": "#0d0d0d",
+      "contrastNominalVsBg": 5.68
+     }
+    }
+   ],
+   "selectionInactive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.28,
+      "h": 19
+     },
+     "inner": "#888e95",
+     "ring": "#e9ecf1",
+     "innerLum": 0.2675,
+     "ringLum": 0.8367,
+     "contrast": 2.79,
+     "selectedText": {
+      "bg": "#888e95",
+      "ink": "#0d0d0d",
+      "contrastMeasured": 5.88,
+      "nominalFg": "#0d0d0d",
+      "contrastNominalVsBg": 5.88
+     }
+    }
+   ],
+   "inactiveCursorDom": "xterm-cursor xterm-cursor-outline",
+   "scrollbarThumb": [
+    {
+     "cls": "visible scrollbar vertical",
+     "sliderBg": "rgb(106, 114, 121)",
+     "label": "scrollbar-slider",
+     "box": {
+      "x": 1250,
+      "y": 644,
+      "w": 14,
+      "h": 125
+     },
+     "inner": "#6c7279",
+     "ring": "#f2e8e4",
+     "innerLum": 0.166,
+     "ringLum": 0.8219,
+     "contrast": 4.04
+    }
+   ],
+   "viewportEmptyMeanLum": 0.8236,
+   "paddingStripMeanLum": 0.8279,
+   "computedTransparent": {
+    "viewport": "rgba(0, 0, 0, 0)",
+    "scrollable": "rgba(0, 0, 0, 0)",
+    "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+   },
+   "host": {
+    "cls": "terminal-screen__host",
+    "box": {
+     "x": 697,
+     "y": 133,
+     "w": 567,
+     "h": 651
+    },
+    "overflow": "clip",
+    "padding": [
+     "0px",
+     "0px",
+     "0px",
+     "0px"
+    ],
+    "scrollTop": 0,
+    "scrollLeft": 0,
+    "scrollHeight": 651,
+    "clientHeight": 651
+   },
+   "wrapper": {
+    "cls": "terminal-screen",
+    "overflow": "clip",
+    "padding": [
+     "8px",
+     "8px",
+     "8px",
+     "8px"
+    ],
+    "scrollTop": 0,
+    "scrollHeight": 667,
+    "clientHeight": 667
+   },
+   "geometry": {
+    "terminalScreen": {
+     "x": 689,
+     "y": 125,
+     "w": 583,
+     "h": 667
+    },
+    "padding": [
+     "8px",
+     "8px"
+    ],
+    "overflow": "clip",
+    "scrollTop": 0,
+    "scrollHeight": 667,
+    "clientHeight": 667,
+    "xterm": {
+     "x": 697,
+     "y": 133,
+     "w": 567,
+     "h": 651
+    },
+    "xtermScreen": {
+     "x": 697,
+     "y": 133,
+     "w": 547,
+     "h": 646
+    },
+    "rowCount": 34,
+    "firstRow": {
+     "x": 697,
+     "y": 133,
+     "w": 547,
+     "h": 19
+    },
+    "lastRow": {
+     "x": 697,
+     "y": 760,
+     "w": 547,
+     "h": 19
+    }
+   },
+   "spans": {
+    "ANSI-0": {
+     "bg": "#e6e9f0",
+     "fg": "#24292f",
+     "nominalContrast": 12.06,
+     "measuredContrast": 12.01
+    },
+    "ANSI-1": {
+     "bg": "#e7eaf0",
+     "fg": "#980416",
+     "nominalContrast": 7.37,
+     "measuredContrast": 7.6
+    },
+    "ANSI-2": {
+     "bg": "#e8eaf0",
+     "fg": "#01521d",
+     "nominalContrast": 7.84,
+     "measuredContrast": 7.79
+    },
+    "ANSI-3": {
+     "bg": "#e8eaf0",
+     "fg": "#5d4303",
+     "nominalContrast": 7.69,
+     "measuredContrast": 7.68
+    },
+    "ANSI-4": {
+     "bg": "#e8ebf0",
+     "fg": "#024797",
+     "nominalContrast": 7.48,
+     "measuredContrast": 7.5
+    },
+    "ANSI-5": {
+     "bg": "#e8ecf1",
+     "fg": "#6724ad",
+     "nominalContrast": 7.28,
+     "measuredContrast": 7.52
+    },
+    "ANSI-6": {
+     "bg": "#e7ecf0",
+     "fg": "#045158",
+     "nominalContrast": 7.6,
+     "measuredContrast": 7.6
+    },
+    "ANSI-7": {
+     "bg": "#e6ecf0",
+     "fg": "#484f56",
+     "nominalContrast": 6.97,
+     "measuredContrast": 6.73
+    },
+    "ANSI-8": {
+     "bg": "#e6e9f0",
+     "fg": "#3a4047",
+     "nominalContrast": 8.62,
+     "measuredContrast": 8.61
+    },
+    "ANSI-9": {
+     "bg": "#e6eaf0",
+     "fg": "#af0a27",
+     "nominalContrast": 6.01,
+     "measuredContrast": 6.2
+    },
+    "ANSI-10": {
+     "bg": "#e8eaf0",
+     "fg": "#046325",
+     "nominalContrast": 6.2,
+     "measuredContrast": 6.13
+    },
+    "ANSI-11": {
+     "bg": "#e9eaf0",
+     "fg": "#6e5104",
+     "nominalContrast": 6.16,
+     "measuredContrast": 6.17
+    },
+    "ANSI-12": {
+     "bg": "#e9ebf0",
+     "fg": "#0556a7",
+     "nominalContrast": 6.08,
+     "measuredContrast": 6.01
+    },
+    "ANSI-13": {
+     "bg": "#e9ecf0",
+     "fg": "#7132ba",
+     "nominalContrast": 6.18,
+     "measuredContrast": 6.38
+    },
+    "ANSI-14": {
+     "bg": "#e8ecf0",
+     "fg": "#04606c",
+     "nominalContrast": 6.11,
+     "measuredContrast": 6.09
+    },
+    "ANSI-15": {
+     "bg": "#e8ecf0",
+     "fg": "#51575f",
+     "nominalContrast": 6.14,
+     "measuredContrast": 6.13
+    },
+    "BOLD-0": {
+     "bg": "#e6e9f0",
+     "fg": "#3a4047",
+     "nominalContrast": 8.62,
+     "measuredContrast": 8.61
+    },
+    "BOLD-1": {
+     "bg": "#e6eaf0",
+     "fg": "#af0a27",
+     "nominalContrast": 6.01,
+     "measuredContrast": 6.2
+    },
+    "BOLD-2": {
+     "bg": "#e7eaf0",
+     "fg": "#046325",
+     "nominalContrast": 6.19,
+     "measuredContrast": 6.12
+    },
+    "BOLD-3": {
+     "bg": "#e8eaf0",
+     "fg": "#6e5104",
+     "nominalContrast": 6.14,
+     "measuredContrast": 6.16
+    },
+    "BOLD-4": {
+     "bg": "#e9eaf0",
+     "fg": "#0556a7",
+     "nominalContrast": 6.04,
+     "measuredContrast": 6.05
+    },
+    "BOLD-5": {
+     "bg": "#eaebef",
+     "fg": "#7132ba",
+     "nominalContrast": 6.15,
+     "measuredContrast": 6.34
+    },
+    "BOLD-6": {
+     "bg": "#eaebee",
+     "fg": "#04606c",
+     "nominalContrast": 6.09,
+     "measuredContrast": 6.07
+    },
+    "BOLD-7": {
+     "bg": "#e9ebee",
+     "fg": "#51575f",
+     "nominalContrast": 6.11,
+     "measuredContrast": 6.1
+    },
+    "REV-DEFAULT": {
+     "bg": "#0d0d0d",
+     "fg": "#ffffff",
+     "nominalContrast": 19.44,
+     "measuredContrast": 19.11
+    },
+    "REV-RED": {
+     "bg": "#8b1d1e",
+     "fg": "#ffffff",
+     "nominalContrast": 9.16,
+     "measuredContrast": 9.16
+    },
+    "REV-GREEN": {
+     "bg": "#225024",
+     "fg": "#ffffff",
+     "nominalContrast": 9.37,
+     "measuredContrast": 9.37
+    },
+    "WHITE-ON-RED": {
+     "bg": "#8b1d1e",
+     "fg": "#51575f",
+     "nominalContrast": 1.26,
+     "measuredContrast": 1.26
+    },
+    "BLACK-ON-WHITE": {
+     "bg": "#494f55",
+     "fg": "#24292f",
+     "nominalContrast": 1.77,
+     "measuredContrast": 1.76
+    },
+    "alpha": {
+     "bg": "#ececed",
+     "fg": "#024797",
+     "nominalContrast": 7.57,
+     "measuredContrast": 7.21
+    },
+    "b.sh": {
+     "bg": "#ecebed",
+     "fg": "#980416",
+     "nominalContrast": 7.48,
+     "measuredContrast": 7.62
+    },
+    "beta": {
+     "bg": "#edeaec",
+     "fg": "#024797",
+     "nominalContrast": 7.48,
+     "measuredContrast": 6.95
+    },
+    "link-to-a": {
+     "bg": "#edeaec",
+     "fg": "#6724ad",
+     "nominalContrast": 7.23,
+     "measuredContrast": 7.37
+    }
+   },
+   "fontMetrics": {
+    "measureWidth": 230.41,
+    "measureHeight": 15,
+    "cellWidthEstimate": 7.2,
+    "rowHeight": 19
+   }
+  },
+  {
+   "cell": "gl-light-none",
+   "description": "glass + light + background none",
+   "attrs": {
+    "theme": "glass",
+    "scheme": "light",
+    "glassColor": "none"
+   },
+   "plainRowContrast": {
+    "min": 13.71,
+    "max": 16.75,
+    "n": 15
+   },
+   "plainRowWorstBg": {
+    "min": 11.59,
+    "max": 16.75,
+    "n": 15
+   },
+   "scrolledPlainRowContrast": {
+    "min": 16.52,
+    "max": 16.75,
+    "n": 34
+   },
+   "cursorActive": {
+    "label": "cursor",
+    "box": {
+     "x": 711.42,
+     "y": 551,
+     "w": 7.22,
+     "h": 19
+    },
+    "inner": "#0d0d0d",
+    "ring": "#eeeeee",
+    "innerLum": 0.004,
+    "ringLum": 0.855,
+    "contrast": 16.75
+   },
+   "selectionActive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.28,
+      "h": 19
+     },
+     "inner": "#718db0",
+     "ring": "#eeeeee",
+     "innerLum": 0.257,
+     "ringLum": 0.855,
+     "contrast": 2.95,
+     "selectedText": {
+      "bg": "#718db0",
+      "ink": "#0d0d0d",
+      "contrastMeasured": 5.68,
+      "nominalFg": "#0d0d0d",
+      "contrastNominalVsBg": 5.68
+     }
+    }
+   ],
+   "selectionInactive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.28,
+      "h": 19
+     },
+     "inner": "#888e95",
+     "ring": "#eeeeee",
+     "innerLum": 0.2675,
+     "ringLum": 0.855,
+     "contrast": 2.85,
+     "selectedText": {
+      "bg": "#888e95",
+      "ink": "#0d0d0d",
+      "contrastMeasured": 5.88,
+      "nominalFg": "#0d0d0d",
+      "contrastNominalVsBg": 5.88
+     }
+    }
+   ],
+   "inactiveCursorDom": "xterm-cursor xterm-cursor-outline",
+   "scrollbarThumb": [
+    {
+     "cls": "visible scrollbar vertical",
+     "sliderBg": "rgb(106, 114, 121)",
+     "label": "scrollbar-slider",
+     "box": {
+      "x": 1250,
+      "y": 644,
+      "w": 14,
+      "h": 125
+     },
+     "inner": "#6c7279",
+     "ring": "#eeeeee",
+     "innerLum": 0.166,
+     "ringLum": 0.855,
+     "contrast": 4.19
+    }
+   ],
+   "viewportEmptyMeanLum": 0.8391,
+   "paddingStripMeanLum": 0.855,
+   "computedTransparent": {
+    "viewport": "rgba(0, 0, 0, 0)",
+    "scrollable": "rgba(0, 0, 0, 0)",
+    "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+   },
+   "host": {
+    "cls": "terminal-screen__host",
+    "box": {
+     "x": 697,
+     "y": 133,
+     "w": 567,
+     "h": 651
+    },
+    "overflow": "clip",
+    "padding": [
+     "0px",
+     "0px",
+     "0px",
+     "0px"
+    ],
+    "scrollTop": 0,
+    "scrollLeft": 0,
+    "scrollHeight": 651,
+    "clientHeight": 651
+   },
+   "wrapper": {
+    "cls": "terminal-screen",
+    "overflow": "clip",
+    "padding": [
+     "8px",
+     "8px",
+     "8px",
+     "8px"
+    ],
+    "scrollTop": 0,
+    "scrollHeight": 667,
+    "clientHeight": 667
+   },
+   "geometry": {
+    "terminalScreen": {
+     "x": 689,
+     "y": 125,
+     "w": 583,
+     "h": 667
+    },
+    "padding": [
+     "8px",
+     "8px"
+    ],
+    "overflow": "clip",
+    "scrollTop": 0,
+    "scrollHeight": 667,
+    "clientHeight": 667,
+    "xterm": {
+     "x": 697,
+     "y": 133,
+     "w": 567,
+     "h": 651
+    },
+    "xtermScreen": {
+     "x": 697,
+     "y": 133,
+     "w": 547,
+     "h": 646
+    },
+    "rowCount": 34,
+    "firstRow": {
+     "x": 697,
+     "y": 133,
+     "w": 547,
+     "h": 19
+    },
+    "lastRow": {
+     "x": 697,
+     "y": 760,
+     "w": 547,
+     "h": 19
+    }
+   },
+   "spans": {
+    "ANSI-0": {
+     "bg": "#eeeeee",
+     "fg": "#24292f",
+     "nominalContrast": 12.63,
+     "measuredContrast": 12.58
+    },
+    "ANSI-1": {
+     "bg": "#eeeeee",
+     "fg": "#980416",
+     "nominalContrast": 7.66,
+     "measuredContrast": 7.9
+    },
+    "ANSI-2": {
+     "bg": "#eeeeee",
+     "fg": "#01521d",
+     "nominalContrast": 8.13,
+     "measuredContrast": 8.08
+    },
+    "ANSI-3": {
+     "bg": "#eeeeee",
+     "fg": "#5d4303",
+     "nominalContrast": 7.97,
+     "measuredContrast": 7.97
+    },
+    "ANSI-4": {
+     "bg": "#eeeeee",
+     "fg": "#024797",
+     "nominalContrast": 7.7,
+     "measuredContrast": 7.72
+    },
+    "ANSI-5": {
+     "bg": "#eeeeee",
+     "fg": "#6724ad",
+     "nominalContrast": 7.44,
+     "measuredContrast": 7.69
+    },
+    "ANSI-6": {
+     "bg": "#eeeeee",
+     "fg": "#045158",
+     "nominalContrast": 7.79,
+     "measuredContrast": 7.79
+    },
+    "ANSI-7": {
+     "bg": "#eeeeee",
+     "fg": "#484f56",
+     "nominalContrast": 7.16,
+     "measuredContrast": 6.81
+    },
+    "ANSI-8": {
+     "bg": "#eeeeee",
+     "fg": "#3a4047",
+     "nominalContrast": 9.03,
+     "measuredContrast": 9.01
+    },
+    "ANSI-9": {
+     "bg": "#eeeeee",
+     "fg": "#af0a27",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.45
+    },
+    "ANSI-10": {
+     "bg": "#eeeeee",
+     "fg": "#046325",
+     "nominalContrast": 6.43,
+     "measuredContrast": 6.35
+    },
+    "ANSI-11": {
+     "bg": "#eeeeee",
+     "fg": "#6e5104",
+     "nominalContrast": 6.37,
+     "measuredContrast": 6.39
+    },
+    "ANSI-12": {
+     "bg": "#eeeeee",
+     "fg": "#0556a7",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.18
+    },
+    "ANSI-13": {
+     "bg": "#eeeeee",
+     "fg": "#7132ba",
+     "nominalContrast": 6.31,
+     "measuredContrast": 6.51
+    },
+    "ANSI-14": {
+     "bg": "#eeeeee",
+     "fg": "#04606c",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.23
+    },
+    "ANSI-15": {
+     "bg": "#eeeeee",
+     "fg": "#51575f",
+     "nominalContrast": 6.29,
+     "measuredContrast": 6.28
+    },
+    "BOLD-0": {
+     "bg": "#eeeeee",
+     "fg": "#3a4047",
+     "nominalContrast": 9.03,
+     "measuredContrast": 9.01
+    },
+    "BOLD-1": {
+     "bg": "#eeeeee",
+     "fg": "#af0a27",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.45
+    },
+    "BOLD-2": {
+     "bg": "#eeeeee",
+     "fg": "#046325",
+     "nominalContrast": 6.43,
+     "measuredContrast": 6.35
+    },
+    "BOLD-3": {
+     "bg": "#eeeeee",
+     "fg": "#6e5104",
+     "nominalContrast": 6.37,
+     "measuredContrast": 6.39
+    },
+    "BOLD-4": {
+     "bg": "#eeeeee",
+     "fg": "#0556a7",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.26
+    },
+    "BOLD-5": {
+     "bg": "#eeeeee",
+     "fg": "#7132ba",
+     "nominalContrast": 6.31,
+     "measuredContrast": 6.51
+    },
+    "BOLD-6": {
+     "bg": "#eeeeee",
+     "fg": "#04606c",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.23
+    },
+    "BOLD-7": {
+     "bg": "#eeeeee",
+     "fg": "#51575f",
+     "nominalContrast": 6.29,
+     "measuredContrast": 6.28
+    },
+    "REV-DEFAULT": {
+     "bg": "#0d0d0d",
+     "fg": "#ffffff",
+     "nominalContrast": 19.44,
+     "measuredContrast": 19.11
+    },
+    "REV-RED": {
+     "bg": "#8b1d1e",
+     "fg": "#ffffff",
+     "nominalContrast": 9.16,
+     "measuredContrast": 9.16
+    },
+    "REV-GREEN": {
+     "bg": "#225024",
+     "fg": "#ffffff",
+     "nominalContrast": 9.37,
+     "measuredContrast": 9.37
+    },
+    "WHITE-ON-RED": {
+     "bg": "#8b1d1e",
+     "fg": "#51575f",
+     "nominalContrast": 1.26,
+     "measuredContrast": 1.26
+    },
+    "BLACK-ON-WHITE": {
+     "bg": "#494f55",
+     "fg": "#24292f",
+     "nominalContrast": 1.77,
+     "measuredContrast": 1.76
+    },
+    "alpha": {
+     "bg": "#eeeeee",
+     "fg": "#024797",
+     "nominalContrast": 7.7,
+     "measuredContrast": 7.33
+    },
+    "b.sh": {
+     "bg": "#eeeeee",
+     "fg": "#980416",
+     "nominalContrast": 7.66,
+     "measuredContrast": 7.8
+    },
+    "beta": {
+     "bg": "#eeeeee",
+     "fg": "#024797",
+     "nominalContrast": 7.7,
+     "measuredContrast": 7.16
+    },
+    "link-to-a": {
+     "bg": "#eeeeee",
+     "fg": "#6724ad",
+     "nominalContrast": 7.44,
+     "measuredContrast": 7.58
+    }
+   },
+   "fontMetrics": {
+    "measureWidth": 230.41,
+    "measureHeight": 15,
+    "cellWidthEstimate": 7.2,
+    "rowHeight": 19
+   }
+  },
+  {
+   "cell": "gl-dark",
+   "description": "glass + dark + aurora",
+   "attrs": {
+    "theme": "glass",
+    "scheme": "dark",
+    "glassColor": "aurora"
+   },
+   "plainRowContrast": {
+    "min": 13.31,
+    "max": 15.82,
+    "n": 15
+   },
+   "plainRowWorstBg": {
+    "min": 11.45,
+    "max": 15.59,
+    "n": 15
+   },
+   "scrolledPlainRowContrast": {
+    "min": 14.98,
+    "max": 15.68,
+    "n": 34
+   },
+   "cursorActive": {
+    "label": "cursor",
+    "box": {
+     "x": 711.42,
+     "y": 551,
+     "w": 7.22,
+     "h": 19
+    },
+    "inner": "#f2f2f2",
+    "ring": "#15161f",
+    "innerLum": 0.8879,
+    "ringLum": 0.0083,
+    "contrast": 16.08
+   },
+   "selectionActive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.28,
+      "h": 19
+     },
+     "inner": "#576d92",
+     "ring": "#161a28",
+     "innerLum": 0.1504,
+     "ringLum": 0.0106,
+     "contrast": 3.31,
+     "selectedText": {
+      "bg": "#576d92",
+      "ink": "#f2f2f2",
+      "contrastMeasured": 4.68,
+      "nominalFg": "#f2f2f2",
+      "contrastNominalVsBg": 4.68
+     }
+    }
+   ],
+   "selectionInactive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.28,
+      "h": 19
+     },
+     "inner": "#6a6d71",
+     "ring": "#161a28",
+     "innerLum": 0.1519,
+     "ringLum": 0.0106,
+     "contrast": 3.33,
+     "selectedText": {
+      "bg": "#6a6d71",
+      "ink": "#f2f2f2",
+      "contrastMeasured": 4.64,
+      "nominalFg": "#f2f2f2",
+      "contrastNominalVsBg": 4.64
+     }
+    }
+   ],
+   "inactiveCursorDom": "xterm-cursor xterm-cursor-outline",
+   "scrollbarThumb": [
+    {
+     "cls": "visible scrollbar vertical",
+     "sliderBg": "rgb(131, 138, 146)",
+     "label": "scrollbar-slider",
+     "box": {
+      "x": 1250,
+      "y": 644,
+      "w": 14,
+      "h": 125
+     },
+     "inner": "#858a91",
+     "ring": "#231b1c",
+     "innerLum": 0.2521,
+     "ringLum": 0.0123,
+     "contrast": 4.85
+    }
+   ],
+   "viewportEmptyMeanLum": 0.0197,
+   "paddingStripMeanLum": 0.0119,
+   "computedTransparent": {
+    "viewport": "rgba(0, 0, 0, 0)",
+    "scrollable": "rgba(0, 0, 0, 0)",
+    "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+   },
+   "host": {
+    "cls": "terminal-screen__host",
+    "box": {
+     "x": 697,
+     "y": 133,
+     "w": 567,
+     "h": 651
+    },
+    "overflow": "clip",
+    "padding": [
+     "0px",
+     "0px",
+     "0px",
+     "0px"
+    ],
+    "scrollTop": 0,
+    "scrollLeft": 0,
+    "scrollHeight": 651,
+    "clientHeight": 651
+   },
+   "wrapper": {
+    "cls": "terminal-screen",
+    "overflow": "clip",
+    "padding": [
+     "8px",
+     "8px",
+     "8px",
+     "8px"
+    ],
+    "scrollTop": 0,
+    "scrollHeight": 667,
+    "clientHeight": 667
+   },
+   "geometry": {
+    "terminalScreen": {
+     "x": 689,
+     "y": 125,
+     "w": 583,
+     "h": 667
+    },
+    "padding": [
+     "8px",
+     "8px"
+    ],
+    "overflow": "clip",
+    "scrollTop": 0,
+    "scrollHeight": 667,
+    "clientHeight": 667,
+    "xterm": {
+     "x": 697,
+     "y": 133,
+     "w": 567,
+     "h": 651
+    },
+    "xtermScreen": {
+     "x": 697,
+     "y": 133,
+     "w": 547,
+     "h": 646
+    },
+    "rowCount": 34,
+    "firstRow": {
+     "x": 697,
+     "y": 133,
+     "w": 547,
+     "h": 19
+    },
+    "lastRow": {
+     "x": 697,
+     "y": 760,
+     "w": 547,
+     "h": 19
+    }
+   },
+   "spans": {
+    "ANSI-0": {
+     "bg": "#171d30",
+     "fg": "#9fa6af",
+     "nominalContrast": 6.81,
+     "measuredContrast": 6.84
+    },
+    "ANSI-1": {
+     "bg": "#161b2e",
+     "fg": "#ff7b72",
+     "nominalContrast": 6.77,
+     "measuredContrast": 6.62
+    },
+    "ANSI-2": {
+     "bg": "#161a2b",
+     "fg": "#3fb950",
+     "nominalContrast": 6.79,
+     "measuredContrast": 6.89
+    },
+    "ANSI-3": {
+     "bg": "#161a27",
+     "fg": "#d29922",
+     "nominalContrast": 6.87,
+     "measuredContrast": 6.8
+    },
+    "ANSI-4": {
+     "bg": "#161a25",
+     "fg": "#58a6ff",
+     "nominalContrast": 6.88,
+     "measuredContrast": 6.86
+    },
+    "ANSI-5": {
+     "bg": "#141b24",
+     "fg": "#bc8cff",
+     "nominalContrast": 6.88,
+     "measuredContrast": 6.76
+    },
+    "ANSI-6": {
+     "bg": "#141d24",
+     "fg": "#39c5cf",
+     "nominalContrast": 8.17,
+     "measuredContrast": 8.25
+    },
+    "ANSI-7": {
+     "bg": "#141d24",
+     "fg": "#b1bac4",
+     "nominalContrast": 8.68,
+     "measuredContrast": 8.44
+    },
+    "ANSI-8": {
+     "bg": "#181d32",
+     "fg": "#a8afb8",
+     "nominalContrast": 7.53,
+     "measuredContrast": 7.54
+    },
+    "ANSI-9": {
+     "bg": "#181d2e",
+     "fg": "#ffa198",
+     "nominalContrast": 8.61,
+     "measuredContrast": 8.54
+    },
+    "ANSI-10": {
+     "bg": "#161a2c",
+     "fg": "#56d364",
+     "nominalContrast": 8.95,
+     "measuredContrast": 9.09
+    },
+    "ANSI-11": {
+     "bg": "#171a26",
+     "fg": "#e3b341",
+     "nominalContrast": 8.9,
+     "measuredContrast": 8.9
+    },
+    "ANSI-12": {
+     "bg": "#151a24",
+     "fg": "#79c0ff",
+     "nominalContrast": 8.96,
+     "measuredContrast": 8.86
+    },
+    "ANSI-13": {
+     "bg": "#151a21",
+     "fg": "#d2a8ff",
+     "nominalContrast": 8.98,
+     "measuredContrast": 8.87
+    },
+    "ANSI-14": {
+     "bg": "#141a21",
+     "fg": "#56d4dd",
+     "nominalContrast": 9.89,
+     "measuredContrast": 9.98
+    },
+    "ANSI-15": {
+     "bg": "#141d23",
+     "fg": "#ffffff",
+     "nominalContrast": 17.08,
+     "measuredContrast": 17.08
+    },
+    "BOLD-0": {
+     "bg": "#181d32",
+     "fg": "#a8afb8",
+     "nominalContrast": 7.53,
+     "measuredContrast": 7.54
+    },
+    "BOLD-1": {
+     "bg": "#181d2d",
+     "fg": "#ffa198",
+     "nominalContrast": 8.63,
+     "measuredContrast": 8.55
+    },
+    "BOLD-2": {
+     "bg": "#181a2a",
+     "fg": "#56d364",
+     "nominalContrast": 8.93,
+     "measuredContrast": 9.08
+    },
+    "BOLD-3": {
+     "bg": "#171a27",
+     "fg": "#e3b341",
+     "nominalContrast": 8.89,
+     "measuredContrast": 8.89
+    },
+    "BOLD-4": {
+     "bg": "#161924",
+     "fg": "#79c0ff",
+     "nominalContrast": 9.01,
+     "measuredContrast": 9.02
+    },
+    "BOLD-5": {
+     "bg": "#161920",
+     "fg": "#d2a8ff",
+     "nominalContrast": 9.03,
+     "measuredContrast": 8.93
+    },
+    "BOLD-6": {
+     "bg": "#16191e",
+     "fg": "#56d4dd",
+     "nominalContrast": 9.95,
+     "measuredContrast": 10.04
+    },
+    "BOLD-7": {
+     "bg": "#16191e",
+     "fg": "#ffffff",
+     "nominalContrast": 17.62,
+     "measuredContrast": 17.62
+    },
+    "REV-DEFAULT": {
+     "bg": "#f2f2f2",
+     "fg": "#212121",
+     "nominalContrast": 14.38,
+     "measuredContrast": 14.04
+    },
+    "REV-RED": {
+     "bg": "#ee8377",
+     "fg": "#212121",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.25
+    },
+    "REV-GREEN": {
+     "bg": "#64b65c",
+     "fg": "#212121",
+     "nominalContrast": 6.43,
+     "measuredContrast": 6.43
+    },
+    "WHITE-ON-RED": {
+     "bg": "#ee8377",
+     "fg": "#ffffff",
+     "nominalContrast": 2.58,
+     "measuredContrast": 2.58
+    },
+    "BLACK-ON-WHITE": {
+     "bg": "#b3b9c3",
+     "fg": "#9fa6af",
+     "nominalContrast": 1.25,
+     "measuredContrast": 1.24
+    },
+    "alpha": {
+     "bg": "#16161b",
+     "fg": "#58a6ff",
+     "nominalContrast": 7.14,
+     "measuredContrast": 6.87
+    },
+    "b.sh": {
+     "bg": "#17161b",
+     "fg": "#ff7b72",
+     "nominalContrast": 7.14,
+     "measuredContrast": 6.9
+    },
+    "beta": {
+     "bg": "#19161a",
+     "fg": "#58a6ff",
+     "nominalContrast": 7.1,
+     "measuredContrast": 6.75
+    },
+    "link-to-a": {
+     "bg": "#1a181a",
+     "fg": "#bc8cff",
+     "nominalContrast": 7.01,
+     "measuredContrast": 6.77
+    }
+   },
+   "fontMetrics": {
+    "measureWidth": 230.41,
+    "measureHeight": 15,
+    "cellWidthEstimate": 7.2,
+    "rowHeight": 19
+   }
+  },
+  {
+   "cell": "gl-dark-none",
+   "description": "glass + dark + background none",
+   "attrs": {
+    "theme": "glass",
+    "scheme": "dark",
+    "glassColor": "none"
+   },
+   "plainRowContrast": {
+    "min": 11.8,
+    "max": 14.05,
+    "n": 15
+   },
+   "plainRowWorstBg": {
+    "min": 10.59,
+    "max": 14.05,
+    "n": 15
+   },
+   "scrolledPlainRowContrast": {
+    "min": 13.93,
+    "max": 14.05,
+    "n": 34
+   },
+   "cursorActive": {
+    "label": "cursor",
+    "box": {
+     "x": 711.42,
+     "y": 551,
+     "w": 7.22,
+     "h": 19
+    },
+    "inner": "#f2f2f2",
+    "ring": "#232322",
+    "innerLum": 0.8879,
+    "ringLum": 0.0167,
+    "contrast": 14.05
+   },
+   "selectionActive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.28,
+      "h": 19
+     },
+     "inner": "#576d92",
+     "ring": "#232322",
+     "innerLum": 0.1504,
+     "ringLum": 0.0167,
+     "contrast": 3,
+     "selectedText": {
+      "bg": "#576d92",
+      "ink": "#f2f2f2",
+      "contrastMeasured": 4.68,
+      "nominalFg": "#f2f2f2",
+      "contrastNominalVsBg": 4.68
+     }
+    }
+   ],
+   "selectionInactive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.28,
+      "h": 19
+     },
+     "inner": "#6a6d71",
+     "ring": "#232322",
+     "innerLum": 0.1519,
+     "ringLum": 0.0167,
+     "contrast": 3.03,
+     "selectedText": {
+      "bg": "#6a6d71",
+      "ink": "#f2f2f2",
+      "contrastMeasured": 4.64,
+      "nominalFg": "#f2f2f2",
+      "contrastNominalVsBg": 4.64
+     }
+    }
+   ],
+   "inactiveCursorDom": "xterm-cursor xterm-cursor-outline",
+   "scrollbarThumb": [
+    {
+     "cls": "visible scrollbar vertical",
+     "sliderBg": "rgb(131, 138, 146)",
+     "label": "scrollbar-slider",
+     "box": {
+      "x": 1250,
+      "y": 644,
+      "w": 14,
+      "h": 125
+     },
+     "inner": "#858a91",
+     "ring": "#232322",
+     "innerLum": 0.2521,
+     "ringLum": 0.0167,
+     "contrast": 4.53
+    }
+   ],
+   "viewportEmptyMeanLum": 0.0263,
+   "paddingStripMeanLum": 0.0167,
+   "computedTransparent": {
+    "viewport": "rgba(0, 0, 0, 0)",
+    "scrollable": "rgba(0, 0, 0, 0)",
+    "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+   },
+   "host": {
+    "cls": "terminal-screen__host",
+    "box": {
+     "x": 697,
+     "y": 133,
+     "w": 567,
+     "h": 651
+    },
+    "overflow": "clip",
+    "padding": [
+     "0px",
+     "0px",
+     "0px",
+     "0px"
+    ],
+    "scrollTop": 0,
+    "scrollLeft": 0,
+    "scrollHeight": 651,
+    "clientHeight": 651
+   },
+   "wrapper": {
+    "cls": "terminal-screen",
+    "overflow": "clip",
+    "padding": [
+     "8px",
+     "8px",
+     "8px",
+     "8px"
+    ],
+    "scrollTop": 0,
+    "scrollHeight": 667,
+    "clientHeight": 667
+   },
+   "geometry": {
+    "terminalScreen": {
+     "x": 689,
+     "y": 125,
+     "w": 583,
+     "h": 667
+    },
+    "padding": [
+     "8px",
+     "8px"
+    ],
+    "overflow": "clip",
+    "scrollTop": 0,
+    "scrollHeight": 667,
+    "clientHeight": 667,
+    "xterm": {
+     "x": 697,
+     "y": 133,
+     "w": 567,
+     "h": 651
+    },
+    "xtermScreen": {
+     "x": 697,
+     "y": 133,
+     "w": 547,
+     "h": 646
+    },
+    "rowCount": 34,
+    "firstRow": {
+     "x": 697,
+     "y": 133,
+     "w": 547,
+     "h": 19
+    },
+    "lastRow": {
+     "x": 697,
+     "y": 760,
+     "w": 547,
+     "h": 19
+    }
+   },
+   "spans": {
+    "ANSI-0": {
+     "bg": "#232322",
+     "fg": "#9fa6af",
+     "nominalContrast": 6.4,
+     "measuredContrast": 6.43
+    },
+    "ANSI-1": {
+     "bg": "#232322",
+     "fg": "#ff7b72",
+     "nominalContrast": 6.24,
+     "measuredContrast": 6.1
+    },
+    "ANSI-2": {
+     "bg": "#232322",
+     "fg": "#3fb950",
+     "nominalContrast": 6.19,
+     "measuredContrast": 6.28
+    },
+    "ANSI-3": {
+     "bg": "#232322",
+     "fg": "#d29922",
+     "nominalContrast": 6.23,
+     "measuredContrast": 6.17
+    },
+    "ANSI-4": {
+     "bg": "#232322",
+     "fg": "#58a6ff",
+     "nominalContrast": 6.23,
+     "measuredContrast": 6.21
+    },
+    "ANSI-5": {
+     "bg": "#232322",
+     "fg": "#bc8cff",
+     "nominalContrast": 6.24,
+     "measuredContrast": 6.13
+    },
+    "ANSI-6": {
+     "bg": "#232322",
+     "fg": "#39c5cf",
+     "nominalContrast": 7.54,
+     "measuredContrast": 7.61
+    },
+    "ANSI-7": {
+     "bg": "#232322",
+     "fg": "#b1bac4",
+     "nominalContrast": 8.01,
+     "measuredContrast": 7.78
+    },
+    "ANSI-8": {
+     "bg": "#232322",
+     "fg": "#a8afb8",
+     "nominalContrast": 7.11,
+     "measuredContrast": 7.12
+    },
+    "ANSI-9": {
+     "bg": "#232322",
+     "fg": "#ffa198",
+     "nominalContrast": 8.09,
+     "measuredContrast": 8.02
+    },
+    "ANSI-10": {
+     "bg": "#232322",
+     "fg": "#56d364",
+     "nominalContrast": 8.16,
+     "measuredContrast": 8.3
+    },
+    "ANSI-11": {
+     "bg": "#232322",
+     "fg": "#e3b341",
+     "nominalContrast": 8.08,
+     "measuredContrast": 8.08
+    },
+    "ANSI-12": {
+     "bg": "#232322",
+     "fg": "#79c0ff",
+     "nominalContrast": 8.09,
+     "measuredContrast": 8
+    },
+    "ANSI-13": {
+     "bg": "#232322",
+     "fg": "#d2a8ff",
+     "nominalContrast": 8.08,
+     "measuredContrast": 7.98
+    },
+    "ANSI-14": {
+     "bg": "#232322",
+     "fg": "#56d4dd",
+     "nominalContrast": 8.88,
+     "measuredContrast": 8.97
+    },
+    "ANSI-15": {
+     "bg": "#232322",
+     "fg": "#ffffff",
+     "nominalContrast": 15.73,
+     "measuredContrast": 15.73
+    },
+    "BOLD-0": {
+     "bg": "#232322",
+     "fg": "#a8afb8",
+     "nominalContrast": 7.11,
+     "measuredContrast": 7.12
+    },
+    "BOLD-1": {
+     "bg": "#232322",
+     "fg": "#ffa198",
+     "nominalContrast": 8.09,
+     "measuredContrast": 8.02
+    },
+    "BOLD-2": {
+     "bg": "#232322",
+     "fg": "#56d364",
+     "nominalContrast": 8.16,
+     "measuredContrast": 8.3
+    },
+    "BOLD-3": {
+     "bg": "#232322",
+     "fg": "#e3b341",
+     "nominalContrast": 8.08,
+     "measuredContrast": 8.08
+    },
+    "BOLD-4": {
+     "bg": "#232322",
+     "fg": "#79c0ff",
+     "nominalContrast": 8.09,
+     "measuredContrast": 8.1
+    },
+    "BOLD-5": {
+     "bg": "#232322",
+     "fg": "#d2a8ff",
+     "nominalContrast": 8.08,
+     "measuredContrast": 7.98
+    },
+    "BOLD-6": {
+     "bg": "#232322",
+     "fg": "#56d4dd",
+     "nominalContrast": 8.88,
+     "measuredContrast": 8.97
+    },
+    "BOLD-7": {
+     "bg": "#232322",
+     "fg": "#ffffff",
+     "nominalContrast": 15.73,
+     "measuredContrast": 15.73
+    },
+    "REV-DEFAULT": {
+     "bg": "#f2f2f2",
+     "fg": "#212121",
+     "nominalContrast": 14.38,
+     "measuredContrast": 14.04
+    },
+    "REV-RED": {
+     "bg": "#ee8377",
+     "fg": "#212121",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.25
+    },
+    "REV-GREEN": {
+     "bg": "#64b65c",
+     "fg": "#212121",
+     "nominalContrast": 6.43,
+     "measuredContrast": 6.43
+    },
+    "WHITE-ON-RED": {
+     "bg": "#ee8377",
+     "fg": "#ffffff",
+     "nominalContrast": 2.58,
+     "measuredContrast": 2.58
+    },
+    "BLACK-ON-WHITE": {
+     "bg": "#b3b9c3",
+     "fg": "#9fa6af",
+     "nominalContrast": 1.25,
+     "measuredContrast": 1.24
+    },
+    "alpha": {
+     "bg": "#232322",
+     "fg": "#58a6ff",
+     "nominalContrast": 6.23,
+     "measuredContrast": 6.06
+    },
+    "b.sh": {
+     "bg": "#232322",
+     "fg": "#ff7b72",
+     "nominalContrast": 6.24,
+     "measuredContrast": 6.03
+    },
+    "beta": {
+     "bg": "#232322",
+     "fg": "#58a6ff",
+     "nominalContrast": 6.23,
+     "measuredContrast": 5.92
+    },
+    "link-to-a": {
+     "bg": "#232322",
+     "fg": "#bc8cff",
+     "nominalContrast": 6.24,
+     "measuredContrast": 6.04
+    }
+   },
+   "fontMetrics": {
+    "measureWidth": 230.41,
+    "measureHeight": 15,
+    "cellWidthEstimate": 7.2,
+    "rowHeight": 19
+   }
+  },
+  {
+   "cell": "so-light",
+   "description": "solid + light",
+   "attrs": {
+    "theme": "solid",
+    "scheme": "light",
+    "glassColor": "none"
+   },
+   "plainRowContrast": {
+    "min": 17.4,
+    "max": 19.44,
+    "n": 15
+   },
+   "plainRowWorstBg": {
+    "min": 15.15,
+    "max": 19.27,
+    "n": 15
+   },
+   "scrolledPlainRowContrast": {
+    "min": 19.44,
+    "max": 19.44,
+    "n": 34
+   },
+   "cursorActive": {
+    "label": "cursor",
+    "box": {
+     "x": 711.42,
+     "y": 551,
+     "w": 7.22,
+     "h": 19
+    },
+    "inner": "#0d0d0d",
+    "ring": "#ffffff",
+    "innerLum": 0.004,
+    "ringLum": 1,
+    "contrast": 19.44
+   },
+   "selectionActive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.17,
+      "h": 19
+     },
+     "inner": "#718db0",
+     "ring": "#ffffff",
+     "innerLum": 0.257,
+     "ringLum": 1,
+     "contrast": 3.42,
+     "selectedText": {
+      "bg": "#718db0",
+      "ink": "#0d0d0d",
+      "contrastMeasured": 5.68,
+      "nominalFg": "#0d0d0d",
+      "contrastNominalVsBg": 5.68
+     }
+    }
+   ],
+   "selectionInactive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.17,
+      "h": 19
+     },
+     "inner": "#888e95",
+     "ring": "#ffffff",
+     "innerLum": 0.2675,
+     "ringLum": 1,
+     "contrast": 3.31,
+     "selectedText": {
+      "bg": "#888e95",
+      "ink": "#0d0d0d",
+      "contrastMeasured": 5.88,
+      "nominalFg": "#0d0d0d",
+      "contrastNominalVsBg": 5.88
+     }
+    }
+   ],
+   "inactiveCursorDom": "xterm-cursor xterm-cursor-outline",
+   "scrollbarThumb": [
+    {
+     "cls": "visible scrollbar vertical",
+     "sliderBg": "rgb(106, 114, 121)",
+     "label": "scrollbar-slider",
+     "box": {
+      "x": 1258,
+      "y": 644,
+      "w": 14,
+      "h": 125
+     },
+     "inner": "#6c7279",
+     "ring": "#ffffff",
+     "innerLum": 0.166,
+     "ringLum": 1,
+     "contrast": 4.86
+    }
+   ],
+   "viewportEmptyMeanLum": 0.982,
+   "paddingStripMeanLum": 1,
+   "computedTransparent": {
+    "viewport": "rgba(0, 0, 0, 0)",
+    "scrollable": "rgba(0, 0, 0, 0)",
+    "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+   },
+   "host": {
+    "cls": "terminal-screen__host",
+    "box": {
+     "x": 697,
+     "y": 133,
+     "w": 575,
+     "h": 659
+    },
+    "overflow": "clip",
+    "padding": [
+     "0px",
+     "0px",
+     "0px",
+     "0px"
+    ],
+    "scrollTop": 0,
+    "scrollLeft": 0,
+    "scrollHeight": 659,
+    "clientHeight": 659
+   },
+   "wrapper": {
+    "cls": "terminal-screen",
+    "overflow": "clip",
+    "padding": [
+     "8px",
+     "8px",
+     "8px",
+     "8px"
+    ],
+    "scrollTop": 0,
+    "scrollHeight": 675,
+    "clientHeight": 675
+   },
+   "geometry": {
+    "terminalScreen": {
+     "x": 689,
+     "y": 125,
+     "w": 591,
+     "h": 675
+    },
+    "padding": [
+     "8px",
+     "8px"
+    ],
+    "overflow": "clip",
+    "scrollTop": 0,
+    "scrollHeight": 675,
+    "clientHeight": 675,
+    "xterm": {
+     "x": 697,
+     "y": 133,
+     "w": 575,
+     "h": 659
+    },
+    "xtermScreen": {
+     "x": 697,
+     "y": 133,
+     "w": 554,
+     "h": 646
+    },
+    "rowCount": 34,
+    "firstRow": {
+     "x": 697,
+     "y": 133,
+     "w": 554,
+     "h": 19
+    },
+    "lastRow": {
+     "x": 697,
+     "y": 760,
+     "w": 554,
+     "h": 19
+    }
+   },
+   "spans": {
+    "ANSI-0": {
+     "bg": "#ffffff",
+     "fg": "#24292f",
+     "nominalContrast": 14.65,
+     "measuredContrast": 14.59
+    },
+    "ANSI-1": {
+     "bg": "#ffffff",
+     "fg": "#980416",
+     "nominalContrast": 8.88,
+     "measuredContrast": 9.16
+    },
+    "ANSI-2": {
+     "bg": "#ffffff",
+     "fg": "#01521d",
+     "nominalContrast": 9.43,
+     "measuredContrast": 9.37
+    },
+    "ANSI-3": {
+     "bg": "#ffffff",
+     "fg": "#5d4303",
+     "nominalContrast": 9.25,
+     "measuredContrast": 8.77
+    },
+    "ANSI-4": {
+     "bg": "#ffffff",
+     "fg": "#024797",
+     "nominalContrast": 8.93,
+     "measuredContrast": 8.96
+    },
+    "ANSI-5": {
+     "bg": "#ffffff",
+     "fg": "#6724ad",
+     "nominalContrast": 8.63,
+     "measuredContrast": 8.71
+    },
+    "ANSI-6": {
+     "bg": "#ffffff",
+     "fg": "#045158",
+     "nominalContrast": 9.04,
+     "measuredContrast": 9.04
+    },
+    "ANSI-7": {
+     "bg": "#ffffff",
+     "fg": "#484f56",
+     "nominalContrast": 8.31,
+     "measuredContrast": 8.02
+    },
+    "ANSI-8": {
+     "bg": "#ffffff",
+     "fg": "#3a4047",
+     "nominalContrast": 10.48,
+     "measuredContrast": 10.46
+    },
+    "ANSI-9": {
+     "bg": "#ffffff",
+     "fg": "#af0a27",
+     "nominalContrast": 7.25,
+     "measuredContrast": 7.48
+    },
+    "ANSI-10": {
+     "bg": "#ffffff",
+     "fg": "#046325",
+     "nominalContrast": 7.46,
+     "measuredContrast": 7.37
+    },
+    "ANSI-11": {
+     "bg": "#ffffff",
+     "fg": "#6e5104",
+     "nominalContrast": 7.39,
+     "measuredContrast": 7.41
+    },
+    "ANSI-12": {
+     "bg": "#ffffff",
+     "fg": "#0556a7",
+     "nominalContrast": 7.25,
+     "measuredContrast": 7.07
+    },
+    "ANSI-13": {
+     "bg": "#ffffff",
+     "fg": "#7132ba",
+     "nominalContrast": 7.32,
+     "measuredContrast": 7.56
+    },
+    "ANSI-14": {
+     "bg": "#ffffff",
+     "fg": "#04606c",
+     "nominalContrast": 7.25,
+     "measuredContrast": 7.23
+    },
+    "ANSI-15": {
+     "bg": "#ffffff",
+     "fg": "#51575f",
+     "nominalContrast": 7.3,
+     "measuredContrast": 7.04
+    },
+    "BOLD-0": {
+     "bg": "#ffffff",
+     "fg": "#3a4047",
+     "nominalContrast": 10.48,
+     "measuredContrast": 10.46
+    },
+    "BOLD-1": {
+     "bg": "#ffffff",
+     "fg": "#af0a27",
+     "nominalContrast": 7.25,
+     "measuredContrast": 7.48
+    },
+    "BOLD-2": {
+     "bg": "#ffffff",
+     "fg": "#046325",
+     "nominalContrast": 7.46,
+     "measuredContrast": 7.37
+    },
+    "BOLD-3": {
+     "bg": "#ffffff",
+     "fg": "#6e5104",
+     "nominalContrast": 7.39,
+     "measuredContrast": 7.41
+    },
+    "BOLD-4": {
+     "bg": "#ffffff",
+     "fg": "#0556a7",
+     "nominalContrast": 7.25,
+     "measuredContrast": 7.26
+    },
+    "BOLD-5": {
+     "bg": "#ffffff",
+     "fg": "#7132ba",
+     "nominalContrast": 7.32,
+     "measuredContrast": 7.56
+    },
+    "BOLD-6": {
+     "bg": "#ffffff",
+     "fg": "#04606c",
+     "nominalContrast": 7.25,
+     "measuredContrast": 7.23
+    },
+    "BOLD-7": {
+     "bg": "#ffffff",
+     "fg": "#51575f",
+     "nominalContrast": 7.3,
+     "measuredContrast": 7.28
+    },
+    "REV-DEFAULT": {
+     "bg": "#0d0d0d",
+     "fg": "#ffffff",
+     "nominalContrast": 19.44,
+     "measuredContrast": 19.11
+    },
+    "REV-RED": {
+     "bg": "#8b1d1e",
+     "fg": "#ffffff",
+     "nominalContrast": 9.16,
+     "measuredContrast": 9.16
+    },
+    "REV-GREEN": {
+     "bg": "#225024",
+     "fg": "#ffffff",
+     "nominalContrast": 9.37,
+     "measuredContrast": 9.37
+    },
+    "WHITE-ON-RED": {
+     "bg": "#8b1d1e",
+     "fg": "#51575f",
+     "nominalContrast": 1.26,
+     "measuredContrast": 1.26
+    },
+    "BLACK-ON-WHITE": {
+     "bg": "#494f55",
+     "fg": "#24292f",
+     "nominalContrast": 1.77,
+     "measuredContrast": 1.76
+    },
+    "alpha": {
+     "bg": "#ffffff",
+     "fg": "#024797",
+     "nominalContrast": 8.93,
+     "measuredContrast": 8.53
+    },
+    "b.sh": {
+     "bg": "#ffffff",
+     "fg": "#980416",
+     "nominalContrast": 8.88,
+     "measuredContrast": 9.05
+    },
+    "beta": {
+     "bg": "#ffffff",
+     "fg": "#024797",
+     "nominalContrast": 8.93,
+     "measuredContrast": 8.62
+    },
+    "link-to-a": {
+     "bg": "#ffffff",
+     "fg": "#6724ad",
+     "nominalContrast": 8.63,
+     "measuredContrast": 8.8
+    }
+   },
+   "fontMetrics": {
+    "measureWidth": 230.41,
+    "measureHeight": 15,
+    "cellWidthEstimate": 7.2,
+    "rowHeight": 19
+   }
+  },
+  {
+   "cell": "so-dark",
+   "description": "solid + dark",
+   "attrs": {
+    "theme": "solid",
+    "scheme": "dark",
+    "glassColor": "none"
+   },
+   "plainRowContrast": {
+    "min": 12.3,
+    "max": 14.38,
+    "n": 15
+   },
+   "plainRowWorstBg": {
+    "min": 11.17,
+    "max": 14.38,
+    "n": 15
+   },
+   "scrolledPlainRowContrast": {
+    "min": 14.38,
+    "max": 14.38,
+    "n": 34
+   },
+   "cursorActive": {
+    "label": "cursor",
+    "box": {
+     "x": 711.42,
+     "y": 551,
+     "w": 7.22,
+     "h": 19
+    },
+    "inner": "#f2f2f2",
+    "ring": "#212121",
+    "innerLum": 0.8879,
+    "ringLum": 0.0152,
+    "contrast": 14.38
+   },
+   "selectionActive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.17,
+      "h": 19
+     },
+     "inner": "#576d92",
+     "ring": "#212121",
+     "innerLum": 0.1504,
+     "ringLum": 0.0152,
+     "contrast": 3.07,
+     "selectedText": {
+      "bg": "#576d92",
+      "ink": "#f2f2f2",
+      "contrastMeasured": 4.68,
+      "nominalFg": "#f2f2f2",
+      "contrastNominalVsBg": 4.68
+     }
+    }
+   ],
+   "selectionInactive": [
+    {
+     "label": "selection0",
+     "box": {
+      "x": 697,
+      "y": 152,
+      "w": 302.17,
+      "h": 19
+     },
+     "inner": "#6a6d71",
+     "ring": "#212121",
+     "innerLum": 0.1519,
+     "ringLum": 0.0152,
+     "contrast": 3.1,
+     "selectedText": {
+      "bg": "#6a6d71",
+      "ink": "#f2f2f2",
+      "contrastMeasured": 4.64,
+      "nominalFg": "#f2f2f2",
+      "contrastNominalVsBg": 4.64
+     }
+    }
+   ],
+   "inactiveCursorDom": "xterm-cursor xterm-cursor-outline",
+   "scrollbarThumb": [
+    {
+     "cls": "visible scrollbar vertical",
+     "sliderBg": "rgb(131, 138, 146)",
+     "label": "scrollbar-slider",
+     "box": {
+      "x": 1258,
+      "y": 644,
+      "w": 14,
+      "h": 125
+     },
+     "inner": "#858a91",
+     "ring": "#212121",
+     "innerLum": 0.2521,
+     "ringLum": 0.0152,
+     "contrast": 4.63
+    }
+   ],
+   "viewportEmptyMeanLum": 0.0246,
+   "paddingStripMeanLum": 0.0152,
+   "computedTransparent": {
+    "viewport": "rgba(0, 0, 0, 0)",
+    "scrollable": "rgba(0, 0, 0, 0)",
+    "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+   },
+   "host": {
+    "cls": "terminal-screen__host",
+    "box": {
+     "x": 697,
+     "y": 133,
+     "w": 575,
+     "h": 659
+    },
+    "overflow": "clip",
+    "padding": [
+     "0px",
+     "0px",
+     "0px",
+     "0px"
+    ],
+    "scrollTop": 0,
+    "scrollLeft": 0,
+    "scrollHeight": 659,
+    "clientHeight": 659
+   },
+   "wrapper": {
+    "cls": "terminal-screen",
+    "overflow": "clip",
+    "padding": [
+     "8px",
+     "8px",
+     "8px",
+     "8px"
+    ],
+    "scrollTop": 0,
+    "scrollHeight": 675,
+    "clientHeight": 675
+   },
+   "geometry": {
+    "terminalScreen": {
+     "x": 689,
+     "y": 125,
+     "w": 591,
+     "h": 675
+    },
+    "padding": [
+     "8px",
+     "8px"
+    ],
+    "overflow": "clip",
+    "scrollTop": 0,
+    "scrollHeight": 675,
+    "clientHeight": 675,
+    "xterm": {
+     "x": 697,
+     "y": 133,
+     "w": 575,
+     "h": 659
+    },
+    "xtermScreen": {
+     "x": 697,
+     "y": 133,
+     "w": 554,
+     "h": 646
+    },
+    "rowCount": 34,
+    "firstRow": {
+     "x": 697,
+     "y": 133,
+     "w": 554,
+     "h": 19
+    },
+    "lastRow": {
+     "x": 697,
+     "y": 760,
+     "w": 554,
+     "h": 19
+    }
+   },
+   "spans": {
+    "ANSI-0": {
+     "bg": "#212121",
+     "fg": "#9fa6af",
+     "nominalContrast": 6.55,
+     "measuredContrast": 6.58
+    },
+    "ANSI-1": {
+     "bg": "#212121",
+     "fg": "#ff7b72",
+     "nominalContrast": 6.39,
+     "measuredContrast": 6.25
+    },
+    "ANSI-2": {
+     "bg": "#212121",
+     "fg": "#3fb950",
+     "nominalContrast": 6.34,
+     "measuredContrast": 6.43
+    },
+    "ANSI-3": {
+     "bg": "#212121",
+     "fg": "#d29922",
+     "nominalContrast": 6.38,
+     "measuredContrast": 6.23
+    },
+    "ANSI-4": {
+     "bg": "#212121",
+     "fg": "#58a6ff",
+     "nominalContrast": 6.37,
+     "measuredContrast": 6.36
+    },
+    "ANSI-5": {
+     "bg": "#212121",
+     "fg": "#bc8cff",
+     "nominalContrast": 6.39,
+     "measuredContrast": 6.17
+    },
+    "ANSI-6": {
+     "bg": "#212121",
+     "fg": "#39c5cf",
+     "nominalContrast": 7.71,
+     "measuredContrast": 7.79
+    },
+    "ANSI-7": {
+     "bg": "#212121",
+     "fg": "#b1bac4",
+     "nominalContrast": 8.2,
+     "measuredContrast": 8.05
+    },
+    "ANSI-8": {
+     "bg": "#212121",
+     "fg": "#a8afb8",
+     "nominalContrast": 7.28,
+     "measuredContrast": 7.29
+    },
+    "ANSI-9": {
+     "bg": "#212121",
+     "fg": "#ffa198",
+     "nominalContrast": 8.28,
+     "measuredContrast": 8.21
+    },
+    "ANSI-10": {
+     "bg": "#212121",
+     "fg": "#56d364",
+     "nominalContrast": 8.36,
+     "measuredContrast": 8.49
+    },
+    "ANSI-11": {
+     "bg": "#212121",
+     "fg": "#e3b341",
+     "nominalContrast": 8.27,
+     "measuredContrast": 8.27
+    },
+    "ANSI-12": {
+     "bg": "#212121",
+     "fg": "#79c0ff",
+     "nominalContrast": 8.28,
+     "measuredContrast": 8.11
+    },
+    "ANSI-13": {
+     "bg": "#212121",
+     "fg": "#d2a8ff",
+     "nominalContrast": 8.27,
+     "measuredContrast": 8.17
+    },
+    "ANSI-14": {
+     "bg": "#212121",
+     "fg": "#56d4dd",
+     "nominalContrast": 9.09,
+     "measuredContrast": 9.18
+    },
+    "ANSI-15": {
+     "bg": "#212121",
+     "fg": "#ffffff",
+     "nominalContrast": 16.1,
+     "measuredContrast": 15.69
+    },
+    "BOLD-0": {
+     "bg": "#212121",
+     "fg": "#a8afb8",
+     "nominalContrast": 7.28,
+     "measuredContrast": 7.29
+    },
+    "BOLD-1": {
+     "bg": "#212121",
+     "fg": "#ffa198",
+     "nominalContrast": 8.28,
+     "measuredContrast": 8.21
+    },
+    "BOLD-2": {
+     "bg": "#212121",
+     "fg": "#56d364",
+     "nominalContrast": 8.36,
+     "measuredContrast": 8.49
+    },
+    "BOLD-3": {
+     "bg": "#212121",
+     "fg": "#e3b341",
+     "nominalContrast": 8.27,
+     "measuredContrast": 8.27
+    },
+    "BOLD-4": {
+     "bg": "#212121",
+     "fg": "#79c0ff",
+     "nominalContrast": 8.28,
+     "measuredContrast": 8.29
+    },
+    "BOLD-5": {
+     "bg": "#212121",
+     "fg": "#d2a8ff",
+     "nominalContrast": 8.27,
+     "measuredContrast": 8.17
+    },
+    "BOLD-6": {
+     "bg": "#212121",
+     "fg": "#56d4dd",
+     "nominalContrast": 9.09,
+     "measuredContrast": 9.18
+    },
+    "BOLD-7": {
+     "bg": "#212121",
+     "fg": "#ffffff",
+     "nominalContrast": 16.1,
+     "measuredContrast": 16.1
+    },
+    "REV-DEFAULT": {
+     "bg": "#f2f2f2",
+     "fg": "#212121",
+     "nominalContrast": 14.38,
+     "measuredContrast": 14.04
+    },
+    "REV-RED": {
+     "bg": "#ee8377",
+     "fg": "#212121",
+     "nominalContrast": 6.25,
+     "measuredContrast": 6.25
+    },
+    "REV-GREEN": {
+     "bg": "#64b65c",
+     "fg": "#212121",
+     "nominalContrast": 6.43,
+     "measuredContrast": 6.43
+    },
+    "WHITE-ON-RED": {
+     "bg": "#ee8377",
+     "fg": "#ffffff",
+     "nominalContrast": 2.58,
+     "measuredContrast": 2.58
+    },
+    "BLACK-ON-WHITE": {
+     "bg": "#b3b9c3",
+     "fg": "#9fa6af",
+     "nominalContrast": 1.25,
+     "measuredContrast": 1.24
+    },
+    "alpha": {
+     "bg": "#212121",
+     "fg": "#58a6ff",
+     "nominalContrast": 6.37,
+     "measuredContrast": 6.16
+    },
+    "b.sh": {
+     "bg": "#212121",
+     "fg": "#ff7b72",
+     "nominalContrast": 6.39,
+     "measuredContrast": 6.18
+    },
+    "beta": {
+     "bg": "#212121",
+     "fg": "#58a6ff",
+     "nominalContrast": 6.37,
+     "measuredContrast": 6.21
+    },
+    "link-to-a": {
+     "bg": "#212121",
+     "fg": "#bc8cff",
+     "nominalContrast": 6.39,
+     "measuredContrast": 6.18
+    }
+   },
+   "fontMetrics": {
+    "measureWidth": 230.41,
+    "measureHeight": 15,
+    "cellWidthEstimate": 7.2,
+    "rowHeight": 19
+   }
+  }
+ ],
+ "bgPairs": {
+  "solidDark": {
+   "DEF-ON-RED": {
+    "bg": "#ee8377",
+    "fg": "#f2f2f2",
+    "nominalContrast": 2.3,
+    "measuredContrast": 2.3
+   },
+   "DEF-ON-GREEN": {
+    "bg": "#64b65c",
+    "fg": "#f2f2f2",
+    "nominalContrast": 2.24,
+    "measuredContrast": 2.23
+   },
+   "BRWHITE-ON-BLUE": {
+    "bg": "#6ba4f8",
+    "fg": "#ffffff",
+    "nominalContrast": 2.53,
+    "measuredContrast": 2.53
+   },
+   "BLACK-ON-YELLOW": {
+    "bg": "#c99b3e",
+    "fg": "#9fa6af",
+    "nominalContrast": 1.04,
+    "measuredContrast": 1.04
+   },
+   "BLACK-ON-GREEN": {
+    "bg": "#64b65c",
+    "fg": "#9fa6af",
+    "nominalContrast": 1.02,
+    "measuredContrast": 1.02
+   },
+   "BLACK-": {
+    "bg": "#66c2cc",
+    "fg": "#9fa6af",
+    "nominalContrast": 1.19,
+    "measuredContrast": 7.79
+   },
+   "ON-CYAN": {
+    "bg": "#66c2cc",
+    "fg": "#9fa6af",
+    "nominalContrast": 1.19,
+    "measuredContrast": 1.18
+   },
+   "DEF-ON-BRBLACK": {
+    "bg": "#a9afb7",
+    "fg": "#f2f2f2",
+    "nominalContrast": 1.97,
+    "measuredContrast": 1.97
+   },
+   "DEF-ON-WHITE": {
+    "bg": "#b3b9c3",
+    "fg": "#f2f2f2",
+    "nominalContrast": 1.76,
+    "measuredContrast": 1.76
+   },
+   "WHITE-ON-RED2": {
+    "bg": "#ee8377",
+    "fg": "#b1bac4",
+    "nominalContrast": 1.31,
+    "measuredContrast": 1.31
+   }
+  },
+  "solidLight": {
+   "DEF-ON-RED": {
+    "bg": "#8b1d1e",
+    "fg": "#0d0d0d",
+    "nominalContrast": 2.12,
+    "measuredContrast": 2.12
+   },
+   "DEF-ON-GREEN": {
+    "bg": "#225024",
+    "fg": "#0d0d0d",
+    "nominalContrast": 2.07,
+    "measuredContrast": 2.06
+   },
+   "BRWHITE-ON-BLUE": {
+    "bg": "#1d4692",
+    "fg": "#51575f",
+    "nominalContrast": 1.23,
+    "measuredContrast": 1.23
+   },
+   "BLACK-ON-YELLOW": {
+    "bg": "#5a4415",
+    "fg": "#24292f",
+    "nominalContrast": 1.59,
+    "measuredContrast": 1.58
+   },
+   "BLACK-ON-GREEN": {
+    "bg": "#225024",
+    "fg": "#24292f",
+    "nominalContrast": 1.56,
+    "measuredContrast": 1.56
+   },
+   "BLACK-": {
+    "bg": "#224f57",
+    "fg": "#24292f",
+    "nominalContrast": 1.62,
+    "measuredContrast": 9.04
+   },
+   "ON-CYAN": {
+    "bg": "#224f57",
+    "fg": "#24292f",
+    "nominalContrast": 1.62,
+    "measuredContrast": 1.61
+   },
+   "DEF-ON-BRBLACK": {
+    "bg": "#3b4046",
+    "fg": "#0d0d0d",
+    "nominalContrast": 1.86,
+    "measuredContrast": 1.86
+   },
+   "DEF-ON-WHITE": {
+    "bg": "#494f55",
+    "fg": "#0d0d0d",
+    "nominalContrast": 2.34,
+    "measuredContrast": 2.34
+   },
+   "WHITE-ON-RED2": {
+    "bg": "#8b1d1e",
+    "fg": "#484f56",
+    "nominalContrast": 1.1,
+    "measuredContrast": 1.1
+   }
+  }
+ },
+ "firstFitTimeline": {
+  "note": "in-page sampler every 25 ms from before the Terminal tool was opened",
+  "monoBeforeFirstTerminal": "400:unloaded/500:loaded for every sample (about 2.4 s) while no terminal was visible",
+  "firstSampleWithTerminal": {
+   "tMs": 2485,
+   "mono": "400:loaded/500:loaded",
+   "rows": 34,
+   "rowHeight": 19,
+   "xtermScreen": [
+    547,
+    646
+   ],
+   "host": [
+    567,
+    651
+   ],
+   "wrapperScrollTop": 0,
+   "hostScrollTop": 0
+  },
+  "distinctGeometryStates": 1,
+  "ptyAfterFirstFit": "34 76 (stty size)"
+ },
+ "fitTable": [
+  {
+   "state": "glass 1280x800 first terminal",
+   "rows": 34,
+   "cols": 76,
+   "rowHeight": 19,
+   "xtermScreen": [
+    547,
+    646
+   ],
+   "host": [
+    567,
+    651
+   ],
+   "gridBottom": 779,
+   "clipBottom": 792,
+   "cursorRow": "[760,779] fully visible",
+   "wrapperScrollTop": 0,
+   "hostScrollTop": 0,
+   "overflow": "clip/clip"
+  },
+  {
+   "state": "glass 1280x800 after fill, typing, click, appearance change",
+   "scrollTop": "0/0 in all four",
+   "rows": 34
+  },
+  {
+   "state": "solid 1280x800",
+   "rows": 34,
+   "cols": 77,
+   "xtermScreen": [
+    554,
+    646
+   ],
+   "host": [
+    575,
+    659
+   ],
+   "gridBottom": 779,
+   "clipBottom": 800,
+   "scrollTop": "0/0"
+  },
+  {
+   "state": "glass 1100x640 and 1024x640 (renderer emulation)",
+   "rows": 25,
+   "cols": 51,
+   "xtermScreen": [
+    367,
+    475
+   ],
+   "host": [
+    "387|383",
+    491
+   ],
+   "gridBottom": 608,
+   "clipBottom": 632,
+   "stty": "25 51",
+   "scrollTop": "0/0"
+  },
+  {
+   "state": "solid 1100x640 / 1024x640 (renderer emulation)",
+   "rows": 26,
+   "cols": "52 / 51",
+   "xtermScreen": [
+    "374|367",
+    494
+   ],
+   "host": [
+    "395|383",
+    499
+   ],
+   "gridBottom": 627,
+   "clipBottom": 640,
+   "stty": "26 52 / 26 51",
+   "scrollTop": "0/0"
+  }
+ ],
+ "sigwinch": {
+  "method": "in-shell trap installed after startup prints stty size per SIGWINCH; IPC call count not observable (window.studio is frozen)",
+  "result": "1100x640 -> one WINCH (26 52); 1024x640 -> one (26 51); repeating 1024x640 -> none; back to 1280x800 -> one (34 77); glass<->solid at 1280x800 -> one (34 77 / 34 76); light<->dark -> none"
+ },
+ "liveSwitch": {
+  "bottom2": "light/glass -> dark/glass -> dark/solid -> light/solid -> follow-system/glass: rows text identical, cursor position identical, scrollbar geometry identical, default fg / ANSI-1 / reverse background colours change each time (13,13,13 <-> 242,242,242 etc.), .xterm-scrollable-element computed transparent in every state",
+  "scrolled": "scrollback intact (thumb height 143/646 unchanged; Shift+PageUp x6 reaches the first command line); viewport returns to the bottom after the Settings overlay closes (re-attach), content not lost"
+ },
+ "cspTrace": {
+  "styleSrcElem": 0,
+  "styleSrcAttr": 33,
+  "source": "Vt._addStyle (TerminalScreen-DRQZf66K.js:3474:7)",
+  "selectionAddsInlineBackground": "each selected span receives setAttribute(style, background-color:#698eb3 / #868e96 / #516e95 / #696d71) = the active/inactive selection colours; blocked, no visible effect because the .xterm-selection layer paints the highlight (measured pixel contrasts equal the predictions)",
+  "truecolor": "RGB-FG-RED computed rgb(13,13,13); RGB-BG-GREEN background transparent; 256-colour unaffected"
+ },
+ "cursor": {
+  "activeBlink": "present in 45/45 polls over ~7 s, no blink class, document.getAnimations() = 0",
+  "inactive": "class xterm-cursor-outline, edge contrast 14.05-19.44 in all six cells"
+ },
+ "browser": {
+  "bare": "page area mean RGB 255,255,255 (min=max=1)",
+  "reload": "Load 1 -> 2",
+  "next": "/next Load 3, address /next",
+  "redirectPrompt": "shown for https://example.com/w5-redirect; Cancel keeps /next Load 3",
+  "settingsOverlay": "dialog 320,140 640x520 fully visible over the Browser, native view hidden"
+ }
+}

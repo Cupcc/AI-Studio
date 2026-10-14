@@ -1,0 +1,42 @@
+--- a/packages/agent-adapter/src/core/runtime-process.ts	2026-10-13 17:27:55
++++ b/packages/agent-adapter/src/core/runtime-process.ts	2026-10-13 17:27:55
+@@ -114,6 +114,7 @@
+   private transport: LineTransport | undefined;
+   private terminating: Promise<TerminationReport> | undefined;
+   private lastSnapshot: ProcessInfo[] = [];
++  private exitSnapshot: Promise<void> | undefined;
+ 
+   private constructor(child: ChildProcess, options: RuntimeSpawnOptions) {
+     this.child = child;
+@@ -146,6 +147,13 @@
+       const tail = this.stderrTail();
+       if (tail) info.stderrTail = tail;
+       this.exitRecord = info;
++      if (child.pid !== undefined) {
++        const leader = child.pid;
++        // While any member lives, the group id cannot be recycled: members found at exit time belong to this runtime.
++        this.exitSnapshot = this.lister.list().then((processes) => {
++          this.rememberSnapshot(processes.filter((p) => p.pgid === leader && p.pid !== leader && !isZombie(p)));
++        }, () => {});
++      }
+       exit.resolve(info);
+       this.exitStream.emit(info);
+       this.exitStream.dispose();
+@@ -268,7 +276,8 @@
+     const pid = this.child.pid;
+     if (pid === undefined || !this.running) return [];
+     const processes = await this.lister.list();
+-    const snapshot = descendantsIn(processes, pid, false);
++    const members = processes.filter((p) => p.pgid === pid && p.pid !== pid && !isZombie(p));
++    const snapshot = [...new Map([...descendantsIn(processes, pid, false), ...members].map((p) => [`${p.pid}@${p.startedAt}`, p])).values()];
+     this.rememberSnapshot(snapshot);
+     return snapshot;
+   }
+@@ -324,6 +333,7 @@
+     const killWaitMs = options.killWaitMs ?? 3_000;
+     this.expectedExit = true;
+     const pid = this.child.pid;
++    await this.exitSnapshot;
+ 
+     if (this.running) {
+       try {

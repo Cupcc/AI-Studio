@@ -1,0 +1,128 @@
+{
+ "note": "Packaged app (apps/desktop/dist/mac-arm64, built a0e7d49 at 18:38:11), temp userData copied from a dev instance, Chromium debug port, light glass (aurora), no Session (packaged ignores the simulated Provider).",
+ "cspMeta": "default-src none; script-src self; style-src self; style-src-elem self unsafe-inline; style-src-attr unsafe-inline; img-src self data:; font-src self; connect-src self; base-uri none; form-action none; object-src none; frame-src none; worker-src none",
+ "scenes": {
+  "s1": {
+   "explicitCss": {
+    "n": 128,
+    "min": 5.5,
+    "p50": 5.67,
+    "below4_5": 0
+   },
+   "explicitPx": {
+    "n": 128,
+    "min": 5.47,
+    "p50": 5.71,
+    "below4_5": 0
+   },
+   "defaultBgNomPx": null,
+   "defaultBgPx": null
+  },
+  "s2": {
+   "explicitCss": {
+    "n": 14,
+    "min": 5.5,
+    "p50": 5.62,
+    "below4_5": 0
+   },
+   "explicitPx": {
+    "n": 14,
+    "min": 5.41,
+    "p50": 5.66,
+    "below4_5": 0
+   },
+   "defaultBgNomPx": null,
+   "defaultBgPx": null
+  },
+  "s3a": {
+   "explicitCss": null,
+   "explicitPx": null,
+   "defaultBgNomPx": {
+    "n": 256,
+    "min": 4.54,
+    "p50": 5.1,
+    "below4_5": 0
+   },
+   "defaultBgPx": {
+    "n": 256,
+    "min": 4.45,
+    "p50": 5.13,
+    "below4_5": 2
+   }
+  },
+  "s4": {
+   "explicitCss": {
+    "n": 127,
+    "min": 4.59,
+    "p50": 5.89,
+    "below4_5": 0
+   },
+   "explicitPx": {
+    "n": 127,
+    "min": 4.21,
+    "p50": 5.85,
+    "below4_5": 5
+   },
+   "defaultBgNomPx": {
+    "n": 117,
+    "min": 4.57,
+    "p50": 5.17,
+    "below4_5": 0
+   },
+   "defaultBgPx": {
+    "n": 117,
+    "min": 3.81,
+    "p50": 5.01,
+    "below4_5": 34
+   }
+  },
+  "s7": {
+   "explicitCss": {
+    "n": 17,
+    "min": 5.52,
+    "p50": 5.65,
+    "below4_5": 0
+   },
+   "explicitPx": {
+    "n": 17,
+    "min": 5.31,
+    "p50": 5.66,
+    "below4_5": 0
+   },
+   "defaultBgNomPx": {
+    "n": 32,
+    "min": 5.96,
+    "p50": 6.93,
+    "below4_5": 0
+   },
+   "defaultBgPx": {
+    "n": 32,
+    "min": 2.15,
+    "p50": 6.02,
+    "below4_5": 8
+   }
+  }
+ },
+ "batMonokai": {
+  "nomPx": {
+   "n": 100,
+   "min": 4.49,
+   "p50": 5.15,
+   "below4_5": 1
+  },
+  "px": {
+   "n": 100,
+   "min": 2.44,
+   "p50": 4.5,
+   "below4_5": 49
+  }
+ },
+ "processes": {
+  "tracked": "main 69016 + 3 Electron helpers + 1 zsh -f (PTY child)",
+  "afterConfirmedQuit": "0 alive, 5 gone",
+  "mainExitSeconds": 0.56,
+  "quitTrigger": "real menu item via System Events (exact PID, not a key press), then the in-app confirmation 停止并退出",
+  "port9395Free": true
+ },
+ "quitDialog": "退出 AI Developer Studio？ / 1 个 Project 中有 1 个未退出终端。终端及其运行的命令将结束。 / W5 Project One · Terminal · Terminal 1"
+}

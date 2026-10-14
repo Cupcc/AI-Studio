@@ -1,6 +1,6 @@
 ---
 id: T20261009-context-tools
-status: ready
+status: in_progress
 fr: [FR-TOOL-001, FR-TOOL-002, FR-TOOL-003, FR-TOOL-004, FR-INPUT-001, FR-PROJ-002]
 ac: [AC-07, AC-01]
 specs: [specs/tools/spec.md, specs/input/spec.md, specs/session/spec.md, specs/agent-adapter/spec.md, specs/project/spec.md]
@@ -11,7 +11,9 @@ created: 2026-10-09
 
 ## 本轮授权与状态
 
-用户于 2026-10-13 接受开发准备审阅建议，明确「accept all, not dev, update all docs」。本轮仅更新文档，不修改应用代码、不执行能力探针或模型调用；未来开发须另获指令，真实调用还须明确范围 / 预算。任务保持 ready 表示产品范围与后续顺序明确，不表示当前获准启动开发；四工具未实现，AC-07 未通过。本轮确认不扩及其他草稿中的无关未决项，文档 diff 待审阅。
+2026-10-13 用户新指令「推进运行时工具的开发。agents并发」授权启动 Terminal / Browser 及其 Project 关闭、应用退出接缝的开发。按下文阶段 2 / 3 并发实施，正常的本地 PTY / HTTP fixture 调用纳入验证；本次未授权真实模型调用，范围 / 预算条件继续保留。Files、两类 Diff 与完整 AC-07 仍由本任务跟踪，不将运行时工具阶段等同四工具交付。执行与 worker 分工见 [plan.md](plan.md)。
+
+此前文档准备：用户于 2026-10-13 接受开发准备审阅建议，明确「accept all, not dev, update all docs」。当时仅更新文档，任务保持 ready；后续开发已由本节新指令启动。确认不扩及其他草稿中的无关未决项，文档 diff 待审阅。四工具 AC-07 仍未整体通过，真实调用仍须明确范围 / 预算。
 
 ## 目标
 
@@ -50,10 +52,12 @@ created: 2026-10-09
 | 关闭仍在运行进程的 Terminal Tab 时是否确认？ | 按 [工具规格 TOOLS-Q4](../../specs/tools/spec.md#12-已确认原则)；依据原型 v03 Q4（2026-10-11 确认） |
 | 关闭最后一个 Terminal Tab 后显示什么？ | 按 [工具规格 TOOLS-Q4](../../specs/tools/spec.md#12-已确认原则)；依据原型 v03 Q5（2026-10-11 确认） |
 | 本轮调研建议是否采用？ | 按 DEC-10 与工具规格 TOOLS-Q2、Q3；用户回复「accept above suggetions, update all related docs」（2026-10-12 确认） |
+| 生产 CSP 是否放宽以让 xterm 运行时样式生效（W5-F3）？ | 仅为 `style-src-elem` 增加 `'unsafe-inline'`；用户在三个方案的取舍说明后回复「我选1」（2026-10-13 确认），记录见 [DEC-02](<../../docs/07. Decisions.md>) 的例外，提交 `c02f7a6` |
+| 是否再放宽 `style-src-attr`，使 24 位色与 `minimumContrastRatio` 生效（W5-F6、W5-F9）？ | 放宽；用户回复「放宽安全限制，先实现功能为主」（2026-10-14 确认），同回复还采纳了上一轮汇报中的建议：接受调色板与毛玻璃浅色选区对比度取舍，光标保持常亮，重开 Project 自动创建终端保持现状，先定 CSP 再压缩提交并本地快进合入 main（不推送），并要求继续实现后续功能 |
 
 ## 文档准备与未来阶段
 
-依据 DEC-14，沿用本任务分阶段，不为四个面板建立重复记录。以下为未来顺序，不构成当前执行授权。
+依据 DEC-14，沿用本任务分阶段，不为四个面板建立重复记录。阶段 2 / 3 已按本节顶部的新指令启动；其无依赖的服务、界面和测试在独立 worktree 并发，主 Agent 顺序集成与原生窗口验证。阶段 0 的真实模型能力验证仍待调用范围 / 预算。
 
 | 阶段 | 交付 / 开始条件 | 完成条件 |
 |---|---|---|
@@ -67,7 +71,7 @@ created: 2026-10-09
 
 ## 验收场景准备
 
-全部状态为“未执行”。运行环境：macOS arm64 实际 Electron 应用；自动化使用隔离 fixture / 模拟 Provider，AI 交互从 UI 入口操作并截图；标注真实 CLI 的场景须获得调用授权，记录实际 CLI / SDK / 应用版本。来源是 05 AC-07 的各次补充、FR-PROJ-002、FR-INPUT-001 及 Tools §3～5。
+下表是场景计划，执行结论及当前未覆盖范围见 [acceptance.md](acceptance.md)。运行环境：macOS arm64 实际 Electron 应用；自动化使用隔离 fixture / 模拟 Provider，Terminal 使用真实本地 PTY、Browser 使用真实本地 HTTP 页面；AI 交互从 UI 入口操作并截图。标注真实 CLI 的场景仍须获得调用授权，记录实际 CLI / SDK / 应用版本。来源是 05 AC-07 的各次补充、FR-PROJ-002、FR-INPUT-001 及 Tools §3～5。
 
 | 场景 / 来源 | 前置条件 | 用户操作 / 故障注入 | 预期 | 验证及证据 |
 |---|---|---|---|---|
@@ -88,13 +92,15 @@ created: 2026-10-09
 
 ## 待验证与启动条件
 
-- 按 04 第 1 节第 13 项验证 CLI 事件、覆盖范围、Claude Code 同等数据、非 Git 原生补丁与历史恢复；资料见 [research.md](research.md)。真实模型调用的授权和预算另行确定，本次仅更新文档。
-- 工具规格的本轮范围已确认；工具代码、轮次补丁存储与 Adapter 接口仍待实现和验证。Browser 首轮问题已按 Q1、Q5、Q6 解决，未来扩展另行评估；现有 Adapter 任务不因此视为覆盖本轮 Diff。
-- 2026-10-13 审阅环境无法从 PATH 找到 agent-browser；正式交互验收前核对安装 / PATH，并按对应 skill 操作。本次未安装工具，也未运行应用测试。
-- 未决执行条件：开发启动指令（负责人：人；阻塞开发 / 探针）；真实 CLI 调用范围与预算（负责人：人；仅阻塞真实调用）；接口、迁移与版本能力验证（负责人：AI；获授权后按阶段 0 执行）。本轮文档更新不受这些条件阻塞。
+- 按 04 第 1 节第 13 项验证 CLI 事件、覆盖范围、Claude Code 同等数据、非 Git 原生补丁与历史恢复；资料见 [research.md](research.md)。真实模型调用的授权和预算另行确定；本阶段未调用真实模型。
+- 工具规格的本轮范围已确认；Terminal / Browser 代码已实现并处于阶段验证（见 [acceptance.md](acceptance.md)）；Files、Diff 代码、轮次补丁存储、文件引用与 Adapter 的文件输入 / 补丁接口仍待实现和验证。Browser 首轮问题已按 Q1、Q5、Q6 解决，未来扩展另行评估；现有 Adapter 任务不因此视为覆盖本轮 Diff。
+- 2026-10-13 开发环境的 PATH 仍无全局 agent-browser，使用 `npx --yes agent-browser`，先读取其已安装版本的 core / electron 工作流，再操作隔离 Electron 应用。
+- 未决执行条件：真实 CLI 调用范围与预算（负责人：人；仅阻塞真实调用）；文件引用、原生补丁接口 / 迁移与版本能力验证（负责人：AI；阶段 0）。运行时工具开发授权已解决，不再阻塞阶段 2 / 3。
 - 交互原型 v01 / v02 尚未覆盖本次工具行为；[v03](../../design/prototypes/README.md#studio-灰度交互原型-v03)（探索中，[T20261011-prototype-v03](../T20261011-prototype-v03/task.md)）已做出项目 / 本轮 Diff 与 Terminal Tabs 供评审。Shell Spec v02 已确认（2026-10-11），v01 保留作历史依据。
 
 ## 执行记录
+
+- 2026-10-14（Runtime 工具阶段当前状态，Main Agent 记录）：Terminal、Browser 及 Project 关闭 / 应用退出接缝已实现并集成在 `feat/runtime-tools`，代码基线 `2223dad`；独立评审与验收结论、基线及未覆盖范围见 [acceptance.md](acceptance.md)（AI 结论：部分通过；人工功能验收：待人工验收）。本阶段不是四工具交付：Files、项目 / 本轮 Diff、文件引用与原生补丁尚未实现，无真实 Codex / Claude CLI 与模型调用，任务保持 `in_progress`。实现者自检（不计入独立结论）：`pnpm check:code` 通过（脚本 36、Adapter 241、桌面端 357）；Electron E2E 40 / 40；`pnpm package` + `pnpm smoke:packaged` PASS（含 Terminal 屏幕模型）。过程中的取舍与确认：生产 CSP 只放宽 `style-src-elem`（用户 2026-10-13「我选1」，DEC-02 例外，`c02f7a6`）；Adapter `dispose()` 由“不抛错”改为“清理未确认则拒绝并可重试”并新增 `releaseRuntimes(cwd?)`（AI 技术决定，规格草稿，diff 待审阅）。待人决定：是否追加 `style-src-attr 'unsafe-inline'`（W5-F6 真彩色丢失、W5-F9 ANSI 彩色背景上文字不可读）；毛玻璃浅色选区对比度 2.79–2.95:1 的“可读优先”取舍与浅 / 深调色板取舍；光标是否闪烁（W5-F7）；真实 CLI 调用范围 / 预算；何时把本阶段合入 main。过程记录见 [plan.md](plan.md)。
 
 - 2026-10-13：用户「accept all, not dev, update all docs」确认本轮建议并限定仅文档。Main Agent 在基线 4de166a 的 docs/tools-preparation worktree 更新 17 份相关文档：DEC-14、FR / UX / 技术要求 / AC、五个相关模块规格、工具规格、路线图、架构工具节点、设计说明与任务 / 调研。工具规格确认范围已同步；没有将其他旧提案一并确认，没有启动开发、能力探针或真实模型调用。完整工具任务保持 ready，未归档、未标记功能验收通过。
 - 本轮文档自检（Main Agent，2026-10-13）：检查跨文档 FR / AC、Browser 分项决定、文件引用、轮次身份 / 存储、终端关闭与启动授权的一致性；清理旧的首轮 Browser 未决与 Session-only 关闭表述，保留历史原型与历史证据。16 份 Markdown 的 380 个标题、102 张表格结构检查通过；架构 HTML 脚本语法及 47 个静态 / 数据引用目标有效；本地链接回归检查 0 新增问题（4 个基线问题未增加），git diff --check 通过。检查复用主 checkout 的文档检查器及依赖，未安装应用依赖、未执行应用测试；未进行 HTML 浏览器视觉复验。文档更新已完成，diff 待人审阅；开发与验证仍按上文条件另行启动。

@@ -1,0 +1,576 @@
+{
+ "generatedAt": "2026-10-14T01:38:29.895Z",
+ "method": "ps -axo pid,ppid,pgid,lstart,command (W5-proc-tree.mjs); liveness by pid + lstart (W5-proc-alive.mjs); the app transient /bin/ps probe is ignored",
+ "scenarios": [
+  {
+   "name": "close-alpha-and-bravo-before",
+   "note": "Instance 1, before any close: Alpha T1 zsh 75087 -> node 75268 (service 61852), Alpha T2 zsh 75282, Bravo T1 zsh 76476 -> node 76669 (62380), Bravo T2 zsh 76688; two preview renderers",
+   "snapshot": {
+    "electronMain": {
+     "pid": 74876,
+     "start": "Wed Oct 14 09:11:33 2026"
+    },
+    "tracked": [
+     {
+      "pid": 74878,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74879,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74880,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 75755,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:13:28 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 77513,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:16:03 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 75087,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:12:06 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 75282,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:12:14 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76476,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:47 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76688,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:55 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 75268,
+      "ppid": 75087,
+      "start": "Wed Oct 14 09:12:12 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>ALPHA-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fu"
+     },
+     {
+      "pid": 76669,
+      "ppid": 76476,
+      "start": "Wed Oct 14 09:14:53 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>BRAVO-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fu"
+     }
+    ]
+   }
+  },
+  {
+   "name": "close-alpha-confirmed-snapshot",
+   "note": "taken just before the confirmed Alpha close; after: 75087, 75282, 75268 and the Alpha preview renderer 75755 gone; 76476, 76688, 76669 and the Bravo preview renderer 77513 alive",
+   "snapshot": {
+    "electronMain": {
+     "pid": 74876,
+     "start": "Wed Oct 14 09:11:33 2026"
+    },
+    "tracked": [
+     {
+      "pid": 74878,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74879,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74880,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 75755,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:13:28 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 77513,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:16:03 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 75087,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:12:06 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 75282,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:12:14 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76476,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:47 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76688,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:55 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 75268,
+      "ppid": 75087,
+      "start": "Wed Oct 14 09:12:12 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>ALPHA-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fu"
+     },
+     {
+      "pid": 76669,
+      "ppid": 76476,
+      "start": "Wed Oct 14 09:14:53 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>BRAVO-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fu"
+     }
+    ]
+   }
+  },
+  {
+   "name": "terminal-only-close",
+   "note": "reopened Alpha with one login shell /bin/zsh -l 78550; cancel: alive; confirm: gone; Bravo pids alive",
+   "snapshot": {
+    "electronMain": {
+     "pid": 74876,
+     "start": "Wed Oct 14 09:11:33 2026"
+    },
+    "tracked": [
+     {
+      "pid": 74878,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74879,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74880,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 77513,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:16:03 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 78550,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:17:56 2026",
+      "command": "/bin/zsh -l"
+     },
+     {
+      "pid": 76476,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:47 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76688,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:55 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76669,
+      "ppid": 76476,
+      "start": "Wed Oct 14 09:14:53 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>BRAVO-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fu"
+     }
+    ]
+   }
+  },
+  {
+   "name": "session-only-close",
+   "note": "Charlie has no terminals; Bravo pids unchanged after confirm",
+   "snapshot": {
+    "electronMain": {
+     "pid": 74876,
+     "start": "Wed Oct 14 09:11:33 2026"
+    },
+    "tracked": [
+     {
+      "pid": 74878,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74879,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74880,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 77513,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:16:03 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 76476,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:47 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76688,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:55 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76669,
+      "ppid": 76476,
+      "start": "Wed Oct 14 09:14:53 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>BRAVO-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fu"
+     }
+    ]
+   }
+  },
+  {
+   "name": "stop-with-tools",
+   "note": "Bravo pids before Session Stop; all alive after",
+   "snapshot": {
+    "electronMain": {
+     "pid": 74876,
+     "start": "Wed Oct 14 09:11:33 2026"
+    },
+    "tracked": [
+     {
+      "pid": 74878,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74879,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74880,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 77513,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:16:03 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 76476,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:47 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76688,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:55 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76669,
+      "ppid": 76476,
+      "start": "Wed Oct 14 09:14:53 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>BRAVO-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fu"
+     }
+    ]
+   }
+  },
+  {
+   "name": "last-project-close",
+   "note": "Bravo T1/T2/T3 + node 76669 gone after closing the last Project tab; app stays up",
+   "snapshot": {
+    "electronMain": {
+     "pid": 74876,
+     "start": "Wed Oct 14 09:11:33 2026"
+    },
+    "tracked": [
+     {
+      "pid": 74878,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74879,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 74880,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:11:33 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 77513,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:16:03 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 76476,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:47 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76688,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:14:55 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 79741,
+      "ppid": 74876,
+      "start": "Wed Oct 14 09:20:17 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 76669,
+      "ppid": 76476,
+      "start": "Wed Oct 14 09:14:53 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>BRAVO-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fu"
+     }
+    ]
+   }
+  },
+  {
+   "name": "quit-a-confirm",
+   "note": "2 Projects: 1 running Session + 3 terminals (shells 85256, 85454, 85973, node 85439); after the confirmed menu Quit all 9 tracked gone",
+   "snapshot": {
+    "electronMain": {
+     "pid": 85190,
+     "start": "Wed Oct 14 09:30:29 2026"
+    },
+    "tracked": [
+     {
+      "pid": 85191,
+      "ppid": 85190,
+      "start": "Wed Oct 14 09:30:29 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 85192,
+      "ppid": 85190,
+      "start": "Wed Oct 14 09:30:29 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 85193,
+      "ppid": 85190,
+      "start": "Wed Oct 14 09:30:29 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 85870,
+      "ppid": 85190,
+      "start": "Wed Oct 14 09:31:56 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 85256,
+      "ppid": 85190,
+      "start": "Wed Oct 14 09:30:41 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 85454,
+      "ppid": 85190,
+      "start": "Wed Oct 14 09:30:49 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 85973,
+      "ppid": 85190,
+      "start": "Wed Oct 14 09:32:13 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 85439,
+      "ppid": 85256,
+      "start": "Wed Oct 14 09:30:47 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>ECHO-SERVICE</h1>\")).listen(0,\"127.0.0.1\",fun"
+     }
+    ]
+   }
+  },
+  {
+   "name": "quit-b-confirm",
+   "note": "terminal-only: zsh 86797, zsh 86981, sleep 87165; after the confirmed menu Quit all 7 gone",
+   "snapshot": {
+    "electronMain": {
+     "pid": 86707,
+     "start": "Wed Oct 14 09:33:17 2026"
+    },
+    "tracked": [
+     {
+      "pid": 86709,
+      "ppid": 86707,
+      "start": "Wed Oct 14 09:33:17 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 86710,
+      "ppid": 86707,
+      "start": "Wed Oct 14 09:33:17 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 86711,
+      "ppid": 86707,
+      "start": "Wed Oct 14 09:33:18 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 86797,
+      "ppid": 86707,
+      "start": "Wed Oct 14 09:33:29 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 86981,
+      "ppid": 86707,
+      "start": "Wed Oct 14 09:33:36 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 87165,
+      "ppid": 86981,
+      "start": "Wed Oct 14 09:33:41 2026",
+      "command": "sleep 5555"
+     }
+    ]
+   }
+  },
+  {
+   "name": "quit-c",
+   "note": "no terminals, finished session: 4 tracked (Electron helpers); quit proceeds without confirmation, all gone",
+   "snapshot": {
+    "electronMain": {
+     "pid": 87408,
+     "start": "Wed Oct 14 09:34:09 2026"
+    },
+    "tracked": [
+     {
+      "pid": 87409,
+      "ppid": 87408,
+      "start": "Wed Oct 14 09:34:09 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 87410,
+      "ppid": 87408,
+      "start": "Wed Oct 14 09:34:09 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     },
+     {
+      "pid": 87412,
+      "ppid": 87408,
+      "start": "Wed Oct 14 09:34:10 2026",
+      "command": "/Users/Chris/Projects/AI Stduio.worktrees/runtime-tools/node_modules/.pnpm/electron@44.4.5_supports-"
+     }
+    ]
+   }
+  },
+  {
+   "name": "packaged-quit-confirm",
+   "note": "packaged app: zsh 87954 + node 88219 (service 49888) + helpers; after the confirmed menu Quit all 7 gone",
+   "snapshot": {
+    "electronMain": {
+     "pid": 87803,
+     "start": "Wed Oct 14 09:34:58 2026"
+    },
+    "tracked": [
+     {
+      "pid": 87809,
+      "ppid": 87803,
+      "start": "Wed Oct 14 09:34:58 2026",
+      "command": "…/Frameworks/AI Developer Studio Helper.app/C"
+     },
+     {
+      "pid": 87810,
+      "ppid": 87803,
+      "start": "Wed Oct 14 09:34:58 2026",
+      "command": "…/Frameworks/AI Developer Studio Helper.app/C"
+     },
+     {
+      "pid": 87811,
+      "ppid": 87803,
+      "start": "Wed Oct 14 09:34:58 2026",
+      "command": "…/Frameworks/AI Developer Studio Helper (Rend"
+     },
+     {
+      "pid": 88446,
+      "ppid": 87803,
+      "start": "Wed Oct 14 09:37:03 2026",
+      "command": "…/Frameworks/AI Developer Studio Helper (Rend"
+     },
+     {
+      "pid": 87954,
+      "ppid": 87803,
+      "start": "Wed Oct 14 09:35:34 2026",
+      "command": "zsh -f"
+     },
+     {
+      "pid": 88219,
+      "ppid": 87954,
+      "start": "Wed Oct 14 09:35:59 2026",
+      "command": "node -e require(\"http\").createServer((q,r)=>r.end(\"<h1>PKG-SERVICE</h1>\")).listen(0,\"127.0.0.1\",func"
+     }
+    ]
+   }
+  }
+ ]
+}

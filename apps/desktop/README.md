@@ -20,9 +20,9 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 |---|---|
 | `pnpm install` | `postinstall` 下载 Electron 二进制并修复 node-pty `spawn-helper` 的可执行位 |
 | `pnpm dev` | electron-vite 开发模式，Renderer 热更新 |
-| `pnpm test:e2e` | 覆盖原生依赖冒烟（SQLite、PTY、CLI 发现）与使用模拟 Provider 的 Project / Session 流程；截图位置见第 4 节“自动化” |
+| `pnpm test:e2e` | 覆盖原生依赖冒烟（SQLite、PTY、CLI 发现）与使用模拟 Provider 的 Project / Session 流程；另含真实本地 Shell / PTY 与回环 HTTP fixture 的 Terminal / Browser 流程（`runtime-tools.spec.ts`，不访问外网）；截图位置见第 4 节“自动化” |
 | `pnpm package` | 输出目录 `apps/desktop/dist/mac-arm64/` |
-| `pnpm smoke:packaged` | 以 `open` 启动打包应用，检查 SQLite、node-pty 与登录 Shell 环境解析。每次默认使用独立临时 userData，保留供诊断；结果默认写入 `.runtime/desktop/packaged-smoke.json`；`-- --out <file>` 指定报告，`-- --user-data-dir <dir>` 显式指定测试数据目录 |
+| `pnpm smoke:packaged` | 以 `open` 启动打包应用，检查 SQLite、node-pty、Terminal 屏幕模型（`@xterm/headless` + 序列化插件 + 状态检查点，验证打包后能解析外部依赖及 xterm 私有结构）与登录 Shell 环境解析。每次默认使用独立临时 userData，保留供诊断；结果默认写入 `.runtime/desktop/packaged-smoke.json`；`-- --out <file>` 指定报告，`-- --user-data-dir <dir>` 显式指定测试数据目录 |
 
 ## 2. 目录
 
@@ -39,7 +39,7 @@ src/
   main/ipc/index.ts            处理器登记（每功能一行）
   main/ipc/registry.ts         注册、发送方校验、事件发送
   main/services/core.ts        CoreServices：数据库、登录 Shell 环境、广播
-  main/services/<feature>/     功能服务（database、shell-env、pty 已有）
+  main/services/<feature>/     功能服务（database、shell-env、pty 冒烟、project、session、settings、project-view、terminal、browser 已有）
   main/security/               app:// 协议、导航与权限拦截
   main/window/                 主窗口（Shell Spec v01 第 1、2 节）
   main/smoke/                  --studio-smoke-output 冒烟模式
@@ -77,11 +77,12 @@ scripts/                       postinstall、afterPack、打包冒烟脚本
 - 数据库：`<userData>/studio.sqlite3`（开发模式 userData 为 `AI Developer Studio (Dev)`），通过 `core.database()` 获取。新增表 = `src/main/services/database/migrations/<YYYYMMDDNN>_<feature>_<name>.ts` + `migrations/index.ts` 一行。
 - 启动环境：Finder 启动的应用只有最小 PATH。需要启动 CLI 或 Shell 时使用 `await core.shellEnv.get()` 返回的 `env`（登录 + 交互 Shell 解析，10 秒超时后回退到启动环境，`source` 字段标明来源）。
 - PTY：只在主进程 `services/` 中创建；node-pty 需懒加载并处理加载失败（参考 `services/pty/pty-smoke.ts`）。
-- 工程工具的后续实现遵循 [工具规格](../../specs/tools/spec.md) 与 [DEC-10](<../../docs/07. Decisions.md#dec-10-工程工具实现原则>)：Project 服务持有 PTY / 输出及 Browser 实例，Renderer 隐藏 / 卸载只解除显示订阅；文件读取、Git 查询和网页权限经限定 IPC 管理。本轮仅更新文档，当前仍为工具占位内容及 PTY 冒烟。
+- 工程工具遵循 [工具规格](../../specs/tools/spec.md) 与 [DEC-10](<../../docs/07. Decisions.md#dec-10-工程工具实现原则>)：Terminal 服务持有 PTY、headless xterm 屏幕与序号输出；Browser 服务持有隔离 WebContentsView，Renderer 隐藏 / 卸载只解除显示。两工具分别登记 typed IPC；Project / 退出由独立 `MainToolPort` 清理，Session Stop 不触及用户 PTY。显示 ACK / 屏幕缓存、分区 / 地址、显隐与关闭细节见 Tools spec §5.1；Files / Diff 内容仍未实施。`@xterm/*` 版本精确锁定，屏幕检查点依赖其私有结构（`shared/tools/terminal.ts`），升级后须重跑 ANSI 差分验证（目前仅保存在任务证据 `tasks/T20261009-context-tools/evidence/W4-ansi-handoff.test.ts`，不在 `pnpm test` 内）。
 - 启动参数：`--studio-user-data-dir=<abs>` 用于测试隔离数据；`--studio-smoke-output=<abs>` 运行冒烟并退出。
 - Adapter 为 ESM workspace 包；Electron 主进程构建当前为 CJS，包的 `exports` 同时提供 `import` 与 `default` 条件，供支持同步 ESM require 的 Node / Electron 加载。新增公共子路径需一并保留这两个条件，E2E 启动门禁覆盖实际构建产物。
-- Session：`sessionCore` 迁移登记后创建 `createSessionFeature`，注册 Project 的主进程 SessionPort；Renderer 在 `createRoot` 前一次调用 `installSessionIntegration()`。退出前完成草稿 / 壳层 flush、Session 停止与 Runtime 释放；Renderer 确认路径先 flush，原生确认路径先 Stop 再 flush。最终统一等待功能与 IPC 清理后关闭数据库。
-- 自动化：未打包且 `STUDIO_E2E_PROVIDERS=1` 时使用模拟 Provider，打包产物忽略该开关。普通 E2E 截图写 `.runtime/desktop-e2e/`；`STUDIO_E2E_EVIDENCE_DIR` 仅用于明确生成验收证据。需要真实窗口焦点的多份 Electron 测试须串行运行。
+- Session：`sessionCore` 迁移登记后创建 `createSessionFeature`，注册 Project 的主进程 SessionPort；Renderer 在 `createRoot` 前一次调用 `installSessionIntegration()`。退出时 QuitFlow 依次 Stop 全部回合、经 `MainToolPort` 清理 Terminal / Browser、`releaseAllRuntimes` 释放全部空闲 / 已退役 Session Runtime（批准前可逆，任一失败保持应用打开并可重试），再完成草稿 / 壳层 flush 并批准退出；Renderer 确认路径先 flush，原生确认路径先 Stop 再 flush。最终统一等待功能与 IPC 清理后关闭数据库。
+- 自动化：未打包且 `STUDIO_E2E_PROVIDERS=1` 时使用模拟 Provider，打包产物忽略该开关。普通 E2E 截图写 `.runtime/desktop-e2e/`；`STUDIO_E2E_EVIDENCE_DIR` 仅用于明确生成验收证据。需要真实窗口焦点的多份 Electron 测试须串行运行。用例一旦打开过 Terminal，结束应用须用 `e2e/quit.ts` 的 `closeTestApp` 处理合并退出确认。
 - Project View：`shared/project-view/resources/` 打包五类默认 Definition 和可读 Schema；校验与绑定规则由同目录 `schema.ts` 实现。主进程只读取 Knowledge / Definition，在带 View Context 的首条发送前初始化指南/Schema/`.gitignore`；文件、回合结束和窗口聚焦触发补扫。生命周期与真实验收边界见 [Project View 规格](../../specs/project-view/spec.md#6-实现计划与落地记录)及[实现任务](../../tasks/archive/T20261011-project-view-implementation/task.md)。
-- 外观（FR-SET-002；[settings spec](../../specs/settings/spec.md)）：主题（`glass` / `solid`）× 颜色模式（浅 / 深）。颜色、阴影与圆角都是 `styles/tokens.css` 中的 Token，按 `<html data-theme data-scheme data-glass-color>` 分四块覆盖（见文件头注释）；毛玻璃的少量几何差异在 `app/shell.css` 末尾。容器背景使用语义 Token（`--color-window`、`--color-pane` 等），不要直接写 `--color-surface`，否则毛玻璃下会挡住原生材质；新增颜色须在四块中都有取值。主进程 `window/appearance.ts` 负责窗口材质与底色，颜色模式经 `nativeTheme.themeSource` 生效；Renderer 在首次渲染前写入 `<html>` 属性。界面改动须检查：`e2e/alignment.spec.ts` 的布局用例在两种主题下各跑一遍，`e2e/settings.spec.ts` 覆盖 AC-08 并测量浅 / 深色下的次要文字对比度（系统深浅色与“降低透明度”在主进程覆盖 `nativeTheme` 模拟）。
+- 外观（FR-SET-002；[settings spec](../../specs/settings/spec.md)）：主题（`glass` / `solid`）× 颜色模式（浅 / 深）。颜色、阴影与圆角都是 `styles/tokens.css` 中的 Token，按 `<html data-theme data-scheme data-glass-color>` 分四块覆盖（见文件头注释）；毛玻璃的少量几何差异在 `app/shell.css` 末尾。容器背景使用语义 Token（`--color-window`、`--color-pane` 等），不要直接写 `--color-surface`，否则毛玻璃下会挡住原生材质；新增颜色须在四块中都有取值（例外：Terminal 的 xterm 调色板是 `features/tools/terminal-theme.ts` 中按浅 / 深两种方案各一张的显式表，随 `data-scheme` 实时切换，不读 Token；其对比度要求由该文件的单元测试守护，改动配色须同步调整测试与规格）。主进程 `window/appearance.ts` 负责窗口材质与底色，颜色模式经 `nativeTheme.themeSource` 生效；Renderer 在首次渲染前写入 `<html>` 属性。界面改动须检查：`e2e/alignment.spec.ts` 的布局用例在两种主题下各跑一遍，`e2e/settings.spec.ts` 覆盖 AC-08 并测量浅 / 深色下的次要文字对比度（系统深浅色与“降低透明度”在主进程覆盖 `nativeTheme` 模拟）。
 - `e2e/project-view.spec.ts` 覆盖 AC-06 的模拟 CLI 文件更新、last-good、工具切换、View Context、草稿隔离与重启；不发送真实模型请求。真实 AC-06 验证须另行记录已授权调用范围。
+- `e2e/runtime-tools.spec.ts` 覆盖真实本地 PTY / HTTP 预览及模拟 Session Stop；验证 ANSI 隐藏恢复、多 Terminal、合并关闭确认、Browser 页面隔离 / 外站选择 / 弹层 / 失败与地址恢复。界面独立交互、阶段范围及人工验收见[运行时工具验收](../../tasks/T20261009-context-tools/acceptance.md)，不代替真实双 CLI 或四工具整体验收。

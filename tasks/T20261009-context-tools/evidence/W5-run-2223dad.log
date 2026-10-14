@@ -1,0 +1,23 @@
+# W5 Part 3：最终基线 2223dad 上的独立自动化复跑（摘录，非完整原始输出；命令在根 worktree 执行，无 Electron / GUI / 真实 CLI / 模型调用）
+# 时间 2026-10-14 08:53–08:56 CST；HEAD 2223dad + 仅文档的未提交 diff；macOS 15.6 arm64；Node v26.10.0
+
+$ pnpm exec vitest run --config tasks/T20261009-context-tools/evidence/W4-vitest.config.ts
+ ✓ W4-ansi-handoff.test.ts (19 tests)   ✓ W4-ownership-unknown.test.ts (1 test)   ✓ W4-lifecycle.test.ts (4 tests)   (+ W4-pty-ownership.test.ts)
+ Test Files  4 passed (4)   Tests  25 passed (25)
+
+$ pnpm exec vitest run --config tasks/T20261009-context-tools/evidence/W5-vitest.config.ts
+ W5-idle-runtime.test.ts, W5-quit-runtime.test.ts: passed
+ W5-shutdown.test.ts: failed (1)  -- 有意保留的历史复现：will-quit 最后防线 createShutdownHandler 在 disposeFeatures 拒绝后，finally 仍调用 disposeCore 并 quit
+ Test Files  1 failed | 2 passed (3)   Tests  1 failed | 4 passed (5)
+
+$ W8_ADAPTER_SRC=$PWD/packages/agent-adapter/src W8_BASE_SRC=<git archive 2f4bb5a 的 packages/agent-adapter/src> pnpm exec vitest run --config tasks/T20261009-context-tools/evidence/W8-vitest.config.ts
+ 第 1 次：Test Files 1 failed | 5 passed (6)   Tests 1 failed | 97 passed (98)
+          失败：W8-differential「identical event streams …」recoveryReason 基线 cleanup_failed vs 当前 cleanup_timeout（负载均值约 5 时的时序差异）
+ 单独重跑 W8-differential 3 次：各 7 passed
+ 全套再跑 2 次：Test Files 6 passed (6)   Tests 98 passed (98)
+
+$ pnpm test
+ scripts: 1 file / 36 tests passed;  @ai-studio/agent-adapter: 17 files / 241 tests passed;  @ai-studio/desktop: 45 files / 357 tests passed   （合计 634）
+
+$ pnpm typecheck      # 先 tsc -p tsconfig.build.json 重新生成 packages/agent-adapter/dist（git 忽略，源码未变），再各包 tsc --noEmit
+ 退出无错误输出

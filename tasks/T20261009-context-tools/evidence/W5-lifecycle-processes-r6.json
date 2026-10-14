@@ -1,0 +1,68 @@
+{
+ "note": "W5 Part 5 (2026-10-14, baseline f06ba98). Exact PID snapshots from instance 1 plus the closing results of both instances. Quit was triggered by main-process app.quit() (fixture control port), no osascript this round.",
+ "instance1": {
+  "electronPid": 26982,
+  "snapshotBeforeDialogChecks_14_24_07": {
+   "root": 26982,
+   "rootStart": "Wed Oct 14 14:16:11 2026",
+   "descendants": [
+    {
+     "pid": 26984,
+     "start": "Wed Oct 14 14:16:11 2026",
+     "command": "…/electron@44.4.5_supports-color@7.2.0/node_modules/electron"
+    },
+    {
+     "pid": 26985,
+     "start": "Wed Oct 14 14:16:11 2026",
+     "command": "…/electron@44.4.5_supports-color@7.2.0/node_modules/electron"
+    },
+    {
+     "pid": 26986,
+     "start": "Wed Oct 14 14:16:11 2026",
+     "command": "…/electron@44.4.5_supports-color@7.2.0/node_modules/electron"
+    },
+    {
+     "pid": 27097,
+     "start": "Wed Oct 14 14:16:31 2026",
+     "command": "zsh -f"
+    },
+    {
+     "pid": 29639,
+     "start": "Wed Oct 14 14:21:45 2026",
+     "command": "zsh -f"
+    }
+   ]
+  },
+  "snapshotBeforeFinalQuit_14_25_15_after_Alpha_closed": {
+   "root": 26982,
+   "rootStart": "Wed Oct 14 14:16:11 2026",
+   "descendants": [
+    {
+     "pid": 26984,
+     "start": "Wed Oct 14 14:16:11 2026",
+     "command": "…/electron@44.4.5_supports-color@7.2.0/node_modules/electron"
+    },
+    {
+     "pid": 26985,
+     "start": "Wed Oct 14 14:16:11 2026",
+     "command": "…/electron@44.4.5_supports-color@7.2.0/node_modules/electron"
+    },
+    {
+     "pid": 26986,
+     "start": "Wed Oct 14 14:16:11 2026",
+     "command": "…/electron@44.4.5_supports-color@7.2.0/node_modules/electron"
+    }
+   ]
+  },
+  "result": "Project close (Alpha, 2 shells 27097/29639) confirmed; both shells gone; Electron main exited in ~1 s after confirmed quit; closed.json written; 4 tracked processes gone; no process mentioning the instance root; history markers 0."
+ },
+ "instance2": {
+  "electronPid": 31394,
+  "fixturePid": 31392,
+  "shellsAtEnd": [
+   31622,
+   32820
+  ],
+  "result": "Quit dialog (2 Projects) confirmed with main-process app.quit(); Electron main gone within ~0.5 s; fixture exited by itself; shells 31622 and 32820 gone; agent-browser session list empty; port 9390 free."
+ }
+}

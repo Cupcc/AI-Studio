@@ -196,7 +196,7 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 
 1. 壳层关闭 Tab 前向本模块查询 Running / Needs Input Session 数量（Stop 进行中的计入 Running），并与 Tools 的未退出 Terminal 计数合并。是否确认与关闭由 Project §3.2.4 统一判断，不能仅凭 Session 数量为 0 直接关闭。
 2. 用户确认后，壳层调用本模块停止该 Project 全部活动 Session 的当前一轮，规则同第 3.12 节。CLI Conversation 与对话记录保留，重新打开 Project 后可继续（FR-PROJ-002）。
-3. 与 Project §3.2.4 对齐：本模块停止活动回合并释放所属 Runtime，报告成功 / 失败；Project 还须等待 Tools 清理结果才可移除 Tab。失败 / 超时保留 Tab、诊断与重试 / 取消入口（2026-10-13 确认，DEC-14；有限等待遵循 04 第 5 节）。
+3. 与 Project §3.2.4 对齐：本模块停止活动回合并释放所属 Runtime，报告成功 / 失败；Project 还须等待 Tools 清理结果才可移除 Tab。失败 / 超时保留 Tab、诊断与重试 / 取消入口（2026-10-13 确认，DEC-14；有限等待遵循 04 第 5 节）。Runtime 释放须由 Adapter 确认退出；未确认则本次关闭失败，保留精确句柄，重试时再释放（Adapter §3.6 第 9 条）。
 4. 关闭后保留各 Session 的 Error、Completed Unread 标记，重新打开 Project 后照常显示（持久化，第 4.5 节）。Stop 兜底失败产生的 Error 同样在重新打开后可见。
 5. 关闭期间 Stop 尚未完成时用户重新打开该 Project：相关 Session 显示 Running 直至 Stop 完成。
 
@@ -342,7 +342,8 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | 事件 `runtimeExited(code, duringTurn)` | E8 / E12 | 06 §4 运行中进程被终止 | — |
 | 事件 `nativeTitle(title)`（可选） | 采用原生名称 | FR-NAV-003 | 两种 CLI 是否提供未验证（chat spec） |
 | `capabilities(cli)` | 输入区与状态机分支 | Shell Spec 第 7 节 | 至少：Running 中可否提交、等待请求是否接受自由文本、是否提供原生名称 |
-| `shutdownAll()` | 退出应用时清理受管 Runtime / 子进程并记录退出结果；返回本身不证明零残留 | 04 §5 退出与异常清理责任边界 | Adapter A-Q3、§3.6 |
+| `shutdownAll()` | 退出应用末段的兜底：逐一尝试清理全部 Provider，任一退出未确认则在全部尝试后以 `AggregateError` 拒绝；成功返回不证明零残留 | 04 §5 退出与异常清理责任边界 | Adapter A-Q3、§3.6 第 9 条 |
+| `releaseRuntimes(cwd?)` | 严格、可重试地释放 Provider 拥有的全部受管 Runtime（含失败 / 迟到的启动与探测）；`cwd` 限定单个 Project；未确认以 `AggregateError` 拒绝并保留句柄，可重试；释放期间同范围的新启动被拒绝 | Project 关闭释放空闲 Runtime；应用退出批准前的可逆释放 | Adapter §3.6 第 9 条 |
 
 回合事件携带 Adapter Session 句柄与 `turnId`，据此丢弃迟到事件（E14）；Session 级原生 ID、标题、Runtime 事件没有 `turnId`，按当前句柄 / Runtime generation 处理。Stop 清理失败以 `interrupted + stop.cleanup = failed` 与 `session.error` 报告，Session Manager 合并为一次 Error，不生成成功的“已停止”完成行（Adapter §5.5）。
 
@@ -354,8 +355,8 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 |---|---|---|
 | `projectAttention(projectId)` 与变化订阅 | `needs_input` / `error` / `completed_unread` / 空（第 3.15 节） | Tab 注意力点、折叠按钮注意力点 |
 | `getBlockingSessionCounts(projectId)` | Running（含 Stop 进行中）与 Needs Input 的 Session 数量 | 关闭确认对话框 |
-| `stopProjectTurns(projectId)` / `projectClosed(projectId)` | 确认后停止全部当前轮，返回 stopped / failed；通过停止检查后由主进程调用 `projectClosed` 释放空闲 Runtime，成功才关闭 Tab | 关闭 Tab |
-| `activeTurnCountAll()` / `stopAllTurns()` | 退出应用确认与停止（S-Q6） | 应用退出流程 |
+| `stopProjectTurns(projectId)` / `projectClosed(projectId)` | 确认后停止全部当前轮，返回 stopped / failed；通过停止检查后由主进程调用 `projectClosed` 释放空闲 Runtime（Session 自有 Runtime 与按 `cwd` 的 Provider 释放），任一未确认则失败、Tab 保留且可重试；超时后迟到完成时调用 `projectCloseCancelled` 恢复该 Project 的提交；成功才关闭 Tab | 关闭 Tab |
+| `activeTurnCountAll()` / `stopAllTurns()` / `releaseAllRuntimes()` / `cancelQuit()` | 退出应用确认与停止（S-Q6）；批准前可逆地释放全部空闲 / 已退役 Runtime，任一失败拒绝退出并可重试；取消或失败后恢复接受提交 | 应用退出流程 |
 | `listSessions(projectId)` 与变化订阅 | 每项：`id`、`title`、`cli_type`、显示状态、`last_user_message_at`、`origin_view_id` | Session History、Overview（后续）、Project View 最近对话（后续） |
 | `renameSession(id, title)` | 写入 `title`，`title_source = user`；空白标题不生效，保留原标题（建议） | navigation 的 Rename |
 | Conversation Mode 组件 | 给定 `sessionId` 渲染对话、顶栏与输入区 | Main Canvas 容器 |
@@ -367,7 +368,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | 查看上下文推送 | 当前窗口的当前 Project；该 Project Main Canvas 的模式与显示对象：`conversation(sessionId)` / `draft` / `view(viewId, leftSessionId?)`。另需窗口前台状态（应用活动、窗口获得焦点、未最小化），以及“打开 S”的用户操作信号（点击列表项、切换 Tab 返回、启动恢复、在 View 左列继续 S），二者区分开：前者决定是否产生提醒，后者触发清除（第 3.11 节，S-Q1 2026-10-09 确认）。状态恢复（FR-PROJ-003）后同样推送 |
 | 打开 Session / 打开 View 的导航接口 | 点击列表项、“在 View 中打开”、创建 Session 后切换到该 Session |
 | 关闭 Tab 前查询与确认后回调 | 调用 `getBlockingSessionCounts`、`stopProjectTurns`，通过后调用 `projectClosed` |
-| 应用退出前钩子 | 调用 `activeTurnCountAll`、`stopAllTurns`（由 app-skeleton / 壳层提供） |
+| 应用退出前钩子 | 依次调用 `stopAllTurns`、`releaseAllRuntimes` 并重新计数（见 [quit-flow.ts](../../apps/desktop/src/main/services/project/quit-flow.ts)）；失败 / 取消调用 `cancelQuit`（由 app-skeleton / 壳层提供） |
 | Project 目录路径 | 作为 CLI cwd |
 
 ### 5.4 与 chat、input 模块

@@ -1,0 +1,240 @@
+# 2026-10-13 17:28:36 W8 suite vs cleanup worktree (staged == 25a79af), baseline 2f4bb5a differential enabled
+$ W8_BASE_SRC=<git archive 2f4bb5a> pnpm exec vitest run --config tasks/T20261009-context-tools/evidence/W8-vitest.config.ts --reporter=verbose
+
+ RUN  v5.0.1 ~/Projects/AI Stduio.worktrees/runtime-tools
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > produces identical event streams, Stop results, Runtime counts and terminate options for the scripted lifecycle 771ms
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > INTENDED CHANGE: Stop failure now leaves an unconfirmed handle that dispose() reports (base swallowed it)
+[W8] base: stop={"status":"failed","summary":{"cleanup":"failed","cleanupReport":{"status":"failed","scope":"none","error":{"code":"time state=closed dispose()=resolved
+
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > INTENDED CHANGE: Stop failure now leaves an unconfirmed handle that dispose() reports (base swallowed it)
+[W8] reviewed: stop={"status":"failed","summary":{"cleanup":"failed","cleanupReport":{"status":"failed","scope":"none","error":{"code":"time state=closed dispose()=rejected
+
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > EVENT ORDER of an explicit dispose() (reported, not asserted equal): base vs reviewed
+[W8] dispose() event order
+  base:     runtime.started > session.native_id > session.state > session.closed
+  reviewed: runtime.started > session.native_id > session.state > session.closed
+
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > Codex: dispose() with a pending approval releases it identically (events and native answer)
+[W8] pending approval on dispose: base native = {"answer":{"decision":"decline"}} | reviewed native = {"answer":{"decision":"decline"}}
+
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > Claude: identical event streams, Stop results and Runtime counts for turn / Stop / continue; dispose() event order reported
+[W8] Claude dispose() event order (new subscriber)
+  base:     runtime.exited > session.state > session.closed
+  reviewed: session.state > session.closed > runtime.exited
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > INTENDED CHANGE: Stop failure now leaves an unconfirmed handle that dispose() reports (base swallowed it) 616ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > EVENT ORDER of an explicit dispose() (reported, not asserted equal): base vs reviewed 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > Codex: dispose() with a pending approval releases it identically (events and native answer) 55ms
+ × tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > Claude: identical event streams, Stop results and Runtime counts for turn / Stop / continue; dispose() event order reported 145ms
+   → expected [ 'session.state', …(2) ] to deeply equal [ 'runtime.exited', …(2) ]
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > base kills a never-sampled orphan of the runtime process group after the leader exits; the reviewed source does not (W8-F1)
+[W8] base: confirmed=true survivors=0 orphanAlive=false
+
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > base kills a never-sampled orphan of the runtime process group after the leader exits; the reviewed source does not (W8-F1)
+[W8] reviewed: confirmed=true survivors=0 orphanAlive=true
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > base kills a never-sampled orphan of the runtime process group after the leader exits; the reviewed source does not (W8-F1) 391ms
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > SIGTERM-ignoring same-group orphan during a normal terminate(): baseline vs reviewed > base SIGKILLs it through group adoption; reviewed reports confirmed while it is alive (W8-F1, broader trigger)
+[W8] base: confirmed=true forced=true orphanAlive=false
+
+stdout | tasks/T20261009-context-tools/evidence/W8-differential.test.ts > SIGTERM-ignoring same-group orphan during a normal terminate(): baseline vs reviewed > base SIGKILLs it through group adoption; reviewed reports confirmed while it is alive (W8-F1, broader trigger)
+[W8] reviewed: confirmed=true forced=false orphanAlive=true
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-differential.test.ts > SIGTERM-ignoring same-group orphan during a normal terminate(): baseline vs reviewed > base SIGKILLs it through group adoption; reviewed reports confirmed while it is alive (W8-F1, broader trigger) 454ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > dispose() rejects while exit is unconfirmed, retries on the exact same handle even when closed, then is a no-op 9ms
+ × tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > a session explicitly disposed after an earlier failure leaves the tracked set (no unbounded retention) 27ms
+   → expected 1 to be +0 // Object.is equality
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > concurrent session.dispose / releaseRuntimes / releaseRuntimes(cwd) / provider.dispose share one termination 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > releaseRuntimes() overlapping with a failing session.dispose() reports the failure once per attempt and stays retryable 13ms
+stdout | tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > release during an in-flight startup waits for the late Runtime, leaves no running Runtime and gates only the same scope
+[W8] codex in-flight startup outcome: rejected invalid_state
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > release during an in-flight startup waits for the late Runtime, leaves no running Runtime and gates only the same scope 64ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > all-Project release gates every cwd while it runs and lifts afterwards (also after a failed release) 35ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > releaseRuntimes(cwd) compares cwd as an exact string: distinct non-normalized spellings are distinct Projects 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > a release scoped to Project A neither blocks nor touches Project B while it is held open 22ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > a failed startup keeps the original startup error, retains the unconfirmed handle and releases it later (create and resume) 18ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > model probe: unconfirmed cleanup rejects (limitation c) but the handle stays retained for releaseRuntimes 45ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > Provider.dispose() is shutdown: rejects while unconfirmed, keeps rejecting new work, retries the same handle, then is idempotent 15ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > self-exit (crash): tracked set drops the session after confirmed release; an unconfirmed one stays and is retried 80ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > no retained-handle growth across many create/dispose, probes, failed startups and crashes 75ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > disposeMs timeout rejects, a retry joins the still-running cleanup (no second termination), then succeeds 200ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > re-entrant dispose() from event listeners joins the running attempt and never starts a second one 3ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > re-entrant dispose() from a diagnostic listener during a failing attempt does not recurse or leak rejections 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > does not leave timers behind after success, failure and timeout paths 41ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > dispose() rejects while exit is unconfirmed, retries on the exact same handle even when closed, then is a no-op 6ms
+ × tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > a session explicitly disposed after an earlier failure leaves the tracked set (no unbounded retention) 23ms
+   → expected 1 to be +0 // Object.is equality
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > concurrent session.dispose / releaseRuntimes / releaseRuntimes(cwd) / provider.dispose share one termination 1ms
+stdout | tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > release during an in-flight startup waits for the late Runtime, leaves no running Runtime and gates only the same scope
+[W8] claude in-flight startup outcome: rejected spawn_failed
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > releaseRuntimes() overlapping with a failing session.dispose() reports the failure once per attempt and stays retryable 25ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > release during an in-flight startup waits for the late Runtime, leaves no running Runtime and gates only the same scope 62ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > all-Project release gates every cwd while it runs and lifts afterwards (also after a failed release) 35ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > releaseRuntimes(cwd) compares cwd as an exact string: distinct non-normalized spellings are distinct Projects 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > a release scoped to Project A neither blocks nor touches Project B while it is held open 22ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > a failed startup keeps the original startup error, retains the unconfirmed handle and releases it later (create and resume) 18ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > model probe: unconfirmed cleanup rejects (limitation c) but the handle stays retained for releaseRuntimes 135ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > Provider.dispose() is shutdown: rejects while unconfirmed, keeps rejecting new work, retries the same handle, then is idempotent 13ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > self-exit (crash): tracked set drops the session after confirmed release; an unconfirmed one stays and is retried 76ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > no retained-handle growth across many create/dispose, probes, failed startups and crashes 63ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > disposeMs timeout rejects, a retry joins the still-running cleanup (no second termination), then succeeds 196ms
+stdout | tasks/T20261009-context-tools/evidence/W8-providers.test.ts > Claude listModels: cleanup failure versus the original catalog error > OBSERVATION: an unconfirmed probe cleanup replaces the catalog error (finally-throw); the handle is retained either way
+[W8] claude listModels catalog failure + unconfirmed cleanup surfaces: stop_cleanup_failed / Claude runtime exit could not be verified
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > re-entrant dispose() from event listeners joins the running attempt and never starts a second one 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > re-entrant dispose() from a diagnostic listener during a failing attempt does not recurse or leak rejections 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > does not leave timers behind after success, failure and timeout paths 39ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > Claude listModels: cleanup failure versus the original catalog error > OBSERVATION: an unconfirmed probe cleanup replaces the catalog error (finally-throw); the handle is retained either way 52ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-providers.test.ts > ProviderRegistry.shutdownAll > attempts every provider, rejects with an AggregateError naming each failure, and succeeds after the retry 13ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > confirms exit of a TERM/HUP-ignoring runtime and its same-group child, escalating to SIGKILL 567ms
+stdout | tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > INVARIANT: a confirmed report never coexists with a live member of the runtime process group (leader exited on its own, group member never sampled)
+[W8] orphan group member after leader self-exit: confirmed=true survivors=0 orphanAlive=true
+
+ × tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > INVARIANT: a confirmed report never coexists with a live member of the runtime process group (leader exited on its own, group member never sampled) 210ms
+   → expected true to be false // Object.is equality
+stdout | tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > INVARIANT (normal terminate): the leader exits on SIGTERM while a SIGTERM-ignoring same-group orphan (ppid 1, not reachable by the parent chain) lives on: never confirmed over it
+[W8] SIGTERM-ignoring same-group orphan after normal terminate(): confirmed=true forced=false survivors=0 orphanAlive=true
+
+ × tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > INVARIANT (normal terminate): the leader exits on SIGTERM while a SIGTERM-ignoring same-group orphan (ppid 1, not reachable by the parent chain) lives on: never confirmed over it 205ms
+   → expected true to be false // Object.is equality
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > control: the same orphan IS found and killed when it was sampled while the leader was still running 1712ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > never signals a pid whose recorded identity (pid + start time) no longer matches 1198ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > control: a recorded identity that still matches IS signalled (so the previous test proves the identity check, not an inert path) 1609ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > after the leader exited, a retry never sends a signal to -pid or the numeric runtime pid 45ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > unconfirmed attempts are dropped (retry on the same handle); pending and confirmed attempts are shared 44ms
+stdout | tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > TIMING (limitation b): the Provider-level retry re-terminates with default 2 s / 3 s waits, not the Session's configured waits
+[W8] driver attempt (killWait 100 ms) took 195 ms; Provider-level retry took 3064 ms (default killWait 3000 ms)
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > leaves no timer behind when the runtime exits during the grace period 236ms
+stdout | tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > CHARACTERIZATION (pre-existing, not part of the W6 diff): processLike().kill() on an already exited runtime still signals -pid without a running guard
+[W8] processLike().kill() after exit sent 1 group signal(s) to -34418
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > TIMING (limitation b): the Provider-level retry re-terminates with default 2 s / 3 s waits, not the Session's configured waits 4476ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > CHARACTERIZATION (pre-existing, not part of the W6 diff): processLike().kill() on an already exited runtime still signals -pid without a running guard 5ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > codex > startup timeout then late Runtime: the late handle is terminated; with an unconfirmed exit it stays retained and retryable 831ms
+stdout | tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > codex > Provider.dispose() during an in-flight startup waits for it and leaves no running Runtime
+[W8] codex: createSession during Provider.dispose() -> invalid_state
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > codex > releaseRuntimes(B) does not wait for an in-flight startup that belongs to Project A 37ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > codex > Provider.dispose() during an in-flight startup waits for it and leaves no running Runtime 67ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > codex > DOCUMENTED LIMITATION (d): releaseRuntimes(cwd) has no upper bound while a startup factory never settles, and keeps gating that Project 539ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > codex > fire-and-forget rejecting session.dispose() / releaseRuntimes() never become unhandled rejections 103ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > claude > startup timeout then late Runtime: the late handle is terminated; with an unconfirmed exit it stays retained and retryable 646ms
+stdout | tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > claude > Provider.dispose() during an in-flight startup waits for it and leaves no running Runtime
+[W8] claude: createSession during Provider.dispose() -> disposed
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > claude > releaseRuntimes(B) does not wait for an in-flight startup that belongs to Project A 34ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > claude > Provider.dispose() during an in-flight startup waits for it and leaves no running Runtime 67ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > claude > DOCUMENTED LIMITATION (d): releaseRuntimes(cwd) has no upper bound while a startup factory never settles, and keeps gating that Project 536ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > claude > fire-and-forget rejecting session.dispose() / releaseRuntimes() never become unhandled rejections 102ms
+stdout | tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > OBSERVATION: Provider.dispose() promise handling differs between providers when the caller ignores the result > Codex pre-handles its shared disposal promise; Claude.dispose() is an async wrapper that is not
+[W8] unhandled rejections after `void provider.dispose()` with an unconfirmed exit: {"codex":0,"claude":1}
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > OBSERVATION: Provider.dispose() promise handling differs between providers when the caller ignores the result > Codex pre-handles its shared disposal promise; Claude.dispose() is an async wrapper that is not 106ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > model probe started late (Codex checkAvailability / Claude listModels with an aborted wait) > Codex: a probe Runtime that arrives after the catalog timeout is terminated and, if unconfirmed, retained for release 304ms
+stdout | tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > model probe started late (Codex checkAvailability / Claude listModels with an aborted wait) > Claude: a listModels Runtime that finishes starting after the caller aborted is terminated and, if unconfirmed, retained for release
+[W8] claude listModels after abort (exit): rejected timeout
+
+stdout | tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > model probe started late (Codex checkAvailability / Claude listModels with an aborted wait) > Claude: a listModels Runtime that finishes starting after the caller aborted is terminated and, if unconfirmed, retained for release
+[W8] claude listModels after abort (hang): rejected timeout
+
+ ✓ tasks/T20261009-context-tools/evidence/W8-late-startup.test.ts > model probe started late (Codex checkAvailability / Claude listModels with an aborted wait) > Claude: a listModels Runtime that finishes starting after the caller aborted is terminated and, if unconfirmed, retained for release 650ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > codex > concurrent Stop and dispose on a running turn: one interrupted terminal, one closed event, Runtime gone (both orders) 12ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > codex > dispose() during a running turn with an unconfirmed exit: turn ends once (interrupted), rejection is retryable, retry adds no events 6ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > codex > Runtime crash racing with dispose(): closed once, exit confirmed, nothing leaks 22ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > codex > ensureSession starts no replacement while the closed Session exit is unconfirmed; resumes on the same native session after the retry 28ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > claude > concurrent Stop and dispose on a running turn: one interrupted terminal, one closed event, Runtime gone (both orders) 26ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > claude > dispose() during a running turn with an unconfirmed exit: turn ends once (interrupted), rejection is retryable, retry adds no events 14ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > claude > Runtime crash racing with dispose(): closed once, exit confirmed, nothing leaks 21ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > claude > ensureSession starts no replacement while the closed Session exit is unconfirmed; resumes on the same native session after the retry 37ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > Stop / replacement flows keep their behaviour and handle accounting > Codex: Stop fallback replaces the Runtime once; the confirmed old handle leaves the retained set; session timeouts are used 323ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > Stop / replacement flows keep their behaviour and handle accounting > Codex: Stop whose recovery cannot confirm the old exit closes the Session (stop_failed) and the handle stays retained for strict release 310ms
+ ✓ tasks/T20261009-context-tools/evidence/W8-session.test.ts > Stop / replacement flows keep their behaviour and handle accounting > Claude: Stop then continue on the same Runtime; Stop with queued input replaces the Runtime and accounting stays exact 38ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W8-differential.test.ts > Stop / model / event behaviour: baseline 2f4bb5a vs reviewed source > Claude: identical event streams, Stop results and Runtime counts for turn / Stop / continue; dispose() event order reported
+AssertionError: expected [ 'session.state', …(2) ] to deeply equal [ 'runtime.exited', …(2) ]
+
+- Expected
++ Received
+
+  [
+-   "runtime.exited",
+    "session.state",
+    "session.closed",
++   "runtime.exited",
+  ]
+
+ ❯ tasks/T20261009-context-tools/evidence/W8-differential.test.ts:157:25
+    155|     expect(after.stop).toEqual(before.stop)
+    156|     expect(after.runtimes).toBe(before.runtimes)
+    157|     expect(after.order).toEqual(before.order)
+       |                         ^
+    158|   })
+    159|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W8-providers.test.ts > codex > a session explicitly disposed after an earlier failure leaves the tracked set (no unbounded retention)
+ FAIL  tasks/T20261009-context-tools/evidence/W8-providers.test.ts > claude > a session explicitly disposed after an earlier failure leaves the tracked set (no unbounded retention)
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tasks/T20261009-context-tools/evidence/W8-providers.test.ts:50:27
+     48|     // Expected by the contract text ("a session leaves the set only a…
+     49|     expect(rig.retained()).toBe(0)
+     50|     expect(rig.tracked()).toBe(0)
+       |                           ^
+     51|   })
+     52|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > INVARIANT: a confirmed report never coexists with a live member of the runtime process group (leader exited on its own, group member never sampled)
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts:69:44
+     67|     // eslint-disable-next-line no-console
+     68|     console.log(`[W8] orphan group member after leader self-exit: conf…
+     69|     expect(report.confirmed && stillAlive).toBe(false)
+       |                                            ^
+     70|   })
+     71|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts > RuntimeProcess.terminate with real processes > INVARIANT (normal terminate): the leader exits on SIGTERM while a SIGTERM-ignoring same-group orphan (ppid 1, not reachable by the parent chain) lives on: never confirmed over it
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tasks/T20261009-context-tools/evidence/W8-runtime-process.test.ts:82:44
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  3 failed | 2 passed (5)
+      Tests  5 failed | 73 passed (78)
+   Start at  17:28:37
+   Duration  20.17s (tests 97%, import 2%, transform 1%)
+

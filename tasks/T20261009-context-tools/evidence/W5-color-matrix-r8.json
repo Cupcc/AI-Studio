@@ -1,0 +1,8045 @@
+{
+ "generatedAt": "2026-10-14T10:46:07.289Z",
+ "baseline": "f06ba98 -> 42a2e31 (b24ba9b: style-src-attr + minimumContrastRatio 4.5); Part 3 reference = W5-theme-measurements-r4.json (2223dad)",
+ "method": "W5-terminal-probe-r7.js + W5-measure-r3.mjs (regression scene) + W5-measure-r7.mjs (colour scenes) + W5-palette-check-r7.mjs; window screenshots by window id (DPR 1)",
+ "cells": {
+  "gl-light": {
+   "attrs": {
+    "theme": "glass",
+    "scheme": "light",
+    "glassColor": "aurora"
+   },
+   "regression": {
+    "plainRowContrast": {
+     "min": 13.84,
+     "max": 16.2,
+     "n": 24
+    },
+    "plainRowWorstBg": {
+     "min": 11.52,
+     "max": 15.81,
+     "n": 24
+    },
+    "cursor": 16.21,
+    "selectionActive": [
+     {
+      "vsSurround": 2.84,
+      "selectedText": 5.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 2.75,
+      "selectedText": 5.88
+     }
+    ],
+    "scrollbarThumb": [
+     3.99
+    ],
+    "viewportEmptyMeanLum": 0.812,
+    "paddingStripMeanLum": 0.816,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+    },
+    "geometry": {
+     "rows": 34,
+     "scrollTop": 0,
+     "clientHeight": 667
+    },
+    "paletteCheck": {
+     "checked": 24,
+     "mismatches": 0,
+     "details": []
+    }
+   },
+   "part3Baseline": {
+    "plainRowContrast": {
+     "min": 13.32,
+     "max": 16.44,
+     "n": 15
+    },
+    "cursor": 16.6,
+    "selectionActive": [
+     {
+      "vsSurround": 2.89,
+      "selectedText": 5.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 2.79,
+      "selectedText": 5.88
+     }
+    ],
+    "scrollbarThumb": [
+     4.04
+    ],
+    "viewportEmptyMeanLum": 0.8236,
+    "paddingStripMeanLum": 0.8279,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+    }
+   },
+   "scenes": {
+    "s1": {
+     "pairs": 128,
+     "measured": {
+      "n": 128,
+      "min": 5.4,
+      "p5": 5.45,
+      "p50": 5.72,
+      "max": 6.18,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 128,
+      "min": 5.5,
+      "p5": 5.52,
+      "p50": 5.67,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 128,
+      "min": 5.41,
+      "p5": 5.43,
+      "p50": 5.72,
+      "max": 6.15,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 128,
+       "min": 5.5,
+       "p5": 5.52,
+       "p50": 5.67,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 128,
+       "min": 5.4,
+       "p5": 5.45,
+       "p50": 5.72,
+       "max": 6.18,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 6,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(210, 190, 233)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.4
+       },
+       {
+        "row": 1,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(197, 198, 199)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 3,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(178, 204, 188)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.51,
+        "measured": 5.42
+       },
+       {
+        "row": 9,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(197, 198, 200)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.42
+       },
+       {
+        "row": 2,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(230, 188, 192)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.53,
+        "measured": 5.43
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "needAdjustment": 128,
+     "adjusted": 128,
+     "requestedMin": 1,
+     "requestedMax": 2.02,
+     "adjustedButStillBelowInCss": [],
+     "notAdjustedBelow": [],
+     "identicalColourPairs": 16,
+     "identicalAllAdjusted": true,
+     "worst": [
+      {
+       "row": 6,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 5,
+       "b": 2,
+       "fgCss": "rgb(210, 190, 233)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.4
+      },
+      {
+       "row": 1,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 2,
+       "fgCss": "rgb(197, 198, 199)",
+       "bgPixel": "#215124",
+       "nominal": 5.41,
+       "measured": 5.41
+      },
+      {
+       "row": 3,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 2,
+       "b": 2,
+       "fgCss": "rgb(178, 204, 188)",
+       "bgPixel": "#215124",
+       "nominal": 5.41,
+       "measured": 5.42
+      },
+      {
+       "row": 9,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 8,
+       "b": 2,
+       "fgCss": "rgb(197, 198, 200)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.42
+      },
+      {
+       "row": 2,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 1,
+       "b": 2,
+       "fgCss": "rgb(230, 188, 192)",
+       "bgPixel": "#215124",
+       "nominal": 5.43,
+       "measured": 5.43
+      }
+     ]
+    },
+    "s2": {
+     "pairs": 14,
+     "measured": {
+      "n": 14,
+      "min": 5.31,
+      "p5": 5.31,
+      "p50": 5.68,
+      "max": 5.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 14,
+      "min": 5.5,
+      "p5": 5.5,
+      "p50": 5.62,
+      "max": 5.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 14,
+      "min": 5.42,
+      "p5": 5.42,
+      "p50": 5.7,
+      "max": 5.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 14,
+       "min": 5.5,
+       "p5": 5.5,
+       "p50": 5.62,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 14,
+       "min": 5.31,
+       "p5": 5.31,
+       "p50": 5.68,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 6,
+        "col": 0,
+        "text": " CASE-42 default-f",
+        "fgCss": "rgb(198, 198, 198)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.31
+       },
+       {
+        "row": 7,
+        "col": 0,
+        "text": " CASE-46-30 black ",
+        "fgCss": "rgb(203, 204, 205)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.62,
+        "measured": 5.55
+       },
+       {
+        "row": 12,
+        "col": 55,
+        "text": " CASE-REV-BOLD-34 ",
+        "fgCss": "rgb(204, 204, 204)",
+        "bgCss": "rgb(2, 71, 151)",
+        "nominalCss": 5.56,
+        "measured": 5.59
+       },
+       {
+        "row": 2,
+        "col": 0,
+        "text": " CASE-44-97 bright",
+        "fgCss": "rgb(204, 205, 208)",
+        "bgCss": "rgb(2, 71, 151)",
+        "nominalCss": 5.62,
+        "measured": 5.64
+       },
+       {
+        "row": 10,
+        "col": 0,
+        "text": " CASE-41-37 white ",
+        "fgCss": "rgb(201, 204, 205)",
+        "bgCss": "rgb(152, 4, 22)",
+        "nominalCss": 5.5,
+        "measured": 5.65
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 6,
+       "col": 0,
+       "text": " CASE-42 default-f",
+       "fgCss": "rgb(198, 198, 198)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.31
+      },
+      {
+       "row": 7,
+       "col": 0,
+       "text": " CASE-46-30 black ",
+       "fgCss": "rgb(203, 204, 205)",
+       "bgPixel": "#225057",
+       "nominal": 5.55,
+       "measured": 5.55
+      },
+      {
+       "row": 12,
+       "col": 55,
+       "text": " CASE-REV-BOLD-34 ",
+       "fgCss": "rgb(204, 204, 204)",
+       "bgPixel": "#1c4692",
+       "nominal": 5.59,
+       "measured": 5.59
+      },
+      {
+       "row": 2,
+       "col": 0,
+       "text": " CASE-44-97 bright",
+       "fgCss": "rgb(204, 205, 208)",
+       "bgPixel": "#1c4692",
+       "nominal": 5.64,
+       "measured": 5.64
+      },
+      {
+       "row": 10,
+       "col": 0,
+       "text": " CASE-41-37 white ",
+       "fgCss": "rgb(201, 204, 205)",
+       "bgPixel": "#8b1c1e",
+       "nominal": 5.7,
+       "measured": 5.65
+      }
+     ]
+    },
+    "s3a": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 4.38,
+      "p5": 4.55,
+      "p50": 5.06,
+      "max": 17.28,
+      "below4_5": 6,
+      "below3": 0
+     },
+     "nominalCss": null,
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 4.47,
+      "p5": 4.57,
+      "p50": 5.06,
+      "max": 17.28,
+      "below4_5": 4,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 256,
+       "min": 4.47,
+       "p5": 4.57,
+       "p50": 5.06,
+       "max": 17.28,
+       "below4_5": 4,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 4.38,
+       "p5": 4.55,
+       "p50": 5.06,
+       "max": 17.28,
+       "below4_5": 6,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#e2eaef",
+       "#ecebed"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": null,
+      "measured": null,
+      "worst": []
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 6,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(43, 120, 0)",
+       "bgPixel": "#e5e7f0",
+       "nominal": 4.49,
+       "measured": 4.38
+      },
+      {
+       "row": 4,
+       "col": 4,
+       "text": " MW ",
+       "fgCss": "rgb(0, 120, 81)",
+       "bgPixel": "#e5e7f0",
+       "nominal": 4.47,
+       "measured": 4.41
+      },
+      {
+       "row": 6,
+       "col": 4,
+       "text": " MW ",
+       "fgCss": "rgb(48, 112, 134)",
+       "bgPixel": "#e5e7f0",
+       "nominal": 4.49,
+       "measured": 4.44
+      },
+      {
+       "row": 4,
+       "col": 0,
+       "text": " MW ",
+       "fgCss": "rgb(0, 120, 63)",
+       "bgPixel": "#e5e7f0",
+       "nominal": 4.53,
+       "measured": 4.46
+      },
+      {
+       "row": 10,
+       "col": 20,
+       "text": " MW ",
+       "fgCss": "rgb(90, 112, 48)",
+       "bgPixel": "#e7e9ef",
+       "nominal": 4.56,
+       "measured": 4.48
+      }
+     ]
+    },
+    "s3b": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 6.94,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 256,
+      "min": 4.6,
+      "p5": 4.92,
+      "p50": 6.95,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 6.94,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 256,
+       "min": 4.6,
+       "p5": 4.92,
+       "p50": 6.95,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 4.55,
+       "p5": 4.97,
+       "p50": 6.94,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 7,
+        "col": 8,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(135, 95, 215)",
+        "nominalCss": 4.65,
+        "measured": 4.55
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(175, 95, 95)",
+        "nominalCss": 4.62,
+        "measured": 4.56
+       },
+       {
+        "row": 2,
+        "col": 48,
+        "text": " MW ",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(0, 135, 0)",
+        "nominalCss": 4.7,
+        "measured": 4.6
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(215, 0, 215)",
+        "nominalCss": 4.87,
+        "measured": 4.62
+       },
+       {
+        "row": 16,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(118, 118, 118)",
+        "nominalCss": 4.62,
+        "measured": 4.62
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 7,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#8161d0",
+       "nominal": 4.55,
+       "measured": 4.55
+      },
+      {
+       "row": 9,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#a56361",
+       "nominal": 4.56,
+       "measured": 4.56
+      },
+      {
+       "row": 2,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#3b8524",
+       "nominal": 4.6,
+       "measured": 4.6
+      },
+      {
+       "row": 11,
+       "col": 16,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#c52ad0",
+       "nominal": 4.62,
+       "measured": 4.62
+      },
+      {
+       "row": 16,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#767676",
+       "nominal": 4.62,
+       "measured": 4.62
+      }
+     ]
+    },
+    "s4": {
+     "pairs": 248,
+     "measured": {
+      "n": 248,
+      "min": 3.76,
+      "p5": 4.18,
+      "p50": 5.22,
+      "max": 19.44,
+      "below4_5": 38,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 127,
+      "min": 4.59,
+      "p5": 4.67,
+      "p50": 5.89,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 248,
+      "min": 4.38,
+      "p5": 4.57,
+      "p50": 5.5,
+      "max": 19.44,
+      "below4_5": 2,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 117,
+       "min": 4.5,
+       "p5": 4.56,
+       "p50": 5.1,
+       "max": 17.04,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 117,
+       "min": 3.76,
+       "p5": 4.01,
+       "p50": 4.9,
+       "max": 17.04,
+       "below4_5": 33,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#e0e9ec",
+       "#e7eaee"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 127,
+       "min": 4.59,
+       "p5": 4.67,
+       "p50": 5.89,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 127,
+       "min": 4.18,
+       "p5": 4.62,
+       "p50": 5.85,
+       "max": 19.44,
+       "below4_5": 5,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 3,
+        "col": 39,
+        "text": "M",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(116, 116, 116)",
+        "nominalCss": 4.67,
+        "measured": 4.18
+       },
+       {
+        "row": 2,
+        "col": 67,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 91)",
+        "nominalCss": 4.65,
+        "measured": 4.2
+       },
+       {
+        "row": 2,
+        "col": 66,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 113)",
+        "nominalCss": 4.74,
+        "measured": 4.37
+       },
+       {
+        "row": 2,
+        "col": 68,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 69)",
+        "nominalCss": 4.59,
+        "measured": 4.38
+       },
+       {
+        "row": 2,
+        "col": 15,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 47, 25)",
+        "nominalCss": 4.79,
+        "measured": 4.45
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 4,
+       "col": 67,
+       "text": "M",
+       "fgCss": "rgb(104, 104, 104)",
+       "bgPixel": "#e2e9ec",
+       "nominal": 4.54,
+       "measured": 3.76
+      },
+      {
+       "row": 4,
+       "col": 39,
+       "text": "M",
+       "fgCss": "rgb(104, 104, 104)",
+       "bgPixel": "#e5e9ec",
+       "nominal": 4.56,
+       "measured": 3.77
+      },
+      {
+       "row": 1,
+       "col": 35,
+       "text": "M",
+       "fgCss": "rgb(11, 121, 39)",
+       "bgPixel": "#e6e9ee",
+       "nominal": 4.57,
+       "measured": 3.8
+      },
+      {
+       "row": 4,
+       "col": 48,
+       "text": "M",
+       "fgCss": "rgb(102, 102, 102)",
+       "bgPixel": "#e4e9ed",
+       "nominal": 4.7,
+       "measured": 3.89
+      },
+      {
+       "row": 1,
+       "col": 34,
+       "text": "M",
+       "fgCss": "rgb(11, 121, 27)",
+       "bgPixel": "#e6e9ee",
+       "nominal": 4.58,
+       "measured": 4
+      }
+     ]
+    },
+    "s5": {
+     "pairs": 25,
+     "measured": {
+      "n": 25,
+      "min": 4.22,
+      "p5": 4.57,
+      "p50": 5.93,
+      "max": 10,
+      "below4_5": 1,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 19,
+      "min": 5.08,
+      "p5": 5.08,
+      "p50": 6.99,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 25,
+      "min": 4.58,
+      "p5": 4.63,
+      "p50": 5.8,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 6,
+       "min": 4.58,
+       "p5": 4.58,
+       "p50": 4.88,
+       "max": 5.1,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 6,
+       "min": 4.22,
+       "p5": 4.22,
+       "p50": 4.58,
+       "max": 5.02,
+       "below4_5": 1,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#e3e7ef",
+       "#e6e9f2"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 19,
+       "min": 5.08,
+       "p5": 5.08,
+       "p50": 6.99,
+       "max": 10.38,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 19,
+       "min": 4.99,
+       "p5": 4.99,
+       "p50": 6.59,
+       "max": 10,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 1,
+        "col": 0,
+        "text": "  ~/proj ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 4.99
+       },
+       {
+        "row": 2,
+        "col": 12,
+        "text": " node 22 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 4,
+        "col": 14,
+        "text": " py 3.12 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 1,
+        "col": 26,
+        "text": " 12ms ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.32
+       },
+       {
+        "row": 6,
+        "col": 16,
+        "text": " 14:55:01 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.35
+       }
+      ]
+     },
+     "excludedGlyphOnly": 16,
+     "worst": [
+      {
+       "row": 5,
+       "col": 7,
+       "text": "main",
+       "fgCss": "rgb(48, 112, 48)",
+       "bgPixel": "#e5e7f0",
+       "nominal": 4.88,
+       "measured": 4.22
+      },
+      {
+       "row": 5,
+       "col": 12,
+       "text": "!2 ?1",
+       "fgCss": "rgb(125, 101, 0)",
+       "bgPixel": "#e6e9f2",
+       "nominal": 4.63,
+       "measured": 4.57
+      },
+      {
+       "row": 6,
+       "col": 2,
+       "text": "git status",
+       "fgCss": "rgb(103, 103, 103)",
+       "bgPixel": "#e5e7f0",
+       "nominal": 4.58,
+       "measured": 4.58
+      },
+      {
+       "row": 5,
+       "col": 0,
+       "text": "~/proj",
+       "fgCss": "rgb(54, 101, 149)",
+       "bgPixel": "#e5e7f0",
+       "nominal": 4.93,
+       "measured": 4.7
+      },
+      {
+       "row": 6,
+       "col": 0,
+       "text": "❯",
+       "fgCss": "rgb(48, 112, 0)",
+       "bgPixel": "#e3e7ef",
+       "nominal": 4.92,
+       "measured": 4.82
+      }
+     ]
+    },
+    "s6": {
+     "pairs": 51,
+     "measured": {
+      "n": 51,
+      "min": 2.55,
+      "p5": 2.79,
+      "p50": 5.44,
+      "max": 8.62,
+      "below4_5": 4,
+      "below3": 3
+     },
+     "nominalCss": {
+      "n": 26,
+      "min": 5.08,
+      "p5": 5.52,
+      "p50": 5.62,
+      "max": 5.83,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 51,
+      "min": 5.13,
+      "p5": 5.41,
+      "p50": 5.82,
+      "max": 8.65,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 25,
+       "min": 5.85,
+       "p5": 5.97,
+       "p50": 7.76,
+       "max": 8.65,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 25,
+       "min": 2.55,
+       "p5": 2.78,
+       "p50": 5.87,
+       "max": 8.62,
+       "below4_5": 4,
+       "below3": 3
+      },
+      "bgPixelRange": [
+       "#e3e7ef",
+       "#e7eaee"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 26,
+       "min": 5.08,
+       "p5": 5.52,
+       "p50": 5.62,
+       "max": 5.83,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 26,
+       "min": 5.07,
+       "p5": 5.14,
+       "p50": 5.43,
+       "max": 5.83,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 16,
+        "col": 28,
+        "text": " 3 node ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.07
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": "r.js     ",
+        "fgCss": "rgb(203, 204, 205)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.62,
+        "measured": 5.14
+       },
+       {
+        "row": 16,
+        "col": 0,
+        "text": " session-a ",
+        "fgCss": "rgb(230, 230, 232)",
+        "bgCss": "rgb(0, 95, 135)",
+        "nominalCss": 5.64,
+        "measured": 5.14
+       },
+       {
+        "row": 11,
+        "col": 24,
+        "text": "F4",
+        "fgCss": "rgb(160, 164, 167)",
+        "bgCss": "rgb(36, 41, 47)",
+        "nominalCss": 5.83,
+        "measured": 5.17
+       },
+       {
+        "row": 11,
+        "col": 34,
+        "text": "Tree  ",
+        "fgCss": "rgb(203, 204, 205)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.62,
+        "measured": 5.25
+       }
+      ]
+     },
+     "excludedGlyphOnly": 2,
+     "worst": [
+      {
+       "row": 1,
+       "col": 16,
+       "text": "||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#e6e9ef",
+       "nominal": 7.35,
+       "measured": 2.55
+      },
+      {
+       "row": 3,
+       "col": 7,
+       "text": "|",
+       "fgCss": "rgb(152, 4, 22)",
+       "bgPixel": "#e6e9f0",
+       "nominal": 7.31,
+       "measured": 2.78
+      },
+      {
+       "row": 4,
+       "col": 15,
+       "text": "||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#e6e9f0",
+       "nominal": 7.35,
+       "measured": 2.79
+      },
+      {
+       "row": 2,
+       "col": 25,
+       "text": "|||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#e6eaef",
+       "nominal": 7.39,
+       "measured": 4.4
+      },
+      {
+       "row": 4,
+       "col": 17,
+       "text": "||||",
+       "fgCss": "rgb(93, 67, 3)",
+       "bgPixel": "#e6e9f0",
+       "nominal": 7.61,
+       "measured": 4.95
+      }
+     ]
+    },
+    "s7": {
+     "pairs": 55,
+     "measured": {
+      "n": 55,
+      "min": 2.22,
+      "p5": 2.34,
+      "p50": 5.85,
+      "max": 16.07,
+      "below4_5": 9,
+      "below3": 8
+     },
+     "nominalCss": {
+      "n": 17,
+      "min": 5.52,
+      "p5": 5.52,
+      "p50": 5.65,
+      "max": 5.95,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 55,
+      "min": 5.42,
+      "p5": 5.56,
+      "p50": 6.06,
+      "max": 16.09,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 32,
+       "min": 5.87,
+       "p5": 5.96,
+       "p50": 6.86,
+       "max": 12.03,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 32,
+       "min": 2.22,
+       "p5": 2.33,
+       "p50": 5.91,
+       "max": 11.48,
+       "below4_5": 8,
+       "below3": 8
+      },
+      "bgPixelRange": [
+       "#e3e7ef",
+       "#e6eaef"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 17,
+       "min": 5.52,
+       "p5": 5.52,
+       "p50": 5.65,
+       "max": 5.95,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 17,
+       "min": 5.3,
+       "p5": 5.3,
+       "p50": 5.65,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 8,
+        "col": 12,
+        "text": "rev32",
+        "fgCss": "rgb(198, 198, 198)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.3
+       },
+       {
+        "row": 9,
+        "col": 18,
+        "text": "rev93",
+        "fgCss": "rgb(223, 223, 223)",
+        "bgCss": "rgb(110, 81, 4)",
+        "nominalCss": 5.55,
+        "measured": 5.3
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": "rev92",
+        "fgCss": "rgb(223, 223, 223)",
+        "bgCss": "rgb(4, 99, 37)",
+        "nominalCss": 5.59,
+        "measured": 5.35
+       },
+       {
+        "row": 8,
+        "col": 36,
+        "text": "rev36",
+        "fgCss": "rgb(204, 204, 204)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.63,
+        "measured": 5.43
+       },
+       {
+        "row": 9,
+        "col": 36,
+        "text": "rev96",
+        "fgCss": "rgb(227, 227, 227)",
+        "bgCss": "rgb(4, 96, 108)",
+        "nominalCss": 5.65,
+        "measured": 5.44
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 5,
+       "col": 48,
+       "text": "Dwhite",
+       "fgCss": "rgba(72, 79, 86, 0.5)",
+       "bgPixel": "#e5eaee",
+       "nominal": 6.86,
+       "measured": 2.22
+      },
+      {
+       "row": 5,
+       "col": 19,
+       "text": "Dyellow",
+       "fgCss": "rgba(93, 67, 3, 0.5)",
+       "bgPixel": "#e6e9ef",
+       "nominal": 7.61,
+       "measured": 2.33
+      },
+      {
+       "row": 5,
+       "col": 42,
+       "text": "Dcyan",
+       "fgCss": "rgba(4, 81, 88, 0.5)",
+       "bgPixel": "#e6eaee",
+       "nominal": 7.48,
+       "measured": 2.34
+      },
+      {
+       "row": 5,
+       "col": 33,
+       "text": "Dmagenta",
+       "fgCss": "rgba(103, 36, 173, 0.5)",
+       "bgPixel": "#e6eaee",
+       "nominal": 7.14,
+       "measured": 2.36
+      },
+      {
+       "row": 5,
+       "col": 27,
+       "text": "Dblue",
+       "fgCss": "rgba(2, 71, 151, 0.5)",
+       "bgPixel": "#e6e9ef",
+       "nominal": 7.35,
+       "measured": 2.37
+      }
+     ]
+    }
+   }
+  },
+  "gl-light-none": {
+   "attrs": {
+    "theme": "glass",
+    "scheme": "light",
+    "glassColor": "none"
+   },
+   "regression": {
+    "plainRowContrast": {
+     "min": 14.55,
+     "max": 16.59,
+     "n": 24
+    },
+    "plainRowWorstBg": {
+     "min": 11.95,
+     "max": 16.59,
+     "n": 24
+    },
+    "cursor": 16.59,
+    "selectionActive": [
+     {
+      "vsSurround": 2.92,
+      "selectedText": 5.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 2.82,
+      "selectedText": 5.88
+     }
+    ],
+    "scrollbarThumb": [
+     4.15
+    ],
+    "viewportEmptyMeanLum": 0.8298,
+    "paddingStripMeanLum": 0.8463,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+    },
+    "geometry": {
+     "rows": 34,
+     "scrollTop": 0,
+     "clientHeight": 667
+    },
+    "paletteCheck": {
+     "checked": 24,
+     "mismatches": 0,
+     "details": []
+    }
+   },
+   "part3Baseline": {
+    "plainRowContrast": {
+     "min": 13.71,
+     "max": 16.75,
+     "n": 15
+    },
+    "cursor": 16.75,
+    "selectionActive": [
+     {
+      "vsSurround": 2.95,
+      "selectedText": 5.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 2.85,
+      "selectedText": 5.88
+     }
+    ],
+    "scrollbarThumb": [
+     4.19
+    ],
+    "viewportEmptyMeanLum": 0.8391,
+    "paddingStripMeanLum": 0.855,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+    }
+   },
+   "scenes": {
+    "s1": {
+     "pairs": 128,
+     "measured": {
+      "n": 128,
+      "min": 5.4,
+      "p5": 5.45,
+      "p50": 5.72,
+      "max": 6.18,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 128,
+      "min": 5.5,
+      "p5": 5.52,
+      "p50": 5.67,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 128,
+      "min": 5.41,
+      "p5": 5.43,
+      "p50": 5.72,
+      "max": 6.15,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 128,
+       "min": 5.5,
+       "p5": 5.52,
+       "p50": 5.67,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 128,
+       "min": 5.4,
+       "p5": 5.45,
+       "p50": 5.72,
+       "max": 6.18,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 6,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(210, 190, 233)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.4
+       },
+       {
+        "row": 1,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(197, 198, 199)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 3,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(178, 204, 188)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.51,
+        "measured": 5.42
+       },
+       {
+        "row": 9,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(197, 198, 200)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.42
+       },
+       {
+        "row": 2,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(230, 188, 192)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.53,
+        "measured": 5.43
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "needAdjustment": 128,
+     "adjusted": 128,
+     "requestedMin": 1,
+     "requestedMax": 2.02,
+     "adjustedButStillBelowInCss": [],
+     "notAdjustedBelow": [],
+     "identicalColourPairs": 16,
+     "identicalAllAdjusted": true,
+     "worst": [
+      {
+       "row": 6,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 5,
+       "b": 2,
+       "fgCss": "rgb(210, 190, 233)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.4
+      },
+      {
+       "row": 1,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 2,
+       "fgCss": "rgb(197, 198, 199)",
+       "bgPixel": "#215124",
+       "nominal": 5.41,
+       "measured": 5.41
+      },
+      {
+       "row": 3,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 2,
+       "b": 2,
+       "fgCss": "rgb(178, 204, 188)",
+       "bgPixel": "#215124",
+       "nominal": 5.41,
+       "measured": 5.42
+      },
+      {
+       "row": 9,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 8,
+       "b": 2,
+       "fgCss": "rgb(197, 198, 200)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.42
+      },
+      {
+       "row": 2,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 1,
+       "b": 2,
+       "fgCss": "rgb(230, 188, 192)",
+       "bgPixel": "#215124",
+       "nominal": 5.43,
+       "measured": 5.43
+      }
+     ]
+    },
+    "s2": {
+     "pairs": 14,
+     "measured": {
+      "n": 14,
+      "min": 5.31,
+      "p5": 5.31,
+      "p50": 5.68,
+      "max": 5.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 14,
+      "min": 5.5,
+      "p5": 5.5,
+      "p50": 5.62,
+      "max": 5.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 14,
+      "min": 5.42,
+      "p5": 5.42,
+      "p50": 5.7,
+      "max": 5.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 14,
+       "min": 5.5,
+       "p5": 5.5,
+       "p50": 5.62,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 14,
+       "min": 5.31,
+       "p5": 5.31,
+       "p50": 5.68,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 6,
+        "col": 0,
+        "text": " CASE-42 default-f",
+        "fgCss": "rgb(198, 198, 198)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.31
+       },
+       {
+        "row": 7,
+        "col": 0,
+        "text": " CASE-46-30 black ",
+        "fgCss": "rgb(203, 204, 205)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.62,
+        "measured": 5.55
+       },
+       {
+        "row": 12,
+        "col": 55,
+        "text": " CASE-REV-BOLD-34 ",
+        "fgCss": "rgb(204, 204, 204)",
+        "bgCss": "rgb(2, 71, 151)",
+        "nominalCss": 5.56,
+        "measured": 5.59
+       },
+       {
+        "row": 2,
+        "col": 0,
+        "text": " CASE-44-97 bright",
+        "fgCss": "rgb(204, 205, 208)",
+        "bgCss": "rgb(2, 71, 151)",
+        "nominalCss": 5.62,
+        "measured": 5.64
+       },
+       {
+        "row": 10,
+        "col": 0,
+        "text": " CASE-41-37 white ",
+        "fgCss": "rgb(201, 204, 205)",
+        "bgCss": "rgb(152, 4, 22)",
+        "nominalCss": 5.5,
+        "measured": 5.65
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 6,
+       "col": 0,
+       "text": " CASE-42 default-f",
+       "fgCss": "rgb(198, 198, 198)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.31
+      },
+      {
+       "row": 7,
+       "col": 0,
+       "text": " CASE-46-30 black ",
+       "fgCss": "rgb(203, 204, 205)",
+       "bgPixel": "#225057",
+       "nominal": 5.55,
+       "measured": 5.55
+      },
+      {
+       "row": 12,
+       "col": 55,
+       "text": " CASE-REV-BOLD-34 ",
+       "fgCss": "rgb(204, 204, 204)",
+       "bgPixel": "#1c4692",
+       "nominal": 5.59,
+       "measured": 5.59
+      },
+      {
+       "row": 2,
+       "col": 0,
+       "text": " CASE-44-97 bright",
+       "fgCss": "rgb(204, 205, 208)",
+       "bgPixel": "#1c4692",
+       "nominal": 5.64,
+       "measured": 5.64
+      },
+      {
+       "row": 10,
+       "col": 0,
+       "text": " CASE-41-37 white ",
+       "fgCss": "rgb(201, 204, 205)",
+       "bgPixel": "#8b1c1e",
+       "nominal": 5.7,
+       "measured": 5.65
+      }
+     ]
+    },
+    "s3a": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 4.62,
+      "p5": 4.71,
+      "p50": 5.22,
+      "max": 17.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": null,
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 4.7,
+      "p5": 4.73,
+      "p50": 5.21,
+      "max": 17.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 256,
+       "min": 4.7,
+       "p5": 4.73,
+       "p50": 5.21,
+       "max": 17.93,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 4.62,
+       "p5": 4.71,
+       "p50": 5.22,
+       "max": 17.93,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#ededec",
+       "#ededec"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": null,
+      "measured": null,
+      "worst": []
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 6,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(43, 120, 0)",
+       "bgPixel": "#ededec",
+       "nominal": 4.73,
+       "measured": 4.62
+      },
+      {
+       "row": 4,
+       "col": 4,
+       "text": " MW ",
+       "fgCss": "rgb(0, 120, 81)",
+       "bgPixel": "#ededec",
+       "nominal": 4.71,
+       "measured": 4.64
+      },
+      {
+       "row": 10,
+       "col": 20,
+       "text": " MW ",
+       "fgCss": "rgb(90, 112, 48)",
+       "bgPixel": "#ededec",
+       "nominal": 4.72,
+       "measured": 4.64
+      },
+      {
+       "row": 5,
+       "col": 36,
+       "text": " MW ",
+       "fgCss": "rgb(61, 113, 113)",
+       "bgPixel": "#ededec",
+       "nominal": 4.72,
+       "measured": 4.66
+      },
+      {
+       "row": 8,
+       "col": 16,
+       "text": " MW ",
+       "fgCss": "rgb(70, 112, 112)",
+       "bgPixel": "#ededec",
+       "nominal": 4.7,
+       "measured": 4.66
+      }
+     ]
+    },
+    "s3b": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 6.94,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 256,
+      "min": 4.6,
+      "p5": 4.92,
+      "p50": 6.95,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 6.94,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 256,
+       "min": 4.6,
+       "p5": 4.92,
+       "p50": 6.95,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 4.55,
+       "p5": 4.97,
+       "p50": 6.94,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 7,
+        "col": 8,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(135, 95, 215)",
+        "nominalCss": 4.65,
+        "measured": 4.55
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(175, 95, 95)",
+        "nominalCss": 4.62,
+        "measured": 4.56
+       },
+       {
+        "row": 2,
+        "col": 48,
+        "text": " MW ",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(0, 135, 0)",
+        "nominalCss": 4.7,
+        "measured": 4.6
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(215, 0, 215)",
+        "nominalCss": 4.87,
+        "measured": 4.62
+       },
+       {
+        "row": 16,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(118, 118, 118)",
+        "nominalCss": 4.62,
+        "measured": 4.62
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 7,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#8161d0",
+       "nominal": 4.55,
+       "measured": 4.55
+      },
+      {
+       "row": 9,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#a56361",
+       "nominal": 4.56,
+       "measured": 4.56
+      },
+      {
+       "row": 2,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#3b8524",
+       "nominal": 4.6,
+       "measured": 4.6
+      },
+      {
+       "row": 11,
+       "col": 16,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#c52ad0",
+       "nominal": 4.62,
+       "measured": 4.62
+      },
+      {
+       "row": 16,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#767676",
+       "nominal": 4.62,
+       "measured": 4.62
+      }
+     ]
+    },
+    "s4": {
+     "pairs": 248,
+     "measured": {
+      "n": 248,
+      "min": 3.93,
+      "p5": 4.29,
+      "p50": 5.32,
+      "max": 19.44,
+      "below4_5": 31,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 127,
+      "min": 4.59,
+      "p5": 4.67,
+      "p50": 5.89,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 248,
+      "min": 4.38,
+      "p5": 4.72,
+      "p50": 5.54,
+      "max": 19.44,
+      "below4_5": 2,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 117,
+       "min": 4.72,
+       "p5": 4.74,
+       "p50": 5.3,
+       "max": 17.93,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 117,
+       "min": 3.93,
+       "p5": 4.17,
+       "p50": 5.13,
+       "max": 17.93,
+       "below4_5": 26,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#ededec",
+       "#ededec"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 127,
+       "min": 4.59,
+       "p5": 4.67,
+       "p50": 5.89,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 127,
+       "min": 4.18,
+       "p5": 4.62,
+       "p50": 5.85,
+       "max": 19.44,
+       "below4_5": 5,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 3,
+        "col": 39,
+        "text": "M",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(116, 116, 116)",
+        "nominalCss": 4.67,
+        "measured": 4.18
+       },
+       {
+        "row": 2,
+        "col": 67,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 91)",
+        "nominalCss": 4.65,
+        "measured": 4.2
+       },
+       {
+        "row": 2,
+        "col": 66,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 113)",
+        "nominalCss": 4.74,
+        "measured": 4.37
+       },
+       {
+        "row": 2,
+        "col": 68,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 69)",
+        "nominalCss": 4.59,
+        "measured": 4.38
+       },
+       {
+        "row": 2,
+        "col": 15,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 47, 25)",
+        "nominalCss": 4.79,
+        "measured": 4.45
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 4,
+       "col": 39,
+       "text": "M",
+       "fgCss": "rgb(104, 104, 104)",
+       "bgPixel": "#ededec",
+       "nominal": 4.76,
+       "measured": 3.93
+      },
+      {
+       "row": 4,
+       "col": 67,
+       "text": "M",
+       "fgCss": "rgb(104, 104, 104)",
+       "bgPixel": "#ededec",
+       "nominal": 4.76,
+       "measured": 3.93
+      },
+      {
+       "row": 1,
+       "col": 35,
+       "text": "M",
+       "fgCss": "rgb(11, 121, 39)",
+       "bgPixel": "#ededec",
+       "nominal": 4.74,
+       "measured": 3.94
+      },
+      {
+       "row": 4,
+       "col": 48,
+       "text": "M",
+       "fgCss": "rgb(102, 102, 102)",
+       "bgPixel": "#ededec",
+       "nominal": 4.9,
+       "measured": 4.05
+      },
+      {
+       "row": 1,
+       "col": 34,
+       "text": "M",
+       "fgCss": "rgb(11, 121, 27)",
+       "bgPixel": "#ededec",
+       "nominal": 4.76,
+       "measured": 4.15
+      }
+     ]
+    },
+    "s5": {
+     "pairs": 25,
+     "measured": {
+      "n": 25,
+      "min": 4.45,
+      "p5": 4.73,
+      "p50": 5.93,
+      "max": 10,
+      "below4_5": 1,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 19,
+      "min": 5.08,
+      "p5": 5.08,
+      "p50": 6.99,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 25,
+      "min": 4.8,
+      "p5": 4.83,
+      "p50": 5.8,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 6,
+       "min": 4.8,
+       "p5": 4.8,
+       "p50": 5.14,
+       "max": 5.29,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 6,
+       "min": 4.45,
+       "p5": 4.45,
+       "p50": 4.83,
+       "max": 5.21,
+       "below4_5": 1,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#ededec",
+       "#ededec"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 19,
+       "min": 5.08,
+       "p5": 5.08,
+       "p50": 6.99,
+       "max": 10.38,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 19,
+       "min": 4.99,
+       "p5": 4.99,
+       "p50": 6.59,
+       "max": 10,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 1,
+        "col": 0,
+        "text": "  ~/proj ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 4.99
+       },
+       {
+        "row": 2,
+        "col": 12,
+        "text": " node 22 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 4,
+        "col": 14,
+        "text": " py 3.12 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 1,
+        "col": 26,
+        "text": " 12ms ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.32
+       },
+       {
+        "row": 6,
+        "col": 16,
+        "text": " 14:55:01 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.35
+       }
+      ]
+     },
+     "excludedGlyphOnly": 16,
+     "worst": [
+      {
+       "row": 5,
+       "col": 7,
+       "text": "main",
+       "fgCss": "rgb(48, 112, 48)",
+       "bgPixel": "#ededec",
+       "nominal": 5.14,
+       "measured": 4.45
+      },
+      {
+       "row": 5,
+       "col": 12,
+       "text": "!2 ?1",
+       "fgCss": "rgb(125, 101, 0)",
+       "bgPixel": "#ededec",
+       "nominal": 4.8,
+       "measured": 4.73
+      },
+      {
+       "row": 6,
+       "col": 2,
+       "text": "git status",
+       "fgCss": "rgb(103, 103, 103)",
+       "bgPixel": "#ededec",
+       "nominal": 4.83,
+       "measured": 4.83
+      },
+      {
+       "row": 5,
+       "col": 0,
+       "text": "~/proj",
+       "fgCss": "rgb(54, 101, 149)",
+       "bgPixel": "#ededec",
+       "nominal": 5.19,
+       "measured": 4.95
+      },
+      {
+       "row": 1,
+       "col": 0,
+       "text": "  ~/proj ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 4.99
+      }
+     ]
+    },
+    "s6": {
+     "pairs": 51,
+     "measured": {
+      "n": 51,
+      "min": 2.58,
+      "p5": 2.83,
+      "p50": 5.44,
+      "max": 8.92,
+      "below4_5": 4,
+      "below3": 3
+     },
+     "nominalCss": {
+      "n": 26,
+      "min": 5.08,
+      "p5": 5.52,
+      "p50": 5.62,
+      "max": 5.83,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 51,
+      "min": 5.13,
+      "p5": 5.41,
+      "p50": 5.82,
+      "max": 8.94,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 25,
+       "min": 6.19,
+       "p5": 6.19,
+       "p50": 8.05,
+       "max": 8.94,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 25,
+       "min": 2.58,
+       "p5": 2.8,
+       "p50": 6.09,
+       "max": 8.92,
+       "below4_5": 4,
+       "below3": 3
+      },
+      "bgPixelRange": [
+       "#ececeb",
+       "#ededec"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 26,
+       "min": 5.08,
+       "p5": 5.52,
+       "p50": 5.62,
+       "max": 5.83,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 26,
+       "min": 5.07,
+       "p5": 5.14,
+       "p50": 5.43,
+       "max": 5.83,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 16,
+        "col": 28,
+        "text": " 3 node ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.07
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": "r.js     ",
+        "fgCss": "rgb(203, 204, 205)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.62,
+        "measured": 5.14
+       },
+       {
+        "row": 16,
+        "col": 0,
+        "text": " session-a ",
+        "fgCss": "rgb(230, 230, 232)",
+        "bgCss": "rgb(0, 95, 135)",
+        "nominalCss": 5.64,
+        "measured": 5.14
+       },
+       {
+        "row": 11,
+        "col": 24,
+        "text": "F4",
+        "fgCss": "rgb(160, 164, 167)",
+        "bgCss": "rgb(36, 41, 47)",
+        "nominalCss": 5.83,
+        "measured": 5.17
+       },
+       {
+        "row": 11,
+        "col": 34,
+        "text": "Tree  ",
+        "fgCss": "rgb(203, 204, 205)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.62,
+        "measured": 5.25
+       }
+      ]
+     },
+     "excludedGlyphOnly": 2,
+     "worst": [
+      {
+       "row": 1,
+       "col": 16,
+       "text": "||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#ededec",
+       "nominal": 7.63,
+       "measured": 2.58
+      },
+      {
+       "row": 3,
+       "col": 7,
+       "text": "|",
+       "fgCss": "rgb(152, 4, 22)",
+       "bgPixel": "#ededec",
+       "nominal": 7.58,
+       "measured": 2.8
+      },
+      {
+       "row": 4,
+       "col": 15,
+       "text": "||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#ededec",
+       "nominal": 7.63,
+       "measured": 2.83
+      },
+      {
+       "row": 2,
+       "col": 25,
+       "text": "|||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#ededec",
+       "nominal": 7.63,
+       "measured": 4.48
+      },
+      {
+       "row": 4,
+       "col": 17,
+       "text": "||||",
+       "fgCss": "rgb(93, 67, 3)",
+       "bgPixel": "#ededec",
+       "nominal": 7.9,
+       "measured": 4.99
+      }
+     ]
+    },
+    "s7": {
+     "pairs": 55,
+     "measured": {
+      "n": 55,
+      "min": 2.26,
+      "p5": 2.38,
+      "p50": 5.93,
+      "max": 16.59,
+      "below4_5": 9,
+      "below3": 8
+     },
+     "nominalCss": {
+      "n": 17,
+      "min": 5.52,
+      "p5": 5.52,
+      "p50": 5.65,
+      "max": 5.95,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 55,
+      "min": 5.42,
+      "p5": 5.56,
+      "p50": 6.31,
+      "max": 16.59,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 32,
+       "min": 6.19,
+       "p5": 6.19,
+       "p50": 7.09,
+       "max": 12.51,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 32,
+       "min": 2.26,
+       "p5": 2.33,
+       "p50": 6.19,
+       "max": 11.91,
+       "below4_5": 8,
+       "below3": 8
+      },
+      "bgPixelRange": [
+       "#ededec",
+       "#ededec"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 17,
+       "min": 5.52,
+       "p5": 5.52,
+       "p50": 5.65,
+       "max": 5.95,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 17,
+       "min": 5.3,
+       "p5": 5.3,
+       "p50": 5.65,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 8,
+        "col": 12,
+        "text": "rev32",
+        "fgCss": "rgb(198, 198, 198)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.3
+       },
+       {
+        "row": 9,
+        "col": 18,
+        "text": "rev93",
+        "fgCss": "rgb(223, 223, 223)",
+        "bgCss": "rgb(110, 81, 4)",
+        "nominalCss": 5.55,
+        "measured": 5.3
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": "rev92",
+        "fgCss": "rgb(223, 223, 223)",
+        "bgCss": "rgb(4, 99, 37)",
+        "nominalCss": 5.59,
+        "measured": 5.35
+       },
+       {
+        "row": 8,
+        "col": 36,
+        "text": "rev36",
+        "fgCss": "rgb(204, 204, 204)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.63,
+        "measured": 5.43
+       },
+       {
+        "row": 9,
+        "col": 36,
+        "text": "rev96",
+        "fgCss": "rgb(227, 227, 227)",
+        "bgCss": "rgb(4, 96, 108)",
+        "nominalCss": 5.65,
+        "measured": 5.44
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 5,
+       "col": 48,
+       "text": "Dwhite",
+       "fgCss": "rgba(72, 79, 86, 0.5)",
+       "bgPixel": "#ededec",
+       "nominal": 7.09,
+       "measured": 2.26
+      },
+      {
+       "row": 5,
+       "col": 42,
+       "text": "Dcyan",
+       "fgCss": "rgba(4, 81, 88, 0.5)",
+       "bgPixel": "#ededec",
+       "nominal": 7.72,
+       "measured": 2.33
+      },
+      {
+       "row": 5,
+       "col": 19,
+       "text": "Dyellow",
+       "fgCss": "rgba(93, 67, 3, 0.5)",
+       "bgPixel": "#ededec",
+       "nominal": 7.9,
+       "measured": 2.38
+      },
+      {
+       "row": 5,
+       "col": 33,
+       "text": "Dmagenta",
+       "fgCss": "rgba(103, 36, 173, 0.5)",
+       "bgPixel": "#ededec",
+       "nominal": 7.37,
+       "measured": 2.4
+      },
+      {
+       "row": 5,
+       "col": 12,
+       "text": "Dgreen",
+       "fgCss": "rgba(1, 82, 29, 0.5)",
+       "bgPixel": "#ededec",
+       "nominal": 8.05,
+       "measured": 2.43
+      }
+     ]
+    }
+   }
+  },
+  "gl-dark": {
+   "attrs": {
+    "theme": "glass",
+    "scheme": "dark",
+    "glassColor": "aurora"
+   },
+   "regression": {
+    "plainRowContrast": {
+     "min": 13.09,
+     "max": 15.9,
+     "n": 24
+    },
+    "plainRowWorstBg": {
+     "min": 10.24,
+     "max": 15.61,
+     "n": 24
+    },
+    "cursor": 15.65,
+    "selectionActive": [
+     {
+      "vsSurround": 3.3,
+      "selectedText": 5.24
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 3.32,
+      "selectedText": 5.2
+     }
+    ],
+    "scrollbarThumb": [
+     4.85
+    ],
+    "viewportEmptyMeanLum": 0.019,
+    "paddingStripMeanLum": 0.0118,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+    },
+    "geometry": {
+     "rows": 34,
+     "scrollTop": 0,
+     "clientHeight": 667
+    },
+    "paletteCheck": {
+     "checked": 24,
+     "mismatches": 0,
+     "details": []
+    }
+   },
+   "part3Baseline": {
+    "plainRowContrast": {
+     "min": 13.31,
+     "max": 15.82,
+     "n": 15
+    },
+    "cursor": 16.08,
+    "selectionActive": [
+     {
+      "vsSurround": 3.31,
+      "selectedText": 4.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 3.33,
+      "selectedText": 4.64
+     }
+    ],
+    "scrollbarThumb": [
+     4.85
+    ],
+    "viewportEmptyMeanLum": 0.0197,
+    "paddingStripMeanLum": 0.0119,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+    }
+   },
+   "scenes": {
+    "s1": {
+     "pairs": 128,
+     "measured": {
+      "n": 128,
+      "min": 5.39,
+      "p5": 5.43,
+      "p50": 5.68,
+      "max": 6.13,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 128,
+      "min": 5.5,
+      "p5": 5.51,
+      "p50": 5.64,
+      "max": 6.1,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 128,
+      "min": 5.42,
+      "p5": 5.45,
+      "p50": 5.69,
+      "max": 6.12,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 128,
+       "min": 5.5,
+       "p5": 5.51,
+       "p50": 5.64,
+       "max": 6.1,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 128,
+       "min": 5.39,
+       "p5": 5.43,
+       "p50": 5.68,
+       "max": 6.13,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 11,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(18, 51, 22)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.51,
+        "measured": 5.39
+       },
+       {
+        "row": 11,
+        "col": 29,
+        "text": " MW8 ",
+        "fgCss": "rgb(18, 51, 22)",
+        "bgCss": "rgb(188, 140, 255)",
+        "nominalCss": 5.52,
+        "measured": 5.4
+       },
+       {
+        "row": 1,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 8,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 1,
+        "col": 29,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(188, 140, 255)",
+        "nominalCss": 5.53,
+        "measured": 5.42
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "needAdjustment": 128,
+     "adjusted": 128,
+     "requestedMin": 1,
+     "requestedMax": 2.54,
+     "adjustedButStillBelowInCss": [],
+     "notAdjustedBelow": [],
+     "identicalColourPairs": 16,
+     "identicalAllAdjusted": true,
+     "worst": [
+      {
+       "row": 11,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 10,
+       "b": 1,
+       "fgCss": "rgb(18, 51, 22)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.42,
+       "measured": 5.39
+      },
+      {
+       "row": 11,
+       "col": 29,
+       "text": " MW8 ",
+       "f": 10,
+       "b": 5,
+       "fgCss": "rgb(18, 51, 22)",
+       "bgPixel": "#b58ef8",
+       "nominal": 5.42,
+       "measured": 5.4
+      },
+      {
+       "row": 1,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 1,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.41
+      },
+      {
+       "row": 8,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 7,
+       "b": 1,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.41
+      },
+      {
+       "row": 1,
+       "col": 29,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 5,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#b58ef8",
+       "nominal": 5.43,
+       "measured": 5.42
+      }
+     ]
+    },
+    "s2": {
+     "pairs": 14,
+     "measured": {
+      "n": 14,
+      "min": 5.34,
+      "p5": 5.34,
+      "p50": 5.74,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 14,
+      "min": 5.52,
+      "p5": 5.52,
+      "p50": 5.84,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 14,
+      "min": 5.43,
+      "p5": 5.43,
+      "p50": 5.74,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 14,
+       "min": 5.52,
+       "p5": 5.52,
+       "p50": 5.84,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 14,
+       "min": 5.34,
+       "p5": 5.34,
+       "p50": 5.74,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 10,
+        "col": 0,
+        "text": " CASE-41-37 white ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.34
+       },
+       {
+        "row": 3,
+        "col": 0,
+        "text": " CASE-43-30 black ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(210, 153, 34)",
+        "nominalCss": 5.52,
+        "measured": 5.51
+       },
+       {
+        "row": 1,
+        "col": 0,
+        "text": " CASE-41 default-f",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.85,
+        "measured": 5.65
+       },
+       {
+        "row": 7,
+        "col": 0,
+        "text": " CASE-46-30 black ",
+        "fgCss": "rgb(52, 56, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.68,
+        "measured": 5.72
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": " CASE-100 default-",
+        "fgCss": "rgb(51, 51, 51)",
+        "bgCss": "rgb(168, 175, 184)",
+        "nominalCss": 5.71,
+        "measured": 5.73
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 10,
+       "col": 0,
+       "text": " CASE-41-37 white ",
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.34
+      },
+      {
+       "row": 3,
+       "col": 0,
+       "text": " CASE-43-30 black ",
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ca9c3e",
+       "nominal": 5.53,
+       "measured": 5.51
+      },
+      {
+       "row": 1,
+       "col": 0,
+       "text": " CASE-41 default-f",
+       "fgCss": "rgb(40, 40, 40)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.74,
+       "measured": 5.65
+      },
+      {
+       "row": 7,
+       "col": 0,
+       "text": " CASE-46-30 black ",
+       "fgCss": "rgb(52, 56, 57)",
+       "bgPixel": "#66c2cd",
+       "nominal": 5.74,
+       "measured": 5.72
+      },
+      {
+       "row": 8,
+       "col": 0,
+       "text": " CASE-100 default-",
+       "fgCss": "rgb(51, 51, 51)",
+       "bgPixel": "#aaafb7",
+       "nominal": 5.73,
+       "measured": 5.73
+      }
+     ]
+    },
+    "s3a": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 5.61,
+      "p5": 5.89,
+      "p50": 6.86,
+      "max": 17.73,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": null,
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 5.72,
+      "p5": 5.96,
+      "p50": 6.86,
+      "max": 17.73,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 256,
+       "min": 5.72,
+       "p5": 5.96,
+       "p50": 6.86,
+       "max": 17.73,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 5.61,
+       "p5": 5.89,
+       "p50": 6.86,
+       "max": 17.73,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#15161b",
+       "#191d30"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": null,
+      "measured": null,
+      "worst": []
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 9,
+       "col": 4,
+       "text": " MW ",
+       "fgCss": "rgb(210, 106, 255)",
+       "bgPixel": "#181d2e",
+       "nominal": 5.78,
+       "measured": 5.61
+      },
+      {
+       "row": 7,
+       "col": 4,
+       "text": " MW ",
+       "fgCss": "rgb(168, 139, 198)",
+       "bgPixel": "#181d2e",
+       "nominal": 5.72,
+       "measured": 5.67
+      },
+      {
+       "row": 11,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(233, 106, 185)",
+       "bgPixel": "#181c2b",
+       "nominal": 5.83,
+       "measured": 5.67
+      },
+      {
+       "row": 4,
+       "col": 60,
+       "text": " MW ",
+       "fgCss": "rgb(139, 139, 255)",
+       "bgPixel": "#151e25",
+       "nominal": 5.81,
+       "measured": 5.74
+      },
+      {
+       "row": 11,
+       "col": 20,
+       "text": " MW ",
+       "fgCss": "rgb(230, 89, 255)",
+       "bgPixel": "#171a25",
+       "nominal": 5.98,
+       "measured": 5.74
+      }
+     ]
+    },
+    "s3b": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 5.76,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 256,
+      "min": 4.6,
+      "p5": 4.92,
+      "p50": 5.72,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 5.76,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 256,
+       "min": 4.6,
+       "p5": 4.92,
+       "p50": 5.72,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 4.55,
+       "p5": 4.97,
+       "p50": 5.76,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 7,
+        "col": 8,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(135, 95, 215)",
+        "nominalCss": 4.65,
+        "measured": 4.55
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(175, 95, 95)",
+        "nominalCss": 4.62,
+        "measured": 4.56
+       },
+       {
+        "row": 2,
+        "col": 48,
+        "text": " MW ",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(0, 135, 0)",
+        "nominalCss": 4.7,
+        "measured": 4.6
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(215, 0, 215)",
+        "nominalCss": 4.87,
+        "measured": 4.62
+       },
+       {
+        "row": 16,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(118, 118, 118)",
+        "nominalCss": 4.62,
+        "measured": 4.62
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 7,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#8161d0",
+       "nominal": 4.55,
+       "measured": 4.55
+      },
+      {
+       "row": 9,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#a56361",
+       "nominal": 4.56,
+       "measured": 4.56
+      },
+      {
+       "row": 2,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#3b8524",
+       "nominal": 4.6,
+       "measured": 4.6
+      },
+      {
+       "row": 11,
+       "col": 16,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#c52ad0",
+       "nominal": 4.62,
+       "measured": 4.62
+      },
+      {
+       "row": 16,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#767676",
+       "nominal": 4.62,
+       "measured": 4.62
+      }
+     ]
+    },
+    "s4": {
+     "pairs": 248,
+     "measured": {
+      "n": 248,
+      "min": 4.18,
+      "p5": 4.69,
+      "p50": 5.89,
+      "max": 18.76,
+      "below4_5": 5,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 127,
+      "min": 4.59,
+      "p5": 4.67,
+      "p50": 5.7,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 248,
+      "min": 4.38,
+      "p5": 4.82,
+      "p50": 6.22,
+      "max": 18.76,
+      "below4_5": 2,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 117,
+       "min": 5.67,
+       "p5": 5.83,
+       "p50": 6.48,
+       "max": 16.74,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 117,
+       "min": 4.92,
+       "p5": 5.08,
+       "p50": 6.33,
+       "max": 16.74,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#151b21",
+       "#181d2e"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 127,
+       "min": 4.59,
+       "p5": 4.67,
+       "p50": 5.7,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 127,
+       "min": 4.18,
+       "p5": 4.62,
+       "p50": 5.51,
+       "max": 18.76,
+       "below4_5": 5,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 3,
+        "col": 39,
+        "text": "M",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(116, 116, 116)",
+        "nominalCss": 4.67,
+        "measured": 4.18
+       },
+       {
+        "row": 2,
+        "col": 67,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 91)",
+        "nominalCss": 4.65,
+        "measured": 4.2
+       },
+       {
+        "row": 2,
+        "col": 66,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 113)",
+        "nominalCss": 4.74,
+        "measured": 4.37
+       },
+       {
+        "row": 2,
+        "col": 68,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 69)",
+        "nominalCss": 4.59,
+        "measured": 4.38
+       },
+       {
+        "row": 2,
+        "col": 15,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 47, 25)",
+        "nominalCss": 4.79,
+        "measured": 4.45
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 3,
+       "col": 39,
+       "text": "M",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#747474",
+       "nominal": 4.67,
+       "measured": 4.18
+      },
+      {
+       "row": 2,
+       "col": 67,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d3355d",
+       "nominal": 4.44,
+       "measured": 4.2
+      },
+      {
+       "row": 2,
+       "col": 66,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d33571",
+       "nominal": 4.52,
+       "measured": 4.37
+      },
+      {
+       "row": 2,
+       "col": 68,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d3354a",
+       "nominal": 4.38,
+       "measured": 4.38
+      },
+      {
+       "row": 2,
+       "col": 15,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d4422b",
+       "nominal": 4.61,
+       "measured": 4.45
+      }
+     ]
+    },
+    "s5": {
+     "pairs": 25,
+     "measured": {
+      "n": 25,
+      "min": 4.99,
+      "p5": 5.1,
+      "p50": 6.41,
+      "max": 10,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 19,
+      "min": 5.08,
+      "p5": 5.08,
+      "p50": 6.06,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 25,
+      "min": 5.13,
+      "p5": 5.13,
+      "p50": 6.8,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 6,
+       "min": 5.88,
+       "p5": 5.88,
+       "p50": 7.23,
+       "max": 9.16,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 6,
+       "min": 5.88,
+       "p5": 5.88,
+       "p50": 6.9,
+       "max": 9.14,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#171b27",
+       "#191d30"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 19,
+       "min": 5.08,
+       "p5": 5.08,
+       "p50": 6.06,
+       "max": 10.38,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 19,
+       "min": 4.99,
+       "p5": 4.99,
+       "p50": 5.98,
+       "max": 10,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 1,
+        "col": 0,
+        "text": "  ~/proj ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 4.99
+       },
+       {
+        "row": 2,
+        "col": 12,
+        "text": " node 22 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 4,
+        "col": 14,
+        "text": " py 3.12 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 1,
+        "col": 26,
+        "text": " 12ms ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.32
+       },
+       {
+        "row": 6,
+        "col": 16,
+        "text": " 14:55:01 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.35
+       }
+      ]
+     },
+     "excludedGlyphOnly": 16,
+     "worst": [
+      {
+       "row": 1,
+       "col": 0,
+       "text": "  ~/proj ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 4.99
+      },
+      {
+       "row": 2,
+       "col": 12,
+       "text": " node 22 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.1
+      },
+      {
+       "row": 4,
+       "col": 14,
+       "text": " py 3.12 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.1
+      },
+      {
+       "row": 1,
+       "col": 26,
+       "text": " 12ms ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#688687",
+       "nominal": 5.35,
+       "measured": 5.32
+      },
+      {
+       "row": 6,
+       "col": 16,
+       "text": " 14:55:01 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#688687",
+       "nominal": 5.35,
+       "measured": 5.35
+      }
+     ]
+    },
+    "s6": {
+     "pairs": 51,
+     "measured": {
+      "n": 51,
+      "min": 2.7,
+      "p5": 3.1,
+      "p50": 5.67,
+      "max": 9.76,
+      "below4_5": 3,
+      "below3": 2
+     },
+     "nominalCss": {
+      "n": 26,
+      "min": 5.08,
+      "p5": 5.52,
+      "p50": 5.68,
+      "max": 7.03,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 51,
+      "min": 5.13,
+      "p5": 5.53,
+      "p50": 6.67,
+      "max": 9.67,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 25,
+       "min": 6.67,
+       "p5": 6.67,
+       "p50": 7.55,
+       "max": 9.67,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 25,
+       "min": 2.7,
+       "p5": 2.81,
+       "p50": 7.58,
+       "max": 9.76,
+       "below4_5": 3,
+       "below3": 2
+      },
+      "bgPixelRange": [
+       "#15191f",
+       "#191d2e"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 26,
+       "min": 5.08,
+       "p5": 5.52,
+       "p50": 5.68,
+       "max": 7.03,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 26,
+       "min": 4.92,
+       "p5": 5.07,
+       "p50": 5.58,
+       "max": 6.35,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 11,
+        "col": 24,
+        "text": "F4",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.67,
+        "measured": 4.92
+       },
+       {
+        "row": 16,
+        "col": 28,
+        "text": " 3 node ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.07
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": "r.js     ",
+        "fgCss": "rgb(52, 56, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.68,
+        "measured": 5.14
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": "F3",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.67,
+        "measured": 5.2
+       },
+       {
+        "row": 11,
+        "col": 34,
+        "text": "Tree  ",
+        "fgCss": "rgb(52, 56, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.68,
+        "measured": 5.28
+       }
+      ]
+     },
+     "excludedGlyphOnly": 2,
+     "worst": [
+      {
+       "row": 3,
+       "col": 7,
+       "text": "|",
+       "fgCss": "rgb(255, 123, 114)",
+       "bgPixel": "#181c2b",
+       "nominal": 6.72,
+       "measured": 2.7
+      },
+      {
+       "row": 1,
+       "col": 16,
+       "text": "||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#171a25",
+       "nominal": 6.87,
+       "measured": 2.81
+      },
+      {
+       "row": 4,
+       "col": 15,
+       "text": "||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#171b28",
+       "nominal": 6.79,
+       "measured": 3.1
+      },
+      {
+       "row": 2,
+       "col": 25,
+       "text": "|||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#161a24",
+       "nominal": 6.89,
+       "measured": 4.64
+      },
+      {
+       "row": 1,
+       "col": 13,
+       "text": "|||",
+       "fgCss": "rgb(255, 123, 114)",
+       "bgPixel": "#171a26",
+       "nominal": 6.87,
+       "measured": 4.89
+      }
+     ]
+    },
+    "s7": {
+     "pairs": 55,
+     "measured": {
+      "n": 55,
+      "min": 2.52,
+      "p5": 2.58,
+      "p50": 6.62,
+      "max": 17.03,
+      "below4_5": 8,
+      "below3": 7
+     },
+     "nominalCss": {
+      "n": 17,
+      "min": 5.53,
+      "p5": 5.53,
+      "p50": 5.85,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 55,
+      "min": 5.59,
+      "p5": 5.73,
+      "p50": 6.88,
+      "max": 17.03,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 32,
+       "min": 6.71,
+       "p5": 6.74,
+       "p50": 8.3,
+       "max": 17.03,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 32,
+       "min": 2.52,
+       "p5": 2.55,
+       "p50": 7.6,
+       "max": 17.03,
+       "below4_5": 8,
+       "below3": 7
+      },
+      "bgPixelRange": [
+       "#151d21",
+       "#181d2e"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 17,
+       "min": 5.53,
+       "p5": 5.53,
+       "p50": 5.85,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 17,
+       "min": 5.37,
+       "p5": 5.37,
+       "p50": 5.74,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 8,
+        "col": 36,
+        "text": "rev36",
+        "fgCss": "rgb(57, 57, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.53,
+        "measured": 5.37
+       },
+       {
+        "row": 9,
+        "col": 18,
+        "text": "rev93",
+        "fgCss": "rgb(57, 57, 57)",
+        "bgCss": "rgb(227, 179, 65)",
+        "nominalCss": 5.93,
+        "measured": 5.5
+       },
+       {
+        "row": 8,
+        "col": 30,
+        "text": "rev35",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(188, 140, 255)",
+        "nominalCss": 5.85,
+        "measured": 5.51
+       },
+       {
+        "row": 8,
+        "col": 18,
+        "text": "rev33",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(210, 153, 34)",
+        "nominalCss": 5.84,
+        "measured": 5.53
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": "rev30",
+        "fgCss": "rgb(45, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.61,
+        "measured": 5.55
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 5,
+       "col": 0,
+       "text": "Dblack",
+       "fgCss": "rgba(159, 166, 175, 0.5)",
+       "bgPixel": "#181d2e",
+       "nominal": 6.82,
+       "measured": 2.52
+      },
+      {
+       "row": 5,
+       "col": 33,
+       "text": "Dmagenta",
+       "fgCss": "rgba(188, 140, 255, 0.5)",
+       "bgPixel": "#161b22",
+       "nominal": 6.86,
+       "measured": 2.55
+      },
+      {
+       "row": 5,
+       "col": 19,
+       "text": "Dyellow",
+       "fgCss": "rgba(210, 153, 34, 0.5)",
+       "bgPixel": "#171b26",
+       "nominal": 6.81,
+       "measured": 2.58
+      },
+      {
+       "row": 5,
+       "col": 7,
+       "text": "Dred",
+       "fgCss": "rgba(255, 123, 114, 0.5)",
+       "bgPixel": "#181c2c",
+       "nominal": 6.71,
+       "measured": 2.6
+      },
+      {
+       "row": 5,
+       "col": 27,
+       "text": "Dblue",
+       "fgCss": "rgba(88, 166, 255, 0.5)",
+       "bgPixel": "#171a23",
+       "nominal": 6.88,
+       "measured": 2.66
+      }
+     ]
+    }
+   }
+  },
+  "gl-dark-none": {
+   "attrs": {
+    "theme": "glass",
+    "scheme": "dark",
+    "glassColor": "none"
+   },
+   "regression": {
+    "plainRowContrast": {
+     "min": 12.47,
+     "max": 14.21,
+     "n": 24
+    },
+    "plainRowWorstBg": {
+     "min": 9.51,
+     "max": 14.21,
+     "n": 24
+    },
+    "cursor": 14.21,
+    "selectionActive": [
+     {
+      "vsSurround": 3.04,
+      "selectedText": 5.24
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 3.06,
+      "selectedText": 5.2
+     }
+    ],
+    "scrollbarThumb": [
+     4.56
+    ],
+    "viewportEmptyMeanLum": 0.0248,
+    "paddingStripMeanLum": 0.016,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+    },
+    "geometry": {
+     "rows": 34,
+     "scrollTop": 0,
+     "clientHeight": 667
+    },
+    "paletteCheck": {
+     "checked": 24,
+     "mismatches": 0,
+     "details": []
+    }
+   },
+   "part3Baseline": {
+    "plainRowContrast": {
+     "min": 11.8,
+     "max": 14.05,
+     "n": 15
+    },
+    "cursor": 14.05,
+    "selectionActive": [
+     {
+      "vsSurround": 3,
+      "selectedText": 4.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 3.03,
+      "selectedText": 4.64
+     }
+    ],
+    "scrollbarThumb": [
+     4.53
+    ],
+    "viewportEmptyMeanLum": 0.0263,
+    "paddingStripMeanLum": 0.0167,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+    }
+   },
+   "scenes": {
+    "s1": {
+     "pairs": 128,
+     "measured": {
+      "n": 128,
+      "min": 5.39,
+      "p5": 5.43,
+      "p50": 5.68,
+      "max": 6.13,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 128,
+      "min": 5.5,
+      "p5": 5.51,
+      "p50": 5.64,
+      "max": 6.1,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 128,
+      "min": 5.42,
+      "p5": 5.45,
+      "p50": 5.69,
+      "max": 6.12,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 128,
+       "min": 5.5,
+       "p5": 5.51,
+       "p50": 5.64,
+       "max": 6.1,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 128,
+       "min": 5.39,
+       "p5": 5.43,
+       "p50": 5.68,
+       "max": 6.13,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 11,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(18, 51, 22)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.51,
+        "measured": 5.39
+       },
+       {
+        "row": 11,
+        "col": 29,
+        "text": " MW8 ",
+        "fgCss": "rgb(18, 51, 22)",
+        "bgCss": "rgb(188, 140, 255)",
+        "nominalCss": 5.52,
+        "measured": 5.4
+       },
+       {
+        "row": 1,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 8,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 1,
+        "col": 29,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(188, 140, 255)",
+        "nominalCss": 5.53,
+        "measured": 5.42
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "needAdjustment": 128,
+     "adjusted": 128,
+     "requestedMin": 1,
+     "requestedMax": 2.54,
+     "adjustedButStillBelowInCss": [],
+     "notAdjustedBelow": [],
+     "identicalColourPairs": 16,
+     "identicalAllAdjusted": true,
+     "worst": [
+      {
+       "row": 11,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 10,
+       "b": 1,
+       "fgCss": "rgb(18, 51, 22)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.42,
+       "measured": 5.39
+      },
+      {
+       "row": 11,
+       "col": 29,
+       "text": " MW8 ",
+       "f": 10,
+       "b": 5,
+       "fgCss": "rgb(18, 51, 22)",
+       "bgPixel": "#b58ef8",
+       "nominal": 5.42,
+       "measured": 5.4
+      },
+      {
+       "row": 1,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 1,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.41
+      },
+      {
+       "row": 8,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 7,
+       "b": 1,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.41
+      },
+      {
+       "row": 1,
+       "col": 29,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 5,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#b58ef8",
+       "nominal": 5.43,
+       "measured": 5.42
+      }
+     ]
+    },
+    "s2": {
+     "pairs": 14,
+     "measured": {
+      "n": 14,
+      "min": 5.34,
+      "p5": 5.34,
+      "p50": 5.74,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 14,
+      "min": 5.52,
+      "p5": 5.52,
+      "p50": 5.84,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 14,
+      "min": 5.43,
+      "p5": 5.43,
+      "p50": 5.74,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 14,
+       "min": 5.52,
+       "p5": 5.52,
+       "p50": 5.84,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 14,
+       "min": 5.34,
+       "p5": 5.34,
+       "p50": 5.74,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 10,
+        "col": 0,
+        "text": " CASE-41-37 white ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.34
+       },
+       {
+        "row": 3,
+        "col": 0,
+        "text": " CASE-43-30 black ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(210, 153, 34)",
+        "nominalCss": 5.52,
+        "measured": 5.51
+       },
+       {
+        "row": 1,
+        "col": 0,
+        "text": " CASE-41 default-f",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.85,
+        "measured": 5.65
+       },
+       {
+        "row": 7,
+        "col": 0,
+        "text": " CASE-46-30 black ",
+        "fgCss": "rgb(52, 56, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.68,
+        "measured": 5.72
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": " CASE-100 default-",
+        "fgCss": "rgb(51, 51, 51)",
+        "bgCss": "rgb(168, 175, 184)",
+        "nominalCss": 5.71,
+        "measured": 5.73
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 10,
+       "col": 0,
+       "text": " CASE-41-37 white ",
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.34
+      },
+      {
+       "row": 3,
+       "col": 0,
+       "text": " CASE-43-30 black ",
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ca9c3e",
+       "nominal": 5.53,
+       "measured": 5.51
+      },
+      {
+       "row": 1,
+       "col": 0,
+       "text": " CASE-41 default-f",
+       "fgCss": "rgb(40, 40, 40)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.74,
+       "measured": 5.65
+      },
+      {
+       "row": 7,
+       "col": 0,
+       "text": " CASE-46-30 black ",
+       "fgCss": "rgb(52, 56, 57)",
+       "bgPixel": "#66c2cd",
+       "nominal": 5.74,
+       "measured": 5.72
+      },
+      {
+       "row": 8,
+       "col": 0,
+       "text": " CASE-100 default-",
+       "fgCss": "rgb(51, 51, 51)",
+       "bgPixel": "#aaafb7",
+       "nominal": 5.73,
+       "measured": 5.73
+      }
+     ]
+    },
+    "s3a": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 5.26,
+      "p5": 5.42,
+      "p50": 6.27,
+      "max": 15.91,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": null,
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 5.43,
+      "p5": 5.48,
+      "p50": 6.3,
+      "max": 15.91,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 256,
+       "min": 5.43,
+       "p5": 5.48,
+       "p50": 6.3,
+       "max": 15.91,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 5.26,
+       "p5": 5.42,
+       "p50": 6.27,
+       "max": 15.91,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#222222",
+       "#222222"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": null,
+      "measured": null,
+      "worst": []
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 11,
+       "col": 20,
+       "text": " MW ",
+       "fgCss": "rgb(230, 89, 255)",
+       "bgPixel": "#222222",
+       "nominal": 5.48,
+       "measured": 5.26
+      },
+      {
+       "row": 13,
+       "col": 32,
+       "text": " MW ",
+       "fgCss": "rgb(255, 70, 227)",
+       "bgPixel": "#222222",
+       "nominal": 5.48,
+       "measured": 5.26
+      },
+      {
+       "row": 6,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(192, 121, 236)",
+       "bgPixel": "#222222",
+       "nominal": 5.45,
+       "measured": 5.31
+      },
+      {
+       "row": 13,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(255, 95, 135)",
+       "bgPixel": "#222222",
+       "nominal": 5.48,
+       "measured": 5.32
+      },
+      {
+       "row": 9,
+       "col": 4,
+       "text": " MW ",
+       "fgCss": "rgb(210, 106, 255)",
+       "bgPixel": "#222222",
+       "nominal": 5.49,
+       "measured": 5.33
+      }
+     ]
+    },
+    "s3b": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 5.76,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 256,
+      "min": 4.6,
+      "p5": 4.92,
+      "p50": 5.72,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 5.76,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 256,
+       "min": 4.6,
+       "p5": 4.92,
+       "p50": 5.72,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 4.55,
+       "p5": 4.97,
+       "p50": 5.76,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 7,
+        "col": 8,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(135, 95, 215)",
+        "nominalCss": 4.65,
+        "measured": 4.55
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(175, 95, 95)",
+        "nominalCss": 4.62,
+        "measured": 4.56
+       },
+       {
+        "row": 2,
+        "col": 48,
+        "text": " MW ",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(0, 135, 0)",
+        "nominalCss": 4.7,
+        "measured": 4.6
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(215, 0, 215)",
+        "nominalCss": 4.87,
+        "measured": 4.62
+       },
+       {
+        "row": 16,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(118, 118, 118)",
+        "nominalCss": 4.62,
+        "measured": 4.62
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 7,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#8161d0",
+       "nominal": 4.55,
+       "measured": 4.55
+      },
+      {
+       "row": 9,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#a56361",
+       "nominal": 4.56,
+       "measured": 4.56
+      },
+      {
+       "row": 2,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#3b8524",
+       "nominal": 4.6,
+       "measured": 4.6
+      },
+      {
+       "row": 11,
+       "col": 16,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#c52ad0",
+       "nominal": 4.62,
+       "measured": 4.62
+      },
+      {
+       "row": 16,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#767676",
+       "nominal": 4.62,
+       "measured": 4.62
+      }
+     ]
+    },
+    "s4": {
+     "pairs": 248,
+     "measured": {
+      "n": 248,
+      "min": 4.18,
+      "p5": 4.69,
+      "p50": 5.65,
+      "max": 18.76,
+      "below4_5": 5,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 127,
+      "min": 4.59,
+      "p5": 4.67,
+      "p50": 5.7,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 248,
+      "min": 4.38,
+      "p5": 4.82,
+      "p50": 5.94,
+      "max": 18.76,
+      "below4_5": 2,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 117,
+       "min": 5.45,
+       "p5": 5.45,
+       "p50": 6.04,
+       "max": 15.91,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 117,
+       "min": 4.73,
+       "p5": 4.8,
+       "p50": 5.86,
+       "max": 15.91,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#222222",
+       "#222222"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 127,
+       "min": 4.59,
+       "p5": 4.67,
+       "p50": 5.7,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 127,
+       "min": 4.18,
+       "p5": 4.62,
+       "p50": 5.51,
+       "max": 18.76,
+       "below4_5": 5,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 3,
+        "col": 39,
+        "text": "M",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(116, 116, 116)",
+        "nominalCss": 4.67,
+        "measured": 4.18
+       },
+       {
+        "row": 2,
+        "col": 67,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 91)",
+        "nominalCss": 4.65,
+        "measured": 4.2
+       },
+       {
+        "row": 2,
+        "col": 66,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 113)",
+        "nominalCss": 4.74,
+        "measured": 4.37
+       },
+       {
+        "row": 2,
+        "col": 68,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 69)",
+        "nominalCss": 4.59,
+        "measured": 4.38
+       },
+       {
+        "row": 2,
+        "col": 15,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 47, 25)",
+        "nominalCss": 4.79,
+        "measured": 4.45
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 3,
+       "col": 39,
+       "text": "M",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#747474",
+       "nominal": 4.67,
+       "measured": 4.18
+      },
+      {
+       "row": 2,
+       "col": 67,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d3355d",
+       "nominal": 4.44,
+       "measured": 4.2
+      },
+      {
+       "row": 2,
+       "col": 66,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d33571",
+       "nominal": 4.52,
+       "measured": 4.37
+      },
+      {
+       "row": 2,
+       "col": 68,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d3354a",
+       "nominal": 4.38,
+       "measured": 4.38
+      },
+      {
+       "row": 2,
+       "col": 15,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d4422b",
+       "nominal": 4.61,
+       "measured": 4.45
+      }
+     ]
+    },
+    "s5": {
+     "pairs": 25,
+     "measured": {
+      "n": 25,
+      "min": 4.99,
+      "p5": 5.1,
+      "p50": 6.26,
+      "max": 10,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 19,
+      "min": 5.08,
+      "p5": 5.08,
+      "p50": 6.06,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 25,
+      "min": 5.13,
+      "p5": 5.13,
+      "p50": 6.8,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 6,
+       "min": 5.58,
+       "p5": 5.58,
+       "p50": 6.87,
+       "max": 8.62,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 6,
+       "min": 5.58,
+       "p5": 5.58,
+       "p50": 6.63,
+       "max": 8.72,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#222222",
+       "#222222"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 19,
+       "min": 5.08,
+       "p5": 5.08,
+       "p50": 6.06,
+       "max": 10.38,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 19,
+       "min": 4.99,
+       "p5": 4.99,
+       "p50": 5.98,
+       "max": 10,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 1,
+        "col": 0,
+        "text": "  ~/proj ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 4.99
+       },
+       {
+        "row": 2,
+        "col": 12,
+        "text": " node 22 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 4,
+        "col": 14,
+        "text": " py 3.12 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 1,
+        "col": 26,
+        "text": " 12ms ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.32
+       },
+       {
+        "row": 6,
+        "col": 16,
+        "text": " 14:55:01 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.35
+       }
+      ]
+     },
+     "excludedGlyphOnly": 16,
+     "worst": [
+      {
+       "row": 1,
+       "col": 0,
+       "text": "  ~/proj ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 4.99
+      },
+      {
+       "row": 2,
+       "col": 12,
+       "text": " node 22 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.1
+      },
+      {
+       "row": 4,
+       "col": 14,
+       "text": " py 3.12 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.1
+      },
+      {
+       "row": 1,
+       "col": 26,
+       "text": " 12ms ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#688687",
+       "nominal": 5.35,
+       "measured": 5.32
+      },
+      {
+       "row": 6,
+       "col": 16,
+       "text": " 14:55:01 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#688687",
+       "nominal": 5.35,
+       "measured": 5.35
+      }
+     ]
+    },
+    "s6": {
+     "pairs": 51,
+     "measured": {
+      "n": 51,
+      "min": 2.66,
+      "p5": 2.98,
+      "p50": 5.67,
+      "max": 9.07,
+      "below4_5": 4,
+      "below3": 3
+     },
+     "nominalCss": {
+      "n": 26,
+      "min": 5.08,
+      "p5": 5.52,
+      "p50": 5.68,
+      "max": 7.03,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 51,
+      "min": 5.13,
+      "p5": 5.53,
+      "p50": 6.26,
+      "max": 8.98,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 25,
+       "min": 6.26,
+       "p5": 6.26,
+       "p50": 7.1,
+       "max": 8.98,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 25,
+       "min": 2.66,
+       "p5": 2.72,
+       "p50": 7.13,
+       "max": 9.07,
+       "below4_5": 4,
+       "below3": 3
+      },
+      "bgPixelRange": [
+       "#222222",
+       "#232323"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 26,
+       "min": 5.08,
+       "p5": 5.52,
+       "p50": 5.68,
+       "max": 7.03,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 26,
+       "min": 4.92,
+       "p5": 5.07,
+       "p50": 5.58,
+       "max": 6.35,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 11,
+        "col": 24,
+        "text": "F4",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.67,
+        "measured": 4.92
+       },
+       {
+        "row": 16,
+        "col": 28,
+        "text": " 3 node ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.07
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": "r.js     ",
+        "fgCss": "rgb(52, 56, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.68,
+        "measured": 5.14
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": "F3",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.67,
+        "measured": 5.2
+       },
+       {
+        "row": 11,
+        "col": 34,
+        "text": "Tree  ",
+        "fgCss": "rgb(52, 56, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.68,
+        "measured": 5.28
+       }
+      ]
+     },
+     "excludedGlyphOnly": 2,
+     "worst": [
+      {
+       "row": 3,
+       "col": 7,
+       "text": "|",
+       "fgCss": "rgb(255, 123, 114)",
+       "bgPixel": "#222222",
+       "nominal": 6.31,
+       "measured": 2.66
+      },
+      {
+       "row": 1,
+       "col": 16,
+       "text": "||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#222222",
+       "nominal": 6.3,
+       "measured": 2.72
+      },
+      {
+       "row": 4,
+       "col": 15,
+       "text": "||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#222222",
+       "nominal": 6.3,
+       "measured": 2.98
+      },
+      {
+       "row": 2,
+       "col": 25,
+       "text": "|||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#222222",
+       "nominal": 6.3,
+       "measured": 4.35
+      },
+      {
+       "row": 1,
+       "col": 13,
+       "text": "|||",
+       "fgCss": "rgb(255, 123, 114)",
+       "bgPixel": "#222222",
+       "nominal": 6.31,
+       "measured": 4.6
+      }
+     ]
+    },
+    "s7": {
+     "pairs": 55,
+     "measured": {
+      "n": 55,
+      "min": 2.49,
+      "p5": 2.55,
+      "p50": 6.08,
+      "max": 15.91,
+      "below4_5": 8,
+      "below3": 7
+     },
+     "nominalCss": {
+      "n": 17,
+      "min": 5.53,
+      "p5": 5.53,
+      "p50": 5.85,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 55,
+      "min": 5.59,
+      "p5": 5.73,
+      "p50": 6.48,
+      "max": 15.91,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 32,
+       "min": 6.26,
+       "p5": 6.26,
+       "p50": 7.62,
+       "max": 15.91,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 32,
+       "min": 2.49,
+       "p5": 2.49,
+       "p50": 7.22,
+       "max": 15.91,
+       "below4_5": 8,
+       "below3": 7
+      },
+      "bgPixelRange": [
+       "#222222",
+       "#222222"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 17,
+       "min": 5.53,
+       "p5": 5.53,
+       "p50": 5.85,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 17,
+       "min": 5.37,
+       "p5": 5.37,
+       "p50": 5.74,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 8,
+        "col": 36,
+        "text": "rev36",
+        "fgCss": "rgb(57, 57, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.53,
+        "measured": 5.37
+       },
+       {
+        "row": 9,
+        "col": 18,
+        "text": "rev93",
+        "fgCss": "rgb(57, 57, 57)",
+        "bgCss": "rgb(227, 179, 65)",
+        "nominalCss": 5.93,
+        "measured": 5.5
+       },
+       {
+        "row": 8,
+        "col": 30,
+        "text": "rev35",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(188, 140, 255)",
+        "nominalCss": 5.85,
+        "measured": 5.51
+       },
+       {
+        "row": 8,
+        "col": 18,
+        "text": "rev33",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(210, 153, 34)",
+        "nominalCss": 5.84,
+        "measured": 5.53
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": "rev30",
+        "fgCss": "rgb(45, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.61,
+        "measured": 5.55
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 5,
+       "col": 0,
+       "text": "Dblack",
+       "fgCss": "rgba(159, 166, 175, 0.5)",
+       "bgPixel": "#222222",
+       "nominal": 6.48,
+       "measured": 2.49
+      },
+      {
+       "row": 5,
+       "col": 33,
+       "text": "Dmagenta",
+       "fgCss": "rgba(188, 140, 255, 0.5)",
+       "bgPixel": "#222222",
+       "nominal": 6.31,
+       "measured": 2.49
+      },
+      {
+       "row": 5,
+       "col": 7,
+       "text": "Dred",
+       "fgCss": "rgba(255, 123, 114, 0.5)",
+       "bgPixel": "#222222",
+       "nominal": 6.31,
+       "measured": 2.55
+      },
+      {
+       "row": 5,
+       "col": 19,
+       "text": "Dyellow",
+       "fgCss": "rgba(210, 153, 34, 0.5)",
+       "bgPixel": "#222222",
+       "nominal": 6.3,
+       "measured": 2.58
+      },
+      {
+       "row": 5,
+       "col": 27,
+       "text": "Dblue",
+       "fgCss": "rgba(88, 166, 255, 0.5)",
+       "bgPixel": "#222222",
+       "nominal": 6.3,
+       "measured": 2.6
+      }
+     ]
+    }
+   }
+  },
+  "so-light": {
+   "attrs": {
+    "theme": "solid",
+    "scheme": "light",
+    "glassColor": "none"
+   },
+   "regression": {
+    "plainRowContrast": null,
+    "plainRowWorstBg": null,
+    "cursor": 19.44,
+    "selectionActive": [
+     {
+      "vsSurround": 3.42,
+      "selectedText": 5.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 3.31,
+      "selectedText": 5.88
+     }
+    ],
+    "scrollbarThumb": [
+     4.87
+    ],
+    "viewportEmptyMeanLum": 0.9811,
+    "paddingStripMeanLum": 1,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+    },
+    "geometry": {
+     "rows": 34,
+     "scrollTop": 0,
+     "clientHeight": 675
+    },
+    "paletteCheck": {
+     "checked": 24,
+     "mismatches": 0,
+     "details": []
+    }
+   },
+   "part3Baseline": {
+    "plainRowContrast": {
+     "min": 17.4,
+     "max": 19.44,
+     "n": 15
+    },
+    "cursor": 19.44,
+    "selectionActive": [
+     {
+      "vsSurround": 3.42,
+      "selectedText": 5.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 3.31,
+      "selectedText": 5.88
+     }
+    ],
+    "scrollbarThumb": [
+     4.86
+    ],
+    "viewportEmptyMeanLum": 0.982,
+    "paddingStripMeanLum": 1,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(255, 255, 255);"
+    }
+   },
+   "scenes": {
+    "s1": {
+     "pairs": 128,
+     "measured": {
+      "n": 128,
+      "min": 5.4,
+      "p5": 5.45,
+      "p50": 5.72,
+      "max": 6.18,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 128,
+      "min": 5.5,
+      "p5": 5.52,
+      "p50": 5.67,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 128,
+      "min": 5.41,
+      "p5": 5.43,
+      "p50": 5.72,
+      "max": 6.15,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 128,
+       "min": 5.5,
+       "p5": 5.52,
+       "p50": 5.67,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 128,
+       "min": 5.4,
+       "p5": 5.45,
+       "p50": 5.72,
+       "max": 6.18,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 6,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(210, 190, 233)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.4
+       },
+       {
+        "row": 1,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(197, 198, 199)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 3,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(178, 204, 188)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.51,
+        "measured": 5.42
+       },
+       {
+        "row": 9,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(197, 198, 200)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.42
+       },
+       {
+        "row": 2,
+        "col": 14,
+        "text": " MW8 ",
+        "fgCss": "rgb(230, 188, 192)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.53,
+        "measured": 5.43
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "needAdjustment": 128,
+     "adjusted": 128,
+     "requestedMin": 1,
+     "requestedMax": 2.02,
+     "adjustedButStillBelowInCss": [],
+     "notAdjustedBelow": [],
+     "identicalColourPairs": 16,
+     "identicalAllAdjusted": true,
+     "worst": [
+      {
+       "row": 6,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 5,
+       "b": 2,
+       "fgCss": "rgb(210, 190, 233)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.4
+      },
+      {
+       "row": 1,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 2,
+       "fgCss": "rgb(197, 198, 199)",
+       "bgPixel": "#215124",
+       "nominal": 5.41,
+       "measured": 5.41
+      },
+      {
+       "row": 3,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 2,
+       "b": 2,
+       "fgCss": "rgb(178, 204, 188)",
+       "bgPixel": "#215124",
+       "nominal": 5.41,
+       "measured": 5.42
+      },
+      {
+       "row": 9,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 8,
+       "b": 2,
+       "fgCss": "rgb(197, 198, 200)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.42
+      },
+      {
+       "row": 2,
+       "col": 14,
+       "text": " MW8 ",
+       "f": 1,
+       "b": 2,
+       "fgCss": "rgb(230, 188, 192)",
+       "bgPixel": "#215124",
+       "nominal": 5.43,
+       "measured": 5.43
+      }
+     ]
+    },
+    "s2": {
+     "pairs": 16,
+     "measured": {
+      "n": 16,
+      "min": 5.3,
+      "p5": 5.3,
+      "p50": 5.71,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 14,
+      "min": 5.5,
+      "p5": 5.5,
+      "p50": 5.62,
+      "max": 5.93,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 16,
+      "min": 5.42,
+      "p5": 5.42,
+      "p50": 5.72,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 14,
+       "min": 5.5,
+       "p5": 5.5,
+       "p50": 5.62,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 14,
+       "min": 5.3,
+       "p5": 5.3,
+       "p50": 5.68,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 6,
+        "col": 0,
+        "text": " CASE-42 default-f",
+        "fgCss": "rgb(198, 198, 198)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.3
+       },
+       {
+        "row": 7,
+        "col": 0,
+        "text": " CASE-46-30 black ",
+        "fgCss": "rgb(203, 204, 205)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.62,
+        "measured": 5.55
+       },
+       {
+        "row": 12,
+        "col": 55,
+        "text": " CASE-REV-BOLD-34 ",
+        "fgCss": "rgb(204, 204, 204)",
+        "bgCss": "rgb(2, 71, 151)",
+        "nominalCss": 5.56,
+        "measured": 5.59
+       },
+       {
+        "row": 2,
+        "col": 0,
+        "text": " CASE-44-97 bright",
+        "fgCss": "rgb(204, 205, 208)",
+        "bgCss": "rgb(2, 71, 151)",
+        "nominalCss": 5.62,
+        "measured": 5.64
+       },
+       {
+        "row": 11,
+        "col": 0,
+        "text": " CASE-104-30 black",
+        "fgCss": "rgb(227, 227, 227)",
+        "bgCss": "rgb(5, 86, 167)",
+        "nominalCss": 5.65,
+        "measured": 5.65
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 6,
+       "col": 0,
+       "text": " CASE-42 default-f",
+       "fgCss": "rgb(198, 198, 198)",
+       "bgPixel": "#215124",
+       "nominal": 5.42,
+       "measured": 5.3
+      },
+      {
+       "row": 7,
+       "col": 0,
+       "text": " CASE-46-30 black ",
+       "fgCss": "rgb(203, 204, 205)",
+       "bgPixel": "#225057",
+       "nominal": 5.55,
+       "measured": 5.55
+      },
+      {
+       "row": 12,
+       "col": 55,
+       "text": " CASE-REV-BOLD-34 ",
+       "fgCss": "rgb(204, 204, 204)",
+       "bgPixel": "#1c4692",
+       "nominal": 5.59,
+       "measured": 5.59
+      },
+      {
+       "row": 2,
+       "col": 0,
+       "text": " CASE-44-97 bright",
+       "fgCss": "rgb(204, 205, 208)",
+       "bgPixel": "#1c4692",
+       "nominal": 5.64,
+       "measured": 5.64
+      },
+      {
+       "row": 11,
+       "col": 0,
+       "text": " CASE-104-30 black",
+       "fgCss": "rgb(227, 227, 227)",
+       "bgPixel": "#2455a2",
+       "nominal": 5.65,
+       "measured": 5.65
+      }
+     ]
+    },
+    "s3a": {
+     "pairs": 258,
+     "measured": {
+      "n": 258,
+      "min": 5.41,
+      "p5": 5.52,
+      "p50": 6.12,
+      "max": 21,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": null,
+     "nominalVsPixelBg": {
+      "n": 258,
+      "min": 5.5,
+      "p5": 5.54,
+      "p50": 6.11,
+      "max": 21,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 256,
+       "min": 5.5,
+       "p5": 5.54,
+       "p50": 6.11,
+       "max": 21,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 5.41,
+       "p5": 5.52,
+       "p50": 6.12,
+       "max": 21,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#ffffff",
+       "#ffffff"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": null,
+      "measured": null,
+      "worst": []
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 6,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(43, 120, 0)",
+       "bgPixel": "#ffffff",
+       "nominal": 5.54,
+       "measured": 5.41
+      },
+      {
+       "row": 4,
+       "col": 4,
+       "text": " MW ",
+       "fgCss": "rgb(0, 120, 81)",
+       "bgPixel": "#ffffff",
+       "nominal": 5.52,
+       "measured": 5.44
+      },
+      {
+       "row": 10,
+       "col": 20,
+       "text": " MW ",
+       "fgCss": "rgb(90, 112, 48)",
+       "bgPixel": "#ffffff",
+       "nominal": 5.53,
+       "measured": 5.44
+      },
+      {
+       "row": 5,
+       "col": 36,
+       "text": " MW ",
+       "fgCss": "rgb(61, 113, 113)",
+       "bgPixel": "#ffffff",
+       "nominal": 5.53,
+       "measured": 5.46
+      },
+      {
+       "row": 8,
+       "col": 16,
+       "text": " MW ",
+       "fgCss": "rgb(70, 112, 112)",
+       "bgPixel": "#ffffff",
+       "nominal": 5.51,
+       "measured": 5.46
+      }
+     ]
+    },
+    "s3b": {
+     "pairs": 258,
+     "measured": {
+      "n": 258,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 7.03,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 256,
+      "min": 4.6,
+      "p5": 4.92,
+      "p50": 6.95,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 258,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 7.03,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 256,
+       "min": 4.6,
+       "p5": 4.92,
+       "p50": 6.95,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 4.55,
+       "p5": 4.97,
+       "p50": 6.94,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 7,
+        "col": 8,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(135, 95, 215)",
+        "nominalCss": 4.65,
+        "measured": 4.55
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(175, 95, 95)",
+        "nominalCss": 4.62,
+        "measured": 4.56
+       },
+       {
+        "row": 2,
+        "col": 48,
+        "text": " MW ",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(0, 135, 0)",
+        "nominalCss": 4.7,
+        "measured": 4.6
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(215, 0, 215)",
+        "nominalCss": 4.87,
+        "measured": 4.62
+       },
+       {
+        "row": 16,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(118, 118, 118)",
+        "nominalCss": 4.62,
+        "measured": 4.62
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 7,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#8161d0",
+       "nominal": 4.55,
+       "measured": 4.55
+      },
+      {
+       "row": 9,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#a56361",
+       "nominal": 4.56,
+       "measured": 4.56
+      },
+      {
+       "row": 2,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#3b8524",
+       "nominal": 4.6,
+       "measured": 4.6
+      },
+      {
+       "row": 11,
+       "col": 16,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#c52ad0",
+       "nominal": 4.62,
+       "measured": 4.62
+      },
+      {
+       "row": 16,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#767676",
+       "nominal": 4.62,
+       "measured": 4.62
+      }
+     ]
+    },
+    "s4": {
+     "pairs": 255,
+     "measured": {
+      "n": 255,
+      "min": 4.18,
+      "p5": 4.65,
+      "p50": 6.01,
+      "max": 21,
+      "below4_5": 6,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 127,
+      "min": 4.59,
+      "p5": 4.67,
+      "p50": 5.89,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 255,
+      "min": 4.38,
+      "p5": 4.82,
+      "p50": 6.21,
+      "max": 21,
+      "below4_5": 2,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 117,
+       "min": 5.52,
+       "p5": 5.56,
+       "p50": 6.21,
+       "max": 21,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 117,
+       "min": 4.49,
+       "p5": 4.79,
+       "p50": 5.92,
+       "max": 21,
+       "below4_5": 1,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#ffffff",
+       "#ffffff"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 127,
+       "min": 4.59,
+       "p5": 4.67,
+       "p50": 5.89,
+       "max": 19.44,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 127,
+       "min": 4.18,
+       "p5": 4.6,
+       "p50": 5.85,
+       "max": 19.44,
+       "below4_5": 5,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 3,
+        "col": 39,
+        "text": "M",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(116, 116, 116)",
+        "nominalCss": 4.67,
+        "measured": 4.18
+       },
+       {
+        "row": 2,
+        "col": 67,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 91)",
+        "nominalCss": 4.65,
+        "measured": 4.2
+       },
+       {
+        "row": 2,
+        "col": 66,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 113)",
+        "nominalCss": 4.74,
+        "measured": 4.37
+       },
+       {
+        "row": 2,
+        "col": 68,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 69)",
+        "nominalCss": 4.59,
+        "measured": 4.38
+       },
+       {
+        "row": 2,
+        "col": 15,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 47, 25)",
+        "nominalCss": 4.79,
+        "measured": 4.45
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 3,
+       "col": 39,
+       "text": "M",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#747474",
+       "nominal": 4.67,
+       "measured": 4.18
+      },
+      {
+       "row": 2,
+       "col": 67,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d3355d",
+       "nominal": 4.44,
+       "measured": 4.2
+      },
+      {
+       "row": 2,
+       "col": 66,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d33571",
+       "nominal": 4.52,
+       "measured": 4.37
+      },
+      {
+       "row": 2,
+       "col": 68,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d3354a",
+       "nominal": 4.38,
+       "measured": 4.38
+      },
+      {
+       "row": 2,
+       "col": 15,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d4422b",
+       "nominal": 4.61,
+       "measured": 4.45
+      }
+     ]
+    },
+    "s5": {
+     "pairs": 27,
+     "measured": {
+      "n": 27,
+      "min": 4.99,
+      "p5": 5.05,
+      "p50": 6.1,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 19,
+      "min": 5.08,
+      "p5": 5.08,
+      "p50": 6.99,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 27,
+      "min": 5.13,
+      "p5": 5.13,
+      "p50": 6.19,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 6,
+       "min": 5.62,
+       "p5": 5.62,
+       "p50": 6.02,
+       "max": 6.19,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 6,
+       "min": 5.05,
+       "p5": 5.05,
+       "p50": 5.66,
+       "max": 6.1,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#ffffff",
+       "#ffffff"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 19,
+       "min": 5.08,
+       "p5": 5.08,
+       "p50": 6.99,
+       "max": 10.38,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 19,
+       "min": 4.99,
+       "p5": 4.99,
+       "p50": 6.59,
+       "max": 10,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 1,
+        "col": 0,
+        "text": "  ~/proj ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 4.99
+       },
+       {
+        "row": 2,
+        "col": 12,
+        "text": " node 22 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 4,
+        "col": 14,
+        "text": " py 3.12 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 1,
+        "col": 26,
+        "text": " 12ms ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.26
+       },
+       {
+        "row": 6,
+        "col": 16,
+        "text": " 14:55:01 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.32
+       }
+      ]
+     },
+     "excludedGlyphOnly": 16,
+     "worst": [
+      {
+       "row": 1,
+       "col": 0,
+       "text": "  ~/proj ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 4.99
+      },
+      {
+       "row": 5,
+       "col": 7,
+       "text": "main",
+       "fgCss": "rgb(48, 112, 48)",
+       "bgPixel": "#ffffff",
+       "nominal": 6.02,
+       "measured": 5.05
+      },
+      {
+       "row": 2,
+       "col": 12,
+       "text": " node 22 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.1
+      },
+      {
+       "row": 4,
+       "col": 14,
+       "text": " py 3.12 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.1
+      },
+      {
+       "row": 1,
+       "col": 26,
+       "text": " 12ms ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#688687",
+       "nominal": 5.35,
+       "measured": 5.26
+      }
+     ]
+    },
+    "s6": {
+     "pairs": 55,
+     "measured": {
+      "n": 55,
+      "min": 2.89,
+      "p5": 2.99,
+      "p50": 5.67,
+      "max": 19.44,
+      "below4_5": 3,
+      "below3": 3
+     },
+     "nominalCss": {
+      "n": 26,
+      "min": 5.08,
+      "p5": 5.52,
+      "p50": 5.62,
+      "max": 5.83,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 55,
+      "min": 5.13,
+      "p5": 5.41,
+      "p50": 7.25,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 25,
+       "min": 7.25,
+       "p5": 7.25,
+       "p50": 9.43,
+       "max": 10.48,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 25,
+       "min": 2.89,
+       "p5": 2.99,
+       "p50": 7.13,
+       "max": 10.45,
+       "below4_5": 3,
+       "below3": 3
+      },
+      "bgPixelRange": [
+       "#fefefe",
+       "#ffffff"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 26,
+       "min": 5.08,
+       "p5": 5.52,
+       "p50": 5.62,
+       "max": 5.83,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 26,
+       "min": 5.02,
+       "p5": 5.1,
+       "p50": 5.41,
+       "max": 5.83,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 16,
+        "col": 28,
+        "text": " 3 node ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.02
+       },
+       {
+        "row": 14,
+        "col": 0,
+        "text": "-26",
+        "fgCss": "rgb(197, 198, 199)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.1
+       },
+       {
+        "row": 16,
+        "col": 0,
+        "text": " session-a ",
+        "fgCss": "rgb(230, 230, 232)",
+        "bgCss": "rgb(0, 95, 135)",
+        "nominalCss": 5.64,
+        "measured": 5.14
+       },
+       {
+        "row": 11,
+        "col": 24,
+        "text": "F4",
+        "fgCss": "rgb(160, 164, 167)",
+        "bgCss": "rgb(36, 41, 47)",
+        "nominalCss": 5.83,
+        "measured": 5.17
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": "F3",
+        "fgCss": "rgb(160, 164, 167)",
+        "bgCss": "rgb(36, 41, 47)",
+        "nominalCss": 5.83,
+        "measured": 5.23
+       }
+      ]
+     },
+     "excludedGlyphOnly": 2,
+     "worst": [
+      {
+       "row": 3,
+       "col": 7,
+       "text": "|",
+       "fgCss": "rgb(152, 4, 22)",
+       "bgPixel": "#ffffff",
+       "nominal": 8.88,
+       "measured": 2.89
+      },
+      {
+       "row": 1,
+       "col": 16,
+       "text": "||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#ffffff",
+       "nominal": 8.93,
+       "measured": 2.99
+      },
+      {
+       "row": 4,
+       "col": 15,
+       "text": "||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#ffffff",
+       "nominal": 8.93,
+       "measured": 2.99
+      },
+      {
+       "row": 2,
+       "col": 25,
+       "text": "|||",
+       "fgCss": "rgb(2, 71, 151)",
+       "bgPixel": "#ffffff",
+       "nominal": 8.93,
+       "measured": 4.94
+      },
+      {
+       "row": 16,
+       "col": 28,
+       "text": " 3 node ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.02
+      }
+     ]
+    },
+    "s7": {
+     "pairs": 60,
+     "measured": {
+      "n": 60,
+      "min": 2.38,
+      "p5": 2.5,
+      "p50": 6.94,
+      "max": 19.44,
+      "below4_5": 9,
+      "below3": 8
+     },
+     "nominalCss": {
+      "n": 17,
+      "min": 5.52,
+      "p5": 5.52,
+      "p50": 5.65,
+      "max": 5.95,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 60,
+      "min": 5.42,
+      "p5": 5.56,
+      "p50": 7.46,
+      "max": 19.44,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 32,
+       "min": 7.25,
+       "p5": 7.25,
+       "p50": 8.31,
+       "max": 14.65,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 32,
+       "min": 2.38,
+       "p5": 2.5,
+       "p50": 7.25,
+       "max": 13.84,
+       "below4_5": 8,
+       "below3": 8
+      },
+      "bgPixelRange": [
+       "#ffffff",
+       "#ffffff"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 17,
+       "min": 5.52,
+       "p5": 5.52,
+       "p50": 5.65,
+       "max": 5.95,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 17,
+       "min": 5.3,
+       "p5": 5.3,
+       "p50": 5.65,
+       "max": 5.93,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 8,
+        "col": 12,
+        "text": "rev32",
+        "fgCss": "rgb(198, 198, 198)",
+        "bgCss": "rgb(1, 82, 29)",
+        "nominalCss": 5.52,
+        "measured": 5.3
+       },
+       {
+        "row": 9,
+        "col": 18,
+        "text": "rev93",
+        "fgCss": "rgb(223, 223, 223)",
+        "bgCss": "rgb(110, 81, 4)",
+        "nominalCss": 5.55,
+        "measured": 5.3
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": "rev92",
+        "fgCss": "rgb(223, 223, 223)",
+        "bgCss": "rgb(4, 99, 37)",
+        "nominalCss": 5.59,
+        "measured": 5.35
+       },
+       {
+        "row": 8,
+        "col": 24,
+        "text": "rev34",
+        "fgCss": "rgb(204, 204, 204)",
+        "bgCss": "rgb(2, 71, 151)",
+        "nominalCss": 5.56,
+        "measured": 5.41
+       },
+       {
+        "row": 8,
+        "col": 36,
+        "text": "rev36",
+        "fgCss": "rgb(204, 204, 204)",
+        "bgCss": "rgb(4, 81, 88)",
+        "nominalCss": 5.63,
+        "measured": 5.43
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 5,
+       "col": 48,
+       "text": "Dwhite",
+       "fgCss": "rgba(72, 79, 86, 0.5)",
+       "bgPixel": "#ffffff",
+       "nominal": 8.31,
+       "measured": 2.38
+      },
+      {
+       "row": 5,
+       "col": 19,
+       "text": "Dyellow",
+       "fgCss": "rgba(93, 67, 3, 0.5)",
+       "bgPixel": "#ffffff",
+       "nominal": 9.25,
+       "measured": 2.5
+      },
+      {
+       "row": 5,
+       "col": 42,
+       "text": "Dcyan",
+       "fgCss": "rgba(4, 81, 88, 0.5)",
+       "bgPixel": "#ffffff",
+       "nominal": 9.04,
+       "measured": 2.5
+      },
+      {
+       "row": 5,
+       "col": 27,
+       "text": "Dblue",
+       "fgCss": "rgba(2, 71, 151, 0.5)",
+       "bgPixel": "#ffffff",
+       "nominal": 8.93,
+       "measured": 2.55
+      },
+      {
+       "row": 5,
+       "col": 12,
+       "text": "Dgreen",
+       "fgCss": "rgba(1, 82, 29, 0.5)",
+       "bgPixel": "#ffffff",
+       "nominal": 9.43,
+       "measured": 2.56
+      }
+     ]
+    }
+   }
+  },
+  "so-dark": {
+   "attrs": {
+    "theme": "solid",
+    "scheme": "dark",
+    "glassColor": "none"
+   },
+   "regression": {
+    "plainRowContrast": {
+     "min": 12.65,
+     "max": 14.38,
+     "n": 24
+    },
+    "plainRowWorstBg": {
+     "min": 11.55,
+     "max": 14.38,
+     "n": 24
+    },
+    "cursor": 14.38,
+    "selectionActive": [
+     {
+      "vsSurround": 3.07,
+      "selectedText": 5.24
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 3.1,
+      "selectedText": 5.2
+     }
+    ],
+    "scrollbarThumb": [
+     4.62
+    ],
+    "viewportEmptyMeanLum": 0.0239,
+    "paddingStripMeanLum": 0.0152,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+    },
+    "geometry": {
+     "rows": 34,
+     "scrollTop": 0,
+     "clientHeight": 675
+    },
+    "paletteCheck": {
+     "checked": 24,
+     "mismatches": 0,
+     "details": []
+    }
+   },
+   "part3Baseline": {
+    "plainRowContrast": {
+     "min": 12.3,
+     "max": 14.38,
+     "n": 15
+    },
+    "cursor": 14.38,
+    "selectionActive": [
+     {
+      "vsSurround": 3.07,
+      "selectedText": 4.68
+     }
+    ],
+    "selectionInactive": [
+     {
+      "vsSurround": 3.1,
+      "selectedText": 4.64
+     }
+    ],
+    "scrollbarThumb": [
+     4.63
+    ],
+    "viewportEmptyMeanLum": 0.0246,
+    "paddingStripMeanLum": 0.0152,
+    "computedTransparent": {
+     "viewport": "rgba(0, 0, 0, 0)",
+     "scrollable": "rgba(0, 0, 0, 0)",
+     "scrollableInline": "position: relative; background-color: rgb(33, 33, 33);"
+    }
+   },
+   "scenes": {
+    "s1": {
+     "pairs": 128,
+     "measured": {
+      "n": 128,
+      "min": 5.39,
+      "p5": 5.43,
+      "p50": 5.68,
+      "max": 6.13,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 128,
+      "min": 5.5,
+      "p5": 5.51,
+      "p50": 5.64,
+      "max": 6.1,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 128,
+      "min": 5.42,
+      "p5": 5.45,
+      "p50": 5.69,
+      "max": 6.12,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 128,
+       "min": 5.5,
+       "p5": 5.51,
+       "p50": 5.64,
+       "max": 6.1,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 128,
+       "min": 5.39,
+       "p5": 5.43,
+       "p50": 5.68,
+       "max": 6.13,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 11,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(18, 51, 22)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.51,
+        "measured": 5.39
+       },
+       {
+        "row": 11,
+        "col": 29,
+        "text": " MW8 ",
+        "fgCss": "rgb(18, 51, 22)",
+        "bgCss": "rgb(188, 140, 255)",
+        "nominalCss": 5.52,
+        "measured": 5.4
+       },
+       {
+        "row": 1,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 8,
+        "col": 9,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 1,
+        "col": 29,
+        "text": " MW8 ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(188, 140, 255)",
+        "nominalCss": 5.53,
+        "measured": 5.42
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "needAdjustment": 128,
+     "adjusted": 128,
+     "requestedMin": 1,
+     "requestedMax": 2.54,
+     "adjustedButStillBelowInCss": [],
+     "notAdjustedBelow": [],
+     "identicalColourPairs": 16,
+     "identicalAllAdjusted": true,
+     "worst": [
+      {
+       "row": 11,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 10,
+       "b": 1,
+       "fgCss": "rgb(18, 51, 22)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.42,
+       "measured": 5.39
+      },
+      {
+       "row": 11,
+       "col": 29,
+       "text": " MW8 ",
+       "f": 10,
+       "b": 5,
+       "fgCss": "rgb(18, 51, 22)",
+       "bgPixel": "#b58ef8",
+       "nominal": 5.42,
+       "measured": 5.4
+      },
+      {
+       "row": 1,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 1,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.41
+      },
+      {
+       "row": 8,
+       "col": 9,
+       "text": " MW8 ",
+       "f": 7,
+       "b": 1,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.41
+      },
+      {
+       "row": 1,
+       "col": 29,
+       "text": " MW8 ",
+       "f": 0,
+       "b": 5,
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#b58ef8",
+       "nominal": 5.43,
+       "measured": 5.42
+      }
+     ]
+    },
+    "s2": {
+     "pairs": 14,
+     "measured": {
+      "n": 14,
+      "min": 5.41,
+      "p5": 5.41,
+      "p50": 5.74,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 14,
+      "min": 5.52,
+      "p5": 5.52,
+      "p50": 5.84,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 14,
+      "min": 5.43,
+      "p5": 5.43,
+      "p50": 5.74,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 14,
+       "min": 5.52,
+       "p5": 5.52,
+       "p50": 5.84,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 14,
+       "min": 5.41,
+       "p5": 5.41,
+       "p50": 5.74,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 10,
+        "col": 0,
+        "text": " CASE-41-37 white ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.52,
+        "measured": 5.41
+       },
+       {
+        "row": 3,
+        "col": 0,
+        "text": " CASE-43-30 black ",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(210, 153, 34)",
+        "nominalCss": 5.52,
+        "measured": 5.51
+       },
+       {
+        "row": 1,
+        "col": 0,
+        "text": " CASE-41 default-f",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(255, 123, 114)",
+        "nominalCss": 5.85,
+        "measured": 5.65
+       },
+       {
+        "row": 7,
+        "col": 0,
+        "text": " CASE-46-30 black ",
+        "fgCss": "rgb(52, 56, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.68,
+        "measured": 5.72
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": " CASE-100 default-",
+        "fgCss": "rgb(51, 51, 51)",
+        "bgCss": "rgb(168, 175, 184)",
+        "nominalCss": 5.71,
+        "measured": 5.73
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 10,
+       "col": 0,
+       "text": " CASE-41-37 white ",
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.43,
+       "measured": 5.41
+      },
+      {
+       "row": 3,
+       "col": 0,
+       "text": " CASE-43-30 black ",
+       "fgCss": "rgb(41, 45, 45)",
+       "bgPixel": "#ca9c3e",
+       "nominal": 5.53,
+       "measured": 5.51
+      },
+      {
+       "row": 1,
+       "col": 0,
+       "text": " CASE-41 default-f",
+       "fgCss": "rgb(40, 40, 40)",
+       "bgPixel": "#ef8377",
+       "nominal": 5.74,
+       "measured": 5.65
+      },
+      {
+       "row": 7,
+       "col": 0,
+       "text": " CASE-46-30 black ",
+       "fgCss": "rgb(52, 56, 57)",
+       "bgPixel": "#66c2cd",
+       "nominal": 5.74,
+       "measured": 5.72
+      },
+      {
+       "row": 8,
+       "col": 0,
+       "text": " CASE-100 default-",
+       "fgCss": "rgb(51, 51, 51)",
+       "bgPixel": "#aaafb7",
+       "nominal": 5.73,
+       "measured": 5.73
+      }
+     ]
+    },
+    "s3a": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 5.32,
+      "p5": 5.49,
+      "p50": 6.34,
+      "max": 16.1,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": null,
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 5.5,
+      "p5": 5.55,
+      "p50": 6.38,
+      "max": 16.1,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 256,
+       "min": 5.5,
+       "p5": 5.55,
+       "p50": 6.38,
+       "max": 16.1,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 5.32,
+       "p5": 5.49,
+       "p50": 6.34,
+       "max": 16.1,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#212121",
+       "#212121"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": null,
+      "measured": null,
+      "worst": []
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 13,
+       "col": 32,
+       "text": " MW ",
+       "fgCss": "rgb(255, 70, 227)",
+       "bgPixel": "#212121",
+       "nominal": 5.55,
+       "measured": 5.32
+      },
+      {
+       "row": 11,
+       "col": 20,
+       "text": " MW ",
+       "fgCss": "rgb(230, 89, 255)",
+       "bgPixel": "#212121",
+       "nominal": 5.55,
+       "measured": 5.33
+      },
+      {
+       "row": 6,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(192, 121, 236)",
+       "bgPixel": "#212121",
+       "nominal": 5.51,
+       "measured": 5.38
+      },
+      {
+       "row": 13,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(255, 95, 135)",
+       "bgPixel": "#212121",
+       "nominal": 5.55,
+       "measured": 5.38
+      },
+      {
+       "row": 9,
+       "col": 4,
+       "text": " MW ",
+       "fgCss": "rgb(210, 106, 255)",
+       "bgPixel": "#212121",
+       "nominal": 5.56,
+       "measured": 5.39
+      }
+     ]
+    },
+    "s3b": {
+     "pairs": 256,
+     "measured": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 5.76,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 256,
+      "min": 4.6,
+      "p5": 4.92,
+      "p50": 5.72,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 256,
+      "min": 4.55,
+      "p5": 4.97,
+      "p50": 5.76,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": null,
+      "measured": null,
+      "bgPixelRange": null
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 256,
+       "min": 4.6,
+       "p5": 4.92,
+       "p50": 5.72,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 256,
+       "min": 4.55,
+       "p5": 4.97,
+       "p50": 5.76,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 7,
+        "col": 8,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(135, 95, 215)",
+        "nominalCss": 4.65,
+        "measured": 4.55
+       },
+       {
+        "row": 9,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(175, 95, 95)",
+        "nominalCss": 4.62,
+        "measured": 4.56
+       },
+       {
+        "row": 2,
+        "col": 48,
+        "text": " MW ",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(0, 135, 0)",
+        "nominalCss": 4.7,
+        "measured": 4.6
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(215, 0, 215)",
+        "nominalCss": 4.87,
+        "measured": 4.62
+       },
+       {
+        "row": 16,
+        "col": 12,
+        "text": " MW ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(118, 118, 118)",
+        "nominalCss": 4.62,
+        "measured": 4.62
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 7,
+       "col": 8,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#8161d0",
+       "nominal": 4.55,
+       "measured": 4.55
+      },
+      {
+       "row": 9,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#a56361",
+       "nominal": 4.56,
+       "measured": 4.56
+      },
+      {
+       "row": 2,
+       "col": 48,
+       "text": " MW ",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#3b8524",
+       "nominal": 4.6,
+       "measured": 4.6
+      },
+      {
+       "row": 11,
+       "col": 16,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#c52ad0",
+       "nominal": 4.62,
+       "measured": 4.62
+      },
+      {
+       "row": 16,
+       "col": 12,
+       "text": " MW ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#767676",
+       "nominal": 4.62,
+       "measured": 4.62
+      }
+     ]
+    },
+    "s4": {
+     "pairs": 248,
+     "measured": {
+      "n": 248,
+      "min": 4.18,
+      "p5": 4.69,
+      "p50": 5.75,
+      "max": 18.76,
+      "below4_5": 5,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 127,
+      "min": 4.59,
+      "p5": 4.67,
+      "p50": 5.7,
+      "max": 18.76,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 248,
+      "min": 4.38,
+      "p5": 4.82,
+      "p50": 5.99,
+      "max": 18.76,
+      "below4_5": 2,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 117,
+       "min": 5.51,
+       "p5": 5.52,
+       "p50": 6.11,
+       "max": 16.1,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 117,
+       "min": 4.79,
+       "p5": 4.92,
+       "p50": 5.94,
+       "max": 16.1,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#212121",
+       "#212121"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 127,
+       "min": 4.59,
+       "p5": 4.67,
+       "p50": 5.7,
+       "max": 18.76,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 127,
+       "min": 4.18,
+       "p5": 4.6,
+       "p50": 5.51,
+       "max": 18.76,
+       "below4_5": 5,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 3,
+        "col": 39,
+        "text": "M",
+        "fgCss": "rgb(255, 255, 255)",
+        "bgCss": "rgb(116, 116, 116)",
+        "nominalCss": 4.67,
+        "measured": 4.18
+       },
+       {
+        "row": 2,
+        "col": 67,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 91)",
+        "nominalCss": 4.65,
+        "measured": 4.2
+       },
+       {
+        "row": 2,
+        "col": 66,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 113)",
+        "nominalCss": 4.74,
+        "measured": 4.37
+       },
+       {
+        "row": 2,
+        "col": 68,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 25, 69)",
+        "nominalCss": 4.59,
+        "measured": 4.38
+       },
+       {
+        "row": 2,
+        "col": 15,
+        "text": "M",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(230, 47, 25)",
+        "nominalCss": 4.79,
+        "measured": 4.45
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 3,
+       "col": 39,
+       "text": "M",
+       "fgCss": "rgb(255, 255, 255)",
+       "bgPixel": "#747474",
+       "nominal": 4.67,
+       "measured": 4.18
+      },
+      {
+       "row": 2,
+       "col": 67,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d3355d",
+       "nominal": 4.44,
+       "measured": 4.2
+      },
+      {
+       "row": 2,
+       "col": 66,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d33571",
+       "nominal": 4.52,
+       "measured": 4.37
+      },
+      {
+       "row": 2,
+       "col": 68,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d3354a",
+       "nominal": 4.38,
+       "measured": 4.38
+      },
+      {
+       "row": 2,
+       "col": 15,
+       "text": "M",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#d4422b",
+       "nominal": 4.61,
+       "measured": 4.45
+      }
+     ]
+    },
+    "s5": {
+     "pairs": 25,
+     "measured": {
+      "n": 25,
+      "min": 4.99,
+      "p5": 5.1,
+      "p50": 6.26,
+      "max": 10,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalCss": {
+      "n": 19,
+      "min": 5.08,
+      "p5": 5.08,
+      "p50": 6.06,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 25,
+      "min": 5.13,
+      "p5": 5.13,
+      "p50": 6.8,
+      "max": 10.38,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 6,
+       "min": 5.65,
+       "p5": 5.65,
+       "p50": 6.95,
+       "max": 8.72,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 6,
+       "min": 5.65,
+       "p5": 5.65,
+       "p50": 6.65,
+       "max": 8.83,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "bgPixelRange": [
+       "#212121",
+       "#212121"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 19,
+       "min": 5.08,
+       "p5": 5.08,
+       "p50": 6.06,
+       "max": 10.38,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 19,
+       "min": 4.99,
+       "p5": 4.99,
+       "p50": 5.99,
+       "max": 10,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 1,
+        "col": 0,
+        "text": "  ~/proj ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 4.99
+       },
+       {
+        "row": 2,
+        "col": 12,
+        "text": " node 22 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 4,
+        "col": 14,
+        "text": " py 3.12 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.1
+       },
+       {
+        "row": 1,
+        "col": 26,
+        "text": " 12ms ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.26
+       },
+       {
+        "row": 6,
+        "col": 16,
+        "text": " 14:55:01 ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(95, 135, 135)",
+        "nominalCss": 5.3,
+        "measured": 5.32
+       }
+      ]
+     },
+     "excludedGlyphOnly": 16,
+     "worst": [
+      {
+       "row": 1,
+       "col": 0,
+       "text": "  ~/proj ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 4.99
+      },
+      {
+       "row": 2,
+       "col": 12,
+       "text": " node 22 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.1
+      },
+      {
+       "row": 4,
+       "col": 14,
+       "text": " py 3.12 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#3b85ab",
+       "nominal": 5.13,
+       "measured": 5.1
+      },
+      {
+       "row": 1,
+       "col": 26,
+       "text": " 12ms ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#688687",
+       "nominal": 5.35,
+       "measured": 5.26
+      },
+      {
+       "row": 6,
+       "col": 16,
+       "text": " 14:55:01 ",
+       "fgCss": "rgb(0, 0, 0)",
+       "bgPixel": "#688687",
+       "nominal": 5.35,
+       "measured": 5.32
+      }
+     ]
+    },
+    "s6": {
+     "pairs": 51,
+     "measured": {
+      "n": 51,
+      "min": 2.68,
+      "p5": 3,
+      "p50": 5.65,
+      "max": 9.18,
+      "below4_5": 4,
+      "below3": 1
+     },
+     "nominalCss": {
+      "n": 26,
+      "min": 5.08,
+      "p5": 5.52,
+      "p50": 5.68,
+      "max": 7.03,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 51,
+      "min": 5.13,
+      "p5": 5.53,
+      "p50": 6.34,
+      "max": 9.09,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 25,
+       "min": 6.34,
+       "p5": 6.34,
+       "p50": 7.19,
+       "max": 9.09,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 25,
+       "min": 2.68,
+       "p5": 3,
+       "p50": 7.22,
+       "max": 9.18,
+       "below4_5": 4,
+       "below3": 1
+      },
+      "bgPixelRange": [
+       "#212121",
+       "#222222"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 26,
+       "min": 5.08,
+       "p5": 5.52,
+       "p50": 5.68,
+       "max": 7.03,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 26,
+       "min": 4.92,
+       "p5": 4.98,
+       "p50": 5.57,
+       "max": 6.35,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 11,
+        "col": 24,
+        "text": "F4",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.67,
+        "measured": 4.92
+       },
+       {
+        "row": 11,
+        "col": 16,
+        "text": "F3",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.67,
+        "measured": 4.98
+       },
+       {
+        "row": 16,
+        "col": 28,
+        "text": " 3 node ",
+        "fgCss": "rgb(0, 0, 0)",
+        "bgCss": "rgb(0, 135, 175)",
+        "nominalCss": 5.08,
+        "measured": 5.02
+       },
+       {
+        "row": 11,
+        "col": 40,
+        "text": "F9",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.67,
+        "measured": 5.07
+       },
+       {
+        "row": 11,
+        "col": 0,
+        "text": "F1",
+        "fgCss": "rgb(41, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.67,
+        "measured": 5.29
+       }
+      ]
+     },
+     "excludedGlyphOnly": 2,
+     "worst": [
+      {
+       "row": 3,
+       "col": 7,
+       "text": "|",
+       "fgCss": "rgb(255, 123, 114)",
+       "bgPixel": "#212121",
+       "nominal": 6.39,
+       "measured": 2.68
+      },
+      {
+       "row": 1,
+       "col": 16,
+       "text": "||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#212121",
+       "nominal": 6.37,
+       "measured": 3
+      },
+      {
+       "row": 4,
+       "col": 15,
+       "text": "||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#212121",
+       "nominal": 6.37,
+       "measured": 3
+      },
+      {
+       "row": 2,
+       "col": 25,
+       "text": "|||",
+       "fgCss": "rgb(88, 166, 255)",
+       "bgPixel": "#212121",
+       "nominal": 6.37,
+       "measured": 4.35
+      },
+      {
+       "row": 1,
+       "col": 13,
+       "text": "|||",
+       "fgCss": "rgb(255, 123, 114)",
+       "bgPixel": "#212121",
+       "nominal": 6.39,
+       "measured": 4.64
+      }
+     ]
+    },
+    "s7": {
+     "pairs": 55,
+     "measured": {
+      "n": 55,
+      "min": 2.56,
+      "p5": 2.57,
+      "p50": 6.16,
+      "max": 16.1,
+      "below4_5": 8,
+      "below3": 7
+     },
+     "nominalCss": {
+      "n": 17,
+      "min": 5.53,
+      "p5": 5.53,
+      "p50": 5.85,
+      "max": 6.16,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "nominalVsPixelBg": {
+      "n": 55,
+      "min": 5.59,
+      "p5": 5.73,
+      "p50": 6.55,
+      "max": 16.1,
+      "below4_5": 0,
+      "below3": 0
+     },
+     "defaultBgColoured": {
+      "nominalVsPixelBg": {
+       "n": 32,
+       "min": 6.34,
+       "p5": 6.34,
+       "p50": 7.71,
+       "max": 16.1,
+       "below4_5": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 32,
+       "min": 2.56,
+       "p5": 2.57,
+       "p50": 6.9,
+       "max": 16.1,
+       "below4_5": 8,
+       "below3": 7
+      },
+      "bgPixelRange": [
+       "#212121",
+       "#212121"
+      ]
+     },
+     "explicitBg": {
+      "nominalCss": {
+       "n": 17,
+       "min": 5.53,
+       "p5": 5.53,
+       "p50": 5.85,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "measured": {
+       "n": 17,
+       "min": 5.37,
+       "p5": 5.37,
+       "p50": 5.74,
+       "max": 6.16,
+       "below4_5": 0,
+       "below4_0": 0,
+       "below3": 0
+      },
+      "worst": [
+       {
+        "row": 8,
+        "col": 36,
+        "text": "rev36",
+        "fgCss": "rgb(57, 57, 57)",
+        "bgCss": "rgb(57, 197, 207)",
+        "nominalCss": 5.53,
+        "measured": 5.37
+       },
+       {
+        "row": 9,
+        "col": 18,
+        "text": "rev93",
+        "fgCss": "rgb(57, 57, 57)",
+        "bgCss": "rgb(227, 179, 65)",
+        "nominalCss": 5.93,
+        "measured": 5.5
+       },
+       {
+        "row": 8,
+        "col": 18,
+        "text": "rev33",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(210, 153, 34)",
+        "nominalCss": 5.84,
+        "measured": 5.53
+       },
+       {
+        "row": 8,
+        "col": 0,
+        "text": "rev30",
+        "fgCss": "rgb(45, 45, 45)",
+        "bgCss": "rgb(159, 166, 175)",
+        "nominalCss": 5.61,
+        "measured": 5.55
+       },
+       {
+        "row": 8,
+        "col": 24,
+        "text": "rev34",
+        "fgCss": "rgb(40, 40, 40)",
+        "bgCss": "rgb(88, 166, 255)",
+        "nominalCss": 5.84,
+        "measured": 5.6
+       }
+      ]
+     },
+     "excludedGlyphOnly": 0,
+     "worst": [
+      {
+       "row": 5,
+       "col": 0,
+       "text": "Dblack",
+       "fgCss": "rgba(159, 166, 175, 0.5)",
+       "bgPixel": "#212121",
+       "nominal": 6.55,
+       "measured": 2.56
+      },
+      {
+       "row": 5,
+       "col": 7,
+       "text": "Dred",
+       "fgCss": "rgba(255, 123, 114, 0.5)",
+       "bgPixel": "#212121",
+       "nominal": 6.39,
+       "measured": 2.57
+      },
+      {
+       "row": 5,
+       "col": 19,
+       "text": "Dyellow",
+       "fgCss": "rgba(210, 153, 34, 0.5)",
+       "bgPixel": "#212121",
+       "nominal": 6.38,
+       "measured": 2.57
+      },
+      {
+       "row": 5,
+       "col": 33,
+       "text": "Dmagenta",
+       "fgCss": "rgba(188, 140, 255, 0.5)",
+       "bgPixel": "#212121",
+       "nominal": 6.39,
+       "measured": 2.57
+      },
+      {
+       "row": 5,
+       "col": 27,
+       "text": "Dblue",
+       "fgCss": "rgba(88, 166, 255, 0.5)",
+       "bgPixel": "#212121",
+       "nominal": 6.37,
+       "measured": 2.6
+      }
+     ]
+    }
+   }
+  }
+ }
+}

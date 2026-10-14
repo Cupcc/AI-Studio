@@ -1,0 +1,179 @@
+{
+ "note": "Part 7: remaining glass background colours (薄荷 mint, 晚霞 dusk, 海雾 mist) in light and dark schemes at ratio 5.5 (a0e7d49). nomPx = computed fg vs real pixel background (default-background text); S1 = ANSI 16x8 sweep.",
+ "cells": {
+  "light/薄荷": {
+   "bgPixelRange": [
+    "#e7ede2",
+    "#f0ede4"
+   ],
+   "s3a": {
+    "n": 256,
+    "min": 4.64,
+    "p50": 5.19,
+    "below4_5": 0
+   },
+   "s4fg": {
+    "n": 117,
+    "min": 4.6,
+    "p50": 5.2,
+    "below4_5": 0
+   },
+   "batMonokai": {
+    "n": 100,
+    "min": 4.61,
+    "p50": 5.23,
+    "below4_5": 0
+   },
+   "s1": {
+    "cssMin": 5.5,
+    "pxMin": 5.47,
+    "pxBelow4_5": 0
+   }
+  },
+  "light/晚霞": {
+   "bgPixelRange": [
+    "#eee7f0",
+    "#f2ece7"
+   ],
+   "s3a": {
+    "n": 256,
+    "min": 4.56,
+    "p50": 5.15,
+    "below4_5": 0
+   },
+   "s4fg": {
+    "n": 117,
+    "min": 4.49,
+    "p50": 5.15,
+    "below4_5": 1
+   },
+   "batMonokai": {
+    "n": 100,
+    "min": 4.57,
+    "p50": 5.17,
+    "below4_5": 0
+   },
+   "s1": {
+    "cssMin": 5.5,
+    "pxMin": 5.47,
+    "pxBelow4_5": 0
+   }
+  },
+  "light/海雾": {
+   "bgPixelRange": [
+    "#e6eaec",
+    "#ececed"
+   ],
+   "s3a": {
+    "n": 256,
+    "min": 4.55,
+    "p50": 5.12,
+    "below4_5": 0
+   },
+   "s4fg": {
+    "n": 117,
+    "min": 4.52,
+    "p50": 5.14,
+    "below4_5": 0
+   },
+   "batMonokai": {
+    "n": 100,
+    "min": 4.56,
+    "p50": 5.14,
+    "below4_5": 0
+   },
+   "s1": {
+    "cssMin": 5.5,
+    "pxMin": 5.47,
+    "pxBelow4_5": 0
+   }
+  },
+  "dark/薄荷": {
+   "bgPixelRange": [
+    "#141816",
+    "#211e15"
+   ],
+   "s3a": {
+    "n": 256,
+    "min": 5.7,
+    "p50": 6.88,
+    "below4_5": 0
+   },
+   "s4fg": {
+    "n": 117,
+    "min": 5.72,
+    "p50": 6.48,
+    "below4_5": 0
+   },
+   "batMonokai": {
+    "n": 100,
+    "min": 5.84,
+    "p50": 12.04,
+    "below4_5": 0
+   },
+   "s1": {
+    "cssMin": 5.5,
+    "pxMin": 5.37,
+    "pxBelow4_5": 0
+   }
+  },
+  "dark/晚霞": {
+   "bgPixelRange": [
+    "#171516",
+    "#271d16"
+   ],
+   "s3a": {
+    "n": 256,
+    "min": 5.68,
+    "p50": 6.87,
+    "below4_5": 0
+   },
+   "s4fg": {
+    "n": 117,
+    "min": 5.78,
+    "p50": 6.57,
+    "below4_5": 0
+   },
+   "batMonokai": {
+    "n": 100,
+    "min": 5.81,
+    "p50": 12.27,
+    "below4_5": 0
+   },
+   "s1": {
+    "cssMin": 5.5,
+    "pxMin": 5.37,
+    "pxBelow4_5": 0
+   }
+  },
+  "dark/海雾": {
+   "bgPixelRange": [
+    "#15161a",
+    "#1a1d24"
+   ],
+   "s3a": {
+    "n": 256,
+    "min": 5.77,
+    "p50": 6.9,
+    "below4_5": 0
+   },
+   "s4fg": {
+    "n": 117,
+    "min": 5.85,
+    "p50": 6.6,
+    "below4_5": 0
+   },
+   "batMonokai": {
+    "n": 100,
+    "min": 5.92,
+    "p50": 12.27,
+    "below4_5": 0
+   },
+   "s1": {
+    "cssMin": 5.5,
+    "pxMin": 5.37,
+    "pxBelow4_5": 0
+   }
+  }
+ }
+}
