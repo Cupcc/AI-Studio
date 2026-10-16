@@ -1,0 +1,376 @@
+{
+ "glass-light": {
+  "label": "files-glass-light",
+  "attrs": {
+   "theme": "glass",
+   "scheme": "light",
+   "glass": "aurora"
+  },
+  "editorBg": "rgba(0, 0, 0, 0)",
+  "tokens": {
+   "all": {
+    "n": 75,
+    "min": 5.89,
+    "p5": 6.86,
+    "median": 7.52,
+    "below4_5": 0
+   },
+   "measuredInk": {
+    "n": 60,
+    "min": 6.16,
+    "p5": 6.26,
+    "median": 7.49,
+    "below4_5": 0
+   },
+   "distinctColours": 8,
+   "worstColours": [
+    {
+     "fg": "rgb(2, 71, 151)",
+     "n": 3,
+     "minNominal": 5.89,
+     "bgSample": [
+      "#ccd2de",
+      "#eceaea"
+     ],
+     "sample": "0"
+    },
+    {
+     "fg": "rgb(69, 77, 86)",
+     "n": 4,
+     "minNominal": 6.66,
+     "bgSample": [
+      "#e0e3e6",
+      "#e0e3e7"
+     ],
+     "sample": "// W17 sample: TypeScrip"
+    },
+    {
+     "fg": "rgb(10, 77, 156)",
+     "n": 3,
+     "minNominal": 6.86,
+     "bgSample": [
+      "#eceaeb",
+      "#edeaeb"
+     ],
+     "sample": "["
+    },
+    {
+     "fg": "rgb(103, 36, 173)",
+     "n": 22,
+     "minNominal": 7.1,
+     "bgSample": [
+      "#e6e9f0",
+      "#e8eaef"
+     ],
+     "sample": "import"
+    },
+    {
+     "fg": "rgb(152, 4, 22)",
+     "n": 4,
+     "minNominal": 7.19,
+     "bgSample": [
+      "#eceaeb",
+      "#ebe6e7"
+     ],
+     "sample": "/"
+    },
+    {
+     "fg": "rgb(1, 82, 29)",
+     "n": 8,
+     "minNominal": 7.34,
+     "bgSample": [
+      "#eaebef",
+      "#eaebf1"
+     ],
+     "sample": "'node:fs'"
+    }
+   ]
+  },
+  "diffBackgrounds": [],
+  "diffText": {
+   "n": 0,
+   "min": null,
+   "below4_5": 0,
+   "worst": []
+  }
+ },
+ "glass-dark": {
+  "label": "files-glass-dark",
+  "attrs": {
+   "theme": "glass",
+   "scheme": "dark",
+   "glass": "aurora"
+  },
+  "editorBg": "rgba(0, 0, 0, 0)",
+  "tokens": {
+   "all": {
+    "n": 75,
+    "min": 6.29,
+    "p5": 8.36,
+    "median": 11,
+    "below4_5": 0
+   },
+   "measuredInk": {
+    "n": 60,
+    "min": 7.76,
+    "p5": 7.82,
+    "median": 9.64,
+    "below4_5": 0
+   },
+   "distinctColours": 7,
+   "worstColours": [
+    {
+     "fg": "rgb(121, 192, 255)",
+     "n": 6,
+     "minNominal": 6.29,
+     "bgSample": [
+      "#2b3645",
+      "#1a181b"
+     ],
+     "sample": "0"
+    },
+    {
+     "fg": "rgb(180, 187, 196)",
+     "n": 4,
+     "minNominal": 8.04,
+     "bgSample": [
+      "#1f2334",
+      "#1f2328"
+     ],
+     "sample": "// W17 sample: TypeScrip"
+    },
+    {
+     "fg": "rgb(255, 157, 149)",
+     "n": 22,
+     "minNominal": 8.36,
+     "bgSample": [
+      "#181d30",
+      "#181a24"
+     ],
+     "sample": "import"
+    },
+    {
+     "fg": "rgb(255, 166, 87)",
+     "n": 3,
+     "minNominal": 8.93,
+     "bgSample": [
+      "#181a26",
+      "#17181f"
+     ],
+     "sample": "User"
+    },
+    {
+     "fg": "rgb(126, 231, 135)",
+     "n": 4,
+     "minNominal": 10.87,
+     "bgSample": [
+      "#19181a",
+      "#1d1e1f"
+     ],
+     "sample": "/"
+    },
+    {
+     "fg": "rgb(165, 214, 255)",
+     "n": 8,
+     "minNominal": 11,
+     "bgSample": [
+      "#17181f",
+      "#151824"
+     ],
+     "sample": "'node:fs'"
+    }
+   ]
+  },
+  "diffBackgrounds": [],
+  "diffText": {
+   "n": 0,
+   "min": null,
+   "below4_5": 0,
+   "worst": []
+  }
+ },
+ "solid-dark": {
+  "label": "files-solid-dark",
+  "attrs": {
+   "theme": "solid",
+   "scheme": "dark",
+   "glass": "aurora"
+  },
+  "editorBg": "rgba(0, 0, 0, 0)",
+  "tokens": {
+   "all": {
+    "n": 75,
+    "min": 5.68,
+    "p5": 8.06,
+    "median": 10.48,
+    "below4_5": 0
+   },
+   "measuredInk": {
+    "n": 60,
+    "min": 7.2,
+    "p5": 7.42,
+    "median": 9.16,
+    "below4_5": 0
+   },
+   "distinctColours": 7,
+   "worstColours": [
+    {
+     "fg": "rgb(121, 192, 255)",
+     "n": 6,
+     "minNominal": 5.68,
+     "bgSample": [
+      "#323d49",
+      "#212121"
+     ],
+     "sample": "0"
+    },
+    {
+     "fg": "rgb(180, 187, 196)",
+     "n": 4,
+     "minNominal": 7.41,
+     "bgSample": [
+      "#2a2a2a",
+      "#212121"
+     ],
+     "sample": "// W17 sample: TypeScrip"
+    },
+    {
+     "fg": "rgb(255, 157, 149)",
+     "n": 22,
+     "minNominal": 8.06,
+     "bgSample": [
+      "#212121"
+     ],
+     "sample": "import"
+    },
+    {
+     "fg": "rgb(255, 166, 87)",
+     "n": 3,
+     "minNominal": 8.31,
+     "bgSample": [
+      "#212121"
+     ],
+     "sample": "User"
+    },
+    {
+     "fg": "rgb(126, 231, 135)",
+     "n": 4,
+     "minNominal": 9.7,
+     "bgSample": [
+      "#212121",
+      "#252825"
+     ],
+     "sample": "/"
+    },
+    {
+     "fg": "rgb(165, 214, 255)",
+     "n": 8,
+     "minNominal": 10.48,
+     "bgSample": [
+      "#212121"
+     ],
+     "sample": "'node:fs'"
+    }
+   ]
+  },
+  "diffBackgrounds": [],
+  "diffText": {
+   "n": 0,
+   "min": null,
+   "below4_5": 0,
+   "worst": []
+  }
+ },
+ "solid-light": {
+  "label": "files-solid-light",
+  "attrs": {
+   "theme": "solid",
+   "scheme": "light",
+   "glass": "aurora"
+  },
+  "editorBg": "rgba(0, 0, 0, 0)",
+  "tokens": {
+   "all": {
+    "n": 75,
+    "min": 7.04,
+    "p5": 8.22,
+    "median": 9.04,
+    "below4_5": 0
+   },
+   "measuredInk": {
+    "n": 60,
+    "min": 7.3,
+    "p5": 7.6,
+    "median": 8.92,
+    "below4_5": 0
+   },
+   "distinctColours": 8,
+   "worstColours": [
+    {
+     "fg": "rgb(2, 71, 151)",
+     "n": 3,
+     "minNominal": 7.04,
+     "bgSample": [
+      "#dee5ee",
+      "#ffffff"
+     ],
+     "sample": "0"
+    },
+    {
+     "fg": "rgb(69, 77, 86)",
+     "n": 4,
+     "minNominal": 7.93,
+     "bgSample": [
+      "#f6f6f6",
+      "#ffffff"
+     ],
+     "sample": "// W17 sample: TypeScrip"
+    },
+    {
+     "fg": "rgb(10, 77, 156)",
+     "n": 3,
+     "minNominal": 8.22,
+     "bgSample": [
+      "#ffffff"
+     ],
+     "sample": "["
+    },
+    {
+     "fg": "rgb(152, 4, 22)",
+     "n": 4,
+     "minNominal": 8.42,
+     "bgSample": [
+      "#ffffff",
+      "#fbf8f9"
+     ],
+     "sample": "/"
+    },
+    {
+     "fg": "rgb(103, 36, 173)",
+     "n": 22,
+     "minNominal": 8.63,
+     "bgSample": [
+      "#ffffff"
+     ],
+     "sample": "import"
+    },
+    {
+     "fg": "rgb(4, 81, 88)",
+     "n": 3,
+     "minNominal": 9.04,
+     "bgSample": [
+      "#ffffff"
+     ],
+     "sample": "User"
+    }
+   ]
+  },
+  "diffBackgrounds": [],
+  "diffText": {
+   "n": 0,
+   "min": null,
+   "below4_5": 0,
+   "worst": []
+  }
+ }
+}

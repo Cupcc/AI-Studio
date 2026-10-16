@@ -1,0 +1,97 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ × tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > out/renderer/index.html 的 CSP 与设计完全一致：脚本 self、worker none、仅两条被接受的 style 放宽，无 blob: / unsafe-eval / 通配 4ms
+   → ENOENT: no such file or directory, open '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/index.html'
+ × tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 已打包应用的 app.asar 内的 index.html 与 out/ 一致，且资源文件名集合一致（打包的就是被评审的构建） 69ms
+   → ENOENT: no such file or directory, scandir '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/assets'
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 与 main 分支相比 CSP 定义、窗口、安全与预加载没有改动；主进程只新增目录 reader 构建入口 76ms
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > window.studio 的特性集合与每个通道：没有通用 fs / shell / exec / 路径读取原语；files 与 diff 的通道集合精确
+[W16-E window.studio surface] {"app":["getInfo","onWindowFocusChanged","ping"],"project":["bootstrap","cancelQuit","closeProject","confirmQuit","getUiState","listRecent","onFlushRequested","onMenuCommand","onQuitRequested","openDirectory","openPath","removeRecent","saveWindowState","stateFlushed","updateUiState"],"session":["answer","create","getConversation","getDefaultCli","getDraft","getModels","getProjectState","getProviders","list","onProvidersChanged","onSummaryChanged","onTranscriptChanged","opened","projectClosed","rename","replyWithText","retry","saveDraft","send","setDefaultCli","setModel","stop","stopProject","updateViewing"],"projectView":["getContext","getSnapshot","list","onError","onSnapshotChanged"],"settings":["getAppearance","onAppearanceChanged","onOpenRequested","setGlassColor","setMode","setTheme"],"browser":["dismissExternal","focus","getState","navigate","onStateChanged","openExternal","reload","setBounds","setVisible"],"terminal":["ack","attach","close","create","detach","input","list","onChanged","onOutput","resize"],"files":["list","onChanged","onWatchChanged","read","resolveReference","subscribe","unsubscribe"],"diff":["getFile","getSnapshot","onInvalidated","onWatchChanged","subscribe","unsubscribe"]}
+
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > files / diff 通道的请求类型里没有任何绝对路径、cwd、sha、参数数组字段（契约源码）
+[W16-E contract words files] ["absolute"]
+[W16-E contract words diff] ["absolute"]
+
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > Monaco 只经 import() 懒加载；运行时只注册只读查看所需贡献；无 @monaco-editor/react、无 CDN、无 worker URL
+[W16-E monaco contributions] ["features/codicon/register.js","features/diffEditor/register.js","features/find/register.js","features/clipboard/register.js","features/contextmenu/register.js","features/wordOperations/register.js"]
+
+ × tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 构建产物中的危险词：eval / document.write 不存在；new Worker / Blob URL 只在 Monaco 的 worker 引导代码里（getWorker 抛错使其不可达） 0ms
+   → ENOENT: no such file or directory, scandir '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/assets'
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > 预加载包只通过 contextBridge 暴露 studio，不暴露 ipcRenderer / Node API 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > window.studio 的特性集合与每个通道：没有通用 fs / shell / exec / 路径读取原语；files 与 diff 的通道集合精确 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > files / diff 通道的请求类型里没有任何绝对路径、cwd、sha、参数数组字段（契约源码） 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > renderer/src（非测试）不含 dangerouslySetInnerHTML / innerHTML / insertAdjacentHTML / eval / new Function / document.write / createObjectURL / window.open / rehype-raw 6ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > renderer/src（非测试）不使用 localStorage / sessionStorage / indexedDB / document.cookie（文件内容与 Diff 只存在内存） 6ms
+ × tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > Monaco 只经 import() 懒加载；运行时只注册只读查看所需贡献；无 @monaco-editor/react、无 CDN、无 worker URL 7ms
+   → expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > out/renderer/index.html 的 CSP 与设计完全一致：脚本 self、worker none、仅两条被接受的 style 放宽，无 blob: / unsafe-eval / 通配
+Error: ENOENT: no such file or directory, open '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/index.html'
+ ❯ tasks/T20261009-context-tools/evidence/W16-surface.test.ts:46:23
+     44| describe('E1 生产 CSP（已构建的 out/ 与已打包的 dist/）', () => {
+     45|   it('out/renderer/index.html 的 CSP 与设计完全一致：脚本 self、worker none、仅两条被接受…
+     46|     const csp = cspOf(readFileSync(join(desktop, 'out/renderer/index.h…
+       |                       ^
+     47|     expect(csp).toEqual(EXPECTED_CSP)
+     48|     const joined = csp.join('; ')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { errno: -2, code: 'ENOENT', syscall: 'open', path: '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/index.html' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 已打包应用的 app.asar 内的 index.html 与 out/ 一致，且资源文件名集合一致（打包的就是被评审的构建）
+Error: ENOENT: no such file or directory, scandir '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/assets'
+ ❯ tasks/T20261009-context-tools/evidence/W16-surface.test.ts:63:19
+     61|     expect(cspOf(html!.toString('utf8'))).toEqual(EXPECTED_CSP)
+     62|     const packaged = [...files.keys()].filter((file) => file.startsWit…
+     63|     const built = readdirSync(join(desktop, 'out/renderer/assets')).so…
+       |                   ^
+     64|     expect(packaged).toEqual(built)
+     65|     expect(files.get('out/preload/index.js')!.equals(readFileSync(join…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { errno: -2, code: 'ENOENT', syscall: 'scandir', path: '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/assets' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 构建产物中的危险词：eval / document.write 不存在；new Worker / Blob URL 只在 Monaco 的 worker 引导代码里（getWorker 抛错使其不可达）
+Error: ENOENT: no such file or directory, scandir '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/assets'
+ ❯ tasks/T20261009-context-tools/evidence/W16-surface.test.ts:97:24
+     95|     const dir = join(desktop, 'out/renderer/assets')
+     96|     const hits: Record<string, string[]> = {}
+     97|     for (const name of readdirSync(dir).filter((file) => file.endsWith…
+       |                        ^
+     98|       const text = readFileSync(join(dir, name), 'utf8')
+     99|       for (const token of ['eval(', 'document.write', 'new Function(',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { errno: -2, code: 'ENOENT', syscall: 'scandir', path: '/Users/Chris/Projects/AI Stduio.worktrees/files-diff/apps/desktop/out/renderer/assets' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > Monaco 只经 import() 懒加载；运行时只注册只读查看所需贡献；无 @monaco-editor/react、无 CDN、无 worker URL
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tasks/T20261009-context-tools/evidence/W16-surface.test.ts:187:62
+    185|     const environment = readFileSync(join(desktop, 'src/renderer/src/f…
+    186|     expect(environment).toContain("throw new Error(WORKERS_DISABLED_ME…
+    187|     expect(existsSync(join(desktop, 'out/renderer/assets'))).toBe(true)
+       |                                                              ^
+    188|   })
+    189| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 6 passed (10)
+   Start at  16:14:35
+   Duration  368ms (tests 69%, transform 24%, import 5%, worker 1%)
+

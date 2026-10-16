@@ -1,9 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { displayName } from '../../lib/display-path'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { SESSION_MESSAGE_MAX_LENGTH } from '@shared/ipc/session'
 import { VIEW_NAMES } from '@shared/project/strings'
 import type { ViewId } from '@shared/project/types'
+import { selectRightArea } from '@shared/project/ui-rules'
 import type { DraftKey } from '@shared/session/types'
-import { cliName, draftId, useSessions } from '../session/store'
+import { cliName, draftId, FILE_REPLY_BLOCKED, replyBlockedByFiles, useSessions } from '../session/store'
 import { useProjectShell } from '../project/store'
 import { Icon } from '../../app/Icon'
 
@@ -18,7 +20,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const model = session ? session.model : draft?.model ?? null
   const input = useRef<HTMLTextAreaElement>(null), composing = useRef(false), justComposedAt = useRef(0)
   const [contextMenu, setContextMenu] = useState(false), [notice, setNotice] = useState<string | null>(null)
-  const contextRef = useRef<HTMLDivElement>(null)
+  const contextRef = useRef<HTMLDivElement>(null), filesNote = useId()
   const text = draft?.text ?? '', provider = providers.find((p) => p.cli === cli)
   const unavailable = draftKey.kind === 'new_chat' && provider?.status !== 'available'
   const running = session?.activity === 'running', needsInput = session?.activity === 'needs_input'
@@ -26,7 +28,9 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const busy = !!pending[id] || !!(session && pending[`model:${session.id}`])
   const supportsRunningInput = running && !!provider && provider.capabilities.inputWhileRunning !== 'none'
   const stopButton = running || (needsInput && !text.trim())
-  const canSend = !!draft && !!text.trim() && !unavailable && (!running || !!supportsRunningInput) && !stopping && !busy
+  // A Needs Input reply is text only; file tags would be cleared without the CLI ever receiving them.
+  const fileReplyBlocked = replyBlockedByFiles(session, draft)
+  const canSend = !!draft && !!text.trim() && !unavailable && (!running || !!supportsRunningInput) && !stopping && !busy && !fileReplyBlocked
   const runningSend = !!supportsRunningInput && !!text.trim() && !stopping && !busy
   useEffect(() => { void useSessions.getState().loadDraft(draftKey) }, [id])
   useEffect(() => { if (cli) void useSessions.getState().loadModels(draftKey.projectId, cli) }, [cli, draftKey.projectId])
@@ -45,6 +49,12 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
     const line = Number.parseFloat(getComputedStyle(node).lineHeight) || 20
     node.style.height = `${Math.min(line * 8, Math.max(line, node.scrollHeight))}px`
   }, [text])
+  // Selecting the Files tool is a user action (a click here); adding the file itself happens in Files ("添加到对话").
+  function openFiles() {
+    setContextMenu(false)
+    const shell = useProjectShell.getState(), ui = shell.uiStates[draftKey.projectId]
+    if (ui) shell.updateUiState(draftKey.projectId, selectRightArea(ui, 'files'))
+  }
   async function send() {
     if (!canSend) return
     if (model && catalog && !catalog.error && !catalog.models.some((item) => item.id === model)) {
@@ -84,11 +94,11 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
     <div className="composer__toolbar">
       <div className="composer__context" ref={contextRef} onKeyDown={(event) => { if (event.key === 'Escape') setContextMenu(false) }}>
         <button className="icon-button composer__add" aria-label="Context / Attachment" data-tip="添加上下文" aria-expanded={contextMenu} onClick={() => setContextMenu(!contextMenu)}><Icon name="plus" size={15} /></button>
-        {contextMenu && <div className="composer__context-menu popover"><button className="menu-item" disabled>从 Files 添加文件</button><p className="menu-item__sub">暂不支持添加附件</p></div>}
+        {contextMenu && <div className="composer__context-menu popover"><button className="menu-item" aria-describedby={filesNote} onClick={openFiles}>从 Files 添加文件</button><p className="menu-item__sub" id={filesNote}>在 Files 中选择文件后点击「添加到对话」</p></div>}
       </div>
-      <div className="composer__tags">{draft?.contextItems.map((context, index) => <span className="composer__tag" key={`${context.type}:${index}`}>
-        <Icon name={context.type === 'view' ? 'preview' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? `当前 View · ${VIEW_NAMES[context.viewId as ViewId] ?? context.viewId}` : context.path.split('/').at(-1)}</span>
-        <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : context.path}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}><Icon name="close" size={10} /></button>
+      <div className="composer__tags">{draft?.contextItems.map((context, index) => <span className="composer__tag" key={`${context.type}:${index}`} title={context.type === 'file' ? displayName(context.path) : undefined}>
+        <Icon name={context.type === 'view' ? 'preview' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? `当前 View · ${VIEW_NAMES[context.viewId as ViewId] ?? context.viewId}` : displayName(context.path.split('/').at(-1) ?? context.path)}</span>
+        <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : displayName(context.path)}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}><Icon name="close" size={10} /></button>
       </span>)}</div>
       <span className="composer__models-wrap"><select className="composer__models" aria-label="Model Selector" title={catalog?.error ?? (session && session.activity !== 'none' ? '选择的模型从下一轮开始生效' : '当前 CLI 的模型')} value={model ?? ''} disabled={!cli || !catalog || !!catalog.error || !!(session && pending[`model:${session.id}`])} onChange={(event) => {
         const selected = event.target.value || null
@@ -105,6 +115,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
       </button>
     </div>
     </div>
+    {fileReplyBlocked && <p className="composer__notice" role="status">{FILE_REPLY_BLOCKED}</p>}
     {modelMissing && <p className="composer__notice">该模型已不可用，下一轮将使用 CLI 默认。</p>}
     {notice && <p className="composer__notice" role="status">{notice}</p>}
     {(errors[id] || (session && (errors[`stop:${session.id}`] || errors[`model:${session.id}`]))) && <p className="error-message" role="alert">{errors[id] || (session && (errors[`stop:${session.id}`] || errors[`model:${session.id}`]))}</p>}

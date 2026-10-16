@@ -1,0 +1,15 @@
+{
+  "baseline": "890a4314e2217c2e6085d1cb20097c0461bcd25e",
+  "filesCompared": 119,
+  "allBytesEqual": true,
+  "mainWorkerAndPreloadHashes": {
+    "out/main/directory-reader-worker.js": "dea5556da0cb7566233c5cadbe6e3315fae7a95ae0ce9a69a24c0ed1920ecfe5",
+    "out/main/index.js": "bb6ee14f20160bb4d1b66429d686bd9dde60b16e23558f0e918a6e9211a66217",
+    "out/preload/index.js": "e26fb5e4882549d19704c07e5c803c94bfc3fe17febbecd26bdf6813aedd4986",
+    "out/renderer/index.html": "347cbbf8c3deab57d94b610dc6371434c5445e7d851b3668a23a714a04d1a92f"
+  },
+  "currentSourceDelta": [
+    "apps/desktop/src/renderer/src/features/tools/diff/strings.ts",
+    "apps/desktop/src/shared/tools/files.ts"
+  ]
+}

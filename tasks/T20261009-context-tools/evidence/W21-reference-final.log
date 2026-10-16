@@ -1,0 +1,21 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > preserves distinct real targets for "Case.txt" 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > preserves distinct real targets for "café.txt" 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > checks every alternate spelling and records the exact proven aliases 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > does not skip a missing NFC-equivalent request on a Unicode-sensitive filesystem 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > passes case and Unicode-distinct requests intact to the resolver and Provider 19ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > accepts a collapsed file only with an explicit alias for each remaining exact request 12ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > strips filesystem aliases and absolute paths from the renderer reference result 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > rejects malformed resolver coverage before any Session or Provider state 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > rejects malformed resolver coverage before any Session or Provider state 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > rejects malformed resolver coverage before any Session or Provider state 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > rejects malformed resolver coverage before any Session or Provider state 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W21-reference-identity.test.ts > W21 filesystem identity and request coverage > rejects malformed resolver coverage before any Session or Provider state 1ms
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  07:50:20
+   Duration  409ms (transform 72%, import 14%, tests 13%, worker 1%)
+

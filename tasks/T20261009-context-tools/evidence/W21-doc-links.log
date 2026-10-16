@@ -1,0 +1,2 @@
+$ node scripts/check-docs.mjs --base main
+Documentation: 0 new issue(s); 4 baseline issue(s) unchanged or removed.

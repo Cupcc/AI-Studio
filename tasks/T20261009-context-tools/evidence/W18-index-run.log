@@ -1,0 +1,21 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ ↓ tasks/T20261009-context-tools/evidence/W18-files-boundary.test.ts > lists an APFS long UTF-8 child as disabled other instead of making the entire directory unreadable
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v2: staged and working-tree changes survive a byte-faithful isolated query 155ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v3: staged and working-tree changes survive a byte-faithful isolated query 137ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v4: staged and working-tree changes survive a byte-faithful isolated query 122ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v2: staged and working-tree changes survive a byte-faithful isolated query 121ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v3: staged and working-tree changes survive a byte-faithful isolated query 140ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v4: staged and working-tree changes survive a byte-faithful isolated query 123ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > a racy-clean same-size edit remains visible while the real index bytes and mtime stay unchanged 127ms
+stdout | tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve real index bytes/mtime and sharedindex data; records cache keepalive metadata
+[W18 split-index] shared bytes unchanged; cache mtime changed=true
+
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve real index bytes/mtime and sharedindex data; records cache keepalive metadata 125ms
+
+ Test Files  1 passed | 1 skipped (2)
+      Tests  8 passed | 1 skipped (9)
+   Start at  15:35:28
+   Duration  1.33s (tests 93%, transform 5%, import 1%)
+

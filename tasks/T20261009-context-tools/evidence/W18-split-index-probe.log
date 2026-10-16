@@ -1,0 +1,2 @@
+{"mode":"default","output":"a.txt","sharedMtimeChanged":true,"sharedBytesUnchanged":true,"sourceIndexBytesUnchanged":true,"sourceIndexMtimeUnchanged":true}
+{"mode":"-c core.splitIndex=false","output":"a.txt","sharedMtimeChanged":true,"sharedBytesUnchanged":true,"sourceIndexBytesUnchanged":true,"sourceIndexMtimeUnchanged":true}

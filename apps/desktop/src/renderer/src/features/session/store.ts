@@ -5,6 +5,9 @@ import { sessionApi } from './api'
 
 export const emptyDraft = (): ComposerDraft => ({ cli: null, model: null, text: '', contextItems: [] })
 export const draftId = (key: DraftKey): string => key.kind === 'new_chat' ? (key.viewId ? `${key.projectId}:view:${key.viewId}:draft` : `${key.projectId}:draft`) : `${key.projectId}:session:${key.sessionId}`
+/** replyWithText carries text only; sending with file tags would clear them without the CLI ever seeing them. */
+export const FILE_REPLY_BLOCKED = '回复 Agent 时不能附带文件引用，请先移除标签或等待本轮结束'
+export const replyBlockedByFiles = (session: SessionSummary | undefined, draft: ComposerDraft | undefined): boolean => session?.activity === 'needs_input' && !!draft?.contextItems.some((item) => item.type === 'file')
 export const cliName = (cli: SessionCli | null): string => cli === 'codex' ? 'Codex CLI' : cli === 'claude-code' ? 'Claude Code' : '选择 CLI'
 
 export interface ConversationState {
@@ -177,6 +180,10 @@ export const useSessions = create<SessionStore>()((set, get) => ({
   async sendComposer(key, originViewId = null) {
     const id = draftId(key), draft = get().drafts[id]
     if (!draft?.text.trim()) return null
+    if (key.kind === 'session' && replyBlockedByFiles(get().summaries[key.sessionId], draft)) {
+      set((s) => ({ errors: { ...s.errors, [id]: FILE_REPLY_BLOCKED } }))
+      return null
+    }
     let result: SessionSummary | null = null
     const ok = await operation(id, async () => {
       if (key.kind === 'new_chat') {

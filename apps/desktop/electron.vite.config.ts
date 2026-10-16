@@ -60,7 +60,16 @@ function contentSecurityPolicy(): Plugin {
 
 export default defineConfig({
   main: {
-    resolve: { alias: { '@shared': shared } }
+    resolve: { alias: { '@shared': shared } },
+    build: {
+      rollupOptions: {
+        input: {
+          index: fileURLToPath(new URL('./src/main/index.ts', import.meta.url)),
+          'directory-reader-worker': fileURLToPath(new URL('./src/main/services/files/directory-reader-worker.ts', import.meta.url))
+        },
+        output: { chunkFileNames: '[name]-[hash].js' }
+      }
+    }
   },
   preload: {
     resolve: { alias: { '@shared': shared } }

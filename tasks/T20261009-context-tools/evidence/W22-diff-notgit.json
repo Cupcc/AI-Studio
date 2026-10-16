@@ -1,0 +1,12 @@
+{
+ "title": "项目变更",
+ "meta": null,
+ "banners": [],
+ "state": "此目录不是 Git 仓库项目变更依赖 Git：当前 Project 目录不在任何 Git 仓库内，因此无法显示变更。需要时可以在 Terminal 中自行运行 git init 创建仓库。本客户端不会自动初始化 Git，也不会替你创建提交。重试",
+ "stateTitle": "此目录不是 Git 仓库",
+ "rowCount": 0,
+ "rows": [],
+ "tabStops": [],
+ "file": null,
+ "monaco": null
+}

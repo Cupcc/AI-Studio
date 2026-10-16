@@ -1,0 +1,246 @@
+{
+ "title": "项目变更 · 相对 HEAD (main @ a23e24d)",
+ "meta": "22 个文件+10−14",
+ "banners": [],
+ "state": null,
+ "stateTitle": null,
+ "rowCount": 22,
+ "rows": [
+  {
+   "label": "新增，-dash.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "-dash.txt"
+  },
+  {
+   "label": "新增，:(top)colon.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": ":(top)colon.txt"
+  },
+  {
+   "label": "修改，a-link，新增 1 行，删除 1 行，符号链接",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "M",
+   "counts": "+1−1",
+   "tags": "符号链接",
+   "rename": null,
+   "title": "a-link"
+  },
+  {
+   "label": "修改，both.txt，新增 2 行，删除 2 行",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "M",
+   "counts": "+2−2",
+   "tags": null,
+   "rename": null,
+   "title": "both.txt"
+  },
+  {
+   "label": "删除，deleted.txt，删除 6 行",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "D",
+   "counts": "−6",
+   "tags": null,
+   "rename": null,
+   "title": "deleted.txt"
+  },
+  {
+   "label": "新增，emoji-😀.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "emoji-😀.txt"
+  },
+  {
+   "label": "新增，glob[1]*.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "glob[1]*.txt"
+  },
+  {
+   "label": "修改，image.bin，二进制",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "M",
+   "counts": null,
+   "tags": "二进制",
+   "rename": null,
+   "title": "image.bin"
+  },
+  {
+   "label": "新增，ls␤name.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "ls␤name.txt"
+  },
+  {
+   "label": "新增，nel␤name.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "nel␤name.txt"
+  },
+  {
+   "label": "新增，new␊line.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "new␊line.txt"
+  },
+  {
+   "label": "新增，new dir/untracked 2.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "new dir/untracked 2.txt"
+  },
+  {
+   "label": "重命名，old-name.ts → renamed/new-name.ts，新增 1 行，删除 1 行",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "R",
+   "counts": "+1−1",
+   "tags": null,
+   "rename": "old-name.ts → renamed/new-name.ts",
+   "title": "renamed/new-name.ts"
+  },
+  {
+   "label": "新增，rlo⟦RLO⟧name.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "rlo⟦RLO⟧name.txt"
+  },
+  {
+   "label": "修改，run.sh，仅模式变化",
+   "selected": "true",
+   "tabindex": "0",
+   "badge": "M",
+   "counts": null,
+   "tags": "仅模式变化",
+   "rename": null,
+   "title": "run.sh"
+  },
+  {
+   "label": "新增，sp ace.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "sp ace.txt"
+  },
+  {
+   "label": "修改，src/app.ts，新增 3 行，删除 2 行",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "M",
+   "counts": "+3−2",
+   "tags": null,
+   "rename": null,
+   "title": "src/app.ts"
+  },
+  {
+   "label": "修改，staged.txt，新增 1 行，删除 1 行",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "M",
+   "counts": "+1−1",
+   "tags": null,
+   "rename": null,
+   "title": "staged.txt"
+  },
+  {
+   "label": "新增，tab␉name.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "tab␉name.txt"
+  },
+  {
+   "label": "修改，unstaged.txt，新增 2 行，删除 1 行",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "M",
+   "counts": "+2−1",
+   "tags": null,
+   "rename": null,
+   "title": "unstaged.txt"
+  },
+  {
+   "label": "新增，untracked.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "untracked.txt"
+  },
+  {
+   "label": "新增，日本語.md，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "日本語.md"
+  }
+ ],
+ "tabStops": [
+  "run.sh"
+ ],
+ "file": {
+  "label": "run.sh 的变更",
+  "header": "Mrun.sh",
+  "notes": [
+   "文件模式：100644 → 100755",
+   "仅模式变化"
+  ],
+  "patch": false,
+  "patchLines": 0,
+  "monaco": false,
+  "busy": "false"
+ },
+ "monaco": null
+}

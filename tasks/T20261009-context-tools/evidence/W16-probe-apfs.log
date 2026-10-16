@@ -1,0 +1,19 @@
+tmp base /private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/w16-probe-6atNDf
+exists .GIT true
+readdir [ '.git' ]
+promises.realpath .GIT -> <b>/.git
+native .GIT -> <b>/.git
+".g‌it" false
+".gi‍t" false
+".git​" false
+".git " false
+".git." false
+".GİT" false
+".gıt" false
+".ǵit" false
+".gıt" false
+".git\u0000" false
+plain O_NOFOLLOW OPENED
+plain O_NOFOLLOW_ANY OPENED
+via symlink dir O_NOFOLLOW OPENED
+via symlink dir O_NOFOLLOW_ANY ELOOP

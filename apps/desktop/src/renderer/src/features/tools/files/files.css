@@ -1,0 +1,53 @@
+/* Files tool. Semantic tokens only (container backgrounds via --color-pane and friends, never the raw surface colour), so the panel
+   works in solid and glass, light and dark. Layout constants stay local to the panel. */
+.files-tool { --files-indent: 14px; --files-row-height: 26px; --files-tree-min: 96px; --files-viewer-min: 140px; display: flex; flex-direction: column; height: 100%; min-height: 0; color: var(--color-text); background: var(--color-pane); }
+.files-header { display: flex; flex: none; align-items: center; gap: var(--space-2); min-height: var(--tab-height); padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3); border-bottom: 1px solid var(--color-border); }
+.files-watch { padding: 1px var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: var(--color-text-muted); font-size: var(--font-size-xs); white-space: nowrap; }
+.files-watch.is-degraded { border-color: var(--color-needs-input-border); background: var(--color-needs-input-bg); color: var(--color-text-2); }
+.files-body { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.files-tree-pane { flex: 1 1 auto; min-height: var(--files-tree-min); overflow: auto; }
+.files-viewer-pane { display: flex; flex-direction: column; min-height: var(--files-viewer-min); }
+
+.files-tree { padding: var(--space-1) 0; }
+.files-row { display: flex; align-items: center; gap: var(--space-1-5); min-height: var(--files-row-height); padding-inline-end: var(--space-2); font-size: var(--font-size-md); cursor: default; user-select: none; }
+.files-row:hover { background: var(--color-hover); }
+.files-row.is-selected { background: var(--color-selected); color: var(--color-text); }
+.files-row:focus-visible { outline-offset: -2px; }
+.files-row[aria-disabled="true"] { color: var(--color-text-muted); }
+.files-row[data-kind="symlink"], .files-row[data-kind="other"] { color: var(--color-text-muted); font-style: italic; }
+.files-row__chevron { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 12px; color: var(--color-text-muted); }
+.files-row[aria-expanded="false"] .files-row__chevron svg { transform: rotate(-90deg); }
+.files-row__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.files-row__badge { flex: none; padding: 0 var(--space-1-5); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xs); color: var(--color-text-muted); font-size: var(--font-size-xs); font-style: normal; }
+.files-note { display: flex; align-items: center; gap: var(--space-2); min-height: var(--files-row-height); padding-inline-end: var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.files-note--error { color: var(--color-text-2); }
+
+.files-splitter { position: relative; flex: none; height: var(--resize-hit-width); margin: -1px 0; cursor: row-resize; touch-action: none; }
+.files-splitter::after { content: ""; position: absolute; inset: calc(var(--resize-hit-width) / 2 - 1px) 0 auto; height: 1px; background: var(--color-border-strong); }
+.files-splitter:hover::after, .files-splitter:focus-visible::after { background: var(--color-border-focus); }
+.files-splitter:focus-visible { outline-offset: -2px; }
+
+.files-viewer { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.files-viewer__header { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); padding: var(--space-1-5) var(--space-2) var(--space-1-5) var(--space-3); }
+.files-viewer__title { display: flex; flex: 1 1 120px; flex-direction: column; min-width: 0; }
+.files-viewer__name { overflow: hidden; font-size: var(--font-size-md); font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.files-viewer__meta { overflow: hidden; color: var(--color-text-muted); font-size: var(--font-size-xs); text-overflow: ellipsis; white-space: nowrap; }
+.files-viewer__actions { display: flex; flex: none; align-items: center; gap: var(--space-1); margin-inline-start: auto; }
+.files-viewer__message { flex: none; margin: 0; padding: 0 var(--space-3) var(--space-1-5); color: var(--color-text-muted); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.files-viewer__message:empty { display: none; }
+.files-viewer__message[data-tone="warn"] { color: var(--color-text-2); }
+.files-viewer__body { position: relative; display: flex; flex: 1; flex-direction: column; min-height: 0; overflow: auto; border-top: 1px solid var(--color-border); }
+.files-viewer__unavailable { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); margin: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); background: var(--color-floating); font-size: var(--font-size-md); overflow-wrap: anywhere; }
+.files-viewer__unavailable[data-reason="missing"] { border-color: var(--color-error-border); background: var(--color-error-bg); }
+.files-viewer__unavailable p { margin: 0; color: var(--color-text-2); }
+.files-viewer__note { flex: none; margin: 0; padding: var(--space-1) var(--space-3); border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.files-viewer__plain { flex: 1; min-height: 0; margin: 0; padding: var(--space-2) var(--space-3); overflow: auto; font: var(--font-size-sm)/1.5 var(--font-mono); white-space: pre; }
+.files-viewer__loading { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); }
+
+/* Skeleton rows (viewer, Suspense fallback, first directory read). Decorative: the status text is read instead. */
+.files-skeleton { display: block; flex: none; width: 60%; height: 10px; border-radius: var(--radius-xs); background: var(--color-selected); animation: files-skeleton 1.2s ease-in-out infinite; }
+.files-viewer__loading .files-skeleton:nth-child(2) { width: 85%; }
+.files-viewer__loading .files-skeleton:nth-child(3) { width: 45%; }
+.files-note .files-skeleton { width: 40%; }
+@keyframes files-skeleton { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .files-skeleton { animation: none; } }

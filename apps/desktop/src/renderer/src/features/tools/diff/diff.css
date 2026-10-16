@@ -1,0 +1,81 @@
+/* Project Diff panel (FR-TOOL-002). Semantic tokens only (--color-pane, --color-selected, ...), never --color-surface itself:
+   under the glass theme those tokens turn translucent and the window material shows through. The right sidebar is only
+   320-560 px wide, so list and file view are stacked and the header wraps instead of truncating its controls. */
+.diff-tool { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; color: var(--color-text); background: var(--color-pane); }
+.diff-tool code { font-family: var(--font-mono); font-size: .95em; overflow-wrap: anywhere; }
+
+.diff-header { flex: none; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); }
+.diff-header__row { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.diff-header__title { flex: 1; min-width: 0; margin: 0; font-size: var(--font-size-md); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.diff-header__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-0) var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.diff-header__sums { display: inline-flex; gap: var(--space-1); }
+.diff-watch { padding: 0 var(--space-1-5); border: 1px solid var(--color-needs-input-border); border-radius: var(--radius-xs); background: var(--color-needs-input-bg); color: var(--color-text-2); font-size: var(--font-size-xs); }
+.icon-button.is-loading svg { animation: diff-spin 1s linear infinite; }
+@keyframes diff-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .icon-button.is-loading svg { animation: none; } }
+
+.diff-banner { flex: none; display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-1-5) var(--space-3); border-bottom: 1px solid var(--color-border); background: var(--color-surface-soft); color: var(--color-text-2); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.diff-banner--warn { border-bottom-color: var(--color-needs-input-border); background: var(--color-needs-input-bg); }
+.diff-banner--error { border-bottom-color: var(--color-error-border); background: var(--color-error-bg); }
+.diff-banner--block { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: var(--space-1); }
+
+.diff-body { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.diff-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-5); color: var(--color-text-muted); text-align: center; overflow: auto; }
+.diff-state h3 { margin: var(--space-1) 0 0; color: var(--color-text-2); font-size: var(--font-size-body); font-weight: 500; overflow-wrap: anywhere; }
+.diff-state p { margin: 0; max-width: var(--placeholder-text-width); font-size: var(--font-size-sm); line-height: 1.6; overflow-wrap: anywhere; }
+.diff-state__detail { display: flex; flex-direction: column; gap: var(--space-0); padding: var(--space-1-5) var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface-soft); text-align: left; }
+
+.diff-split { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.diff-split__list { flex: 1 1 0; min-height: 96px; overflow: auto; }
+.diff-hint { margin: 0; padding: var(--space-2) var(--space-3); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.diff-splitter { flex: none; position: relative; height: var(--resize-hit-width); margin: calc(var(--resize-hit-width) / -2) 0; z-index: var(--z-handle); cursor: row-resize; touch-action: none; }
+.diff-splitter::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--color-border-strong); }
+.diff-splitter:hover, .diff-splitter:focus-visible { background: var(--color-focus-ring-soft); }
+
+.diff-list.is-stale { opacity: .6; }
+.diff-row { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-1) var(--space-3); cursor: pointer; font-size: var(--font-size-md); }
+.diff-row:hover { background: var(--color-hover); }
+.diff-row.is-selected { background: var(--color-selected); }
+.diff-row:focus-visible { outline-offset: -2px; }
+.diff-row__body { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.diff-row__path, .diff-file__path { display: flex; align-items: baseline; gap: var(--space-1-5); min-width: 0; }
+.diff-row__name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.diff-row__dir { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.diff-row__rename { color: var(--color-text-muted); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.diff-row__tags { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.diff-row__counts { flex: none; display: inline-flex; gap: var(--space-1); }
+
+.diff-tag { padding: 0 var(--space-1); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xs); color: var(--color-text-3); font-size: var(--font-size-xs); white-space: nowrap; }
+.diff-count { padding: 0 var(--space-1); border-radius: var(--radius-xs); color: var(--color-text-2); font: var(--font-size-xs) var(--font-mono); white-space: nowrap; }
+.diff-count--add { background: var(--color-diff-add-bg); }
+.diff-count--del { background: var(--color-diff-del-bg); }
+
+/* Kind badges: the letter carries the meaning, the tint only supports it (readable in light, dark, solid and glass). */
+.diff-badge { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-top: 1px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-xs); background: var(--color-surface-soft); color: var(--color-text-2); font: 600 var(--font-size-xs) var(--font-mono); }
+.diff-badge--added { background: var(--color-diff-add-bg); }
+.diff-badge--deleted { background: var(--color-diff-del-bg); }
+.diff-badge--renamed, .diff-badge--copied { border-color: var(--color-needs-input-border); background: var(--color-needs-input-bg); }
+.diff-badge--conflicted { border-color: var(--color-error-border); background: var(--color-error-bg); }
+
+.diff-file { flex: 1 1 0; display: flex; flex-direction: column; min-height: 160px; min-width: 0; border-top: 1px solid var(--color-border); }
+.diff-file__header { flex: none; display: flex; align-items: center; gap: var(--space-2); min-width: 0; padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3); border-bottom: 1px solid var(--color-border-soft); font-size: var(--font-size-md); }
+.diff-file__path { flex: 1; align-items: center; }
+.diff-file__busy { flex: none; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.diff-file__body { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; }
+.diff-file__body.is-refreshing { opacity: .75; }
+
+.diff-note { margin: 0; padding: var(--space-1-5) var(--space-3); color: var(--color-text-2); font-size: var(--font-size-sm); line-height: 1.6; overflow-wrap: anywhere; }
+.diff-note p { margin: 0 0 var(--space-1-5); }
+.diff-note--warn { background: var(--color-needs-input-bg); }
+.diff-note--error { background: var(--color-error-bg); }
+.diff-viewer { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 200px; min-width: 0; }
+.diff-viewer > * { flex: 1; min-height: 0; min-width: 0; }
+
+/* The stored patch: monospace, scrolls in both directions, bounded by the container. */
+.diff-patch-wrap { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.diff-patch { flex: 1; min-height: 0; margin: 0; padding: var(--space-1) 0; overflow: auto; font: var(--font-size-sm)/1.5 var(--font-mono); white-space: pre; tab-size: 4; }
+.diff-patch__line { display: block; min-width: max-content; padding: 0 var(--space-3); }
+.diff-patch__line--add { background: var(--color-diff-add-bg); }
+.diff-patch__line--del { background: var(--color-diff-del-bg); }
+.diff-patch__line--hunk { background: var(--color-surface-soft); color: var(--color-text-3); }
+.diff-patch__line--meta { color: var(--color-text-muted); }

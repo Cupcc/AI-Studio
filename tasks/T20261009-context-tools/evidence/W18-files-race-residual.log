@@ -1,0 +1,177 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > out/renderer/index.html 的 CSP 与设计完全一致：脚本 self、worker none、仅两条被接受的 style 放宽，无 blob: / unsafe-eval / 通配
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 已打包应用的 app.asar 内的 index.html 与 out/ 一致，且资源文件名集合一致（打包的就是被评审的构建）
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 与 main 分支相比 CSP / 窗口 / 安全 / 预加载源文件没有改动（新增攻击面不改变这些）
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 构建产物中的危险词：eval / document.write 不存在；new Worker / Blob URL 只在 Monaco 的 worker 引导代码里（getWorker 抛错使其不可达）
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > 预加载包只通过 contextBridge 暴露 studio，不暴露 ipcRenderer / Node API
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > window.studio 的特性集合与每个通道：没有通用 fs / shell / exec / 路径读取原语；files 与 diff 的通道集合精确
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > files / diff 通道的请求类型里没有任何绝对路径、cwd、sha、参数数组字段（契约源码）
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > renderer/src（非测试）不含 dangerouslySetInnerHTML / innerHTML / insertAdjacentHTML / eval / new Function / document.write / createObjectURL / window.open / rehype-raw
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > renderer/src（非测试）不使用 localStorage / sessionStorage / indexedDB / document.cookie（文件内容与 Diff 只存在内存）
+ ↓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > Monaco 只经 import() 懒加载；运行时只注册只读查看所需贡献；无 @monaco-editor/react、无 CDN、无 worker URL
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B1 符号链接、特殊文件、硬链接 > 文件符号链接 / 目录符号链接 / 悬空 / 环 / 中间符号链接：列表标 symlink，读取与引用一律拒绝，永不返回 Project 外内容
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B1 符号链接、特殊文件、硬链接 > 符号链接目标文本（linkTarget）按原样回传，至多 256 字符：这是设计内的信息（记录）
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B1 符号链接、特殊文件、硬链接 > FIFO 与 Unix 套接字：不阻塞（读取、引用、列表都在 2 秒内返回），原因为 not_file
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B1 符号链接、特殊文件、硬链接 > 硬链接：服务无法、也不尝试区分硬链接（记录）；指向 Project 外同卷文件的硬链接可被读取
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B2 .git 排除：大小写、规范化、控制字符与特殊名称 > .GIT / .Git / 任意大小写与 NFD 路径均 excluded；列表不含任何 .git 变体
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B2 .git 排除：大小写、规范化、控制字符与特殊名称 > 非 ASCII 同形 / 不可见字符变体不会被 APFS 当作 .git（实测），因此无需排除；.git 文件（gitdir:）同样被排除
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B2 .git 排除：大小写、规范化、控制字符与特殊名称 > NFC / NFD 拼写：同一文件两种拼写都能读到，引用按 NFC 去重；大小写变体按真实路径去重
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B2 .git 排除：大小写、规范化、控制字符与特殊名称 > 含换行 / 控制字符 / RTL 覆盖符 / 255 字符的名字：可列出、可读（查看），但不可引用（name_unsupported）；RTL 覆盖符可引用（记录）
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B3 根目录被替换 / 删除，权限与大小 > Project 根被删除、被替换为指向外部的符号链接：project_unavailable，绝无外部内容
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B3 根目录被替换 / 删除，权限与大小 > chmod 000 的文件 / 目录：permission_denied，不抛出
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B3 根目录被替换 / 删除，权限与大小 > 10 GiB 稀疏文件：以 too_large 回答并带 size，内存不随文件大小增长，耗时 < 1 秒
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B3 根目录被替换 / 删除，权限与大小 > 读取期间文件持续增长：不返回撕裂内容（changed_while_reading 或一致快照）
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B4 规模：10 万个条目的目录 > 列表有界（≤ 2000 条、truncated），事件循环不被长时间阻塞
+[W16-B4] list(100k entries): 270 ms, entries=2000, event-loop max delay 9.0 ms
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B4 规模：10 万个条目的目录 > 列表有界（≤ 2000 条、truncated），事件循环不被长时间阻塞 6798ms
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 读取：目录被高速换成指向外部的符号链接时，永不读到 Project 外文件内容
+[W16-B5-read] attempts=76573 ok=1 leaked=0
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 读取：目录被高速换成指向外部的符号链接时，永不读到 Project 外文件内容 8103ms
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 列表：目录被高速换成指向外部目录的符号链接时，不应列出 Project 外目录的条目名
+[W16-B5-list] first leak after 840 ms
+[W16-B5-list] attempts=8262 ok=28 outside-names-listed=1
+
+ × tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 列表：目录被高速换成指向外部目录的符号链接时，不应列出 Project 外目录的条目名 947ms
+   → list() 在目录被换成符号链接后仍返回了 Project 外目录的条目名: expected 1 to be +0 // Object.is equality
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > node_modules 内 10 万个文件的创建风暴：不产生事件（早期过滤），事件循环不被拖慢
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > 普通目录内 10 万个文件的创建风暴：事件被合并为 overflow / 少量事件，数量有界
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > 最多 4 个活动 watcher：第 5 个 Project 降级为 degraded，释放一个后补上；订阅泄漏上限（记录）
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > 订阅泛滥：同一发送方重复订阅 20 万次，只占 Map 条目；全部退订 / 关闭后 watcher 释放（记录内存增长）
+ ↓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > detachOwner 释放该发送方的所有订阅；Project 关闭后广播 stopped 并可重新订阅
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F1 Files：请求泛滥 > 2 万个并发 read（1 MiB 文件）：并发受限、5 秒内全部给出结果、堆不失控、事件循环不被长时间阻塞
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F2 Diff：并发与订阅泛滥、风暴、泄漏 > getFile 并发超过 16 个：多出的请求被明确拒绝，不排成无界队列
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F2 Diff：并发与订阅泛滥、风暴、泄漏 > getSnapshot 泛滥（200 次连发）：后者取代前者，git 子进程数始终 ≤ 2（每 Project）
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F2 Diff：并发与订阅泛滥、风暴、泄漏 > 订阅泛滥：20 万次 diff:subscribe 只占 Map 条目（无每发送方上限，记录）；detachOwner 一次清空并关闭 watcher
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F2 Diff：并发与订阅泛滥、风暴、泄漏 > Diff watcher 风暴：普通目录 10 万个新文件，invalidated 事件数有界，事件循环不被拖慢；closeProject 后不再有事件
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F2 Diff：并发与订阅泛滥、风暴、泄漏 > Diff watcher 不忽略 .git 之外的 node_modules 一级以下事件之外的内容；node_modules 深层 10 万文件不触发事件
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F3 Diff 修改侧读取（readProjectFileBounded）：中间目录被换成符号链接的竞态 > 只对最后一级使用 O_NOFOLLOW（不是 O_NOFOLLOW_ANY）：高速换目录时是否读到外部内容（身份检查是唯一防线）
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F4 句柄与定时器泄漏：关闭 / 释放后没有残留 > Files：订阅 → 关闭 Project / dispose 后，活动 FSEvent 与计时器资源回到基线
+ ↓ tasks/T20261009-context-tools/evidence/W16-resources.test.ts > F4 句柄与定时器泄漏：关闭 / 释放后没有残留 > Diff：订阅 → 关闭后无 FSEvent；git 子进程为 0（按进程组探测）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C1 恶意仓库配置：被服务参数 / 环境挡掉的向量（期望：标记文件从不出现） > core.fsmonitor、diff.external、diff.<driver>.textconv / command、core.pager、core.sshCommand、core.askPass、credential.helper、core.editor、alias.diff 均不执行
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C1 恶意仓库配置：被服务参数 / 环境挡掉的向量（期望：标记文件从不出现） > include.path / includeIf 引入的配置同样被命令行 -c 覆盖：fsmonitor 与 diff.external 不执行
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C1 恶意仓库配置：被服务参数 / 环境挡掉的向量（期望：标记文件从不出现） > core.attributesFile 指向 Project 外文件（含 diff=driver）：textconv 不执行
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C1 恶意仓库配置：被服务参数 / 环境挡掉的向量（期望：标记文件从不出现） > 宿主环境里的 GIT_*（GIT_DIR / GIT_WORK_TREE / GIT_INDEX_FILE / GIT_EXTERNAL_DIFF / GIT_PAGER / GIT_SSH_COMMAND / GIT_CONFIG_* / GIT_TRACE / GIT_EXEC_PATH）全部被丢弃
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C1 恶意仓库配置：被服务参数 / 环境挡掉的向量（期望：标记文件从不出现） > scrubbedGitEnv：删除全部 GIT_*（含大小写之外的奇怪键），固定非交互变量；GIT_GLOBAL_ARGS 含 fsmonitor / external / pager 覆盖
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C2 [期望] 只读查询不应执行仓库钩子、不应改写用户的 .git/index > [期望] post-index-change 钩子不应在 Diff 查询期间运行（工作树文件仅 mtime 变化，内容未改）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C2 [期望] 只读查询不应执行仓库钩子、不应改写用户的 .git/index > [期望] core.hooksPath 指向 Project 内目录时同样不应运行钩子
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C2 [期望] 只读查询不应执行仓库钩子、不应改写用户的 .git/index > [期望] 查询不应改写用户仓库的 .git/index（--no-optional-locks 并不阻止 git diff 刷新索引）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C3 [已接受风险] filter.*.clean：精确记录何时执行、是否需要“有改动的文件” > CHARACTERISATION：仅 mtime 变化、内容未改的工作树，打开 Diff（快照）即执行 clean 过滤器
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C3 [已接受风险] filter.*.clean：精确记录何时执行、是否需要“有改动的文件” > CHARACTERISATION：整份拷贝的仓库（cp -R，无任何编辑）在首次打开 Diff 时对每个匹配文件执行 clean 过滤器与钩子
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C3 [已接受风险] filter.*.clean：精确记录何时执行、是否需要“有改动的文件” > CHARACTERISATION：未跟踪文件的单文件补丁（diff --no-index）也经过 clean 过滤器
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C4 仓库发现：.git 文件 / 符号链接 / core.worktree / 裸仓库 / 子目录 / 嵌套 > Project 位于 .git 目录内或是裸仓库：not_git，不列任何文件
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C4 仓库发现：.git 文件 / 符号链接 / core.worktree / 裸仓库 / 子目录 / 嵌套 > core.worktree 指向 Project 之外：not_git（Project 不在工作树内）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C4 仓库发现：.git 文件 / 符号链接 / core.worktree / 裸仓库 / 子目录 / 嵌套 > .git 是文件（gitdir:）或符号链接，指向 Project 之外的另一仓库：Diff 服务把那个仓库当作 Project 的仓库（记录行为与泄露面）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C4 仓库发现：.git 文件 / 符号链接 / core.worktree / 裸仓库 / 子目录 / 嵌套 > Project 是上层仓库的子目录：只显示该前缀内的变更，repoPrefix 给出前缀
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C4 仓库发现：.git 文件 / 符号链接 / core.worktree / 裸仓库 / 子目录 / 嵌套 > 嵌套仓库 / 子模块目录：作为 submodule 条目只给补丁，不读取其内部文件
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C4 仓库发现：.git 文件 / 符号链接 / core.worktree / 裸仓库 / 子目录 / 嵌套 > HEAD 树里手工构造的 .git/config 条目：只显示被提交的假内容，绝不读取真实的 .git/config
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C5 参数注入与路径形态 > 以 - / : 开头、含通配符、含空格 / 换行 / 制表符 / 非 UTF-8 的文件名：列表与补丁都精确，且不产生副作用
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C5 参数注入与路径形态 > oldPath 是任意 Project 路径（含魔法）：不改变查询范围，不报错泄露
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C5 参数注入与路径形态 > 原始侧的 sha 只来自 Git 自己的输出：一个恶意仓库把“文件名”设成形如 sha 的字符串也只是路径
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C6 规模与上限 > 2 MiB 补丁被截断为 ≤ 1 MiB 并标 truncated；两侧超过 512 KiB 时只给补丁（omitted too_large）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C6 规模与上限 > 5000 个未跟踪文件：列表 ≤ 2000 并标 truncated
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C6 规模与上限 > 2.5 万个 200 字符文件名的未跟踪文件（> 4 MiB 清单）：git 被终止，结果 truncated，快照不会声称“没有变更”
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C6 规模与上限 > 已跟踪的 64 MiB 二进制 / 文本 blob：原始侧经 cat-file -s 判定为 too_large，不把整个 blob 读入内存
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C7 取消 / 关闭 / 超时：不留 git 或过滤器子进程 > closeProject 在过滤器卡住时终止整个进程组：无 git、无过滤器子进程残留，且在 5 秒内返回
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C7 取消 / 关闭 / 超时：不留 git 或过滤器子进程 > 新的快照请求取代旧请求时，旧请求的 git / 过滤器被杀死
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C7 取消 / 关闭 / 超时：不留 git 或过滤器子进程 > [已接受风险·记录] 过滤器自行 setsid 脱离进程组后，closeProject 无法终止它（进程组清理的固有边界）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C7 取消 / 关闭 / 超时：不留 git 或过滤器子进程 > 查询超时（15 s）：返回 timeout，并杀死 git 与过滤器；约耗时 16 s
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C8 Git 查找器与错误信息 > splitPath / findExecutable 忽略相对与空的 PATH 项（Project 目录里的 ./git 不会被选中）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C8 Git 查找器与错误信息 > PATH 中靠前的绝对目录里的 git 会被采用（by design：与 CLI 发现一致）；定位器缓存结果
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C8 Git 查找器与错误信息 > /usr/bin/git 且 xcode-select 失败：返回 missing，且从不执行该可执行文件（version 注入器未被调用）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C8 Git 查找器与错误信息 > [记录] 通过符号链接 / 其它路径指向 /usr/bin/git 垫片时，定位器不识别垫片（仅比较字符串 /usr/bin/git）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C8 Git 查找器与错误信息 > dubious ownership：真实 git 的 stderr 含绝对路径与 safe.directory 建议；服务映射为固定说明，不含路径、不建议也不执行 safe.directory
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff.test.ts > C8 Git 查找器与错误信息 > sanitizeDetail：含空格的绝对路径、用户名、环境值的 stderr：记录残留（空格后的路径片段）
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C9 失败详情（snapshot.detail / 错误）不含绝对路径、用户名、环境值 > 坏配置行：渲染端收到的快照 JSON 不含临时目录、用户主目录、栈
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C9 失败详情（snapshot.detail / 错误）不含绝对路径、用户名、环境值 > repositoryformatversion=99：渲染端收到的快照 JSON 不含临时目录、用户主目录、栈
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C9 失败详情（snapshot.detail / 错误）不含绝对路径、用户名、环境值 > 损坏的 HEAD：渲染端收到的快照 JSON 不含临时目录、用户主目录、栈
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C9 失败详情（snapshot.detail / 错误）不含绝对路径、用户名、环境值 > 损坏的 index：渲染端收到的快照 JSON 不含临时目录、用户主目录、栈
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C9 失败详情（snapshot.detail / 错误）不含绝对路径、用户名、环境值 > 未知扩展：渲染端收到的快照 JSON 不含临时目录、用户主目录、栈
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C9 失败详情（snapshot.detail / 错误）不含绝对路径、用户名、环境值 > include.path 指向目录：渲染端收到的快照 JSON 不含临时目录、用户主目录、栈
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C9 失败详情（snapshot.detail / 错误）不含绝对路径、用户名、环境值 > git 可执行文件消失（定位器缓存了旧路径）：降级为 git_missing，不抛出，不泄露路径
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C10 查询期间的变化 > 持续改写已跟踪文件（先截断再写入的非原子写者）：修改侧永远是完整的某一版本或被保留，补丁与修改侧不混版本
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C10 查询期间的变化 > 查询过程中 Project 目录被整个移走：返回 project_unavailable / 失败，不抛未处理异常，无残留 git
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C11 真实子模块（gitlink） > 子模块只以 submodule 条目出现；子模块自己的恶意 config / 钩子在查询超级项目时不被执行；不读取子模块内部文件
+ ↓ tasks/T20261009-context-tools/evidence/W16-diff-extra.test.ts > C12 [记录] 子模块内部的未提交修改对 Diff 不可见 > 只修改子模块工作树内的文件：快照为 clean（--ignore-submodules=dirty），界面没有任何提示
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A1 files:list / files:read：敌意路径 > files:list：任何敌意路径要么在 parse 被拒，要么得到 unavailable；绝不返回 Project 外内容，错误不含绝对路径 / 栈
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A1 files:list / files:read：敌意路径 > files:read：任何敌意路径要么在 parse 被拒，要么得到 unavailable；绝不返回 Project 外内容，错误不含绝对路径 / 栈
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A1 files:list / files:read：敌意路径 > 合法路径作为对照：根目录、普通文件可读，.git 不被列出
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A2 files:resolve-reference > 敌意路径整体拒绝；数组形状攻击（巨大 / 稀疏 / 非数组 / 带原型键）在 parse 阶段被拒
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A2 files:resolve-reference > 成功的引用结果不含绝对路径（absolutePath 只留在主进程）
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A2 files:resolve-reference > 引用符号链接（文件 / 目录下的文件）与 .git 内容被拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:list：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:read：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:resolve-reference：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:subscribe：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:unsubscribe：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:get-snapshot：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:get-file：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:subscribe：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:unsubscribe：额外键（含 __proto__ / constructor / prototype）一律拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:list：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:read：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:resolve-reference：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:subscribe：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:unsubscribe：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:get-snapshot：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:get-file：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:subscribe：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:unsubscribe：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > 无原型对象是被接受的纯对象（Electron 结构化克隆产生的就是普通对象，这里仅记录行为）
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A4 Project id：未知 / 外来 / 关闭后 / 原型名 > Files：未知 Project 只得到 project_unavailable，没有目录内容
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A4 Project id：未知 / 外来 / 关闭后 / 原型名 > Diff：未知 Project 的错误不含路径
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A4 Project id：未知 / 外来 / 关闭后 / 原型名 > Project 被关闭（closeProject）后：list / read 拒绝服务但不崩，订阅可重新建立
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A5 订阅：他人发送方 / 重放 / 泛滥 > Files：他人的 subscriptionId 退订无效（订阅仍然有效），重放退订无副作用
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A5 订阅：他人发送方 / 重放 / 泛滥 > Diff：他人的 subscriptionId 退订被明确拒绝（信息：存在性预言机，单窗口应用下无影响）
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A6 Diff：getFile / getSnapshot 的敌意输入（参数注入走完整服务与真实 git） > 路径形如 git 选项 / pathspec 魔法：只当字面文件名，不产生任何副作用文件
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A6 Diff：getFile / getSnapshot 的敌意输入（参数注入走完整服务与真实 git） > 名为 --output=pwned.txt 的已提交文件被修改后，补丁正确且不写出文件
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A6 Diff：getFile / getSnapshot 的敌意输入（参数注入走完整服务与真实 git） > 指向 Project 外的符号链接：快照只列出链接本身，补丁只含目标文本，不含目标内容
+ ↓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A6 Diff：getFile / getSnapshot 的敌意输入（参数注入走完整服务与真实 git） > .git 路径查询：不返回 .git 内容
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D1 buildUserInput：任意路径都不能伪造额外的列表行 > 随机 + 定向的路径（引号、反斜杠、各种 Unicode 行终止符、双向控制符、代理对）下，一份引用恰好一行
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D1 buildUserInput：任意路径都不能伪造额外的列表行 > 无文件时与引用功能出现之前完全相同；attachments 策略携带绝对路径（未启用，仅记录）
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 特殊但合法的文件名：Provider 收到恰好 N 行 JSON 引号路径；绝对路径不出现；转录与 DB 只保存相对路径
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 含换行 / NEL / LS / PS / 制表符 / DEL 的文件名：整条消息被拒绝并点名，Provider 不被调用，无 Session 残留
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 完全相同的重复引用折叠成一行，不静默丢弃其它项
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > [W16-F 低] NFC / NFD 或大小写不同拼写的同一文件：解析器折叠为一份，SessionService 却按“请求数 = 返回数”校验，整条消息被拒绝且提示不点名路径
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 20 个可以，21 个在 IPC parse 即被拒绝；100 项上限与不同类型的混合项
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 符号链接、.git 内容、目录、已删除：整条消息被拒绝，错误只含相对路径与原因（无绝对路径 / 栈）
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 经 saveDraft / create / send / retry 偷运绝对路径 / .. / NUL：IPC parse 一律拒绝；旧版本遗留在 DB 的绝对路径在 retry 时被解析器拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 运行中追加（steer）与 Claude（text 策略）同样走解析器；Claude 无运行中输入时在解析器之前被拒绝
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 没有解析器：create / send / retry 明确拒绝，不静默丢弃引用
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > [窗口·记录] 解析之后、Provider 读取之前文件被换成指向外部的符号链接：引用仍被交付（交付的是路径文本，CLI 之后自行读取）
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 用户文本伪造引用头：只出现在用户文本区域，不影响应用生成的列表；无文件时用户文本原样发送
+ ↓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > [记录] 把名字本身写成提示注入的文件：该名字（≤ 255 字符）逐字进入提示词；JSON 引号不阻止语义注入
+ ↓ tasks/T20261009-context-tools/evidence/W16-owner.test.ts > 渲染进程消失后订阅被清理 > render-process-gone 与 destroyed 都触发 detachOwner；同一 owner 的监听器被移除；已销毁的 owner 立即清理
+ ↓ tasks/T20261009-context-tools/evidence/W16-owner.test.ts > 渲染进程消失后订阅被清理 > 未知的 webContents id（fromId 返回 undefined）也会被清理，不会永远占着订阅
+ ↓ tasks/T20261009-context-tools/evidence/W16-hfs.test.ts > HFS+：.git 的 Unicode 忽略码点别名 > 读取 / 列表 / 引用经别名名字都不能到达 .git 内容
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 列表：目录被高速换成指向外部目录的符号链接时，不应列出 Project 外目录的条目名
+AssertionError: list() 在目录被换成符号链接后仍返回了 Project 外目录的条目名: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tasks/T20261009-context-tools/evidence/W16-files.test.ts:332:62
+    333|
+    334| describe('B6 watcher：风暴、上限、泄漏、关闭', () => {
+    335|   it('node_modules 内 10 万个文件的创建风暴：不产生事件（早期过滤），事件循环不被拖慢', async () => {
+       |               ^
+    336|     const tree = fresh('w16-storm-nm')
+    337|     const { service, changed } = stack(tree)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 skipped (9)
+      Tests  1 failed | 2 passed | 132 skipped (135)
+   Start at  15:37:27
+   Duration  17.55s (tests 95%, transform 3%, import 2%)
+

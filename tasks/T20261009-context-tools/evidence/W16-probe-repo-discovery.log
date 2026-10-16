@@ -1,0 +1,25 @@
+### 1. crafted HEAD tree with .git/config entry
+error: invalid path '.git/config'
+fatal: make_cache_entry failed for path '.git/config'
+diff HEAD raw:
+:100644 000000 acbc962 0000000 D|.git/config|0	1	.git/config|
+### 2. .git FILE pointing outside
+inside-work-tree/prefix:
+true
+
+diff:
+:100644 000000 bbc86bf 0000000 D|other.txt|0	1	other.txt|
+proj.txt|
+### 3. core.worktree outside
+false
+
+:100644 000000 7898192 0000000 D|a.txt|
+### 4. bare repo as project / inside .git
+false
+
+false
+
+### 5. .git symlink to other repo
+true
+
+:100644 000000 bbc86bf 0000000 D|other.txt|

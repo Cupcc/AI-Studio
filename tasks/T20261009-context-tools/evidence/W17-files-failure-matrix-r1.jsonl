@@ -1,0 +1,32 @@
+{"n":"5","row":"--output=x.txt","kind":"file","viewerName":"--output=x.txt","meta":"28 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"--output=x.txt\" | "}
+{"n":"6","row":"-dash.txt","kind":"file","viewerName":"-dash.txt","meta":"23 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"-dash.txt\" | "}
+{"n":"7","row":":(top)colon.txt","kind":"file","viewerName":":(top)colon.txt","meta":"29 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \":(top)colon.txt\" | "}
+{"n":"8","row":"bad␊name.txt","kind":"file","viewerName":"bad␊name.txt","meta":"27 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"bad\\nname.txt\" | "}
+{"n":"9","row":"bad-utf8.txt","kind":"file","viewerName":"bad-utf8.txt","meta":"8 B","unavailable":"非 UTF-8 编码，无法显示bad-utf8.txt","reason":"unsupported_encoding","add":true,"plain":false,"mon":null}
+{"n":"10","row":"bell␇.txt","kind":"file","viewerName":"bell␇.txt","meta":"28 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"bell\\u0007.txt\" | "}
+{"n":"11","row":"bin.dat","kind":"file","viewerName":"bin.dat","meta":"8 B","unavailable":"二进制文件，不显示内容bin.dat","reason":"binary","add":true,"plain":false,"mon":null}
+{"n":"12","row":"crlf.txt","kind":"file","viewerName":"crlf.txt","meta":"21 B · UTF-8 · CRLF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"line1 | line2 | line3"}
+{"n":"13","row":"emoji-😀.txt","kind":"file","viewerName":"emoji-😀.txt","meta":"28 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"emoji-😀.txt\" | "}
+{"n":"14","row":"exact-1MiB.txt","kind":"file","viewerName":"exact-1MiB.txt","meta":"1 MiB · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+{"n":"15","row":"glob[1]*?.txt","kind":"file","viewerName":"glob[1]*?.txt","meta":"27 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"glob[1]*?.txt\" | "}
+{"n":"16","row":"link-dangling","kind":"symlink","viewerName":"link-dangling","unavailable":"符号链接未跟随，无法查看link-dangling","reason":"symlink_refused","add":false,"plain":false,"mon":null}
+{"n":"17","row":"link-loop-a","kind":"symlink","viewerName":"link-loop-a","unavailable":"符号链接未跟随，无法查看link-loop-a","reason":"symlink_refused","add":false,"plain":false,"mon":null}
+{"n":"18","row":"link-loop-b","kind":"symlink","viewerName":"link-loop-b","unavailable":"符号链接未跟随，无法查看link-loop-b","reason":"symlink_refused","add":false,"plain":false,"mon":null}
+{"n":"19","row":"link-to-dir","kind":"symlink","viewerName":"link-to-dir","unavailable":"符号链接未跟随，无法查看link-to-dir","reason":"symlink_refused","add":false,"plain":false,"mon":null}
+{"n":"20","row":"link-to-file","kind":"symlink","viewerName":"link-to-file","unavailable":"符号链接未跟随，无法查看link-to-file","reason":"symlink_refused","add":false,"plain":false,"mon":null}
+{"n":"21","row":"link-to-outside","kind":"symlink","viewerName":"link-to-outside","unavailable":"符号链接未跟随，无法查看link-to-outside","reason":"symlink_refused","add":false,"plain":false,"mon":null}
+{"n":"22","row":"ls name.txt","kind":"file","viewerName":"ls name.txt","meta":"27 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"ls�name.txt\" | "}
+{"n":"23","row":"mixed.txt","kind":"file","viewerName":"mixed.txt","meta":"27 B · UTF-8 · 混合换行","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"lf | crlf | lf again"}
+{"n":"24","row":"nelname.txt","kind":"file","viewerName":"nelname.txt","meta":"27 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"nel�name.txt\" | "}
+{"n":"25","row":"over-1MiB-by-1.txt","kind":"file","viewerName":"over-1MiB-by-1.txt","meta":"1.0 MiB","unavailable":"文件过大（1.0 MiB），超过 1 MiB 的查看上限over-1MiB-by-1.txt","reason":"too_large","add":true,"plain":false,"mon":null}
+{"n":"26","row":"pipe.fifo","kind":"other","viewerName":"pipe.fifo","unavailable":"不是普通文件，无法查看pipe.fifo","reason":"not_file","add":false,"plain":false,"mon":null}
+{"n":"27","row":"rlo‮name.txt","kind":"file","viewerName":"rlo‮name.txt","meta":"28 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"rlo‮name.txt\" | "}
+{"n":"28","row":"secret.txt","kind":"file","viewerName":"secret.txt","unavailable":"无权限读取此文件secret.txt","reason":"permission_denied","add":true,"plain":false,"mon":null}
+{"n":"29","row":"space name.txt","kind":"file","viewerName":"space name.txt","meta":"28 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"space name.txt\" | "}
+{"n":"30","row":"tab␉name.txt","kind":"file","viewerName":"tab␉name.txt","meta":"27 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"tab\\tname.txt\" | "}
+{"n":"31","row":"too-large-1.3MiB.txt","kind":"file","viewerName":"too-large-1.3MiB.txt","meta":"1.3 MiB","unavailable":"文件过大（1.3 MiB），超过 1 MiB 的查看上限too-large-1.3MiB.txt","reason":"too_large","add":true,"plain":false,"mon":null}
+{"n":"32","row":"utf8-bom.txt","kind":"file","viewerName":"utf8-bom.txt","meta":"17 B · UTF-8 (BOM) · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"utf8 with bom | "}
+{"n":"33","row":"utf16be-bom.txt","kind":"file","viewerName":"utf16be-bom.txt","meta":"32 B · UTF-16 BE (BOM) · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"UTF-16 BE text | "}
+{"n":"34","row":"utf16le-bom.txt","kind":"file","viewerName":"utf16le-bom.txt","meta":"62 B · UTF-16 LE (BOM) · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"UTF-16 LE text 你好 | second line | "}
+{"n":"35","row":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","kind":"file","viewerName":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.txt","meta":"19 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"255-character name | "}
+{"n":"36","row":"日本語.md","kind":"file","viewerName":"日本語.md","meta":"26 B · UTF-8 · LF","unavailable":null,"reason":null,"add":true,"plain":false,"mon":"content of \"日本語.md\" | "}

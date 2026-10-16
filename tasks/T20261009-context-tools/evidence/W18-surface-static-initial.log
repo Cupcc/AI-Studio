@@ -1,0 +1,54 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 构建产物中的危险词：eval / document.write 不存在；new Worker / Blob URL 只在 Monaco 的 worker 引导代码里（getWorker 抛错使其不可达）
+[W16-E dangerous tokens in built chunks] {}
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > out/renderer/index.html 的 CSP 与设计完全一致：脚本 self、worker none、仅两条被接受的 style 放宽，无 blob: / unsafe-eval / 通配 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 已打包应用的 app.asar 内的 index.html 与 out/ 一致，且资源文件名集合一致（打包的就是被评审的构建） 67ms
+ × tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 与 main 分支相比 CSP / 窗口 / 安全 / 预加载源文件没有改动（新增攻击面不改变这些） 23ms
+   → expected 'apps/desktop/electron.vite.config.ts' to be '' // Object.is equality
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 构建产物中的危险词：eval / document.write 不存在；new Worker / Blob URL 只在 Monaco 的 worker 引导代码里（getWorker 抛错使其不可达） 50ms
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > window.studio 的特性集合与每个通道：没有通用 fs / shell / exec / 路径读取原语；files 与 diff 的通道集合精确
+[W16-E window.studio surface] {"app":["getInfo","onWindowFocusChanged","ping"],"project":["bootstrap","cancelQuit","closeProject","confirmQuit","getUiState","listRecent","onFlushRequested","onMenuCommand","onQuitRequested","openDirectory","openPath","removeRecent","saveWindowState","stateFlushed","updateUiState"],"session":["answer","create","getConversation","getDefaultCli","getDraft","getModels","getProjectState","getProviders","list","onProvidersChanged","onSummaryChanged","onTranscriptChanged","opened","projectClosed","rename","replyWithText","retry","saveDraft","send","setDefaultCli","setModel","stop","stopProject","updateViewing"],"projectView":["getContext","getSnapshot","list","onError","onSnapshotChanged"],"settings":["getAppearance","onAppearanceChanged","onOpenRequested","setGlassColor","setMode","setTheme"],"browser":["dismissExternal","focus","getState","navigate","onStateChanged","openExternal","reload","setBounds","setVisible"],"terminal":["ack","attach","close","create","detach","input","list","onChanged","onOutput","resize"],"files":["list","onChanged","onWatchChanged","read","resolveReference","subscribe","unsubscribe"],"diff":["getFile","getSnapshot","onInvalidated","onWatchChanged","subscribe","unsubscribe"]}
+
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > files / diff 通道的请求类型里没有任何绝对路径、cwd、sha、参数数组字段（契约源码）
+[W16-E contract words files] ["absolute"]
+[W16-E contract words diff] ["absolute"]
+
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > Monaco 只经 import() 懒加载；运行时只注册只读查看所需贡献；无 @monaco-editor/react、无 CDN、无 worker URL
+[W16-E monaco contributions] ["features/codicon/register.js","features/diffEditor/register.js","features/find/register.js","features/clipboard/register.js","features/contextmenu/register.js","features/wordOperations/register.js"]
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > 预加载包只通过 contextBridge 暴露 studio，不暴露 ipcRenderer / Node API 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > window.studio 的特性集合与每个通道：没有通用 fs / shell / exec / 路径读取原语；files 与 diff 的通道集合精确 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > files / diff 通道的请求类型里没有任何绝对路径、cwd、sha、参数数组字段（契约源码） 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > renderer/src（非测试）不含 dangerouslySetInnerHTML / innerHTML / insertAdjacentHTML / eval / new Function / document.write / createObjectURL / window.open / rehype-raw 13ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > renderer/src（非测试）不使用 localStorage / sessionStorage / indexedDB / document.cookie（文件内容与 Diff 只存在内存） 4ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > Monaco 只经 import() 懒加载；运行时只注册只读查看所需贡献；无 @monaco-editor/react、无 CDN、无 worker URL 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 与 main 分支相比 CSP / 窗口 / 安全 / 预加载源文件没有改动（新增攻击面不改变这些）
+AssertionError: expected 'apps/desktop/electron.vite.config.ts' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ apps/desktop/electron.vite.config.ts
+
+ ❯ tasks/T20261009-context-tools/evidence/W16-surface.test.ts:72:21
+     70|       cwd: join(desktop, '../..'), encoding: 'utf8'
+     71|     }).trim()
+     72|     expect(changed).toBe('')
+       |                     ^
+     73|   })
+     74|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  16:06:52
+   Duration  365ms (tests 69%, transform 24%, import 6%, worker 1%)
+

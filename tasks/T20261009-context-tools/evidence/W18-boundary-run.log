@@ -1,0 +1,21 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v2: staged and working-tree changes survive a byte-faithful isolated query 161ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v3: staged and working-tree changes survive a byte-faithful isolated query 141ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v4: staged and working-tree changes survive a byte-faithful isolated query 128ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v2: staged and working-tree changes survive a byte-faithful isolated query 140ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v3: staged and working-tree changes survive a byte-faithful isolated query 145ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v4: staged and working-tree changes survive a byte-faithful isolated query 117ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > a racy-clean same-size edit remains visible while the real index bytes and mtime stay unchanged 124ms
+stdout | tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve real index bytes/mtime and sharedindex data; records cache keepalive metadata
+[W18 split-index] shared bytes unchanged; cache mtime changed=true
+
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve real index bytes/mtime and sharedindex data; records cache keepalive metadata 114ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-files-boundary.test.ts > omits an unaddressable APFS long UTF-8 child with a flag while keeping the rest of its directory available 83ms
+
+ Test Files  2 passed (2)
+      Tests  9 passed (9)
+   Start at  15:37:09
+   Duration  1.43s (tests 94%, transform 4%, import 1%)
+

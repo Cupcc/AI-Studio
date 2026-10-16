@@ -1,0 +1,45 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v2: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v3: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v4: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v2: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v3: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v4: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > a racy-clean same-size edit remains visible while the real index bytes and mtime stay unchanged
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve real index bytes/mtime and sharedindex data; records cache keepalive metadata
+stdout | tasks/T20261009-context-tools/evidence/W18-files-race.test.ts > does not return names or link targets from an external directory swapped into the requested path
+[W18 symlink-row race] attempts=178476 ok=336 leaks=1
+
+ × tasks/T20261009-context-tools/evidence/W18-files-race.test.ts > does not return names or link targets from an external directory swapped into the requested path 19570ms
+   → expected 1 to be +0 // Object.is equality
+ ↓ tasks/T20261009-context-tools/evidence/W18-files-boundary.test.ts > omits an unaddressable APFS long UTF-8 child with a flag while keeping the rest of its directory available
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W18-files-race.test.ts > does not return names or link targets from an external directory swapped into the requested path
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tasks/T20261009-context-tools/evidence/W18-files-race.test.ts:33:19
+     31|     }
+     32|     console.info(`[W18 symlink-row race] attempts=${attempts} ok=${ok}…
+     33|     expect(leaks).toBe(0)
+       |                   ^
+     34|   } finally {
+     35|     writeFileSync(stop, 'stop'); child.kill('SIGKILL')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 skipped (3)
+      Tests  1 failed | 9 skipped (10)
+   Start at  15:47:09
+   Duration  20.03s (tests 99%)
+

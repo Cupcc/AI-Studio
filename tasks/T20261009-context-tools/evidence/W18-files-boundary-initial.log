@@ -1,0 +1,51 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ × tasks/T20261009-context-tools/evidence/W18-files-boundary.test.ts > lists an APFS long UTF-8 child as disabled other instead of making the entire directory unreadable 74ms
+   → expected { ok: false, reason: 'unreadable' } to deeply equal { ok: true, …(2) }
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v2: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v3: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v4: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v2: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v3: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v4: staged and working-tree changes survive a byte-faithful isolated query
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > a racy-clean same-size edit remains visible while the real index bytes and mtime stay unchanged
+ ↓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve the real index and every sharedindex file
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W18-files-boundary.test.ts > lists an APFS long UTF-8 child as disabled other instead of making the entire directory unreadable
+AssertionError: expected { ok: false, reason: 'unreadable' } to deeply equal { ok: true, …(2) }
+
+- Expected
++ Received
+
+  {
+-   "entries": [
+-     {
+-       "kind": "other",
+-       "name": "漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢漢",
+-     },
+-   ],
+-   "ok": true,
+-   "truncated": false,
++   "ok": false,
++   "reason": "unreadable",
+  }
+
+ ❯ tasks/T20261009-context-tools/evidence/W18-files-boundary.test.ts:23:18
+     21|   execFileSync(process.execPath, ['-e', "require('node:fs').writeFileS…
+     22|   const listed = await listDirectory(root, parent)
+     23|   expect(listed).toEqual({ ok: true, entries: [{ name, kind: 'other' }…
+       |                  ^
+     24| })
+     25|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 skipped (2)
+      Tests  1 failed | 8 skipped (9)
+   Start at  15:16:40
+   Duration  350ms (tests 55%, transform 31%, import 11%, worker 3%)
+

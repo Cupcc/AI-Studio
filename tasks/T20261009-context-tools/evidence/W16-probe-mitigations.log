@@ -1,0 +1,5 @@
+real .git/index mtime before=1792049735.007135339 after=1792049735.007135339
+hook markers:
+-- control: same without GIT_INDEX_FILE and without hooksPath
+real .git/index mtime before=1792049735.007135339 after=1792049737.118631592
+hook

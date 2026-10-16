@@ -2,6 +2,7 @@ import type { AgentProvider, InputRequestInit, ResumeSessionOptions, SessionSink
 import { FakeProvider } from '@ai-studio/agent-adapter/testing'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { parseReferencedFiles } from './file-reference'
 
 /** `[e2e:markdown]` reply covering the Markdown range of Shell Spec v02 §6 (content mirrors prototype v02). */
 export const E2E_MARKDOWN_REPLY = [
@@ -38,14 +39,18 @@ export const E2E_MARKDOWN_REPLY = [
 /** Explicitly injected by the development entry point; never chosen by runtime fallback. */
 export function createE2eProviders(): AgentProvider[] {
   return (['codex', 'claude-code'] as const).map(cli => {
-    const runs = new Map<string, { turn: TurnContext; sink: SessionSink; remaining: number }>()
+    // `files` collects the references of every user input of the turn (start and steer), in arrival order.
+    const runs = new Map<string, { turn: TurnContext; sink: SessionSink; remaining: number; files: string[] }>()
     const failures = new Set<string>()
     const schedule = (turn: TurnContext, callback: () => void, delay: number) => {
       const timer = setTimeout(() => { if (!turn.signal.aborted) callback() }, delay)
       turn.signal.addEventListener('abort', () => clearTimeout(timer), { once: true })
     }
-    const complete = (run: { turn: TurnContext; sink: SessionSink }, text = '模拟回复已完成。可以继续同一个 Session。') => {
-      run.sink.itemCompleted(run.turn.turnId, { itemId: `${run.turn.turnId}:message`, kind: 'assistant_message', status: 'completed', text })
+    const DEFAULT_REPLY = '模拟回复已完成。可以继续同一个 Session。'
+    const complete = (run: { turn: TurnContext; sink: SessionSink; files: string[] }, text = DEFAULT_REPLY) => {
+      // Lets Playwright assert from the transcript which references actually reached the Provider.
+      const reply = text === DEFAULT_REPLY && run.files.length ? `已收到文件引用：${run.files.join(', ')}` : text
+      run.sink.itemCompleted(run.turn.turnId, { itemId: `${run.turn.turnId}:message`, kind: 'assistant_message', status: 'completed', text: reply })
       run.sink.nativeTurnEnded(run.turn.turnId, { status: 'completed', model: cli === 'codex' ? 'e2e-codex' : 'e2e-claude' })
     }
     const approval: InputRequestInit = {
@@ -67,11 +72,12 @@ export function createE2eProviders(): AgentProvider[] {
       ],
       capabilities: { nativeTitle: true, inputWhileRunning: cli === 'codex' ? 'steer' : 'none' },
       behavior: {
-        onSteer(_turn, input) {
+        onSteer(turn, input) {
           if (input.text.includes('[e2e:steer-error]')) throw new Error('模拟追加失败，输入已保留')
+          runs.get(turn.turnId)?.files.push(...parseReferencedFiles(input.text))
         },
         onStartTurn(turn, input, sink) {
-          const run = { turn, sink, remaining: 0 }
+          const run = { turn, sink, remaining: 0, files: parseReferencedFiles(input.text) }
           runs.set(turn.turnId, run)
           turn.signal.addEventListener('abort', () => runs.delete(turn.turnId), { once: true })
           sink.itemStarted(turn.turnId, { itemId: `${turn.turnId}:message`, kind: 'assistant_message', status: 'in_progress', text: '' })

@@ -1,0 +1,60 @@
+{
+ "title": "项目变更 · HEAD 不可用（尚无首个提交）",
+ "meta": "4 个文件",
+ "banners": [
+  {
+   "cls": "diff-banner--warn diff-banner--block",
+   "text": "还没有首个提交，基线（HEAD）不可用没有 HEAD 就无法比较变更，所以这里列出的是Git 可见的非忽略文件，按新增显示；这并不表示它们已被添加或提交。本客户端不会替你创建提交或仓库；在 Terminal 中完成首次提交后，这里会显示相对 HEAD 的变更。"
+  }
+ ],
+ "state": null,
+ "stateTitle": null,
+ "rowCount": 4,
+ "rows": [
+  {
+   "label": "新增，readme.md",
+   "selected": "false",
+   "tabindex": "0",
+   "badge": "A",
+   "counts": null,
+   "tags": null,
+   "rename": null,
+   "title": "readme.md"
+  },
+  {
+   "label": "新增，sp ace.txt",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": null,
+   "rename": null,
+   "title": "sp ace.txt"
+  },
+  {
+   "label": "新增，src/a.ts",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": null,
+   "rename": null,
+   "title": "src/a.ts"
+  },
+  {
+   "label": "新增，src/b.ts",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": null,
+   "rename": null,
+   "title": "src/b.ts"
+  }
+ ],
+ "tabStops": [
+  "readme.md"
+ ],
+ "file": null,
+ "monaco": null
+}

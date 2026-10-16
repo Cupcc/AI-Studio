@@ -1,0 +1,40 @@
+{
+ "title": "项目变更 · 相对 HEAD (main @ ed110f9)",
+ "meta": "2 个文件+1−1",
+ "banners": [
+  {
+   "cls": "",
+   "text": "此 Project 位于 Git 仓库的子目录 pkg 中，只显示该目录内的变更，路径相对于 Project 目录。"
+  }
+ ],
+ "state": null,
+ "stateTitle": null,
+ "rowCount": 2,
+ "rows": [
+  {
+   "label": "修改，inner.txt，新增 1 行，删除 1 行",
+   "selected": "false",
+   "tabindex": "0",
+   "badge": "M",
+   "counts": "+1−1",
+   "tags": null,
+   "rename": null,
+   "title": "inner.txt"
+  },
+  {
+   "label": "新增，new.txt，未跟踪",
+   "selected": "false",
+   "tabindex": "-1",
+   "badge": "A",
+   "counts": null,
+   "tags": "未跟踪",
+   "rename": null,
+   "title": "new.txt"
+  }
+ ],
+ "tabStops": [
+  "inner.txt"
+ ],
+ "file": null,
+ "monaco": null
+}

@@ -188,12 +188,12 @@
 
 ### 3.13 工程工具接缝
 
-FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026-10-13 确认）。本节是接口准备，尚未实现或运行验证；逻辑契约以 [Tools §4.1、§4.2](../tools/spec.md#4-状态与接口) 为准。
+FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026-10-13 确认）。文件引用已接入桌面 Session 的输入转换，轮次补丁仍为接口准备；逻辑契约以 [Tools §4.1、§4.2](../tools/spec.md#4-状态与接口) 为准。
 
-- 文件输入：Codex 已有 file → mention 映射，但桌面 Session 尚未转交 attachments；Claude 当前拒绝结构化附件。后续分别核对原生文件 / 文本引用方式并接通，覆盖普通发送和原生支持的运行中输入；不把当前 unsupported 固化为产品禁止，不静默丢弃引用或声称已发送。
+- 文件输入：Adapter 保留 Codex 的 file → mention 映射与 Claude 对结构化附件的 `unsupported`。桌面 Session 阶段 1 对两个 CLI 都选择文本路径清单，转换由 `main/services/session/file-reference.ts` 负责，Adapter 不重复转换；依据与边界见 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化)。模拟 Provider 已覆盖普通发送、恢复 / 重试和 Codex 运行中追加；两个真实 CLI 是否实际采用这些引用仍未验证，不以标签或文本送达代替真实接收。Claude 运行中追加 / 排队仍待原生能力对齐。
 - 轮次数据：Codex 当前 fileChange 映射仅保留路径 / 类型，尚未转交 patch，未接入 turn/diff/updated。先验证锁定版本的聚合更新、完成状态、非 Git 和 Shell 修改覆盖，再输出带来源与原生身份的记录。Claude 独立核对同等数据及缺失原因，不假设两者一致。
 - 事件接收核对 Runtime 代次、Thread / Turn 归属及修订；Adapter 报告 unknown / empty / unavailable / failed 的依据，应用 Session 负责持久化与 App Turn 关联，Adapter 不读当前工作区伪造历史。
-- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。真实调用范围与预算另行确定，本轮只更新文档。
+- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。真实调用范围与预算另行确定；阶段 1 的模拟文件引用链路不扩大真实调用授权。
 
 本地审阅依据及官方接口来源见 [工程工具调研 §9](../../tasks/T20261009-context-tools/research.md#9-开发准备审阅2026-10-13)。
 

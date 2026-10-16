@@ -8,6 +8,8 @@ import { projectViewContract } from './project-view'
 import { settingsContract } from './settings'
 import { browserContract } from './browser'
 import { terminalContract } from './terminal'
+import { filesContract } from './files'
+import { diffContract } from './diff'
 
 export const contracts = [
   appContract,
@@ -16,7 +18,9 @@ export const contracts = [
   projectViewContract,
   settingsContract,
   browserContract,
-  terminalContract
+  terminalContract,
+  filesContract,
+  diffContract
 ] as const
 
 /** Type of `window.studio` as exposed by the preload bridge. */

@@ -4,6 +4,7 @@ import { ClaudeProvider } from '@ai-studio/agent-adapter/claude'
 import type { AgentProvider, InputResponse } from '@ai-studio/agent-adapter'
 import { sessionContract, SESSION_MESSAGE_MAX_LENGTH, SESSION_TITLE_MAX_LENGTH } from '@shared/ipc/session'
 import type { ComposerDraft, ContextItem, DraftKey, SessionCli } from '@shared/session/types'
+import { FILES_LIMITS, parseProjectPath, type FileReferenceResolver } from '@shared/tools/files'
 import { SESSION_CLIS } from '@shared/session/types'
 import { catalogEntry } from '@shared/project-view/defaults'
 import { projectViewsFor } from '../services/project-view'
@@ -28,10 +29,15 @@ function record(raw: unknown, keys: readonly string[]) {
 }
 function projectRef(raw: unknown) { const value = record(raw, ['projectId']); return { projectId: id(value.projectId, 'projectId') } }
 function sessionRef(raw: unknown) { const value = record(raw, ['sessionId']); return { sessionId: id(value.sessionId, 'sessionId') } }
+/** File items are Project-relative (Tools §4.1); the shared rules reject absolute paths, `..`, NUL and oversize. */
+function filePath(value: unknown): string {
+  const path = expectString(value, 'path', { minLength: 1, maxLength: 8192 })
+  try { return parseProjectPath(path) } catch (error) { throw new IpcValidationError(error instanceof Error ? error.message : 'Invalid path') }
+}
 function context(value: unknown): ContextItem[] {
   if (value === undefined) return []
   if (!Array.isArray(value) || value.length > 100) throw new IpcValidationError('Invalid contextItems')
-  return value.map(item => {
+  const items = value.map((item): ContextItem => {
     const entry = expectRecord(item)
     if (entry.type === 'view') {
       expectOnlyKeys(entry, ['type', 'viewId'])
@@ -39,12 +45,12 @@ function context(value: unknown): ContextItem[] {
     }
     if (entry.type === 'file') {
       expectOnlyKeys(entry, ['type', 'path'])
-      const path = expectString(entry.path, 'path', { minLength: 1, maxLength: 8192 })
-      if (path.includes('\0')) throw new IpcValidationError('Invalid path')
-      return { type: 'file', path }
+      return { type: 'file', path: filePath(entry.path) }
     }
     throw new IpcValidationError('Invalid context type')
   })
+  if (items.filter(item => item.type === 'file').length > FILES_LIMITS.referencesPerMessage) throw new IpcValidationError('Too many file references')
+  return items
 }
 function draftKey(raw: unknown): DraftKey {
   const value = expectRecord(raw)
@@ -93,6 +99,8 @@ function response(raw: unknown): InputResponse {
 export interface SessionFeatureOptions {
   providers?: readonly AgentProvider[]
   isForeground?: (senderId: number) => boolean
+  /** Re-validates Files references at send time; without it a message with file items is refused. */
+  fileReferences?: FileReferenceResolver
 }
 
 export function isSessionWindowForeground(senderId: number): boolean {
@@ -109,6 +117,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     providers: options.providers ?? [new CodexProvider(), new ClaudeProvider()],
     environment: async () => ({ env: (await core.shellEnv.get()).env }),
     isForeground: options.isForeground ?? isSessionWindowForeground,
+    fileReferences: options.fileReferences,
     summaryChanged: change => core.broadcast(sessionContract.events.summaryChanged, change),
     transcriptChanged: change => core.broadcast(sessionContract.events.transcriptChanged, change),
     providersChanged: providers => core.broadcast(sessionContract.events.providersChanged, providers),

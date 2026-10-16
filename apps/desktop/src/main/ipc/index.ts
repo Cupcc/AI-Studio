@@ -9,29 +9,50 @@ import { createSessionFeature, type SessionFeatureOptions } from './session'
 import { createSettingsFeature } from './settings'
 import { createBrowserFeature } from './browser'
 import { createTerminalFeature } from './terminal'
+import { createFilesFeature } from './files'
+import { createDiffFeature } from './diff'
 import { projectShellFor } from '../services/project'
 import { terminalFor } from '../services/terminal'
 import { browserFor } from '../services/browser'
+import { filesFor } from '../services/files'
+import { diffFor } from '../services/diff'
 import { registerFeatureHandlers, type FeatureHandlers, type MainIpc } from './registry'
 
+/** Every cleanup is attempted; failures are reported together so one stuck tool cannot skip the others. */
+async function attemptAll(message: string, operations: (() => Promise<void>)[]): Promise<void> {
+  const results = await Promise.allSettled(operations.map(operation => operation()))
+  const errors = results.flatMap(result => result.status === 'rejected' ? [result.reason] : [])
+  if (errors.length) throw new AggregateError(errors, `${message}: ${errors.map(error => error instanceof Error ? error.message : String(error)).join('; ')}`)
+}
+
 export function createFeatures(core: CoreServices, sessionOptions: SessionFeatureOptions = {}): FeatureHandlers[] {
-  const terminal = terminalFor(core), browser = browserFor(core), shell = projectShellFor(core)
+  const terminal = terminalFor(core), browser = browserFor(core), files = filesFor(core), diff = diffFor(core), shell = projectShellFor(core)
   shell.toolsChanged = () => browser.syncVisibility()
   shell.setToolPort({
     activeTerminals: projectId => terminal.activeTerminals(projectId).map(item => ({
       kind: 'terminal' as const, id: item.terminalId, projectId: item.projectId, title: item.title
     })),
-    closeProject: async projectId => { await terminal.closeProject(projectId); await browser.close(projectId) },
-    closeAll: async () => { await terminal.closeAll(); await browser.closeAll() }
+    closeProject: projectId => attemptAll('Project 工具清理失败', [
+      async () => { await terminal.closeProject(projectId); await browser.close(projectId) },
+      () => files.closeProject(projectId),
+      () => diff.closeProject(projectId)
+    ]),
+    closeAll: () => attemptAll('工具清理失败', [
+      async () => { await terminal.closeAll(); await browser.closeAll() },
+      () => files.closeAll(),
+      () => diff.closeAll()
+    ])
   })
   return [
     createAppFeature(core),
     createProjectFeature(core),
     createProjectViewFeature(core),
-    createSessionFeature(core, sessionOptions),
+    createSessionFeature(core, { ...sessionOptions, fileReferences: sessionOptions.fileReferences ?? files }),
     createSettingsFeature(core),
     createBrowserFeature(core),
-    createTerminalFeature(core)
+    createTerminalFeature(core),
+    createFilesFeature(core),
+    createDiffFeature(core)
   ]
 }
 

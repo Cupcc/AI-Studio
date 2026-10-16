@@ -1,0 +1,57 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A1 files:list / files:read：敌意路径 > files:list：任何敌意路径要么在 parse 被拒，要么得到 unavailable；绝不返回 Project 外内容，错误不含绝对路径 / 栈 4ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A1 files:list / files:read：敌意路径 > files:read：任何敌意路径要么在 parse 被拒，要么得到 unavailable；绝不返回 Project 外内容，错误不含绝对路径 / 栈 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A1 files:list / files:read：敌意路径 > 合法路径作为对照：根目录、普通文件可读，.git 不被列出 79ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A2 files:resolve-reference > 敌意路径整体拒绝；数组形状攻击（巨大 / 稀疏 / 非数组 / 带原型键）在 parse 阶段被拒 10ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A2 files:resolve-reference > 成功的引用结果不含绝对路径（absolutePath 只留在主进程） 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A2 files:resolve-reference > 引用符号链接（文件 / 目录下的文件）与 .git 内容被拒绝 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:list：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:read：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:resolve-reference：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:subscribe：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:unsubscribe：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:get-snapshot：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:get-file：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:subscribe：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:unsubscribe：额外键（含 __proto__ / constructor / prototype）一律拒绝 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:list：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:read：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:resolve-reference：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:subscribe：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > files:unsubscribe：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:get-snapshot：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:get-file：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:subscribe：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > diff:unsubscribe：非对象 / 类实例 / 数组 / 多参数 / 不受信的发送方 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A3 对象形状：额外键、原型污染键、非纯对象 > 无原型对象是被接受的纯对象（Electron 结构化克隆产生的就是普通对象，这里仅记录行为） 71ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A4 Project id：未知 / 外来 / 关闭后 / 原型名 > Files：未知 Project 只得到 project_unavailable，没有目录内容 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A4 Project id：未知 / 外来 / 关闭后 / 原型名 > Diff：未知 Project 的错误不含路径 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A4 Project id：未知 / 外来 / 关闭后 / 原型名 > Project 被关闭（closeProject）后：list / read 拒绝服务但不崩，订阅可重新建立 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A5 订阅：他人发送方 / 重放 / 泛滥 > Files：他人的 subscriptionId 退订无效（订阅仍然有效），重放退订无副作用 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A5 订阅：他人发送方 / 重放 / 泛滥 > Diff：他人的 subscriptionId 退订被明确拒绝（信息：存在性预言机，单窗口应用下无影响） 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A6 Diff：getFile / getSnapshot 的敌意输入（参数注入走完整服务与真实 git） > 路径形如 git 选项 / pathspec 魔法：只当字面文件名，不产生任何副作用文件 568ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A6 Diff：getFile / getSnapshot 的敌意输入（参数注入走完整服务与真实 git） > 名为 --output=pwned.txt 的已提交文件被修改后，补丁正确且不写出文件 199ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A6 Diff：getFile / getSnapshot 的敌意输入（参数注入走完整服务与真实 git） > 指向 Project 外的符号链接：快照只列出链接本身，补丁只含目标文本，不含目标内容 116ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-ipc.test.ts > A6 Diff：getFile / getSnapshot 的敌意输入（参数注入走完整服务与真实 git） > .git 路径查询：不返回 .git 内容 207ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D1 buildUserInput：任意路径都不能伪造额外的列表行 > 随机 + 定向的路径（引号、反斜杠、各种 Unicode 行终止符、双向控制符、代理对）下，一份引用恰好一行 71ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D1 buildUserInput：任意路径都不能伪造额外的列表行 > 无文件时与引用功能出现之前完全相同；attachments 策略携带绝对路径（未启用，仅记录） 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 特殊但合法的文件名：Provider 收到恰好 N 行 JSON 引号路径；绝对路径不出现；转录与 DB 只保存相对路径 21ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 含换行 / NEL / LS / PS / 制表符 / DEL 的文件名：整条消息被拒绝并点名，Provider 不被调用，无 Session 残留 13ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 完全相同的重复引用折叠成一行，不静默丢弃其它项 14ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > [W16-F 低] NFC / NFD 或大小写不同拼写的同一文件：解析器折叠为一份，SessionService 却按“请求数 = 返回数”校验，整条消息被拒绝且提示不点名路径 5ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 20 个可以，21 个在 IPC parse 即被拒绝；100 项上限与不同类型的混合项 18ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 符号链接、.git 内容、目录、已删除：整条消息被拒绝，错误只含相对路径与原因（无绝对路径 / 栈） 3ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 经 saveDraft / create / send / retry 偷运绝对路径 / .. / NUL：IPC parse 一律拒绝；旧版本遗留在 DB 的绝对路径在 retry 时被解析器拒绝 15ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 运行中追加（steer）与 Claude（text 策略）同样走解析器；Claude 无运行中输入时在解析器之前被拒绝 27ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 没有解析器：create / send / retry 明确拒绝，不静默丢弃引用 13ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > [窗口·记录] 解析之后、Provider 读取之前文件被换成指向外部的符号链接：引用仍被交付（交付的是路径文本，CLI 之后自行读取） 14ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > 用户文本伪造引用头：只出现在用户文本区域，不影响应用生成的列表；无文件时用户文本原样发送 27ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-refchain.test.ts > D2 端到端：真实解析器 → IPC → SessionService → Provider > [记录] 把名字本身写成提示注入的文件：该名字（≤ 255 字符）逐字进入提示词；JSON 引号不阻止语义注入 12ms
+
+ Test Files  2 passed (2)
+      Tests  48 passed (48)
+   Start at  07:40:44
+   Duration  2.29s (tests 76%, transform 17%, import 6%)
+

@@ -1,10 +1,51 @@
-# 验收：Runtime 工具阶段
+# 验收：工程工具阶段
 
-## 未覆盖与待决事项
+## 当前范围与人工功能验收
+
+- 当前阶段 1（Files、项目 Diff、文件引用）的独立验收见下节；Runtime 历史报告保留在后半部，不能把其旧状态读作当前未实现状态。
+- **完整 AC-07 尚未完成**：本轮 Diff、原生补丁持久化、Conversation 入口与两 CLI 的真实文件接收仍未覆盖。真实 CLI / 模型调用范围和预算未授权，本轮没有模型请求。
+- **人工功能验收：待人工验收**。阶段合入与 AI 结论均不代表人工接受；完整任务继续跟踪剩余交付，不在本阶段归档。
+
+<a id="stage-1"></a>
+
+## 阶段 1：Files / 项目 Diff / 文件引用
+
+### 未覆盖、边界与待决事项
+
+- 本阶段使用模拟 Provider；Claude 运行中追加 / 排队、Needs Input 文件答复、真实 CLI 接收、本轮 Diff / 历史补丁不在本次通过范围。
+- W22 未完成深路径降级提示的 GUI 步骤；W18 / W21 已独立验证长路径子项省略、可读同级项保留、目录不会整体失败。HFS+ 与区分大小写 / Unicode 的实体卷未挂载，后者用 FS seam 验证，不声称实体卷实测通过。
+- 本地 Project 为受信任目录：Git `filter.*.clean` 仍可能执行仓库配置命令；主动脱离进程组的恶意过滤器不在当前清理保证内。Git 元数据可合法位于 Project 外；split-index 的 sharedindex 缓存 mtime 会刷新（内容不变）。文件引用是发送前验证的路径文本，不是内容快照。详细边界由 [独立安全复验](evidence/W18-review.md#本地-project-信任边界与非阻塞事项)维护。
+- W22 GUI 使用 `890a431` 的既有开发 / 打包产物；不含本轮无 HEAD 说明文案和 aliases 修复，其 GUI 结论仍限定于旧基线。aliases 修复由 W21 独立复验；最新源码的构建 / E2E / 打包与冒烟门禁已由 Main Agent 自检完成，W21 独立复核新包与构建的 119 个对应文件逐字节一致，详见下表；不将旧包截图改记为新包 GUI 验收。
+
+### AI 结论、审阅者与基线
+
+**授权模拟阶段的独立 AI 验收：通过。完整 AC-07：未完成。** 本阶段已发现的目录替换泄漏、长路径目录失败、Git index / hooks 写入、特殊名显示与截断排序、引用别名误折叠均已由独立复验覆盖关闭；没有未解决的本阶段阻塞项。未覆盖范围保留在上节，不扩大通过结论。
+
+- W16 / W18 / W21：独立安全 / 契约审阅；W17 / W19 / W22：独立界面验收，均未参与应用实现。W22 只写证据及本节，不修改应用源码；详细运行环境与注入范围见各证据。
+- 源码基线：`890a4314e2217c2e6085d1cb20097c0461bcd25e` + 本轮未提交 aliases 修复及无 HEAD 文案；W21 最终审阅的五个 aliases 相关文件 diff SHA-256 为 `868b7c83219bd1a5968aaa8153a6fe21f3a8bdeba54b2a6a152e9881cbb747c1`，含文案的完整六文件源码 diff 与新包 hash 见 [最终产物记录](evidence/W21-package-final.log)，审阅过程见 [安全复验](evidence/W18-review.md)。GUI 基线仍为 `890a431` 构建，产物时间及 hash 见 [W22](evidence/W22-review.md#构建基线)。
+- 平台：macOS 15.6 arm64、Electron 44.4.5、Node 26.10.0、pnpm 12.10.1、Apple Git 2.39.2；开发构建使用隔离 fixture / 模拟 Provider，生产包未创建 Session。
+
+### 逐项结果
+
+| 来源与场景 | 独立操作 / 实际结果 | 结论与证据 |
+|---|---|---|
+| FR-TOOL-001 / AC-07：Files | W17 按需展开、只读多编码查看、变化刷新、失败状态、键盘及外观；W19 复验可见控制字符与前 2000 项；W22 在包含 utility worker 的 `890a431` 构建中实际展开 src 并查看代码 | 通过；[W17](evidence/W17-review.md)、[W19](evidence/W19-review.md)、[W22 Files](evidence/W22-files-latest-normal.png) |
+| FR-INPUT-001：模拟引用闭环 | W19 从 UI 验证 View / Codex / Claude 普通发送、移除与去重、Codex 追加 / 失败保留、删除前拒绝及跨 Project 隔离；Claude capability none 如实保持输入 | 通过（模拟）；[W19](evidence/W19-review.md)、[Codex](evidence/W19-codex-reference-delivered.png)、[Claude](evidence/W19-claude-reference-delivered.png) |
+| FR-TOOL-002：项目 Diff | W22 主动打开工具，已暂存 / 未暂存同显、未跟踪、删除、重命名、二进制 / 链接 / 模式回退、字面 pathspec、冲突、非 Git、无 HEAD 与子目录范围均符合；工具 / Project 切换恢复正确文件 | 通过；[逐项 GUI](evidence/W22-review.md#实际操作与结果)、[HEAD 两处编辑](evidence/W22-diff-both.png)、[冲突](evidence/W22-diff-conflict.png)、[无 HEAD](evidence/W22-diff-unborn.png) |
+| Tools §4.1 / §5.2：路径、索引与权限边界 | W21 原定 60 项终验通过；含最终 Files / surface 30、Git / 引用定向 20、index / 边界矩阵。目录替换两个完整 40 秒窗口与读取均无泄漏；长路径精确保留可读同级项；用户 index 内容 / mtime 不变，hooks 不执行 | 通过；[W18 / W21](evidence/W18-review.md)、[边界](evidence/W21-boundary-final.log)、[Files / surface](evidence/W21-files-surface-final.log) |
+| 文件身份修复 / FR-INPUT-001 | W21 新增 12 项独立用例 + 48 项引用 / IPC 回归通过：按实际 realpath 合并 aliases、不同路径不漏投、原始拼写完整验证、精确覆盖、主进程 aliases 不泄漏 | 通过；[独立结果](evidence/W21-reference-final.log)、[回归](evidence/W21-reference-ipc-regression.log) |
+| Tools §5：生产包 | W21 独立审计最新 aliases / 文案构建与 app.asar：119 个文件集合及内容全部一致，含目录 utility worker；W22 从 UI 正常查看 Files 与 Diff 的结果仍属于旧 `890a431` 包 | 通过（新包一致性；GUI 限定旧包）；[新包独立审计](evidence/W21-package-final.log)、[旧包历史审计](evidence/W21-package-audit.log)、[旧包 Files](evidence/W22-packaged-files.png)、[旧包 Diff](evidence/W22-packaged-diff.png) |
+| 最新版本自动化 / 打包门禁（Main Agent 自检） | 最新源码 E2E 46 / 46；同一构建执行 `package:built` 成功、packaged smoke PASS（SQLite / PTY / Terminal 屏幕 / 登录 Shell / Renderer）。这些命令由 Main Agent 执行，W21 核对日志与产物，不称独立 GUI 或冒烟验收 | 通过（自检）；[E2E](evidence/W0-stage1-close-e2e.log)、[打包](evidence/W0-stage1-close-package.log)、[冒烟](evidence/W0-stage1-packaged-smoke.json) |
+
+## Runtime 工具阶段历史报告（2026-10-14）
+
+以下保留 W4 / W5 / W8 当时的结论与未覆盖范围；历史 F13 / F15 的后续决定和修复以 [task.md](task.md) 及 Runtime 最终文档为准。本节不重新判定历史人工确认。
+
+### 未覆盖与待决事项
 
 范围与边界：
 
-- 本记录覆盖 Terminal、Browser 及 Project 关闭 / 应用退出接缝的运行时阶段。Files、项目 / 本轮 Diff、文件引用与原生补丁持久化尚未实现，四工具整体的 AC-07 不通过，也没有任何结论可以转记为它的通过（见 [task.md](task.md)）。
+- 本历史报告覆盖当时 Terminal、Browser 及 Project 关闭 / 应用退出接缝的运行时阶段；其中“Files / 项目 Diff / 文件引用未实现”的状态仅适用于本报告的 2026-10-14 基线。当前阶段 1 状态见上节；本轮 Diff 与原生补丁持久化仍未实施，完整 AC-07 尚未完成（见 [task.md](task.md)）。
 - 没有真实 Codex / Claude CLI 与模型调用（调用范围 / 预算仍未授权）。所有 GUI 结果使用模拟 Session Provider（`STUDIO_E2E_PROVIDERS=1`）、真实本地 PTY 和本机回环 HTTP 页面；Adapter 严格释放用真实本地进程（`/bin/sh`、`sleep`）与假驱动，未用真实 CLI 进程。
 
 最终基线上仍没有独立结果的路径：
@@ -33,13 +74,13 @@
 
 仍保留的残留 / 低风险项（已在缺陷表记录）：`createShutdownHandler`（`will-quit` 最后防线）在特性清理拒绝后仍会 `disposeCore` 并退出，由 [W5-shutdown.test.ts](evidence/W5-shutdown.test.ts) 作为历史复现保留红色，真正的保护是 QuitFlow 的批准前释放；Settings 弹层关闭后 Terminal 视口回到底部（重新附着的既有行为，内容不丢）。
 
-## 人工功能验收
+### 人工功能验收
 
 - 状态：待人工验收。
 - 范围与版本：Runtime 工具阶段（Terminal、Browser、Project 关闭 / 退出接缝）；证据基线为 HEAD `a0e7d49` 加本文件与 `evidence/` 的未提交内容（见下），其中部分证据来自更早的构建（`2223dad`、`f06ba98` 等），已在逐项结果中注明；未覆盖项见上节。
 - 人工记录：尚未收到本阶段的功能验收确认。用户 2026-10-13 对话只确认过 CSP 例外「我选1」，2026-10-14 回复确认放宽 `style-src-attr` 并接受若干取舍（见上节），这些都是单项技术 / 视觉取舍，不是功能验收。AI 评审、任务关闭、提交和合入均不代表人工接受。
 
-## AI 结论与运行环境
+### AI 结论与运行环境
 
 - 总体结论：**部分通过**。Terminal 与 Browser 的运行时核心场景在最终基线上通过：Terminal 的网格适配、外观矩阵（默认文字 / ANSI 前景 / 选区 / 反显 / 光标 / 滚动条，`42a2e31` 与 `a0e7d49` 上六个单元格相对 Part 3 无回归，反显除外见 W5-F13）、24 位色与彩色背景文字（W5-F6、W5-F9 已关闭，零 CSP 违规；默认背景上的调整文字在 5.5 下基本达到 4.5，W5-F12 已关闭）、实时外观切换、隐藏输出与重新附着（含窗格缩窄后的重新附着，W5-F10 已关闭）、Project 隔离、Tab 关闭确认；Browser 的本地导航 / reload / 302 外站提示取消、页面背景、弹层与工具切换；Project 关闭（带 Session、终端、预览，含仅终端 / 仅 Session / 最后一个标签三种变体）、应用退出（含终端 + 运行中 Session、仅终端、无工具三种情形，确认框正文只描述实际存在的资源，W5-F11 已关闭）与 Session Stop（带工具）在真实 UI 上通过，按精确 PID 核对没有误清理也没有残留，打包应用的 smoke（`2223dad`）、Terminal / Browser 与退出确认通过，并在 `a0e7d49` 的打包产物上再验证了生产 CSP、零违规、24 位色、彩色背景对比度与退出（无 Session）。关闭 / 退出接缝与 Adapter 严格释放另由独立无 GUI 测试通过。没有未关闭的阻塞缺陷；仍未关闭的是两个低严重度项：W5-F13（反显文字约 5.4–6:1，已知视觉取舍，待用户确认）、W5-F15（规格 / 注释中的数字与实测不符，仅文字）。**本阶段仍给「部分通过」**，原因是：未覆盖的失败 / 超时 GUI 路径、真实窗口 resize 与 Browser 原生视图 bounds、真实 Codex / Claude CLI 链路（未授权）、打包形态下没有 Session，以及 F13 尚无用户决定。**什么会改变这个结论**：用户对 F13 作出取舍（接受或修复并经独立复验），F15 的文字更正；覆盖或明确放弃失败 / 超时 GUI 路径与真实窗口 resize；真实 CLI 链路获得授权并执行。这些满足后，Terminal + Browser + 关闭 / 退出接缝这一运行时阶段可以给「通过」；任务整体（四工具、AC-07）仍要等 Files、项目 / 本轮 Diff、文件引用与原生补丁实现并验证。
 - 验收者：W4（初审，未参与实现）、W5（终验，未参与实现，本文件唯一写入者）、W8（Adapter 严格释放独立审阅，未参与 W6 实现）。实现者包括主 Agent、W1～W3、W6、W9 等；他们的自检不计入独立结论。W5 编写过诊断脚本与测量工具，没有修改任何源码。
@@ -47,7 +88,7 @@
 - 平台与应用形态：macOS 15.6 arm64（Darwin 24.6.0）、Electron 44.4.5、Node v26.10.0；主要证据来自源码构建（`electron-vite build`）的 Electron 应用，经 Playwright `_electron.launch` fixture 启动，隔离 userData；另有 Part 4 的打包应用（`apps/desktop/dist/mac-arm64`，主 Agent 于 2026-10-14 09:05 构建，`app.asar` 09:05:36）：独立运行 `pnpm smoke:packaged`，并用 `--remote-debugging-port` 直接启动二进制、经 CDP 驱动。通过 agent-browser 操作真实 UI，截图使用窗口 ID 只截应用窗口。
 - Provider 与 CLI：模拟 Session Provider（开发构建）；打包应用没有创建 Session；无真实 Codex / Claude CLI 与模型调用（`smoke:packaged` 只探测到本机 Codex 0.162.1 / Claude 2.1.296 的存在，没有调用）。fixture 只注入目录选择器 stub、本机回环 HTTP 页面与模拟 Provider，另有只监听回环的控制端口（`app.quit()`、`webContents` 列表等只读 / 对照操作）；诊断中的只读观察（`securitypolicyviolation` 监听、`setAttribute('style')` 栈记录、页面内采样）不改变行为。
 
-## 验收结果
+### 验收结果
 
 各行的「验证方式与环境」注明构建时间 / 基线。最终基线 = `a0e7d49`；`2223dad` → `f06ba98` 只改变 Terminal 的 tab stop 校验与退出确认的正文，`f06ba98` → `42a2e31` 只改变生产 CSP（`style-src-attr`）与 xterm 的 `minimumContrastRatio`（4.5），`42a2e31` → `a0e7d49` 只把比值改为 5.5（见上节），所以其余行沿用 `2223dad` 构建（2026-10-14 08:39:04）上的独立结果；涉及这些改动的行（Terminal 外观 / 色彩 / 网格适配 / CSP / 恢复、Browser 与 UI 快查、退出确认文字、tab stop 缩窄）已在 `f06ba98`（14:14:22）或 `42a2e31`（14:55:34）构建上复验，行内注明。
 
@@ -88,7 +129,7 @@
 | Files / 项目 Diff / 本轮 Diff / 文件引用 / 原生补丁 / FR-TOOL-001、002、FR-INPUT-001 | — | — | 未实现，本阶段不在范围内 | — | 未覆盖 | [task.md](task.md) |
 | 真实 Codex / Claude CLI 链路 | 创建 Session、流式输出、Stop、恢复 | 实际 CLI 行为符合 | 未执行（未授权调用） | — | 未覆盖 | — |
 
-## 缺陷与复验
+### 缺陷与复验
 
 编号按审阅者区分：W4-Fn 来自 [W4 记录](evidence/W4-review.md)，W5-Fn 来自 [W5 记录](evidence/W5-review.md)，W8-Fn 来自 [W8 记录](evidence/W8-review.md)。
 

@@ -13,6 +13,10 @@ created: 2026-10-09
 
 2026-10-13 用户新指令「推进运行时工具的开发。agents并发」授权启动 Terminal / Browser 及其 Project 关闭、应用退出接缝的开发。按下文阶段 2 / 3 并发实施，正常的本地 PTY / HTTP fixture 调用纳入验证；本次未授权真实模型调用，范围 / 预算条件继续保留。Files、两类 Diff 与完整 AC-07 仍由本任务跟踪，不将运行时工具阶段等同四工具交付。执行与 worker 分工见 [plan.md](plan.md)。
 
+2026-10-14 用户回复「放宽安全限制，先实现功能为主。accept above, apply, continue implementing」：放宽 `style-src-attr`（DEC-02 例外），采纳上一轮汇报中的建议，并要求继续实现后续功能。Main Agent 的理解（用户可更正）：继续范围为阶段 1（Files + 项目 Diff）及其文件引用链路（Files → Input → Session → Adapter），文件引用只对模拟 Provider 验证；需要真实 Codex / Claude CLI 或模型调用的内容（文件引用的真实接收、原生轮次补丁、本轮 Diff）仍未获授权，因调用范围 / 预算未定而保留。阶段 1 的计划、worker 与写入范围见 [plan.md](plan.md) 的「阶段 1」。
+
+2026-10-17 用户指令「对尽快可以完成的worktrees 进行收尾，合并到main，clear worktrees」授权阶段收尾、合入 main 与清理附加 worktree。主 Agent 按既有阶段范围补齐最终验证，不扩大真实 CLI / 模型调用授权，不将合并视为人工产品验收；本轮继续本地合并、不推送的既有边界。
+
 此前文档准备：用户于 2026-10-13 接受开发准备审阅建议，明确「accept all, not dev, update all docs」。当时仅更新文档，任务保持 ready；后续开发已由本节新指令启动。确认不扩及其他草稿中的无关未决项，文档 diff 待审阅。四工具 AC-07 仍未整体通过，真实调用仍须明确范围 / 预算。
 
 ## 目标
@@ -93,12 +97,16 @@ created: 2026-10-09
 ## 待验证与启动条件
 
 - 按 04 第 1 节第 13 项验证 CLI 事件、覆盖范围、Claude Code 同等数据、非 Git 原生补丁与历史恢复；资料见 [research.md](research.md)。真实模型调用的授权和预算另行确定；本阶段未调用真实模型。
-- 工具规格的本轮范围已确认；Terminal / Browser 代码已实现并处于阶段验证（见 [acceptance.md](acceptance.md)）；Files、Diff 代码、轮次补丁存储、文件引用与 Adapter 的文件输入 / 补丁接口仍待实现和验证。Browser 首轮问题已按 Q1、Q5、Q6 解决，未来扩展另行评估；现有 Adapter 任务不因此视为覆盖本轮 Diff。
+- 工具规格的本轮范围已确认；Terminal / Browser 与 Files / 项目 Diff / 文件引用代码已实现；阶段 1 的独立安全与界面复验已通过，适用基线、自动化门禁与未覆盖项见 [acceptance.md](acceptance.md)。本轮 Diff、轮次补丁存储与 Adapter 原生补丁接口仍待实现和验证。Browser 首轮问题已按 Q1、Q5、Q6 解决，未来扩展另行评估；现有 Adapter 任务不因此视为覆盖本轮 Diff。
 - 2026-10-13 开发环境的 PATH 仍无全局 agent-browser，使用 `npx --yes agent-browser`，先读取其已安装版本的 core / electron 工作流，再操作隔离 Electron 应用。
-- 未决执行条件：真实 CLI 调用范围与预算（负责人：人；仅阻塞真实调用）；文件引用、原生补丁接口 / 迁移与版本能力验证（负责人：AI；阶段 0）。运行时工具开发授权已解决，不再阻塞阶段 2 / 3。
+- 未决执行条件：真实 CLI 调用范围与预算（负责人：人；仅阻塞真实调用）；原生文件引用接收、补丁接口 / 迁移与版本能力验证（负责人：AI；需上述真实调用授权）。运行时工具开发授权已解决，不再阻塞阶段 2 / 3。
 - 交互原型 v01 / v02 尚未覆盖本次工具行为；[v03](../../design/prototypes/README.md#studio-灰度交互原型-v03)（探索中，[T20261011-prototype-v03](../T20261011-prototype-v03/task.md)）已做出项目 / 本轮 Diff 与 Terminal Tabs 供评审。Shell Spec v02 已确认（2026-10-11），v01 保留作历史依据。
 
 ## 执行记录
+
+- 2026-10-17（阶段收尾，Main Agent）：独立 W21 安全终验与 W22 实际 Electron / 打包界面复验通过，证据与适用范围见 [acceptance.md](acceptance.md)。代码复核额外发现大小写 / Unicode 路径预折叠会漏传不同文件，已交实现 agent 修复，并由 W21 独立复验；Files 按实际 realpath 证明别名，Session 精确核对原始请求覆盖，未放宽路径安全校验。实现回写与人工产品验收状态保持分开；任务仍为 `in_progress`，本轮 Diff、原生补丁、真实引用与完整 AC-07 尚待后续。分支等价核对、残留备份及 worktree 清理记录见 [plan.md](plan.md#2026-10-17-worktree-收尾)。
+
+- 2026-10-16（阶段 1 / all worktrees 继续，Main Agent）：六个 Files / Diff worker 的代码已完整导入 `feat/files-diff`；聚合分支为唯一集成候选，主 checkout 保持 main。W16 安全评审发现 Git hook / index 写入、目录竞态泄漏、错误详情脱敏与 macOS 引用别名问题，已交回实现者；W17 界面发现控制字符显示、截断顺序问题，由主 Agent 修复并新增回归。W18 / W19 接续独立复验，具体基线、结果与未覆盖项写入 [acceptance.md](acceptance.md)。同步 Tools / Input / Session / Adapter / Project 规格、桌面开发说明、路线图及架构工具节点，均为实现回写，diff 待人工审阅。旧 `runtime-tools-ui` 的未提交依赖与契约残留已核对：main 含相同依赖和更完整契约，无新功能待导入；保留原工作区，不覆盖或丢弃。任务仍为 `in_progress`，未将阶段实现记为真实 CLI 或完整 AC-07 通过。
 
 - 2026-10-14（Runtime 工具阶段当前状态，Main Agent 记录）：Terminal、Browser 及 Project 关闭 / 应用退出接缝已实现并集成在 `feat/runtime-tools`，代码基线 `2223dad`；独立评审与验收结论、基线及未覆盖范围见 [acceptance.md](acceptance.md)（AI 结论：部分通过；人工功能验收：待人工验收）。本阶段不是四工具交付：Files、项目 / 本轮 Diff、文件引用与原生补丁尚未实现，无真实 Codex / Claude CLI 与模型调用，任务保持 `in_progress`。实现者自检（不计入独立结论）：`pnpm check:code` 通过（脚本 36、Adapter 241、桌面端 357）；Electron E2E 40 / 40；`pnpm package` + `pnpm smoke:packaged` PASS（含 Terminal 屏幕模型）。过程中的取舍与确认：生产 CSP 只放宽 `style-src-elem`（用户 2026-10-13「我选1」，DEC-02 例外，`c02f7a6`）；Adapter `dispose()` 由“不抛错”改为“清理未确认则拒绝并可重试”并新增 `releaseRuntimes(cwd?)`（AI 技术决定，规格草稿，diff 待审阅）。待人决定：是否追加 `style-src-attr 'unsafe-inline'`（W5-F6 真彩色丢失、W5-F9 ANSI 彩色背景上文字不可读）；毛玻璃浅色选区对比度 2.79–2.95:1 的“可读优先”取舍与浅 / 深调色板取舍；光标是否闪烁（W5-F7）；真实 CLI 调用范围 / 预算；何时把本阶段合入 main。过程记录见 [plan.md](plan.md)。
 

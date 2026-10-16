@@ -1,0 +1,20 @@
+{
+  "baseline": "890a4314e2217c2e6085d1cb20097c0461bcd25e",
+  "filesCompared": 119,
+  "allBytesEqual": true,
+  "mainWorkerAndPreloadHashes": {
+    "out/main/directory-reader-worker.js": "dea5556da0cb7566233c5cadbe6e3315fae7a95ae0ce9a69a24c0ed1920ecfe5",
+    "out/main/index.js": "63b52d0920b948bb29a6744e7db1fe517c28bb2eb511c07dd67bee77074f558d",
+    "out/preload/index.js": "e26fb5e4882549d19704c07e5c803c94bfc3fe17febbecd26bdf6813aedd4986",
+    "out/renderer/index.html": "f68874a4191dfa572796441516a18c6f20b352035845de4c7e4f44e9a2d4a144"
+  },
+  "currentSourceDelta": [
+    "apps/desktop/src/main/services/files/references.test.ts",
+    "apps/desktop/src/main/services/files/references.ts",
+    "apps/desktop/src/main/services/session/session-service.test.ts",
+    "apps/desktop/src/main/services/session/session-service.ts",
+    "apps/desktop/src/renderer/src/features/tools/diff/strings.ts",
+    "apps/desktop/src/shared/tools/files.ts"
+  ],
+  "currentSourceDiffSha256": "72e61737c7bb62616ba62274d1a8d3b6ff6d291acce6cacc48f63dfdc38aa801"
+}

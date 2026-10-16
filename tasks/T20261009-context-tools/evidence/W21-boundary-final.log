@@ -1,0 +1,25 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+stdout | tasks/T20261009-context-tools/evidence/W18-files-race.test.ts > does not return names or link targets from an external directory swapped into the requested path
+[W18 symlink-row race] attempts=32994 ok=20 leaks=0
+
+ ✓ tasks/T20261009-context-tools/evidence/W18-files-race.test.ts > does not return names or link targets from an external directory swapped into the requested path 40165ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v2: staged and working-tree changes survive a byte-faithful isolated query 145ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v3: staged and working-tree changes survive a byte-faithful isolated query 139ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v4: staged and working-tree changes survive a byte-faithful isolated query 127ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v2: staged and working-tree changes survive a byte-faithful isolated query 144ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v3: staged and working-tree changes survive a byte-faithful isolated query 170ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v4: staged and working-tree changes survive a byte-faithful isolated query 159ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > a racy-clean same-size edit remains visible while the real index bytes and mtime stay unchanged 127ms
+stdout | tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve real index bytes/mtime and sharedindex data; records cache keepalive metadata
+[W18 split-index] shared bytes unchanged; cache mtime changed=true
+
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve real index bytes/mtime and sharedindex data; records cache keepalive metadata 130ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-files-boundary.test.ts > omits an unaddressable APFS long UTF-8 child with a flag while keeping the rest of its directory available 138ms
+
+ Test Files  3 passed (3)
+      Tests  10 passed (10)
+   Start at  07:35:58
+   Duration  42.12s (tests 99%)
+

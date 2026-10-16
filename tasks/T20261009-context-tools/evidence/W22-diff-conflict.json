@@ -1,0 +1,43 @@
+{
+ "title": "项目变更 · 相对 HEAD (main @ b918326)",
+ "meta": "1 个文件+4−0",
+ "banners": [],
+ "state": null,
+ "stateTitle": null,
+ "rowCount": 1,
+ "rows": [
+  {
+   "label": "冲突，conflict.txt，新增 4 行",
+   "selected": "true",
+   "tabindex": "0",
+   "badge": "U",
+   "counts": "+4",
+   "tags": null,
+   "rename": null,
+   "title": "conflict.txt"
+  }
+ ],
+ "tabStops": [
+  "conflict.txt"
+ ],
+ "file": {
+  "label": "conflict.txt 的变更",
+  "header": "Uconflict.txt",
+  "notes": [
+   "该文件有未解决的合并冲突，显示的是工作区内容相对 HEAD 的差异。"
+  ],
+  "patch": false,
+  "patchLines": 0,
+  "monaco": true,
+  "busy": "false"
+ },
+ "monaco": {
+  "lineInsert": 4,
+  "lineDelete": 0,
+  "charInsert": 4,
+  "charDelete": 0,
+  "readOnly": true,
+  "sides": 2,
+  "text": "base 0 | base 1 | MAIN change | base 3 | base 4 | "
+ }
+}

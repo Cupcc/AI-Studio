@@ -26,6 +26,7 @@ import { createE2eProviders } from './services/session/e2e-providers'
 import { settingsFor } from './services/settings'
 import { installWindowAppearance } from './window/appearance'
 import { terminalFor } from './services/terminal'
+import { diffFor } from './services/diff'
 import { browserFor } from './services/browser'
 
 const launch = parseLaunchOptions(process.argv)
@@ -63,9 +64,11 @@ function openWindow(hidden = false): BrowserWindow {
   })
   win.on('focus', () => { if (core) projectViewsFor(core).refreshAll() })
   const senderId = win.webContents.id
-  const detachTerminals = () => { if (core) terminalFor(core).detachOwner(senderId) }
-  win.webContents.on('destroyed', detachTerminals)
-  win.webContents.on('render-process-gone', detachTerminals)
+  // A gone renderer must not keep PTY attachments or Diff subscriptions (and so a Git watcher) alive. Files cleans up
+  // through webContents events inside its own service.
+  const detachTools = () => { if (core) { terminalFor(core).detachOwner(senderId); diffFor(core).detachOwner(senderId) } }
+  win.webContents.on('destroyed', detachTools)
+  win.webContents.on('render-process-gone', detachTools)
   if (!hidden && process.platform === 'darwin') {
     // Keep the renderer and its draft/tool state alive while the macOS window
     // is closed; sessions continue until an explicit application quit.

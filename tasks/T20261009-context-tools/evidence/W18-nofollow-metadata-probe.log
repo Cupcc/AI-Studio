@@ -1,0 +1,12 @@
+{"flags":"20200000","relative":"real","outcome":"directory"}
+{"flags":"20200000","relative":"real/file","error":"EACCES"}
+{"flags":"20200000","relative":"real/link","outcome":"symlink"}
+{"flags":"20200000","relative":"real/dangling","outcome":"symlink"}
+{"flags":"20200000","relative":"ancestor/file","error":"ELOOP"}
+{"flags":"20200000","relative":"ancestor/link","error":"ELOOP"}
+{"flags":"20208000","relative":"real","outcome":"directory"}
+{"flags":"20208000","relative":"real/file","error":"EACCES"}
+{"flags":"20208000","relative":"real/link","outcome":"symlink"}
+{"flags":"20208000","relative":"real/dangling","outcome":"symlink"}
+{"flags":"20208000","relative":"ancestor/file","error":"ELOOP"}
+{"flags":"20208000","relative":"ancestor/link","error":"ELOOP"}

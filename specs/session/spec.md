@@ -373,7 +373,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 
 ### 5.4 与 chat、input 模块
 
-FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../tools/spec.md#41-文件引用契约)（2026-10-13 确认准备方向）。Session 是输入转交与记录的负责方：普通发送及运行中追加 / 排队均须传递经主进程校验的引用，不能只将 contextItems 存入用户消息；不同 Provider 的转换由 Adapter 承接，原生接收失败回报 Input。现有代码仅发送文本的缺口由工程工具任务推进，不标记为已实现。
+FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../tools/spec.md#41-文件引用契约)（2026-10-13 确认准备方向）。Session 是输入转交与记录的负责方：普通发送及运行中追加 / 排队均须传递经主进程校验的引用，不能只将 contextItems 存入用户消息；桌面 Session 负责将引用转换为 Provider 输入，Adapter 保持通用输入契约。阶段 1 已接通 Files → Input → Session → Provider：主进程发送前重新验证，两个 CLI 当前均使用带 JSON 引号的 Project 相对路径清单（不是文件内容快照或结构化附件）；普通发送、重试与 Codex 原生运行中追加共用此转换。Claude 当前报告 `inputWhileRunning: none`，运行中输入仍属原生能力对齐缺口。校验或提交失败向 Input 返回错误并保留输入；模拟链路验证与真实接收边界见 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化)。
 
 正式 IPC 契约为 [`shared/ipc/session.ts`](../../apps/desktop/src/shared/ipc/session.ts)，Preload 暴露 `window.studio.session`，主进程校验字段和可信发送方。参数与结果均为可序列化 DTO，不携带 Runtime 句柄。
 

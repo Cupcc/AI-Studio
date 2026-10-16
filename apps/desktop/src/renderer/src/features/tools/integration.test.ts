@@ -1,11 +1,15 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import type { WindowState } from '@shared/project/types'
 import { terminalApi, type TerminalApi } from './api'
+import { filesApi } from './files/api'
+import { diffApi } from './diff/api'
 import { useProjectShell } from '../project/store'
 import { installToolsIntegration } from './integration'
 import { useTerminals } from './terminal-store'
 
 vi.mock('./api', () => ({ terminalApi: vi.fn(), browserApi: vi.fn() }))
+vi.mock('./files/api', () => ({ filesApi: vi.fn() }))
+vi.mock('./diff/api', () => ({ diffApi: vi.fn() }))
 const previousWindow = useProjectShell.getState().windowState
 afterEach(() => { useProjectShell.setState({ windowState: previousWindow }); useTerminals.getState().forget('lifecycle') })
 
@@ -16,6 +20,8 @@ it('drops cached terminals when the Project tab closes and creates a new first s
     onChanged: vi.fn(() => () => {})
   }
   vi.mocked(terminalApi).mockReturnValue(api as unknown as TerminalApi)
+  vi.mocked(diffApi).mockReturnValue({ onInvalidated: vi.fn(() => () => {}), onWatchChanged: vi.fn(() => () => {}) } as unknown as ReturnType<typeof diffApi>)
+  vi.mocked(filesApi).mockReturnValue({ onChanged: vi.fn(() => () => {}), onWatchChanged: vi.fn(() => () => {}) } as unknown as ReturnType<typeof filesApi>)
   const opened: WindowState = { tabs: [{ id: 'project:lifecycle', kind: 'project', projectId: 'lifecycle' }], currentTabId: 'project:lifecycle', navCollapsed: false }
   useProjectShell.setState({ windowState: opened })
   const dispose = installToolsIntegration()

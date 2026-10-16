@@ -15,6 +15,8 @@ import { resolveLoginEnv, toEnv } from '../services/shell-env/login-env'
 import type { RendererSmokeResult } from './renderer-smoke'
 
 export const SMOKE_EXECUTABLES = ['codex', 'claude'] as const
+/** Reported, never gating: the project Diff degrades to an explanation when Git is missing. */
+export const SMOKE_INFO_EXECUTABLES = ['git'] as const
 
 export interface SmokeReport {
   schema: 1
@@ -53,7 +55,7 @@ export async function runNativeSmoke(input: SmokeInput): Promise<SmokeReport> {
   const pty = await runPtySmoke({ shell: loginEnv.shell, env: loginEnv.env })
   const terminalScreen = await checkTerminalScreen()
   const executables: SmokeReport['executables'] = {}
-  for (const name of SMOKE_EXECUTABLES) {
+  for (const name of [...SMOKE_EXECUTABLES, ...SMOKE_INFO_EXECUTABLES]) {
     const { name: _ignored, ...probe } = await probeExecutable(name, loginEnv.env)
     executables[name] = probe
   }

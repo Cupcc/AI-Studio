@@ -1,0 +1,60 @@
+## 0. pristine tree (nothing touched):
+### pristine diff HEAD
+clean a.txt
+clean b.txt
+index mtime 15:12:44
+### ls-files -o
+(nothing ran)
+index mtime 15:12:44
+### ls-files -u
+(nothing ran)
+index mtime 15:12:44
+### rev-parse/symbolic-ref
+(nothing ran)
+index mtime 15:12:44
+## 1. mtime-only touch (no content change) then the snapshot query
+
+### after touch diff HEAD (raw+numstat)
+clean a.txt
+clean b.txt
+clean a.txt
+clean b.txt
+hook-post-index-change 0 0
+index mtime 15:12:45
+## 2. touch again, patch query for ONE file (unchanged content)
+### after touch diff HEAD -- c.dat (diff=evil driver)
+clean a.txt
+clean b.txt
+hook-post-index-change 0 0
+index mtime 15:12:46
+## 3. real content change in a.txt
+diff --git a/a.txt b/a.txt
+index 7898192..6a91238 100644
+--- a/a.txt
++++ b/a.txt
+@@ -1 +1,2 @@
+ a
++changed
+diff --git a/c.dat b/c.dat
+index f2ad6c7..fcfcb69 100644
+--- a/c.dat
++++ b/c.dat
+@@ -1 +1,2 @@
+ c
++more
+### after content change
+clean a.txt
+clean a.txt
+index mtime 15:12:46
+## 4. untracked file, patch via --no-index
+diff --git a/u.txt b/u.txt
+new file mode 100644
+index 0000000..4ae8ef0
+--- /dev/null
++++ b/u.txt
+### untracked u.txt --no-index (filter attr)
+clean u.txt
+clean u.txt
+index mtime 15:12:46
+diff --git a/v.dat b/v.dat
+new file mode 100644

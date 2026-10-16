@@ -1,0 +1,48 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v2: staged and working-tree changes survive a byte-faithful isolated query 139ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v3: staged and working-tree changes survive a byte-faithful isolated query 138ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha1 index v4: staged and working-tree changes survive a byte-faithful isolated query 118ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v2: staged and working-tree changes survive a byte-faithful isolated query 126ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v3: staged and working-tree changes survive a byte-faithful isolated query 144ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > sha256 index v4: staged and working-tree changes survive a byte-faithful isolated query 124ms
+ ✓ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > a racy-clean same-size edit remains visible while the real index bytes and mtime stay unchanged 130ms
+ × tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve the real index and every sharedindex file 183ms
+   → expected Map{ 'index' => { …(2) }, …(1) } to deeply equal Map{ 'index' => { …(2) }, …(1) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts > W18 index isolation compatibility > split-index queries preserve the real index and every sharedindex file
+AssertionError: expected Map{ 'index' => { …(2) }, …(1) } to deeply equal Map{ 'index' => { …(2) }, …(1) }
+
+- Expected
++ Received
+
+@@ -752,8 +752,8 @@
+          212,
+          186,
+        ],
+        "type": "Buffer",
+      },
+-     "mtime": 1792134530631383727n,
++     "mtime": 1792134530647219000n,
+    },
+  }
+
+ ❯ tasks/T20261009-context-tools/evidence/W18-index-compat.test.ts:84:24
+     82|       expect(changed).toBe('a.txt\0')
+     83|     } finally { await prepared.cleanup() }
+     84|     expect(snapshot()).toEqual(before)
+       |                        ^
+     85|   })
+     86| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  15:08:49
+   Duration  1.27s (tests 96%, transform 3%, import 1%)
+

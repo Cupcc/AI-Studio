@@ -8,6 +8,8 @@ import type { ProjectService } from '../project/project-service'
 import type { MainSessionPort } from '../project/session-port'
 import { SessionStore } from './store'
 import { VIEW_CATALOG, type ViewContext } from '@shared/project-view/types'
+import type { FileReferenceResolver, ProjectPath, ResolvedFileReference } from '@shared/tools/files'
+import { buildUserInput, describeFileReferenceFailures, FILE_REFERENCE_STRATEGY } from './file-reference'
 
 type RequestItem = Extract<TranscriptItem, { kind: 'input_request' }>
 type ItemBody = TranscriptItem extends infer T ? T extends TranscriptItem ? Omit<T, 'id' | 'sessionId' | 'turnId' | 'sequence' | 'at'> : never : never
@@ -18,6 +20,8 @@ interface ActiveTurn {
   adapterId?: string
   message: SessionMessage
   viewContext?: ViewContext
+  /** Re-validated just before this turn began; the transcript keeps only the relative `message.contextItems`. */
+  files?: readonly ResolvedFileReference[]
   pending: Map<string, RequestItem>
   items: Map<string, TranscriptItem>
   answering: boolean
@@ -56,6 +60,22 @@ export interface SessionServiceOptions {
   newId?: () => string
   /** Trusted cross-feature gate spans tool cleanup as well as Session Stop. */
   canOperate?(projectId: string): boolean
+  /** Re-validates Files references at send time. Without it a message with file items is refused, never sent without them. */
+  fileReferences?: FileReferenceResolver
+}
+
+/** Paths of a message's file context items, first occurrence kept. */
+function fileReferencePaths(message: SessionMessage): ProjectPath[] {
+  const seen = new Set<string>()
+  const paths: ProjectPath[] = []
+  for (const item of message.contextItems ?? []) {
+    if (item.type !== 'file') continue
+    // Only the filesystem can establish aliases: macOS can also host case-sensitive volumes.
+    if (seen.has(item.path)) continue
+    seen.add(item.path)
+    paths.push(item.path)
+  }
+  return paths
 }
 
 /** Owns application turns; Adapter owns native turns, requests and process cleanup. */
@@ -158,6 +178,10 @@ export class SessionService implements MainSessionPort {
     this.project(request.projectId)
     const available = (await this.getProviders()).find(p => p.cli === request.cli)
     if (available?.status !== 'available') throw new Error(available?.reason ?? 'CLI 不可用')
+    // Files are re-validated before any state exists, so a refusal leaves no Session behind; ensureCanSubmit below runs after this await.
+    const paths = fileReferencePaths(request)
+    const files = paths.length ? await this.resolveFileReferences(request.projectId, paths) : undefined
+    if (files) this.project(request.projectId)
     const attach = !!request.originViewId && request.viewContextAttached === true && VIEW_CATALOG.some(view => view.id === request.originViewId)
     const viewContext = attach ? this.options.buildViewContext?.(request.projectId, request.originViewId!) : undefined
     const at = this.now()
@@ -174,7 +198,7 @@ export class SessionService implements MainSessionPort {
     try {
       this.options.store.transaction(() => {
         this.options.store.saveSummary(summary)
-        this.begin(entry, request, viewContext)
+        this.begin(entry, request, viewContext, files)
         this.options.store.deleteDraft({ projectId: request.projectId, kind: 'new_chat', ...(request.originViewId ? { viewId: request.originViewId } : {}) })
       })
     } catch (error) {
@@ -188,6 +212,8 @@ export class SessionService implements MainSessionPort {
     const entry = this.entry(sessionId)
     this.validateMessage(message)
     if (this.disposed || this.quitting || this.closing.has(entry.summary.projectId) || this.closed.has(entry.summary.projectId) || this.options.canOperate?.(entry.summary.projectId) === false) throw new Error('Project 正在关闭')
+    const paths = fileReferencePaths(message)
+    if (paths.length && !this.options.fileReferences) throw new Error('文件引用不可用')
     if (entry.turn && entry.summary.activity === 'running' && !entry.summary.stopping) {
       const capability = this.provider(entry.summary.cli).capabilities.inputWhileRunning
       if (capability === 'none') throw new Error('当前 CLI 不支持运行中发送')
@@ -198,17 +224,63 @@ export class SessionService implements MainSessionPort {
       return task.finally(() => this.background.delete(task))
     }
     this.ensureCanSubmit(entry)
+    if (paths.length) return this.beginWithFiles(entry, message, paths)
     this.options.store.transaction(() => this.begin(entry, message))
+  }
+
+  private async beginWithFiles(entry: Entry, message: SessionMessage, paths: readonly ProjectPath[]): Promise<void> {
+    const files = await this.resolveFileReferences(entry.summary.projectId, paths)
+    // A turn can have begun, Stop or a Project close can have started while the files were read.
+    this.ensureCanSubmit(entry)
+    this.options.store.transaction(() => this.begin(entry, message, undefined, files))
+  }
+
+  /** Reads the referenced files again (Project, relative path, real target, access). Throws, changing nothing, unless every file is acceptable. */
+  private async resolveFileReferences(projectId: string, paths: readonly ProjectPath[]): Promise<ResolvedFileReference[]> {
+    const resolver = this.options.fileReferences
+    if (!resolver) throw new Error('文件引用不可用')
+    let result: Awaited<ReturnType<FileReferenceResolver['resolve']>>
+    try { result = await resolver.resolve(projectId, paths) }
+    catch (error) { throw new Error(`文件引用校验失败：${error instanceof Error ? error.message : String(error)}`) }
+    if (result.status === 'rejected') throw new Error(describeFileReferenceFailures(result.failures))
+    // Every requested spelling must be covered exactly once, either as a file or a filesystem-verified alias.
+    // A matching count alone cannot detect a substituted path or a dropped reference hidden by a duplicate.
+    const requested = new Set(paths)
+    const covered = new Set<ProjectPath>()
+    for (const file of result.files) {
+      for (const path of [file.path, ...(file.aliases ?? [])]) {
+        if (!requested.has(path) || covered.has(path)) throw new Error('文件引用校验失败：返回的文件与请求不一致，消息未发送')
+        covered.add(path)
+      }
+    }
+    if (covered.size !== requested.size) throw new Error('文件引用校验失败：返回的文件与请求不一致，消息未发送')
+    return result.files
+  }
+
+  private ensureProjectOpen(projectId: string): void {
+    if (this.disposed || this.quitting || this.closing.has(projectId) || this.closed.has(projectId) || this.options.canOperate?.(projectId) === false) throw new Error('Project 正在关闭')
   }
 
   private async sendWhileRunning(entry: Entry, message: SessionMessage): Promise<void> {
     const turn = entry.turn
     if (!turn) throw new Error('CLI 运行时尚未就绪')
-    try {
-      await turn.startup
+    const live = (): AgentSession => {
       const runtime = entry.runtime
       if (!runtime || entry.turn !== turn || entry.summary.stopping || runtime.state !== 'running') throw new Error('当前一轮已结束或正在停止，输入已保留')
-      const result = await runtime.sendUserInput({ text: message.text })
+      return runtime
+    }
+    try {
+      await turn.startup
+      let runtime = live()
+      const paths = fileReferencePaths(message)
+      let files: ResolvedFileReference[] = []
+      if (paths.length) {
+        // Read last, right before the input goes out; the turn can end, stop or start closing meanwhile.
+        files = await this.resolveFileReferences(entry.summary.projectId, paths)
+        this.ensureProjectOpen(entry.summary.projectId)
+        runtime = live()
+      }
+      const result = await runtime.sendUserInput(buildUserInput({ files, text: message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli] }))
       if (result.turnId !== turn.adapterId) throw new Error('CLI 返回了不同的回合，输入已保留')
       this.options.store.transaction(() => {
         // Native completion/Stop can arrive before the steering acknowledgement.
@@ -221,12 +293,12 @@ export class SessionService implements MainSessionPort {
     } finally { turn.sending = false }
   }
 
-  private begin(entry: Entry, message: SessionMessage, viewContext?: ViewContext): void {
+  private begin(entry: Entry, message: SessionMessage, viewContext?: ViewContext, files?: readonly ResolvedFileReference[]): void {
     const at = this.now()
     const turn: ActiveTurn = {
       id: this.newId(), at, model: entry.summary.model,
       message: { text: message.text, contextItems: message.contextItems ?? [] },
-      viewContext,
+      viewContext, files,
       pending: new Map(), items: new Map(), answering: false
     }
     entry.turn = turn
@@ -279,7 +351,9 @@ export class SessionService implements MainSessionPort {
       }
       await runtime.setModel(turn.model)
       if (entry.turn !== turn || entry.summary.stopping) return
-      const result = await runtime.sendUserInput({ text: turn.viewContext ? `${turn.viewContext.text}\n\n${turn.message.text}` : turn.message.text })
+      const result = await runtime.sendUserInput(buildUserInput({
+        viewContextText: turn.viewContext?.text, files: turn.files ?? [], text: turn.message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli]
+      }))
       // turn.started is synchronous; a whole turn can finish before this Promise resolves.
       if (entry.turn === turn && !turn.adapterId) {
         turn.adapterId = result.turnId
@@ -608,13 +682,29 @@ export class SessionService implements MainSessionPort {
     }
   }
 
-  retry(sessionId: string): void {
+  retry(sessionId: string): void | Promise<void> {
     const entry = this.entry(sessionId)
     this.ensureCanSubmit(entry)
     const turn = this.options.store.lastTurn(sessionId)
     if (turn?.outcome !== 'failed') throw new Error('没有可重试的失败消息')
+    const message: SessionMessage = JSON.parse(turn.message)
+    if (fileReferencePaths(message).length) {
+      if (!this.options.fileReferences) throw new Error('文件引用不可用')
+      return this.retryWithFiles(entry, turn.id, message)
+    }
     this.retire(entry)
-    this.send(sessionId, JSON.parse(turn.message))
+    this.send(sessionId, message)
+  }
+
+  /** A retry re-resolves its files: one deleted since the failure blocks the retry, which stays possible. */
+  private async retryWithFiles(entry: Entry, failedTurnId: string, message: SessionMessage): Promise<void> {
+    this.validateMessage(message)
+    const files = await this.resolveFileReferences(entry.summary.projectId, fileReferencePaths(message))
+    this.ensureCanSubmit(entry)
+    // Only the same failed turn is retried; a send or another retry may have replaced it meanwhile.
+    if (this.options.store.lastTurn(entry.summary.id)?.id !== failedTurnId) throw new Error('没有可重试的失败消息')
+    this.retire(entry)
+    this.options.store.transaction(() => this.begin(entry, message, undefined, files))
   }
 
   rename(sessionId: string, title: string): SessionSummary {

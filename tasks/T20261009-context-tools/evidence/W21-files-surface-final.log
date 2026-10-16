@@ -1,0 +1,71 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/files-diff
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > out/renderer/index.html 的 CSP 与设计完全一致：脚本 self、worker none、仅两条被接受的 style 放宽，无 blob: / unsafe-eval / 通配 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 已打包应用的 app.asar 内的 index.html 与 out/ 一致，且资源文件名集合一致（打包的就是被评审的构建） 54ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 与 main 分支相比 CSP 定义、窗口、安全与预加载没有改动；主进程只新增目录 reader 构建入口 65ms
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 构建产物中的危险词：eval / document.write 不存在；new Worker / Blob URL 只在 Monaco 的 worker 引导代码里（getWorker 抛错使其不可达）
+[W16-E dangerous tokens in built chunks] {}
+
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > window.studio 的特性集合与每个通道：没有通用 fs / shell / exec / 路径读取原语；files 与 diff 的通道集合精确
+[W16-E window.studio surface] {"app":["getInfo","onWindowFocusChanged","ping"],"project":["bootstrap","cancelQuit","closeProject","confirmQuit","getUiState","listRecent","onFlushRequested","onMenuCommand","onQuitRequested","openDirectory","openPath","removeRecent","saveWindowState","stateFlushed","updateUiState"],"session":["answer","create","getConversation","getDefaultCli","getDraft","getModels","getProjectState","getProviders","list","onProvidersChanged","onSummaryChanged","onTranscriptChanged","opened","projectClosed","rename","replyWithText","retry","saveDraft","send","setDefaultCli","setModel","stop","stopProject","updateViewing"],"projectView":["getContext","getSnapshot","list","onError","onSnapshotChanged"],"settings":["getAppearance","onAppearanceChanged","onOpenRequested","setGlassColor","setMode","setTheme"],"browser":["dismissExternal","focus","getState","navigate","onStateChanged","openExternal","reload","setBounds","setVisible"],"terminal":["ack","attach","close","create","detach","input","list","onChanged","onOutput","resize"],"files":["list","onChanged","onWatchChanged","read","resolveReference","subscribe","unsubscribe"],"diff":["getFile","getSnapshot","onInvalidated","onWatchChanged","subscribe","unsubscribe"]}
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E1 生产 CSP（已构建的 out/ 与已打包的 dist/） > 构建产物中的危险词：eval / document.write 不存在；new Worker / Blob URL 只在 Monaco 的 worker 引导代码里（getWorker 抛错使其不可达） 140ms
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > files / diff 通道的请求类型里没有任何绝对路径、cwd、sha、参数数组字段（契约源码）
+[W16-E contract words files] ["absolute"]
+[W16-E contract words diff] ["absolute"]
+
+stdout | tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > Monaco 只经 import() 懒加载；运行时只注册只读查看所需贡献；无 @monaco-editor/react、无 CDN、无 worker URL
+[W16-E monaco contributions] ["features/codicon/register.js","features/diffEditor/register.js","features/find/register.js","features/clipboard/register.js","features/contextmenu/register.js","features/wordOperations/register.js"]
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > 预加载包只通过 contextBridge 暴露 studio，不暴露 ipcRenderer / Node API 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > window.studio 的特性集合与每个通道：没有通用 fs / shell / exec / 路径读取原语；files 与 diff 的通道集合精确 1ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E2 预加载与 window.studio 表面 > files / diff 通道的请求类型里没有任何绝对路径、cwd、sha、参数数组字段（契约源码） 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > renderer/src（非测试）不含 dangerouslySetInnerHTML / innerHTML / insertAdjacentHTML / eval / new Function / document.write / createObjectURL / window.open / rehype-raw 14ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > renderer/src（非测试）不使用 localStorage / sessionStorage / indexedDB / document.cookie（文件内容与 Diff 只存在内存） 5ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-surface.test.ts > E3 渲染端源码：没有 HTML / 脚本注入点，没有持久化文件内容的存储 > Monaco 只经 import() 懒加载；运行时只注册只读查看所需贡献；无 @monaco-editor/react、无 CDN、无 worker URL 26ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B1 符号链接、特殊文件、硬链接 > 文件符号链接 / 目录符号链接 / 悬空 / 环 / 中间符号链接：列表标 symlink，读取与引用一律拒绝，永不返回 Project 外内容 187ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B1 符号链接、特殊文件、硬链接 > 符号链接目标文本（linkTarget）按原样回传，至多 256 字符：这是设计内的信息（记录） 96ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B1 符号链接、特殊文件、硬链接 > FIFO 与 Unix 套接字：不阻塞（读取、引用、列表都在 2 秒内返回），原因为 not_file 103ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B1 符号链接、特殊文件、硬链接 > 硬链接：服务无法、也不尝试区分硬链接（记录）；指向 Project 外同卷文件的硬链接可被读取 5ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B2 .git 排除：大小写、规范化、控制字符与特殊名称 > .GIT / .Git / 任意大小写与 NFD 路径均 excluded；列表不含任何 .git 变体 204ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B2 .git 排除：大小写、规范化、控制字符与特殊名称 > 非 ASCII 同形 / 不可见字符变体不会被 APFS 当作 .git（实测），因此无需排除；.git 文件（gitdir:）同样被排除 8ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B2 .git 排除：大小写、规范化、控制字符与特殊名称 > NFC / NFD 拼写：同一文件两种拼写都能读到，引用按 NFC 去重；大小写变体按真实路径去重 9ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B2 .git 排除：大小写、规范化、控制字符与特殊名称 > 含换行 / 控制字符 / RTL 覆盖符 / 255 字符的名字：可列出、可读（查看），但不可引用（name_unsupported）；RTL 覆盖符可引用（记录） 43ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B3 根目录被替换 / 删除，权限与大小 > Project 根被删除、被替换为指向外部的符号链接：project_unavailable，绝无外部内容 8ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B3 根目录被替换 / 删除，权限与大小 > chmod 000 的文件 / 目录：permission_denied，不抛出 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B3 根目录被替换 / 删除，权限与大小 > 10 GiB 稀疏文件：以 too_large 回答并带 size，内存不随文件大小增长，耗时 < 1 秒 2ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B3 根目录被替换 / 删除，权限与大小 > 读取期间文件持续增长：不返回撕裂内容（changed_while_reading 或一致快照） 175ms
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B4 规模：10 万个条目的目录 > 列表有界（≤ 2000 条、truncated），事件循环不被长时间阻塞
+[W16-B4] list(100k entries): 378 ms, entries=2000, event-loop max delay 6.2 ms
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B4 规模：10 万个条目的目录 > 列表有界（≤ 2000 条、truncated），事件循环不被长时间阻塞 14814ms
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 读取：目录被高速换成指向外部的符号链接时，永不读到 Project 外文件内容
+[W16-B5-read] attempts=50944 ok=217 leaked=0
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 读取：目录被高速换成指向外部的符号链接时，永不读到 Project 外文件内容 8102ms
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 列表：目录被高速换成指向外部目录的符号链接时，不应列出 Project 外目录的条目名
+[W16-B5-list] first leak after 40000 ms
+[W16-B5-list] attempts=38847 ok=10 outside-names-listed=0
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B5 TOCTOU：目录与符号链接在检查与使用之间被换 > 列表：目录被高速换成指向外部目录的符号链接时，不应列出 Project 外目录的条目名 40102ms
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > node_modules 内 10 万个文件的创建风暴：不产生事件（早期过滤），事件循环不被拖慢
+[W16-B6-nm] changed events=1, lag max 13.4 ms, heap delta -7.0 MB
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > node_modules 内 10 万个文件的创建风暴：不产生事件（早期过滤），事件循环不被拖慢 16946ms
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > 普通目录内 10 万个文件的创建风暴：事件被合并为 overflow / 少量事件，数量有界
+[W16-B6-src] changed events=8, overflow=0, lag max 11.0 ms
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > 普通目录内 10 万个文件的创建风暴：事件被合并为 overflow / 少量事件，数量有界 17663ms
+stdout | tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > 订阅泛滥：同一发送方重复订阅 20 万次，只占 Map 条目；全部退订 / 关闭后 watcher 释放（记录内存增长）
+[W16-B6-flood] 200k subscriptions: heap +50.1 MB (no per-owner cap)
+
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > 最多 4 个活动 watcher：第 5 个 Project 降级为 degraded，释放一个后补上；订阅泄漏上限（记录） 277ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > 订阅泛滥：同一发送方重复订阅 20 万次，只占 Map 条目；全部退订 / 关闭后 watcher 释放（记录内存增长） 143ms
+ ✓ tasks/T20261009-context-tools/evidence/W16-files.test.ts > B6 watcher：风暴、上限、泄漏、关闭 > detachOwner 释放该发送方的所有订阅；Project 关闭后广播 stopped 并可重新订阅 158ms
+
+ Test Files  2 passed (2)
+      Tests  30 passed (30)
+   Start at  07:35:58
+   Duration  100.17s (tests 100%)
+

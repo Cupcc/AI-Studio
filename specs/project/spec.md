@@ -56,7 +56,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
   - New Chat 草稿、Default CLI 的取值与设置规则、CLI 菜单 → `specs/chat/spec.md`。
   - 左侧导航的内部行为（Project Views 列表、Session History、折叠）→ `specs/navigation/spec.md`。
   - Project View 的内容、Conversation 列的内部行为与 Preview → `specs/project-view/spec.md`（后续 task）。
-  - Files / Diff / Browser / Terminal 的内容与资源生命周期 → [tools spec](../tools/spec.md)；Terminal / Browser 已实现，Files / Diff 待实现。
+  - Files / Diff / Browser / Terminal 的内容与资源生命周期 → [tools spec](../tools/spec.md)；四工具入口已接入；项目 Diff 与本轮 Diff 的交付边界见 Tools spec §5.2。
   - 色值、字体、图标等视觉参数（Visual Direction 第 1 节）。
 - V1 范围外（文档未要求，本 spec 不设计）：Tab 拖拽排序与拖出窗口（PROJ-Q10）、多窗口（PROJ-Q16）、Project 重命名与目录迁移（PROJ-Q5）。
 
@@ -349,7 +349,7 @@ Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级�
 
 ## 5. 接口与事件
 
-主进程正式接缝见 [`MainSessionPort`](../../apps/desktop/src/main/services/project/session-port.ts)，Renderer 槽位与接缝见 [`features/project/integration.tsx`](../../apps/desktop/src/renderer/src/features/project/integration.tsx)，IPC 见 [`shared/ipc/project.ts`](../../apps/desktop/src/shared/ipc/project.ts)。2026-10-09 已接入 Session；Project View 与 Terminal / Browser 内容已接入，Files / Diff 内容仍为槽位；工具关闭接缝见 [`MainToolPort`](../../apps/desktop/src/main/services/project/tool-port.ts)。
+主进程正式接缝见 [`MainSessionPort`](../../apps/desktop/src/main/services/project/session-port.ts)，Renderer 槽位与接缝见 [`features/project/integration.tsx`](../../apps/desktop/src/renderer/src/features/project/integration.tsx)，IPC 见 [`shared/ipc/project.ts`](../../apps/desktop/src/shared/ipc/project.ts)。2026-10-09 已接入 Session；Project View 与四工具内容已接入（Diff 当前为项目变更）；工具关闭接缝见 [`MainToolPort`](../../apps/desktop/src/main/services/project/tool-port.ts)。
 
 ### 5.1 本模块需要 session 模块提供
 
@@ -383,7 +383,7 @@ Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级�
 ### 5.5 与 project-view、tools（后续 task）
 
 - project-view 读取 `ui_state.main_canvas` 中 `view` 分支，写入左列 `conversation`、`view_right_area`；使用 `view_conversation_width`。
-- tools 读取 `sidebar_open`、`view_right_area`、`last_tool`、`sidebar_width`，写入 `last_tool`；右侧边栏容器（开关、图标切换、宽度拖拽）由本 task 提供；Terminal / Browser 内容已由工程工具任务接入，Files / Diff 仍为占位（见 [tools spec §5.1](../tools/spec.md#51-运行时实现细化)）。
+- tools 读取 `sidebar_open`、`view_right_area`、`last_tool`、`sidebar_width`，写入 `last_tool`；右侧边栏容器（开关、图标切换、宽度拖拽）由本 task 提供；四工具内容已由工程工具任务接入，运行时与 Files / 项目 Diff 的细化分别见 [Tools §5.1](../tools/spec.md#51-运行时实现细化)、[§5.2](../tools/spec.md#52-files--项目-diff-实现细化)。
 - 工具实例与缓存按 [tools spec](../tools/spec.md#4-状态与接口) 管理；壳层隐藏 / 卸载内容时不能销毁用户 PTY 或丢失输出状态，Project 的可信关闭流程负责调用工具清理。壳层不持有历史补丁或网页权限（DEC-10，2026-10-12 确认）。
 - 关闭编排新增工具端口：查询所属未退出 Terminal、阻止新实例创建、释放所属资源并返回逐项成功 / 失败；与 Session 计数合并生成 §3.2.4 的确认信息。已实现为 [`MainToolPort`](../../apps/desktop/src/main/services/project/tool-port.ts)（`activeTerminals`、`closeProject`、`closeAll`），由 close-flow 与 quit-flow 与 Session 计数合并；失败或超时保留 Project，并保留底层实际清理锁直到清理 settled（AI 技术决定，2026-10-13）；验证状态见[运行时工具验收](../../tasks/T20261009-context-tools/acceptance.md)。
 - 两者都通过本模块的 `updateUiState(project_id, patch)` 写入，由本模块统一落盘（3.3.4）；不得各自存储同一事实。

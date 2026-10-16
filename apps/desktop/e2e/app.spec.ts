@@ -116,7 +116,7 @@ test('renderer has no Node.js, require or raw ipcRenderer', async () => {
     global: 'undefined',
     ipcRenderer: 'undefined',
     electron: 'undefined',
-    studioKeys: ['app', 'project', 'session', 'projectView', 'settings', 'browser', 'terminal'],
+    studioKeys: ['app', 'project', 'session', 'projectView', 'settings', 'browser', 'terminal', 'files', 'diff'],
     appKeys: ['getInfo', 'onWindowFocusChanged', 'ping']
   })
 })
@@ -170,6 +170,7 @@ test('smoke mode: SQLite, node-pty and login env work in the Electron main proce
     const report = JSON.parse(readFileSync(output, 'utf8'))
     expect(report.sqlite).toMatchObject({ ok: true, driver: 'node:sqlite', dbInsideUserData: true, secondRunApplied: 0, readBack: true })
     expect(report.pty).toMatchObject({ ok: true, receivedMarker: true, exitCode: 0 })
+    expect(report.executables.git).toBeDefined()
     expect(report.terminalScreen).toMatchObject({ ok: true, serializedMarker: true, emulatorStateVersion: 1, xtermVersion: '6.0.0' })
     expect(report.shellEnv).toMatchObject({ ok: true, source: 'login-shell' })
     expect(report.renderer).toMatchObject({ ok: true, origin: 'app://studio', topBarRendered: true, nodeGlobalsAbsent: true, preloadApiWorks: true })
