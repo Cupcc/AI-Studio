@@ -6,8 +6,8 @@ import { sessionApi } from './api'
 export const emptyDraft = (): ComposerDraft => ({ cli: null, model: null, text: '', contextItems: [] })
 export const draftId = (key: DraftKey): string => key.kind === 'new_chat' ? (key.viewId ? `${key.projectId}:view:${key.viewId}:draft` : `${key.projectId}:draft`) : `${key.projectId}:session:${key.sessionId}`
 /** replyWithText carries text only; sending with file tags would clear them without the CLI ever seeing them. */
-export const FILE_REPLY_BLOCKED = '回复 Agent 时不能附带文件引用，请先移除标签或等待本轮结束'
-export const replyBlockedByFiles = (session: SessionSummary | undefined, draft: ComposerDraft | undefined): boolean => session?.activity === 'needs_input' && !!draft?.contextItems.some((item) => item.type === 'file')
+export const FILE_REPLY_BLOCKED = '回复 Agent 时不能附带文件、图片或 Skill，请先移除标签或等待本轮结束'
+export const replyBlockedByFiles = (session: SessionSummary | undefined, draft: ComposerDraft | undefined): boolean => session?.activity === 'needs_input' && !!draft?.contextItems.some((item) => item.type === 'file' || item.type === 'image' || item.type === 'skill')
 export const cliName = (cli: SessionCli | null): string => cli === 'codex' ? 'Codex CLI' : cli === 'claude-code' ? 'Claude Code' : '选择 CLI'
 
 export interface ConversationState {
@@ -52,6 +52,7 @@ interface SessionStore {
   stop(sessionId: string): Promise<boolean>
   retry(sessionId: string): Promise<boolean>
   rename(sessionId: string, title: string): Promise<boolean>
+  setReasoningEffort(sessionId: string, reasoningEffort: string | null): Promise<boolean>
   setModel(sessionId: string, model: string | null): Promise<boolean>
   userOpened(projectId: string, sessionId: string): void
   requestLatest(sessionId: string): void
@@ -190,7 +191,7 @@ export const useSessions = create<SessionStore>()((set, get) => ({
         const provider = get().providers.find((p) => p.cli === draft.cli)
         if (!draft.cli || provider?.status !== 'available') throw new Error(provider?.reason ?? '请选择已安装并已登录的 CLI')
         const startedAt = revision
-        const created = await sessionApi().create({ projectId: key.projectId, cli: draft.cli, model: draft.model, text: draft.text, contextItems: draft.contextItems, originViewId, viewContextAttached: !!originViewId && draft.contextItems.some(item => item.type === 'view' && item.viewId === originViewId) })
+        const created = await sessionApi().create({ projectId: key.projectId, cli: draft.cli, model: draft.model, ...(draft.reasoningEffort !== undefined ? { reasoningEffort: draft.reasoningEffort } : {}), text: draft.text, contextItems: draft.contextItems, originViewId, viewContextAttached: !!originViewId && draft.contextItems.some(item => item.type === 'view' && item.viewId === originViewId) })
         result = acceptSummaryIfFresh(created, startedAt)
       } else {
         const session = get().summaries[key.sessionId]
@@ -211,6 +212,11 @@ export const useSessions = create<SessionStore>()((set, get) => ({
     const startedAt = revision
     const renamed = await sessionApi().rename({ sessionId, title })
     acceptSummaryIfFresh(renamed, startedAt)
+  }),
+  setReasoningEffort: (sessionId, reasoningEffort) => operation(`effort:${sessionId}`, async () => {
+    await sessionApi().setReasoningEffort({ sessionId, reasoningEffort })
+    const summary = get().summaries[sessionId]
+    if (summary) acceptSummary({ ...summary, reasoningEffort })
   }),
   setModel: (sessionId, model) => operation(`model:${sessionId}`, async () => {
     await sessionApi().setModel({ sessionId, model })

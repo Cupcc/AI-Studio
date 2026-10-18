@@ -57,11 +57,11 @@ export function FilesPanel({ projectId, canvas, active }: FilesPanelProps) {
   const canAdd = !!state && viewer !== null && selected === viewer.path && (entryOf(state, viewer.path)?.kind ?? 'file') === 'file'
   const watchLive = state?.watch === 'live'
 
-  async function add() {
+  async function add(type: 'file' | 'image' = 'file') {
     if (!selected || adding) return
     const path = selected
     setAdding(true); setMessage(null)
-    const outcome = await addToConversation({ projectId, canvas, path })
+    const outcome = await addToConversation({ projectId, canvas, path, type })
     setAdding(false); setMessage({ ...outcome, path })
   }
 
@@ -100,7 +100,7 @@ export function FilesPanel({ projectId, canvas, active }: FilesPanelProps) {
           <FileViewer
             projectId={projectId} viewer={viewer} canAdd={canAdd} active={active}
             message={message?.path === viewer.path ? message : null} adding={adding}
-            onAdd={() => void add()} onClose={() => { useFiles.getState().closeViewer(projectId); setMessage(null) }}
+            onAdd={() => void add()} onAddImage={() => void add('image')} onClose={() => { useFiles.getState().closeViewer(projectId); setMessage(null) }}
             onRetry={() => void useFiles.getState().refresh(projectId)}
           />
         </div>

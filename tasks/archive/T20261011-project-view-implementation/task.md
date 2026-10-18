@@ -66,7 +66,7 @@ Knowledge / Definition 内置 Schema、五类 JSON 默认定义、安全读取�
 
 用户授权“commit all，执行所有分支的并入”。Main Agent 将本分支 rebase 到包含治理修订的 main，保留主目录已确认的规格来源和精简后的路线图，合入本分支当前实现、独立验收及归档证据。冲突只涉及路线图与规格来源；与原始 `746d409` 比较，`apps/desktop/src`、`apps/desktop/e2e` 和 `packages` 无差异，原独立界面及真实 CLI 证据的代码范围继续有效。本次不新增真实模型调用或人工验收结论。两个同目标过程提交整理为一个实现提交，按 CONTRIBUTING 仅快进合入。
 
-历史限制来源：[Adapter 验收](../../T20261009-agent-adapter/acceptance.md#未覆盖与边界)。历史预算与失败证据不变；本次新授权不扩展 AC-02～05 的补验范围。
+历史限制来源：[Adapter 验收](../T20261009-agent-adapter/acceptance.md#未覆盖与边界)。历史预算与失败证据不变；本次新授权不扩展 AC-02～05 的补验范围。
 
 ## 2026-10-11 人工功能验收记录
 

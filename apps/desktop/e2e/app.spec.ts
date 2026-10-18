@@ -117,7 +117,7 @@ test('renderer has no Node.js, require or raw ipcRenderer', async () => {
     ipcRenderer: 'undefined',
     electron: 'undefined',
     studioKeys: ['app', 'project', 'session', 'projectView', 'settings', 'browser', 'terminal', 'files', 'diff'],
-    appKeys: ['getInfo', 'onWindowFocusChanged', 'ping']
+    appKeys: ['getInfo', 'getWindowFocus', 'onWindowFocusChanged', 'ping']
   })
 })
 
@@ -136,7 +136,7 @@ test('typed preload API works and main validates input', async () => {
   expect(result.electron).toMatch(/^\d+\.\d+\.\d+$/)
   expect(result.isPackaged).toBe(false)
   expect(result.name).toBe('AI Developer Studio')
-  expect(result.version).toBe('0.0.0')
+  expect(result.version).toBe('1.0.0')
   expect(result.pong).toBe('hello')
   expect(result.invalid).toMatch(/message must be a string/)
   await expect(page.getByRole('heading', { name: 'AI Developer Studio' })).toBeVisible()

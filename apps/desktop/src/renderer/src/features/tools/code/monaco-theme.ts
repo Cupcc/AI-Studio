@@ -11,7 +11,7 @@ import type { editor } from 'monaco-editor/editor/editor.api.js'
  * - Overlays (selection, find matches, diff lines) are translucent tints, so they follow whatever is behind them.
  * - Nominal backgrounds are the solid theme's `--color-surface` (`styles/tokens.css`; a test reads the CSS and fails if
  *   they drift). The worst glass backgrounds are the relative luminances measured on the real app for the Terminal
- *   (`tasks/T20261009-context-tools/evidence/W5-theme-measurements-r3.json`), see `monaco-theme.test.ts`.
+ *   (`tasks/archive/T20261009-context-tools/evidence/W5-theme-measurements-r3.json`), see `monaco-theme.test.ts`.
  * - Token colours start from the Terminal's validated ANSI hues (GitHub Primer) and keep every syntax colour >= 4.5:1 on
  *   both backgrounds and on the persistent line tints (line highlight, inserted / removed diff lines). Transient
  *   overlays (selection, find matches, word-level diff highlights) may lower syntax colours to >= 3:1 on the worst glass;

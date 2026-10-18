@@ -1,0 +1,97 @@
+{
+  "sessions": [
+    {
+      "activity": "none",
+      "cli": "codex",
+      "completionUnread": false,
+      "createdAt": 1792315931037,
+      "errorUnseen": false,
+      "id": "f3b1ba2f-4206-4f3c-bdbc-d16a6545db49",
+      "lastOutcome": "completed",
+      "lastUserMessageAt": 1792316023353,
+      "model": "gpt-6-astra",
+      "nativeSessionId": "01a14e5a-ba74-76a1-aef3-52ea65a01d60",
+      "originViewId": null,
+      "projectId": "7fb91ed1-9c2d-4b4a-9d68-5d9e8e8f2a33",
+      "status": null,
+      "stopping": false,
+      "title": "Run exactly one shell command: python3 -…",
+      "titleSource": "client",
+      "updatedAt": 1792316026501,
+      "viewContextAttached": false,
+      "viewContextPaths": []
+    },
+    {
+      "activity": "none",
+      "cli": "codex",
+      "completionUnread": false,
+      "createdAt": 1792315962339,
+      "errorUnseen": false,
+      "id": "44f48402-704b-45b5-bb14-fc18b802a405",
+      "lastOutcome": "completed",
+      "lastUserMessageAt": 1792315962339,
+      "model": null,
+      "nativeSessionId": "01a14e5b-3484-7af2-9451-9e69d10b5294",
+      "originViewId": null,
+      "projectId": "7fb91ed1-9c2d-4b4a-9d68-5d9e8e8f2a33",
+      "status": null,
+      "stopping": false,
+      "title": "Run python3 -c \"import time; print(\\\"W26…",
+      "titleSource": "client",
+      "updatedAt": 1792316422035,
+      "viewContextAttached": false,
+      "viewContextPaths": []
+    }
+  ],
+  "turns": [
+    {
+      "id": "f3b1ba2f-4206-4f3c-bdbc-d16a6545db49",
+      "model": "gpt-6-astra",
+      "nativeSessionId": "01a14e5a-ba74-76a1-aef3-52ea65a01d60",
+      "status": null,
+      "turns": [
+        {
+          "at": 1792315994638,
+          "durationMs": 63599,
+          "id": "7e4537b3-993b-4041-bb67-643705d50e15",
+          "kind": "turn_end",
+          "model": "gpt-6.1-sol",
+          "outcome": "interrupted",
+          "sequence": 4,
+          "sessionId": "f3b1ba2f-4206-4f3c-bdbc-d16a6545db49",
+          "turnId": "7998a472-fea2-4ca7-a9df-4740fd237e26"
+        },
+        {
+          "at": 1792316026501,
+          "durationMs": 3148,
+          "id": "7dc989de-0598-40e9-bfc4-729a2735d6b0",
+          "kind": "turn_end",
+          "model": "gpt-6-astra",
+          "outcome": "completed",
+          "sequence": 7,
+          "sessionId": "f3b1ba2f-4206-4f3c-bdbc-d16a6545db49",
+          "turnId": "24ea0878-c276-4bbc-82df-b6f642ebbe36"
+        }
+      ]
+    },
+    {
+      "id": "44f48402-704b-45b5-bb14-fc18b802a405",
+      "model": null,
+      "nativeSessionId": "01a14e5b-3484-7af2-9451-9e69d10b5294",
+      "status": null,
+      "turns": [
+        {
+          "at": 1792316048742,
+          "durationMs": 86403,
+          "id": "920981b8-69ae-4179-84ac-bbf964b63930",
+          "kind": "turn_end",
+          "model": "gpt-6.1-sol",
+          "outcome": "completed",
+          "sequence": 6,
+          "sessionId": "44f48402-704b-45b5-bb14-fc18b802a405",
+          "turnId": "4f1f228e-c435-4334-8e11-f8b83b0f9bdb"
+        }
+      ]
+    }
+  ]
+}

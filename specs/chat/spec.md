@@ -13,7 +13,7 @@
 
 ## 1. 未决问题
 
-2026-10-09 参考应用复核见 [Session research](../../tasks/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
+2026-10-09 参考应用复核见 [Session research](../../tasks/archive/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|

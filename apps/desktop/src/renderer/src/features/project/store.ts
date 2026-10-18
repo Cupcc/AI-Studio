@@ -190,8 +190,9 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
     set({ foreground }); shellIntegration().session.setWindowForeground(foreground); syncViewing()
   },
   watchEvents() {
+    let active = true, focusRevision = 0
     const unsub = [
-      studio().app.onWindowFocusChanged(({ focused }) => get().setForeground(focused)),
+      studio().app.onWindowFocusChanged(({ focused }) => { focusRevision++; get().setForeground(focused) }),
       studio().project.onQuitRequested((request) => set({ quitRequest: request, quitting: false })),
       studio().project.onFlushRequested(() => {
         void get().flush().then(() => studio().project.stateFlushed())
@@ -206,7 +207,13 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
         }
       })
     ]
-    return () => unsub.forEach((off) => off())
+    // Subscribe before reading: initial native focus may predate Renderer startup.
+    // A later event wins over an in-flight snapshot, and focus never opens a Session.
+    const snapshotRevision = focusRevision
+    void studio().app.getWindowFocus().then(({ focused }) => {
+      if (active && focusRevision === snapshotRevision) get().setForeground(focused)
+    }).catch(error => console.error('[project] initial window focus unavailable', error))
+    return () => { active = false; unsub.forEach((off) => off()) }
   },
   async confirmQuit() {
     if (get().quitting) return

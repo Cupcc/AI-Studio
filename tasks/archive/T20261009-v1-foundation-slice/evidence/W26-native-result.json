@@ -1,0 +1,88 @@
+{
+  "baseline": "dc66a16 + W26 diff; package rebuilt after W28 public output mapping corrections; before later incomplete-transcript recovery fix",
+  "platform": "15.6 arm64",
+  "cli": "0.163.0",
+  "sessionId": "1d5318a8-77f7-4fbe-9781-018d8b85500e",
+  "nativeSessionId": "01a14f99-4cd9-7200-a8f0-eef88ef49197",
+  "summary": {
+    "model": null,
+    "reasoningEffort": null,
+    "activity": "none",
+    "lastOutcome": "completed"
+  },
+  "nativeTurnContexts": [
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "summary": "none",
+      "approval_policy": "on-request"
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "summary": "none",
+      "approval_policy": "on-request"
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "high",
+      "summary": "none",
+      "approval_policy": "on-request"
+    },
+    {
+      "model": "gpt-6-astra",
+      "effort": "low",
+      "summary": "none",
+      "approval_policy": "on-request"
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "summary": "none",
+      "approval_policy": "on-request"
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "effort": "xhigh",
+      "summary": "none",
+      "approval_policy": "on-request"
+    }
+  ],
+  "agentMessages": [
+    "I’m applying the w26-marker skill.",
+    "I’m applying the selected `w26-marker` skill and will create the requested file with the native patch tool.",
+    "Left: red. Right: blue. W26_SKILL_913 W26_RULE_841",
+    "Requesting native approval to run the specified harmless command.",
+    "Left half: solid red. Right half: solid blue.\n\nW26_RULE_841 W26_SKILL_913 W28_UI_732",
+    "Output: `W26_APPROVAL_527`\n\nW26_SKILL_913 W26_RULE_841",
+    "Requesting native approval for the specified file write; I will wait for the approval result.",
+    "W26_DECLINED_629 W26_RULE_841",
+    "Starting the foreground recovery command with normal permissions and waiting for it to finish.",
+    "Earlier image: left half red, right half blue. W26_RESUMED_733 W26_RULE_841"
+  ],
+  "inputResolutions": [
+    {
+      "status": "answered",
+      "response": {
+        "kind": "approval",
+        "optionId": "0"
+      }
+    },
+    {
+      "status": "declined_with_text",
+      "text": "Decline the pending write. Do not run or retry it. Reply only W26_DECLINED_629 plus the project rule token."
+    }
+  ],
+  "declinedWriteAbsent": true,
+  "checks": {
+    "image": "left red / right blue; no file image-reading tool",
+    "skill": "W26_SKILL_913",
+    "rule": "W26_RULE_841",
+    "approval": "Accept then native W26_APPROVAL_527",
+    "textDecline": "W26_DECLINED_629 same turn, marker absent",
+    "resetDefaults": "Astra low -> config model gpt-6.1-sol xhigh",
+    "hostCrash": "see W26-electron-recovery.json",
+    "resume": "same native ID, image history recalled, W26_RESUMED_733",
+    "reasoningBody": "native summary none on resumed thread; no public body emitted, not counted as real body display passed"
+  }
+}

@@ -14,7 +14,7 @@ const contrast = (a: string | number, b: string | number) => {
 
 /*
  * Worst measured glass pane background (relative luminance) per colour scheme, derived from the W5 measurement of the
- * real built app: tasks/T20261009-context-tools/evidence/W5-theme-measurements-r3.json, `plainRowWorstBg.min` of each
+ * real built app: tasks/archive/T20261009-context-tools/evidence/W5-theme-measurements-r3.json, `plainRowWorstBg.min` of each
  * cell (contrast of the default text against the worst background pixel of a text row):
  *   light: 12.99:1 for #0d0d0d (glass + aurora)  -> L = 12.99 * (0.0040 + 0.05) - 0.05 = 0.6518  (glass, no wallpaper: 13.32 -> 0.6696)
  *   dark:  10.71:1 for #f2f2f2 (glass, no wallpaper) -> L = (0.8879 + 0.05) / 10.71 - 0.05 = 0.0376  (aurora 11.37 -> 0.0325, system dark 11.23 -> 0.0335)

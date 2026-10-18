@@ -59,6 +59,26 @@ export class SessionStore {
       .all(id) as { data: string }[]).map(row => JSON.parse(row.data))
   }
 
+  incompleteItems(id: string, turnId: string): TranscriptItem[] {
+    return (this.db.prepare(`SELECT data FROM transcript_items WHERE session_id=? AND json_extract(data, '$.turnId')=? AND (
+      (json_extract(data, '$.kind')='agent_message' AND json_extract(data, '$.complete')=0) OR
+      (json_extract(data, '$.kind')='tool_activity' AND json_extract(data, '$.item.status')='in_progress'))`)
+      .all(id, turnId) as { data: string }[]).map(row => JSON.parse(row.data))
+  }
+
+  /** Repair stale streaming rows left by older crash recovery, without rewriting completed turns. */
+  finalizeInterruptedHistory(): void {
+    this.db.prepare(`UPDATE transcript_items SET data=CASE json_extract(data, '$.kind')
+      WHEN 'agent_message' THEN json_set(data, '$.complete', json('true'))
+      ELSE json_set(data, '$.item.status', (
+        SELECT outcome FROM session_turns WHERE id=json_extract(transcript_items.data, '$.turnId')
+        AND session_id=transcript_items.session_id)) END
+      WHERE ((json_extract(data, '$.kind')='agent_message' AND json_extract(data, '$.complete')=0)
+        OR (json_extract(data, '$.kind')='tool_activity' AND json_extract(data, '$.item.status')='in_progress'))
+      AND EXISTS (SELECT 1 FROM session_turns WHERE id=json_extract(transcript_items.data, '$.turnId')
+        AND session_id=transcript_items.session_id AND ended_at IS NOT NULL AND outcome IN ('failed', 'interrupted'))`).run()
+  }
+
   startTurn(id: string, sessionId: string, at: number, model: string | null, message: SessionMessage): void {
     this.db.prepare('INSERT INTO session_turns(id, session_id, started_at, model, message) VALUES (?, ?, ?, ?, ?)')
       .run(id, sessionId, at, model, JSON.stringify(message))

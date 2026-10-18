@@ -28,6 +28,7 @@ export const PING_MESSAGE_MAX_LENGTH = 1000
 
 export const appContract = defineContract('app', {
   invoke: {
+    getWindowFocus: invoke<void, WindowFocusPayload>('app:get-window-focus'),
     getInfo: invoke<void, AppInfo>('app:get-info'),
     ping: invoke<PingRequest, PingResponse>('app:ping')
   },

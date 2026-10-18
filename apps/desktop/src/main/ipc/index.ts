@@ -5,7 +5,7 @@ import type { CoreServices } from '../services/core'
 import { createAppFeature } from './app'
 import { createProjectViewFeature } from './project-view'
 import { createProjectFeature } from './project'
-import { createSessionFeature, type SessionFeatureOptions } from './session'
+import { isSessionWindowForeground, createSessionFeature, type SessionFeatureOptions } from './session'
 import { createSettingsFeature } from './settings'
 import { createBrowserFeature } from './browser'
 import { createTerminalFeature } from './terminal'
@@ -44,7 +44,7 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
     ])
   })
   return [
-    createAppFeature(core),
+    createAppFeature(core, sessionOptions.isForeground ?? isSessionWindowForeground),
     createProjectFeature(core),
     createProjectViewFeature(core),
     createSessionFeature(core, { ...sessionOptions, fileReferences: sessionOptions.fileReferences ?? files }),
@@ -69,13 +69,26 @@ export function registerIpc(
       console.error(`[ipc] ${channel} failed:`, error instanceof Error ? error.message : error)
     }
   })
+  return createFeatureDisposer(features, unregister)
+}
+
+/** Successful disposers run once; failures retain their exact service for another quit attempt. */
+export function createFeatureDisposer(features: readonly FeatureHandlers[], unregister: () => void): () => Promise<void> {
   let disposal: Promise<void> | undefined
-  return () => disposal ??= (async () => {
-    unregister()
+  const completed = new Set<FeatureHandlers>()
+  return () => {
+    if (disposal) return disposal
+    const pending = (async () => {
     const errors: unknown[] = []
     for (const feature of [...features].reverse()) {
-      try { await feature.dispose?.() } catch (error) { errors.push(error) }
+      if (completed.has(feature)) continue
+      try { await feature.dispose?.(); completed.add(feature) } catch (error) { errors.push(error) }
     }
     if (errors.length) throw new AggregateError(errors, 'Feature cleanup failed')
-  })()
+    unregister()
+    })()
+    disposal = pending
+    void pending.catch(() => { if (disposal === pending) disposal = undefined })
+    return pending
+  }
 }

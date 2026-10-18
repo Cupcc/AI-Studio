@@ -25,7 +25,7 @@ beforeEach(() => {
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
   vi.stubGlobal('CSS', { escape: (value: string) => value })
   api = {
-    getTurnDiff: vi.fn(async () => { throw new Error('unused') }), list: vi.fn(async () => []), getConversation: vi.fn(async () => ({ session: summary(), items: [], hasMore: false, nextBeforeSequence: null })), create: vi.fn(async () => summary({ activity: 'running', status: 'running' })), send: vi.fn(async () => {}), answer: vi.fn(async () => {}), replyWithText: vi.fn(async () => {}), stop: vi.fn(async () => {}), retry: vi.fn(async () => {}), rename: vi.fn(async ({ title }) => summary({ title, titleSource: 'user' })), setModel: vi.fn(async () => {}), getProviders: vi.fn(async () => providers), getModels: vi.fn(async () => ({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true }, { id: 'm2', displayName: 'Model Two' }], error: null })), getDefaultCli: vi.fn(async () => 'codex' as const), setDefaultCli: vi.fn(async () => {}), getDraft: vi.fn(async () => emptyDraft()), saveDraft: vi.fn(async () => {}), updateViewing: vi.fn(async () => {}), opened: vi.fn(async () => {}), getProjectState: vi.fn(async () => ({ projectId: 'p', attention: null, counts: { running: 0, needsInput: 0 } })), stopProject: vi.fn(async () => ({ stopped: [], failed: [] })), projectClosed: vi.fn(async () => {}),
+    getTurnDiff: vi.fn(async () => { throw new Error('unused') }), list: vi.fn(async () => []), getConversation: vi.fn(async () => ({ session: summary(), items: [], hasMore: false, nextBeforeSequence: null })), create: vi.fn(async () => summary({ activity: 'running', status: 'running' })), send: vi.fn(async () => {}), answer: vi.fn(async () => {}), replyWithText: vi.fn(async () => {}), stop: vi.fn(async () => {}), retry: vi.fn(async () => {}), rename: vi.fn(async ({ title }) => summary({ title, titleSource: 'user' })), setReasoningEffort: vi.fn(async () => {}), setModel: vi.fn(async () => {}), getProviders: vi.fn(async () => providers), getSkills: vi.fn(async () => ({ skills: [], error: null })), getModels: vi.fn(async () => ({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true }, { id: 'm2', displayName: 'Model Two' }], error: null })), getDefaultCli: vi.fn(async () => 'codex' as const), setDefaultCli: vi.fn(async () => {}), getDraft: vi.fn(async () => emptyDraft()), saveDraft: vi.fn(async () => {}), updateViewing: vi.fn(async () => {}), opened: vi.fn(async () => {}), getProjectState: vi.fn(async () => ({ projectId: 'p', attention: null, counts: { running: 0, needsInput: 0 } })), stopProject: vi.fn(async () => ({ stopped: [], failed: [] })), projectClosed: vi.fn(async () => {}),
     onSummaryChanged: (listener) => { summaryEvent = listener; return () => {} }, onTranscriptChanged: (listener) => { transcriptEvent = listener; return () => {} }, onProvidersChanged: () => () => {}
   }
   Object.defineProperty(window, 'studio', { configurable: true, value: { session: api, project: { updateUiState: async ({ patch }: { patch: object }) => ({ ...defaultUiState(), ...patch }) } } as unknown as StudioApi })
@@ -201,7 +201,7 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
     await waitFor(() => expect(api.replyWithText).toHaveBeenCalledWith({ sessionId: 's', text: 'Later' }))
   })
-  it('lets Running Sessions select the next model and falls back from a removed model before sending', async () => {
+  it('lets Running Sessions select the next model and preserves a model absent from the catalog', async () => {
     const sessionKey = { projectId: 'p', kind: 'session' as const, sessionId: 's' }
     useSessions.setState({ summaries: { s: summary({ activity: 'running', model: 'm1' }) }, drafts: { [draftId(sessionKey)]: { ...emptyDraft(), text: 'Next' } } })
     render(<Composer draftKey={sessionKey} active />)
@@ -210,7 +210,7 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     fireEvent.change(picker, { target: { value: 'm2' } }); await waitFor(() => expect(api.setModel).toHaveBeenCalledWith({ sessionId: 's', model: 'm2' }))
     act(() => useSessions.setState({ summaries: { s: summary({ activity: 'none', model: 'removed' }) } }))
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
-    await waitFor(() => expect(api.setModel).toHaveBeenCalledWith({ sessionId: 's', model: null }))
+    expect(api.setModel).not.toHaveBeenCalledWith({ sessionId: 's', model: null })
     await waitFor(() => expect(api.send).toHaveBeenCalledWith(expect.objectContaining({ text: 'Next' })))
   })
   it('shows CLI unavailability reasons and disables selecting that CLI', async () => {

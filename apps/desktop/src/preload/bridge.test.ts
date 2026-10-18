@@ -28,7 +28,7 @@ describe('buildStudioApi', () => {
     const { ipc } = fakeIpc()
     const api = buildStudioApi(contracts, ipc)
     expect(Object.keys(api)).toEqual(contracts.map((c) => c.name))
-    expect(Object.keys(api.app).sort()).toEqual(['getInfo', 'onWindowFocusChanged', 'ping'])
+    expect(Object.keys(api.app).sort()).toEqual(['getInfo', 'getWindowFocus', 'onWindowFocusChanged', 'ping'])
     expect(Object.isFrozen(api)).toBe(true)
     expect(Object.isFrozen(api.app)).toBe(true)
   })

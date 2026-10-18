@@ -16,6 +16,8 @@ import {
 } from './process-probe.js';
 
 export interface RuntimeSpawnOptions {
+  /** Logical Adapter Session identifier, persisted only by an explicit host registry. */
+  sessionId?: string;
   command: string;
   args: readonly string[];
   cwd: string;
@@ -95,6 +97,11 @@ export interface RuntimeHandle {
   terminate(options?: TerminateOptions): Promise<TerminationReport>;
   /** Resolves with exit info, or rejects with `timeout`. */
   waitForExit(timeoutMs: number): Promise<RuntimeExitInfo>;
+}
+
+/** A factory failed after spawning; its owner must retain the exact handle for cleanup retries. */
+export class RuntimeStartupError extends Error {
+  constructor(message: string, readonly runtime: RuntimeHandle, options: ErrorOptions) { super(message, options); }
 }
 
 const DEFAULT_STDERR_LIMIT = 64 * 1024;

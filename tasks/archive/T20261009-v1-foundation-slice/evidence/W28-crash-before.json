@@ -1,0 +1,69 @@
+{
+  "time": "2026-10-18T15:50:08.051534+00:00",
+  "host": {
+    "pid": 21735,
+    "startedAt": "Sun Oct 18 10:47:01 2026"
+  },
+  "runtime": 23311,
+  "command": 23618,
+  "externalSentinel": 1646,
+  "journals": [
+    {
+      "version": 1,
+      "instanceId": "d0033ec3-d359-4676-8887-2ff1b2efc02d",
+      "host": {
+        "pid": 21735,
+        "startedAt": "Sun Oct 18 10:47:01 2026"
+      },
+      "runtime": {
+        "pid": 23311,
+        "startedAt": "Sun Oct 18 10:49:25 2026",
+        "pgid": 23311
+      },
+      "sessionId": "891daf38-6f49-4a7c-8705-ffb0eea3765a",
+      "processes": [
+        {
+          "pid": 23311,
+          "startedAt": "Sun Oct 18 10:49:25 2026",
+          "pgid": 23311
+        },
+        {
+          "pid": 23615,
+          "startedAt": "Sun Oct 18 10:49:33 2026",
+          "pgid": 23615
+        },
+        {
+          "pid": 23618,
+          "startedAt": "Sun Oct 18 10:49:34 2026",
+          "pgid": 23618
+        }
+      ]
+    }
+  ],
+  "activeItems": [
+    {
+      "kind": "tool_activity",
+      "item": {
+        "itemId": "exec-f15637ce-4161-4167-8fb6-800d6bffd69a",
+        "status": "in_progress",
+        "nativeType": "commandExecution",
+        "kind": "command",
+        "activity": {
+          "verb": "run",
+          "label": "/bin/zsh -lc \"python3 -c \\\"import os,time; print(\\\\\\\"W28_CRASH_PID\\\\\\\",os.getpid(),flush=True); time.sleep(300)\\\"\"",
+          "target": "/bin/zsh -lc \"python3 -c \\\"import os,time; print(\\\\\\\"W28_CRASH_PID\\\\\\\",os.getpid(),flush=True); time.sleep(300)\\\"\""
+        },
+        "command": {
+          "command": "/bin/zsh -lc \"python3 -c \\\"import os,time; print(\\\\\\\"W28_CRASH_PID\\\\\\\",os.getpid(),flush=True); time.sleep(300)\\\"\"",
+          "cwd": "/private/tmp/ai-studio-v1-input-20261018/project",
+          "exitCode": null
+        }
+      },
+      "id": "f67804a0-e8b3-4307-9bd1-309c818a0eb7",
+      "sessionId": "1da03312-b521-4b11-a73c-2632ac5a052f",
+      "turnId": "7d5e6039-2642-42e8-8dd9-dd9d1164f5a3",
+      "sequence": 19,
+      "at": 1792338574343
+    }
+  ]
+}

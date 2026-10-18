@@ -15,7 +15,7 @@
 
 ### 1.1 未决问题
 
-2026-10-09 参考应用复核见 [Session research](../../tasks/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
+2026-10-09 参考应用复核见 [Session research](../../tasks/archive/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
@@ -27,8 +27,8 @@
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
-| I-Q2 | 在输入框输入的回复对 CLI 意味着什么？有多个未答复请求时作用于哪一个？ | 只有一个未答复请求且该请求原生接受自由文本（如提问）时，文字作为该请求的答案；其他情况下，所有未答复请求按“拒绝并附该文字为说明”解决（Claude `canUseTool` 拒绝可附说明；Codex 拒绝后由 Adapter 把文字作为用户消息交给 Agent，具体方式待 Adapter 验证）。对话中显示为用户消息 | 是：涉及 Adapter 接口，须在 Needs Input 实现前确认 | 采纳建议（2026-10-09 确认）；Codex 拒绝后交付文字的具体方式由 Adapter 验证 |
-| I-Q3 | Running 中是否允许发送？ | 按各 CLI 原生能力接入，保留 Codex 当前回合追加与 Claude 后续回合排队的差异；消息归属及 Stop 对队列的行为由 Adapter 验证并如实呈现 | 产品问题已解决；实现与验证待完成 | 依据 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>)（2026-10-11 确认）；不再采用“本切片不支持”作为产品决定，diff 待审阅 |
+| I-Q2 | 在输入框输入的回复对 CLI 意味着什么？有多个未答复请求时作用于哪一个？ | 只有一个未答复请求且该请求原生接受自由文本（如提问）时，文字作为该请求的答案；其他情况下，所有未答复请求按“拒绝并附该文字为说明”解决（Claude `canUseTool` 拒绝可附说明；Codex 先由同轮 turn/steer 交付文字、确认接收后拒绝原请求，W25 / W26 已真实验证）。对话中显示为用户消息 | 产品已确认；Codex实现与真实验证已完成，Claude后续 | 采纳建议（2026-10-09 确认）；Codex具体交付方式已由Adapter与UI验证，见§3（技术结果2026-10-18） |
+| I-Q3 | Running 中是否允许发送？ | 按各 CLI 原生能力接入，保留 Codex 当前回合追加与 Claude 后续回合排队的差异；消息归属及 Stop 对队列的行为由 Adapter 验证并如实呈现 | 产品问题已解决；Codex 同轮追加已实现及真实复验，Claude queue 后续 | 依据 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>)（2026-10-11 确认）；不再采用“本切片不支持”作为产品决定，diff 待审阅 |
 
 ### 1.3 技术决定
 
@@ -46,7 +46,7 @@
 - 不负责：
   - 发送、答复、Stop、切换模型之后的 Session 状态变化：见 [specs/session/spec.md](../session/spec.md) 第 4.1 节。
   - 草稿的创建与 CLI 选择：见 [specs/chat/spec.md](../chat/spec.md)。
-  - 从 Files 添加文件到上下文（FR-TOOL-001，[tools spec](../tools/spec.md#fr-tool-001-files)）；当前 View 作为上下文的注入方式（04 第 1 节第 10 项，Project View task）。本轮只提供入口与标签位。Files 的查看动作不自动添加标签；显式添加面向当前 Project 的 Session / 草稿，沿用本模块发送通道（DEC-10，2026-10-12 确认）。
+  - 从 Files 添加文件到上下文（FR-TOOL-001，[tools spec](../tools/spec.md#fr-tool-001-files)）；当前 View 作为上下文的注入方式（04 第 1 节第 10 项，Project View task）。当前实现包含文件 / 图片 / 原生 Skill 的入口、标签与可信发送接缝，契约见 §4。Files 的查看动作不自动添加标签；显式添加面向当前 Project 的 Session / 草稿，沿用本模块发送通道（DEC-10，2026-10-12 确认）。
 
 ## 3. 行为细则
 
@@ -72,10 +72,13 @@
 #### Context / Attachment 入口与上下文标签
 
 1. `+` 打开 Context / Attachment 菜单（Shell Spec 第 7 节）。菜单提供“从 Files 添加文件”，打开 Files 后由用户选择普通文件并添加到当前草稿 / Session；实现细节见 §1.3。
-2. 上下文标签位：显示当前 View 与从 Files 添加的文件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。本轮实现标签位与数据结构 `context_items: [{type: 'view', viewId} | {type: 'file', path}]`；Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。
+2. 上下文标签位：显示当前 View 与从 Files 添加的文件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。本轮实现标签位与数据结构 `context_items: [{type: 'view', viewId} | {type: 'file', path} | {type: 'image', path} | {type: 'skill', id, name}]`；Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。
 3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
-   - 当前转换：Codex 原生 mention、Claude 文本路径清单；引用不是文件内容快照。2026-10-18 Codex 普通发送真实接收及尚未覆盖的运行中输入边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
-4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件标签时明确阻止答复并保留输入，避免标签被无声清空；运行中发送遵循 Provider 的实际能力。实现与独立验收边界由 [工程工具任务](../../tasks/T20261009-context-tools/task.md) 维护。
+   - 当前转换：Codex 原生 mention、Claude 文本路径清单；引用不是文件内容快照。Codex 普通发送与应用 UI 同轮追加的真实证据及其余能力边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
+4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件、图片或 Skill 标签时明确阻止答复并保留输入，避免标签被无声清空；运行中发送遵循 Provider 的实际能力。实现与独立验收边界由 [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 维护。
+
+5. 原生图片由 Files 的「作为图片附加」明确选择，主进程沿用文件路径边界和发送前重校验，传 Codex `localImage`；同一文件可同时保留 file / image 两种显式语义。图片内容和模型是否支持由 CLI 实际结果判定，不能静默改成路径文字（原则 24；2026-10-18 技术实现）。
+6. Codex 的 `+` 菜单按需读取当前 Project 原生 Skill 目录。草稿与历史只存 Project 隔离的 opaque ID / 展示名；主进程在普通 / Running / Retry 发送前重新查询 enabled 目录并解析原生 name / path，拒绝失效或禁用项。Renderer 不得自行提交本机 Skill 路径；原生自动加载与显式选择分别验证。推理强度来自原生模型目录，改选仅影响下一轮，默认复位由 [Adapter §3.8](../agent-adapter/spec.md) 负责（Input §2、原则 20、24；2026-10-18 技术实现，diff 待审阅）。
 
 #### Send / Stop
 
@@ -101,18 +104,18 @@
 
 按 I-Q3 与 FR-INPUT-001，运行中发送是必须接入的原生能力。Codex 当前回合追加与 Claude 后续回合排队分别呈现；发送接收确认后再清空对应输入，失败保留内容，排队接受不显示为已执行。回合结束、Stop 与继续发送的竞态应依原生语义处理，不自行重放、丢弃或合并排队消息。
 
-当前 Adapter 的 `capabilities.inputWhileRunning` 已建模 `none` / `steer` / `queue`，Codex 已接入原生 `steer`；Claude 的排队能力尚未建模，UI 和 IPC 仍需贯通并验证。Claude Stop 后队列行为仍待真实验证（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 `still_queued`），不能以此长期禁止 Running 中发送。跟踪见[对齐任务](../../tasks/T20261011-native-cli-parity/task.md)。
+当前 Adapter 的 `capabilities.inputWhileRunning` 已建模 `none` / `steer` / `queue`，Codex 已接入原生 `steer`；Claude 的排队能力尚未建模，UI 和 IPC 仍需贯通并验证。Claude Stop 后队列行为仍待真实验证（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 `still_queued`），不能以此长期禁止 Running 中发送。跟踪见[对齐任务](../../tasks/archive/T20261011-native-cli-parity/task.md)。
 
 #### 在输入框答复 Needs Input
 
 依据：UX 第 6 节 Needs Input 呈现；D-03；FR-STATE-002；Shell Spec 第 6 节 Needs Input 卡片“也可以在下方直接回复”。
 
 1. Needs Input 时输入框可用，输入非空时按钮为 Send。发送后：文字作为用户消息出现在对话中，未答复的卡片按 I-Q2 的规则解决并变为只读（显示“已在输入框回复”），Session 回到 Running，Needs Input 清除（session spec E5）。
-2. Codex 授权请求只接受批准 / 拒绝；W25 真实复验确认输入框文字会先通过同一回合 `turn/steer` 交付，再拒绝待处理请求并继续。Claude 的 `canUseTool` 返回允许 / 拒绝（拒绝可附说明），提问类请求可能接受自由文本，真实语义仍待验证。推荐规则见 I-Q2，需 Adapter 确认可实现。
+2. Codex 授权请求只接受批准 / 拒绝；W25 Adapter 与 W26 最终包 UI 真实复验确认输入框文字会先通过同一回合 `turn/steer` 交付，再拒绝待处理请求并继续，已落实 I-Q2。Claude 的 `canUseTool` 返回允许 / 拒绝（拒绝可附说明），提问类请求可能接受自由文本；其真实语义按 DEC-16 留待后续验证。
 
 ### FR-INPUT-002 Model Selector
 
-依据：FR-INPUT-002；FR-CHAT-003；FR-SESSION-003（独立模型配置）；01 第 8 节原则 8、20；04 第 4 节；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节（模型目录可读取）与第 6 节；Codex 0.163.0 的同 Session 第二模型切换见 [W25 记录](../../tasks/T20261011-native-cli-parity/evidence/W25-codex-native.md)，Claude 真实链路仍待验证。
+依据：FR-INPUT-002；FR-CHAT-003；FR-SESSION-003（独立模型配置）；01 第 8 节原则 8、20；04 第 4 节；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节（模型目录可读取）与第 6 节；Codex 0.163.0 的同 Session 第二模型切换见 [W25 记录](../../tasks/archive/T20261011-native-cli-parity/evidence/W25-codex-native.md)，Claude 真实链路仍待验证。
 
 1. 位置：输入区底行右侧，Send / Stop 左侧；不在顶部 Tab Bar 设置全局 Model Selector（FR-INPUT-002；Shell Spec 第 7 节）。
 2. 内容：只列出当前 Session（或草稿）所用 CLI 的模型目录，来自 Adapter；不列出其他 CLI 的模型（FR-CHAT-003）。
@@ -132,6 +135,7 @@
 | 草稿输入 | 见 chat spec 第 4 节 | — |
 | 控件状态 | 由 `activity`、`stopping`、`pending_requests` 是否为空、输入是否为空、CLI 可用性、`capabilities` 推导 | 不单独存储 |
 | 模型 | `Session.model`（空 = CLI 默认）；草稿 `model` | session spec 第 4.2 节 |
+| 推理强度 | Session / 草稿 `reasoningEffort?: string \| null` | 原生目录命名；undefined不覆盖，null显式复位默认；下一轮快照 |
 
 ## 5. 接口与事件
 
@@ -146,12 +150,14 @@
 | 输入框回复 Needs Input | 同一发送入口根据状态调用 `replyWithText({sessionId, text})`；失败保留草稿，已接受的用户文本先于同步终态入对话记录 |
 | Stop | IPC `stop({sessionId})` |
 | 切换模型 | IPC `setModel({sessionId, model})`；草稿则通过 `saveDraft` 写入 `model` |
+| 推理强度 | IPC `setReasoningEffort({sessionId, reasoningEffort})`；草稿通过 `saveDraft` |
+| 原生Skill目录 | IPC `getSkills({projectId, cli})`；返回opaque ID / 展示名 / 描述，不返回可信路径 |
 
 ### 5.2 需要 CLI Adapter 提供（经 session 模块）
 
 | 能力 | 用途 | 需对齐的点 |
 |---|---|---|
 | `listModels(cli)` → `[{id, displayName, isDefault}]` | Model Selector；草稿阶段可用 | 不得为读取目录创建原生会话（chat spec 第 5.2 节） |
-| `setModel` / 发送时携带模型 | 下一轮生效 | [CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 6 节未验证同 Session 切换 |
+| `setModel` / 发送时携带模型 | 下一轮生效 | Codex W25 Adapter / W26 UI 已真实验证；Claude 真实链路后续 |
 | `capabilities.inputWhileRunning` | Running 中发送；Adapter 报告并执行 `steer` / `queue` 原生语义，确不支持才为 `none` | I-Q3 已确认；Adapter 须保留 steer / queue 差异 |
 | `capabilities.freeTextAnswers` 与 `replyWithText(text)` | 输入框回复 Needs Input；作用集合由 Adapter 取当前轮的待答复请求 | I-Q2；Adapter 正式契约 |

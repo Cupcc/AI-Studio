@@ -1,7 +1,6 @@
 import { BrowserWindow } from 'electron'
 import { CodexProvider } from '@ai-studio/agent-adapter/codex'
-import { ClaudeProvider } from '@ai-studio/agent-adapter/claude'
-import type { AgentProvider, InputResponse } from '@ai-studio/agent-adapter'
+import type { AgentProvider, InputResponse, RuntimeHandle, RuntimeSpawnOptions } from '@ai-studio/agent-adapter'
 import { sessionContract, SESSION_MESSAGE_MAX_LENGTH, SESSION_TITLE_MAX_LENGTH } from '@shared/ipc/session'
 import type { ComposerDraft, ContextItem, DraftKey, SessionCli } from '@shared/session/types'
 import { FILES_LIMITS, parseProjectPath, type FileReferenceResolver } from '@shared/tools/files'
@@ -39,17 +38,21 @@ function context(value: unknown): ContextItem[] {
   if (!Array.isArray(value) || value.length > 100) throw new IpcValidationError('Invalid contextItems')
   const items = value.map((item): ContextItem => {
     const entry = expectRecord(item)
+    if (entry.type === 'skill') {
+      expectOnlyKeys(entry, ['type', 'id', 'name'])
+      return { type: 'skill', id: id(entry.id, 'skillId'), name: id(entry.name, 'skillName') }
+    }
     if (entry.type === 'view') {
       expectOnlyKeys(entry, ['type', 'viewId'])
       return { type: 'view', viewId: id(entry.viewId, 'viewId') }
     }
-    if (entry.type === 'file') {
+    if (entry.type === 'file' || entry.type === 'image') {
       expectOnlyKeys(entry, ['type', 'path'])
-      return { type: 'file', path: filePath(entry.path) }
+      return { type: entry.type, path: filePath(entry.path) }
     }
     throw new IpcValidationError('Invalid context type')
   })
-  if (items.filter(item => item.type === 'file').length > FILES_LIMITS.referencesPerMessage) throw new IpcValidationError('Too many file references')
+  if (items.filter(item => item.type === 'file' || item.type === 'image').length > FILES_LIMITS.referencesPerMessage) throw new IpcValidationError('Too many file references')
   return items
 }
 function draftKey(raw: unknown): DraftKey {
@@ -68,8 +71,8 @@ function draftKey(raw: unknown): DraftKey {
   throw new IpcValidationError('Invalid draft key')
 }
 function draft(raw: unknown): ComposerDraft {
-  const value = record(raw, ['cli', 'model', 'text', 'contextItems'])
-  return { cli: value.cli === null ? null : cli(value.cli), model: model(value.model), text: text(value.text), contextItems: context(value.contextItems) }
+  const value = record(raw, ['cli', 'model', 'reasoningEffort', 'text', 'contextItems'])
+  return { ...(value.reasoningEffort !== undefined ? { reasoningEffort: model(value.reasoningEffort) } : {}), cli: value.cli === null ? null : cli(value.cli), model: model(value.model), text: text(value.text), contextItems: context(value.contextItems) }
 }
 function response(raw: unknown): InputResponse {
   const value = expectRecord(raw)
@@ -98,6 +101,7 @@ function response(raw: unknown): InputResponse {
 
 export interface SessionFeatureOptions {
   providers?: readonly AgentProvider[]
+  runtimeFactory?: (options: RuntimeSpawnOptions) => Promise<RuntimeHandle>
   isForeground?: (senderId: number) => boolean
   /** Re-validates Files references at send time; without it a message with file items is refused. */
   fileReferences?: FileReferenceResolver
@@ -114,7 +118,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
   const service = new SessionService({
     store: new SessionStore(core.database().db), projects: shell.projects,
     canOperate: id => !shell.isProjectClosing(id) && !shell.isQuitting(),
-    providers: options.providers ?? [new CodexProvider(), new ClaudeProvider()],
+    providers: options.providers ?? [new CodexProvider({ runtimeFactory: options.runtimeFactory })],
     environment: async () => ({ env: (await core.shellEnv.get()).env }),
     isForeground: options.isForeground ?? isSessionWindowForeground,
     fileReferences: options.fileReferences,
@@ -145,9 +149,9 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     },
     create: {
       parse: raw => {
-        const value = record(raw, ['projectId', 'cli', 'model', 'originViewId', 'viewContextAttached', 'text', 'contextItems'])
+        const value = record(raw, ['projectId', 'cli', 'model', 'reasoningEffort', 'originViewId', 'viewContextAttached', 'text', 'contextItems'])
         if (value.viewContextAttached !== undefined && typeof value.viewContextAttached !== 'boolean') throw new IpcValidationError('Invalid viewContextAttached')
-        return { projectId: id(value.projectId, 'projectId'), cli: cli(value.cli), model: model(value.model), originViewId: value.originViewId == null ? null : id(value.originViewId, 'originViewId'), viewContextAttached: value.viewContextAttached as boolean | undefined, text: text(value.text), contextItems: context(value.contextItems) }
+        return { projectId: id(value.projectId, 'projectId'), cli: cli(value.cli), ...(value.reasoningEffort !== undefined ? { reasoningEffort: model(value.reasoningEffort) } : {}), model: model(value.model), originViewId: value.originViewId == null ? null : id(value.originViewId, 'originViewId'), viewContextAttached: value.viewContextAttached as boolean | undefined, text: text(value.text), contextItems: context(value.contextItems) }
       },
       handle: request => service.create(request)
     },
@@ -169,11 +173,16 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
       parse: raw => { const value = record(raw, ['sessionId', 'title']); return { sessionId: id(value.sessionId, 'sessionId'), title: expectString(value.title, 'title', { maxLength: SESSION_TITLE_MAX_LENGTH * 2 }) } },
       handle: ({ sessionId, title }) => service.rename(sessionId, title)
     },
+    setReasoningEffort: {
+      parse: raw => { const value = record(raw, ['sessionId', 'reasoningEffort']); return { sessionId: id(value.sessionId), reasoningEffort: model(value.reasoningEffort) } },
+      handle: ({ sessionId, reasoningEffort }) => service.setReasoningEffort(sessionId, reasoningEffort)
+    },
     setModel: {
       parse: raw => { const value = record(raw, ['sessionId', 'model']); return { sessionId: id(value.sessionId, 'sessionId'), model: model(value.model) } },
       handle: ({ sessionId, model }) => service.setModel(sessionId, model)
     },
     getProviders: { parse: noInput, handle: () => service.getProviders() },
+    getSkills: { parse: raw => { const value = record(raw, ['cli', 'projectId']); return { cli: cli(value.cli), projectId: id(value.projectId, 'projectId') } }, handle: ({ cli, projectId }) => service.getSkills(cli, projectId) },
     getModels: { parse: raw => { const value = record(raw, ['cli', 'projectId']); return { cli: cli(value.cli), projectId: id(value.projectId, 'projectId') } }, handle: ({ cli, projectId }) => service.getModels(cli, projectId) },
     getDefaultCli: { parse: projectRef, handle: ({ projectId }) => service.getDefaultCli(projectId) },
     setDefaultCli: { parse: raw => { const value = record(raw, ['projectId', 'cli']); return { projectId: id(value.projectId, 'projectId'), cli: cli(value.cli) } }, handle: ({ projectId, cli }) => service.setDefaultCli(projectId, cli) },

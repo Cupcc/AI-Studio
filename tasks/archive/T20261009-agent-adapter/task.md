@@ -1,0 +1,76 @@
+---
+id: T20261009-agent-adapter
+status: done
+fr: [FR-CHAT-002, FR-CHAT-003, FR-SESSION-002, FR-SESSION-003, FR-STATE-001, FR-STATE-002, FR-STATE-003, FR-STATE-007, FR-INPUT-001, FR-INPUT-002]
+ac: [AC-02, AC-03, AC-05]
+specs: [specs/agent-adapter/spec.md]
+created: 2026-10-09
+---
+
+# CLI Adapter 首阶段
+
+## 当前收尾（2026-10-19）
+
+- 状态：`done`；Main Agent 按 Task Protocol 核对当前授权范围、完成条件、独立评审与证据后收尾，并在本次变更中整体归档。依据为用户要求路线图已完成事项移除、未完成继续推进及后续「continue」；真实 CLI 和发布范围遵循 DEC-16～22。
+- 十二条标准按当前 Codex 真实范围与双 Provider 模拟实现核对。Codex 创建 / 流式 / 原 ID 恢复、请求答复 / 文字拒绝、Stop / 并发隔离、模型 / effort、图片 / Skill、公开输出与严格清理均有当前证据。原双 Provider 和 Claude Stop 的真实条款保留未全过，按 DEC-16 / 19 后续安排。
+- 基线：应用源码 `9cd17ef`，随后仅更新文档及归档路径。W27 / W28 独立评审、最终包指纹与真实 UI 结果见[总体验收](../T20261009-v1-foundation-slice/acceptance.md)；Main Agent 最终完整 Electron **49 / 49**、基础门禁 **36 / 257 / 1172**、`1.0.0` arm64 打包和 open 冒烟见[最终报告](../T20261009-v1-foundation-slice/report.md)。此前锁屏条件已解除，没有遗留的技术收尾阻塞。
+- 人工接受与技术收尾分开：既有体验确认保留；新增本轮 Diff、推理控制 / 公开输出及图片 / Skill 仍待人工验收。Claude 后续、未观察后代 / 共享 MCP 的证明边界、macOS 13 实机和暂不发布边界继续由总体验收及路线图维护；不改写历史验证或把草稿标成人工确认。
+
+## 2026-10-11 原生能力对齐补充（历史要求）
+
+按 [DEC-13](<../../../docs/07. Decisions.md#dec-13-原生-cli-能力对齐>) 与[对齐任务](../T20261011-native-cli-parity/task.md)，A-Q1 / A-Q2 / A-Q5 的产品方向及 A-Q3 的技术方案已回写 spec；当前 V1 Codex 的运行中发送、原生能力接入和崩溃清理已实现并完成独立验证，结果与后续边界见上方当前收尾。当时本任务保持 `verifying`，等待最终完整 Electron 回归与同步；历史验收不改记通过，真实调用结果按 CLI 实际行为记录。
+
+### 2026-10-18 当前 V1 验收口径
+
+按 [DEC-16](<../../../docs/07. Decisions.md#dec-16-v1-真实-cli-验收范围>)，当前 V1 的真实 CLI 验收只执行 Codex。Claude Code Provider、模拟测试和历史真实证据继续保留，但本轮不发起新的 Claude Code 调用，不把其真实链路记为通过，且不随当前 V1 发布（DEC-19）。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；主 Agent 按实际 CLI 结果记录验证，不由应用设置调用次数、费用上限或自动重试护栏。
+
+W5-F13 与 SET-Q6 / SET-Q7 已由用户于 2026-10-18 确认（DEC-20）；路线图现有功能的人工体验也已验收通过，见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。本任务仍单独跟踪 Adapter 的实现与真实技术边界。
+
+## 历史签收入口（当前收尾见上）
+
+- 人工体验：当前结论见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)；新增体验仍待人工验收。当前 Codex 真实技术复核已通过，本任务在最终完整 Electron 回归与同步完成前保持 `verifying`；Claude 与其他原生协议的后续边界保留在负责规格中。
+- 审阅依据：[验收记录](acceptance.md)、[交付报告](report.md)。
+
+## 目标
+
+实现与 Electron 无关的 CLI Adapter 包，把 Codex App Server 与 Claude Agent SDK 两条已验证的接入路径统一为一套 Provider 接口和事件模型，并按 [04. Technical Requirements](<../../../docs/04. Technical Requirements.md>) 第 5 节实现 Stop 与进程管理。产出 `specs/agent-adapter/spec.md` 草稿，供 Session 管理（[T20261009-session-slice](../T20261009-session-slice/task.md)）使用。
+
+## 范围
+
+- 做：
+  - 独立 workspace 包（不依赖 Electron），可在纯 Node 中测试。
+  - Provider 接口与统一事件模型；架构上允许新增其他 CLI（04 第 7 节“可扩展性”），V1 只实现 Codex 与 Claude Code。
+  - 可用性检测：可执行文件发现（接受外部传入的 PATH / 可执行路径）、版本、登录状态、模型目录，四者分开报告（[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 5 节最后一条）。
+  - Codex：`codex app-server --listen stdio://` JSON-RPC；创建 / 恢复 Thread、流式文本、工具活动、授权请求与 `requestUserInput`、模型目录与切换、回合终态、错误；协议类型由本机 CLI 生成并锁定版本（[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 3 节）。
+  - Claude Code：官方 Agent SDK Streaming Input，`pathToClaudeCodeExecutable` 指向本机 CLI；`includePartialMessages`、`resume`、`canUseTool`（权限与 AskUserQuestion）、interrupt、模型目录与切换。
+  - 原生配置复用：默认不覆盖 CLI 自身的模型、权限、Rule、Skill 与 Context 配置（[01. Product Definition](<../../../docs/01. Product Definition.md>) 第 8 节原则 19、20；04 第 4 节）；需要覆盖的项作为可选参数暴露。
+  - Stop：按 04 第 5 节七条约束实现；主动取消与原生终态关联，不误报 Error（[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 5 节状态映射表）。
+  - Runtime 隔离：首阶段每个活动 Session 使用独立 Runtime；单个 Runtime 崩溃不影响其他 Session（04 第 3、7 节）。
+  - 单元测试使用模拟传输；真实 CLI 集成测试需显式开启，结果按 CLI 实际行为记录，不由应用设置调用次数、费用上限或自动重试护栏（2026-10-09 确认，2026-10-18 更新边界）。
+- 不做：产品 Session 状态机（Completed Unread、查看清除、排序）、SQLite 持久化、IPC、UI；文件变更归因与 Diff（04 第 1 节第 13 项）；Project View Context 注入（04 第 1 节第 10 项）。
+
+## 依据
+
+- 集成接口、实测矩阵、状态映射与 Adapter 约束：[CLI Integration Preflight](../../T20261008-cli-preflight/report.md) 第 3、4、5 节；剩余校验：第 6 节。
+- Stop 约束：04 第 5 节“Codex Stop 实现约束”1～7。
+- 预检脚本（协议用法参考，非产品代码）：[scripts/cli-preflight.mjs](../../../scripts/cli-preflight.mjs)、[codex-native-stop-check.mjs](../../T20261008-cli-preflight/evidence/codex-native-stop-check.mjs)。
+- Session 与 CLI 1:1、CLI 锁定、模型切换：FR-CHAT-003；[02. Functional Requirements](<../../../docs/02. Functional Requirements.md>) 第 2 节 Session 状态。
+
+## 验收标准
+
+- [ ] 同一 Provider 接口下，两个 Provider 都能创建 Session、流式输出、在 Runtime 重启后以原生 ID 恢复并保留上下文；恢复失败时报告错误，不静默创建新原生 Session（[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 4、5 节；04 第 5 节第 7 条）。 **当前范围：Codex 真实与双 Provider 模拟已验证；Claude 真实部分按 DEC-16 / 19 后续，不记为当前通过。**
+- [x] 提交消息后立即产生 Running 事件，不等待首个文本片段（[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 5 节；FR-STATE-001）。
+- [x] 区分文本增量与完整消息，正文不重复（[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 5 节）。
+- [x] 授权与提问以统一的“等待输入”事件发出，携带请求 ID 与 CLI 原生选项；答复后解除；同时存在多个请求时各自独立答复（FR-STATE-002；[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 6 节“授权接受、取消等待请求、多请求竞态”）。
+- [x] 回合终态区分 completed / interrupted / failed；只有成功终态标为 completed；用户主动取消不报 Error（[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 5 节；FR-STATE-003）。回合事件包含耗时，供“Worked for … · Done”使用（FR-STATE-007）。
+- [x] Codex Stop：`turn/interrupt` 后精确终止本轮命令，并以系统进程退出作为完成证据；清理有限时等待；超时或接口不可用时走独立 Runtime 兜底并以原 `thread.id` 恢复；重复 Stop 与迟到事件不破坏状态（04 第 5 节第 1～7 条）。
+- [ ] Claude Stop：interrupt 后本轮子进程退出，同一 Session 可继续对话（[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 4 节）。 **当前范围：Codex 真实与双 Provider 模拟已验证；Claude 真实部分按 DEC-16 / 19 后续，不记为当前通过。**
+- [ ] 一个 Session 的 Stop、崩溃或兜底不影响同时运行的其他 Session（FR-SESSION-003；04 第 5 节第 7 条）；两个 Provider 的 Session 可并发运行（AC-03 的 Adapter 部分）。 **当前范围：Codex 真实与双 Provider 模拟已验证；Claude 真实部分按 DEC-16 / 19 后续，不记为当前通过。**
+- [x] 模型目录可读取；同一 Session 内切换模型后下一轮使用新模型（FR-INPUT-002；[CLI 校验报告](../../T20261008-cli-preflight/report.md) 第 6 节“同 Session 模型切换”）。
+- [x] 可用性检测分别报告未安装、未登录、可用三种情况及原因（UX Specification 第 6 节 New Chat 第 4 条）。
+- [x] 单元测试覆盖上述状态映射与 Stop 分支；真实集成测试结果以筛选后的证据保存，不含认证信息、邮件地址或完整配置（`tasks/README.md` 证据规则）。
+- [x] `specs/agent-adapter/spec.md` 草稿描述接口、事件、状态映射、Stop 流程与已知边界。
+
+## 2026-10-18 Codex 当前补验
+
+W25 在主 Agent 基线 `88bbe2c` 上以 Codex `0.163.0` 执行了真实 Adapter 六回合综合套件、两回合 Stop 套件、同 Session 第二模型切换，以及原生并发 / 中断 / Runtime 崩溃恢复预检。结果与边界见 [W25 证据](../T20261011-native-cli-parity/evidence/W25-codex-native.md)。这些结果覆盖了上表中 Codex 的部分真实缺口，但不满足两个 Provider 的完整 AC，也不覆盖 0.163.0 未执行的协议方法、宿主异常清理或 Claude Code 真实链路；任务继续保持 `verifying`。

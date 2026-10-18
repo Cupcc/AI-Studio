@@ -27,7 +27,7 @@ const grey = (relativeLuminance: number): Rgb => {
 
 /*
  * Worst measured glass pane background (relative luminance) per colour scheme, the same measurement the Terminal palette
- * uses (tasks/T20261009-context-tools/evidence/W5-theme-measurements-r3.json, `plainRowWorstBg.min`; derivation in
+ * uses (tasks/archive/T20261009-context-tools/evidence/W5-theme-measurements-r3.json, `plainRowWorstBg.min`; derivation in
  * `terminal-theme.test.ts`). A neutral grey of that luminance stands in for it: only luminance enters the contrast ratio,
  * and the hue of a tint over it moves the result by far less than the margins below.
  */

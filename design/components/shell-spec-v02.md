@@ -7,7 +7,7 @@
 | 产品 | AI Developer Studio |
 | 版本 | v02 |
 | 状态 | 已确认（2026-10-11）：继承 v01；工程工具行为已于 2026-10-10 确认，本版 v01 对齐修订与交互原型 v02 的 Conversation 修订随各自任务签收 |
-| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/T20261009-context-tools/task.md) 的 2026-10-10 确认；用户 2026-10-11 对话确认的 v01 对齐界面决定，证据见[归档复验记录](../../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)；[交互原型 v02](../prototypes/README.md#studio-灰度交互原型-v02) 与[其采用确认](../../tasks/archive/T20261010-prototype-v02/task.md#已确认事项)（2026-10-10） |
+| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 的 2026-10-10 确认；用户 2026-10-11 对话确认的 v01 对齐界面决定，证据见[归档复验记录](../../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)；[交互原型 v02](../prototypes/README.md#studio-灰度交互原型-v02) 与[其采用确认](../../tasks/archive/T20261010-prototype-v02/task.md#已确认事项)（2026-10-10） |
 | 范围 | 窗口布局、区域尺寸、组件结构与交互状态 |
 | 不含 | 色值、字体、图标库等视觉参数：见 [Visual Direction](../visual-direction.md) 第 1 节 |
 

@@ -1,6 +1,6 @@
 # 原型 v01 与桌面端差异清单
 
-对照对象：`design/prototypes/studio-prototype-v01.html` 与 `studio-prototype-v01/render.js`（原型），`apps/desktop/src/renderer/src`（`dev/v1` 当前实现）及 [W6-needs-input-approval](../../T20261009-session-slice/evidence/W6-needs-input-approval.png)、[W3-view-1280](../../T20261009-project-shell/evidence/W3-view-1280.png) 截图。2026-10-09 整理。
+对照对象：`design/prototypes/studio-prototype-v01.html` 与 `studio-prototype-v01/render.js`（原型），`apps/desktop/src/renderer/src`（`dev/v1` 当前实现）及 [W6-needs-input-approval](../T20261009-session-slice/evidence/W6-needs-input-approval.png)、[W3-view-1280](../T20261009-project-shell/evidence/W3-view-1280.png) 截图。2026-10-09 整理。
 
 “归属”一列：本任务 = 本次对齐；其他任务名 = 内容尚未实现，由该任务按原型实现。
 

@@ -22,11 +22,13 @@ import type { ThreadBackgroundTerminalsTerminateParams } from './protocol/v2/Thr
 import type { ThreadBackgroundTerminalsTerminateResponse } from './protocol/v2/ThreadBackgroundTerminalsTerminateResponse.js';
 import type { ModelListParams } from './protocol/v2/ModelListParams.js';
 import type { ModelListResponse } from './protocol/v2/ModelListResponse.js';
+import type { SkillsListParams } from './protocol/v2/SkillsListParams.js';
+import type { SkillsListResponse } from './protocol/v2/SkillsListResponse.js';
 import type { ConfigReadParams } from './protocol/v2/ConfigReadParams.js';
 import type { ConfigReadResponse } from './protocol/v2/ConfigReadResponse.js';
 import type { ThreadBackgroundTerminal } from './protocol/v2/ThreadBackgroundTerminal.js';
 
-export const CODEX_PROTOCOL_VERSION = '0.161.0';
+export const CODEX_PROTOCOL_VERSION = '0.163.0';
 
 interface Methods {
   initialize: [InitializeParams, InitializeResponse];
@@ -39,10 +41,11 @@ interface Methods {
   'thread/backgroundTerminals/list': [ThreadBackgroundTerminalsListParams, ThreadBackgroundTerminalsListResponse];
   'thread/backgroundTerminals/terminate': [ThreadBackgroundTerminalsTerminateParams, ThreadBackgroundTerminalsTerminateResponse];
   'model/list': [ModelListParams, ModelListResponse];
+  'skills/list': [SkillsListParams, SkillsListResponse];
   'config/read': [ConfigReadParams, ConfigReadResponse];
 }
 
-/** All outbound operations are checked against CLI-generated 0.161.0 types. */
+/** All outbound operations are checked against CLI-generated 0.163.0 types. */
 export class CodexConnection {
   readonly peer: JsonRpcPeer;
   serverVersion: string | undefined;
@@ -77,7 +80,7 @@ export class CodexConnection {
           throw adapterError('protocol_error', 'Malformed model entry');
         }
         models.push({ id: model.model, displayName: model.displayName, description: model.description,
-          isDefault: model.isDefault, hidden: model.hidden,
+          isDefault: model.isDefault, hidden: model.hidden, defaultReasoningEffort: model.defaultReasoningEffort, inputModalities: model.inputModalities,
           reasoningEfforts: model.supportedReasoningEfforts?.map((entry) => entry.reasoningEffort) ?? [] });
       }
       return page.nextCursor;

@@ -15,7 +15,7 @@
 
 ### 1.1 未决问题
 
-2026-10-09 参考应用复核见 [Session research](../../tasks/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
+2026-10-09 参考应用复核见 [Session research](../../tasks/archive/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
 
 “阻塞”指：未回答前，对应部分不应开始实现；“否”表示可按建议答案先实现，回答不同再调整。以下均无阻塞项，但 NAV-Q4、NAV-Q5 建议在实现 Rename 与 View 导航前确认。
 
@@ -38,7 +38,7 @@
 
 | 编号 | 问题 | 建议答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
-| NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入。依据：`tasks/T20261009-session-slice/task.md` 已把 Rename 列入范围（FR-NAV-003；D-12）；实现量小，且 05 第 4 节把 Rename 列入专项测试。若判定为 P1，则首个交付可延后 3.3.6，其余不受影响。需要在 02 中统一优先级 | 否 | Rename 为 P0，纳入 session-slice；02 第 6 节 MVP 表同步改为 P0（2026-10-09 确认） |
+| NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入。依据：`tasks/archive/T20261009-session-slice/task.md` 已把 Rename 列入范围（FR-NAV-003；D-12）；实现量小，且 05 第 4 节把 Rename 列入专项测试。若判定为 P1，则首个交付可延后 3.3.6，其余不受影响。需要在 02 中统一优先级 | 否 | Rename 为 P0，纳入 session-slice；02 第 6 节 MVP 表同步改为 P0（2026-10-09 确认） |
 
 ## 2. 职责与边界
 

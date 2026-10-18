@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
@@ -23,7 +24,14 @@ async function focusWindow() {
     app.focus({ steal: true })
     win.focus()
   })
-  await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.isFocused())).toBe(true)
+  await expect.poll(() => app.evaluate(({ app, BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows()[0]!
+    return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+  })).toBe(true)
+  if (process.platform === 'darwin') {
+    const pid = await app.evaluate(() => process.pid)
+    await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+  }
 }
 async function launch() {
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
@@ -66,6 +74,7 @@ test('AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session f
   await workspace().getByRole('button', { name: 'Architecture', exact: true }).click()
   await workspace().getByRole('button', { name: 'New Chat', exact: true }).first().click()
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue('Unsent draft')
+  await focusWindow()
   const session = await send('[e2e:delay] Build streamed feature')
   await expect(row(session.id).getByRole('img', { name: 'Running', exact: true })).toBeVisible()
   await expect(workspace().locator('.transcript-agent')).not.toHaveCount(0)

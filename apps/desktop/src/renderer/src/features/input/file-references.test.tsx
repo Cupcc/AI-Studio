@@ -35,7 +35,7 @@ beforeEach(() => {
   api = {
     list: vi.fn(async () => []), getConversation: vi.fn(async () => ({ session: summary(), items: [], hasMore: false, nextBeforeSequence: null })),
     create: vi.fn(async () => summary({ activity: 'running', status: 'running' })), send: vi.fn(async () => {}), replyWithText: vi.fn(async () => {}),
-    stop: vi.fn(async () => {}), setModel: vi.fn(async () => {}), getProviders: vi.fn(async () => providers),
+    getSkills: vi.fn(async () => ({ skills: [], error: null })), stop: vi.fn(async () => {}), setModel: vi.fn(async () => {}), getProviders: vi.fn(async () => providers),
     getModels: vi.fn(async () => ({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true }], error: null })),
     getDefaultCli: vi.fn(async () => 'codex' as const),
     getDraft: vi.fn(async (key) => structuredClone(stored[keyOf(key)] ?? emptyDraft())),
@@ -233,7 +233,7 @@ describe('Composer: + menu, tags and Needs Input · I-Q4, FR-INPUT-001', () => {
   it('blocks a Needs Input reply that carries file tags: no call, input and tags kept, the reason shown, Send disabled', async () => {
     await mount(sessionKey, { text: 'answer', contextItems: [file('src/a.ts')] }, { summaries: { s: summary({ activity: 'needs_input', status: 'needs_input' }) } })
     expect(screen.getByRole('status').textContent).toBe(FILE_REPLY_BLOCKED)
-    expect(FILE_REPLY_BLOCKED).toBe('回复 Agent 时不能附带文件引用，请先移除标签或等待本轮结束')
+    expect(FILE_REPLY_BLOCKED).toBe('回复 Agent 时不能附带文件、图片或 Skill，请先移除标签或等待本轮结束')
     const send = screen.getByRole('button', { name: 'Send' })
     expect(send.hasAttribute('disabled')).toBe(true)
     fireEvent.click(send); fireEvent.keyDown(screen.getByRole('textbox', { name: '回复 Agent' }), { key: 'Enter' })

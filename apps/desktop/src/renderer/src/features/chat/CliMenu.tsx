@@ -1,5 +1,5 @@
 import { useEffect, useId } from 'react'
-import { SESSION_CLIS } from '@shared/session/types'
+import type { SessionCli } from '@shared/session/types'
 import type { ShellSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
 import { cliName, useSessions } from '../session/store'
@@ -10,13 +10,15 @@ export function CliMenu({ project, dismiss }: ShellSlotProps & { dismiss(): void
   const providers = useSessions((s) => s.providers), selected = useSessions((s) => s.defaultCli[project.id]), error = useSessions((s) => s.errors[`default:${project.id}`])
   const providersError = useSessions((s) => s.providersError), pending = useSessions((s) => s.pending[`default:${project.id}`])
   useEffect(() => { void useSessions.getState().loadProviders() }, [])
-  const availability = (cli: (typeof SESSION_CLIS)[number]) => {
+  const clis = providers.map(provider => provider.cli)
+  const availability = (cli: SessionCli) => {
     const provider = providers.find((p) => p.cli === cli)
     return { available: provider?.status === 'available', reason: provider?.reason ?? (provider?.status === 'checking' || !provider ? '正在检查 CLI…' : 'CLI 不可用') }
   }
   return <div className="session-cli-menu" aria-label="选择 New Chat CLI">
     <p className="menu-heading">选择 CLI 新建对话</p>
-    {SESSION_CLIS.map((cli) => {
+    {!providers.length && !providersError && <p role="status" className="menu-item__sub">正在检查 CLI…</p>}
+    {clis.map((cli) => {
       const { available, reason } = availability(cli)
       const labelId = `${menuId}-${cli}-label`, reasonId = `${menuId}-${cli}-reason`, defaultId = `${menuId}-${cli}-default`
       const descriptionIds = [!available && reasonId, selected === cli && defaultId].filter(Boolean).join(' ') || undefined
@@ -27,7 +29,7 @@ export function CliMenu({ project, dismiss }: ShellSlotProps & { dismiss(): void
       </button>
     })}
     <div className="menu-divider" />
-    {SESSION_CLIS.filter((cli) => cli !== selected).map((cli) => <button className="menu-item session-cli-menu__default" key={cli} disabled={!availability(cli).available || pending} onClick={() => void useSessions.getState().setDefaultCli(project.id, cli)}>将 {cliName(cli)} 设为此 Project 默认</button>)}
+    {clis.filter((cli) => cli !== selected).map((cli) => <button className="menu-item session-cli-menu__default" key={cli} disabled={!availability(cli).available || pending} onClick={() => void useSessions.getState().setDefaultCli(project.id, cli)}>将 {cliName(cli)} 设为此 Project 默认</button>)}
     {(error || providersError) && <p role="alert" className="error-message">{error || providersError}</p>}
   </div>
 }

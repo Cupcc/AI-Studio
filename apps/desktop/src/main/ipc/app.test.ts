@@ -22,6 +22,13 @@ describe('app feature handlers', () => {
     expect(await handlers.getInfo.handle(undefined, ctx)).toEqual(info)
   })
 
+  it('reads the trusted sender window focus and accepts no renderer state', async () => {
+    const feature = createAppFeature({ appInfo: () => info }, sender => sender === ctx.senderId)
+    expect(() => feature.handlers.getWindowFocus.parse({ focused: true })).toThrow(IpcValidationError)
+    expect(feature.handlers.getWindowFocus.handle(undefined, ctx)).toEqual({ focused: true })
+    expect(feature.handlers.getWindowFocus.handle(undefined, { ...ctx, senderId: 2 })).toEqual({ focused: false })
+  })
+
   it('ping validates its input strictly', async () => {
     expect(handlers.ping.parse({ message: 'hi' })).toEqual({ message: 'hi' })
     for (const bad of [undefined, null, 'hi', [], { message: 1 }, { message: 'x'.repeat(1001) }, { message: 'hi', extra: 1 }]) {

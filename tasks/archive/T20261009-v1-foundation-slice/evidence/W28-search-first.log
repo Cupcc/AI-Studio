@@ -1,0 +1,30 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/v1-closure
+
+ ❯ tasks/T20261009-v1-foundation-slice/evidence/W28-boundaries.test.ts (10 tests | 1 failed) 410ms
+   ❯ W28 independent boundaries; synthetic RPC/OS only, no Electron or model calls (10)
+     × preserves native search result bodies and collaboration result messages 56ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-v1-foundation-slice/evidence/W28-boundaries.test.ts > W28 independent boundaries; synthetic RPC/OS only, no Electron or model calls > preserves native search result bodies and collaboration result messages
+AssertionError: expected '{"turnId":"963de691-1171-4b5f-b014-80…' to contain 'W28 public search body'
+
+Expected: "W28 public search body"
+Received: "{"turnId":"963de691-1171-4b5f-b014-8080dc99d978","item":{"itemId":"search","status":"completed","nativeType":"webSearch","kind":"web_search","activity":{"verb":"search","label":"fixture query"}},"type":"item.completed","seq":6,"at":1792337167637,"providerId":"codex","sessionId":"d07a4bc4-d624-4a2b-8c3e-30f646f744bb"}"
+
+ ❯ tasks/T20261009-v1-foundation-slice/evidence/W28-boundaries.test.ts:153:114
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  10:26:06
+   Duration  713ms (tests 68%, transform 27%, import 5%)
+
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /Users/Chris/Projects/AI Stduio.worktrees/
+  │ v1-closure/packages/agent-adapter

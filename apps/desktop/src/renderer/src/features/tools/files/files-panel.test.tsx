@@ -393,7 +393,7 @@ describe('add to conversation', () => {
     const message = await screen.findByText('已添加到对话：README.md')
     expect(message.closest('[aria-live="polite"]')).toBe(announcement())
     expect(fake.mocks.resolveReference).toHaveBeenCalledWith({ projectId: id, paths: ['README.md'] })
-    expect(addFileReference).toHaveBeenCalledWith({ projectId: id, canvas, path: 'README.md' })
+    expect(addFileReference).toHaveBeenCalledWith({ projectId: id, canvas, path: 'README.md', type: 'file' })
   })
 
   it('says so when the file is already in the conversation', async () => {

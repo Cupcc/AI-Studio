@@ -1,6 +1,8 @@
 // Main process entry: app lifecycle, security setup, IPC and the window.
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import { join } from 'node:path'
+import { writeFile } from 'node:fs/promises'
+import { RuntimeOwnershipRegistry } from '@ai-studio/agent-adapter'
 import type { AppInfo } from '@shared/ipc/app'
 import { projectContract } from '@shared/ipc/project'
 import { S } from '@shared/project/strings'
@@ -83,7 +85,11 @@ let core: CoreServices | null = null
 let disposeIpc: (() => Promise<void>) | null = null
 
 /** Runs after `ready`: protocol, permissions, core services and IPC. */
-function startRuntime(): void {
+async function startRuntime(): Promise<void> {
+  const ownership = new RuntimeOwnershipRegistry({ directory: join(app.getPath('userData'), 'runtime-ownership'), onError: error => console.error('[runtime-ownership]', error) })
+  const recovery = await ownership.recover()
+  await writeFile(join(app.getPath('userData'), 'runtime-recovery.json'), JSON.stringify(recovery), { mode: 0o600 })
+  for (const item of recovery) if (item.status === 'unconfirmed') console.error('[runtime-recovery]', item)
   installPermissionPolicy(rendererOrigin)
   handleAppProtocol(join(__dirname, '../renderer'))
   core = createCoreServices({
@@ -96,7 +102,7 @@ function startRuntime(): void {
   const providers = !app.isPackaged && process.env.STUDIO_E2E_PROVIDERS === '1'
     ? createE2eProviders()
     : launch.smokeOutput ? [] : undefined
-  disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl), { providers })
+  disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl), { providers, runtimeFactory: options => ownership.start(options) })
   installWindowAppearance(core)
   if (!launch.smokeOutput) {
     const shell = projectShellFor(core)
@@ -148,7 +154,7 @@ async function runSmokeAndQuit(output: string): Promise<void> {
         node: info.versions.node
       }
     })
-    startRuntime()
+    await startRuntime()
     const win = openWindow(true)
     const renderer = await runRendererSmoke(win)
     const full = { ...report, renderer, ok: report.ok && renderer.ok }
@@ -180,13 +186,17 @@ if (launch.smokeOutput) {
     }
   })
 
-  void app.whenReady().then(() => {
-    startRuntime()
+  void app.whenReady().then(async () => {
+    await startRuntime()
     openWindow()
     app.on('activate', () => {
       const [win] = BrowserWindow.getAllWindows()
       if (win) { win.show(); win.focus() } else openWindow()
     })
+  }).catch(error => {
+    console.error('[main] startup failed:', error)
+    dialog.showErrorBox('启动失败', error instanceof Error ? error.message : String(error))
+    app.quit()
   })
 
   app.on('window-all-closed', () => {
@@ -200,6 +210,9 @@ if (launch.smokeOutput) {
     disposeFeatures: async () => { await disposeIpc?.() },
     disposeCore: () => core?.dispose(),
     quit: () => app.quit(),
-    onError: (error) => console.error('[main] dispose failed:', error)
+    onError: (error) => {
+      console.error('[main] dispose failed:', error)
+      dialog.showErrorBox('退出清理失败', '进程退出尚未确认。请再次退出以重试。\n' + (error instanceof Error ? error.message : String(error)))
+    }
   }))
 }

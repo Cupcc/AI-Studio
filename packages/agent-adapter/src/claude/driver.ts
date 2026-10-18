@@ -101,7 +101,7 @@ export class ClaudeDriver implements SessionDriver {
       canUseTool: (name, input, context) => state.permissions.request(state.currentTurn, name, input, context),
       spawnClaudeCodeProcess: (spawn) => {
         const started = (this.deps.startRuntime ?? RuntimeProcess.start)({
-          command: spawn.command, args: spawn.args, cwd: spawn.cwd ?? this.options.cwd,
+          sessionId: this.sink.sessionId, command: spawn.command, args: spawn.args, cwd: spawn.cwd ?? this.options.cwd,
           env: spawn.env, generation, label: 'Claude Code', lister: this.deps.processLister,
           terminate: { graceMs: this.timeouts.terminateGraceMs, killWaitMs: this.timeouts.killWaitMs },
         }).then(async (runtime) => {

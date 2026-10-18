@@ -21,7 +21,7 @@ created: 2026-10-09
 
 ## 目标
 
-2026-10-09 确认交互原型 v01 与 Shell Spec v01，并要求“下一步按照 v01 的原型对齐设计”。本任务把阶段 1 已实现的界面（[T20261009-project-shell](../../T20261009-project-shell/task.md)、[T20261009-session-slice](../../T20261009-session-slice/task.md)）的外观与组件结构对齐到原型 v01，使阶段 1 签收有已确认的界面依据。
+2026-10-09 确认交互原型 v01 与 Shell Spec v01，并要求“下一步按照 v01 的原型对齐设计”。本任务把阶段 1 已实现的界面（[T20261009-project-shell](../T20261009-project-shell/task.md)、[T20261009-session-slice](../T20261009-session-slice/task.md)）的外观与组件结构对齐到原型 v01，使阶段 1 签收有已确认的界面依据。
 
 ## 范围
 
@@ -31,7 +31,7 @@ created: 2026-10-09
   - 1024 / 1280 / 1440 三种宽度截图复核（Shell Spec v01 第 1 节）。
 - 不做：
   - 行为变化。原型与 spec 冲突时以 spec 为准（例如 [session spec](../../../specs/session/spec.md) S-Q1(c)）。
-  - 尚未实现的内容：Preview 与五个默认 View、View 左侧的最近对话块、四类工具内容、文件上下文、“修改了 N 个文件”链接。它们由 [T20261009-project-view](../../archive/T20261009-project-view/task.md)、[T20261009-context-tools](../../T20261009-context-tools/task.md) 实现，届时同样以原型 v01 为界面依据。
+  - 尚未实现的内容：Preview 与五个默认 View、View 左侧的最近对话块、四类工具内容、文件上下文、“修改了 N 个文件”链接。它们由 [T20261009-project-view](../../archive/T20261009-project-view/task.md)、[T20261009-context-tools](../T20261009-context-tools/task.md) 实现，届时同样以原型 v01 为界面依据。
   - 原型中的“演示控制”面板与模拟数据。
 
 ## 依据

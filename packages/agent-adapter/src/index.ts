@@ -60,3 +60,6 @@ export type { AdapterTimeouts } from './core/timeouts.js';
 export { TurnGuard } from './core/turn-guard.js';
 export { boundNativeDiff, NATIVE_DIFF_LIMIT, NATIVE_DIFF_FILES } from './core/turn-diff.js';
 export type { TurnClass, TurnRecord } from './core/turn-guard.js';
+
+export { RuntimeOwnershipRegistry } from './core/runtime-ownership.js';
+export type { OwnershipOptions, OwnershipRecovery } from './core/runtime-ownership.js';

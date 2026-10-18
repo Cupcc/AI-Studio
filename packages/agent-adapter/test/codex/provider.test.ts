@@ -316,6 +316,86 @@ describe('Codex Provider lifecycle / FR-CHAT-002, FR-CHAT-003, AC-02', () => {
     expect(h.runtimes[0]!.running).toBe(false);
   });
 
+  it('lists native skills without creating a Thread and releases its probe runtime', async () => {
+    const h = setup();
+    h.configure = server => server.handle('skills/list', p => ({ data: [{ cwd: (p as { cwds: string[] }).cwds[0], skills: [{ name: 'example', description: 'Use example', path: '/skills/example/SKILL.md', enabled: true }], errors: [] }] }));
+    expect(await h.provider.listSkills({ cwd: options.cwd, environment: options.environment })).toMatchObject({ skills: [{ name: 'example', path: '/skills/example/SKILL.md' }], errors: [] });
+    expect(h.servers[0]!.received.some(r => r.method.startsWith('thread/'))).toBe(false);
+    expect(h.servers[0]!.received.find(r => r.method === 'skills/list')!.params).toEqual({ cwds: [options.cwd], forceReload: true });
+    expect(h.runtimes[0]!.running).toBe(false);
+  });
+
+  it('passes explicit image and skill inputs in ordinary and running messages', async () => {
+    const h = setup(); const session = await h.session();
+    const attachments = [{ kind: 'image' as const, path: '/project/pic.png' }, { kind: 'skill' as const, name: 'example', path: '/skills/example/SKILL.md' }];
+    await session.sendUserInput({ text: 'first', attachments });
+    await vi.waitFor(() => expect(session.activeTurn?.nativeTurnId).toBeTruthy());
+    await session.sendUserInput({ text: 'second', attachments });
+    for (const method of ['turn/start', 'turn/steer']) expect(h.servers[0]!.received.find(r => r.method === method)!.params).toMatchObject({ input: [{ type: 'text' }, { type: 'localImage', path: '/project/pic.png' }, { type: 'skill', name: 'example', path: '/skills/example/SKILL.md' }] });
+  });
+
+  it('keeps public reasoning sources and indexes separate and ignores late deltas after the final item', async () => {
+    const h = setup(); const session = await h.session(); const recorder = new EventRecorder(session);
+    await h.start(session);
+    h.notify(session, 'item/started', { item: { id: 'think', type: 'reasoning', summary: [], content: [] } });
+    h.notify(session, 'item/reasoning/textDelta', { itemId: 'think', contentIndex: 0, delta: 'public content' });
+    h.notify(session, 'item/reasoning/summaryTextDelta', { itemId: 'think', summaryIndex: 1, delta: 'second' });
+    h.notify(session, 'item/reasoning/summaryTextDelta', { itemId: 'think', summaryIndex: 0, delta: 'first' });
+    h.notify(session, 'item/reasoning/summaryTextDelta', { itemId: 'think', summaryIndex: 0, delta: ' part' });
+    await vi.waitFor(() => expect(recorder.events.filter(e => e.type === 'item.updated')).toHaveLength(4));
+    expect(recorder.events.filter(e => e.type === 'item.updated').at(-1)).toMatchObject({ item: { text: 'first part\nsecond' } });
+    h.notify(session, 'item/completed', { item: { id: 'think', type: 'reasoning', summary: ['final summary'], content: ['public content'] } });
+    h.notify(session, 'item/reasoning/textDelta', { itemId: 'think', contentIndex: 0, delta: 'late' });
+    await vi.waitFor(() => expect(recorder.events.filter(e => e.type === 'item.completed')).toHaveLength(1));
+    expect(recorder.events.filter(e => e.type === 'item.updated')).toHaveLength(4);
+    expect(recorder.events.find(e => e.type === 'item.completed')).toMatchObject({ item: { text: 'final summary', status: 'completed' } });
+  });
+
+  it('retains public native tool output, review text and agent results through completed events', async () => {
+    const h = setup(); const session = await h.session(); const recorder = new EventRecorder(session);
+    await h.start(session);
+    const items = [
+      { id: 'function', type: 'functionCallOutput', name: 'inspect', namespace: 'tools', output: 'native output marker' },
+      { id: 'review', type: 'exitedReviewMode', review: 'native review marker' },
+      { id: 'agents', type: 'collabAgentToolCall', tool: 'wait', status: 'completed', prompt: 'native prompt', senderThreadId: 'parent', receiverThreadIds: ['child'], model: null, reasoningEffort: null, agentsStates: { child: { status: 'completed', message: 'native agent result' } } },
+      { id: 'image', type: 'imageView', path: '/project/result.png' },
+      { id: 'web', type: 'webSearch', query: 'native query', action: { type: 'search', query: 'native query', queries: null }, results: [{ title: 'native result', url: 'https://example.test/result' }] },
+    ];
+    for (const item of items) h.notify(session, 'item/completed', { item });
+    await vi.waitFor(() => expect(recorder.events.filter(e => e.type === 'item.completed')).toHaveLength(items.length));
+    const events = recorder.events.filter(e => e.type === 'item.completed');
+    expect(events[0]).toMatchObject({ item: { tool: { name: 'inspect', server: 'tools', result: 'native output marker' } } });
+    expect(events[1]).toMatchObject({ item: { text: 'native review marker' } });
+    expect(events[2]).toMatchObject({ item: { tool: { input: { prompt: 'native prompt' }, result: { child: { message: 'native agent result' } } } } });
+    expect(events[3]).toMatchObject({ item: { tool: { result: { path: '/project/result.png' } } } });
+    expect(events[4]).toMatchObject({ item: { tool: { input: { action: { type: 'search' } }, result: [{ title: 'native result' }] } } });
+  });
+
+  it('snapshots reasoning effort for the next turn and explicitly restores the configured CLI default', async () => {
+    const h = setup();
+    h.configure = server => server.handle('config/read', () => ({ config: { model: 'configured-model', model_reasoning_effort: 'high' } }));
+    const session = await h.session();
+    await session.setReasoningEffort('low');
+    await h.start(session);
+    await session.setReasoningEffort('xhigh');
+    expect(h.servers[0]!.received.filter(r => r.method === 'turn/start')[0]!.params).toMatchObject({ effort: 'low' });
+    h.complete(session); await vi.waitFor(() => expect(session.state).toBe('idle'));
+    await h.start(session);
+    expect(h.servers[0]!.received.filter(r => r.method === 'turn/start')[1]!.params).toMatchObject({ effort: 'xhigh' });
+    h.complete(session); await vi.waitFor(() => expect(session.state).toBe('idle'));
+    await session.setReasoningEffort(null);
+    await h.start(session);
+    expect(h.servers[0]!.received.filter(r => r.method === 'turn/start')[2]!.params).toMatchObject({ effort: 'high' });
+  });
+
+  it('passes native effort strings such as max without a stale client enum', async () => {
+    const h = setup(); const session = await h.session({ providerOptions: { effort: 'max' } });
+    await h.start(session);
+    expect(h.servers[0]!.received.find(r => r.method === 'turn/start')!.params).toMatchObject({ effort: 'max' });
+    expect(() => h.provider.createSession({ ...options, providerOptions: { effort: 1 } })).toThrow(/Invalid reasoning/);
+    expect(() => h.provider.createSession({ ...options, providerOptions: { effort: ' ' } })).toThrow(/Invalid reasoning/);
+  });
+
   it('sets models for the next turn and resolves CLI default when reset', async () => {
     const h = setup(); const session = await h.session();
     await h.start(session); await session.setModel('new-model');

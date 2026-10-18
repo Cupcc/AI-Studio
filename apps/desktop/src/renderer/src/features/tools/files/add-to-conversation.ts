@@ -12,13 +12,13 @@ export interface AddOutcome { tone: 'ok' | 'warn'; text: string }
  * the service gives early feedback (`resolveReference`; the authoritative check runs again at send time) and the
  * Input module adds the tag to the conversation the Project's main canvas displays. Never throws.
  */
-export async function addToConversation(request: { projectId: string; canvas: MainCanvas; path: ProjectPath }): Promise<AddOutcome> {
+export async function addToConversation(request: { type?: 'file' | 'image'; projectId: string; canvas: MainCanvas; path: ProjectPath }): Promise<AddOutcome> {
   const { projectId, canvas, path } = request, name = displayName(projectPathName(path))
   if (!isReferenceablePath(path)) return { tone: 'warn', text: nameUnsupported }
   try {
     const resolved = await filesApi().resolveReference({ projectId, paths: [path] })
     if (resolved.status === 'rejected') return { tone: 'warn', text: referenceFailureText(resolved.failures[0]?.reason ?? 'unreadable') }
-    const result = await addFileReference({ projectId, canvas, path })
+    const result = await addFileReference({ projectId, canvas, path, type: request.type })
     if (result.status === 'rejected') return { tone: 'warn', text: addRejectionText(result.reason) }
     return { tone: 'ok', text: result.status === 'added' ? FILES_TEXT.added(name) : FILES_TEXT.duplicate(name) }
   } catch {

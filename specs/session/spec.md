@@ -15,7 +15,7 @@
 
 ### 1.1 未决问题
 
-2026-10-09 参考应用复核见 [Session research](../../tasks/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
+2026-10-09 参考应用复核见 [Session research](../../tasks/archive/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
@@ -28,7 +28,7 @@
 | S-Q9 | 用户停止的轮是否显示完成行？ | 显示 `Worked for <时长> · 已停止`；失败的轮只显示 Error 卡片。依据：FR-STATE-007“或同等语义形式” | 否 | |
 | S-Q10 | “Worked for” 时长是否包含等待用户答复的时间？ | 包含，按提交到终态的墙钟时间；与 Adapter 报告的回合耗时一致，实现简单 | 否 | |
 | S-Q11 | 因 Stop、错误、关闭 Project、原生撤回而失效的 Needs Input 卡片如何显示？ | 变为只读并标注原因（“已停止”“已失效”），按钮不可点击。依据：Shell Spec 第 6 节“答复后变为只读记录” | 否 | |
-| S-Q12 | 原生向用户公开的推理 / 思考内容如何接入和呈现？ | 按 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>) 接入公开输出，不再以原型未列出而省略。当前展示缺口、事件可用性与呈现方式由 AI 核对；不推测或重建原生未公开的内容 | 否；技术接入问题，不再等待是否展示的产品选择 | |
+| S-Q12 | 原生向用户公开的推理 / 思考内容如何接入和呈现？ | 按 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>) 接入公开输出，不再以原型未列出而省略。当前已将原生公开reasoning / summary及工具正文持久化并折叠呈现，W28已真实展开非空摘要；技术结果2026-10-18，见总体验收；不推测或重建原生未公开内容 | 否；技术接入问题，不再等待是否展示的产品选择 | |
 | S-Q13 | 如何接入原生历史会话与应用外续聊记录？ | 按原则 24 核对 CLI 的历史查询、恢复与记录读取接口并接入，不再把“V1 不导入、不同步”作为产品限制。当前只记录应用内会话是实现缺口；重复绑定、并行写入和记录格式差异由 AI 验证并记录技术边界 | 否；技术接入问题 | |
 
 ### 1.2 已确认
@@ -51,11 +51,11 @@
 - 不负责：
   - New Chat 草稿、Default CLI、CLI 菜单、Session 命名方法：见 [specs/chat/spec.md](../chat/spec.md)。
   - 输入区结构、Send / Stop 控件、Model Selector：见 [specs/input/spec.md](../input/spec.md)。本文只规定发送、答复、Stop、切换模型对 Session 状态的影响。
-  - Session History 的分组、排序呈现、滚动、Rename 交互：见 `specs/navigation/spec.md`（并行起草中）。本文提供排序字段与状态。
-  - Tab 注意力点的渲染、关闭确认对话框的 UI、折叠按钮注意力点的渲染：Project 壳层（[T20261009-project-shell](../../tasks/T20261009-project-shell/task.md)）。
-  - CLI 协议、进程管理、Stop 的资源清理细节：CLI Adapter（`specs/agent-adapter/spec.md`，并行起草中）。本文只以抽象接口描述所需能力（第 5.1 节）。
+  - Session History 的分组、排序呈现、滚动、Rename 交互：见 [Navigation spec](../navigation/spec.md)。本文提供排序字段与状态。
+  - Tab 注意力点的渲染、关闭确认对话框的 UI、折叠按钮注意力点的渲染：Project 壳层（[T20261009-project-shell](../../tasks/archive/T20261009-project-shell/task.md)）。
+  - CLI 协议、进程管理、Stop 的资源清理细节：CLI Adapter（[Adapter spec](../agent-adapter/spec.md)）。本文只以抽象接口描述所需能力（第 5.1 节）。
   - Project View Mode 的 Conversation 列与 View 上下文注入（[T20261009-project-view](../../tasks/archive/T20261009-project-view/task.md)）；本文只定义该列中的 Session 如何计入“正在查看”。
-  - 轮次原生文件记录与 Diff 联动（依赖 FR-TOOL-002、04 第 1 节第 13 项与 [context-tools task](../../tasks/T20261009-context-tools/task.md)；组件修订见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节）。
+  - 轮次原生文件记录与 Diff 联动（依赖 FR-TOOL-002、04 第 1 节第 13 项与 [context-tools task](../../tasks/archive/T20261009-context-tools/task.md)；组件修订见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节）。
 
 ## 3. 行为细则
 
@@ -83,26 +83,26 @@
 
 依据：FR-SESSION-001；FR-STATE-005；UX 第 6 节“Session 打开”“Needs Input 与 Error 呈现”；Shell Spec 第 6 节；UX D-02。
 
-1. 打开 Session（从 Session History 点击，或由 FR-PROJ-003 状态恢复）时，Conversation 首帧即定位在最底部，不出现从顶部滚动到底部的过程。实现要求：先加载对话记录的尾部，在首次绘制前完成滚动定位；更早的内容在用户向上滚动时再加载（技术方案，待实现确认）。
+1. 打开 Session（从 Session History 点击，或由 FR-PROJ-003 状态恢复）时，Conversation 首帧即定位在最底部，不出现从顶部滚动到底部的过程。实现要求：先加载对话记录的尾部，在首次绘制前完成滚动定位；更早的内容在用户向上滚动时再加载（技术实现见 §5 及负责验收）。
 2. 定位到底部时，末尾的 Needs Input 卡片或 Error 卡片完整可见（AC-05；UX 第 6 节）。
 3. 流式输出逐段追加；用户位于底部时自动跟随；向上滚动后停止跟随并显示“回到最新”（Shell Spec 第 6 节）。
 4. 切换 Project Tab 后返回、或在同一 Project 内从其他 View 返回同一 Session 时：离开时处于底部（跟随中）的，返回后定位到最新位置；离开时已向上滚动的，恢复离开时的位置并显示“回到最新”（建议；依据 UX D-15“恢复离开时的完整状态”，与 FR-STATE-005“点击进入最新位置”在点击路径上一致）。
 5. 对话记录条目（Shell Spec 第 6 节）：用户消息、Agent 消息、工具活动行、Needs Input 卡片、Error 卡片、轮次完成行。条目定义见第 4.4 节。是否显示 CLI 的推理 / 思考内容见 S-Q12。Agent 消息按 Markdown 渲染，用户消息保持纯文本；渲染范围、代码块和链接规则见 Shell Spec v02 第 6 节（交互原型 v02，2026-10-10 确认）。流式输出期间按已到达的文本渲染，未闭合的代码块显示到当前末尾。
-6. 主画布顶栏显示 CLI 标识、Session 标题、CLI 名称；Session 的 `origin_view_id` 不为空时，显示来源 View 和“在 View 中打开”入口（UX 第 6 节 Session 打开；D-02）。Project View Mode 尚未实现前，该入口按壳层提供的导航接口跳转到该 View 的占位页。
+6. 主画布顶栏显示 CLI 标识、Session 标题、CLI 名称；Session 的 `origin_view_id` 不为空时，显示来源 View 和“在 View 中打开”入口（UX 第 6 节 Session 打开；D-02）。该入口通过壳层导航到真实 Project View，并在左列打开原 Session；当前实现与验证见 [Project View 任务](../../tasks/archive/T20261011-project-view-implementation/task.md)。
 7. 输入区固定在对话区域下方（FR-SESSION-001），可立即输入（UX 第 6 节 Session 打开第 4 项），细节见 input spec。
 8. 性能：打开 Session 和切换 Session 不等待 CLI；大量历史 Session 时只加载列表所需元数据（04 第 7 节性能）。
 
 ### 3.3 FR-SESSION-002 Session 连续性
 
 1. 同一 Session 内可进行任意多轮。客户端内部以“轮”（turn）记录每次提交到终态的过程，用于状态机、完成行和 Stop 关联；“轮”不作为 UI 信息架构出现，不显示 Run / Task / Job 列表或编号（FR-SESSION-002；01 第 8 节原则 5、6）。
-2. 回合执行与输入接收分开建模：Running 中按原生能力接受当前回合追加或后续回合排队，见已确认的 input spec I-Q3。排队输入尚未开始执行时不能伪造新执行回合，先前回合的终态不得丢弃后续消息；模型、等待请求与输出按原生关联归属。现有单活动回合实现须补齐队列接收和后续回合的事件／持久化路径。
+2. 回合执行与输入接收分开建模：Running 中按原生能力接受当前回合追加或后续回合排队，见已确认的 input spec I-Q3。Codex 同轮追加已经接入并由 W24 真实 UI 复验；Claude 当前不报告运行中输入能力，原生队列接收与后续回合的事件 / 持久化路径留待其后续交付。排队输入尚未开始执行时不能伪造新执行回合，先前回合的终态不得丢弃后续消息；模型、等待请求与输出按原生关联归属。
 
 ### 3.4 FR-SESSION-003 多 Session 并行
 
 1. 同一 Project、不同 Project 的多个 Session 可以同时处于 Running / Needs Input；每个 Session 有独立的原生会话、状态、上下文与模型设置（FR-SESSION-003）。
 2. 切换 Session、切换 Project Tab、进入 Project View 都不打断其他 Session 的执行（AC-03；UX 第 6 节 Project 切换）。
 3. 隔离：首阶段每个活动 Session 使用独立 Runtime（04 第 3 节“开发前 CLI 校验”；agent-adapter task）。一个 Session 的 Stop、崩溃、兜底恢复不得影响其他 Session、其他 Project 或用户 Terminal（04 第 5 节第 7 条；04 第 7 节稳定性）。
-4. 并行 Session 的事件处理不得阻塞 Renderer（04 第 7 节性能）。高频文本增量在主进程合并后按帧推送（技术方案，待实现确认）。
+4. 并行 Session 的事件处理不得阻塞 Renderer（04 第 7 节性能）。高频文本增量在主进程合并后按帧推送（技术实现见 §5 及负责验收）。
 5. 多个 Session 共享同一 Project 目录；V1 非目标与并行写入风险遵循 [01 第 4 节](<../../docs/01. Product Definition.md#4-v1-非目标范围>)，不把冲突检测转交给其他客户端模块。04 第 1 节第 7、8 项已关闭为范围结论（2026-10-11 确认，DEC-11）。
 
 ### 3.5 FR-STATE-001 Running
@@ -264,7 +264,7 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 
 ### 4.2 Session 字段
 
-以 04 第 6 节 Session 为基础；“提案”列为本草稿新增或调整，均为技术方案，待实现确认。
+以 04 第 6 节 Session 为基础；“提案”列为本草稿新增或调整，均为技术实现见 §5 及负责验收。
 
 | 字段 | 来源 | 说明 |
 |---|---|---|
@@ -300,12 +300,14 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 
 | 类型 | 内容 | 来源 |
 |---|---|---|
-| `user_message` | 文本、附带的上下文项（View、文件，见 input spec）、发送时间 | 用户发送 |
+| `user_message` | 文本、附带的上下文项（View、文件、图片、Skill，见 input spec）、发送时间 | 用户发送 |
 | `agent_message` | 完整文本（Markdown 原文，展示时渲染，见第 3.2 节第 5 条）；流式期间为增量拼接，完成时以完整消息校正，正文不重复（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节文本追加行） | Adapter |
-| `tool_activity` | 动作类别（Read / Edit / Run / 其他）、单行摘要、进行中 / 完成 / 失败 | Adapter |
+| `tool_activity` | 动作类别（Read / Edit / Run / 其他）、单行摘要、进行中 / 完成 / 失败；CLI 已公开 reasoning 折叠正文及 MCP / dynamic tool 结果，按同 item 完整快照替换并持久化（S-Q12、原则 24） | Adapter |
 | `input_request` | 请求 ID、类型（授权 / 提问）、CLI 原生内容与选项、结果（已答复及所选项 / 文字回复 / 已停止 / 已失效） | Adapter + 用户 |
 | `error` | 摘要、原生诊断详情、是否可重试 | Adapter / Session Manager |
 | `turn_end` | 时长、结果（Done / 已停止）、`files_changed` | Session Manager |
+
+新增控制和附件字段的当前可序列化契约见 [`shared/session/types.ts`](../../apps/desktop/src/shared/session/types.ts)：摘要 / 草稿 `reasoningEffort?: string|null` 区分未设置与显式默认，ActiveTurn 接受时快照；上下文按 Input 负责规格保存，不保存 Runtime 句柄。独立持久身份 journal 由 [Adapter 第 3.9 节](../agent-adapter/spec.md)负责，不代替 Session 历史或原生 ID。
 
 ### 4.5 持久化（2026-10-09 实现回写，文档仍为草稿）
 
@@ -317,13 +319,13 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 - 本轮采用“只在发送时恢复 Runtime”：打开、分页、Rename 不启动原生会话；继续对话使用原 `nativeSessionId`、Project cwd 和下一轮模型。秘密问题的答案与草稿不写入明文持久化记录，界面记录以隐藏文本代替。
 - 只记录在本应用中发生的轮；在应用外用 CLI 继续同一原生会话产生的内容不会出现在对话记录中（S-Q13）。
 
-实现与验证记录见 [Session task](../../tasks/T20261009-session-slice/task.md)、[后端证据](../../tasks/T20261009-session-slice/evidence/W4-backend-validation.md) 与[独立验收](../../tasks/T20261009-session-slice/acceptance.md)。模拟 Provider 验证不代表真实 CLI 的 AC-02～AC-05 已完整通过。
+实现与验证记录见 [Session task](../../tasks/archive/T20261009-session-slice/task.md)、[后端证据](../../tasks/archive/T20261009-session-slice/evidence/W4-backend-validation.md) 与[独立验收](../../tasks/archive/T20261009-session-slice/acceptance.md)。模拟 Provider 验证不代表真实 CLI 的 AC-02～AC-05 已完整通过。
 
 ## 5. 接口与事件
 
 ### 5.1 需要 CLI Adapter 提供（抽象）
 
-以下为本模块所需能力，命名为示意。实现使用 [Adapter spec §5](../agent-adapter/spec.md) 与 `packages/agent-adapter/src/provider.ts` 的正式契约；两者的名称映射见 Adapter §5.5。本轮对齐记录见 [research](../../tasks/T20261009-session-slice/research.md) §3。
+以下为本模块所需能力，命名为示意。实现使用 [Adapter spec §5](../agent-adapter/spec.md) 与 `packages/agent-adapter/src/provider.ts` 的正式契约；两者的名称映射见 Adapter §5.5。本轮对齐记录见 [research](../../tasks/archive/T20261009-session-slice/research.md) §3。
 
 | 能力 / 事件 | 用途 | 对应 [CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 / 04 第 5 节 | 需对齐的点 |
 |---|---|---|---|
@@ -336,7 +338,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | 事件 `toolActivity(itemId, kind, summary, state)` | 工具活动行 | 06 §5 | 原生工具类型到 Read / Edit / Run 的归类 |
 | 事件 `inputRequested(requestId, kind, nativeContent, options)` / `inputResolved(requestId, reason)` | Needs Input 卡片与清除 | 06 §5 Needs Input 行 | 原生撤回请求时是否有事件（Codex 服务端请求失效） |
 | `answer(requestId, optionId)` | 卡片答复 | 06 §5 | — |
-| `replyWithText(requestId[], text)` | 在输入框回复 Needs Input | UX 第 6 节 | 两种 CLI 的语义未验证，见 input spec I-Q2 |
+| `replyWithText(requestId[], text)` | 在输入框回复 Needs Input | UX 第 6 节 | Codex W25 Adapter / W26 UI 已落实 I-Q2；Claude 真实语义后续 |
 | `stop(句柄)` → 完成 / 失败 | Stop、关闭 Project、退出 | 04 §5 第 1～7 条 | 幂等；完成表示终态 + 资源清理；兜底失败返回错误 |
 | `setModel(句柄, model)` | 下一轮生效 | 06 §6 同 Session 模型切换 | Codex 0.163.0 的目录与第二模型切换已由 W25 真实复验；Claude 真实链路仍待验证 |
 | 事件 `runtimeExited(code, duringTurn)` | E8 / E12 | 06 §4 运行中进程被终止 | — |
@@ -379,12 +381,16 @@ FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../too
 
 | 调用 / 事件 | 实现约定 |
 |---|---|
-| `create({projectId, cli, model?, originViewId?, text, contextItems?})` | 返回已持久化、已接受的 `SessionSummary`；Runtime 启动异步进行，失败转 Error |
-| `send`、`answer`、`replyWithText`、`stop`、`retry`、`rename`、`setModel` | input / History 操作；答案使用 Adapter `InputResponse` 原生选项结构；`setModel` 下一轮生效 |
+| `create({projectId, cli, model?, reasoningEffort?, originViewId?, text, contextItems?})` | 返回已持久化、已接受的 `SessionSummary`；Runtime 启动异步进行，失败转 Error |
+| `send`、`answer`、`replyWithText`、`stop`、`retry`、`rename`、`setModel`、`setReasoningEffort` | input / History 操作；答案使用 Adapter `InputResponse` 原生选项结构；`setModel` 下一轮生效 |
 | `list`、`getConversation` | 摘要列表与尾部分页；`beforeSequence` 向前翻页 |
 | `getDraft` / `saveDraft` | 以 `DraftKey` 区分每 Project New Chat 与每 Session 输入草稿；关闭 / 退出 flush 等待在途草稿写入 |
-| `getProviders`、`getModels`、`getDefaultCli`、`setDefaultCli` | 菜单、模型与 Project 默认值；不为草稿创建原生会话 |
+| `getProviders`、`getModels`、`getSkills`、`getDefaultCli`、`setDefaultCli` | 菜单、模型与 Project 默认值；不为草稿创建原生会话 |
 | `updateViewing` / `opened` | 展示上下文与显式打开分开；主进程另外核实窗口 focused / visible / 非 minimized |
 | `summaryChanged` / `transcriptChanged` / `providersChanged` | 摘要（含 Project 汇总）、按 ID upsert 的对话条目、CLI 可用性快照 |
 
 Renderer 在 `createRoot` 前一次安装 `installSessionIntegration()`，注册 History、Conversation / Header 与 CLI Menu 槽位，避免 React StrictMode 重复注册。模拟 Provider 仅在未打包且显式设置 `STUDIO_E2E_PROVIDERS=1` 时启用。
+
+### 2026-10-18 异常退出后的条目恢复
+
+依据 FR-STATE-001 / 003、FR-SESSION-002 与第 3.14 节的恢复责任：启动发现未结束回合时，将该回合保存的未完成 Agent 消息标为完整、运行中工具条目标为失败，并沿原错误流程结束回合、取消未答请求；保留已有正文，不重放命令。活动恢复只读取该 Session / turn 的未完成记录；启动同时按已保存的 failed / interrupted 终态修复旧版遗留的不完整条目，不改写成功回合、正文和摘要，也不重放命令。W26 强杀截图暴露并修复此接缝，技术证据见[收尾自检](../../tasks/archive/T20261009-v1-foundation-slice/evidence/W26-closure.md)；当前基线与独立结果由总体验收负责。

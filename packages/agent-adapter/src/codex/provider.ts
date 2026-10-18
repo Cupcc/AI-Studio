@@ -4,7 +4,7 @@ import { adapterError } from '../errors.js';
 import { failed, ok, skipped, buildAvailabilityReport } from '../availability.js';
 import type { AgentProvider, AgentSession, AvailabilityOptions, AvailabilityReport, CheckResult, CreateSessionOptions,
   ExecutableInfo, LoginInfo, ModelCatalog, ProviderCapabilities, ProviderEnvironment, ResumeSessionOptions, VersionInfo } from '../provider.js';
-import type { ModelInfo } from '../types.js';
+import type { ModelInfo, NativeSkillCatalog } from '../types.js';
 import { execBounded, parseVersion, resolveExecutable } from '../core/exec.js';
 import { RuntimeProcess, type RuntimeHandle } from '../core/runtime-process.js';
 import { defaultProcessLister } from '../core/process-probe.js';
@@ -94,6 +94,17 @@ export class CodexProvider implements AgentProvider {
     return this.probeModels(options.environment, options.cwd, options.signal);
   }
 
+  async listSkills(options: { environment: ProviderEnvironment; cwd: string; signal?: AbortSignal }): Promise<NativeSkillCatalog> {
+    return this.probe(options.environment, options.cwd, options.signal, 30_000, async (connection, signal) => {
+      const response = await connection.request('skills/list', { cwds: [options.cwd], forceReload: true }, signal);
+      if (!Array.isArray(response?.data)) throw adapterError('protocol_error', 'Malformed skills/list response');
+      const entry = response.data.find(entry => entry.cwd === options.cwd);
+      if (!entry || !Array.isArray(entry.skills) || !Array.isArray(entry.errors)) throw adapterError('protocol_error', 'Missing skills catalog for Project');
+      for (const skill of entry.skills) if (typeof skill.name !== 'string' || typeof skill.path !== 'string' || typeof skill.description !== 'string' || typeof skill.enabled !== 'boolean') throw adapterError('protocol_error', 'Malformed skill entry');
+      return { skills: entry.skills.map(({ name, description, path, enabled }) => ({ name, description, path, enabled })), errors: entry.errors };
+    });
+  }
+
   createSession(options: CreateSessionOptions): Promise<AgentSession> { return this.open(options); }
   resumeSession(options: ResumeSessionOptions): Promise<AgentSession> {
     if (typeof options.nativeSessionId !== 'string' || !options.nativeSessionId.trim()) return Promise.reject(adapterError('invalid_argument', 'Native Session id is required'));
@@ -149,23 +160,27 @@ export class CodexProvider implements AgentProvider {
   }
 
   private async probeModels(environment: ProviderEnvironment, cwd = tmpdir(), signal?: AbortSignal, timeoutMs = 30_000): Promise<ModelInfo[]> {
+    return this.probe(environment, cwd, signal, timeoutMs, (connection, signal) => connection.models(signal));
+  }
+
+  private async probe<T>(environment: ProviderEnvironment, cwd: string, signal: AbortSignal | undefined, timeoutMs: number, read: (connection: CodexConnection, signal: AbortSignal) => Promise<T>): Promise<T> {
     this.assertLive();
     signal?.throwIfAborted();
     const executable = await this.executable(environment);
     let runtime: RuntimeHandle | undefined;
     let connection: CodexConnection | undefined;
-    let catalog: ModelInfo[] | undefined;
+    let catalog: T | undefined;
     let failure: { error: unknown } | undefined;
     try {
       catalog = await withTimeout(async (bounded) => {
         const combined = AbortSignal.any([this.lifetime.signal, bounded, ...(signal ? [signal] : [])]);
         combined.throwIfAborted();
         runtime = await this.dependencies.runtimeFactory({ command: executable.path, args: ['app-server', '--listen', 'stdio://'],
-          cwd, env: environment.env, label: 'codex model catalog', generation: 1, lister: this.dependencies.processLister });
+          cwd, env: environment.env, label: 'codex catalog', generation: 1, lister: this.dependencies.processLister });
         if (combined.aborted) { await runtime.terminate(); combined.throwIfAborted(); }
         connection = new CodexConnection(runtime, timeoutMs);
         await connection.initialize(combined);
-        return connection.models(combined);
+        return read(connection, combined);
       }, timeoutMs, 'Codex model catalog');
     } catch (error) { failure = { error }; }
     connection?.peer.close();
@@ -197,7 +212,7 @@ function validateOptions(options: CreateSessionOptions): CodexProviderOptions {
   for (const key of Object.keys(extras)) {
     if (!['config', 'baseInstructions', 'developerInstructions', 'effort', 'collaborationMode'].includes(key)) throw adapterError('unsupported', `Unsupported Codex provider option: ${key}`);
   }
-  if (extras.effort !== undefined && !['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'ultra'].includes(String(extras.effort))) throw adapterError('invalid_argument', 'Invalid reasoning effort');
+  if (extras.effort !== undefined && (typeof extras.effort !== 'string' || !extras.effort.trim())) throw adapterError('invalid_argument', 'Invalid reasoning effort');
   for (const key of ['baseInstructions', 'developerInstructions']) {
     if (extras[key] !== undefined && typeof extras[key] !== 'string') throw adapterError('invalid_argument', `${key} must be a string`);
   }

@@ -36,12 +36,13 @@ export interface FileViewerProps {
   active: boolean
   message: AddOutcome | null
   adding: boolean
+  onAddImage?(): void
   onAdd(): void
   onClose(): void
   onRetry(): void
 }
 
-export function FileViewer({ projectId, viewer, canAdd, active, message, adding, onAdd, onClose, onRetry }: FileViewerProps) {
+export function FileViewer({ projectId, viewer, canAdd, active, message, adding, onAdd, onAddImage, onClose, onRetry }: FileViewerProps) {
   const name = displayName(projectPathName(viewer.path))
   const meta = viewer.phase === 'ready'
     ? [formatBytes(viewer.size), encodingLabel(viewer.encoding, viewer.bom), lineEndingLabel(viewer.lineEnding)].filter(Boolean).join(' · ')
@@ -53,6 +54,7 @@ export function FileViewer({ projectId, viewer, canAdd, active, message, adding,
         {meta && <span className="files-viewer__meta">{meta}</span>}
       </div>
       <div className="files-viewer__actions">
+        {canAdd && onAddImage && <button className="secondary-button button--small" disabled={adding} onClick={onAddImage}>作为图片附加</button>}
         {canAdd && <button className="primary-button button--small" disabled={adding} onClick={onAdd}>{adding ? FILES_TEXT.adding : FILES_TEXT.addToConversation}</button>}
         <button className="icon-button" aria-label={FILES_TEXT.closeViewer} data-tip={FILES_TEXT.closeViewer} data-tip-align="end" onClick={onClose}><Icon name="close" size={14} /></button>
       </div>

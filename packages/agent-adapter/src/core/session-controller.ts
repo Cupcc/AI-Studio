@@ -105,6 +105,7 @@ export interface SessionDriver {
   /** Releases a request cancelled outside Stop (turn ended, runtime exited, disposed). Best effort. */
   cancelInput?(record: PendingInputRecord, reason: CancelReason): Promise<void> | void;
   setModel(model: string | null): Promise<void>;
+  setReasoningEffort?(effort: string | null): Promise<void>;
   listModels(): Promise<ModelInfo[]>;
   /**
    * Terminates the runtime and resolves only once its exit is confirmed; rejects when it is not.
@@ -436,6 +437,13 @@ export class SessionController implements AgentSession {
     await this.driver.setModel(model);
     this.modelValue = model ?? undefined;
     this.emit('model.changed', { model });
+  }
+
+  async setReasoningEffort(effort: string | null): Promise<void> {
+    if (this.guard.state === 'closed') throw adapterError('invalid_state', 'The session is closed');
+    if (effort !== null && (typeof effort !== 'string' || !effort.trim())) throw adapterError('invalid_argument', 'Reasoning effort must be a non-empty string or null');
+    if (!this.driver.setReasoningEffort) throw adapterError('unsupported', 'The provider does not expose reasoning effort controls');
+    await this.driver.setReasoningEffort(effort);
   }
 
   listModels(): Promise<ModelInfo[]> {

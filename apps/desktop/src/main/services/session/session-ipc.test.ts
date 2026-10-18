@@ -110,6 +110,13 @@ describe('Session IPC boundary · FR-STATE-004/005, S-Q1', () => {
       expect(() => entries[name]([{ type: 'view', viewId: 'overview' }, ...many(FILES_LIMITS.referencesPerMessage)])(f)).not.toThrow()
     })
 
+    it.each(Object.keys(entries) as (keyof typeof entries)[])('%s validates image paths and accepts only opaque Skill identity fields', name => {
+      const f = feature()
+      const items = [{ type: 'image', path: 'pic.png' }, { type: 'skill', id: 'opaque-id', name: 'native-skill' }]
+      expect(entries[name](items)(f).contextItems).toEqual(items)
+      for (const item of [{ type: 'image', path: '../outside.png' }, { type: 'image', path: '/tmp/pic.png' }, { type: 'skill', id: 'id', name: 'skill', path: '/private/SKILL.md' }, { type: 'skill', name: 'skill' }]) expect(() => entries[name]([item])(f)).toThrow()
+    })
+
     it('hands the injected resolver to the Session service: create reads it, and without one refuses explicitly', async () => {
       const ctx = { senderId: 99, senderUrl: 'app://studio' }
       const calls: unknown[] = []

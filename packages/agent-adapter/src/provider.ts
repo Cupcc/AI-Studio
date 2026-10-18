@@ -4,6 +4,7 @@ import type {
   InputRequest,
   InputResponse,
   ModelInfo,
+  NativeSkillCatalog,
   ProviderId,
   ReplyWithTextResult,
   SessionRuntimeState,
@@ -159,6 +160,8 @@ export interface AgentProvider {
    * a native conversation.
    */
   listModels(options: { environment: ProviderEnvironment; cwd?: string; signal?: AbortSignal }): Promise<ModelInfo[]>;
+  /** Lists CLI-discovered skills without creating a native conversation. */
+  listSkills?(options: { environment: ProviderEnvironment; cwd: string; signal?: AbortSignal }): Promise<NativeSkillCatalog>;
   /** Starts an isolated runtime and a new native session. Resolves when input can be sent. */
   createSession(options: CreateSessionOptions): Promise<AgentSession>;
   /**
@@ -222,6 +225,8 @@ export interface AgentSession {
   stop(): Promise<StopResult>;
   /** Applies to subsequent turns (`null` = CLI default). */
   setModel(model: string | null): Promise<void>;
+  /** Next turn override; null explicitly resolves the CLI default. */
+  setReasoningEffort(effort: string | null): Promise<void>;
   listModels(): Promise<ModelInfo[]>;
   /** Closes the session and verifies runtime release. Pending/successful calls are idempotent;
    * failed cleanup rejects and can be retried on this same handle, even when state is closed. */

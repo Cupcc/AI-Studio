@@ -1,0 +1,8 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/v1-closure
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  07:27:39
+   Duration  798ms (tests 72%, transform 23%, import 4%)

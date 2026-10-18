@@ -21,9 +21,11 @@ await provider.dispose();
 - 不传 overrides 时只向 `thread/start` 传 `cwd`；模型、审批、沙箱、Rule、Skill、Context 均由原生配置决定。不读取宿主的隐式 `process.env`。
 - 通用 overrides：`model`、`approvalPolicy`、`sandboxMode`。`permissionMode` 或未知覆盖项明确拒绝。
 - 可选 `providerOptions`：`config`（原生 JSON 配置对象）、`baseInstructions`、`developerInstructions`、`effort`、`collaborationMode`。默认不传任何额外项；不提供 `history` / `path`，以免绕过恢复的 `threadId`。
+- `setReasoningEffort(effort | null)` 只影响下一轮；显式 null 从该 cwd 有效配置或所选模型原生目录默认解析，取不到时明确失败，不硬编码默认级别。
+- `listSkills({ environment, cwd })` 只查询原生目录，不创建 Thread；`sendUserInput` 支持 file / image / skill 原生附件，宿主负责将用户选择解析为可信路径。
 - `setModel` 只影响下一轮。原生 `model:null` 表示保持已有设置，因此 Adapter 的 `setModel(null)` 会读取该 cwd 的 CLI 有效默认模型，下一轮显式提交它；无配置值时使用原生目录的默认项。
 - 可用性分别检查 executable、`--version`、`login status` 和可选模型目录。认证输出只转换为粗粒度状态，不保留原始输出。模型目录只进行握手与 `model/list`，不创建 Thread。
-- 已锁定并验证协议：Codex CLI `0.161.0`。其他版本报告 `untested`，不会因版本号不同自动禁止；实验接口缺失时 Stop 走独立 Runtime 兜底。
+- 当前类型锁定为 Codex CLI `0.163.0`；已执行方法的证据见[本轮收尾](../../../../tasks/archive/T20261009-v1-foundation-slice/evidence/W26-closure.md)，不宣称全部生成协议通过。其他版本报告 `untested`，不会因版本号不同自动禁止；实验接口缺失时 Stop 走独立 Runtime 兜底。
 
 ## 事件与请求
 
@@ -47,7 +49,7 @@ await provider.dispose();
 
 ## 协议生成与验证
 
-`protocol/` 是本机 0.161.0 CLI 生成类型的传递依赖子集，共 206 个类型文件。只把相对 import 补 `.js`；`manifest.json` 保存原始文件 SHA-256 和来源版本。
+`protocol/` 是本机 0.163.0 CLI 生成类型的传递依赖子集，共 215 个类型文件。只把相对 import 补 `.js`；`manifest.json` 保存原始文件 SHA-256 和来源版本。
 
 ```sh
 node packages/agent-adapter/src/codex/generate-protocol.mjs /path/to/codex
@@ -57,4 +59,4 @@ pnpm --filter @ai-studio/agent-adapter test
 
 生成器检查 CLI 版本，无模型调用。默认测试不启动真实 CLI；测试用模拟协议与系统 Node 进程验证 OS 退出。真实套件只有 `AI_STUDIO_REAL_CLI=1` 才启用，六回合综合场景和另一个双回合 Stop 场景互斥；后者还需 `AI_STUDIO_CODEX_STOP_ONLY=1`。
 
-官方协议文档：[Codex App Server](https://learn.chatgpt.com/docs/app-server)。本次真实结果与未覆盖项：[W2 evidence](../../../../tasks/T20261009-agent-adapter/evidence/W2-codex-provider.md)。
+官方协议文档：[Codex App Server](https://learn.chatgpt.com/docs/app-server)。本次真实结果与未覆盖项：[W2 evidence](../../../../tasks/archive/T20261009-agent-adapter/evidence/W2-codex-provider.md)。

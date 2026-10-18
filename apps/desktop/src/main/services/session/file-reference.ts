@@ -1,6 +1,6 @@
 // Turns validated Files references into Provider input (FR-TOOL-001 item 4, Tools spec §4.1; FR-INPUT-001).
 // Pure: the resolver has already re-validated every path, so this module only decides how the CLI is told about them.
-import type { UserInput } from '@ai-studio/agent-adapter'
+import type { InputAttachment, UserInput } from '@ai-studio/agent-adapter'
 import { FILES_LIMITS, type FileReferenceFailureReason, type ProjectPath, type ResolvedFileReference } from '@shared/tools/files'
 import type { SessionCli } from '@shared/session/types'
 
@@ -21,6 +21,9 @@ export const FILE_REFERENCE_HEADER = 'Referenced files (paths relative to the Pr
 export interface BuildUserInputOptions {
   /** Project View context, already rendered; prefixed exactly as before file references existed. */
   viewContextText?: string
+  skills?: readonly InputAttachment[]
+  images?: readonly string[]
+  filePaths?: readonly string[]
   files: readonly ResolvedFileReference[]
   text: string
   strategy: FileReferenceStrategy
@@ -34,10 +37,17 @@ const quote = (path: ProjectPath): string => JSON.stringify(path).replace(LINE_S
  * `text`: `[viewContext\n\n]HEADER\n- "path"…\n\nuser text`. Paths are JSON-quoted so spaces, quotes and unicode survive and
  * one file is always one line. Without files the result is exactly what was sent before references existed.
  */
-export function buildUserInput({ viewContextText, files, text, strategy }: BuildUserInputOptions): UserInput {
+export function buildUserInput({ viewContextText, files, skills = [], images = [], filePaths, text, strategy }: BuildUserInputOptions): UserInput {
   const body = viewContextText ? `${viewContextText}\n\n${text}` : text
+  if ((images.length || skills.length) && strategy !== 'attachments') throw new Error('当前 CLI 未接入原生附件，消息未发送')
+  if (!files.length && !skills.length) return { text: body }
+  if (strategy === 'attachments') return { text: body, attachments: [...skills, ...files.flatMap(file => {
+    const aliases = [file.path, ...(file.aliases ?? [])]
+    const image = aliases.some(path => images.includes(path))
+    const mention = filePaths ? aliases.some(path => filePaths.includes(path)) : !image
+    return [...(mention ? [{ kind: 'file' as const, path: file.absolutePath, name: file.name }] : []), ...(image ? [{ kind: 'image' as const, path: file.absolutePath }] : [])]
+  })] }
   if (!files.length) return { text: body }
-  if (strategy === 'attachments') return { text: body, attachments: files.map(file => ({ kind: 'file' as const, path: file.absolutePath, name: file.name })) }
   const list = [FILE_REFERENCE_HEADER, ...files.map(file => `- ${quote(file.path)}`)].join('\n')
   return { text: `${viewContextText ? `${viewContextText}\n\n` : ''}${list}\n\n${text}` }
 }

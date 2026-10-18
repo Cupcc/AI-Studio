@@ -1,0 +1,65 @@
+{
+  "time": "2026-10-18T15:44:37.972143+00:00",
+  "host": 3438,
+  "runtime": {
+    "pid": 5264,
+    "startedAt": "Sun Oct 18 10:32:15 2026"
+  },
+  "command": 18462,
+  "terminalServer": 6464,
+  "externalSentinel": 1646,
+  "journals": [
+    {
+      "version": 1,
+      "instanceId": "5aec68a2-f165-4be5-adba-427fa31e569e",
+      "host": {
+        "pid": 3438,
+        "startedAt": "Sun Oct 18 10:29:10 2026"
+      },
+      "runtime": {
+        "pid": 5264,
+        "startedAt": "Sun Oct 18 10:32:15 2026",
+        "pgid": 5264
+      },
+      "sessionId": "6f66fa1c-8238-4fdf-8a82-e2127593e447",
+      "processes": [
+        {
+          "pid": 5264,
+          "startedAt": "Sun Oct 18 10:32:15 2026",
+          "pgid": 5264
+        },
+        {
+          "pid": 5871,
+          "startedAt": "Sun Oct 18 10:32:32 2026",
+          "pgid": 5871
+        },
+        {
+          "pid": 18462,
+          "startedAt": "Sun Oct 18 10:44:06 2026",
+          "pgid": 18462
+        }
+      ]
+    },
+    {
+      "version": 1,
+      "instanceId": "5aec68a2-f165-4be5-adba-427fa31e569e",
+      "host": {
+        "pid": 3438,
+        "startedAt": "Sun Oct 18 10:29:10 2026"
+      },
+      "runtime": {
+        "pid": 3903,
+        "startedAt": "Sun Oct 18 10:30:13 2026",
+        "pgid": 3903
+      },
+      "sessionId": "ae26f263-da9e-4a5a-a09f-aa69492965b6",
+      "processes": [
+        {
+          "pid": 3903,
+          "startedAt": "Sun Oct 18 10:30:13 2026",
+          "pgid": 3903
+        }
+      ]
+    }
+  ]
+}

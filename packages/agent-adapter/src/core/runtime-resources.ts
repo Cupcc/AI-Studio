@@ -1,3 +1,4 @@
+import { RuntimeStartupError } from './runtime-process.js';
 import { adapterError } from '../errors.js';
 import type { RuntimeHandle, RuntimeSpawnOptions, TerminateOptions, TerminationReport } from './runtime-process.js';
 
@@ -34,6 +35,9 @@ export class RuntimeResources {
     const pending = Promise.resolve().then(() => factory(options)).then(runtime => {
       this.track(runtime, options);
       return runtime;
+    }, error => {
+      if (error instanceof RuntimeStartupError) this.track(error.runtime, options);
+      throw error;
     });
     this.starting.set(pending, options.cwd);
     void pending.then(() => this.starting.delete(pending), () => this.starting.delete(pending));

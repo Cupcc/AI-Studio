@@ -4,8 +4,9 @@ import type { CoreServices } from '../services/core'
 import { defineHandlers } from './registry'
 import { expectOnlyKeys, expectRecord, expectString, noInput } from './validate'
 
-export function createAppFeature(core: Pick<CoreServices, 'appInfo'>) {
+export function createAppFeature(core: Pick<CoreServices, 'appInfo'>, getWindowFocus: (senderId: number) => boolean = () => false) {
   return defineHandlers(appContract, {
+    getWindowFocus: { parse: noInput, handle: (_, context) => ({ focused: getWindowFocus(context.senderId) }) },
     getInfo: {
       parse: noInput,
       handle: () => core.appInfo()

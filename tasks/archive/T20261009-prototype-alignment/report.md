@@ -18,7 +18,7 @@
 ## 遗留问题
 
 - 已在屏幕解锁后复跑；修复后的完整 E2E、针对性重复和实际 Electron 交互均通过，历史失败与复验见[验收第 6.3 节](acceptance.md#63-间歇失败与修复复验)。
-- 上下文 chip、“来自 <View>”顶栏与 View 左侧的输入区目前没有可达的产品路径，只有 W2 注入 DOM 的检查；由 [T20261009-context-tools](../../T20261009-context-tools/task.md)、[T20261009-project-view](../../archive/T20261009-project-view/task.md) 实现时复核。
+- 上下文 chip、“来自 <View>”顶栏与 View 左侧的输入区目前没有可达的产品路径，只有 W2 注入 DOM 的检查；由 [T20261009-context-tools](../T20261009-context-tools/task.md)、[T20261009-project-view](../../archive/T20261009-project-view/task.md) 实现时复核。
 - `session.css` 中仍有组件内部尺寸使用像素字面量（与此前做法一致），高保真阶段调整视觉参数前可再收拢为 Token。
 - 原型 v01 自身在 1024 宽度下右侧区域会溢出窗口；应用遵循 Shell Spec §2.3，不以原型为准。
 

@@ -24,6 +24,7 @@ export interface SessionSummary {
   nativeSessionId: string | null
   title: string
   titleSource: 'client' | 'native' | 'user'
+  reasoningEffort?: string | null
   model: string | null
   originViewId: string | null
   viewContextAttached?: boolean
@@ -39,7 +40,7 @@ export interface SessionSummary {
   lastUserMessageAt: number
 }
 
-export type ContextItem = { type: 'view'; viewId: string } | { type: 'file'; path: string }
+export type ContextItem = { type: 'view'; viewId: string } | { type: 'file'; path: string } | { type: 'image'; path: string } | { type: 'skill'; id: string; name: string }
 
 interface TranscriptBase {
   id: string
@@ -79,6 +80,11 @@ export interface ProviderSummary {
   capabilities: ProviderCapabilities
 }
 
+export interface SkillCatalogResult {
+  skills: { id: string; name: string; description: string }[]
+  error: string | null
+}
+
 export interface ModelCatalogResult {
   models: ModelInfo[]
   error: string | null
@@ -91,6 +97,7 @@ export type DraftKey =
 
 export interface ComposerDraft {
   cli: SessionCli | null
+  reasoningEffort?: string | null
   model: string | null
   text: string
   contextItems: ContextItem[]
@@ -104,6 +111,7 @@ export interface SessionMessage {
 export interface CreateSessionRequest extends SessionMessage {
   projectId: string
   cli: SessionCli
+  reasoningEffort?: string | null
   model?: string | null
   originViewId?: string | null
   viewContextAttached?: boolean

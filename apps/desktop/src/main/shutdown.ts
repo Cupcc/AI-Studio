@@ -18,13 +18,18 @@ export function createShutdownHandler(deps: ShutdownDependencies) {
       try {
         await deps.disposeFeatures()
       } catch (error) {
+        disposing = false
         deps.onError(error)
-      } finally {
-        try { deps.disposeCore() } catch (error) { deps.onError(error) }
-        disposed = true
-        // Electron needs another macrotask to complete a second app.quit().
-        setImmediate(deps.quit)
+        return
       }
+      try { deps.disposeCore() } catch (error) {
+        disposing = false
+        deps.onError(error)
+        return
+      }
+      disposed = true
+      // Electron needs another macrotask to complete a second app.quit().
+      setImmediate(deps.quit)
     })()
   }
 }

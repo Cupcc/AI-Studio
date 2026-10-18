@@ -42,7 +42,7 @@ beforeEach(() => {
     confirmQuit: async () => {}, cancelQuit: async () => {}, onMenuCommand: () => () => {}, onQuitRequested: () => () => {}, stateFlushed: async () => {}, onFlushRequested: () => () => {}
   }
   Object.defineProperty(window, 'studio', { configurable: true, value: {
-    project: api, app: { onWindowFocusChanged: () => () => {} }
+    project: api, app: { getWindowFocus: async () => ({ focused: useProjectShell.getState().foreground }), onWindowFocusChanged: () => () => {} }
   } as unknown as StudioApi })
 })
 afterEach(async () => { cleanup(); await useProjectShell.getState().flush(); restoreIntegration(); vi.unstubAllGlobals() })
@@ -126,6 +126,27 @@ describe('Project shell · FR-PROJ/NAV · AC-01', () => {
     act(() => shell.openSession('a', 's-a'))
     expect(port.userOpenedSession).toHaveBeenCalledTimes(2)
     expect(port.setWindowForeground).toHaveBeenCalledWith(false)
+  })
+  it('synchronizes missed initial native focus, ignores stale snapshots and never treats focus as opening', async () => {
+    let resolve!: (value: { focused: boolean }) => void
+    let focusEvent!: (value: { focused: boolean }) => void
+    const app = window.studio.app
+    Object.assign(app, {
+      getWindowFocus: () => new Promise<{ focused: boolean }>(done => { resolve = done }),
+      onWindowFocusChanged: (listener: (value: { focused: boolean }) => void) => { focusEvent = listener; return () => {} }
+    })
+    useProjectShell.setState({ foreground: false })
+    const unwatch = useProjectShell.getState().watchEvents()
+    resolve({ focused: true }); await Promise.resolve()
+    expect(useProjectShell.getState().foreground).toBe(true)
+    expect(port.userOpenedSession).not.toHaveBeenCalled()
+    unwatch()
+    const unwatch2 = useProjectShell.getState().watchEvents()
+    focusEvent({ focused: false })
+    resolve({ focused: true }); await Promise.resolve()
+    expect(useProjectShell.getState().foreground).toBe(false)
+    expect(port.userOpenedSession).not.toHaveBeenCalled()
+    unwatch2()
   })
   it('waits for pending Session drafts before closing a Project', async () => {
     await mount()

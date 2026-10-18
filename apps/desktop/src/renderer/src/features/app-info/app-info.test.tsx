@@ -19,6 +19,7 @@ function installFakeStudio(getInfo: () => Promise<AppInfo>) {
   const unsubscribe = vi.fn()
   const api: Pick<StudioApi, 'app'> = {
     app: {
+      getWindowFocus: async () => ({ focused: true }),
       getInfo,
       ping: async ({ message }) => ({ message, receivedAt: '' }),
       onWindowFocusChanged: (listener) => {

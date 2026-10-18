@@ -17,7 +17,8 @@ export function nativeInput(input: UserInput): NativeUserInput[] {
   const result: NativeUserInput[] = [];
   if (input.text) result.push({ type: 'text', text: input.text, text_elements: [] });
   for (const attachment of input.attachments ?? []) {
-    if (attachment.kind === 'image') result.push({ type: 'localImage', path: attachment.path });
+    if (attachment.kind === 'skill') result.push({ type: 'skill', name: attachment.name, path: attachment.path });
+    else if (attachment.kind === 'image') result.push({ type: 'localImage', path: attachment.path });
     else if (attachment.kind === 'file') result.push({ type: 'mention', name: attachment.name ?? basename(attachment.path), path: attachment.path });
     else throw adapterError('unsupported', 'Unsupported Codex attachment');
   }
@@ -48,14 +49,28 @@ export function mapItem(item: ThreadItem, completed: boolean): ItemSnapshot | un
       activity: { verb: 'edit', label: item.changes.map((change) => change.path).join(', ') },
       files: item.changes.map((change) => ({ path: change.path, change: change.kind.type === 'update' ? (change.kind.move_path ? 'rename' : 'modify') : change.kind.type })) };
     case 'mcpToolCall': return { ...base, kind: 'tool_call', status: status(item.status, completed),
-      activity: { verb: 'tool', label: `${item.server} / ${item.tool}` }, tool: { name: item.tool, server: item.server, input: item.arguments },
+      activity: { verb: 'tool', label: `${item.server} / ${item.tool}` }, tool: { name: item.tool, server: item.server, input: item.arguments, ...(item.result !== null ? { result: item.result } : {}) },
       ...(item.error ? { error: item.error.message } : {}) };
     case 'dynamicToolCall': return { ...base, kind: 'tool_call', status: status(item.status, completed),
-      activity: { verb: 'tool', label: item.tool }, tool: { name: item.tool, input: item.arguments } };
+      activity: { verb: 'tool', label: item.tool }, tool: { name: item.tool, input: item.arguments, ...(item.contentItems !== null ? { result: item.contentItems } : {}) } };
+    case 'functionCallOutput': return { ...base, kind: 'tool_call',
+      activity: { verb: 'tool', label: item.namespace ? `${item.namespace} / ${item.name}` : item.name },
+      tool: { name: item.name, ...(item.namespace ? { server: item.namespace } : {}), result: item.output } };
     case 'collabAgentToolCall': return { ...base, kind: 'tool_call', status: status(item.status, completed),
-      activity: { verb: 'agent', label: item.tool }, tool: { name: item.tool } };
-    case 'webSearch': return { ...base, kind: 'web_search', activity: { verb: 'search', label: item.query } };
-    default: return { ...base, kind: 'other', activity: { verb: 'other', label: item.type } };
+      activity: { verb: 'agent', label: item.tool }, tool: { name: item.tool,
+        input: { prompt: item.prompt, model: item.model, reasoningEffort: item.reasoningEffort, senderThreadId: item.senderThreadId, receiverThreadIds: item.receiverThreadIds },
+        result: item.agentsStates } };
+    case 'webSearch': return { ...base, kind: 'web_search', activity: { verb: 'search', label: item.query },
+      tool: { name: 'webSearch', input: { query: item.query, action: item.action }, ...(item.results !== null ? { result: item.results } : {}) } };
+    case 'enteredReviewMode':
+    case 'exitedReviewMode': return { ...base, kind: 'other', activity: { verb: 'other', label: item.type }, text: item.review };
+    default: {
+      // Preserve the public payload of less common native items for the existing
+      // collapsed result view instead of reducing their content to a type label.
+      const { id: _id, type: _type, ...result } = item;
+      return { ...base, kind: 'other', activity: { verb: 'other', label: item.type },
+        ...(Object.keys(result).length ? { tool: { name: item.type, result } } : {}) };
+    }
   }
 }
 

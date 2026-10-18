@@ -1,0 +1,47 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/v1-closure
+
+ ❯ tasks/T20261009-v1-foundation-slice/evidence/W28-boundaries.test.ts (9 tests | 2 failed) 360ms
+   ❯ W28 independent boundaries; synthetic RPC/OS only, no Electron or model calls (9)
+     × preserves the native public function output body instead of reducing it to a type label 55ms
+     × preserves native review mode public text 52ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tasks/T20261009-v1-foundation-slice/evidence/W28-boundaries.test.ts > W28 independent boundaries; synthetic RPC/OS only, no Electron or model calls > preserves the native public function output body instead of reducing it to a type label
+AssertionError: expected '{"turnId":"9233766c-3121-4e1b-87df-4d…' to contain 'W28 public function result body'
+
+Expected: "W28 public function result body"
+Received: "{"turnId":"9233766c-3121-4e1b-87df-4d70b7865a9d","item":{"itemId":"function-output","status":"completed","nativeType":"functionCallOutput","kind":"other","activity":{"verb":"other","label":"functionCallOutput"}},"type":"item.completed","seq":6,"at":1792337001995,"providerId":"codex","sessionId":"2f0ca014-6ad3-4850-b2c6-4d3f97e000ac"}"
+
+ ❯ tasks/T20261009-v1-foundation-slice/evidence/W28-boundaries.test.ts:136:84
+    134|     h.notify(session, 'item/completed', { item: { id: 'function-output…
+    135|     await vi.waitFor(() => expect(recorder.events.some(e => e.type ===…
+    136|     expect(JSON.stringify(recorder.events.find(e => e.type === 'item.c…
+       |                                                                                    ^
+    137|   })
+    138|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tasks/T20261009-v1-foundation-slice/evidence/W28-boundaries.test.ts > W28 independent boundaries; synthetic RPC/OS only, no Electron or model calls > preserves native review mode public text
+AssertionError: expected '{"turnId":"b96863b0-869f-46e2-97b7-22…' to contain 'W28 public enteredReviewMode body'
+
+Expected: "W28 public enteredReviewMode body"
+Received: "{"turnId":"b96863b0-869f-46e2-97b7-225e1fd8ad00","item":{"itemId":"enteredReviewMode","status":"completed","nativeType":"enteredReviewMode","kind":"other","activity":{"verb":"other","label":"enteredReviewMode"}},"type":"item.completed","seq":6,"at":1792337002051,"providerId":"codex","sessionId":"953fcf3c-8721-4c97-836c-c982372a21c8"}"
+
+ ❯ tasks/T20261009-v1-foundation-slice/evidence/W28-boundaries.test.ts:144:172
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 7 passed (9)
+   Start at  10:23:21
+   Duration  692ms (tests 63%, transform 31%, import 5%, worker 1%)
+
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /Users/Chris/Projects/AI Stduio.worktrees/
+  │ v1-closure/packages/agent-adapter

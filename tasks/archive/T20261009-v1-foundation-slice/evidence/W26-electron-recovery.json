@@ -1,0 +1,50 @@
+{
+  "before": {
+    "journals": [
+      {
+        "version": 1,
+        "instanceId": "2f228bb4-3cdd-4565-b759-044f194ae739",
+        "host": {
+          "pid": 1610,
+          "startedAt": "Sun Oct 18 10:27:29 2026"
+        },
+        "runtime": {
+          "pid": 2049,
+          "startedAt": "Sun Oct 18 10:27:59 2026",
+          "pgid": 2049
+        },
+        "sessionId": "6ba37e2b-905e-4484-8fb0-a09dee4505cd",
+        "processes": [
+          {
+            "pid": 2049,
+            "startedAt": "Sun Oct 18 10:27:59 2026",
+            "pgid": 2049
+          },
+          {
+            "pid": 2264,
+            "startedAt": "Sun Oct 18 10:28:05 2026",
+            "pgid": 2264
+          },
+          {
+            "pid": 2265,
+            "startedAt": "Sun Oct 18 10:28:05 2026",
+            "pgid": 2265
+          }
+        ]
+      }
+    ],
+    "identities": " 1610  5961  1610 Sun Oct 18 10:27:29 2026     Ss  \n 1646  5961  1646 Sun Oct 18 10:27:30 2026     Ss  \n 2049  1610  2049 Sun Oct 18 10:27:59 2026     Ss  \n 2264  2049  2264 Sun Oct 18 10:28:05 2026     S   \n 2265  2049  2265 Sun Oct 18 10:28:05 2026     Ss  \n",
+    "sentinel": 1646,
+    "commandPid": 2265
+  },
+  "action": "SIGKILL fixture Electron host only",
+  "afterHostKill": " 1646  5961  1646 Sun Oct 18 10:27:30 2026     Ss  \n",
+  "recovery": [
+    {
+      "record": "4a3c59a8-a9b0-49b0-a430-1850b001b1f2.json",
+      "status": "cleaned"
+    }
+  ],
+  "afterRestart": " 1646  5961  1646 Sun Oct 18 10:27:30 2026     Ss  \n",
+  "remainingJournalCount": 0
+}

@@ -110,13 +110,13 @@ Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-i
 - Release Notes 与最终发布方式待后续安排；
 - 是否必须签名、公证及附带校验和。
 
-路线图所列现有功能的人工体验已全部通过（2026-10-18 确认），接受范围与基线见[人工功能验收记录](../tasks/T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。剩余实现、真实 CLI 技术证据和最终打包验证仍按路线图跟踪。
+路线图所列现有功能的人工体验已全部通过（2026-10-18 确认），接受范围与基线见[人工功能验收记录](../tasks/archive/T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。当前 Codex 技术复核、完整 Electron 回归及最终打包验证已通过，新增体验人工验收和发布前保留事项见[路线图](<../docs/06. Development Roadmap.md>)。
 
 Claude Code 已确定不随当前 V1 发布（DEC-19）；后续真实验收和发布另行安排。真实 Codex 调用的额度、限流及限流后的停止 / 错误行为由 Codex CLI / 上游服务提供方决定，应用不设置调用次数、费用上限或自动重试护栏；验收记录以 CLI 实际结果为准。
 
 产物生成和检查结果不表示已经发布，也不表示产物已签名或公证。
 
-后续生成产物时的验证命令（本轮不执行）：
+生成产物时的验证命令（当前结果与产物入口见[总报告](../tasks/archive/T20261009-v1-foundation-slice/report.md)）：
 
 ```sh
 pnpm check:code

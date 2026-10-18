@@ -1,0 +1,39 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck && pnpm test:scripts && pnpm -r --if-present run test
+$ tsc -p tsconfig.build.json
+Scope: 2 of 3 workspace projects
+$ tsc -p tsconfig.json --noEmit
+$ tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.e2e.json
+$ vitest run --config scripts/vitest.config.mjs
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/v1-closure
+
+
+ Test Files  1 passed (1)
+      Tests  36 passed (36)
+   Start at  11:03:22
+   Duration  2.83s (tests 94%, import 5%, transform 1%)
+
+Scope: 2 of 3 workspace projects
+$ vitest run
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/v1-closure/packages/agent-adapter
+
+
+ Test Files  19 passed (19)
+      Tests  257 passed (257)
+   Start at  11:03:25
+   Duration  7.37s (tests 90%, transform 7%, import 3%)
+
+$ vitest run
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/v1-closure/apps/desktop
+
+
+ Test Files  91 passed (91)
+      Tests  1172 passed (1172)
+   Start at  11:03:32
+   Duration  9.80s (tests 66%, environment 22%, transform 6%, import 5%)
+
+Environment  |renderer| jsdom was created 35 times · 16.82s total, 51% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments

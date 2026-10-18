@@ -3,7 +3,7 @@
 ## 未覆盖与边界
 
 - 2026-10-12 独立评审部分仅负责 Codex Running 中发送的 Adapter、SessionService、Renderer store 与 Composer 跨模块独立技术评审；独立评审本身不代表整条工作线集成完成；本轮集成自检及收尾见末节。
-- 使用模拟 Provider / Codex JSON-RPC transport，不调用真实 CLI 或模型、不占用 Electron 窗口。实际 Electron 操作与截图由 Main Agent 验证；一般 Running 追加的真实兼容性及 Claude queue 路径继续由[原生能力对齐任务](../../T20261011-native-cli-parity/task.md)跟踪。
+- 使用模拟 Provider / Codex JSON-RPC transport，不调用真实 CLI 或模型、不占用 Electron 窗口。实际 Electron 操作与截图由 Main Agent 验证；一般 Running 追加的真实兼容性及 Claude queue 路径继续由[原生能力对齐任务](../T20261011-native-cli-parity/task.md)跟踪。
 - 人工产品验收沿用负责功能的任务记录；本次技术评审、提交或合并均不代表人工功能验收。
 
 ## AI 结论与运行环境

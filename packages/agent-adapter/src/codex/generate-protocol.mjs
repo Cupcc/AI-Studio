@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const version = '0.161.0';
+const version = '0.163.0';
 const executable = process.argv[2] ?? 'codex';
 const actual = execFileSync(executable, ['--version'], { encoding: 'utf8' }).trim();
 if (actual !== `codex-cli ${version}`) throw new Error(`Expected ${version}; found ${actual}`);
@@ -20,7 +20,7 @@ const roots = ['InitializeParams', 'InitializeResponse', ...[
   'ThreadSettingsUpdateResponse', 'ThreadBackgroundTerminalsListParams',
   'ThreadBackgroundTerminalsListResponse', 'ThreadBackgroundTerminalsTerminateParams',
   'ThreadBackgroundTerminalsTerminateResponse', 'ModelListParams', 'ModelListResponse',
-  'ConfigReadParams', 'ConfigReadResponse', 'CommandExecutionRequestApprovalParams',
+  'SkillsListParams', 'SkillsListResponse', 'ConfigReadParams', 'ConfigReadResponse', 'CommandExecutionRequestApprovalParams',
   'CommandExecutionRequestApprovalResponse', 'FileChangeRequestApprovalParams',
   'FileChangeRequestApprovalResponse', 'ToolRequestUserInputParams', 'ToolRequestUserInputResponse',
   'PermissionsRequestApprovalParams', 'PermissionsRequestApprovalResponse',
@@ -49,7 +49,7 @@ await writeFile(join(output, 'manifest.json'), `${JSON.stringify({
   cliVersion: version,
   generatedBy: 'codex app-server generate-ts --experimental',
   transformation: 'relative import specifiers gain .js for Node ESM',
-  upstream: 'https://github.com/openai/codex/tree/rust-v0.161.0',
+  upstream: `https://github.com/openai/codex/tree/rust-v${version}`,
   sourceSha256: Object.fromEntries(Object.entries(hashes).sort(([a], [b]) => a.localeCompare(b))),
 }, null, 2)}\n`);
 console.log(`Generated ${Object.keys(hashes).length} types for Codex ${version}`);

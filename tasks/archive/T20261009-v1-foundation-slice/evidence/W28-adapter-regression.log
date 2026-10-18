@@ -1,0 +1,8 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/v1-closure/packages/agent-adapter
+
+
+ Test Files  2 passed (2)
+      Tests  48 passed (48)
+   Start at  10:22:11
+   Duration  1.85s (tests 82%, transform 15%, import 3%)

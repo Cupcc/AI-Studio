@@ -34,6 +34,7 @@ export interface ScriptedDriverBehavior {
   recover?: (stop: StopContext, sink: SessionSink) => RecoveryReport | Promise<RecoveryReport>;
   onRespond?: (record: PendingInputRecord, response: InputResponse) => void | Promise<void>;
   onDeclineWithText?: (records: readonly PendingInputRecord[], text: string) => void | Promise<void>;
+  onSetReasoningEffort?: (effort: string | null) => void | Promise<void>;
   onSetModel?: (model: string | null) => void | Promise<void>;
   models?: ModelInfo[];
 }
@@ -111,6 +112,11 @@ export class ScriptedDriver implements SessionDriver {
   async setModel(model: string | null): Promise<void> {
     this.calls.push({ method: 'setModel', args: [model] });
     await this.behavior.onSetModel?.(model);
+  }
+
+  async setReasoningEffort(effort: string | null): Promise<void> {
+    this.calls.push({ method: 'setReasoningEffort', args: [effort] });
+    await this.behavior.onSetReasoningEffort?.(effort);
   }
 
   async listModels(): Promise<ModelInfo[]> {

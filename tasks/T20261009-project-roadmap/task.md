@@ -33,7 +33,7 @@ created: 2026-10-09
 - [功能需求](<../../docs/02. Functional Requirements.md>) 第 2～6 节：模块能力、P0 / P1 范围。
 - [技术要求](<../../docs/04. Technical Requirements.md>) 第 3、5、7、1 节：应用基础、首发平台、进程管理与未决问题。
 - [验收标准](<../../docs/05. Acceptance Criteria.md>) AC-01～AC-07 及第 4 节：验收范围与专项验证要求。
-- [阶段报告](../T20261009-v1-foundation-slice/report.md)、[总体验收](../T20261009-v1-foundation-slice/acceptance.md)：现有交付与证据边界。
+- [阶段报告](../archive/T20261009-v1-foundation-slice/report.md)、[总体验收](../archive/T20261009-v1-foundation-slice/acceptance.md)：现有交付与证据边界。
 
 ## 验收标准
 

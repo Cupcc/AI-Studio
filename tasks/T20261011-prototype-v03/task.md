@@ -79,7 +79,7 @@ created: 2026-10-11
 ## 执行记录
 
 - 2026-10-11：在 `task/prototype-v03` 分支（worktree `../AI Stduio.worktrees/prototype-v03`）开始；从 v02 复制原型。
-- 2026-10-11：新增 `views.js`（受信组件 Renderer、关系图布局、校验、示例 Knowledge / Definition）；改写 `data.js`、`render.js`、`app.js` 与样式。发布[在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)，登记到原型索引；同步[工程工具任务](../T20261009-context-tools/task.md)的引用。路线图第 1 节正由 T20261011-review-boundaries 改写（主 checkout 中未提交），合入时未加 v03 的引用，待其提交后补充。
+- 2026-10-11：新增 `views.js`（受信组件 Renderer、关系图布局、校验、示例 Knowledge / Definition）；改写 `data.js`、`render.js`、`app.js` 与样式。发布[在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)，登记到原型索引；同步[工程工具任务](../archive/T20261009-context-tools/task.md)的引用。路线图第 1 节正由 T20261011-review-boundaries 改写（主 checkout 中未提交），合入时未加 v03 的引用，待其提交后补充。
 - 自查（W1 为实现者，不是独立验收）：本地静态服务 + agent-browser 0.38.2（Chrome），从界面入口操作：五个 View 切换、Architecture 拆分流程（更新中 → 新关系图 → 本轮变更 2 个 `.ai-studio/` 文件）、演示控制中的四种 Preview 写入、缩放按钮、两个对话框、Diff 四种情形、Terminal 新建 / 运行 / 关闭确认 / 收起后恢复、admin-console 生成 Architecture、“当前 View”标签移除与重新附加、Preview 路径在 Files 中定位。停止运行中的“支付模块开发”后，my-saas 的 `pnpm dev` 终端仍在运行。缩放：顶栏按钮与焦点在 Preview 内时的 ⌘ + / − / 0 均按预期变化（1 → 1.1 → 1.2 → 1.1 → 1）；⌘ + 滚轮只用合成的 `ctrlKey` 滚轮事件验证（1 → 1.1），真实触控板捏合未验证。`agent-browser errors` 无输出。
 - 走查中修正：同层关系图连线的标签放不下，改为只画箭头、标签放入悬停提示；表格路径改为只在“/”后换行；本地预览缺少字符集声明导致乱码，HTML 首行加 `<meta charset="utf-8">`。
 - 2026-10-11：按 Q1～Q6 的确认更新原型并重新发布到同一链接（第 2 版）：移除缩放方案 B；骨架改为读取超过 200 ms 才显示。自查：打开 Agent Team 后 100 ms 无骨架、300 ms 显示骨架、600 ms 显示内容，期间不出现空状态；admin-console 生成 Overview 正常；`agent-browser errors` 无输出。同步更新 Project View spec（新增未决问题 PV-Q13）、工程工具任务与原型说明。

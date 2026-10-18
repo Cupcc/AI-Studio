@@ -17,7 +17,12 @@ export type InputAttachment =
   /** A local file reference the CLI should consider (Codex `mention`, Claude file reference). */
   | { kind: 'file'; path: string; name?: string }
   /** A local image. */
-  | { kind: 'image'; path: string };
+  | { kind: 'image'; path: string }
+  | { kind: 'skill'; name: string; path: string };
+
+/** Native CLI skill metadata. Paths are for trusted host use, never renderer input. */
+export interface NativeSkillInfo { name: string; description: string; path: string; enabled: boolean }
+export interface NativeSkillCatalog { skills: NativeSkillInfo[]; errors: { path: string; message: string }[] }
 
 export interface UserInput {
   text: string;
@@ -40,6 +45,8 @@ export interface ModelInfo {
   hidden?: boolean;
   /** Reasoning effort levels the CLI reports for the model, if any. */
   reasoningEfforts?: readonly string[];
+  defaultReasoningEffort?: string;
+  inputModalities?: readonly string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -110,7 +117,7 @@ export interface ItemSnapshot {
   activity?: ActivityDescriptor;
   command?: { command: string; cwd?: string; exitCode?: number | null; output?: string };
   files?: ReadonlyArray<{ path: string; change: FileChangeKind }>;
-  tool?: { name: string; server?: string; input?: unknown };
+  tool?: { name: string; server?: string; input?: unknown; result?: unknown };
   /** Short failure text for failed items. */
   error?: string;
   /** Native type tag for diagnostics, e.g. `commandExecution` or `tool_use:Bash`. */

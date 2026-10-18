@@ -40,11 +40,14 @@ export class CodexDriver implements SessionDriver {
   private readonly listeners: Unsubscribe[] = [];
   private threadId: string | undefined;
   private desiredModel: string | undefined;
+  private desiredEffort: string | undefined;
   private pendingTurn: string | undefined;
   private nativeTurn: string | undefined;
   private nativeTurnReady: { turnId: string; deferred: Deferred<string> } | undefined;
   private actualModel: string | undefined;
   private readonly turnModels = new Map<string, string>();
+  private readonly completedReasoning = new Set<string>();
+  private readonly reasoning = new Map<string, { summary: Map<number, string>; content: Map<number, string> }>();
   private turnDiff: NativeTurnDiff | undefined;
   private readonly diffSources = new Set<string>();
   private readonly deferredNotifications: JsonRpcNotification[] = [];
@@ -62,12 +65,13 @@ export class CodexDriver implements SessionDriver {
   ) {
     this.timeouts = resolveTimeouts(options.timeouts);
     this.desiredModel = options.overrides?.model;
+    this.desiredEffort = extras.effort ?? undefined;
     const terminate = { graceMs: this.timeouts.terminateGraceMs, killWaitMs: this.timeouts.killWaitMs };
     this.slot = new RuntimeSlot(async (generation) => {
       this.operationSignal?.throwIfAborted();
       if (this.disposed) throw adapterError('disposed', 'Codex Session is disposed');
       const runtime = await dependencies.runtimeFactory({ command: executable, args: ['app-server', '--listen', 'stdio://'],
-        cwd: options.cwd, env: options.environment.env, label: 'codex app-server', generation, lister: dependencies.processLister, terminate });
+        sessionId: sink.sessionId, cwd: options.cwd, env: options.environment.env, label: 'codex app-server', generation, lister: dependencies.processLister, terminate });
       if (this.operationSignal?.aborted || this.disposed) {
         await runtime.terminate(terminate);
         throw adapterError('disposed', 'Runtime startup was cancelled');
@@ -163,6 +167,8 @@ export class CodexDriver implements SessionDriver {
     void nativeTurnReady.promise.catch(() => {});
     this.nativeTurnReady = { turnId: turn.turnId, deferred: nativeTurnReady };
     this.deferredNotifications.length = 0;
+    this.reasoning.clear();
+    this.completedReasoning.clear();
     try {
       await this.tracker!.begin(turn.turnId, turn.signal);
       const mode = this.extras.collaborationMode;
@@ -171,7 +177,7 @@ export class CodexDriver implements SessionDriver {
       this.turnModels.clear();
       if (this.actualModel) this.turnModels.set(turn.turnId, this.actualModel);
       const response = await connection.request('turn/start', { threadId: this.requireThread(), input: content,
-        ...(model !== undefined ? { model } : {}), ...(this.extras.effort ? { effort: this.extras.effort } : {}),
+        ...(model !== undefined ? { model } : {}), ...(this.desiredEffort !== undefined ? { effort: this.desiredEffort } : {}),
         ...(mode ? { collaborationMode: model ? { ...mode, settings: { ...mode.settings, model } } : mode } : {}),
       }, turn.signal);
       this.bindTurn(turn.turnId, response.turn.id);
@@ -272,6 +278,15 @@ export class CodexDriver implements SessionDriver {
       if (!model) throw adapterError('provider_error', 'The CLI default model could not be resolved');
     }
     this.desiredModel = model;
+  }
+
+  async setReasoningEffort(effort: string | null): Promise<void> {
+    if (effort === null) {
+      const response = await this.requireConnection().request('config/read', { cwd: this.options.cwd, includeLayers: false });
+      effort = response.config.model_reasoning_effort ?? (await this.listModels()).find(model => model.id === (this.desiredModel ?? this.actualModel))?.defaultReasoningEffort ?? null;
+      if (!effort) throw adapterError('provider_error', 'The CLI default reasoning effort could not be resolved');
+    }
+    this.desiredEffort = effort;
   }
 
   listModels(): Promise<ModelInfo[]> { return this.requireConnection().models(); }
@@ -394,6 +409,7 @@ export class CodexDriver implements SessionDriver {
       const item = p.item as ThreadItem;
       if (!item || typeof item.id !== 'string' || typeof item.type !== 'string') throw adapterError('protocol_error', 'Malformed native item');
       if (item.type === 'commandExecution') this.tracker?.command(turnId, item);
+      if (item.type === 'reasoning' && method === 'item/completed') { this.completedReasoning.add(item.id); this.reasoning.delete(item.id); }
       const mapped = mapItem(item, method === 'item/completed');
       if (mapped) (method === 'item/started' ? this.sink.itemStarted : this.sink.itemCompleted)(turnId, mapped);
       if (item.type === 'fileChange' && method === 'item/completed' && this.turnDiff && p.threadId === this.threadId) {
@@ -411,8 +427,20 @@ export class CodexDriver implements SessionDriver {
       }
       return;
     }
-    const channels = { 'item/agentMessage/delta': 'text', 'item/reasoning/textDelta': 'reasoning',
-      'item/reasoning/summaryTextDelta': 'reasoning', 'item/commandExecution/outputDelta': 'output', 'item/plan/delta': 'text' } as const;
+    if ((method === 'item/reasoning/textDelta' || method === 'item/reasoning/summaryTextDelta') && typeof p.itemId === 'string' && typeof p.delta === 'string') {
+      if (this.completedReasoning.has(p.itemId)) return;
+      const parts = this.reasoning.get(p.itemId) ?? { summary: new Map<number, string>(), content: new Map<number, string>() };
+      this.reasoning.set(p.itemId, parts);
+      const summary = method === 'item/reasoning/summaryTextDelta';
+      const values = summary ? parts.summary : parts.content;
+      const rawIndex = summary ? p.summaryIndex : p.contentIndex;
+      const index = typeof rawIndex === 'number' && Number.isSafeInteger(rawIndex) && rawIndex >= 0 ? rawIndex : 0;
+      values.set(index, (values.get(index) ?? '') + p.delta);
+      const visible = parts.summary.size ? parts.summary : parts.content;
+      this.sink.itemUpdated(turnId, { itemId: p.itemId, kind: 'reasoning', status: 'in_progress', text: [...visible].sort(([a], [b]) => a - b).map(([, text]) => text).join('\n') });
+      return;
+    }
+    const channels = { 'item/agentMessage/delta': 'text', 'item/commandExecution/outputDelta': 'output', 'item/plan/delta': 'text' } as const;
     const channel = channels[method as keyof typeof channels];
     if (channel && typeof p.itemId === 'string' && typeof p.delta === 'string') this.sink.itemDelta(turnId, p.itemId, channel, p.delta);
   }

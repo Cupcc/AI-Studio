@@ -1,5 +1,5 @@
-# Unsigned macOS app directory for skeleton verification (T20261009-app-skeleton).
-# appId and productName are provisional; signing / notarization are out of scope.
+# V1 unsigned macOS arm64 app directory (DEC-15, DEC-21, DEC-22).
+# Signing / notarization and publication remain release-time decisions.
 appId: dev.aistudio.desktop
 productName: AI Developer Studio
 directories:
@@ -33,6 +33,7 @@ electronFuses:
   onlyLoadAppFromAsar: true
   grantFileProtocolExtraPrivileges: false
 mac:
+  minimumSystemVersion: 13.0.0
   icon: build/icon.png
   target:
     - target: dir

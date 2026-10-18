@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { deferred, type AgentSession, type CreateSessionOptions, type InputRequestInit } from '@ai-studio/agent-adapter'
 import { FakeProvider } from '@ai-studio/agent-adapter/testing'
 import { runMigrations } from '../database/migrator'
@@ -132,7 +132,7 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     expect(h.items(session.id).filter(item => item.kind === 'turn_end')).toHaveLength(1)
   })
 
-  it('accumulates stream then replaces by complete snapshot with stable id and sequence; omits reasoning', async () => {
+  it('accumulates stream then replaces by complete snapshot with stable id and sequence; preserves public reasoning', async () => {
     const h = harness()
     const session = await h.create(); await tick()
     const { controller: runtime } = h.native()
@@ -140,14 +140,24 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     runtime.sink.itemStarted(turn, { itemId: 'm', kind: 'assistant_message', status: 'in_progress' })
     runtime.sink.itemDelta(turn, 'm', 'text', 'hel')
     runtime.sink.itemDelta(turn, 'm', 'text', 'lo')
-    runtime.sink.itemStarted(turn, { itemId: 'think', kind: 'reasoning', status: 'in_progress', text: 'private thought' })
+    runtime.sink.itemStarted(turn, { itemId: 'think', kind: 'reasoning', status: 'in_progress', text: 'public reasoning summary' })
     const streaming = h.items(session.id).find(item => item.kind === 'agent_message')!
     expect(streaming).toMatchObject({ text: 'hello', complete: false })
     runtime.sink.itemCompleted(turn, { itemId: 'm', kind: 'assistant_message', status: 'completed', text: 'hello!' })
     runtime.sink.nativeTurnEnded(turn, { status: 'completed' })
     const messages = h.items(session.id).filter(item => item.kind === 'agent_message')
     expect(messages).toEqual([{ ...streaming, text: 'hello!', complete: true }])
-    expect(JSON.stringify(h.items(session.id))).not.toContain('private thought')
+    expect(h.items(session.id)).toContainEqual(expect.objectContaining({ kind: 'tool_activity', item: expect.objectContaining({ kind: 'reasoning', text: 'public reasoning summary' }) }))
+  })
+
+  it('keeps a selected model absent from the directory and lets the native call decide', async () => {
+    const h = harness()
+    await h.service.getModels('codex', 'p')
+    const created = await h.service.create({ projectId: 'p', cli: 'codex', model: 'custom-not-in-catalog', text: 'hello' })
+    await tick()
+    expect(h.summary(created.id).model).toBe('custom-not-in-catalog')
+    expect(h.native().controller.model).toBe('custom-not-in-catalog')
+    expect(h.items(created.id).some(item => item.kind === 'tool_activity' && item.item.activity?.label.includes('默认模型'))).toBe(false)
   })
 
   it('uses actual window foreground at terminal time; focus alone does not clear unread but repeated opened does', async () => {
@@ -334,18 +344,57 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     const h = harness()
     const session = await h.create(); await tick()
     const runtime = h.native().controller
+    runtime.sink.itemStarted(runtime.activeTurn!.turnId, { itemId: 'partial-reply', kind: 'assistant_message', status: 'in_progress', text: 'partial reply' })
+    runtime.sink.itemStarted(runtime.activeTurn!.turnId, { itemId: 'running-command', kind: 'command', status: 'in_progress', command: { command: 'sleep 180' } })
     runtime.sink.inputRequested(runtime.activeTurn!.turnId, approval, null)
     const summary = h.summary(session.id)
     const request = h.items(session.id).at(-1)!
+    const incomplete = h.items(session.id).filter(item => item.kind === 'agent_message' || item.kind === 'tool_activity')
     await h.service.dispose()
     h.store.saveSummary(summary)
     h.store.saveItem(request)
+    for (const item of incomplete) h.store.saveItem(item)
     h.db.prepare('UPDATE session_turns SET outcome=NULL, ended_at=NULL WHERE session_id=?').run(session.id)
     await h.restart()
     expect(h.codex.sessions).toHaveLength(1)
     expect(h.summary(session.id)).toMatchObject({ status: 'error', activity: 'none' })
     expect(h.items(session.id).at(-1)).toMatchObject({ kind: 'error', summary: '应用退出时本轮未完成' })
     expect(h.items(session.id).find(item => item.id === request.id)).toMatchObject({ resolution: { status: 'cancelled' } })
+    expect(h.items(session.id).find(item => item.kind === 'agent_message')).toMatchObject({ text: 'partial reply', complete: true })
+    expect(h.items(session.id).find(item => item.kind === 'tool_activity')).toMatchObject({ item: { status: 'failed', command: { command: 'sleep 180' } } })
+  })
+
+  it.each(['failed', 'interrupted'] as const)('repairs legacy incomplete rows on a historical %s turn without replay or changing completed history', async outcome => {
+    const h = harness()
+    const session = await h.create(); await tick()
+    const runtime = h.native().controller
+    const turnId = runtime.activeTurn!.turnId
+    runtime.sink.itemStarted(turnId, { itemId: 'partial', kind: 'assistant_message', status: 'in_progress', text: 'keep this text' })
+    runtime.sink.itemStarted(turnId, { itemId: 'command', kind: 'command', status: 'in_progress', command: { command: 'sleep 180' } })
+    const stale = structuredClone(h.items(session.id).filter(item => item.kind === 'agent_message' || item.kind === 'tool_activity'))
+    runtime.sink.nativeTurnEnded(turnId, { status: outcome })
+    h.service.send(session.id, { text: 'later successful turn' }); await tick()
+    const nextRuntime = h.codex.sessions.at(-1)!.controller
+    const nextTurn = nextRuntime.activeTurn!.turnId
+    nextRuntime.sink.itemStarted(nextTurn, { itemId: 'done', kind: 'command', status: 'completed', command: { command: 'true' } })
+    nextRuntime.sink.nativeTurnEnded(nextTurn, { status: 'completed' })
+    await h.service.dispose()
+    for (const item of stale) h.store.saveItem(item)
+    const before = h.items(session.id)
+    const summary = h.summary(session.id)
+    await h.restart()
+    const runtimeCount = h.codex.sessions.length
+    expect(runtimeCount).toBe(outcome === 'failed' ? 2 : 1)
+    expect(h.summary(session.id)).toEqual(summary)
+    const after = h.items(session.id)
+    for (const item of stale) {
+      expect(after.find(row => row.id === item.id)).toMatchObject(item.kind === 'agent_message'
+        ? { text: 'keep this text', complete: true }
+        : { item: { status: outcome, command: { command: 'sleep 180' } } })
+    }
+    expect(after.filter(item => !stale.some(row => row.id === item.id))).toEqual(before.filter(item => !stale.some(row => row.id === item.id)))
+    await h.restart()
+    expect(h.items(session.id)).toEqual(after)
   })
 
   it('preserves title priority, message-only sorting, drafts, model-next-turn and default CLI inheritance', async () => {
@@ -1140,5 +1189,58 @@ describe('Native turn Diff persistence and attribution · FR-TOOL-002 / AC-07', 
       expect(db.prepare('SELECT value FROM session_preferences WHERE key=?').get('old')).toMatchObject({ value: 'keep' })
       expect(runMigrations(db, [coreAppMeta, projectCore, sessionCore, turnDiff]).applied).toEqual([])
     } finally { db.close() }
+  })
+})
+
+
+describe('Native controls and attachments · Input §2 / S-Q12 / principle 24', () => {
+  it('snapshots effort per turn and persists the next choice without mutating a running turn', async () => {
+    const h = harness()
+    const session = await h.service.create({ projectId: 'p', cli: 'codex', text: 'first', reasoningEffort: 'low' }); await tick()
+    expect(h.native().driver.callsTo('setReasoningEffort').map(call => call.args)).toEqual([['low']])
+    h.service.setReasoningEffort(session.id, 'high')
+    expect(h.native().driver.callsTo('setReasoningEffort')).toHaveLength(1)
+    expect(h.store.summaries().find(item => item.id === session.id)).toMatchObject({ reasoningEffort: 'high' })
+    h.native().controller.sink.nativeTurnEnded(h.native().controller.activeTurn!.turnId, { status: 'completed' })
+    h.service.send(session.id, { text: 'next' }); await tick()
+    expect(h.native().driver.callsTo('setReasoningEffort').at(-1)!.args).toEqual(['high'])
+    h.service.setReasoningEffort(session.id, null)
+    const key = { projectId: 'p', kind: 'session' as const, sessionId: session.id }
+    expect(await h.service.getDraft(key)).toMatchObject({ reasoningEffort: null })
+  })
+
+  it('resolves opaque Skill IDs from the current Project catalog and rejects disabled, foreign and forged selections', async () => {
+    const provider = new FakeProvider('codex')
+    const listSkills = vi.fn(async () => ({ skills: [{ name: 'example', description: 'Use example', path: '/private/skills/example/SKILL.md', enabled: true }], errors: [] }))
+    const h = harness(Object.assign(provider, { listSkills }))
+    const catalog = await h.service.getSkills('codex', 'p')
+    expect(JSON.stringify(catalog)).not.toContain('/private/')
+    const selected = catalog.skills[0]!
+    const contextItems = [{ type: 'skill' as const, id: selected.id, name: 'forged display name' }]
+    const session = await h.service.create({ projectId: 'p', cli: 'codex', text: 'use skill', contextItems }); await tick()
+    expect(startInputs(h)[0]).toEqual({ text: 'use skill', attachments: [{ kind: 'skill', name: 'example', path: '/private/skills/example/SKILL.md' }] })
+    expect(JSON.stringify(h.items(session.id))).not.toContain('/private/')
+    await expect(h.service.create({ projectId: 'p2', cli: 'codex', text: 'foreign', contextItems })).rejects.toThrow('不在原生目录')
+    await expect(h.service.create({ projectId: 'p', cli: 'codex', text: 'forged', contextItems: [{ ...contextItems[0]!, id: '/etc/passwd' }] })).rejects.toThrow('不在原生目录')
+    h.native().controller.sink.nativeTurnEnded(h.native().controller.activeTurn!.turnId, { status: 'completed' })
+    listSkills.mockResolvedValue({ skills: [{ name: 'example', description: '', path: '/private/skills/example/SKILL.md', enabled: false }], errors: [] })
+    await expect(h.service.send(session.id, { text: 'disabled', contextItems })).rejects.toThrow('禁用')
+    expect(userMessages(h, session.id)).toHaveLength(1)
+  })
+
+  it('rechecks images on ordinary and running sends, retaining rejected drafts without sending path text', async () => {
+    const fake = fileResolver({ reject: {} })
+    const h = harness(new FakeProvider('codex', { capabilities: { inputWhileRunning: 'steer' }, behavior: { onSteer: () => {} } }), undefined, { fileReferences: fake.resolver })
+    const contextItems = [{ type: 'image' as const, path: 'pic.png' }]
+    const session = await h.service.create({ projectId: 'p', cli: 'codex', text: 'look', contextItems }); await tick()
+    expect(startInputs(h)[0]).toEqual({ text: 'look', attachments: [{ kind: 'image', path: '/tmp/p/pic.png' }] })
+    await h.service.send(session.id, { text: 'again', contextItems })
+    expect(steerInputs(h)[0]).toEqual({ text: 'again', attachments: [{ kind: 'image', path: '/tmp/p/pic.png' }] })
+    fake.reject!['pic.png'] = 'symlink_refused'
+    const key = { projectId: 'p', kind: 'session' as const, sessionId: session.id }
+    h.service.saveDraft(key, { cli: 'codex', model: null, text: 'blocked', contextItems })
+    await expect(h.service.send(session.id, { text: 'blocked', contextItems })).rejects.toThrow('符号链接')
+    expect(await h.service.getDraft(key)).toMatchObject({ text: 'blocked', contextItems })
+    expect(steerInputs(h)).toHaveLength(1)
   })
 })

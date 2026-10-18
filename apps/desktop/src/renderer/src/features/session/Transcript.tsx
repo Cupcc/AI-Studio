@@ -77,13 +77,13 @@ export function InputRequestCard({ item }: { item: Extract<TranscriptItem, { kin
 export function Transcript({ item }: { item: TranscriptItem }) {
   if (item.kind === 'user_message') return <article className="transcript-user" data-transcript-id={item.id}>
     {item.viewContextAttached && <details className="transcript-user__context"><summary>当前 View</summary><ul>{item.viewContextPaths?.map(path => <li key={path}><code>{path}</code></li>)}</ul></details>}
-    {item.contextItems.length > 0 && <div className="transcript-user__context">{item.contextItems.filter(context => context.type !== 'view' || !item.viewContextAttached).map((context, index) => <span key={index}>{context.type === 'view' ? context.viewId : displayName(context.path)}</span>)}</div>}
+    {item.contextItems.length > 0 && <div className="transcript-user__context">{item.contextItems.filter(context => context.type !== 'view' || !item.viewContextAttached).map((context, index) => <span key={index}>{context.type === 'view' ? context.viewId : context.type === 'skill' ? `Skill · ${context.name}` : displayName(context.path)}</span>)}</div>}
     <p>{item.redacted ? '••••••（私密回复不保存）' : item.text}</p>
   </article>
   if (item.kind === 'agent_message') return <article className="transcript-agent" data-transcript-id={item.id}><AgentMarkdown text={item.text} />{!item.complete && <span className="sr-only">正在输出</span>}</article>
   if (item.kind === 'tool_activity') {
     const tool = item.item
-    const label = tool.activity?.label ?? tool.command?.command ?? tool.tool?.name ?? tool.text ?? tool.nativeType ?? '工具活动'
+    const label = tool.kind === 'reasoning' ? '推理摘要' : tool.activity?.label ?? tool.command?.command ?? tool.tool?.name ?? tool.text ?? tool.nativeType ?? '工具活动'
     return <details className="transcript-tool" data-transcript-id={item.id}>
       <summary>{tool.status === 'in_progress' ? <span className="session-spinner" aria-label="工具运行中" /> : <span aria-hidden="true">{tool.status === 'completed' ? '✓' : tool.status === 'failed' ? '!' : '—'}</span>}<span>{label}</span></summary>
       {tool.command?.cwd && <p className="muted">{tool.command.cwd}</p>}
@@ -91,6 +91,7 @@ export function Transcript({ item }: { item: TranscriptItem }) {
       {tool.files?.map((file) => <p key={file.path}>{file.change} · {file.path}</p>)}
       {tool.text && tool.text !== label && <pre>{tool.text}</pre>}
       {tool.tool?.input !== undefined && <pre>{JSON.stringify(tool.tool.input, null, 2)}</pre>}
+      {tool.tool?.result !== undefined && <pre aria-label="工具结果">{JSON.stringify(tool.tool.result, null, 2)}</pre>}
       {tool.error && <p className="error-message">{tool.error}</p>}
     </details>
   }

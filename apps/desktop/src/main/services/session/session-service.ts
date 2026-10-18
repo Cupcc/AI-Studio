@@ -1,7 +1,7 @@
-import { randomUUID } from 'node:crypto'
-import { toErrorInfo, type AdapterEvent, type AdapterErrorInfo, type AgentProvider, type AgentSession, type InputRequest, type InputResolution, type InputResponse, type ItemSnapshot, type ProviderEnvironment } from '@ai-studio/agent-adapter'
+import { createHash, randomUUID } from 'node:crypto'
+import { toErrorInfo, type InputAttachment, type NativeSkillInfo, type AdapterEvent, type AdapterErrorInfo, type AgentProvider, type AgentSession, type InputRequest, type InputResolution, type InputResponse, type ItemSnapshot, type ProviderEnvironment } from '@ai-studio/agent-adapter'
 import { initialSessionTitle, projectSessionState, sessionStatus, sortSessions } from '@shared/session/presentation'
-import type { ComposerDraft, ConversationPage, CreateSessionRequest, DraftKey, ModelCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem } from '@shared/session/types'
+import type { ComposerDraft, ConversationPage, CreateSessionRequest, DraftKey, ModelCatalogResult, SkillCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem } from '@shared/session/types'
 import { SESSION_CLIS } from '@shared/session/types'
 import { SESSION_MESSAGE_MAX_LENGTH, TRANSCRIPT_PAGE_SIZE } from '@shared/ipc/session'
 import type { ProjectService } from '../project/project-service'
@@ -19,6 +19,7 @@ interface ActiveTurn {
   id: string
   at: number
   model: string | null
+  reasoningEffort?: string | null
   adapterId?: string
   message: SessionMessage
   viewContext?: ViewContext
@@ -71,7 +72,7 @@ function fileReferencePaths(message: SessionMessage): ProjectPath[] {
   const seen = new Set<string>()
   const paths: ProjectPath[] = []
   for (const item of message.contextItems ?? []) {
-    if (item.type !== 'file') continue
+    if (item.type !== 'file' && item.type !== 'image') continue
     // Only the filesystem can establish aliases: macOS can also host case-sensitive volumes.
     if (seen.has(item.path)) continue
     seen.add(item.path)
@@ -111,6 +112,7 @@ export class SessionService implements MainSessionPort {
       if (this.providers.has(provider.id as SessionCli)) throw new Error(`Duplicate provider: ${provider.id}`)
       this.providers.set(provider.id as SessionCli, provider)
     }
+    options.store.finalizeInterruptedHistory()
     for (const summary of options.store.summaries()) {
       const entry: Entry = { summary: { ...summary, stopping: false }, sequence: options.store.nextSequence(summary.id), generation: 0, secrets: new Set() }
       this.entries.set(summary.id, entry)
@@ -127,6 +129,10 @@ export class SessionService implements MainSessionPort {
     }
     for (const item of this.options.store.unresolved(entry.summary.id)) {
       if (item.kind === 'input_request') entry.turn.pending.set(item.request.requestId, item)
+    }
+    for (const item of this.options.store.incompleteItems(entry.summary.id, entry.turn.id)) {
+      if (item.kind === 'agent_message') entry.turn.items.set(item.nativeItemId, item)
+      if (item.kind === 'tool_activity') entry.turn.items.set(item.item.itemId, item)
     }
     this.finish(entry, 'failed', { code: 'runtime_crashed', message: '应用退出时本轮未完成', retryable: true })
   }
@@ -202,12 +208,13 @@ export class SessionService implements MainSessionPort {
     const paths = fileReferencePaths(request)
     const files = paths.length ? await this.resolveFileReferences(request.projectId, paths) : undefined
     if (files) this.project(request.projectId)
+    await this.resolveSkills(request.projectId, request.cli, request)
     const attach = !!request.originViewId && request.viewContextAttached === true && VIEW_CATALOG.some(view => view.id === request.originViewId)
     const viewContext = attach ? this.options.buildViewContext?.(request.projectId, request.originViewId!) : undefined
     const at = this.now()
     const summary: SessionSummary = {
       id: this.newId(), projectId: request.projectId, cli: request.cli, nativeSessionId: null,
-      title: initialSessionTitle(request.text), titleSource: 'client', model: request.model ?? null,
+      title: initialSessionTitle(request.text), titleSource: 'client', model: request.model ?? null, ...(request.reasoningEffort !== undefined ? { reasoningEffort: request.reasoningEffort } : {}),
       originViewId: request.originViewId ?? null, activity: 'none', stopping: false,
       viewContextAttached: !!viewContext, viewContextPaths: viewContext?.paths ?? [],
       errorUnseen: false, completionUnread: false, status: null, createdAt: at, updatedAt: at, lastUserMessageAt: at
@@ -244,12 +251,13 @@ export class SessionService implements MainSessionPort {
       return task.finally(() => this.background.delete(task))
     }
     this.ensureCanSubmit(entry)
-    if (paths.length) return this.beginWithFiles(entry, message, paths)
+    if (paths.length || message.contextItems?.some(item => item.type === 'skill')) return this.beginWithFiles(entry, message, paths)
     this.options.store.transaction(() => this.begin(entry, message))
   }
 
   private async beginWithFiles(entry: Entry, message: SessionMessage, paths: readonly ProjectPath[]): Promise<void> {
-    const files = await this.resolveFileReferences(entry.summary.projectId, paths)
+    const files = paths.length ? await this.resolveFileReferences(entry.summary.projectId, paths) : []
+    await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
     // A turn can have begun, Stop or a Project close can have started while the files were read.
     this.ensureCanSubmit(entry)
     this.options.store.transaction(() => this.begin(entry, message, undefined, files))
@@ -300,7 +308,10 @@ export class SessionService implements MainSessionPort {
         this.ensureProjectOpen(entry.summary.projectId)
         runtime = live()
       }
-      const result = await runtime.sendUserInput(buildUserInput({ files, text: message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli] }))
+      const skills = await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
+      this.ensureProjectOpen(entry.summary.projectId)
+      runtime = live()
+      const result = await runtime.sendUserInput(buildUserInput({ skills, files, filePaths: message.contextItems?.filter(item => item.type === 'file').map(item => item.path), images: message.contextItems?.filter(item => item.type === 'image').map(item => item.path), text: message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli] }))
       if (result.turnId !== turn.adapterId) throw new Error('CLI 返回了不同的回合，输入已保留')
       this.options.store.transaction(() => {
         // Native completion/Stop can arrive before the steering acknowledgement.
@@ -316,7 +327,7 @@ export class SessionService implements MainSessionPort {
   private begin(entry: Entry, message: SessionMessage, viewContext?: ViewContext, files?: readonly ResolvedFileReference[]): void {
     const at = this.now()
     const turn: ActiveTurn = {
-      id: this.newId(), at, model: entry.summary.model,
+      id: this.newId(), at, model: entry.summary.model, reasoningEffort: entry.summary.reasoningEffort,
       message: { text: message.text, contextItems: message.contextItems ?? [] },
       viewContext, files,
       pending: new Map(), items: new Map(), answering: false
@@ -362,17 +373,14 @@ export class SessionService implements MainSessionPort {
         if (runtime.nativeSessionId) this.bindNativeId(entry, runtime.nativeSessionId)
       }
       if (entry.turn !== turn || entry.summary.stopping) return
-      const catalog = this.catalogs.get(`${entry.summary.projectId}:${entry.summary.cli}`)
-      if (turn.model && catalog && !catalog.error && !catalog.models.some(model => model.id === turn.model)) {
-        turn.model = null
-        entry.summary.model = null
-        this.append(entry, { kind: 'tool_activity', item: { itemId: this.newId(), kind: 'other', status: 'completed', activity: { verb: 'other', label: '已选模型不可用，本轮使用 CLI 默认模型' } } })
-        this.publish(entry)
-      }
       await runtime.setModel(turn.model)
+      if (turn.reasoningEffort !== undefined) await runtime.setReasoningEffort(turn.reasoningEffort)
       if (entry.turn !== turn || entry.summary.stopping) return
+      const skills = await this.resolveSkills(entry.summary.projectId, entry.summary.cli, turn.message)
+      if (entry.turn !== turn || entry.summary.stopping) return
+      this.ensureProjectOpen(entry.summary.projectId)
       const result = await runtime.sendUserInput(buildUserInput({
-        viewContextText: turn.viewContext?.text, files: turn.files ?? [], text: turn.message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli]
+        skills, viewContextText: turn.viewContext?.text, files: turn.files ?? [], filePaths: turn.message.contextItems?.filter(item => item.type === 'file').map(item => item.path), images: turn.message.contextItems?.filter(item => item.type === 'image').map(item => item.path), text: turn.message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli]
       }))
       // turn.started is synchronous; a whole turn can finish before this Promise resolves.
       if (entry.turn === turn && !turn.adapterId) {
@@ -494,13 +502,17 @@ export class SessionService implements MainSessionPort {
         this.snapshot(entry, turn, event.item)
         break
       case 'item.delta': {
-        if (event.channel === 'reasoning') break
         let item = turn.items.get(event.itemId)
         if (!item && event.channel === 'text') {
           item = this.append(entry, { kind: 'agent_message', nativeItemId: event.itemId, text: '', complete: false })
           turn.items.set(event.itemId, item)
         }
-        if (item?.kind === 'agent_message' && event.channel === 'text') item.text += event.delta
+        if (!item && event.channel === 'reasoning') {
+          item = this.append(entry, { kind: 'tool_activity', item: { itemId: event.itemId, kind: 'reasoning', status: 'in_progress', text: '' } })
+          turn.items.set(event.itemId, item)
+        }
+        if (item?.kind === 'tool_activity' && event.channel === 'reasoning') item.item.text = (item.item.text ?? '') + event.delta
+        else if (item?.kind === 'agent_message' && event.channel === 'text') item.text += event.delta
         else if (item?.kind === 'tool_activity' && event.channel === 'output' && item.item.command) item.item.command.output = (item.item.command.output ?? '') + event.delta
         else break
         // A secret can be echoed across delta boundaries. Wait for the authoritative
@@ -512,7 +524,6 @@ export class SessionService implements MainSessionPort {
   }
 
   private snapshot(entry: Entry, turn: ActiveTurn, snapshot: ItemSnapshot): void {
-    if (snapshot.kind === 'reasoning') return
     let item = turn.items.get(snapshot.itemId)
     if (snapshot.kind === 'assistant_message') {
       if (!item) item = this.append(entry, { kind: 'agent_message', nativeItemId: snapshot.itemId, text: snapshot.text ?? '', complete: snapshot.status !== 'in_progress' })
@@ -729,8 +740,8 @@ export class SessionService implements MainSessionPort {
     const turn = this.options.store.lastTurn(sessionId)
     if (turn?.outcome !== 'failed') throw new Error('没有可重试的失败消息')
     const message: SessionMessage = JSON.parse(turn.message)
-    if (fileReferencePaths(message).length) {
-      if (!this.options.fileReferences) throw new Error('文件引用不可用')
+    if (fileReferencePaths(message).length || message.contextItems?.some(item => item.type === 'skill')) {
+      if (fileReferencePaths(message).length && !this.options.fileReferences) throw new Error('文件引用不可用')
       return this.retryWithFiles(entry, turn.id, message)
     }
     this.retire(entry)
@@ -740,7 +751,9 @@ export class SessionService implements MainSessionPort {
   /** A retry re-resolves its files: one deleted since the failure blocks the retry, which stays possible. */
   private async retryWithFiles(entry: Entry, failedTurnId: string, message: SessionMessage): Promise<void> {
     this.validateMessage(message)
-    const files = await this.resolveFileReferences(entry.summary.projectId, fileReferencePaths(message))
+    const paths = fileReferencePaths(message)
+    const files = paths.length ? await this.resolveFileReferences(entry.summary.projectId, paths) : []
+    await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
     this.ensureCanSubmit(entry)
     // Only the same failed turn is retried; a send or another retry may have replaced it meanwhile.
     if (this.options.store.lastTurn(entry.summary.id)?.id !== failedTurnId) throw new Error('没有可重试的失败消息')
@@ -757,6 +770,13 @@ export class SessionService implements MainSessionPort {
       this.publish(entry)
     }
     return { ...entry.summary }
+  }
+
+  setReasoningEffort(sessionId: string, reasoningEffort: string | null): void {
+    const entry = this.entry(sessionId)
+    if (entry.summary.cli !== 'codex') throw new Error('当前 CLI 未公开推理强度接口')
+    entry.summary.reasoningEffort = reasoningEffort
+    this.publish(entry)
   }
 
   setModel(sessionId: string, model: string | null): void {
@@ -893,7 +913,7 @@ export class SessionService implements MainSessionPort {
     this.availability = (async () => {
       const environment = await this.options.environment()
       if (this.quitting || this.disposed) return structuredClone(this.providerSummaries)
-      const summaries = await Promise.all(SESSION_CLIS.map(async cli => {
+      const summaries = await Promise.all([...this.providers.keys()].map(async cli => {
         const provider = this.provider(cli)
         try {
           const report = await provider.checkAvailability({ environment, includeModels: false, signal: this.discoveryAbort.signal })
@@ -915,6 +935,45 @@ export class SessionService implements MainSessionPort {
     try { return await this.availability } finally { this.availability = undefined }
   }
 
+  private skillId(projectId: string, skill: NativeSkillInfo): string {
+    return createHash('sha256').update(JSON.stringify([projectId, skill.path, skill.name])).digest('hex')
+  }
+
+  private async nativeSkills(projectId: string, cli: SessionCli) {
+    const project = this.project(projectId)
+    this.ensureProjectOpen(projectId)
+    const provider = this.provider(cli)
+    if (!provider.listSkills) throw new Error('当前 CLI 未公开 Skill 目录')
+    const environment = await this.options.environment()
+    this.ensureProjectOpen(projectId)
+    const task = provider.listSkills({ environment, cwd: project.canonicalPath, signal: this.discoveryAbort.signal })
+    this.background.add(task)
+    try {
+      const catalog = await task
+      this.ensureProjectOpen(projectId)
+      return catalog
+    } finally { this.background.delete(task) }
+  }
+
+  async getSkills(cli: SessionCli, projectId: string): Promise<SkillCatalogResult> {
+    try {
+      const catalog = await this.nativeSkills(projectId, cli)
+      return { skills: catalog.skills.filter(skill => skill.enabled).map(skill => ({ id: this.skillId(projectId, skill), name: skill.name, description: skill.description })), error: catalog.errors.length ? `有 ${catalog.errors.length} 个 Skill 未能加载` : null }
+    } catch (error) { return { skills: [], error: toErrorInfo(error).message } }
+  }
+
+  private async resolveSkills(projectId: string, cli: SessionCli, message: SessionMessage): Promise<InputAttachment[]> {
+    const selected = message.contextItems?.filter(item => item.type === 'skill') ?? []
+    if (!selected.length) return []
+    const catalog = await this.nativeSkills(projectId, cli)
+    const enabled = new Map(catalog.skills.filter(skill => skill.enabled).map(skill => [this.skillId(projectId, skill), skill]))
+    return [...new Set(selected.map(item => item.id))].map(id => {
+      const skill = enabled.get(id)
+      if (!skill) throw new Error('所选 Skill 已不在原生目录中或已禁用，消息未发送；请重新选择')
+      return { kind: 'skill' as const, name: skill.name, path: skill.path }
+    })
+  }
+
   async getModels(cli: SessionCli, projectId: string): Promise<ModelCatalogResult> {
     const project = this.project(projectId)
     const task = (async (): Promise<ModelCatalogResult> => {
@@ -934,18 +993,18 @@ export class SessionService implements MainSessionPort {
   async getDefaultCli(projectId: string): Promise<SessionCli | null> {
     this.project(projectId)
     const saved = this.options.projects.getDefaultCli(projectId)
-    if (SESSION_CLIS.includes(saved as SessionCli)) return saved as SessionCli
+    if (this.providers.has(saved as SessionCli)) return saved as SessionCli
     const preferenceKey = `initial_default_cli:${projectId}`
     let inherited = this.options.store.getPreference(preferenceKey)
     if (inherited === null) {
       inherited = this.options.store.getPreference('last_set_default_cli') ?? ''
       this.options.store.setPreference(preferenceKey, inherited)
     }
-    const resolved = SESSION_CLIS.includes(inherited as SessionCli) ? inherited as SessionCli
+    const resolved = this.providers.has(inherited as SessionCli) ? inherited as SessionCli
       : (await this.getProviders()).find(provider => provider.status === 'available')?.cli ?? null
     if (this.quitting || this.disposed) return null
     const changedWhileChecking = this.options.projects.getDefaultCli(projectId)
-    if (SESSION_CLIS.includes(changedWhileChecking as SessionCli)) return changedWhileChecking as SessionCli
+    if (this.providers.has(changedWhileChecking as SessionCli)) return changedWhileChecking as SessionCli
     if (resolved) this.options.projects.setDefaultCli(projectId, resolved)
     return resolved
   }
@@ -980,14 +1039,14 @@ export class SessionService implements MainSessionPort {
     const entry = this.validateDraftKey(key)
     this.closed.delete(key.projectId)
     const saved = (entry && this.volatileDrafts.get(entry.summary.id)) || this.options.store.getDraft(key)
-    return saved ?? { cli: entry?.summary.cli ?? await this.getDefaultCli(key.projectId), model: entry?.summary.model ?? null, text: '', contextItems: key.kind === 'new_chat' && key.viewId ? [{ type: 'view', viewId: key.viewId }] : [] }
+    return saved ?? { cli: entry?.summary.cli ?? await this.getDefaultCli(key.projectId), model: entry?.summary.model ?? null, ...(entry?.summary.reasoningEffort !== undefined ? { reasoningEffort: entry.summary.reasoningEffort } : {}), text: '', contextItems: key.kind === 'new_chat' && key.viewId ? [{ type: 'view', viewId: key.viewId }] : [] }
   }
 
   saveDraft(key: DraftKey, draft: ComposerDraft): void {
     const entry = this.validateDraftKey(key)
     const previous = this.options.store.getDraft(key)
     const safe = { ...draft, contextItems: [...draft.contextItems] }
-    if (entry) { safe.cli = entry.summary.cli; safe.model = entry.summary.model }
+    if (entry) { safe.cli = entry.summary.cli; safe.model = entry.summary.model; safe.reasoningEffort = entry.summary.reasoningEffort }
     else if (previous?.cli && safe.cli !== previous.cli) safe.model = null
     if (entry && !safe.text && !safe.contextItems.length) {
       this.clearComposer(entry)
@@ -1052,17 +1111,21 @@ export class SessionService implements MainSessionPort {
   async dispose(): Promise<void> {
     if (this.disposed) return
     this.discoveryAbort.abort()
-    try { await this.stopAllTurns() } finally {
-      this.quitting = true
-      for (const entry of this.entries.values()) this.retire(entry)
-      await Promise.allSettled([...this.entries.values()].map(entry => entry.retiring))
-      await Promise.allSettled([...this.background, ...(this.availability ? [this.availability] : [])])
-      await Promise.allSettled([...this.providers.values()].map(provider => provider.dispose()))
-      this.flushDisk()
-      this.flushBroadcast()
-      this.disposed = true
-      this.viewing.clear()
-      this.volatileDrafts.clear()
-    }
+    const errors: unknown[] = []
+    try { await this.stopAllTurns() } catch (error) { errors.push(error) }
+    this.quitting = true
+    for (const entry of this.entries.values()) this.retire(entry)
+    const results = await Promise.allSettled([
+      ...[...this.entries.values()].map(entry => entry.retiring),
+      ...[...this.providers.values()].map(provider => provider.dispose())
+    ])
+    await Promise.allSettled([...this.background, ...(this.availability ? [this.availability] : [])])
+    for (const result of results) if (result.status === 'rejected') errors.push(result.reason)
+    this.flushDisk()
+    this.flushBroadcast()
+    if (errors.length) throw new AggregateError(errors, 'Session cleanup failed')
+    this.disposed = true
+    this.viewing.clear()
+    this.volatileDrafts.clear()
   }
 }
