@@ -11,11 +11,17 @@ created: 2026-10-09
 
 ## 2026-10-11 原生能力对齐补充
 
-按 [DEC-13](<../../docs/07. Decisions.md#dec-13-原生-cli-能力对齐>) 与[对齐任务](../T20261011-native-cli-parity/task.md)，A-Q1 / A-Q2 / A-Q5 的产品方向及 A-Q3 的技术方案已回写 spec；运行中发送、原生能力接入和崩溃清理仍需实现及验证。本任务保持 `verifying`；历史验收不改记通过，真实调用须先明确预算。
+按 [DEC-13](<../../docs/07. Decisions.md#dec-13-原生-cli-能力对齐>) 与[对齐任务](../T20261011-native-cli-parity/task.md)，A-Q1 / A-Q2 / A-Q5 的产品方向及 A-Q3 的技术方案已回写 spec；运行中发送、原生能力接入和崩溃清理仍需实现及验证。本任务保持 `verifying`；历史验收不改记通过，真实调用结果按 CLI 实际行为记录。
+
+### 2026-10-18 当前 V1 验收口径
+
+按 [DEC-16](<../../docs/07. Decisions.md#dec-16-v1-真实-cli-验收范围>)，当前 V1 的真实 CLI 验收只执行 Codex。Claude Code Provider、模拟测试和历史真实证据继续保留，但本轮不发起新的 Claude Code 调用，不把其真实链路记为通过，且不随当前 V1 发布（DEC-19）。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；主 Agent 按实际 CLI 结果记录验证，不由应用设置调用次数、费用上限或自动重试护栏。
+
+W5-F13 与 SET-Q6 / SET-Q7 已由用户于 2026-10-18 确认（DEC-20）；路线图现有功能的人工体验也已验收通过，见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。本任务仍单独跟踪 Adapter 的实现与真实技术边界。
 
 ## 签收
 
-- 状态：待人工签收；任务保持 `verifying`。
+- 人工体验：当前结论见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)；本任务保持 `verifying`，Codex 真实技术补验与未实现范围继续保留。
 - 审阅依据：[验收记录](acceptance.md)、[交付报告](report.md)。
 
 ## 目标
@@ -33,7 +39,7 @@ created: 2026-10-09
   - 原生配置复用：默认不覆盖 CLI 自身的模型、权限、Rule、Skill 与 Context 配置（[01. Product Definition](<../../docs/01. Product Definition.md>) 第 8 节原则 19、20；04 第 4 节）；需要覆盖的项作为可选参数暴露。
   - Stop：按 04 第 5 节七条约束实现；主动取消与原生终态关联，不误报 Error（[CLI 校验报告](../T20261008-cli-preflight/report.md) 第 5 节状态映射表）。
   - Runtime 隔离：首阶段每个活动 Session 使用独立 Runtime；单个 Runtime 崩溃不影响其他 Session（04 第 3、7 节）。
-  - 单元测试使用模拟传输；真实 CLI 集成测试需显式开启，限量运行（2026-10-09 确认）。
+  - 单元测试使用模拟传输；真实 CLI 集成测试需显式开启，结果按 CLI 实际行为记录，不由应用设置调用次数、费用上限或自动重试护栏（2026-10-09 确认，2026-10-18 更新边界）。
 - 不做：产品 Session 状态机（Completed Unread、查看清除、排序）、SQLite 持久化、IPC、UI；文件变更归因与 Diff（04 第 1 节第 13 项）；Project View Context 注入（04 第 1 节第 10 项）。
 
 ## 依据

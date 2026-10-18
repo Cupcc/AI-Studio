@@ -101,13 +101,39 @@ Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-i
 
 事件与分支过滤依据：[GitHub workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)。本次配置在本地验证；远端部署与运行结果见实现任务，不以配置已修改等同远端 CI 已通过。
 
+## GitHub Release 发布准备
+
+发布渠道为 GitHub Releases，目标版本为 `v1.0.0`，不设固定上线日期（DEC-17、DEC-21）。后续发布准备仅生成和留存产物，暂不创建或上传 Release；本轮只更新文档，不执行打包或产物生成，见 [DEC-22](<../docs/07. Decisions.md#dec-22-发布准备范围与本轮文档边界>)。CI 继续只检查、打包和保存产物，不自动发布。
+
+发布前保留事项：
+
+- Release Notes 与最终发布方式待后续安排；
+- 是否必须签名、公证及附带校验和。
+
+路线图所列现有功能的人工体验已全部通过（2026-10-18 确认），接受范围与基线见[人工功能验收记录](../tasks/T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。剩余实现、真实 CLI 技术证据和最终打包验证仍按路线图跟踪。
+
+Claude Code 已确定不随当前 V1 发布（DEC-19）；后续真实验收和发布另行安排。真实 Codex 调用的额度、限流及限流后的停止 / 错误行为由 Codex CLI / 上游服务提供方决定，应用不设置调用次数、费用上限或自动重试护栏；验收记录以 CLI 实际结果为准。
+
+产物生成和检查结果不表示已经发布，也不表示产物已签名或公证。
+
+后续生成产物时的验证命令（本轮不执行）：
+
+```sh
+pnpm check:code
+pnpm test:e2e
+pnpm package
+pnpm smoke:packaged
+```
+
+本仓库当前没有自动发布 workflow；最终发布方式待后续安排。
+
 ## 开发前 CLI 校验
 
-`cli-preflight.mjs` 是验证真实本机 CLI 的开发前实验脚本，不是产品 Adapter 或 GUI 验收测试。依据：FR-CHAT-001～003、FR-SESSION-001～003、FR-STATE-001～006、FR-INPUT-002；AC-02、AC-03、AC-05。
+`cli-preflight.mjs` 是验证真实本机 CLI 的开发前实验脚本，不是产品 Adapter 或 GUI 验收测试。当前 V1 的真实 CLI 验收只执行 Codex；Claude Code 命令保留为历史证据或后续独立复测。依据：FR-CHAT-001～003、FR-SESSION-001～003、FR-STATE-001～006、FR-INPUT-002；AC-02、AC-03、AC-05。
 
 ## 1. 前置条件
 
-- 已安装 Node.js，且 `codex` / `claude` 可通过 PATH 找到；各 CLI 已登录。
+- 当前 Codex 验收需要已安装 Node.js，且 `codex` 可通过 PATH 找到并已登录；Claude Code 只在后续独立验收时需要。
 - Claude 校验还需要在独立目录安装 `@anthropic-ai/claude-agent-sdk`。本次验证使用 SDK `0.3.293` 驱动已安装的 CLI `2.1.294`，不使用 SDK 内附的 CLI。
 - 请求使用 CLI 当前配置的默认模型，产生真实模型调用；输入仅为脚本中的合成提示词。
 - 输出目录必须是专用于校验的目录，脚本会创建 `project with spaces/` 与 `other project/`。不使用真实代码工程作为输出目录。
@@ -120,6 +146,7 @@ Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-i
 node --check scripts/cli-preflight.mjs
 node scripts/cli-preflight.mjs --provider codex --out /tmp/ai-studio-codex-check
 
+# Claude Code：历史 / 后续独立复测，不属于当前 V1 验收
 npm install --prefix /tmp/ai-studio-preflight-sdk --ignore-scripts --no-audit --no-fund @anthropic-ai/claude-agent-sdk@0.3.293
 node scripts/cli-preflight.mjs --provider claude \
   --sdk-dir /tmp/ai-studio-preflight-sdk/node_modules/@anthropic-ai/claude-agent-sdk \
@@ -132,7 +159,7 @@ node scripts/cli-preflight.mjs --provider claude \
 node scripts/cli-preflight.mjs --provider codex --only 'question|crash' --out /tmp/ai-studio-codex-extra
 ```
 
-`--only` 接受正则表达式。`--timeout` 指定单次等待上限，默认 90000ms；不提供 `--out` 时在系统临时目录新建目录。全量 Codex 为 12 项，Claude 为 10 项。原脚本保留“仅 `turn/interrupt` 即可保证子进程退出”的历史断言；该断言在 Codex 0.161.0 上不成立，不能把它直接计为 Codex 进程终止缺陷。
+`--only` 接受正则表达式。`--timeout` 指定单次等待上限，默认 90000ms；不提供 `--out` 时在系统临时目录新建目录。全量 Codex 为 12 项；Claude 为 10 项，但 Claude 当前不属于 V1 真实验收。原脚本保留“仅 `turn/interrupt` 即可保证子进程退出”的历史断言；该断言在 Codex 0.161.0 上不成立，不能把它直接计为 Codex 进程终止缺陷。
 
 补充原生 Stop 复核使用证据目录中保存的实际执行脚本：
 

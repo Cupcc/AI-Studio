@@ -16,6 +16,6 @@
 
 ## 结论
 
-Project 壳层已集成至 `dev/v1`：目录身份与最近列表、多 Tab、Project / 窗口状态保存恢复、导航 / 边栏容器、可信关闭与退出流程可用。独立验收与六种窗口布局截图见 [acceptance.md](acceptance.md)。任务保持 `verifying`，等待人工签收。
+Project 壳层已集成至 `dev/v1`：目录身份与最近列表、多 Tab、Project / 窗口状态保存恢复、导航 / 边栏容器、可信关闭与退出流程可用。独立验收与六种窗口布局截图见 [acceptance.md](acceptance.md)。现有功能人工体验已于 2026-10-18 验收通过，范围见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)；任务保持 `verifying`，待 AI 核对技术收尾条件。
 
 历史壳层验收的 9 项 Electron 场景使用 Session 接口替身；随后 Session 切片接入真实 IPC / SQLite 与模拟 Provider，补充关闭 Running / idle Project 后重开、原生会话 ID 与草稿保留、并行 Stop 和注意力验证，结果见 [Session 验收](../T20261009-session-slice/acceptance.md)。两阶段证据分别保留，不把旧占位验证表述为真实 Provider 验证。

@@ -1,6 +1,6 @@
 # 人工验收清单：T20261009-v1-foundation-slice
 
-> 写入者：主 Agent。场景初稿日期：2026-10-09；验收分工更新：2026-10-11。状态：草稿，供人体验核心流程时参考；AI 负责技术验证及缺口复测，人工按功能或阶段接受交付。本清单不改变既有 AI 验收结论；当前人工验收状态统一记录在[总体验收](acceptance.md#人工功能验收)。分工依据见 [Task Protocol](../README.md#lifecycle)，本次治理规则 diff 待审阅。
+> 写入者：主 Agent。场景初稿日期：2026-10-09；人工体验结果更新：2026-10-18。路线图所列现有功能的人工体验已全部通过，范围、确认原文与基线统一记录在[总体验收](acceptance.md#人工功能验收)。下文保留历史场景模板供技术复核参考，不再作为待人体验清单；模板复选框不表示当前验收状态。AI 技术验证缺口仍按原证据跟踪，分工见 [Task Protocol](../README.md#lifecycle)。
 
 ## 1. 记录结果与签收
 
@@ -32,10 +32,10 @@
 | [第 3 部分](#3-应用窗口) | 窗口尺寸、窗口控制区、拖拽 | [app-skeleton](../T20261009-app-skeleton/task.md) | 无 | 5 分钟 |
 | [第 4 部分](#4-project-与导航ac-01) | 多 Project、启动页、恢复、导航、注意力点 | [project-shell](../T20261009-project-shell/task.md) | 无 | 20 分钟 |
 | [第 5 部分](#5-session模拟模式ac-02ac-05) | Session 全流程，使用模拟 CLI | [session-slice](../T20261009-session-slice/task.md) | 无 | 30 分钟 |
-| [第 6 部分](#6-真实-cliac-02ac-05-补验) | 真实 Codex / Claude Code 补验 | [agent-adapter](../T20261009-agent-adapter/task.md)、session-slice | **有，约 8～10 轮** | 30 分钟 |
+| [第 6 部分](#6-真实-cliac-02ac-05-补验) | 当前 V1 Codex 真实补验；Claude Code 暂缓 | [agent-adapter](../T20261009-agent-adapter/task.md)、session-slice | **有，约 8～10 轮** | 30 分钟 |
 | [第 7 部分](#7-不在本次验收范围) | 不需要验收的内容 | — | — | — |
 
-第 3～5 部分不调用模型，可以随时执行。第 6 部分会消耗 CLI 额度：在应用里使用真实 CLI 跑完整流程，本轮还没有做过（见[总体验收](acceptance.md#未完成与签收)），是否执行由你决定。
+第 3～5 部分的现有功能人工体验已验收。第 6 部分仍是 AI 真实 Codex 技术补验参考；当前证据缺口见[总体验收](acceptance.md#未完成与签收)。本轮仅更新文档，不执行该清单。模型访问、额度、限流以及限流后的停止或错误由 CLI / 上游服务提供方决定，应用不设置调用次数、费用上限、自动重试或自动替换模型的护栏；用户主动选择模型仍按输入规格传给 CLI，用户主动点击 Stop 仍按产品定义验证，实际结果按 CLI 返回记录。
 
 自动化已覆盖的项目在“已有自动化”中注明。人工验收看的是：亲眼看到的行为是否符合预期，以及界面上能否理解。
 
@@ -392,11 +392,11 @@ chmod 000 ~/studio-acceptance/locked
 
 ## 6. 真实 CLI（AC-02～AC-05 补验）
 
-本部分会调用真实模型，是本轮唯一没覆盖的验收内容。需要事先知道：
+本部分会调用真实模型，是本轮唯一没覆盖的验收内容。当前 V1 只执行 Codex；Claude Code 的实现、模拟验证和历史真实证据保留，但真实步骤暂缓。若 Codex 因额度或限流返回停止 / 错误，记录为 CLI 实际结果和未覆盖项，不由应用主动制造或改变该结果。需要事先知道：
 
 - Codex 本机为 `0.162.0`，但协议按 `0.161.0` 锁定，当前版本的兼容性没有验证过。本部分本身就是在验证兼容性，遇到失败要如实记录。
-- Claude Code 之前因额度不足（`rate_limit / quota_exceeded`）没有跑通；CLI 显示已登录，不代表还有额度。
-- 先在终端运行 `codex --version`、`claude --version`，确认两个 CLI 都已登录。用 `pnpm dev` 启动应用，打开 project-a。
+- Claude Code 之前因额度不足（`rate_limit / quota_exceeded`）没有跑通；按 DEC-16 本轮不再发起真实调用，CLI 显示已登录也不代表还有额度。
+- 先在终端运行 `codex --version`，确认 Codex 已登录。Claude Code 只保留可用性记录，不在本轮发起调用。用 `pnpm dev` 启动应用，打开 project-a。
 - 出现 Needs Input 的条件取决于本机 CLI 的权限配置；没有触发时记为“未触发”，不算失败。
 
 #### M-R1 创建 Codex Session（AC-02）
@@ -407,14 +407,14 @@ chmod 000 ~/studio-acceptance/locked
 - [ ] 回复是流式逐步出现，不是最后一次性出现；内容没有重复。
 - [ ] 完成后显示“Worked for … · Done”。
 
-#### M-R2 两个 CLI 并发（AC-03）
+#### M-R2 Codex 多 Session 并发（AC-03；Claude Code 暂缓）
 
 1. New Chat 用 Codex 发送“写一篇约 800 字的文章，介绍本地优先软件的优缺点”。
-2. 马上 New Chat 用 Claude Code 发送同样的内容。
-3. 在两条 Session 之间切换几次。
+2. 马上 New Chat 再用 Codex 发送同样的内容。
+3. 在两条 Codex Session 之间切换几次；Claude Code 并发留待后续独立验收。
 
-- [ ] 两条同时显示 Running，并且都在输出。
-- [ ] 来回切换不会打断任何一条，最后两条都完成。
+- [ ] 两条 Codex Session 同时显示 Running，并且都在输出。
+- [ ] 来回切换不会打断任何一条，最后两条都完成；Claude Code 并发不在本轮结论内。
 
 #### M-R3 后台完成（AC-04）
 
@@ -424,13 +424,13 @@ chmod 000 ~/studio-acceptance/locked
 
 #### M-R4 Needs Input（AC-05）
 
-1. New Chat 用 Claude Code 发送“在当前目录创建 hello.txt，内容为 hello”，随即切到另一条 Session。
-2. 用 Codex 发送“运行 `ls -la ~` 并告诉我结果”，随即切换。
+1. New Chat 用 Codex 发送“在当前目录创建 hello.txt，内容为 hello”，随即切到另一条 Codex Session。
+2. 再用 Codex 发送“运行 `ls -la ~` 并告诉我结果”，随即切换；Claude Code Needs Input 留待后续独立验收。
 3. 对出现的授权卡片，先点“拒绝”，再用一条新请求测试“允许”。
 
 - [ ] Session 条目显示橙点；点击后能看到 CLI 想执行的操作（展开“工具参数”可以看到细节）。
 - [ ] 答复后继续执行；拒绝时，CLI 收到拒绝并给出相应回复。
-- 记录每个 CLI 是否出现了授权请求：Claude ___ / Codex ___。
+- 记录 Codex 是否出现授权请求：Codex ___；Claude Code 本轮不调用。
 
 #### M-R5 Stop
 
@@ -438,7 +438,7 @@ chmod 000 ~/studio-acceptance/locked
 
 1. 用 Codex 发送“运行 `sleep 60`，结束后告诉我”。命令开始执行后（工具行在转圈）点击 Stop。
 2. 在同一 Session 发送“刚才的命令结束了吗？”。
-3. 对 Claude Code 重复以上步骤。
+3. Claude Code 重复步骤留待后续真实验收。
 
 - [ ] 点击 Stop 后几秒内显示“已停止”，不显示 Error。
 - [ ] 停止后同一 Session 可以继续对话，Agent 记得之前的上下文。
@@ -451,7 +451,7 @@ chmod 000 ~/studio-acceptance/locked
 
 1. 在一条已完成的 Session 中，从 Model Selector 选择另一个模型，发送“你现在是哪个模型？”。
 
-- [ ] 下拉列表里有该 CLI 的真实模型；新一轮使用新选择的模型（可以从回复内容或 CLI 用量中判断）。
+- [ ] Codex 下拉列表里有真实模型；新一轮使用新选择的模型（可以从回复内容或 CLI 用量中判断）。Claude Code 模型切换留待后续真实验收。
 
 #### M-R7 重启后恢复上下文
 

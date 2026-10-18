@@ -11,7 +11,7 @@ created: 2026-10-09
 
 ## 签收
 
-- 状态：待人工签收；任务保持 `verifying`。
+- 人工体验：应用窗口等现有体验已随 V1 功能验收通过（2026-10-18），范围见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)；任务保持 `verifying`，技术收尾按 Lifecycle 执行。
 - 审阅依据：[验收记录](acceptance.md)、[交付报告](report.md)。
 
 ## 目标

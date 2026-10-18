@@ -1,5 +1,11 @@
 # 结论：T20261009-session-slice
 
+## 2026-10-18 当前 V1 范围更新
+
+本记录的历史模拟 / 真实证据与结论不改写。当前 V1 后续真实 CLI 验收只执行 Codex；Claude Code 的实现、模拟结果和历史真实证据保留，真实链路暂缓且不随当前 V1 发布（DEC-19）。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，真实复测按 CLI 实际结果记录。
+
+现有 Session 对话、输入与状态提醒的人工体验已于 2026-10-18 验收通过，范围与确认原文见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)；原有真实 CLI 技术证据缺口继续保留。
+
 ## 需要回写的内容
 
 | 目标文档 | 内容 | 状态 |
@@ -14,7 +20,7 @@
 - 真实 CLI UI AC-02～AC-05 本轮均未运行；Claude 成功推理受配额阻断，Codex 精确 Stop 修正版与当前 `0.162.0` 兼容未真实复测，详见 [Adapter 验收](../T20261009-agent-adapter/acceptance.md)。
 - Project View / Context 工具仅接入点；结构化上下文注入、修改文件统计和真实附件不属于本轮。
 - Runtime dispose 的 diagnostic 与 OS 退出证明边界见 [W4 生命周期记录](evidence/W4-lifecycle-review.md)，宿主崩溃和未观察到的后代清理仍待专项验证。
-- 非阻塞产品推荐与各 spec 草稿仍待人审阅；人工签收尚未发生。
+- 非阻塞产品推荐与各 spec 草稿仍待人审阅；现有功能人工体验结论见本文顶部。
 
 ## 结论
 

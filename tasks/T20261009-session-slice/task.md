@@ -15,7 +15,7 @@ created: 2026-10-09
 
 ## 签收
 
-- 状态：待人工签收；任务保持 `verifying`。
+- 人工体验：已随现有 V1 功能验收通过（2026-10-18），范围与确认依据见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)；Codex 真实技术补验仍待完成，任务保持 `verifying`。
 - 审阅依据：[验收记录](acceptance.md)、[交付报告](report.md)。
 
 ## 待审阅规格

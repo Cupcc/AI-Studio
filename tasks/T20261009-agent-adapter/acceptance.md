@@ -1,12 +1,15 @@
 # 验收：T20261009-agent-adapter
 
-> 写入者：W4（GPT-6.1 Sol high），未参与 Provider / 核心实现。日期：2026-10-09。状态：待人工签收；不能据此标记 task 为 done。
+## 2026-10-18 当前 V1 范围更新
+
+本记录的历史验收基线与“部分通过”结论不改写。当前 V1 真实 CLI 验收只覆盖 Codex；Claude Code 的实现、模拟结果和历史真实证据保留，真实链路暂缓，且不随当前 V1 发布（DEC-19）。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；应用不设置调用次数、费用上限或自动重试护栏，真实复测按 CLI 实际结果记录。
+
+> 技术报告写入者：W4（GPT-6.1 Sol high），未参与 Provider / 核心实现。日期：2026-10-09；原有部分通过结论与技术边界保留。当前人工体验结论见下节。
 
 ## 签收
 
-- 状态：待签收。
-- 人工确认日期：尚无。
-- 需人决定：是否接受当前阶段的自动化通过与真实验证未覆盖边界；后续真实复测须由主 Agent 按已授权预算安排。
+- 人工体验：路线图现有功能已于 2026-10-18 全部验收通过，接受范围、确认原文与基线见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。
+- 技术边界：Codex 真实结果仍需由 AI 按 CLI 行为补验记录；Claude Code 真实验收按 DEC-16 暂缓且不随当前 V1 发布。本次体验确认不新增真实兼容性测试结果，任务收尾仍按 Lifecycle 核对。
 
 ## 结论
 
@@ -34,7 +37,7 @@
 | completed / interrupted / failed 与耗时；取消不误报 Error | task 标准5；FR-STATE-003/007；06 §5 | 通过（模拟及 OS fixture） | [最终单测](evidence/W4-final-unit.log)覆盖 success+is_error、取消原生 error、终态竞态和耗时；[W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)中 Claude Stop 为 interrupted，续聊成功；真实 Claude 成功终态未覆盖 |
 | Codex 精确 Stop，系统退出证据、有限等待、独立 Runtime 兜底原 ID 恢复、重复 / 迟到守卫 | task 标准6；04 §5.1～5.7 | 部分通过 | [W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)独立实际 OS fixture确认当前轮两层进程退出、先前服务存活、Runtime 不重启、重复 Stop 一致；全部模拟异常分支通过。真实修正版未重测，W2 实测旧实现为 runtime_restarted，不能宣称精确 Stop 真 CLI 已通过 |
 | Claude interrupt 后本轮子进程退出，同 Session 可继续 | task 标准7；06 §4 | 部分通过 | Claude 模拟单测覆盖新后代退出、原 ID 重启、同 Runtime 续聊；独立 OS Runtime / SDK fixture 续聊通过。真实工具命令未启动，真实子进程 Stop 退出未验证 |
-| 一个 Session 的 Stop / 崩溃 / 兜底不影响其他；两 Provider 并发 | task 标准8；FR-SESSION-003；AC-03 Adapter 部分 | 部分通过 | [W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)实际进程证明 Codex Stop 时 Claude 与独立 Terminal 存活，Claude 崩溃时 Codex 仍 Running；两 Provider 各自的同时 Session 与兜底测试通过。真实两 CLI 推理并发未覆盖 |
+| 一个 Session 的 Stop / 崩溃 / 兜底不影响其他；两 Provider 并发 | task 标准8；FR-SESSION-003；AC-03 Adapter 部分 | 部分通过 | [W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)实际进程证明 Codex Stop 时 Claude 与独立 Terminal 存活，Claude 崩溃时 Codex 仍 Running；两 Provider 各自的同时 Session 与兜底测试通过。真实 Codex 推理并发未覆盖；Claude Code 按 DEC-16 暂缓 |
 | 模型目录与同 Session 下一轮模型切换 | task 标准9；FR-INPUT-002；06 §6 | 部分通过 | 两 Provider 模拟测试覆盖目录、默认模型、Running 暂存 / 下一轮提交；[W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)SDK fixture next-turn model；W2 / W3 真实目录有历史观察，真实第二模型切换均未覆盖 |
 | 未安装 / 未登录 / 可用及原因分别报告 | task 标准10；UX §6 New Chat.4 | 通过 | [W4-availability.json](evidence/W4-availability.json)独立本机可用；两 Provider availability 单测覆盖未安装 / 未登录 / 版本 / 模型失败分别报告并剔除身份信息；[最终单测](evidence/W4-final-unit.log) |
 | 状态映射 / Stop 分支单测；真实证据筛选保存，不留认证或完整配置 | task 标准11；tasks/AGENTS Evidence | 通过（证据如实保留未通过） | [最终单测](evidence/W4-final-unit.log)181项；[W2-codex-results.json](evidence/W2-codex-results.json)、[W3-claude-results.json](evidence/W3-claude-results.json)明确失败 / 配额。检查本次输出仅含测试摘要、枚举、合成路径 / 文本、fixture与必要错误 |
@@ -57,7 +60,7 @@ W4 在 `4c66414` 复现：`replyWithText → turn/steer` 在途，原生撤回�
 ## 未覆盖与边界
 
 1. **Claude 真实推理**：历史实测 `rate_limit / quota_exceeded`，流式成功、原生 Rule / Skill / Context、恢复、模型切换、工具命令 Stop 与续聊未通过。当前登录可用不表示模型配额可用。本次未发模型调用验证配额。
-2. **Codex 修正版精确 Stop**：W2 已用完六回合预算。修后仅真实 Node / OS fixture + 模拟协议证据；实际旧版本原生场景走 Runtime 兜底，先前后台服务未保留。精确清理仍需真实复测，不能把该历史套件改记通过。
+2. **Codex 修正版精确 Stop**：W2 已完成六个真实回合。修后仅真实 Node / OS fixture + 模拟协议证据；实际旧版本原生场景走 Runtime 兜底，先前后台服务未保留。精确清理仍需真实复测，不能把该历史套件改记通过。
 3. 本次只读发现本机 Codex 已升为 `0.162.0`，协议仍锁定 `0.161.0`；按 A-Q1 推荐可报告 untested，但没有 `0.162.0` 推理 / 精确 Stop / 实验接口兼容证据。历史六回合结果不能迁移为新版本通过。真实第二模型切换、真实两 CLI 同时推理 / 故障注入未覆盖；认证 / 网络等故障以模拟协议验证。
 4. 采样前即完全脱离父链 / 进程组的命令、外部 MCP 自有进程树、宿主异常崩溃清理未验证。正常 dispose / shutdown 与 Stop 的范围不等于宿主崩溃保障（A-Q3）。
 5. Claude 无 `user_message_uuid` 的新异步帧只能归当前回合，任意旧生产者乱序无法完整识别；恢复原生 ID 的最终校验可能延后到下一次输入。

@@ -1,5 +1,9 @@
 # Runtime 工具执行计划
 
+## 当前人工体验结论（2026-10-18）
+
+路线图所列现有功能的人工体验已全部通过，工具接受范围与确认依据见[验收记录](acceptance.md#当前范围与人工功能验收)。下文保留各阶段当时的计划与收尾基线；其中待人工体验的历史状态不再作为当前阻塞。本轮仅更新文档，任务剩余实现与技术验证由 [task.md](task.md#本轮授权与状态) 跟踪。
+
 ## 范围与基线
 
 - 指令：用户 2026-10-13「推进运行时工具的开发。agents并发」。本阶段实现 Terminal / Browser 与关闭接缝，依据 Tools spec §3、§4.3、FR-TOOL-003 / 004、FR-PROJ-002、AC-07。
@@ -42,7 +46,7 @@
 ## 阶段 1：Files + 项目 Diff + 文件引用链路
 
 - 指令与范围：用户 2026-10-14「continue implementing」（理解见 [task.md](task.md#本轮授权与状态)）。依据 [Tools spec](../../specs/tools/spec.md) FR-TOOL-001、FR-TOOL-002 第 2、3、6 项、§4.1，FR-INPUT-001；验收场景见 task.md 的 Files 正常、文件引用、文件失败、项目 Diff、Diff 边界行。基线：main `597b423` 之上的 `feat/files-diff`（`b6cd065`：Monaco 0.57.0 与共享契约）。
-- 计划来源：只读规划 agent（2026-10-14）。非目标：本轮 Diff、Conversation 入口、补丁持久化、Git 写操作、文件编辑、任何真实 CLI 调用。推迟项与解除条件：文件引用的真实接收（需真实 CLI 范围 / 预算）、Claude 运行中追加 / 排队（`inputWhileRunning: 'none'`，需原生对齐任务）、本轮 Diff（需真实能力探测与存储方案）、Monaco 真 Web Worker（仅当主线程实测超阈值才申请 `worker-src 'self'`）。
+- 计划来源：只读规划 agent（2026-10-14）。非目标：本轮 Diff、Conversation 入口、补丁持久化、Git 写操作、文件编辑、任何真实 CLI 调用。推迟项与解除条件：文件引用的真实接收（按 DEC-16 只验证 Codex，并记录 CLI / 上游服务实际结果；应用不设置调用次数、费用上限或自动重试护栏）、Claude 运行中追加 / 排队（`inputWhileRunning: 'none'`，需原生对齐任务）、本轮 Diff（需真实能力探测与存储方案）、Monaco 真 Web Worker（仅当主线程实测超阈值才申请 `worker-src 'self'`）。原计划中的“真实 CLI 范围 / 预算”是当时的授权前提，已由 2026-10-18 的 DEC-16 当前口径取代。
 - 技术选择（AI）：文件引用两个 CLI 都先以文本路径清单交付（`mention` 语义未验证、Claude 附件抛 `unsupported`；任何静默失效形式都违反“不静默丢弃”）；Monaco 用主线程回退、不改 CSP；符号链接只列出不跟随、拒绝查看与引用；隐藏 `.git`；无首个提交时说明基线不可用并列出新增文件，绝不写“无变更”。
 - 先行验证（失败会改变设计）：SP1 Monaco 在生产 CSP 下无 worker 的回退、零违规、分块体积（W12）；SP2 macOS 上 `O_NOFOLLOW_ANY` 与 FSEvents 事件形态及过滤成本（W10）；SP3 Git 2.39 命令矩阵、`xcode-select` 垫片检测（W11）。
 
@@ -92,3 +96,10 @@
 - 同一流程复用该构建执行 `pnpm --filter @ai-studio/desktop package:built`，随后 `pnpm smoke:packaged` PASS；[打包日志](evidence/W0-stage1-close-package.log)、[原生冒烟报告](evidence/W0-stage1-packaged-smoke.json)。冒烟输出先由 pnpm 的包内 cwd 写入，随后原样移到本证据目录。
 - W21 对最新 `out/` 与 `app.asar` 的 119 个文件逐字节审计通过，含目录 utility worker；W22 的实际 GUI 保留其已声明的旧包基线，不把新包自动化结果冒充新一轮 GUI。独立结论与剩余边界由 [acceptance.md](acceptance.md#stage-1)负责。
 - 本阶段按一个完整可验证目标整理提交，保留 `backup/files-diff-pre-closeout` 以追溯压缩前代码与证据基线；同步 main 后 rebase，依 CONTRIBUTING §5 只作本地快进合入，再正常移除干净的聚合 worktree。真实 CLI、本轮 Diff、人工功能验收及整个任务的剩余范围继续保留。
+
+### 2026-10-18 范围与文档同步
+
+- 用户确认当前 V1 的真实 CLI 验收只覆盖 Codex；Claude Code 暂不真实验收且不随当前 V1 发布。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，应用不设置调用次数、费用上限或自动重试护栏；真实结果按 CLI 实际行为记录。
+- 用户确认取消固定上线排期，GitHub Releases 为后续发布渠道；目标版本和发布准备边界见 DEC-21、DEC-22。签名 / 公证 / 校验和发布前再定；扩展范围不插入 V1。
+- 用户接受 W5-F13，并确认 SET-Q6 / SET-Q7，已记录为 DEC-20；最终 V1 功能 / 阶段人工验收仍待执行。
+- 用户随后明确本轮仅更新文档，不继续推荐或推进实现、真实 CLI、打包、产物生成与发布。已经核对路线图、决定记录、技术要求、验收标准、架构快照、脚本说明及相关规格和任务；历史基线、未覆盖项、任务状态和人工验收结论保留。

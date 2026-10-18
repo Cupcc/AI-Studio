@@ -133,7 +133,7 @@ Void 的公开代码说明其编辑状态以 URI 对应的 text model 为中心�
 - [Electron session](https://www.electronjs.org/docs/latest/api/session)：分区可与应用主页面分离；采用内存分区、地址另行保存的设计仍需实际验证。
 - [xterm.js flow control](https://xtermjs.org/docs/guides/flowcontrol/)：需要输出流量控制及消费确认；文本缓存不能单独证明屏幕恢复正确。
 
-本轮未修改应用、未执行真实 CLI / PTY / Browser 功能测试，未取得新的额度或模型预算。未来场景由 task.md 维护。
+本轮未修改应用、未执行真实 CLI / PTY / Browser 功能测试，未取得新的额度或模型调用授权。这里的历史“预算”措辞不表示应用应设置额度护栏；按 2026-10-18 的 DEC-16，当前 V1 真实 CLI 只验证 Codex，额度、限流及限流后的停止 / 错误由 Codex CLI / 上游服务提供方决定，未来场景由 task.md 维护。
 
 ## 阶段 1 实现设计（Files + 项目 Diff + 文件引用链路，2026-10-14）
 
@@ -204,7 +204,7 @@ Diff（`src/main/services/diff/**`，`src/main/ipc/diff.ts`；工厂 `diffFor(co
 
 ### 留给人的决定（AI 的建议）
 
-H1 本阶段对 FR-INPUT-001 与 FR-TOOL-001 第 4 项只能算部分完成（链路完整并对模拟 Provider 验证，真实 CLI 接收未验证，Claude 队列不可能）：接受并在验收记录中明写，不标 AC-07 通过。H2 真实 CLI 调用范围 / 预算：以后授予小而有界的范围，仅用于文件引用接收探测。H3 Monaco 选型沿用已确认的决定，`CodeViewer` / `CodeDiffViewer` 隔离了库，SP1 或体积不佳再复议。H4 `worker-src 'self'`：现在不申请。H5 符号链接：列出、不跟随、拒绝查看与引用（与 Project View 的 `safePath` 一致），有反馈再评估“目标在 Project 内则跟随”。H6 隐藏 `.git`。H7 Composer 的“从 Files 添加文件”启用并打开 Files 工具（仅用户点击时）。H8 unborn HEAD：说明加文件清单，绝不写“无变更”。H9 Project 位于上层仓库内：只显示其前缀并加横幅，不特判 `$HOME`。H10 引用规则：二进制与大文件可引用，含控制字符的名称不可引用，每条消息最多 20 个。H11 编码：仅 UTF-8（含 BOM）与带 BOM 的 UTF-16，GBK 等显示“非 UTF-8”，以后可加“按 GBK 打开”。H12 两个 CLI 先用文本路径清单交付，不用 `mention` / `@`，并更新 Session §5.4 与 Adapter §3.13 措辞。
+H1 本阶段对 FR-INPUT-001 与 FR-TOOL-001 第 4 项只能算部分完成（链路完整并对模拟 Provider 验证，真实 CLI 接收未验证，Claude 队列不可能）：接受并在验收记录中明写，不标 AC-07 通过。H2（历史建议，已由 DEC-16 取代）真实 CLI 调用范围 / 预算：原建议是以后授予小而有界的范围，仅用于文件引用接收探测；当前 V1 已确认只验证 Codex，调用次数、费用上限、自动重试和限流后的停止均不由应用控制，按 CLI / 上游服务实际结果记录。H3 Monaco 选型沿用已确认的决定，`CodeViewer` / `CodeDiffViewer` 隔离了库，SP1 或体积不佳再复议。H4 `worker-src 'self'`：现在不申请。H5 符号链接：列出、不跟随、拒绝查看与引用（与 Project View 的 `safePath` 一致），有反馈再评估“目标在 Project 内则跟随”。H6 隐藏 `.git`。H7 Composer 的“从 Files 添加文件”启用并打开 Files 工具（仅用户点击时）。H8 unborn HEAD：说明加文件清单，绝不写“无变更”。H9 Project 位于上层仓库内：只显示其前缀并加横幅，不特判 `$HOME`。H10 引用规则：二进制与大文件可引用，含控制字符的名称不可引用，每条消息最多 20 个。H11 编码：仅 UTF-8（含 BOM）与带 BOM 的 UTF-16，GBK 等显示“非 UTF-8”，以后可加“按 GBK 打开”。H12 两个 CLI 先用文本路径清单交付，不用 `mention` / `@`，并更新 Session §5.4 与 Adapter §3.13 措辞。
 
 ### 风险（AI 管理）
 

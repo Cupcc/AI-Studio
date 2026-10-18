@@ -2,7 +2,7 @@
 
 - 状态：设计探索稿；2026-10-12。本机采用范围与确认记录见[图标索引](README.md#本机采用)。
 - 需求来源：用户 2026-10-12 对话「基于 worktree v04 原型设计风格，设计应用 icon」，以及「所有版本都保存到 design/icons 里面」。本次交付为图标设计稿，不涉及 FR / AC 行为变更。
-- 视觉来源：`chore/worklines-integration` worktree，提交 `988700a`，`design/prototypes/studio-prototype-v04.html` 的 `.skin-glass` 样式、示例壁纸 A / B 与适中内容层；与 `feat/settings-theme` 中的 v04 HTML 内容相同。深色版本参考 [Visual Direction](../visual-direction.md) 第 1 节“毛玻璃 · 深色”提案（SET-Q7）。
+- 视觉来源：`chore/worklines-integration` worktree，提交 `988700a`，`design/prototypes/studio-prototype-v04.html` 的 `.skin-glass` 样式、示例壁纸 A / B 与适中内容层；与 `feat/settings-theme` 中的 v04 HTML 内容相同。深色版本依据 [Visual Direction](../visual-direction.md) 第 1 节“毛玻璃 · 深色”已确认方案（SET-Q7、DEC-20）。
 - 与 [玻璃工作台 v01](app-icon-glass-v01.md) 为同日并行的另一组探索，互不替代。
 
 ## 交付

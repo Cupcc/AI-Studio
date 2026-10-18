@@ -12,7 +12,7 @@
 | 来源 | [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 1～5、7 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 3～6 节；[01. Product Definition](<../../docs/01. Product Definition.md>) 第 8 节原则 19、20；任务 [T20261009-agent-adapter](../../tasks/T20261009-agent-adapter/task.md)；input spec I-Q2、session spec S-Q2（2026-10-09 确认） |
 | 设计记录 | [research.md](../../tasks/T20261009-agent-adapter/research.md) |
 
-> 本文的类型名、方法名与 `packages/agent-adapter/src` 一致；字段的完整定义以代码为准，本文只写行为规则与约束。第 3.11、3.12 节记录已实现的 Provider 行为，并分别列明模拟测试与真实 CLI 验证的边界。
+> 本文的类型名、方法名与 `packages/agent-adapter/src` 一致；字段的完整定义以代码为准，本文只写行为规则与约束。第 3.11、3.12 节记录已实现的 Provider 行为，并分别列明模拟测试与真实 CLI 验证的边界。按 [DEC-16](../../docs/07.%20Decisions.md#dec-16-v1-真实-cli-验收范围)，当前 V1 新增真实验收只执行 Codex；Claude Code 的实现、模拟结果和历史真实证据保留，真实验收暂缓，且不随当前 V1 发布（DEC-19）。
 
 ## 1. 未决问题
 
@@ -34,7 +34,7 @@
 | A-Q2 | 扩展能力、提交结果与事件模型以区分 steer / queue，保留消息与原生回合关联；排队不能伪造成当前回合追加 | 主 Agent，2026-10-11；待实现及真实验证，当前接口与实现缺口见第 3.4、5.5 节 |
 | A-Q3 | 对客户端启动的 Runtime 建立归属记录（宿主实例身份、PID、启动时间、进程组、Session），启动时确认原宿主已失效且进程身份仍匹配后清理；活跃其他实例、共享 MCP、用户终端不得清理。无法确认归属或退出则保留诊断，不声明零残留 | 主 Agent，2026-10-11；依据现有 Runtime 隔离责任（04 第 5 节、本文第 3.9 节）与本次遗留问题处理要求。待实现及崩溃／脱离进程验证；不标成人工确认异常清理已通过 |
 | A-Q4 | I-Q2 先 `turn/steer` 回执，再拒绝原请求，失败保留原请求 | 2026-10-09 已验证，见第 3.11 节；保持历史技术结论 |
-| A-Q5 | 以 CLI 原生加载结果为准核对 user / project / local 配置和 `claude_code` 预设；SDK 参数若未达到同等行为则修正，不能只凭缺省参数名称认定等价 | 主 Agent，2026-10-11；现有实现见第 3.12 节，真实 Rule / Skill 仍待授权预算补验 |
+| A-Q5 | 以 CLI 原生加载结果为准核对 user / project / local 配置和 `claude_code` 预设；SDK 参数若未达到同等行为则修正，不能只凭缺省参数名称认定等价 | 主 Agent，2026-10-11；现有实现见第 3.12 节，真实 Rule / Skill 仍待后续 Claude Code 独立验收 |
 
 ## 2. 职责与边界
 
@@ -172,7 +172,7 @@
 5. 模型目录分页使用 `model/list`，不创建 Thread。模型选择保留到下一轮 `turn/start`；重置为 `null` 时读取原生配置的默认模型。错误依据 `codexErrorInfo` 归一，认证 / 配额 / 网络错误有模拟覆盖；可用性只保留粗粒度登录结果。
 6. Stop 以当前命令 item / App Server `processId` 调用 `thread/backgroundTerminals/terminate`；`processId` 从不作为系统 PID。生成类型虽含 `osPid`，锁定的 `0.161.0` 实现实际返回 `null`（源码位置见 W2 证据），不能依赖该字段取得退出证明。
 7. 提交前保存后台命令与系统后代身份基线，运行中和 Stop 前继续采样。有 `osPid` 时验证其 Runtime 归属；没有时保守跟踪本轮新出现的后代集合。原生终态后终止对应命令，并以 PID + 启动时间确认已观察目标均退出。没有身份、映射歧义、接口错误或无法确认退出时，按第 3.6 节先确认旧 Runtime 退出，再恢复原 ID；不重放输入。不会调用 Thread 级 `clean` 替代本轮清理。
-8. 验证边界：六个真实 Astra high 回合确认流式、跨 Runtime 原 ID 恢复及上下文、I-Q2 同轮文字拒绝和 Runtime 兜底恢复。`osPid:null` 修正版已用真实 Node / 系统进程 fixture 证明本轮两层进程退出、先前服务保留，但六回合预算用完后未再对真实 Codex 重测，因此精确 Stop 真实验收仍未通过。真实第二模型切换、活动命令下宿主崩溃、未观察即脱离的后代与外部 MCP 进程树仍待验证；两次真实套件失败记录保留在 W2 证据。
+8. 验证边界：此前六个真实 Astra high 回合确认流式、跨 Runtime 原 ID 恢复及上下文、I-Q2 同轮文字拒绝和 Runtime 兜底恢复。`osPid:null` 修正版已用真实 Node / 系统进程 fixture 证明本轮两层进程退出、先前服务保留；此前真实回合结束后未再对真实 Codex 重测，因此精确 Stop 真实验收仍未通过。真实第二模型切换、活动命令下宿主崩溃、未观察即脱离的后代与外部 MCP 进程树仍待验证；两次真实套件失败记录保留在 W2 证据。
 
 ### 3.12 Claude Provider
 
@@ -190,10 +190,10 @@
 
 FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026-10-13 确认）。文件引用已接入桌面 Session 的输入转换，轮次补丁仍为接口准备；逻辑契约以 [Tools §4.1、§4.2](../tools/spec.md#4-状态与接口) 为准。
 
-- 文件输入：Adapter 保留 Codex 的 file → mention 映射与 Claude 对结构化附件的 `unsupported`。桌面 Session 阶段 1 对两个 CLI 都选择文本路径清单，转换由 `main/services/session/file-reference.ts` 负责，Adapter 不重复转换；依据与边界见 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化)。模拟 Provider 已覆盖普通发送、恢复 / 重试和 Codex 运行中追加；两个真实 CLI 是否实际采用这些引用仍未验证，不以标签或文本送达代替真实接收。Claude 运行中追加 / 排队仍待原生能力对齐。
+- 文件输入：Adapter 保留 Codex 的 file → mention 映射与 Claude 对结构化附件的 `unsupported`。桌面 Session 阶段 1 对两个 CLI 都选择文本路径清单，转换由 `main/services/session/file-reference.ts` 负责，Adapter 不重复转换；依据与边界见 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化)。模拟 Provider 已覆盖普通发送、恢复 / 重试和 Codex 运行中追加；当前 V1 只安排 Codex 真实引用接收，Claude Code 真实接收暂缓，不以标签或文本送达代替真实接收。Claude 运行中追加 / 排队仍待后续原生能力对齐。
 - 轮次数据：Codex 当前 fileChange 映射仅保留路径 / 类型，尚未转交 patch，未接入 turn/diff/updated。先验证锁定版本的聚合更新、完成状态、非 Git 和 Shell 修改覆盖，再输出带来源与原生身份的记录。Claude 独立核对同等数据及缺失原因，不假设两者一致。
 - 事件接收核对 Runtime 代次、Thread / Turn 归属及修订；Adapter 报告 unknown / empty / unavailable / failed 的依据，应用 Session 负责持久化与 App Turn 关联，Adapter 不读当前工作区伪造历史。
-- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。真实调用范围与预算另行确定；阶段 1 的模拟文件引用链路不扩大真实调用授权。
+- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。Codex 真实调用按 CLI 实际结果验证，额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；Claude Code 真实验收按 DEC-16 暂缓且不随当前 V1 发布（DEC-19）；阶段 1 的模拟文件引用链路不改变真实 CLI 结果。
 
 本地审阅依据及官方接口来源见 [工程工具调研 §9](../../tasks/T20261009-context-tools/research.md#9-开发准备审阅2026-10-13)。
 
