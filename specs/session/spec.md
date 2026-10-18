@@ -338,7 +338,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | `answer(requestId, optionId)` | 卡片答复 | 06 §5 | — |
 | `replyWithText(requestId[], text)` | 在输入框回复 Needs Input | UX 第 6 节 | 两种 CLI 的语义未验证，见 input spec I-Q2 |
 | `stop(句柄)` → 完成 / 失败 | Stop、关闭 Project、退出 | 04 §5 第 1～7 条 | 幂等；完成表示终态 + 资源清理；兜底失败返回错误 |
-| `setModel(句柄, model)` | 下一轮生效 | 06 §6 同 Session 模型切换 | 未验证 |
+| `setModel(句柄, model)` | 下一轮生效 | 06 §6 同 Session 模型切换 | Codex 0.163.0 的目录与第二模型切换已由 W25 真实复验；Claude 真实链路仍待验证 |
 | 事件 `runtimeExited(code, duringTurn)` | E8 / E12 | 06 §4 运行中进程被终止 | — |
 | 事件 `nativeTitle(title)`（可选） | 采用原生名称 | FR-NAV-003 | 两种 CLI 是否提供未验证（chat spec） |
 | `capabilities(cli)` | 输入区与状态机分支 | Shell Spec 第 7 节 | 至少：Running 中可否提交、等待请求是否接受自由文本、是否提供原生名称 |

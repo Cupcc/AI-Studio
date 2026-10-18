@@ -108,11 +108,11 @@
 依据：UX 第 6 节 Needs Input 呈现；D-03；FR-STATE-002；Shell Spec 第 6 节 Needs Input 卡片“也可以在下方直接回复”。
 
 1. Needs Input 时输入框可用，输入非空时按钮为 Send。发送后：文字作为用户消息出现在对话中，未答复的卡片按 I-Q2 的规则解决并变为只读（显示“已在输入框回复”），Session 回到 Running，Needs Input 清除（session spec E5）。
-2. 文字回复在两种 CLI 原生协议中的语义尚未定义与验证：Codex 授权请求只接受批准 / 拒绝，Claude 的 `canUseTool` 返回允许 / 拒绝（拒绝可附说明），提问类请求可能接受自由文本。推荐规则见 I-Q2，需 Adapter 确认可实现。
+2. Codex 授权请求只接受批准 / 拒绝；W25 真实复验确认输入框文字会先通过同一回合 `turn/steer` 交付，再拒绝待处理请求并继续。Claude 的 `canUseTool` 返回允许 / 拒绝（拒绝可附说明），提问类请求可能接受自由文本，真实语义仍待验证。推荐规则见 I-Q2，需 Adapter 确认可实现。
 
 ### FR-INPUT-002 Model Selector
 
-依据：FR-INPUT-002；FR-CHAT-003；FR-SESSION-003（独立模型配置）；01 第 8 节原则 8、20；04 第 4 节；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节（模型目录可读取，Codex 9 项、Claude 13 项）与第 6 节（同 Session 模型切换待验证）；agent-adapter task 验收“同一 Session 内切换模型后下一轮使用新模型”。
+依据：FR-INPUT-002；FR-CHAT-003；FR-SESSION-003（独立模型配置）；01 第 8 节原则 8、20；04 第 4 节；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节（模型目录可读取）与第 6 节；Codex 0.163.0 的同 Session 第二模型切换见 [W25 记录](../../tasks/T20261011-native-cli-parity/evidence/W25-codex-native.md)，Claude 真实链路仍待验证。
 
 1. 位置：输入区底行右侧，Send / Stop 左侧；不在顶部 Tab Bar 设置全局 Model Selector（FR-INPUT-002；Shell Spec 第 7 节）。
 2. 内容：只列出当前 Session（或草稿）所用 CLI 的模型目录，来自 Adapter；不列出其他 CLI 的模型（FR-CHAT-003）。

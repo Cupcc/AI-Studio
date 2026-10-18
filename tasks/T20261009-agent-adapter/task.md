@@ -63,3 +63,7 @@ W5-F13 与 SET-Q6 / SET-Q7 已由用户于 2026-10-18 确认（DEC-20）；路�
 - [ ] 可用性检测分别报告未安装、未登录、可用三种情况及原因（UX Specification 第 6 节 New Chat 第 4 条）。
 - [ ] 单元测试覆盖上述状态映射与 Stop 分支；真实集成测试结果以筛选后的证据保存，不含认证信息、邮件地址或完整配置（`tasks/README.md` 证据规则）。
 - [ ] `specs/agent-adapter/spec.md` 草稿描述接口、事件、状态映射、Stop 流程与已知边界。
+
+## 2026-10-18 Codex 当前补验
+
+W25 在主 Agent 基线 `88bbe2c` 上以 Codex `0.163.0` 执行了真实 Adapter 六回合综合套件、两回合 Stop 套件、同 Session 第二模型切换，以及原生并发 / 中断 / Runtime 崩溃恢复预检。结果与边界见 [W25 证据](../T20261011-native-cli-parity/evidence/W25-codex-native.md)。这些结果覆盖了上表中 Codex 的部分真实缺口，但不满足两个 Provider 的完整 AC，也不覆盖 0.163.0 未执行的协议方法、宿主异常清理或 Claude Code 真实链路；任务继续保持 `verifying`。

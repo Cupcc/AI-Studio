@@ -168,11 +168,11 @@
 1. 每 Session 启动本机 `codex app-server --listen stdio://`，以共享 `JsonRpcPeer` 连接，消息缺省不带 `jsonrpc` 字段。`initialize` 声明实验能力后发送 `initialized`；协议类型由 CLI `0.161.0` 生成，206 份传递类型及原始内容摘要保存在 `src/codex/protocol/`。模型、权限与配置只传调用方明确覆盖的项，不读取或改写用户配置。
 2. 新建使用 `thread/start`，恢复使用 `thread/resume` 并要求返回原 ID；恢复失败不创建新 Thread。文本增量和完整条目按同一 item ID 更新；命令的 `commandActions` 映射活动，`thread/name/updated` 报告原生标题。`turn/completed` 是权威终态；`error` 通知只作诊断，避免原生重试期间提前结束。
 3. 命令、文件、权限授权与问题均映射为第 3.5 节的请求，保留原生选项顺序及对象形式决定。`serverRequest/resolved` 同时通过 `dismissIncoming(id)` 无响应地释放 JSON-RPC 记录，并解除 Session 等待；旧回调不可再答复。未知请求明确拒绝，其他 Thread 的通知不影响当前 Session。
-4. I-Q2 的拒绝路径先以当前 `expectedTurnId` 调用 `turn/steer`，确认文字已被同一回合接收，再对所有待处理请求答复 `decline`。交付失败时保留原请求可回答，不发新 `turn/start`。真实场景已确认同一回合回复指定标记且被拒绝命令未执行；一般 Running 中追加现已复用同一原生接口，真实兼容复验仍待完成。
+4. I-Q2 的拒绝路径先以当前 `expectedTurnId` 调用 `turn/steer`，确认文字已被同一回合接收，再对所有待处理请求答复 `decline`。交付失败时保留原请求可回答，不发新 `turn/start`。真实场景已确认同一回合回复指定标记且被拒绝命令未执行；一般 Running 中追加现已复用同一原生接口，并在 W24 应用 UI 与 W25 Adapter 真实回合中复验。
 5. 模型目录分页使用 `model/list`，不创建 Thread。模型选择保留到下一轮 `turn/start`；重置为 `null` 时读取原生配置的默认模型。错误依据 `codexErrorInfo` 归一，认证 / 配额 / 网络错误有模拟覆盖；可用性只保留粗粒度登录结果。
 6. Stop 以当前命令 item / App Server `processId` 调用 `thread/backgroundTerminals/terminate`；`processId` 从不作为系统 PID。生成类型虽含 `osPid`，锁定的 `0.161.0` 实现实际返回 `null`（源码位置见 W2 证据），不能依赖该字段取得退出证明。
 7. 提交前保存后台命令与系统后代身份基线，运行中和 Stop 前继续采样。有 `osPid` 时验证其 Runtime 归属；没有时保守跟踪本轮新出现的后代集合。原生终态后终止对应命令，并以 PID + 启动时间确认已观察目标均退出。没有身份、映射歧义、接口错误或无法确认退出时，按第 3.6 节先确认旧 Runtime 退出，再恢复原 ID；不重放输入。不会调用 Thread 级 `clean` 替代本轮清理。
-8. 验证边界：此前六个真实 Astra high 回合确认流式、跨 Runtime 原 ID 恢复及上下文、I-Q2 同轮文字拒绝和 Runtime 兜底恢复。`osPid:null` 修正版已用真实 Node / 系统进程 fixture 证明本轮两层进程退出、先前服务保留；此前真实回合结束后未再对真实 Codex 重测，因此精确 Stop 真实验收仍未通过。真实第二模型切换、活动命令下宿主崩溃、未观察即脱离的后代与外部 MCP 进程树仍待验证；两次真实套件失败记录保留在 W2 证据。
+8. 验证边界：此前六个真实 Astra high 回合及 W25 Codex 0.163.0 套件确认流式、跨 Runtime 原 ID 恢复及上下文、I-Q2 同轮文字拒绝、精确 Stop、第二模型下一轮切换、并发隔离和 Runtime 崩溃恢复；`osPid:null` 路径按 Runtime 后代快照超集确认当前命令退出且此前服务保留。W25 只覆盖已执行的方法子集，不把 0.163.0 结果外推为完整 0.161.0 协议兼容。活动命令下宿主异常清理、未观察即脱离的后代与外部 MCP 进程树仍待验证；结果与一次 Claude 账号策略阻断见 [W25 记录](../../tasks/T20261011-native-cli-parity/evidence/W25-codex-native.md)。
 
 ### 3.12 Claude Provider
 

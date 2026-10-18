@@ -4,6 +4,15 @@
 
 本记录的历史验收基线与“部分通过”结论不改写。当前 V1 真实 CLI 验收只覆盖 Codex；Claude Code 的实现、模拟结果和历史真实证据保留，真实链路暂缓，且不随当前 V1 发布（DEC-19）。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；应用不设置调用次数、费用上限或自动重试护栏，真实复测按 CLI 实际结果记录。
 
+### W25 当前 Codex 专项补验（2026-10-18）
+
+W25 是 Main Agent 在 `88bbe2c` 基线上的真实技术复验，不改写下方 W4 的独立验收结论，也不把本轮结果记作完整 AC-02 / AC-03 / AC-05。实际 CLI 为 `codex-cli 0.163.0`，生成协议类型仍为 `0.161.0`；证据与运行命令见 [W25 记录](../T20261011-native-cli-parity/evidence/W25-codex-native.md) 和 [结构化结果](../T20261011-native-cli-parity/evidence/W25-codex-native.json)。
+
+- Adapter 六回合套件与两回合 Stop 套件通过：流式、跨 Runtime 原 ID 恢复、同轮拒绝后续写入、当前命令退出、此前后台服务保留、同一 Runtime 和合成进程退出均有真实结果，Stop 清理为 `confirmed`。
+- Adapter 同一 Session 的第二模型切换通过：模型目录 8 项，默认 `gpt-6.1-sol`，下一轮切换到 `gpt-6-astra`，终态报告实际模型且 native Session 未变化。
+- 原生预检的两个 Thread / Project 并发隔离、中断后续聊和 Runtime 崩溃恢复通过。
+- 这组结果只覆盖已执行的 Codex 方法子集；未观察即脱离的后代、外部 MCP 进程树、宿主异常崩溃清理、未执行协议方法和 Claude Code 真实链路仍未通过。本轮一次默认 integration 命令触发的 Claude Code 调用因 `auth_required / oauth_org_not_allowed` 阻断，按 DEC-16 不计入当前 V1。
+
 > 技术报告写入者：W4（GPT-6.1 Sol high），未参与 Provider / 核心实现。日期：2026-10-09；原有部分通过结论与技术边界保留。当前人工体验结论见下节。
 
 ## 签收
@@ -35,10 +44,10 @@
 | 增量与完整消息分开，正文不重复 | task 标准3；06 §5 | 通过（模拟协议 / SDK） | core / Codex / Claude partial+full、UUID 去重测试；审查 item ID 及全文替换映射。真实 Claude 仍未覆盖 |
 | 授权 / 问题统一等待事件、ID / 原生选项、独立多请求答复 / 解除 | task 标准4；FR-STATE-002；06 §6 | 通过（模拟；已修复两项撤回问题） | [W4-input-retirement.json](evidence/W4-input-retirement.json)、[W4-input-race.json](evidence/W4-input-race.json)、两 Provider / core 单测；真实 Claude 授权 / AskUserQuestion 未覆盖 |
 | completed / interrupted / failed 与耗时；取消不误报 Error | task 标准5；FR-STATE-003/007；06 §5 | 通过（模拟及 OS fixture） | [最终单测](evidence/W4-final-unit.log)覆盖 success+is_error、取消原生 error、终态竞态和耗时；[W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)中 Claude Stop 为 interrupted，续聊成功；真实 Claude 成功终态未覆盖 |
-| Codex 精确 Stop，系统退出证据、有限等待、独立 Runtime 兜底原 ID 恢复、重复 / 迟到守卫 | task 标准6；04 §5.1～5.7 | 部分通过 | [W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)独立实际 OS fixture确认当前轮两层进程退出、先前服务存活、Runtime 不重启、重复 Stop 一致；全部模拟异常分支通过。真实修正版未重测，W2 实测旧实现为 runtime_restarted，不能宣称精确 Stop 真 CLI 已通过 |
+| Codex 精确 Stop，系统退出证据、有限等待、独立 Runtime 兜底原 ID 恢复、重复 / 迟到守卫 | task 标准6；04 §5.1～5.7 | 部分通过 | W4 历史独立 OS fixture结论保留；W25 在 Codex 0.163.0 真实 Adapter 套件确认当前命令退出、此前服务保留及 `cleanup=confirmed`。完整协议兼容和宿主异常边界仍未覆盖 |
 | Claude interrupt 后本轮子进程退出，同 Session 可继续 | task 标准7；06 §4 | 部分通过 | Claude 模拟单测覆盖新后代退出、原 ID 重启、同 Runtime 续聊；独立 OS Runtime / SDK fixture 续聊通过。真实工具命令未启动，真实子进程 Stop 退出未验证 |
-| 一个 Session 的 Stop / 崩溃 / 兜底不影响其他；两 Provider 并发 | task 标准8；FR-SESSION-003；AC-03 Adapter 部分 | 部分通过 | [W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)实际进程证明 Codex Stop 时 Claude 与独立 Terminal 存活，Claude 崩溃时 Codex 仍 Running；两 Provider 各自的同时 Session 与兜底测试通过。真实 Codex 推理并发未覆盖；Claude Code 按 DEC-16 暂缓 |
-| 模型目录与同 Session 下一轮模型切换 | task 标准9；FR-INPUT-002；06 §6 | 部分通过 | 两 Provider 模拟测试覆盖目录、默认模型、Running 暂存 / 下一轮提交；[W4-runtime-isolation.json](evidence/W4-runtime-isolation.json)SDK fixture next-turn model；W2 / W3 真实目录有历史观察，真实第二模型切换均未覆盖 |
+| 一个 Session 的 Stop / 崩溃 / 兜底不影响其他；两 Provider 并发 | task 标准8；FR-SESSION-003；AC-03 Adapter 部分 | 部分通过 | W4 历史隔离结论保留；W25 原生预检确认两个 Codex Thread / Project 并发、单 Runtime 崩溃后另一 Runtime 健康及原 ID 恢复。两个 Provider 的真实并发和宿主异常边界仍未覆盖；Claude Code 按 DEC-16 暂缓 |
+| 模型目录与同 Session 下一轮模型切换 | task 标准9；FR-INPUT-002；06 §6 | 部分通过 | W4 模拟 / fixture 结论保留；W25 Adapter 真实复验确认 8 项目录和 `gpt-6.1-sol` → `gpt-6-astra` 下一轮切换。其他版本、模型能力和完整原生配置仍未覆盖 |
 | 未安装 / 未登录 / 可用及原因分别报告 | task 标准10；UX §6 New Chat.4 | 通过 | [W4-availability.json](evidence/W4-availability.json)独立本机可用；两 Provider availability 单测覆盖未安装 / 未登录 / 版本 / 模型失败分别报告并剔除身份信息；[最终单测](evidence/W4-final-unit.log) |
 | 状态映射 / Stop 分支单测；真实证据筛选保存，不留认证或完整配置 | task 标准11；tasks/AGENTS Evidence | 通过（证据如实保留未通过） | [最终单测](evidence/W4-final-unit.log)181项；[W2-codex-results.json](evidence/W2-codex-results.json)、[W3-claude-results.json](evidence/W3-claude-results.json)明确失败 / 配额。检查本次输出仅含测试摘要、枚举、合成路径 / 文本、fixture与必要错误 |
 | spec 草稿含接口、事件、状态映射、Stop 与边界 | task 标准12 | 通过（草稿） | `4c66414` 的 [spec](../../specs/agent-adapter/spec.md) §3.11/3.12已完整描述实现与真实限制；§3.6 / 4.2 / 5描述核心流程与接口；A-Q问题保持待确认 |

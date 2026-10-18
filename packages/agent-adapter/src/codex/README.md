@@ -33,7 +33,7 @@ await provider.dispose();
 - command/file/permissions 审批、`requestUserInput` 分别保存独立服务端请求。原生审批选项按顺序保留，对象形式 amendment 原样回复；问题选项回复使用原生 label。
 - `replyWithText` 需要拒绝请求时，先用带 `expectedTurnId` 的 `turn/steer` 把文字交给仍被请求阻塞的同一轮，再拒绝挂起请求；一般运行中发送也复用该原生 steer，失败时保留输入，不另起一轮。这个顺序已在真实 0.161.0 上验证。
 - 不认识的服务端请求明确返回 `-32601` 并报告 diagnostic，不允许请求无限挂起。
-- `serverRequest/resolved` 清除 UI 待输入。共享 `JsonRpcPeer` 尚缺无响应撤回接口，原生自行撤回时其内部 incoming 记录需由主 agent 补齐清理（见 W2 evidence）。
+- `serverRequest/resolved` 清除 UI 待输入，并通过 `JsonRpcPeer.dismissIncoming` 释放对应的未响应请求；该路径已由输入撤回回归覆盖。
 
 ## Stop 的系统进程证据
 

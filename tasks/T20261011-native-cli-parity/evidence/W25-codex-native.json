@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-18",
+  "baseline": {
+    "git": "88bbe2c",
+    "platform": "macOS 15.6 arm64",
+    "node": "26.10.0",
+    "codex": "codex-cli 0.163.0",
+    "protocolTypes": "0.161.0",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "high"
+  },
+  "adapterProviderSuite": {
+    "status": "passed",
+    "command": "AI_STUDIO_REAL_CLI=1 pnpm --filter @ai-studio/agent-adapter exec vitest run --config vitest.integration.config.ts test/codex/provider.integration.test.ts --silent=false",
+    "turnsSubmitted": 6,
+    "catalogRead": true,
+    "streamed": true,
+    "crossRuntimeResumeContext": true,
+    "sameTurnDeclineTextDelivered": true,
+    "earlierServiceStarted": true,
+    "preciseStop": true,
+    "earlierServicePreserved": true,
+    "stopCleanup": "confirmed",
+    "sameThreadContinuation": true,
+    "syntheticProcessesExited": true
+  },
+  "adapterStopSuite": {
+    "status": "passed",
+    "command": "AI_STUDIO_REAL_CLI=1 AI_STUDIO_CODEX_STOP_ONLY=1 pnpm --filter @ai-studio/agent-adapter exec vitest run --config vitest.integration.config.ts test/codex/stop.integration.test.ts --silent=false",
+    "turnsSubmitted": 2,
+    "stopStatus": "stopped",
+    "cleanup": "confirmed",
+    "cleanupDetail": "Native osPid unavailable: verified all observed new Runtime descendant identities against the pre-turn baseline",
+    "currentCommandExited": true,
+    "earlierServicePreserved": true,
+    "sameRuntime": true,
+    "uniqueInterruptedTerminal": true,
+    "syntheticProcessesExited": true
+  },
+  "adapterModelSwitch": {
+    "status": "passed",
+    "catalog": {
+      "count": 8,
+      "default": "gpt-6.1-sol",
+      "alternate": "gpt-6-astra"
+    },
+    "turns": [
+      { "phase": "before", "outcome": "completed", "model": "gpt-6.1-sol" },
+      { "phase": "after", "outcome": "completed", "model": "gpt-6-astra" }
+    ],
+    "modelChanged": true,
+    "sameSession": true
+  },
+  "nativeConcurrency": {
+    "status": "passed",
+    "command": "node scripts/cli-preflight.mjs --provider codex --only 'concurrent-session-isolation'",
+    "distinctIds": true,
+    "separateCwd": true,
+    "overlapObserved": true,
+    "bothCompleted": true
+  },
+  "nativeCrashAndInterrupt": {
+    "status": "passed",
+    "command": "node scripts/cli-preflight.mjs --provider codex --only 'crash-isolation-and-resume|interrupt-and-continue'",
+    "interruptSameSessionContinued": true,
+    "crashOtherProcessHealthy": true,
+    "crashSameIdRestored": true
+  },
+  "incidentalClaudeAttempt": {
+    "status": "blocked",
+    "code": "auth_required",
+    "nativeCode": "oauth_org_not_allowed",
+    "countedForCurrentV1": false
+  },
+  "limits": [
+    "Protocol types remain generated and locked at 0.161.0; 0.163.0 is observed as untested outside the exercised method subset.",
+    "The Adapter suites use synthetic prompts and temporary projects; they do not establish the full Codex protocol or every native tool and configuration surface.",
+    "Host crash cleanup after an unobserved detached descendant and external MCP process ownership remain outside the evidence.",
+    "Claude Code remains outside the current V1 real acceptance scope; the incidental integration attempt was blocked by the CLI account policy and is not a pass."
+  ]
+}
