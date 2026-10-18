@@ -48,7 +48,17 @@ This rule follows the user's 2026-10-13 requests; the wording remains subject to
 
 Read `tasks/README.md` before creating or executing a task.
 
-AI 执行任务最后，注意检查并更新相关文档，避免文档漂移。
+### 文档同步与收尾复核
+
+依据用户 2026-10-17 对文档漂移复盘建议的「apply」确认；本次规则 diff 待审阅。
+
+- 触发时机：对话决定落稿、实现或验证结果改变现有事实时，检查文档影响；提交前和回复工作完成前，复核最终 diff。没有提交的工作也必须完成复核。
+- 按决定或事实追踪影响，不只按修改文件检查。先明确本次改变了什么、哪些条件仍未解决，再核对负责文档、决定记录、路线图、验收要求和相关任务；按主题、编号、引用与同义表述搜索，不能只搜索原句。
+- 路线图须同时核对“下一步、整体概况、模块状态、阶段计划、验收进度”；相关记录须检查下一步、负责人、阻塞条件、完成条件和状态摘要。已决定事项不得继续写成待人决定，同一文件不同章节也须一致。
+- 保持事实的唯一负责文档，其他位置优先引用；历史验证记录保留原基线和结论，当前总结链接新决定。范围确认、代码实现、验证通过和人工验收分别记录，不互相代替。
+- 链接、格式或语法检查通过不代表语义一致。复核发现的遗漏应在本轮修正；无法修正的列明原因和影响，不报告为全部同步完成。
+- 收尾在已有任务记录中简述已核对的文档及章节、更新项和保留项理由；无需任务记录的小改动在最终回复中简述。检查没有影响的文档不必制造修改。
+- Agent 修改文档后的自动提醒、收尾链接检查、性能边界与信任启用步骤见 [Agent 文档 Hook](scripts/README.md#agent-文档-hook)；hook 不代替上述语义复核。
 
 ## Build, Test, and Development Commands
 
@@ -58,7 +68,7 @@ The repository is a pnpm workspace (`pnpm-workspace.yaml`); Node and pnpm versio
 - `pnpm dev`: start the desktop app in development mode.
 - `pnpm typecheck`: type-check every workspace package.
 - `pnpm test`: run workflow-script tests and every package's unit tests (Vitest); no real CLI or model calls.
-- `pnpm test:scripts`: test documentation checks and workflow scope selection only.
+- `pnpm test:scripts`: test documentation checks, Agent document hooks, and workflow scope selection only.
 - `pnpm check:docs`: check local Markdown link regressions against HEAD; options and manual review boundaries are in `scripts/README.md`.
 - `pnpm check:code`: build the Adapter once, type-check all packages and run all script/unit tests regardless of the changed files.
 - `pnpm check:commit`: check staged documentation and select documentation-only or full basic checks; also run by the `pre-commit` hook. Scope rules are in `scripts/README.md`.

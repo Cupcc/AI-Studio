@@ -1,4 +1,4 @@
-# 开发脚本与 Commit 门禁
+# 开发脚本与 Hooks
 
 ## 测试分层
 
@@ -36,6 +36,32 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 - 本地 `check:docs` 默认比较 HEAD 与当前工作树（包含未忽略的未跟踪文件）；提交门禁比较 HEAD 与 Git 暂存快照，未暂存修复和未跟踪目标不能掩盖提交中的断链。
 - 只阻断相对基线新增的问题，历史问题按来源路径、链接和问题类型识别，不借本任务批量清理。`pnpm check:docs --base <commit> --head <commit>` 检查两个快照；`pnpm check:docs --base ''` 对当前工作树做完整审计，可能暴露历史问题。
 - 不访问外链，不检查 HTML 内 href、非 Markdown 文件锚点或文档内容语义，也不是 Markdown 排版 linter。表格／标题预览、移动后的旧路径搜索、FR/AC 一致性及确认规则仍按负责索引执行。
+- 决策与状态的语义复核按 [AGENTS.md 文档同步与收尾复核](../AGENTS.md#文档同步与收尾复核) 执行；提交 hook 的链接检查结果不表示关联文档已同步，未提交工作也须在回复完成前复核。
+
+## Agent 文档 Hook
+
+依据：用户 2026-10-17 明确要求 Agent 修改文档时触发 hook，并回复「approve and apply，注意轻量级，不要拖缓运行」。配置为 [.codex/hooks.json](../.codex/hooks.json)，处理脚本为 [agent-docs-hook.mjs](../.codex/scripts/agent-docs-hook.mjs)。文档复核规则仍由 [AGENTS.md](../AGENTS.md#文档同步与收尾复核) 负责。
+
+| 时点 | 行为与开销 |
+|---|---|
+| `SessionStart` | 记录本会话的文档元数据基线；只做一次有超时的 Git 状态查询，不运行链接检查 |
+| `PostToolUse`：`apply_patch` / `Bash`（含 `exec_command`） | 一次有超时的 Git 状态查询，仅读取变更文档的文件元数据；有文档变化时给 Agent 一次复核提醒，同一待收尾批次去重。不读取正文、不调用模型、不运行链接检查 |
+| `Stop` | 只在本会话基线之后检测到文档变化时运行现有链接回归检查，同一会话、同一文件元数据与 Git 状态复用结果。无本会话文档变化时直接放行；已提醒且链接通过直接放行；漏发提醒或检查失败时最多请求一次续跑，修复改变快照后可再检查，`stop_hook_active` 时不再阻止结束 |
+
+轻量约束：Git 查询上限 1.5 秒，链接检查上限 8 秒；外层 SessionStart / Post / Stop 超时分别为 3 / 3 / 12 秒。通常只花进程启动、Git 查询与少量文件元数据读取时间；链接检查只在收尾运行。没有后台 watcher、模型评审调用或应用测试；失败续跑会使用当前 Agent 的正常对话预算，不无限重试。超时和失败会要求 Agent 修复或明确报告未完成，不能记作通过。
+
+检测范围与边界：
+
+- 检测未被 Git 忽略的 `.md`（含根规则、索引、spec、task）及 `docs/` 下 `.html` 的新增、修改、删除和重命名。通过 Git 实际状态检测 Shell 写入，不依赖命令字符串猜测；Stop 补查未匹配的工具写入。HTML 只触发语义复核提醒，现有链接检查不解析 HTML 内容。
+- `SessionStart` 会把启动前已有的文档改动记录为基线，不让每个新会话为历史脏文档重复支付链接检查；启动后由其他会话或人工修改文档仍可能触发。已提交且在两次检测之间没有留下工作树变化、被忽略的文件、仓库外文件，不在此轻量检测的保证范围内；原有提交门禁和人工／AI 复核仍适用。
+- 文件元数据用于失效检测，非内容语义判断；触碰时间戳可能导致重新检查。状态按工作树与会话隔离，保存于忽略目录 `.runtime/agent-docs-hook/`，仅保存路径、元数据摘要、检查结果及去重标记，不保存对话或工具输入。可随 `.runtime/` 清理，清理后重新检测。
+- 此 hook 提醒 Agent 追踪关联文档；不证明已经完成语义复核，不自动改写文档，不代替人工确认。仅配置 Codex 主会话的 `SessionStart` / `PostToolUse` / `Stop`；未配置 Claude Code 或 `SubagentStop`。
+
+启用与验证：
+
+1. 在仓库目录启动支持 hooks 的 Codex，运行 `/hooks` 查看并信任本项目的具体 hook 定义；项目 `.codex/` 配置层也须受信任。这是 [Codex 官方的加载与信任要求](https://learn.chatgpt.com/docs/hooks)，配置文件存在不代表已经启用；定义变更后按 Codex 提示重新审阅。
+2. `pnpm test:scripts` 覆盖去重、Shell 修改、增删改名、漏发补查、会话隔离、失败续跑、修复重检、真实本地链接检查与超时；不发送真实模型请求。
+3. 本次交付为配置与本地脚本验证；尚未在用户信任后的真实 Codex 会话中验证事件加载与触发。可在信任后修改一份文档，确认收到一次复核提醒并在结束前运行检查。需在 `/hooks` 中停用时，不必改动 Git hooks。
 
 ## 本地 Commit 门禁
 

@@ -1,0 +1,42 @@
+{
+  "description": "Lightweight document review reminders and cached end-of-turn link checks",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact|fork",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/scripts/agent-docs-hook.mjs\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/scripts/agent-docs-hook.mjs\"",
+            "timeout": 3,
+            "additionalContextLimit": 700
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/scripts/agent-docs-hook.mjs\"",
+            "timeout": 12,
+            "statusMessage": "Checking changed documentation"
+          }
+        ]
+      }
+    ]
+  }
+}
