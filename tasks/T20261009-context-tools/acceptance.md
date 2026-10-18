@@ -16,6 +16,18 @@ W23 初审发现六项缺陷（截断标志粘住、路径裁切未标记、脱�
 
 独立真实 Codex 非 Git 原生 patch 与当前应用原生附件策略分别成功，见[原生 patch](evidence/W23-real-codex.json)、[文件引用](evidence/W23-native-reference.json)。这两次真实调用早于 F5 / F6 元数据修复；最新来源与无 patch 身份保存由最终本地探针复验，历史 JSON 保留原样。Main Agent 的 Adapter 同轮 steer 原始证据已由 W23 审计，未冒充 W23 独立执行或应用 UI 的真实追加验收。
 
+## 2026-10-18 Codex 应用 UI 与四工具综合复验（W24）
+
+### Main Agent 技术复验结果
+
+- **本轮 Main Agent 技术复验：通过。** 在隔离的 macOS arm64 Electron 应用中，不启用模拟 Provider，使用 Codex CLI 0.163.0 完成普通文件引用、Running 回合内追加引用，并在同一应用中打开 Files、项目 Diff、Browser 本地预览和 Terminal。
+- 普通发送从 Files 添加带空格文件名后，Codex 读出应用未放入文字的 token `ui-steer-amber-542`；Running 回合先执行 `sleep 30`，再从 Files 添加 `steer reference.txt` 并发送，Codex 在同一回合读出 `ui-steer-same-turn-731`。完成后仅有一个该回合的“查看本轮变更”入口，证明追加没有新建回合。
+- 四工具结果：Terminal 真实 PTY 输出标记并创建第二个 Tab，Browser 访问隔离回环 HTTP 页面，项目 Diff 从非 Git 降级切换到 Git HEAD `+1/-0`，Project 关闭确认后回到启动页。原始记录、fixture、环境和截图哈希见 [W24 review](evidence/W24-review.md) 与 [结构化结果](evidence/W24-real-codex-ui.json)。
+
+### 通过范围与保留项
+
+W24 补齐路线图第 1 项所列的应用 UI Codex 运行中追加和四工具综合技术证据；它是 Main Agent 自检，不代替独立 AI 复验、随后新增本轮 Diff 的人工产品验收、Codex Stop / 第二模型 / 并发等原生对齐专项、Claude Code 真实验收或最终打包验收。
+
 ## 2026-10-18 当前 V1 范围更新
 
 本记录的历史基线、阶段结论和未覆盖项保持不变。按 [DEC-16](../../docs/07.%20Decisions.md#dec-16-v1-真实-cli-验收范围)，当前 V1 后续真实 CLI 只执行 Codex；Claude Code 的实现、模拟验证和历史真实证据保留，本轮不新增真实调用，也不把其真实链路记为通过，且不随当前 V1 发布（DEC-19）。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，应用不设置调用次数、费用上限或自动重试护栏。按 [DEC-17](../../docs/07.%20Decisions.md#dec-17-github-release-发布渠道与排期)，固定上线日期取消，发布准备目标改为 GitHub Releases；发布物要求仍需人工确认。
@@ -25,7 +37,7 @@ W23 初审发现六项缺陷（截断标志粘住、路径裁切未标记、脱�
 ## 当前范围与人工功能验收
 
 - 当前阶段 1（Files、项目 Diff、文件引用）的独立验收见下节；Runtime 历史报告保留在后半部，不能把其旧状态读作当前未实现状态。
-- **完整 AC-07 尚未完成**：本轮 Diff、原生补丁持久化、Conversation 入口及 Codex 普通发送的原生文件接收已有新增证据，见上节 W23 与[主 Agent 自检](evidence/W0-turn-diff-report.md)。Adapter 真实同轮 steer 文件引用已有[自检证据](evidence/W0-codex-steer-live.json)；应用 UI 的真实追加交互与四工具综合技术验收仍待补齐；Claude Code 按 DEC-16 / DEC-19 暂缓。
+- **完整 AC-07 尚未完成**：本轮 Diff、原生补丁持久化、Conversation 入口、Codex 普通发送与应用 UI 同轮追加已有新增证据，见 W23、W24 与[主 Agent 自检](evidence/W0-turn-diff-report.md)。W24 的四工具综合结果仍是 Main Agent 技术复验，独立 AI 复验、新增本轮 Diff 人工验收、原生 Stop / 其他协议专项及最终打包范围继续保留；Claude Code 按 DEC-16 / DEC-19 暂缓。
 - **人工功能验收：已验收（2026-10-18）**。用户确认路线图中人体验收的项目全部通过，接受 Files / 项目 Diff / 文件引用现有体验，以及 Terminal / Browser 与关闭 / 退出交互。确认原文、接受基线与边界见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。该次接受不覆盖随后实现的本轮 Diff；新增功能待人工验收，完整 AC-07 的剩余技术边界见上节，任务状态不变。
 
 ## 2026-10-18 人工取舍确认
@@ -40,7 +52,7 @@ W23 初审发现六项缺陷（截断标志粘住、路径裁切未标记、脱�
 
 ### 未覆盖、边界与待决事项
 
-- 本阶段使用模拟 Provider；Claude Code 运行中追加 / 排队、Needs Input 文件答复、真实 CLI 接收、本轮 Diff / 历史补丁不在本次通过范围。当前 V1 后续真实验证只安排 Codex。
+- 阶段 1 的历史独立复验使用模拟 Provider；W24 已补充真实 Codex 应用 UI 的普通发送与 Running 同轮追加。Claude Code 运行中追加 / 排队、Needs Input 文件答复、本轮 Diff / 历史补丁的 Claude 真实链路仍不在当前 V1 范围；后续真实验证只安排 Codex。
 - W22 未完成深路径降级提示的 GUI 步骤；W18 / W21 已独立验证长路径子项省略、可读同级项保留、目录不会整体失败。HFS+ 与区分大小写 / Unicode 的实体卷未挂载，后者用 FS seam 验证，不声称实体卷实测通过。
 - 本地 Project 为受信任目录：Git `filter.*.clean` 仍可能执行仓库配置命令；主动脱离进程组的恶意过滤器不在当前清理保证内。Git 元数据可合法位于 Project 外；split-index 的 sharedindex 缓存 mtime 会刷新（内容不变）。文件引用是发送前验证的路径文本，不是内容快照。详细边界由 [独立安全复验](evidence/W18-review.md#本地-project-信任边界与非阻塞事项)维护。
 - W22 GUI 使用 `890a431` 的既有开发 / 打包产物；不含本轮无 HEAD 说明文案和 aliases 修复，其 GUI 结论仍限定于旧基线。aliases 修复由 W21 独立复验；最新源码的构建 / E2E / 打包与冒烟门禁已由 Main Agent 自检完成，W21 独立复核新包与构建的 119 个对应文件逐字节一致，详见下表；不将旧包截图改记为新包 GUI 验收。
@@ -58,7 +70,7 @@ W23 初审发现六项缺陷（截断标志粘住、路径裁切未标记、脱�
 | 来源与场景 | 独立操作 / 实际结果 | 结论与证据 |
 |---|---|---|
 | FR-TOOL-001 / AC-07：Files | W17 按需展开、只读多编码查看、变化刷新、失败状态、键盘及外观；W19 复验可见控制字符与前 2000 项；W22 在包含 utility worker 的 `890a431` 构建中实际展开 src 并查看代码 | 通过；[W17](evidence/W17-review.md)、[W19](evidence/W19-review.md)、[W22 Files](evidence/W22-files-latest-normal.png) |
-| FR-INPUT-001：模拟引用闭环 | W19 从 UI 验证 View / Codex / Claude 普通发送、移除与去重、Codex 追加 / 失败保留、删除前拒绝及跨 Project 隔离；Claude capability none 如实保持输入 | 通过（模拟）；[W19](evidence/W19-review.md)、[Codex](evidence/W19-codex-reference-delivered.png)、[Claude](evidence/W19-claude-reference-delivered.png) |
+| FR-INPUT-001：文件引用闭环 | W19 从 UI 验证 View / Codex / Claude 普通发送、移除与去重、Codex 追加 / 失败保留、删除前拒绝及跨 Project 隔离；W24 真实 Codex UI 验证普通发送与 Running 同轮追加；Claude capability none 如实保持输入 | 通过（模拟 + Codex 真实 UI）；[W19](evidence/W19-review.md)、[W24](evidence/W24-review.md)、[Codex](evidence/W19-codex-reference-delivered.png)、[Claude](evidence/W19-claude-reference-delivered.png) |
 | FR-TOOL-002：项目 Diff | W22 主动打开工具，已暂存 / 未暂存同显、未跟踪、删除、重命名、二进制 / 链接 / 模式回退、字面 pathspec、冲突、非 Git、无 HEAD 与子目录范围均符合；工具 / Project 切换恢复正确文件 | 通过；[逐项 GUI](evidence/W22-review.md#实际操作与结果)、[HEAD 两处编辑](evidence/W22-diff-both.png)、[冲突](evidence/W22-diff-conflict.png)、[无 HEAD](evidence/W22-diff-unborn.png) |
 | Tools §4.1 / §5.2：路径、索引与权限边界 | W21 原定 60 项终验通过；含最终 Files / surface 30、Git / 引用定向 20、index / 边界矩阵。目录替换两个完整 40 秒窗口与读取均无泄漏；长路径精确保留可读同级项；用户 index 内容 / mtime 不变，hooks 不执行 | 通过；[W18 / W21](evidence/W18-review.md)、[边界](evidence/W21-boundary-final.log)、[Files / surface](evidence/W21-files-surface-final.log) |
 | 文件身份修复 / FR-INPUT-001 | W21 新增 12 项独立用例 + 48 项引用 / IPC 回归通过：按实际 realpath 合并 aliases、不同路径不漏投、原始拼写完整验证、精确覆盖、主进程 aliases 不泄漏 | 通过；[独立结果](evidence/W21-reference-final.log)、[回归](evidence/W21-reference-ipc-regression.log) |

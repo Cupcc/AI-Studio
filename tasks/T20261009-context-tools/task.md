@@ -52,7 +52,7 @@ created: 2026-10-09
 - [ ] 按 AC-07 的补充标准验证项目 / 本轮 Diff 的范围、原生补丁保存、并行轮次隔离及不可用降级。
 - [ ] 按 AC-07 的补充标准验证多 Terminal 实例运行、新建 / 切换 / 关闭、隐藏面板及 Session Stop 隔离。
 - [ ] 按 AC-07 的 2026-10-12 补充标准验证 Files 按需加载、文件刷新 / 上下文分离、Browser 本地页面和隔离、历史 patch 显示、终端重新附着与输出恢复；场景见 [工具规格 §5](../../specs/tools/spec.md#5-验证与实施边界)。
-- [ ] 按 AC-07 的 2026-10-13 补充标准验证 Codex 实际收到文件引用、Browser 首轮边界和终端合并关闭 / 退出确认；Claude Code 的真实文件引用暂缓；下表为场景计划，实际结论以验收记录为准。
+- [x] 按 AC-07 的 2026-10-13 补充标准验证 Codex 实际收到文件引用、Browser 首轮边界和终端合并关闭 / 退出确认；Claude Code 的真实文件引用暂缓；W24 补齐应用 UI 的普通发送与 Running 同轮追加，完整范围和边界见[验收记录](acceptance.md#2026-10-18-codex-应用-ui-与四工具综合复验w24)。
 
 ## 已确认事项
 
@@ -108,7 +108,7 @@ created: 2026-10-09
 - 按 04 第 1 节第 13 项先验证 Codex CLI 事件、覆盖范围、非 Git 原生补丁与历史恢复；Claude Code 同等数据保留后续入口；资料见 [research.md](research.md)。Codex 真实调用按 CLI 实际结果记录；2026-10-18 新增真实结果见本轮验收，历史未调用记录不改写。
 - 工具规格的本轮范围已确认；Terminal / Browser 与 Files / 项目 Diff / 文件引用代码已实现；阶段 1 的独立安全与界面复验已通过，适用基线、自动化门禁与未覆盖项见 [acceptance.md](acceptance.md)。本轮 Diff、轮次补丁存储与 Adapter 原生补丁接口已在 2026-10-18 接入；本阶段剩余综合验收与独立结论见验收记录。Browser 首轮问题已按 Q1、Q5、Q6 解决，未来扩展另行评估；现有 Adapter 任务不因此视为覆盖本轮 Diff。
 - 2026-10-13 开发环境的 PATH 仍无全局 agent-browser，使用 `npx --yes agent-browser`，先读取其已安装版本的 core / electron 工作流，再操作隔离 Electron 应用。
-- 剩余验证（负责人：AI；不阻塞本阶段实现）：应用 UI 的 Codex 真实运行中追加引用与四工具综合技术验收。Adapter 同轮 steer 引用已取得真实证据；普通发送原生引用、Git / 非 Git 原生补丁及 Shell 无记录边界已取得证据，接口 / 迁移已实施，不再列为待开始条件。Claude Code 真实验收由 DEC-16 暂缓且不随当前 V1 发布（DEC-19）；运行时工具开发授权已解决，不再阻塞阶段 2 / 3。
+- W24 已完成应用 UI 的 Codex 真实运行中追加引用与四工具综合技术复验（Main Agent 自检）；Adapter 同轮 steer、普通发送原生引用、Git / 非 Git 原生补丁及 Shell 无记录边界已有对应证据，接口 / 迁移已实施。剩余工作是独立 AI 复验、新增本轮 Diff 人工验收、Codex Stop / 第二模型 / 并发等原生对齐专项及最终打包；Claude Code 真实验收由 DEC-16 暂缓且不随当前 V1 发布（DEC-19）。
 - 交互原型 v01 / v02 尚未覆盖本次工具行为；[v03](../../design/prototypes/README.md#studio-灰度交互原型-v03)（探索中，[T20261011-prototype-v03](../T20261011-prototype-v03/task.md)）已做出项目 / 本轮 Diff 与 Terminal Tabs 供评审。Shell Spec v02 已确认（2026-10-11），v01 保留作历史依据。
 
 ## 执行记录
@@ -116,6 +116,8 @@ created: 2026-10-09
 - 2026-10-18（本阶段收尾复核，Main Agent）：已按事实追踪核对 Tools §4 / §5、Adapter §3.13、Session §3.10 / §5.4、Input 引用入口与 Project 接缝、desktop README；同步 04 接口实施说明、05 现有证据入口、06 下一步 / 整体 / 模块 / 阶段 / 验收、07 后续执行授权与发布边界、08 数据流与工具 / 持久化节点、scripts 发布准备及地基总任务 / 人工清单 / 原生对齐任务的当前摘要。01～03 的既定行为与 FR / AC 映射未改变，不制造规格修改。历史验证保留原基线和结论；新功能与既有人工接受分开，完整 AC-07 的剩余综合验证和最终 V1 发布包仍保留。49 项 Electron 回归、基础门禁与本阶段未签名包冒烟通过，证据见本轮自检；独立结论以 W23 记录为准。
 
 - 2026-10-18（本轮 Diff 实施，Main Agent）：完成 Adapter 原生快照与绑定身份、SQLite `turn_diffs` / 修订冻结、typed IPC、Conversation 入口及两类 Diff 切换；Codex 文件引用采用已实测的 native mention。真实 Codex 0.163.0 在隔离 Git / 非 Git fixture 验证原生 patch，并验证 Adapter 同轮 steer 文件引用；Shell 写入未提供对应记录；真实应用 UI 验证引用 token、补丁显示、工作区后改不改变历史及深浅色。独立 W23 发现的限额、来源、脱敏及无 patch 身份问题已交回修复并复验。基线、门禁和未覆盖项见[本轮自检](evidence/W0-turn-diff-report.md)与[独立评审](acceptance.md#2026-10-18-本轮-diff-独立评审w23)；任务保留 in_progress，新增功能未人工验收。
+
+- 2026-10-18（W24 Codex 应用 UI 与四工具综合复验，Main Agent）：在隔离 Electron 应用中关闭模拟 Provider，使用 Codex 0.163.0 验证 Files 普通引用、Running 同轮追加（同一回合返回 `ui-steer-same-turn-731`），并打开 Files、项目 Diff、Browser 本地预览、Terminal 多实例及 Project 关闭确认。结果与截图见 [W24 review](evidence/W24-review.md) / [结构化结果](evidence/W24-real-codex-ui.json)。该自检补齐路线图第 1 项，不代替独立 AI 复验、Codex 其他原生对齐、Claude Code 真实验收、最终打包或新增 Diff 人工验收；任务继续 `in_progress`。
 
 - 2026-10-18（人工体验结果同步，Main Agent）：用户确认路线图中人体验收的项目全部通过；更新本任务和验收记录的当前人工结论，现有功能不再列为待人体验。历史技术基线、未实现的本轮 Diff、真实引用及完整 AC-07 缺口保留；本轮只更新文档。
 

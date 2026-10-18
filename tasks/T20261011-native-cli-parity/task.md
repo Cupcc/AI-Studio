@@ -30,11 +30,11 @@ created: 2026-10-11
 
 ## 后续实施与验证
 
-2026-10-13 工具准备依赖澄清（DEC-14）：文件引用、原生轮次补丁与 Project / Terminal 关闭接口由 [工程工具任务](../T20261009-context-tools/task.md) 统筹贯通，修改 Adapter / Session 时与本清单协调，避免重复工作；其余遗留项继续在原负责范围跟踪，不全部阻塞工具开发。该次仅文档更新；2026-10-18 后续「continue to implement」已启动工具原生接缝实施，Codex 0.163.0 普通原生引用、聚合 / 完成文件补丁及其真实边界见[新增独立评审](../T20261009-context-tools/acceptance.md#2026-10-18-本轮-diff-独立评审w23)。该子集不代替下表的真实 steer、Stop、模型及全协议兼容性补验。
+2026-10-13 工具准备依赖澄清（DEC-14）：文件引用、原生轮次补丁与 Project / Terminal 关闭接口由 [工程工具任务](../T20261009-context-tools/task.md) 统筹贯通，修改 Adapter / Session 时与本清单协调，避免重复工作；其余遗留项继续在原负责范围跟踪，不全部阻塞工具开发。该次仅文档更新；2026-10-18 后续「continue to implement」已启动工具原生接缝实施，Codex 0.163.0 普通原生引用、聚合 / 完成文件补丁及其真实边界见[新增独立评审](../T20261009-context-tools/acceptance.md#2026-10-18-本轮-diff-独立评审w23)。工程工具任务的 W24 已补充应用 UI 同轮引用与四工具综合 Main Agent 复验；本任务仍跟踪 Codex Stop、模型、并发和全协议兼容性，不将 W24 记作这些专项通过。
 
 | 遗留项 | 实施与验证要求 | 负责 / 完成条件 |
 |---|---|---|
-| 运行中发送 | Codex 当前回合追加已接入 Adapter；当前 V1 先贯通 Codex IPC、持久化、输入区并验证消息归属、终态、Stop 后队列与续聊；Claude 原生排队保留后续 | Adapter / Session；Codex 先补模拟／真实复验，Claude Code 暂不发起真实验收 |
+| 运行中发送 | Codex 当前回合追加已接入 Adapter，并已由工程工具任务在应用 UI 真实复验同轮文件引用；当前 V1 仍需核对消息归属、终态、Stop 后队列与续聊；Claude 原生排队保留后续 | Adapter / Session；Codex 继续补原生专项，Claude Code 暂不发起真实验收 |
 | 原生功能覆盖 | 核对原生可见输出、模型与推理控制、权限、附件、Rule / Skill / Context、命令与会话操作；区分已接入、待接入、原生接口未开放及版本不支持，记录具体证据 | Adapter / Session；逐项能力表与缺口实现，协议不可用不能记为产品永久不支持 |
 | Codex 版本与精确 Stop | 记录复测时的可执行文件、实际版本、代码、协议与模型；核对协议差异，分别验证精确停止和 Runtime 兜底；精确路径须保留先前服务且不影响其他 Session | Adapter；旧 0.161.0 证据不外推到历史检测的 0.162.0 或其他版本 |
 | Claude 与模型 / 并发 | Codex 第二模型、真实 Codex 并发与单方停止隔离列入当前 V1；Claude 真实流式、Rule / Skill、原 ID Resume、模型切换、命令 Stop / 续聊和并发暂缓 | Adapter / Session；Codex 真实请求与结果、UI 和系统进程证据；Claude 后续独立安排 |

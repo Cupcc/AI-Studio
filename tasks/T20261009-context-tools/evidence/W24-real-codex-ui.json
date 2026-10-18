@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-18",
+  "baseline": {
+    "git": "f0f3a8c0af54cd150985a4a4cea476984357e9a0",
+    "mainBundleSha256": "69ddcf8923e28ffc21409b7b0d1c93dba98c7685e44c16b86cc96079ce59639e",
+    "platform": "macOS 15.6 arm64",
+    "electron": "44.4.5",
+    "node": "26.10.0",
+    "pnpm": "12.10.1",
+    "codex": "codex-cli 0.163.0",
+    "protocolTypes": "0.161.0"
+  },
+  "fixture": {
+    "project": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-real-ui-0DrSNg/Codex Real Project",
+    "userData": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-real-ui-0DrSNg/user data",
+    "server": "http://127.0.0.1:48765/",
+    "tokens": {
+      "ordinaryReference": "ui-steer-amber-542",
+      "sameTurnSteer": "ui-steer-same-turn-731"
+    }
+  },
+  "results": {
+    "ordinaryReference": {
+      "status": "passed",
+      "operation": "Files -> select reference note.txt -> Add to conversation -> send",
+      "codexReadReference": true,
+      "tokenReturned": true,
+      "nativePatchHistoryEntryVisible": true,
+      "scopeStayedInFilesUntilUserChangedIt": true
+    },
+    "sameTurnSteer": {
+      "status": "passed",
+      "operation": "start Codex turn with sleep 30 -> add steer reference.txt while Running -> Send",
+      "codexReadReference": true,
+      "tokenReturned": true,
+      "singleTurnHistoryEntry": true,
+      "sameTurnConversationEntry": true,
+      "filesWereNotModified": true
+    },
+    "fourTools": {
+      "files": "opened, selected and referenced files; token visible in read-only viewer",
+      "diff": "non-Git fallback displayed, then Git HEAD diff showed native.txt +1/-0 and file patch",
+      "browser": "local 127.0.0.1 preview loaded directory listing in isolated webview target",
+      "terminal": "real PTY printed W24-TERMINAL-OK; two tabs created; idle tab close confirmation accepted; HTTP server stopped with Ctrl-C",
+      "projectClose": "confirmation shown and confirmed; returned to launcher"
+    }
+  },
+  "screenshots": {
+    "sameTurn": { "path": "W24/codex-ui-steer-same-turn.png", "sha256": "65e299fd309694192724ccf08e66200f245f713d3e6959d8f10d980fac622f62" },
+    "projectDiff": { "path": "W24/codex-ui-project-diff.png", "sha256": "d295dbf6df93835dd19a46737d6cec10255071ae47418ad8b376fafcca318a78" },
+    "browser": { "path": "W24/codex-ui-browser-local.png", "sha256": "fa8f0d9db7c0f7b4c784df98e4df78c626996730d90f003dfca8ea77a26cd613" },
+    "terminal": { "path": "W24/codex-ui-terminal-tabs.png", "sha256": "e1387311432891a630c2e4f2ce36b4cb184500d6ee3d359423722445b1d5eea4" }
+  },
+  "limits": [
+    "This is a real Codex 0.163.0 application UI run in one isolated Project; it does not establish Claude Code compatibility.",
+    "The same-turn run used a shell sleep to keep the turn active; no model or CLI quota guard was added.",
+    "The real run did not modify files through Codex; the project Diff check used an explicit local Git fixture edit."
+  ]
+}
