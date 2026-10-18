@@ -1,0 +1,195 @@
+{
+  "reviewer": "W23",
+  "capturedAtUtc": "2026-10-18T06:59:51.974660+00:00",
+  "head": "dcfaac35ef86200721727ab53533682f2dd85d4e",
+  "branch": "feat/turn-diff",
+  "platform": {
+    "system": "Darwin",
+    "release": "15.6",
+    "machine": "arm64",
+    "node": "v26.10.0",
+    "pnpm": "12.10.1",
+    "electron": "44.4.5"
+  },
+  "scope": "Modified tracked and untracked application source files under apps/desktop/src and packages/agent-adapter/src; task evidence excluded. Other unchanged source is fixed by head.",
+  "sourceManifestSha256": "a9d0cf3df621d7f6a07800ad6e6cdf090ff153ea3582c9c80f54bcd7d2ee7125",
+  "sourceFiles": [
+    {
+      "path": "apps/desktop/src/main/ipc/session.ts",
+      "sha256": "e4eaa1cc2e8dedeb418624f57e061702f75f82a230d4254e600b6ba5c2009d87",
+      "bytes": 12910
+    },
+    {
+      "path": "apps/desktop/src/main/services/database/migrations/2026101801_turn_diff.ts",
+      "sha256": "4def3862dd4db92fe3142b6d8d9cfea7a97f2e1a6a5c508c77b75f77109691a7",
+      "bytes": 374
+    },
+    {
+      "path": "apps/desktop/src/main/services/database/migrations/index.ts",
+      "sha256": "3322a14132b8e7c58a705819b5874b4807d182f1b13c3dd79119c68ce265f21c",
+      "bytes": 527
+    },
+    {
+      "path": "apps/desktop/src/main/services/session/e2e-providers.ts",
+      "sha256": "23d5355d26d27c0ce75283750c66ee7c866e1b8fcb941dabb4eef286cecd0e90",
+      "bytes": 10917
+    },
+    {
+      "path": "apps/desktop/src/main/services/session/file-reference.test.ts",
+      "sha256": "6f03af5418b1e3eaf7200807557d8cfd36c638b887675781ffc9503d46b30cfd",
+      "bytes": 5299
+    },
+    {
+      "path": "apps/desktop/src/main/services/session/file-reference.ts",
+      "sha256": "9fb5fe8527747e71f536355bbbf5d71772878173bccd455d780ec4cf25235b64",
+      "bytes": 4195
+    },
+    {
+      "path": "apps/desktop/src/main/services/session/session-ipc.test.ts",
+      "sha256": "8286791f215e77edad1e776ace0b5f1f3ef6204288da9435cc43bac2897f3156",
+      "bytes": 9481
+    },
+    {
+      "path": "apps/desktop/src/main/services/session/session-service.test.ts",
+      "sha256": "51aac2620cf81d228d235d76a760dff39608fad596f0e3f3da7ba766b2461a0f",
+      "bytes": 75079
+    },
+    {
+      "path": "apps/desktop/src/main/services/session/session-service.ts",
+      "sha256": "74abcb6c6c4cf7277c76bcc7c2086f6ffd569309d99d02a8e5e6590dd58528c2",
+      "bytes": 54198
+    },
+    {
+      "path": "apps/desktop/src/main/services/session/store.ts",
+      "sha256": "e4019b965602f84f65621c93f045508503306bea04b15f181a867a5187e17819",
+      "bytes": 5416
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/project/Workspace.tsx",
+      "sha256": "23637cb693fbbc1d1867cf9e2032700d65681f75ff2d5dac01a247661949952c",
+      "bytes": 8267
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/project/integration.tsx",
+      "sha256": "293e9ed1548914929df09ec06ba4244cc95af3c0dc852624f6b37b460a254ced",
+      "bytes": 3441
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/session/Transcript.tsx",
+      "sha256": "eec3ddde8190b943afff6e5e87e542e0b8859353a53468c7c61212a5345050b9",
+      "bytes": 10431
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/session/session.css",
+      "sha256": "7b84c5941534503c8b047bb045181f94a24020ac5913e792b8dbfdf4c0b241a0",
+      "bytes": 20794
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/session/session.test.tsx",
+      "sha256": "8e4036ac3d224e67f8278e72e787c7c89fff9de74aedae7d53886daa104393cc",
+      "bytes": 25404
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/tools/diff/DiffPanel.tsx",
+      "sha256": "ad832951310ddfffd6e604da874438dcdf3ae76501bd6357f9b9e21547343752",
+      "bytes": 10562
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/tools/diff/TurnDiffPanel.tsx",
+      "sha256": "9cfbb2e4c96597ecb8790b7823a4fda024c27012a8dbb338d8328840ca8aa5aa",
+      "bytes": 5401
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/tools/diff/diff.css",
+      "sha256": "e10403b8efdf040a7baf338c699cfa927443bce35044b71ce48d1322b2dffdbd",
+      "bytes": 9090
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/tools/diff/integration.ts",
+      "sha256": "224b64944182d1cc554537c0f4b49ffacd264a9340990bfe3f42279d5d7fc070",
+      "bytes": 1736
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/tools/diff/turn-diff-panel.test.tsx",
+      "sha256": "0b92f2b0c04630cecd73d8a2a1c4d0d8b2979c6ff45f6a0a3abbcf1005ba2e5a",
+      "bytes": 3122
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/tools/diff/turn-diff-store.ts",
+      "sha256": "d1439cd8e93f6296758a0fdaf84fee2fa8a0b17b2451ca149f428145c8aa3eb9",
+      "bytes": 573
+    },
+    {
+      "path": "apps/desktop/src/renderer/src/features/tools/integration.ts",
+      "sha256": "af1fe448b02f06ea77f8df1b7f04f8f6f87ba631e68020fb494ff4e100c322eb",
+      "bytes": 1038
+    },
+    {
+      "path": "apps/desktop/src/shared/ipc/session.ts",
+      "sha256": "fc73d16095a16c280a24116d9e0349bd8a0d219cf1f1f8b09cbdf91c4ee2c573",
+      "bytes": 2962
+    },
+    {
+      "path": "apps/desktop/src/shared/tools/turn-diff.ts",
+      "sha256": "aa991859ebf2936390831d829726b9db30c959df3e32c3b516d42b358b92721f",
+      "bytes": 524
+    },
+    {
+      "path": "packages/agent-adapter/src/codex/connection.ts",
+      "sha256": "040dd38f6e6ab361910da1ab40d0c6478fc746342109f9cf7b92a3ce81624b12",
+      "bytes": 6533
+    },
+    {
+      "path": "packages/agent-adapter/src/codex/driver.ts",
+      "sha256": "21b13ef973e6ad668001e037b5b9da362641c54eefb57585eb9bff2ce52497d5",
+      "bytes": 24396
+    },
+    {
+      "path": "packages/agent-adapter/src/core/session-controller.ts",
+      "sha256": "2895c3f12fa70624191761414d100869ba22c47cfa20a07f70c43f5f04060bbb",
+      "bytes": 46489
+    },
+    {
+      "path": "packages/agent-adapter/src/core/turn-diff.ts",
+      "sha256": "bd2459c11dee3afcdbc49406df021972c07dce0a93af62105d599db2243e92b4",
+      "bytes": 1666
+    },
+    {
+      "path": "packages/agent-adapter/src/events.ts",
+      "sha256": "1e4f44d1266e9976ba1844e7b9f25f64908b49d0d36cf73cf16e94b1dace11ae",
+      "bytes": 4364
+    },
+    {
+      "path": "packages/agent-adapter/src/index.ts",
+      "sha256": "040ea0b665b6de0ada11ce6b5926c6deb1f40a1945477f6b4047bba67b1ce709",
+      "bytes": 2650
+    },
+    {
+      "path": "packages/agent-adapter/src/types.ts",
+      "sha256": "71e38c5667a2d799f09ae978fedec35f2756dce425774760e0d9715731bedf7a",
+      "bytes": 11669
+    }
+  ],
+  "affectedTestFiles": [
+    {
+      "path": "apps/desktop/e2e/turn-diff.spec.ts",
+      "sha256": "fd03034a761292597b3a1343039a0599525d7325db46c7d1b5e7269d3d05be2b"
+    },
+    {
+      "path": "packages/agent-adapter/test/codex/turn-diff.test.ts",
+      "sha256": "744212509c4c2e2110e9b03195cd8c6ab69beb1476f4e812cecdba5c630015bf"
+    }
+  ],
+  "gui": {
+    "provider": "simulated",
+    "mainBundleSha256": "69ddcf8923e28ffc21409b7b0d1c93dba98c7685e44c16b86cc96079ce59639e",
+    "contentSize": {
+      "width": 1440,
+      "height": 900
+    },
+    "finalMainBundleSha256": "69ddcf8923e28ffc21409b7b0d1c93dba98c7685e44c16b86cc96079ce59639e",
+    "finalMainBundleMatchesGui": true,
+    "sourceDifferenceAfterGui": "file-reference.ts evidence filename comment only, per Main Agent; no runtime behavior change."
+  },
+  "realCliEvidenceBoundary": "Independent real Codex 0.163.0 tests were captured before F5/F6 source/identity metadata fixes. Final metadata fixes are independently covered by local probes. No real request rerun."
+}

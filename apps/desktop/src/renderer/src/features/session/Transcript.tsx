@@ -4,6 +4,13 @@ import type { InputRequest, InputResolution, InputResponse, TranscriptItem } fro
 import { formatWorkedFor } from '@shared/session/presentation'
 import { AgentMarkdown } from './Markdown'
 import { useSessions } from './store'
+import { shellIntegration } from '../project/integration'
+
+function TurnDiffButton({ item }: { item: TranscriptItem }) {
+  const projectId = useSessions(state => state.summaries[item.sessionId]?.projectId)
+  if (!projectId || !item.turnId) return null
+  return <button className="transcript-diff-link" onClick={() => shellIntegration().openTurnDiff?.({ projectId, sessionId: item.sessionId, turnId: item.turnId! })}>查看本轮变更</button>
+}
 
 function resolutionText(request: InputRequest, resolution: InputResolution, redacted?: boolean): string {
   if (resolution.status === 'declined_with_text' || (resolution.status === 'answered' && resolution.viaText)) return '已在输入框回复'
@@ -88,7 +95,7 @@ export function Transcript({ item }: { item: TranscriptItem }) {
     </details>
   }
   if (item.kind === 'input_request') return <div data-transcript-id={item.id}><InputRequestCard item={item} /></div>
-  if (item.kind === 'turn_end') return <p className="transcript-turn-end" data-transcript-id={item.id}>Worked for {formatWorkedFor(item.durationMs)} · {item.outcome === 'completed' ? 'Done' : '已停止'}</p>
+  if (item.kind === 'turn_end') return <div className="transcript-turn-end" data-transcript-id={item.id}><span>Worked for {formatWorkedFor(item.durationMs)} · {item.outcome === 'completed' ? 'Done' : '已停止'}</span><TurnDiffButton item={item} /></div>
   return <ErrorCard item={item} />
 }
 
@@ -101,6 +108,7 @@ function ErrorCard({ item }: { item: Extract<TranscriptItem, { kind: 'error' }> 
     <div className="request-card__actions">
       {item.retryable && <button className="primary-button" disabled={pending || summary?.activity !== 'none' || summary?.stopping} onClick={() => void useSessions.getState().retry(item.sessionId)}>{pending ? '重试中…' : '重试'}</button>}
       <button className="secondary-button" aria-expanded={details} onClick={() => setDetails(!details)}>{details ? '收起详情' : '查看详情'}</button>
+      <TurnDiffButton item={item} />
     </div>
     {error && <p className="error-message" role="alert">{error}</p>}
   </section>

@@ -79,3 +79,11 @@
 .diff-patch__line--del { background: var(--color-diff-del-bg); }
 .diff-patch__line--hunk { background: var(--color-surface-soft); color: var(--color-text-3); }
 .diff-patch__line--meta { color: var(--color-text-muted); }
+
+.turn-diff-body { overflow: auto; }
+.turn-diff-summary { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.turn-diff-summary details { color: var(--color-text-muted); }
+.turn-diff-summary summary { cursor: pointer; }
+.turn-diff-selector { display: flex; flex-direction: column; gap: var(--space-1); padding: 0 var(--space-3) var(--space-2); font-size: var(--font-size-sm); }
+.turn-diff-selector select { width: 100%; min-width: 0; padding: var(--space-1); background: var(--color-pane); color: var(--color-text); border: 1px solid var(--color-border); border-radius: var(--radius-xs); }
+.turn-diff-body .diff-patch-wrap { flex: none; min-height: 80px; }

@@ -1,4 +1,5 @@
 import { defineContract, event, invoke } from './contract'
+import type { TurnDiffRecord, TurnDiffRef } from '../tools/turn-diff'
 import type {
   ComposerDraft,
   ConversationPage,
@@ -24,6 +25,7 @@ export const TRANSCRIPT_PAGE_SIZE = 100
 export const sessionContract = defineContract('session', {
   invoke: {
     list: invoke<{ projectId: string }, SessionSummary[]>('session:list'),
+    getTurnDiff: invoke<TurnDiffRef, TurnDiffRecord>('session:get-turn-diff'),
     getConversation: invoke<{ sessionId: string; beforeSequence?: number; limit?: number }, ConversationPage>('session:get-conversation'),
     // Creation/send return once stored and accepted; Runtime startup is asynchronous.
     create: invoke<CreateSessionRequest, SessionSummary>('session:create'),

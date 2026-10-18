@@ -1,0 +1,134 @@
+{
+  "scenario": "Independent non-Git native patch integration",
+  "fixture": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-native-UIIbeJ/non git fixture",
+  "availability": {
+    "version": {
+      "status": "ok",
+      "value": {
+        "version": "0.163.0",
+        "raw": "codex-cli 0.163.0",
+        "compatibility": "untested",
+        "testedVersions": "0.161.0"
+      }
+    },
+    "login": {
+      "status": "ok",
+      "value": {
+        "state": "logged_in",
+        "method": "api_key"
+      }
+    },
+    "status": "available"
+  },
+  "terminal": {
+    "outcome": "completed"
+  },
+  "diffEvents": [
+    {
+      "turnId": "9bf9f30c-f96f-4d18-8c1c-33544a2dc499",
+      "seq": 19,
+      "diff": {
+        "nativeSessionId": "01a14dbc-4266-7740-8210-f50682d44d8f",
+        "nativeTurnId": "01a14dbc-4310-7740-8812-36f0dfcd2e4a",
+        "source": "codex:turn/diff/updated",
+        "protocolVersion": "0.161.0",
+        "cliVersion": "0.163.0",
+        "state": "unknown",
+        "patch": null,
+        "files": [
+          {
+            "itemId": "exec-6ee2c44a-9dd6-4626-9261-10443787f7fe",
+            "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-native-UIIbeJ/non git fixture/native.txt",
+            "change": "modify",
+            "status": "completed",
+            "patch": "@@ -1 +1 @@\n-w23-before\n+w23-after\n",
+            "truncated": false
+          }
+        ],
+        "truncated": false,
+        "patchTruncated": false,
+        "fileListTruncated": false
+      }
+    },
+    {
+      "turnId": "9bf9f30c-f96f-4d18-8c1c-33544a2dc499",
+      "seq": 20,
+      "diff": {
+        "nativeSessionId": "01a14dbc-4266-7740-8210-f50682d44d8f",
+        "nativeTurnId": "01a14dbc-4310-7740-8812-36f0dfcd2e4a",
+        "source": "codex:turn/diff/updated",
+        "protocolVersion": "0.161.0",
+        "cliVersion": "0.163.0",
+        "state": "available",
+        "patch": "diff --git a/native.txt b/native.txt\nindex 4cbec61c504f319d6f1773d080937092ec9200ad..830775f010334d0c3d1aa74c73f28e3d4e7e5dab\n--- a/native.txt\n+++ b/native.txt\n@@ -1 +1 @@\n-w23-before\n+w23-after\n",
+        "files": [
+          {
+            "itemId": "exec-6ee2c44a-9dd6-4626-9261-10443787f7fe",
+            "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-native-UIIbeJ/non git fixture/native.txt",
+            "change": "modify",
+            "status": "completed",
+            "patch": "@@ -1 +1 @@\n-w23-before\n+w23-after\n",
+            "truncated": false
+          }
+        ],
+        "truncated": false,
+        "patchTruncated": false,
+        "fileListTruncated": false
+      }
+    },
+    {
+      "turnId": "9bf9f30c-f96f-4d18-8c1c-33544a2dc499",
+      "seq": 21,
+      "diff": {
+        "nativeSessionId": "01a14dbc-4266-7740-8210-f50682d44d8f",
+        "nativeTurnId": "01a14dbc-4310-7740-8812-36f0dfcd2e4a",
+        "source": "codex:turn/diff/updated",
+        "protocolVersion": "0.161.0",
+        "cliVersion": "0.163.0",
+        "state": "available",
+        "patch": "diff --git a/native.txt b/native.txt\nindex 4cbec61c504f319d6f1773d080937092ec9200ad..830775f010334d0c3d1aa74c73f28e3d4e7e5dab\n--- a/native.txt\n+++ b/native.txt\n@@ -1 +1 @@\n-w23-before\n+w23-after\n",
+        "files": [
+          {
+            "itemId": "exec-6ee2c44a-9dd6-4626-9261-10443787f7fe",
+            "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-native-UIIbeJ/non git fixture/native.txt",
+            "change": "modify",
+            "status": "completed",
+            "patch": "@@ -1 +1 @@\n-w23-before\n+w23-after\n",
+            "truncated": false
+          }
+        ],
+        "truncated": false,
+        "patchTruncated": false,
+        "fileListTruncated": false
+      }
+    },
+    {
+      "turnId": "9bf9f30c-f96f-4d18-8c1c-33544a2dc499",
+      "seq": 25,
+      "diff": {
+        "nativeSessionId": "01a14dbc-4266-7740-8210-f50682d44d8f",
+        "nativeTurnId": "01a14dbc-4310-7740-8812-36f0dfcd2e4a",
+        "source": "codex:turn/diff/updated",
+        "protocolVersion": "0.161.0",
+        "cliVersion": "0.163.0",
+        "state": "available",
+        "patch": "diff --git a/native.txt b/native.txt\nindex 4cbec61c504f319d6f1773d080937092ec9200ad..830775f010334d0c3d1aa74c73f28e3d4e7e5dab\n--- a/native.txt\n+++ b/native.txt\n@@ -1 +1 @@\n-w23-before\n+w23-after\n",
+        "files": [
+          {
+            "itemId": "exec-6ee2c44a-9dd6-4626-9261-10443787f7fe",
+            "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-native-UIIbeJ/non git fixture/native.txt",
+            "change": "modify",
+            "status": "completed",
+            "patch": "@@ -1 +1 @@\n-w23-before\n+w23-after\n",
+            "truncated": false
+          }
+        ],
+        "truncated": false,
+        "patchTruncated": false,
+        "fileListTruncated": false
+      }
+    }
+  ],
+  "content": "w23-after\n",
+  "result": "passed"
+}

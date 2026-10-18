@@ -1,0 +1,9 @@
+{
+  "base": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-ui-himj6K",
+  "project": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-ui-himj6K/W23 Native Diff",
+  "otherProject": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-ui-himj6K/W23 Other Project",
+  "pid": 59745,
+  "port": 9341,
+  "provider": "simulated",
+  "mainBundleSha256": "69ddcf8923e28ffc21409b7b0d1c93dba98c7685e44c16b86cc96079ce59639e"
+}

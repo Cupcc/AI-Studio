@@ -1,0 +1,24 @@
+{
+  "version": "codex-cli 0.163.0",
+  "login": "logged_in",
+  "root": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-steer-reference-Ufoz8s",
+  "filename": "steered reference #中文.txt",
+  "token": "steer-163d981a-862b-4f4d-9d37-0876e030771c",
+  "events": [
+    {
+      "type": "turn.diff.updated",
+      "state": "unknown",
+      "source": "client:native-turn-bound",
+      "nativeSessionId": "01a14dca-09af-7ee0-85cd-a8969bcc4961",
+      "nativeTurnId": "01a14dca-0aa4-7bc0-b6dd-d514d7157e77",
+      "cliVersion": "0.163.0",
+      "protocolVersion": "0.161.0"
+    }
+  ],
+  "answer": "I’ll run the four-second sleep command, then reply ready.\nready",
+  "startedTurn": "2cf30b53-d19a-42c1-8023-45e5fd0ffafd",
+  "outcome": "completed",
+  "completedTurn": "2cf30b53-d19a-42c1-8023-45e5fd0ffafd",
+  "referenceReceived": false,
+  "sameTurn": false
+}

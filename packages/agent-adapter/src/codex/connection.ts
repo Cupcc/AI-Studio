@@ -45,6 +45,7 @@ interface Methods {
 /** All outbound operations are checked against CLI-generated 0.161.0 types. */
 export class CodexConnection {
   readonly peer: JsonRpcPeer;
+  serverVersion: string | undefined;
 
   constructor(readonly runtime: RuntimeHandle, timeoutMs: number, onProtocolError?: (message: string) => void) {
     this.peer = new JsonRpcPeer(runtime.lineTransport(), {
@@ -58,10 +59,11 @@ export class CodexConnection {
   }
 
   async initialize(signal?: AbortSignal): Promise<void> {
-    await this.request('initialize', {
+    const response = await this.request('initialize', {
       clientInfo: { name: 'ai_developer_studio', title: 'AI Developer Studio', version: '0.1.0' },
       capabilities: { experimentalApi: true, requestAttestation: false },
     }, signal);
+    this.serverVersion = typeof response?.userAgent === 'string' ? /^[^/\s]+\/([\d.]+)/.exec(response.userAgent)?.[1] : undefined;
     this.peer.notify('initialized');
   }
 

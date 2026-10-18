@@ -103,7 +103,7 @@ Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-i
 
 ## GitHub Release 发布准备
 
-发布渠道为 GitHub Releases，目标版本为 `v1.0.0`，不设固定上线日期（DEC-17、DEC-21）。后续发布准备仅生成和留存产物，暂不创建或上传 Release；本轮只更新文档，不执行打包或产物生成，见 [DEC-22](<../docs/07. Decisions.md#dec-22-发布准备范围与本轮文档边界>)。CI 继续只检查、打包和保存产物，不自动发布。
+发布渠道为 GitHub Releases，目标版本为 `v1.0.0`，不设固定上线日期（DEC-17、DEC-21）。发布准备仅生成和留存产物，暂不创建或上传 Release；2026-10-18 的仅文档指令已由同日后续「continue to implement」恢复实施，执行范围及历史边界见 [DEC-22](<../docs/07. Decisions.md#dec-22-发布准备范围与本轮文档边界>)。阶段打包自检不等于最终 V1 发布产物。CI 继续只检查、打包和保存产物，不自动发布。
 
 发布前保留事项：
 

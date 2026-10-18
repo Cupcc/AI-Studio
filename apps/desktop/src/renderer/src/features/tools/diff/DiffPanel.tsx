@@ -8,6 +8,8 @@ import { FileList } from './FileList'
 import { InlineText } from './InlineText'
 import { AVAILABILITY, D, type StateMessage } from './strings'
 import './diff.css'
+import { useTurnDiff } from './turn-diff-store'
+import { TurnDiffPanel } from './TurnDiffPanel'
 
 export interface DiffPanelProps {
   projectId: string
@@ -115,7 +117,7 @@ function Body({ projectId, active, project }: { projectId: string; active: boole
   return <Message message={AVAILABILITY[status]} detail={snapshot.detail} onRetry={retry} />
 }
 
-export function DiffPanel({ projectId, active }: DiffPanelProps) {
+function ProjectDiffPanel({ projectId, active }: DiffPanelProps) {
   const project = useDiff(s => s.projects[projectId])
   // Subscribe and query only while visible; hiding (or a tool switch) releases the subscription.
   useEffect(() => (active ? useDiff.getState().activate(projectId) : undefined), [projectId, active])
@@ -150,6 +152,11 @@ export function DiffPanel({ projectId, active }: DiffPanelProps) {
       <Body projectId={projectId} active={active} project={project} />
     </div>
   </section>
+}
+
+export function DiffPanel(props: DiffPanelProps) {
+  const source = useTurnDiff(state => state.sources[props.projectId])
+  return source ? <TurnDiffPanel source={source} active={props.active} /> : <ProjectDiffPanel {...props} />
 }
 
 export default DiffPanel

@@ -148,7 +148,7 @@
 1. 成功结束的轮在 Conversation 末尾追加完成行：`Worked for <时长> · Done`（FR-STATE-007；Shell Spec 第 6 节）。“Done”只表示这一轮结束。
 2. 时长：从用户提交到终态的墙钟时间，含等待用户答复的时间（建议，S-Q10）。格式建议：小于 1 分钟为 `48s`，小于 1 小时为 `2m 18s`，否则为 `1h 05m`。
 3. 用户停止的轮：建议显示同类行 `Worked for <时长> · 已停止`（S-Q9）。失败的轮以 Error 卡片结尾，不显示 Done。
-4. 本切片尚未接入文件记录与 Diff。后续由 context-tools 按 FR-TOOL-002 和 04 第 1 节第 13 项接入本轮原生记录及持久化补丁；完成行进入该轮“本轮变更”，不可用时明确降级到“查看项目变更”。既有 `files_changed` 预留字段的 null 仍表示未知，不得显示为 0。关联、来源、可用状态、修订和存储契约由 [Tools §4.2](../tools/spec.md#42-轮次补丁契约) 负责；Session 将 Adapter 记录绑定到 App Turn 并持久化，Tools 消费保存内容，旧历史不按当前工作区回填。该契约为 2026-10-13 文档准备，代码与迁移尚未实现和验证。
+4. context-tools 已按 FR-TOOL-002 和 04 第 1 节第 13 项接入本轮原生记录与持久化补丁（2026-10-18 实施）。完成 / 停止行与 Error 卡片进入该轮“本轮变更”；不可用原因明确显示，并提供“项目变更”。既有 `files_changed` 预留字段的 null 仍表示未知，不得显示为 0。关联、来源、可用状态、修订和存储契约由 [Tools §4.2](../tools/spec.md#42-轮次补丁契约) 负责；Session 将 Adapter 记录绑定到 App Turn 并保存，Tools 只消费保存内容，旧历史不按当前工作区回填。迁移、冻结、脱敏与实际验证边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)。
 5. 完成行数据随对话记录持久化，重启后照常显示。
 
 ### 3.11 “正在查看”的定义
@@ -373,7 +373,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 
 ### 5.4 与 chat、input 模块
 
-FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../tools/spec.md#41-文件引用契约)（2026-10-13 确认准备方向）。Session 是输入转交与记录的负责方：普通发送及运行中追加 / 排队均须传递经主进程校验的引用，不能只将 contextItems 存入用户消息；桌面 Session 负责将引用转换为 Provider 输入，Adapter 保持通用输入契约。阶段 1 已接通 Files → Input → Session → Provider：主进程发送前重新验证，两个 CLI 当前均使用带 JSON 引号的 Project 相对路径清单（不是文件内容快照或结构化附件）；普通发送、重试与 Codex 原生运行中追加共用此转换。Claude 当前报告 `inputWhileRunning: none`，运行中输入仍属原生能力对齐缺口。校验或提交失败向 Input 返回错误并保留输入；模拟链路验证与真实接收边界见 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化)。
+FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../tools/spec.md#41-文件引用契约)（2026-10-13 确认准备方向）。Session 是输入转交与记录的负责方：普通发送及原生支持的运行中输入均须传递经主进程校验的引用，不能只将 contextItems 存入用户消息；桌面 Session 转换 Provider 输入，Adapter 保持通用契约。Files → Input → Session → Provider 已接通：发送前重新验证，Codex 使用原生 mention，Claude 保留带 JSON 引号的 Project 相对路径清单；两者都不提供文件内容快照，转录只保存相对引用。普通发送、重试与 Codex 原生运行中追加共用转换。Claude 当前报告 `inputWhileRunning: none`，运行中输入仍属原生能力对齐缺口。校验或提交失败返回错误并保留输入；模拟与真实接收边界见 [Tools §5.2 / §5.3](../tools/spec.md#52-files--项目-diff-实现细化)。
 
 正式 IPC 契约为 [`shared/ipc/session.ts`](../../apps/desktop/src/shared/ipc/session.ts)，Preload 暴露 `window.studio.session`，主进程校验字段和可信发送方。参数与结果均为可序列化 DTO，不携带 Runtime 句柄。
 

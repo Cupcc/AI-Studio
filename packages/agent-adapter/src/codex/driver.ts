@@ -1,6 +1,6 @@
 import { adapterError } from '../errors.js';
 import type { SessionOptionsBase, Unsubscribe } from '../provider.js';
-import type { CleanupReport, InputResponse, ModelInfo, RecoveryReport, UserInput } from '../types.js';
+import type { CleanupReport, InputResponse, ModelInfo, NativeTurnDiff, RecoveryReport, UserInput } from '../types.js';
 import type { PendingInputRecord, SessionDriver, SessionSink, StopContext, TurnContext } from '../core/session-controller.js';
 import { RuntimeSlot } from '../core/runtime-slot.js';
 import type { RuntimeHandle, RuntimeSpawnOptions } from '../core/runtime-process.js';
@@ -8,7 +8,8 @@ import type { ProcessLister } from '../core/process-probe.js';
 import type { IncomingRequest, JsonRpcNotification } from '../core/json-rpc.js';
 import { resolveTimeouts } from '../core/timeouts.js';
 import { deferred, withTimeout, type Deferred } from '../core/async.js';
-import { CodexConnection } from './connection.js';
+import { CODEX_PROTOCOL_VERSION, CodexConnection } from './connection.js';
+import { boundNativeDiff } from '../core/turn-diff.js';
 import { codexError, turnError } from './errors.js';
 import { answerRequest, mapItem, mapRequest, nativeInput, type NativeInputRef } from './mapping.js';
 import { CodexProcessTracker } from './process-tracker.js';
@@ -44,6 +45,8 @@ export class CodexDriver implements SessionDriver {
   private nativeTurnReady: { turnId: string; deferred: Deferred<string> } | undefined;
   private actualModel: string | undefined;
   private readonly turnModels = new Map<string, string>();
+  private turnDiff: NativeTurnDiff | undefined;
+  private readonly diffSources = new Set<string>();
   private readonly deferredNotifications: JsonRpcNotification[] = [];
   private operationSignal: AbortSignal | undefined;
   private disposed = false;
@@ -319,6 +322,15 @@ export class CodexDriver implements SessionDriver {
     this.nativeTurn = nativeId;
     if (this.nativeTurnReady?.turnId === turnId) this.nativeTurnReady.deferred.resolve(nativeId);
     this.sink.bindNativeTurnId(turnId, nativeId);
+    if (this.turnDiff?.nativeTurnId !== nativeId) {
+      this.diffSources.clear();
+      this.turnDiff = {
+        nativeSessionId: this.requireThread(), nativeTurnId: nativeId,
+        source: 'client:native-turn-bound', protocolVersion: CODEX_PROTOCOL_VERSION,
+        cliVersion: this.connection?.serverVersion, state: 'unknown', patch: null, files: [], truncated: false
+      };
+      this.sink.turnDiffUpdated(turnId, this.turnDiff);
+    }
     const buffered = this.deferredNotifications.splice(0);
     for (const notification of buffered) this.notification(notification);
   }
@@ -351,6 +363,21 @@ export class CodexDriver implements SessionDriver {
       else this.sink.diagnostic({ kind: 'late_event', message: `Unbound Codex event: ${method}` });
       return;
     }
+    // Never let an old bound turn overwrite this driver's next-turn snapshot.
+    if (this.sink.currentTurnId !== turnId) return;
+    if (method === 'turn/diff/updated') {
+      if (p.threadId !== this.threadId || !this.turnDiff) return;
+      this.diffSources.add('codex:turn/diff/updated');
+      this.turnDiff = boundNativeDiff({ ...this.turnDiff,
+        source: [...this.diffSources].sort().join(';'),
+        state: typeof p.diff !== 'string' ? 'failed' : p.diff === '' ? 'empty' : 'available',
+        patch: typeof p.diff === 'string' ? p.diff : null,
+        patchTruncated: false,
+        reason: typeof p.diff === 'string' ? undefined : 'Codex returned a malformed turn diff'
+      });
+      this.sink.turnDiffUpdated(turnId, this.turnDiff);
+      return;
+    }
     if (method === 'turn/completed') { this.end(turnId, p.turn as Turn); return; }
     if (method === 'model/rerouted') {
       if (typeof p.toModel === 'string' && this.sink.currentTurnId === turnId) { this.turnModels.set(turnId, p.toModel); this.actualModel = p.toModel; }
@@ -369,6 +396,19 @@ export class CodexDriver implements SessionDriver {
       if (item.type === 'commandExecution') this.tracker?.command(turnId, item);
       const mapped = mapItem(item, method === 'item/completed');
       if (mapped) (method === 'item/started' ? this.sink.itemStarted : this.sink.itemCompleted)(turnId, mapped);
+      if (item.type === 'fileChange' && method === 'item/completed' && this.turnDiff && p.threadId === this.threadId) {
+        this.diffSources.add('codex:item/completed:fileChange');
+        this.turnDiff = boundNativeDiff({ ...this.turnDiff,
+          source: [...this.diffSources].sort().join(';'),
+          files: [...this.turnDiff.files.filter(file => file.itemId !== item.id), ...item.changes.map(change => ({
+            itemId: item.id, path: change.kind.type === 'update' && change.kind.move_path ? change.kind.move_path : change.path,
+            ...(change.kind.type === 'update' && change.kind.move_path ? { oldPath: change.path } : {}),
+            change: change.kind.type === 'update' ? (change.kind.move_path ? 'rename' as const : 'modify' as const) : change.kind.type,
+            status: mapped!.status, patch: change.diff
+          }))]
+        });
+        this.sink.turnDiffUpdated(turnId, this.turnDiff);
+      }
       return;
     }
     const channels = { 'item/agentMessage/delta': 'text', 'item/reasoning/textDelta': 'reasoning',

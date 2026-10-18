@@ -1,0 +1,173 @@
+{
+  "version": "codex-cli 0.163.0",
+  "login": "unknown",
+  "root": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe",
+  "scenarios": [
+    {
+      "git": false,
+      "mode": "reference-and-native",
+      "threadId": "01a14db5-0f60-70a1-ba33-064ece7228a0",
+      "diffs": [
+        {
+          "threadId": "01a14db5-0f60-70a1-ba33-064ece7228a0",
+          "turnId": "01a14db5-102c-7ac0-a1de-2711d67d91f6",
+          "diff": "diff --git a/native.txt b/native.txt\nindex 90be1f3056c4f471f977a28497b8d4b392c55a02..7f66557881f80fe567263ad0eea79cb7a5f70ded\n--- a/native.txt\n+++ b/native.txt\n@@ -1 +1 @@\n-before\n+native-after\n"
+        },
+        {
+          "threadId": "01a14db5-0f60-70a1-ba33-064ece7228a0",
+          "turnId": "01a14db5-102c-7ac0-a1de-2711d67d91f6",
+          "diff": "diff --git a/native.txt b/native.txt\nindex 90be1f3056c4f471f977a28497b8d4b392c55a02..7f66557881f80fe567263ad0eea79cb7a5f70ded\n--- a/native.txt\n+++ b/native.txt\n@@ -1 +1 @@\n-before\n+native-after\n"
+        },
+        {
+          "threadId": "01a14db5-0f60-70a1-ba33-064ece7228a0",
+          "turnId": "01a14db5-102c-7ac0-a1de-2711d67d91f6",
+          "diff": "diff --git a/native.txt b/native.txt\nindex 90be1f3056c4f471f977a28497b8d4b392c55a02..7f66557881f80fe567263ad0eea79cb7a5f70ded\n--- a/native.txt\n+++ b/native.txt\n@@ -1 +1 @@\n-before\n+native-after\n"
+        }
+      ],
+      "fileItems": [
+        {
+          "type": "fileChange",
+          "id": "exec-0b2fd2b7-89d5-4c5d-9a02-e54f637162c6",
+          "changes": [
+            {
+              "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/non-git/native.txt",
+              "kind": {
+                "type": "update",
+                "move_path": null
+              },
+              "diff": "@@ -1 +1 @@\n-before\n+native-after\n"
+            }
+          ],
+          "status": "completed"
+        }
+      ],
+      "commands": [
+        {
+          "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'reference note.txt' -g 'native.txt' -g '\"'!node_modules'\"' -g '\"'!.git'\"'\"",
+          "status": "completed"
+        },
+        {
+          "command": "/bin/zsh -lc 'cat native.txt'",
+          "status": "completed"
+        },
+        {
+          "command": "/bin/zsh -lc \"cat 'reference note.txt'\"",
+          "status": "completed"
+        },
+        {
+          "command": "/bin/zsh -lc 'cat native.txt'",
+          "status": "completed"
+        }
+      ],
+      "answer": "I’ll read the reference note and native.txt, then patch only native.txt.Verification token: `teal-orbit-742`\n\nReplaced `before` with `native-after` in `native.txt` using apply_patch. No other files changed.",
+      "outcome": "completed",
+      "nativeFile": "native-after\n",
+      "shellFile": "before\n"
+    },
+    {
+      "git": false,
+      "mode": "shell",
+      "threadId": "01a14db5-0f60-70a1-ba33-064ece7228a0",
+      "diffs": [],
+      "fileItems": [],
+      "commands": [
+        {
+          "command": "/bin/zsh -lc \"printf '%s\\\\n' 'shell-after' > shell.txt\"",
+          "status": "completed"
+        }
+      ],
+      "answer": "I’ll write `shell-after` with a newline to `shell.txt` using a shell command.Wrote `shell-after` followed by a newline to `shell.txt`. No other files changed.",
+      "outcome": "completed",
+      "nativeFile": "native-after\n",
+      "shellFile": "shell-after\n"
+    },
+    {
+      "git": true,
+      "mode": "reference-and-native",
+      "threadId": "01a14db5-64e2-7af1-9a10-a0e11ebde6f8",
+      "diffs": [
+        {
+          "threadId": "01a14db5-64e2-7af1-9a10-a0e11ebde6f8",
+          "turnId": "01a14db5-653a-7b71-9f3d-36932d314244",
+          "diff": "diff --git a//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt b//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\nindex 90be1f3056c4f471f977a28497b8d4b392c55a02..7f66557881f80fe567263ad0eea79cb7a5f70ded\n--- a//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\n+++ b//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\n@@ -1 +1 @@\n-before\n+native-after\n"
+        },
+        {
+          "threadId": "01a14db5-64e2-7af1-9a10-a0e11ebde6f8",
+          "turnId": "01a14db5-653a-7b71-9f3d-36932d314244",
+          "diff": "diff --git a//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt b//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\nindex 90be1f3056c4f471f977a28497b8d4b392c55a02..7f66557881f80fe567263ad0eea79cb7a5f70ded\n--- a//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\n+++ b//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\n@@ -1 +1 @@\n-before\n+native-after\n"
+        },
+        {
+          "threadId": "01a14db5-64e2-7af1-9a10-a0e11ebde6f8",
+          "turnId": "01a14db5-653a-7b71-9f3d-36932d314244",
+          "diff": "diff --git a//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt b//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\nindex 90be1f3056c4f471f977a28497b8d4b392c55a02..7f66557881f80fe567263ad0eea79cb7a5f70ded\n--- a//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\n+++ b//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\n@@ -1 +1 @@\n-before\n+native-after\n"
+        },
+        {
+          "threadId": "01a14db5-64e2-7af1-9a10-a0e11ebde6f8",
+          "turnId": "01a14db5-653a-7b71-9f3d-36932d314244",
+          "diff": "diff --git a//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt b//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\nindex 90be1f3056c4f471f977a28497b8d4b392c55a02..7f66557881f80fe567263ad0eea79cb7a5f70ded\n--- a//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\n+++ b//private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt\n@@ -1 +1 @@\n-before\n+native-after\n"
+        }
+      ],
+      "fileItems": [
+        {
+          "type": "fileChange",
+          "id": "exec-548f6a94-ce5d-4e27-a4b5-66f3ad102f4f",
+          "changes": [
+            {
+              "path": "/private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git/native.txt",
+              "kind": {
+                "type": "update",
+                "move_path": null
+              },
+              "diff": "@@ -1 +1 @@\n-before\n+native-after\n"
+            }
+          ],
+          "status": "completed"
+        }
+      ],
+      "commands": [
+        {
+          "command": "/bin/zsh -lc \"pwd; rg --files -g 'AGENTS.md' -g 'native.txt' -g 'reference note.txt'; git status --short\"",
+          "status": "completed"
+        },
+        {
+          "command": "/bin/zsh -lc 'for d in / /private /private/var /private/var/folders /private/var/folders/kl /private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp /private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T /private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe /private/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-turn-diff-7TXPNe/git; do if [ -f \"$d/AGENTS.md\" ]; then printf '\"'\\\\n%s\\\\n' \\\"\"'$d/AGENTS.md\"; cat \"$d/AGENTS.md\"; fi; done'",
+          "status": "completed"
+        },
+        {
+          "command": "/bin/zsh -lc \"cat 'reference note.txt'; cat native.txt\"",
+          "status": "completed"
+        },
+        {
+          "command": "/bin/zsh -lc 'git diff -- native.txt; git status --short'",
+          "status": "completed"
+        }
+      ],
+      "answer": "I’ll read the reference note, then patch `native.txt` and check that only it changed.\nVerification token: `teal-orbit-742`.\n\nUsed `apply_patch` to replace `before` with `native-after` in `native.txt`. No other files changed.",
+      "outcome": "completed",
+      "nativeFile": "native-after\n",
+      "shellFile": "before\n"
+    },
+    {
+      "git": true,
+      "mode": "shell",
+      "threadId": "01a14db5-64e2-7af1-9a10-a0e11ebde6f8",
+      "diffs": [],
+      "fileItems": [],
+      "commands": [
+        {
+          "command": "/bin/zsh -lc \"printf '%s\\\\n' 'shell-after' > shell.txt\"",
+          "status": "completed"
+        },
+        {
+          "command": "/bin/zsh -lc 'od -An -tx1 shell.txt; git status --short'",
+          "status": "completed"
+        }
+      ],
+      "answer": "I’ll write `shell-after` followed by a newline into `shell.txt` using the shell.\nWrote `shell-after` followed by a newline to `shell.txt` using a shell command. No other files changed.",
+      "outcome": "completed",
+      "nativeFile": "native-after\n",
+      "shellFile": "shell-after\n"
+    }
+  ],
+  "userAgent": "studio_diff_verification/0.163.0 (Mac OS 15.6.0; arm64) vscode/1.141.0 (studio_diff_verification; 0.1.0)"
+}

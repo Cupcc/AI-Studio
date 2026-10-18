@@ -56,7 +56,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
   - New Chat 草稿、Default CLI 的取值与设置规则、CLI 菜单 → `specs/chat/spec.md`。
   - 左侧导航的内部行为（Project Views 列表、Session History、折叠）→ `specs/navigation/spec.md`。
   - Project View 的内容、Conversation 列的内部行为与 Preview → `specs/project-view/spec.md`（后续 task）。
-  - Files / Diff / Browser / Terminal 的内容与资源生命周期 → [tools spec](../tools/spec.md)；四工具入口已接入；项目 Diff 与本轮 Diff 的交付边界见 Tools spec §5.2。
+  - Files / Diff / Browser / Terminal 的内容与资源生命周期 → [tools spec](../tools/spec.md)；四工具入口已接入；项目 Diff 与本轮 Diff 的交付边界见 Tools spec §5.2 / §5.3。
   - 色值、字体、图标等视觉参数（Visual Direction 第 1 节）。
 - V1 范围外（文档未要求，本 spec 不设计）：Tab 拖拽排序与拖出窗口（PROJ-Q10）、多窗口（PROJ-Q16）、Project 重命名与目录迁移（PROJ-Q5）。
 

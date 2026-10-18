@@ -6,7 +6,7 @@
 |---|---|
 | 模块 | `tools` |
 | 文档状态 | 已确认（2026-10-13） |
-| 确认范围 | 用户接受本轮审阅建议「accept all, not dev, update all docs」；技术契约为 AI 细化、待实现验证，本次 diff 待审阅；不代表开发授权或功能验收；§5.1 / §5.2 为运行时与 Files / 项目 Diff 阶段的 AI 技术决定，不是人工产品确认，diff 待审阅；开发授权见 §5 |
+| 确认范围 | 用户接受本轮审阅建议「accept all, not dev, update all docs」；技术契约为 AI 细化，本次实施 diff 待审阅；不代表开发授权或功能验收；§5.1～§5.3 为运行时、Files / 项目 Diff 与本轮 Diff 的 AI 技术决定和实施记录，不是新增人工产品确认；开发授权见 §5 及负责任务 |
 | 覆盖需求 | FR-TOOL-001～FR-TOOL-004；文件上下文关联 FR-INPUT-001 |
 | 相关验收 | AC-07；Project 状态隔离关联 AC-01 |
 | 相关设计 | [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节 |
@@ -92,13 +92,13 @@ Project 删除、关闭与应用退出通过可信主进程生命周期释放资
 
 ### 4.1 文件引用契约
 
-FR-TOOL-001、FR-INPUT-001：以下由 AI 于 2026-10-13 细化，待实现验证。Files 添加动作绑定 Project 与当前显示的草稿 / Session 身份；异步读取结束不能把结果添加到后来切换的其他对话。Input 保存可移除的文件引用，Session 在发送时经主进程重新校验 Project、相对路径、实际目标与可访问性，构造 Provider 输入；文件查看缓存不作为已发送内容。
+FR-TOOL-001、FR-INPUT-001：以下由 AI 于 2026-10-13 细化；当前实施与验证见 §5.2 / §5.3。Files 添加动作绑定 Project 与当前显示的草稿 / Session 身份；异步读取结束不能把结果添加到后来切换的其他对话。Input 保存可移除的文件引用，Session 在发送时经主进程重新校验 Project、相对路径、实际目标与可访问性，构造 Provider 输入；文件查看缓存不作为已发送内容。
 
 优先使用 CLI 原生文件引用；Provider 无对应结构化输入时核对其原生文本引用方式，明确转换及覆盖边界，不伪称已提交结构化附件。引用不等于文件内容快照，不自动内联全文或覆盖用户权限。校验 / 提交失败向输入区返回原因并保留未接受的输入；原生权限拒绝按原生结果呈现。现有附件类型及发送链路差异见 [Adapter](../agent-adapter/spec.md#313-工程工具接缝) 与 [Input](../input/spec.md#context--attachment-入口与上下文标签)。
 
 ### 4.2 轮次补丁契约
 
-FR-TOOL-002：AI 技术方案（2026-10-13，待实现验证）；Adapter 提供原生数据与能力证据，Session 保存关联，Tools 只读展示。逻辑字段如下，具体 TypeScript / SQL 命名在实现时确定：
+FR-TOOL-002：AI 技术方案（2026-10-13；2026-10-18 实施见 §5.3）；Adapter 提供原生数据与能力证据，Session 保存关联，Tools 只读展示。逻辑字段如下，具体 TypeScript / SQL 命名见 §5.3：
 
 | 字段 | 语义 |
 |---|---|
@@ -149,8 +149,18 @@ FR-TOOL-001 / 002、FR-INPUT-001：以下为阶段 1 授权内的 AI 技术决�
 - 项目 Diff：展示 HEAD 到当前工作区的最终差异，包含已暂存、未暂存及非忽略的未跟踪文件；冲突以冲突徽标展示工作区相对 HEAD，重命名显示两条路径。Project 在仓库子目录时只列该目录内变更；无 HEAD、非 Git、Git 缺失、不安全目录及查询超时分别说明，不自动初始化或写提交。列表最多 2000 文件，单文件 patch 最多 1 MiB，两侧文本各最多 512 KiB；二进制、符号链接、子模块及内容不可读时使用有说明的 patch 回退，截断明确可见。只在面板活动时查询，文件事件、手动刷新及窗口重新聚焦触发更新，旧 revision 不覆盖新结果。
 - Git 只读边界：使用隔离环境、字面路径参数、无交互 / 无颜色输出，关闭外部 diff、textconv、fsmonitor 与 hooks；Git 的 index 内容刷新限制在保留原时间语义的临时副本中，真实 `index` 内容与 mtime 不变；split-index 仓库中，Git 读取仍会刷新 `sharedindex.*` 的过期时间戳，文件内容不变（[Git 官方配置说明](https://git-scm.com/docs/git-config/2.44.3)，独立兼容测试见任务验收）。不回写旧 mtime，避免与用户并发 Git 操作竞争。仓库本地 `filter.*.clean` 配置仍可能执行命令；当前沿用用户打开本地 Project 即信任其目录的边界，不宣称在恶意仓库内隔离执行 Git。主进程有查询超时、输出限额及进程清理。
 - Monaco 0.57.0 按需加载，保留生产 `worker-src 'none'`，使用主线程回退；禁用需要语言服务的功能。两侧 Diff 计算预算 250 ms，复杂变更可能以近似结果显示；512 KiB 全量不同两侧的先行测量约占主线程 230–530 ms。该取舍限于只读查看器，不提供文件编辑或 IDE 语言服务。
-- 文件引用：最多 20 个普通文件，标签可移除，添加绑定当前草稿 / Session；普通发送、恢复 / 重试及原生支持的运行中输入在发送前重新校验。Session 当前为两个 CLI 都构造明确标识“路径引用、不是内容”的 JSON 引号相对路径清单，不内联文件全文、不声称结构化附件。Codex 的原生 mention 是否被实际采用尚未验证，Claude 结构化附件仍为 unsupported，因此保留通用文本策略直至真实证据支持切换。含 C0、DEL、NEL、LS 或 PS 的名称可查看但不能引用，避免伪造路径清单行；macOS 上 NFC/NFD 与大小写别名去重。当前 V1 只安排 Codex 真实引用接收；Needs Input 文件答复、Claude 运行中追加 / 排队及 Claude Code 真实接收暂缓，不纳入本轮通过范围。
+- 文件引用：最多 20 个普通文件，标签可移除，添加绑定当前草稿 / Session；普通发送、恢复 / 重试及原生支持的运行中输入在发送前重新校验。2026-10-18 验证后，Codex 使用 Adapter 的 file → native mention，绝对路径只在主进程转换，转录仍保存原始相对引用；Claude 保留明确标识“路径引用、不是内容”的 JSON 引号相对路径清单（结构化附件仍为 unsupported）。两者均不内联文件全文、不承诺内容快照。含 C0、DEL、NEL、LS 或 PS 的名称可查看但不能引用，避免伪造路径清单行。真实普通发送及 Adapter steer 引用接收见 §5.3；运行中追加共用转换，应用 UI 的真实 steer 交互未单独复测。Needs Input 文件答复、Claude 运行中追加 / 排队及 Claude Code 真实接收暂缓。
 
 - 引用别名校验（AI 技术决定，2026-10-17）：Session 仅对完全相同的路径字符串预去重；Files 逐一安全解析后，按实际 realpath 合并别名，保留区分大小写或 Unicode 拼写的文件系统中的不同文件。main-only aliases 明确关联每个已校验的原始请求；Session 核对请求集合被精确覆盖，拒绝遗漏、替换或重复覆盖。别名元数据和绝对路径不经过 Renderer / 转录。硬链接的不同路径分别保留。
 
-本轮 Diff、Conversation 完成行入口、原生补丁持久化仍未实施；不使用当前工作区拼出历史原文。Codex 真实 CLI 调用与原生轮次能力按 CLI 实际结果验证，Claude Code 真实能力暂缓且不随当前 V1 发布。
+### 5.3 本轮 Diff 实现与原生能力证据
+
+FR-TOOL-002、FR-STATE-007、FR-INPUT-001；依据 §4.1 / §4.2、04 第 1 节事项 13 及用户 2026-10-18「continue to implement」。以下为 Main Agent 的实施记录与技术选择，不代表新功能人工验收。
+
+- Adapter 以 `turn.diff.updated` 输出已绑定的原生 Thread / Turn、实际 CLI 版本、协议版本、来源及可用状态。绑定时先发 `client:native-turn-bound` 的 unknown 记录；`turn/diff/updated` 替换聚合快照，完成的 `fileChange` 按 item ID 替换其文件记录，并保留补丁、变更类型、移动路径及原生完成状态。实际 patch 来源只记录收到的通知。Runtime 代次、Thread / Turn 与活动轮次共同过滤重复、迟到及错投事件；完成后冻结。
+- Session 以 `turn_diffs` 迁移（`2026101801`）按 App Turn 保存 JSON，事件 seq 作为修订，校验 Project / Session / App Turn 与原生身份。终态与补丁 final / outcome 在同一事务落盘；旧修订及已终结记录不可覆写。读取只接受该 Project / Session 的 Turn，旧历史没有记录时保持 unknown，不读当前工作区回填。Claude 未实现同等数据时返回 unavailable。
+- 聚合 patch 限 512 KiB；全部单文件 patch 合计另限 512 KiB；最多 2000 条文件记录，单路径限 8192 UTF-8 字节。裁切不拆 Unicode，分别记录聚合、文件及列表截断。先仅对 patch / 路径 / 原因脱敏，再重新施加限额；结构身份和枚举不作文本脱敏。UI 复用只读 PatchView 的 4000 行显示限额，HTML 作为文本展示。
+- Conversation 的完成 / 停止行与失败卡片提供“查看本轮变更”；只由用户点击打开，显示 Session / Turn、outcome、来源与覆盖提示，可选择聚合 / 原生文件记录。unknown、CLI 明确 empty、unavailable、failed 分别展示，不将未知文件数显示成 0；文件补丁不证明写入成功。点击工具栏 Diff 或“项目变更”返回共享工作区范围。
+- 真实环境：macOS 15.6 arm64、Codex 0.163.0，协议类型仍锁定 0.161.0。Git / 非 Git 的原生 `apply_patch` 均收到聚合与完成文件补丁；对应 Shell 写文件均未收到这两类事件。因此该视图只保证展示收到的原生记录，不覆盖所有工作区修改，不宣称整个 0.163.0 协议已兼容。原生 mention 已在 Adapter、应用 UI 及独立特殊路径 fixture 中读出 prompt 未提供的 token；最新 Adapter 在命令运行中追加 mention，同一 Adapter Turn 完成并读出随机 token。应用 UI 真实 steer 交互仍未单独复测。CLI 版本 / 场景 / 证据与独立结论见[本轮验收](../../tasks/T20261009-context-tools/acceptance.md#2026-10-18-本轮-diff-独立评审w23)及[自检记录](../../tasks/T20261009-context-tools/evidence/W0-turn-diff-report.md)。
+
+Claude Code 真实能力仍暂缓且不随当前 V1 发布；以上不扩大完整 AC-07、应用 UI 真实运行中追加或原生 Stop 的通过范围。

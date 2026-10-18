@@ -1,5 +1,6 @@
 import { useCallback, useSyncExternalStore, type ComponentType } from 'react'
 import type { MainCanvas, ProjectAttention, ProjectRecord, RightArea, ViewId } from '@shared/project/types'
+import type { TurnDiffRef } from '@shared/tools/turn-diff'
 
 /** Session owns attention and read rules. Focus changes are never user-open operations. */
 export interface RendererSessionPort {
@@ -20,6 +21,8 @@ export interface ShellSlotProps { project: ProjectRecord; canvas: MainCanvas; ac
 export interface RightSlotProps extends ShellSlotProps { area: RightArea }
 export interface ViewSlotProps extends ShellSlotProps { viewId: ViewId }
 export interface ShellIntegration {
+  openTurnDiff?(ref: TurnDiffRef): void
+  toolSelected?(projectId: string, area: RightArea): void
   session: RendererSessionPort
   SessionHistory?: ComponentType<ShellSlotProps>
   Conversation?: ComponentType<ShellSlotProps>

@@ -71,6 +71,32 @@ export interface ActivityDescriptor {
 
 export type FileChangeKind = 'add' | 'modify' | 'delete' | 'rename' | 'unknown';
 
+/** Native records only. No working-tree reads or inferred Shell coverage. */
+export interface NativeTurnDiff {
+  nativeSessionId: string;
+  nativeTurnId: string;
+  source: string;
+  cliVersion?: string;
+  protocolVersion: string;
+  state: 'unknown' | 'available' | 'empty' | 'unavailable' | 'failed';
+  patch: string | null;
+  patchTruncated?: boolean;
+  fileListTruncated?: boolean;
+  files: NativeDiffFile[];
+  truncated: boolean;
+  reason?: string;
+}
+
+export interface NativeDiffFile {
+  itemId: string;
+  path: string;
+  oldPath?: string;
+  change: FileChangeKind;
+  status: ItemStatus;
+  patch: string;
+  truncated?: boolean;
+}
+
 export interface ItemSnapshot {
   /** Native item id (Codex item id, Claude message/tool_use id). Unique within the session. */
   itemId: string;

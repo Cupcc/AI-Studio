@@ -15,5 +15,5 @@ export function installToolsIntegration(): () => void {
     const open = new Set(state.windowState.tabs.filter(t => t.kind === 'project').map(t => t.projectId))
     for (const tab of previous.windowState.tabs) if (tab.kind === 'project' && !open.has(tab.projectId)) useTerminals.getState().forget(tab.projectId)
   })
-  return () => { unwatch(); uninstallFiles(); uninstallDiff(); unregister(); unsubscribe() }
+  return () => { unsubscribe(); unregister(); uninstallDiff(); uninstallFiles(); unwatch() }
 }

@@ -128,6 +128,13 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
   void service.getProviders().catch(() => {})
   return defineHandlers(sessionContract, {
     list: { parse: projectRef, handle: ({ projectId }) => service.list(projectId) },
+    getTurnDiff: {
+      parse: raw => {
+        const value = record(raw, ['projectId', 'sessionId', 'turnId'])
+        return { projectId: id(value.projectId, 'projectId'), sessionId: id(value.sessionId, 'sessionId'), turnId: id(value.turnId, 'turnId') }
+      },
+      handle: ({ projectId, sessionId, turnId }) => service.getTurnDiff(projectId, sessionId, turnId)
+    },
     getConversation: {
       parse: raw => {
         const value = record(raw, ['sessionId', 'beforeSequence', 'limit'])

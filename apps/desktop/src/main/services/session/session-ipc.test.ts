@@ -8,6 +8,7 @@ import { runMigrations } from '../database/migrator'
 import { coreAppMeta } from '../database/migrations/2026100901_core_app_meta'
 import { projectCore } from '../database/migrations/2026100902_project_core'
 import { sessionCore } from '../database/migrations/2026100903_session_core'
+import { turnDiff } from '../database/migrations/2026101801_turn_diff'
 import { projectShellFor } from '../project'
 import type { CoreServices } from '../core'
 
@@ -17,7 +18,7 @@ afterEach(async () => { for (const cleanup of cleanups.splice(0)) await cleanup(
 
 function feature(fileReferences?: FileReferenceResolver) {
   const db = new DatabaseSync(':memory:')
-  runMigrations(db, [coreAppMeta, projectCore, sessionCore])
+  runMigrations(db, [coreAppMeta, projectCore, sessionCore, turnDiff])
   db.prepare('INSERT INTO projects(id,name,local_path,canonical_path,dev,ino,created_at) VALUES (?,?,?,?,?,?,?)')
     .run('p', 'Project', '/tmp', '/tmp', '1', '1', '2026-10-09')
   const providers = [new FakeProvider('codex'), new FakeProvider('claude-code')]
@@ -122,7 +123,7 @@ describe('Session IPC boundary · FR-STATE-004/005, S-Q1', () => {
       const session = await withResolver.handlers.create.handle({ projectId: 'p', cli: 'codex', text: 'hi', contextItems: [{ type: 'file', path: 'src/a.ts' }] }, ctx)
       await new Promise(resolve => setTimeout(resolve, 0))
       expect(calls).toEqual([{ projectId: 'p', paths: ['src/a.ts'] }])
-      expect(withResolver.providers[0]!.sessions[0]!.driver.callsTo('startTurn')[0]!.args[1]).toMatchObject({ text: expect.stringContaining('- "src/a.ts"') })
+      expect(withResolver.providers[0]!.sessions[0]!.driver.callsTo('startTurn')[0]!.args[1]).toMatchObject({ text: 'hi', attachments: [{ kind: 'file', path: '/tmp/src/a.ts', name: 'src/a.ts' }] })
       expect(session.activity).toBe('running')
 
       const bare = feature()

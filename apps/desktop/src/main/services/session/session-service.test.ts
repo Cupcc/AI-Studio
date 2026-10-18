@@ -6,6 +6,7 @@ import { runMigrations } from '../database/migrator'
 import { coreAppMeta } from '../database/migrations/2026100901_core_app_meta'
 import { projectCore } from '../database/migrations/2026100902_project_core'
 import { sessionCore } from '../database/migrations/2026100903_session_core'
+import { turnDiff } from '../database/migrations/2026101801_turn_diff'
 import { createProjectService } from '../project/project-service'
 import { closeProjectWithSessions } from '../project/close-flow'
 import { SessionService, type SessionServiceOptions } from './session-service'
@@ -29,7 +30,7 @@ const question = (secret = false): InputRequestInit => ({
 function harness(codex = new FakeProvider('codex'), buildViewContext?: SessionServiceOptions['buildViewContext'], extra: Partial<SessionServiceOptions> = {}) {
   const db = new DatabaseSync(':memory:')
   db.exec('PRAGMA foreign_keys=ON')
-  runMigrations(db, [coreAppMeta, projectCore, sessionCore])
+  runMigrations(db, [coreAppMeta, projectCore, sessionCore, turnDiff])
   for (const projectId of ['p', 'p2']) db.prepare('INSERT INTO projects(id,name,local_path,canonical_path,dev,ino,created_at) VALUES (?,?,?,?,?,?,?)')
     .run(projectId, projectId, '/tmp', `/tmp/${projectId}`, '1', projectId, '2026-10-09')
   const projects = createProjectService(() => db)
@@ -610,13 +611,14 @@ function fileResolver(options: { reject?: Record<string, FileReferenceFailureRea
   return { resolver, calls, reject: options.reject }
 }
 const referenceBlock = (paths: string[], text: string) => `${FILE_REFERENCE_HEADER}\n${paths.map(path => `- ${JSON.stringify(path)}`).join('\n')}\n\n${text}`
+const nativeReferences = (paths: string[], text: string) => ({ text, attachments: paths.map(path => ({ kind: 'file', path: `/tmp/p/${path}`, name: path.slice(path.lastIndexOf('/') + 1) })) })
 const files = (...paths: string[]) => paths.map(path => ({ type: 'file' as const, path }))
 const userMessages = (h: ReturnType<typeof harness>, id: string) => h.items(id).filter(item => item.kind === 'user_message')
 const startInputs = (h: ReturnType<typeof harness>, index = 0) => h.native(index).driver.callsTo('startTurn').map(call => call.args[1])
 const steerInputs = (h: ReturnType<typeof harness>, index = 0) => h.native(index).driver.callsTo('steerTurn').map(call => call.args[1])
 
 describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-001, Tools §4.1', () => {
-  it('create: re-validates before any state exists, hands the Provider the exact text block, and stores only relative paths', async () => {
+  it('create: re-validates before any state exists, hands the Provider native file references, and stores only relative paths', async () => {
     const gate = deferred<void>()
     const fake = fileResolver({ gate: () => gate.promise })
     const h = harness(undefined, undefined, { fileReferences: fake.resolver })
@@ -630,7 +632,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     expect(h.codex.sessions).toHaveLength(0)
     gate.resolve()
     const session = await created; await tick()
-    expect(startInputs(h)).toEqual([{ text: referenceBlock(['src/a.ts', 'docs/my file.md'], '请阅读') }])
+    expect(startInputs(h)).toEqual([nativeReferences(['src/a.ts', 'docs/my file.md'], '请阅读')])
     expect(userMessages(h, session.id)[0]).toMatchObject({ text: '请阅读', contextItems })
     expect(JSON.parse(h.store.lastTurn(session.id)!.message)).toEqual({ text: '请阅读', contextItems })
     expect(JSON.stringify(h.items(session.id))).not.toContain('/tmp/p')
@@ -695,7 +697,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     expect((await h.service.getDraft(key)).contextItems).toEqual(files('src/a.ts'))
     gate.resolve(); await sent; await tick()
     expect(h.summary(session.id).activity).toBe('running')
-    expect(startInputs(h)[1]).toEqual({ text: referenceBlock(['src/a.ts'], 'next') })
+    expect(startInputs(h)[1]).toEqual(nativeReferences(['src/a.ts'], 'next'))
     expect(userMessages(h, session.id).at(-1)).toMatchObject({ text: 'next', contextItems: files('src/a.ts') })
     expect((await h.service.getDraft(key)).text).toBe('')
   })
@@ -716,7 +718,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     expect(startInputs(h)).toHaveLength(1)
     delete reject['gone.ts']
     await h.service.send(session.id, draft); await tick()
-    expect(startInputs(h)[1]).toEqual({ text: referenceBlock(['gone.ts'], 'again') })
+    expect(startInputs(h)[1]).toEqual(nativeReferences(['gone.ts'], 'again'))
   })
 
   it('send: a double submit during the await starts exactly one turn; the loser is refused and keeps its input', async () => {
@@ -762,7 +764,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     expect(h.summary(session.id).activity).toBe('none'); expect(startInputs(h)).toHaveLength(1)
   })
 
-  it('running steer: reserves the turn before awaiting, delivers the same block as turn/steer, and releases the reservation', async () => {
+  it('running steer: reserves the turn before awaiting, delivers native references as turn/steer, and releases the reservation', async () => {
     const gate = deferred<void>()
     const fake = fileResolver({ gate: () => gate.promise })
     const h = harness(new FakeProvider('codex', { capabilities: { inputWhileRunning: 'steer' }, behavior: { onSteer: () => {} } }), undefined, { fileReferences: fake.resolver })
@@ -772,7 +774,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     await tick()
     expect(steerInputs(h)).toEqual([]); expect(userMessages(h, session.id)).toHaveLength(1)
     gate.resolve(); await steer
-    expect(steerInputs(h)).toEqual([{ text: referenceBlock(['docs/my file.md'], 'also this') }])
+    expect(steerInputs(h)).toEqual([nativeReferences(['docs/my file.md'], 'also this')])
     expect(userMessages(h, session.id).at(-1)).toMatchObject({ text: 'also this', contextItems: files('docs/my file.md') })
     expect(fake.calls).toHaveLength(1)
     await h.service.send(session.id, { text: 'third' })
@@ -826,18 +828,18 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     expect(h.claude.sessions[0]!.driver.callsTo('steerTurn')).toEqual([])
   })
 
-  it.each(['codex', 'claude-code'] as const)('%s: both CLIs get the text block on the first turn of a new Session', async cli => {
+  it.each(['codex', 'claude-code'] as const)('%s: each CLI gets its supported reference form on the first turn of a new Session', async cli => {
     const h = harness(undefined, undefined, { fileReferences: fileResolver().resolver })
     await h.service.create({ projectId: 'p', cli, text: 'look', contextItems: files('a b/c.ts') }); await tick()
     const provider = cli === 'codex' ? h.codex : h.claude
-    expect(provider.sessions[0]!.driver.callsTo('startTurn')[0]!.args[1]).toEqual({ text: referenceBlock(['a b/c.ts'], 'look') })
+    expect(provider.sessions[0]!.driver.callsTo('startTurn')[0]!.args[1]).toEqual(cli === 'codex' ? nativeReferences(['a b/c.ts'], 'look') : { text: referenceBlock(['a b/c.ts'], 'look') })
   })
 
-  it('combines View context, the reference block and the user text in that order', async () => {
+  it('preserves View context and user text alongside native references', async () => {
     const viewText = 'Current Project View: Architecture'
     const h = harness(undefined, (_project, viewId) => ({ originViewId: viewId, paths: [], text: viewText }), { fileReferences: fileResolver().resolver })
     await h.service.create({ projectId: 'p', cli: 'codex', text: 'go', originViewId: 'architecture', viewContextAttached: true, contextItems: [{ type: 'view', viewId: 'architecture' }, ...files('a.ts')] }); await tick()
-    expect(startInputs(h)).toEqual([{ text: `${viewText}\n\n${referenceBlock(['a.ts'], 'go')}` }])
+    expect(startInputs(h)).toEqual([nativeReferences(['a.ts'], `${viewText}\n\ngo`)])
   })
 
   it('resolves a duplicated path once and lists it once', async () => {
@@ -845,7 +847,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     const h = harness(undefined, undefined, { fileReferences: fake.resolver })
     await h.service.create({ projectId: 'p', cli: 'codex', text: 'x', contextItems: files('a.ts', 'b.ts', 'a.ts') }); await tick()
     expect(fake.calls[0]!.paths).toEqual(['a.ts', 'b.ts'])
-    expect(startInputs(h)).toEqual([{ text: referenceBlock(['a.ts', 'b.ts'], 'x') }])
+    expect(startInputs(h)).toEqual([nativeReferences(['a.ts', 'b.ts'], 'x')])
   })
 
   it('passes distinct case and Unicode spellings unchanged to Files and delivers every resolved file', async () => {
@@ -854,7 +856,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     const h = harness(undefined, undefined, { fileReferences: fake.resolver })
     await h.service.create({ projectId: 'p', cli: 'codex', text: 'all files', contextItems: files(...paths) }); await tick()
     expect(fake.calls).toEqual([{ projectId: 'p', paths }])
-    expect(startInputs(h)).toEqual([{ text: referenceBlock(paths, 'all files') }])
+    expect(startInputs(h)).toEqual([nativeReferences(paths, 'all files')])
   })
 
   it('accepts fewer resolved files only when verified aliases cover every original request', async () => {
@@ -872,7 +874,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     const h = harness(undefined, undefined, { fileReferences: resolver })
     const session = await h.service.create({ projectId: 'p', cli: 'codex', text: 'aliases', contextItems: files(...paths) }); await tick()
     expect(calls).toEqual([paths])
-    expect(startInputs(h)).toEqual([{ text: referenceBlock(['A.ts', 'café.txt'], 'aliases') }])
+    expect(startInputs(h)).toEqual([nativeReferences(['A.ts', 'café.txt'], 'aliases')])
     expect(userMessages(h, session.id)[0]).toMatchObject({ contextItems: files(...paths) })
     expect(JSON.stringify(h.items(session.id))).not.toContain('"aliases":')
   })
@@ -923,7 +925,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     expect(fake.calls).toHaveLength(3)
     expect(h.summary(session.id).status).toBe('running')
     const resumed = h.native(1).driver.callsTo('startTurn')
-    expect(resumed.at(-1)!.args[1]).toEqual({ text: referenceBlock(['src/a.ts'], 'analyze') })
+    expect(resumed.at(-1)!.args[1]).toEqual(nativeReferences(['src/a.ts'], 'analyze'))
     expect(userMessages(h, session.id).at(-1)).toMatchObject({ text: 'analyze', contextItems: files('src/a.ts') })
   })
 
@@ -1030,5 +1032,113 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
       expect(h.summary(session.id).activity).toBe('running')
       expect(fake.calls).toEqual([])
     })
+  })
+})
+
+describe('Native turn Diff persistence and attribution · FR-TOOL-002 / AC-07', () => {
+  const bind = (h: ReturnType<typeof harness>, index = 0, nativeId?: string) => {
+    const controller = h.native(index).controller
+    const turnId = controller.activeTurn!.turnId
+    const nativeTurnId = nativeId ?? `native:${turnId}`
+    controller.sink.bindNativeTurnId(turnId, nativeTurnId)
+    return { controller, turnId, nativeTurnId }
+  }
+  const emit = (bound: ReturnType<typeof bind>, patch: string | null = 'saved patch', state: 'available' | 'empty' | 'failed' = 'available') => {
+    bound.controller.sink.turnDiffUpdated(bound.turnId, {
+      nativeSessionId: bound.controller.nativeSessionId!, nativeTurnId: bound.nativeTurnId,
+      source: 'codex:turn/diff/updated', cliVersion: '0.163.0', protocolVersion: '0.161.0',
+      state, patch, files: [], truncated: false
+    })
+  }
+  it('saves only the latest native patch, freezes it on completion and restores it after restarting', async () => {
+    const h = harness(), session = await h.create(); await tick()
+    const turnId = h.items(session.id)[0]!.turnId!
+    const bound = bind(h)
+    emit(bound, 'first patch'); emit(bound, 'final patch')
+    expect(h.service.getTurnDiff('p', session.id, turnId)).toMatchObject({ patch: 'final patch', final: false, nativeTurnId: bound.nativeTurnId })
+    bound.controller.sink.nativeTurnEnded(bound.turnId, { status: 'completed' })
+    const saved = h.service.getTurnDiff('p', session.id, turnId)
+    expect(saved).toMatchObject({ patch: 'final patch', final: true, outcome: 'completed' })
+    h.store.saveTurnDiff({ ...saved, revision: saved.revision + 1, patch: 'late direct save' })
+    emit(bound, 'late event')
+    expect(h.service.getTurnDiff('p', session.id, turnId)).toEqual(saved)
+    await h.restart()
+    expect(h.service.getTurnDiff('p', session.id, turnId)).toEqual(saved)
+  })
+  it('keeps parallel Sessions and subsequent turns separate and rejects mismatched reads', async () => {
+    const h = harness(), a = await h.create('a'), b = await h.create('b'); await tick()
+    const ta = h.items(a.id)[0]!.turnId!, tb = h.items(b.id)[0]!.turnId!
+    const ba = bind(h, 0), bb = bind(h, 1)
+    emit(ba, 'only a'); emit(bb, 'only b')
+    expect(h.service.getTurnDiff('p', a.id, ta).patch).toBe('only a')
+    expect(h.service.getTurnDiff('p', b.id, tb).patch).toBe('only b')
+    expect(() => h.service.getTurnDiff('p2', a.id, ta)).toThrow()
+    expect(() => h.service.getTurnDiff('p', b.id, ta)).toThrow()
+    ba.controller.sink.nativeTurnEnded(ba.turnId, { status: 'completed' })
+    h.service.send(a.id, { text: 'next' }); await tick()
+    const second = h.store.lastTurn(a.id)!.id
+    expect(h.service.getTurnDiff('p', a.id, second)).toMatchObject({ state: 'unknown', patch: null, final: false })
+    emit(ba, 'old patch')
+    expect(h.service.getTurnDiff('p', a.id, second).patch).toBeNull()
+  })
+  it.each(['failed', 'interrupted'] as const)('preserves received records on a %s turn without calling it a successful write', async outcome => {
+    const h = harness(), session = await h.create(); await tick()
+    const turnId = h.items(session.id)[0]!.turnId!, bound = bind(h)
+    emit(bound)
+    bound.controller.sink.nativeTurnEnded(bound.turnId, { status: outcome, ...(outcome === 'failed' ? { error: { code: 'provider_error' as const, message: 'native failed' } } : {}) })
+    expect(h.service.getTurnDiff('p', session.id, turnId)).toMatchObject({ patch: 'saved patch', final: true, outcome })
+  })
+  it('distinguishes explicit empty, malformed data, old history and unsupported Provider', async () => {
+    const h = harness(), session = await h.create(); await tick()
+    const turnId = h.items(session.id)[0]!.turnId!, bound = bind(h)
+    expect(h.service.getTurnDiff('p', session.id, turnId)).toMatchObject({ state: 'unknown', patch: null })
+    emit(bound, '', 'empty')
+    expect(h.service.getTurnDiff('p', session.id, turnId)).toMatchObject({ state: 'empty', patch: '' })
+    emit(bound, null, 'failed')
+    expect(h.service.getTurnDiff('p', session.id, turnId)).toMatchObject({ state: 'failed', patch: null })
+    const claude = await h.create('unsupported', 'claude-code'); await tick()
+    expect(h.service.getTurnDiff('p', claude.id, h.items(claude.id)[0]!.turnId!)).toMatchObject({ state: 'unavailable', patch: null })
+  })
+  it('redacts secret answers even when the CLI echoes them into a native patch', async () => {
+    const h = harness(), session = await h.create(); await tick()
+    const turnId = h.items(session.id)[0]!.turnId!, bound = bind(h)
+    const requestId = bound.controller.sink.inputRequested(bound.turnId, question(true), null)!
+    await h.service.answer(session.id, requestId, { kind: 'answers', answers: { q: { text: 'a-secret-fixture' } } })
+    emit(bound, '+a-secret-fixture')
+    bound.controller.sink.nativeTurnEnded(bound.turnId, { status: 'completed' })
+    const data = JSON.stringify(h.service.getTurnDiff('p', session.id, turnId))
+    expect(data).not.toContain('a-secret-fixture')
+  })
+  it('keeps structural IDs and enums during redaction and bounds the expanded replacement text', async () => {
+    const h = harness(), session = await h.create(); await tick()
+    const appTurnId = h.items(session.id)[0]!.turnId!, bound = bind(h, 0, 'native-completed')
+    const answer = async (secret: string) => {
+      const requestId = bound.controller.sink.inputRequested(bound.turnId, question(true), null)!
+      await h.service.answer(session.id, requestId, { kind: 'answers', answers: { q: { text: secret } } })
+    }
+    await answer('completed')
+    await answer(appTurnId)
+    await answer('x')
+    const diff = { nativeSessionId: bound.controller.nativeSessionId!, nativeTurnId: bound.nativeTurnId,
+      source: 'codex:turn/diff/updated', protocolVersion: 'test', state: 'available' as const, patch: 'x'.repeat(512 * 1024),
+      files: [{ itemId: 'file-completed', path: 'result.txt', change: 'modify' as const, status: 'completed' as const, patch: '+completed' }], truncated: false }
+    bound.controller.sink.turnDiffUpdated(bound.turnId, diff)
+    const saved = h.service.getTurnDiff('p', session.id, appTurnId)
+    expect(saved).toMatchObject({ turnId: appTurnId, nativeTurnId: 'native-completed', state: 'available', patchTruncated: true, truncated: true })
+    expect(saved.files[0]).toMatchObject({ itemId: 'file-completed', status: 'completed' })
+    expect(Buffer.byteLength(saved.patch!)).toBeLessThanOrEqual(512 * 1024)
+    bound.controller.sink.turnDiffUpdated(bound.turnId, { ...diff, patch: 'latest' })
+    expect(h.service.getTurnDiff('p', session.id, appTurnId).patch).toBe('latest')
+  })
+  it('upgrades a pre-Diff database without inventing old patches or altering transcript data', () => {
+    const db = new DatabaseSync(':memory:')
+    try {
+      runMigrations(db, [coreAppMeta, projectCore, sessionCore])
+      db.prepare('INSERT INTO session_preferences VALUES (?, ?)').run('old', 'keep')
+      runMigrations(db, [coreAppMeta, projectCore, sessionCore, turnDiff])
+      expect(db.prepare('SELECT * FROM turn_diffs').all()).toEqual([])
+      expect(db.prepare('SELECT value FROM session_preferences WHERE key=?').get('old')).toMatchObject({ value: 'keep' })
+      expect(runMigrations(db, [coreAppMeta, projectCore, sessionCore, turnDiff]).applied).toEqual([])
+    } finally { db.close() }
   })
 })

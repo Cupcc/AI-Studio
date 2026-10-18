@@ -1,8 +1,28 @@
 # Runtime 工具执行计划
 
+## 2026-10-18 本轮 Diff 继续实施
+
+- 基线 `dcfaac3`；worktree `../AI Stduio.worktrees/turn-diff`，分支 `feat/turn-diff`。主 checkout 保持 main，已快进同步检查，无远端新提交。
+- 授权与范围见 [task.md](task.md#本轮授权与状态)。Main Agent 单独实施 Adapter → Session / SQLite → typed IPC → Diff / Conversation。
+- 验证覆盖原生事件替换、重复 / 迟到事件、跨 Session / Turn、旧库升级、重启历史、失败 / 中断、数据限额；Electron 回归及 agent-browser 从完成行查看补丁、返回项目 Diff、跨项目和重启恢复。真实调用仅使用 Codex 隔离 fixture。
+- 按 Task Protocol 的跨模块 / 持久化要求，实施后安排未参与实现的 Review Agent；其写入范围届时登记。代码实现和真实普通引用 / 原生 patch 验证已完成，独立评审及最终门禁结果见下方与验收记录；无发布或本次人工功能接受结论。
+
+| Worker | 职责与只写范围 | 基线 / 集成 |
+|---|---|---|
+| W23（独立 Review Agent，未参与实现） | 独立检查 Adapter / Session / 迁移 / IPC / Diff 关联与安全边界，运行自己的探针；只写 `acceptance.md` 的本轮评审章节和 `evidence/W23-*`，不修改代码或计划。原生窗口测试待主 Agent 通知，避免焦点竞争 | `dcfaac3` + 本分支本轮 diff；缺陷交 Main Agent 修复，W23 复验 |
+
+### 本阶段进度
+
+- 最终自检：`pnpm check:code`（36 / 246 / 1160）、Electron E2E 49 / 49、本阶段 unsigned macOS arm64 打包与 smoke PASS；源码最后的证据注释更正重建后，119 个 out 文件 hash 全部相同。文档检查无新增问题、4 个历史基线问题保留。
+
+- Adapter → Session / 迁移 → typed IPC → Conversation / Diff 已完成；新轮无 patch 也保存已知原生身份与版本，旧历史不回填。
+- 真实 Codex 0.163.0 的 Git / 非 Git 原生 patch、普通 native mention 与实际 UI 已验证；Shell 写入没有对应 patch 事件，已写入 UI 覆盖提示。
+- W23 独立发现的截断、路径标记、脱敏破坏结构、脱敏扩容、来源与无 patch 身份问题由主 Agent 修复，W23 独立复验。最终门禁、证据与剩余项由[自检记录](evidence/W0-turn-diff-report.md)与[独立验收](acceptance.md#2026-10-18-本轮-diff-独立评审w23)负责。
+- 提交初次 hook 出现既有 Project View 监听用例超时；定向套件与完整提交检查重跑通过，失败与重检证据保存在上述自检记录，未修改该服务或测试、未绕过门禁。按既有授权完成本地快进合入与干净 worktree 清理，不推送、不发布；完整工具任务继续 `in_progress`。
+
 ## 当前人工体验结论（2026-10-18）
 
-路线图所列现有功能的人工体验已全部通过，工具接受范围与确认依据见[验收记录](acceptance.md#当前范围与人工功能验收)。下文保留各阶段当时的计划与收尾基线；其中待人工体验的历史状态不再作为当前阻塞。本轮仅更新文档，任务剩余实现与技术验证由 [task.md](task.md#本轮授权与状态) 跟踪。
+路线图所列现有功能的人工体验已全部通过，工具接受范围与确认依据见[验收记录](acceptance.md#当前范围与人工功能验收)。下文保留各阶段当时的计划与收尾基线；其中待人工体验的历史状态不再作为当前阻塞。同日后续指令已恢复实施，任务剩余技术验证由 [task.md](task.md#本轮授权与状态) 跟踪。
 
 ## 范围与基线
 
@@ -97,9 +117,9 @@
 - W21 对最新 `out/` 与 `app.asar` 的 119 个文件逐字节审计通过，含目录 utility worker；W22 的实际 GUI 保留其已声明的旧包基线，不把新包自动化结果冒充新一轮 GUI。独立结论与剩余边界由 [acceptance.md](acceptance.md#stage-1)负责。
 - 本阶段按一个完整可验证目标整理提交，保留 `backup/files-diff-pre-closeout` 以追溯压缩前代码与证据基线；同步 main 后 rebase，依 CONTRIBUTING §5 只作本地快进合入，再正常移除干净的聚合 worktree。真实 CLI、本轮 Diff、人工功能验收及整个任务的剩余范围继续保留。
 
-### 2026-10-18 范围与文档同步
+### 2026-10-18 范围与文档同步（恢复实施前的历史记录）
 
 - 用户确认当前 V1 的真实 CLI 验收只覆盖 Codex；Claude Code 暂不真实验收且不随当前 V1 发布。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，应用不设置调用次数、费用上限或自动重试护栏；真实结果按 CLI 实际行为记录。
 - 用户确认取消固定上线排期，GitHub Releases 为后续发布渠道；目标版本和发布准备边界见 DEC-21、DEC-22。签名 / 公证 / 校验和发布前再定；扩展范围不插入 V1。
-- 用户接受 W5-F13，并确认 SET-Q6 / SET-Q7，已记录为 DEC-20；最终 V1 功能 / 阶段人工验收仍待执行。
+- 用户接受 W5-F13，并确认 SET-Q6 / SET-Q7，已记录为 DEC-20；该时点后用户又确认现有功能体验全部通过，当前结论见顶部。
 - 用户随后明确本轮仅更新文档，不继续推荐或推进实现、真实 CLI、打包、产物生成与发布。已经核对路线图、决定记录、技术要求、验收标准、架构快照、脚本说明及相关规格和任务；历史基线、未覆盖项、任务状态和人工验收结论保留。

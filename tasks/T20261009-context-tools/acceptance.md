@@ -1,16 +1,32 @@
 # 验收：工程工具阶段
 
+## 2026-10-18 本轮 Diff 独立评审（W23）
+
+### 未覆盖、边界与人工验收入口
+
+- 本节是 `dcfaac3` 后本轮 Diff / 原生补丁持久化及 Codex 原生文件引用的独立新增评审；下文旧阶段的基线和结论保留。W23 未参与应用实现。
+- **本轮所列范围的独立 AI 评审：通过（2026-10-18）**。真实 CLI 只验证 Codex 0.163.0，Claude Code 暂缓；应用 UI 真实运行中追加、四工具综合技术验收、完整 AC-07、最终打包产物独立验收及人工产品验收不在本次通过范围。
+- 人工新功能验收：待人工验收。既有 Files / 项目 Diff / Terminal / Browser 的人工接受范围见[当前范围与人工功能验收](#当前范围与人工功能验收)，不自动扩展到本轮 Diff。
+
+### 当前独立结果
+
+W23 初审发现六项缺陷（截断标志粘住、路径裁切未标记、脱敏破坏身份 / 枚举、脱敏扩容绕过限额、来源 / 文案不准确、无 patch 新轮身份未保存），均由 Main Agent 修复并经 W23 独立复验；没有未解决的本次评审阻塞项。最终自写探针 10 项、既有桌面回归 110 项、Adapter Diff / Controller / Stop 回归 81 项通过。独立 agent-browser 在模拟 Provider 的实际 Electron 中完成主动打开、聚合 / 文件、后续工作区与新轮不改旧历史、项目范围、unknown / empty、失败 / 中断、Project 隔离、来源和完整重启场景，关键截图已查看。
+
+最终基线为 `dcfaac35ef86200721727ab53533682f2dd85d4e` + `feat/turn-diff` 未提交源码，31 个修改 / 新增源码文件清单摘要 SHA-256 为 `a9d0cf3df621d7f6a07800ad6e6cdf090ff153ea3582c9c80f54bcd7d2ee7125`；源码及 GUI 构建哈希见[基线清单](evidence/W23-baseline.json)。详细场景、环境、夹具注入边界、六项修复及最终日志见 [W23-review.md](evidence/W23-review.md)。
+
+独立真实 Codex 非 Git 原生 patch 与当前应用原生附件策略分别成功，见[原生 patch](evidence/W23-real-codex.json)、[文件引用](evidence/W23-native-reference.json)。这两次真实调用早于 F5 / F6 元数据修复；最新来源与无 patch 身份保存由最终本地探针复验，历史 JSON 保留原样。Main Agent 的 Adapter 同轮 steer 原始证据已由 W23 审计，未冒充 W23 独立执行或应用 UI 的真实追加验收。
+
 ## 2026-10-18 当前 V1 范围更新
 
 本记录的历史基线、阶段结论和未覆盖项保持不变。按 [DEC-16](../../docs/07.%20Decisions.md#dec-16-v1-真实-cli-验收范围)，当前 V1 后续真实 CLI 只执行 Codex；Claude Code 的实现、模拟验证和历史真实证据保留，本轮不新增真实调用，也不把其真实链路记为通过，且不随当前 V1 发布（DEC-19）。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，应用不设置调用次数、费用上限或自动重试护栏。按 [DEC-17](../../docs/07.%20Decisions.md#dec-17-github-release-发布渠道与排期)，固定上线日期取消，发布准备目标改为 GitHub Releases；发布物要求仍需人工确认。
 
-目标版本、发布准备范围及本轮只更新文档的限制见 [DEC-21、DEC-22](<../../docs/07. Decisions.md#dec-21-v1-github-release-版本号>)；本轮不执行真实复测、产物生成或发布。
+目标版本及发布准备范围见 [DEC-21、DEC-22](<../../docs/07. Decisions.md#dec-21-v1-github-release-版本号>)。同日后续「continue to implement」已恢复实施；本轮真实 Codex 与新功能独立结果见上节，不创建或上传 Release。
 
 ## 当前范围与人工功能验收
 
 - 当前阶段 1（Files、项目 Diff、文件引用）的独立验收见下节；Runtime 历史报告保留在后半部，不能把其旧状态读作当前未实现状态。
-- **完整 AC-07 尚未完成**：本轮 Diff、原生补丁持久化、Conversation 入口与 Codex 的真实文件接收仍未覆盖；Claude Code 真实文件接收按 DEC-16 暂缓且不随当前 V1 发布。本轮没有真实模型请求；后续 Codex 结果按 CLI 实际行为记录。
-- **人工功能验收：已验收（2026-10-18）**。用户确认路线图中人体验收的项目全部通过，接受 Files / 项目 Diff / 文件引用现有体验，以及 Terminal / Browser 与关闭 / 退出交互。确认原文、接受基线与边界见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。本轮 Diff、真实引用与完整 AC-07 的技术缺口继续保留，任务状态不变。
+- **完整 AC-07 尚未完成**：本轮 Diff、原生补丁持久化、Conversation 入口及 Codex 普通发送的原生文件接收已有新增证据，见上节 W23 与[主 Agent 自检](evidence/W0-turn-diff-report.md)。Adapter 真实同轮 steer 文件引用已有[自检证据](evidence/W0-codex-steer-live.json)；应用 UI 的真实追加交互与四工具综合技术验收仍待补齐；Claude Code 按 DEC-16 / DEC-19 暂缓。
+- **人工功能验收：已验收（2026-10-18）**。用户确认路线图中人体验收的项目全部通过，接受 Files / 项目 Diff / 文件引用现有体验，以及 Terminal / Browser 与关闭 / 退出交互。确认原文、接受基线与边界见[总体验收](../T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。该次接受不覆盖随后实现的本轮 Diff；新增功能待人工验收，完整 AC-07 的剩余技术边界见上节，任务状态不变。
 
 ## 2026-10-18 人工取舍确认
 
@@ -57,7 +73,7 @@
 
 范围与边界：
 
-- 本历史报告覆盖当时 Terminal、Browser 及 Project 关闭 / 应用退出接缝的运行时阶段；其中“Files / 项目 Diff / 文件引用未实现”的状态仅适用于本报告的 2026-10-14 基线。当前阶段 1 状态见上节；本轮 Diff 与原生补丁持久化仍未实施，完整 AC-07 尚未完成（见 [task.md](task.md)）。
+- 本历史报告覆盖当时 Terminal、Browser 及 Project 关闭 / 应用退出接缝的运行时阶段；其中“Files / 项目 Diff / 文件引用未实现”的状态仅适用于本报告的 2026-10-14 基线。当前阶段 1 状态见上节；2026-10-18 新增本轮 Diff 与原生补丁结果见顶部 W23 章节，完整 AC-07 仍未完成。
 - 没有真实 Codex / Claude CLI 与模型调用（本阶段未安排真实模型场景）。所有 GUI 结果使用模拟 Session Provider（`STUDIO_E2E_PROVIDERS=1`）、真实本地 PTY 和本机回环 HTTP 页面；Adapter 严格释放用真实本地进程（`/bin/sh`、`sleep`）与假驱动，未用真实 CLI 进程。
 
 最终基线上仍没有独立结果的路径：
@@ -79,7 +95,7 @@
 
 后续事项（已按 2026-10-18 人工体验确认更新）：
 
-1. 真实 Codex CLI 场景的技术证据由 AI 后续补齐（本轮仅更新文档；额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，应用不设置调用护栏）。
+1. 真实 Codex CLI 的剩余综合证据由 AI 补齐，新增引用与 patch 结果见顶部 W23 章节；额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，应用不设置调用护栏。
 2. 本阶段现有交付的人工体验已接受；AI「部分通过」的原有技术结论与任务剩余标准保留（见 [task.md](task.md)）。
 3. 是否需要 Nerd Font / powerline 字符的字体回退（IBM Plex Mono 没有这些字符，p10k 之类提示符的分隔符显示为方框）：功能取舍，与本次 CSP 改动无关。
 

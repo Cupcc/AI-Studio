@@ -74,6 +74,7 @@
 1. `+` 打开 Context / Attachment 菜单（Shell Spec 第 7 节）。菜单提供“从 Files 添加文件”，打开 Files 后由用户选择普通文件并添加到当前草稿 / Session；实现细节见 §1.3。
 2. 上下文标签位：显示当前 View 与从 Files 添加的文件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。本轮实现标签位与数据结构 `context_items: [{type: 'view', viewId} | {type: 'file', path}]`；Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。
 3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
+   - 当前转换：Codex 原生 mention、Claude 文本路径清单；引用不是文件内容快照。2026-10-18 Codex 普通发送真实接收及尚未覆盖的运行中输入边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
 4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件标签时明确阻止答复并保留输入，避免标签被无声清空；运行中发送遵循 Provider 的实际能力。实现与独立验收边界由 [工程工具任务](../../tasks/T20261009-context-tools/task.md) 维护。
 
 #### Send / Stop

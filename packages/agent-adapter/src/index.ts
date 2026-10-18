@@ -58,4 +58,5 @@ export type {
 export { DEFAULT_TIMEOUTS, resolveTimeouts } from './core/timeouts.js';
 export type { AdapterTimeouts } from './core/timeouts.js';
 export { TurnGuard } from './core/turn-guard.js';
+export { boundNativeDiff, NATIVE_DIFF_LIMIT, NATIVE_DIFF_FILES } from './core/turn-diff.js';
 export type { TurnClass, TurnRecord } from './core/turn-guard.js';

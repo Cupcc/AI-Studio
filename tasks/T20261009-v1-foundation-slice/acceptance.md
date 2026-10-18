@@ -4,7 +4,7 @@
 
 本记录保留 2026-10-09 的历史基线和部分通过结论。当前 V1 的真实 CLI 验收只执行 Codex；Claude Code 的历史证据与未覆盖项不改写，新增真实链路暂缓且不随当前 V1 发布（DEC-19）。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，真实复测按 CLI 实际结果记录；固定上线日期取消，发布准备目标为 GitHub Releases。W5-F13 与 SET-Q6 / SET-Q7 已按 DEC-20 确认；路线图所列现有功能的人工体验验收已全部通过，确认范围见下节。
 
-目标版本、发布准备范围及本轮只更新文档的限制见 [DEC-21、DEC-22](<../../docs/07. Decisions.md#dec-21-v1-github-release-版本号>)；本轮不执行真实复测、产物生成或发布。
+目标版本及发布范围见 [DEC-21、DEC-22](<../../docs/07. Decisions.md#dec-21-v1-github-release-版本号>)；同日后续已恢复实施，Codex 原生引用及本轮 Diff 新增技术证据见[工程工具验收](../T20261009-context-tools/acceptance.md#2026-10-18-本轮-diff-独立评审w23)。该证据不改写下文历史结论，暂不创建或上传 Release。
 
 > 下文技术报告写入者：独立验收 W6（兼 Adapter W4、Project W3），未参与实现。日期：2026-10-09；当时待人工签收的状态保留为历史背景。当前人工体验结论见下节。
 
@@ -14,7 +14,7 @@
 - 人工确认：用户明确表示“"docs/06. Development Roadmap.md" 里面人体验验收的都通过了，更新文档啊”。Main Agent 据此记录验收通过，移除相应的待人体验事项。
 - 接受范围：应用窗口与多 Project / 导航、Session 对话与输入及状态提醒、Project Knowledge / 默认 View、Files / 项目 Diff / 文件引用的现有体验、Terminal / Browser 与关闭 / 退出交互、设置与外观，以及上述现有功能的阶段整体体验。工程工具和设置的负责记录分别见[工具验收](../T20261009-context-tools/acceptance.md#当前范围与人工功能验收)、[设置任务](../archive/T20261012-settings-theme/task.md#人工功能验收)。
 - 版本与证据基线：以 2026-10-18 对话所指路线图中的现有已实现功能为接受范围；用户未另提供体验构建版本号。技术证据沿用各模块原记录的提交、构建及环境，不把本次人工确认绑定到未经用户指明的新构建。
-- 未覆盖项：本轮仅更新文档，没有新增测试结果。未实现的本轮 Diff / 原生补丁与对话关联、Codex 尚缺的真实兼容性及专项证据、最终产品打包验证继续保留；Claude Code 按 DEC-16 / DEC-19 暂缓。现有人工体验不再列为待办，任务状态由 AI 按[任务协议](../README.md#lifecycle)核对技术交付后收尾。
+- 未覆盖项：该次人工体验确认没有新增测试结果，也不覆盖随后实现的本轮 Diff / 原生补丁与对话关联；其当前技术证据见顶部新记录。Codex 其余真实兼容性及专项证据、最终产品打包验证继续保留；Claude Code 按 DEC-16 / DEC-19 暂缓。现有人工体验不再列为待办，任务状态由 AI 按[任务协议](../README.md#lifecycle)核对技术交付后收尾。
 - 原有[原型 v01 对齐签收](../archive/T20261009-prototype-alignment/task.md)、[原型 v02 对齐签收](../archive/T20261010-prototype-v02-alignment/task.md)及[核心交互模拟范围签收](../archive/T20261011-core-interaction-acceptance/task.md)保留各自日期和基线。以下为 2026-10-09 的历史技术报告，部分通过及未覆盖项仍按当时证据解读。
 
 ## 历史技术报告（2026-10-09）

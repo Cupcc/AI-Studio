@@ -7,8 +7,8 @@ const file = (path: string, name = path.slice(path.lastIndexOf('/') + 1)): Resol
 const header = 'Referenced files (paths relative to the Project root; these are references, not file contents):'
 
 describe('Provider input for Files references · FR-TOOL-001 item 4, Tools §4.1', () => {
-  it('uses the text strategy for both CLIs until a real run proves a native form', () => {
-    expect(FILE_REFERENCE_STRATEGY).toEqual({ codex: 'text', 'claude-code': 'text' })
+  it('uses the verified native strategy for Codex and the textual strategy for Claude', () => {
+    expect(FILE_REFERENCE_STRATEGY).toEqual({ codex: 'attachments', 'claude-code': 'text' })
     expect(Object.keys(FILE_REFERENCE_STRATEGY).sort()).toEqual([...SESSION_CLIS].sort())
     expect(FILE_REFERENCE_HEADER).toBe(header)
   })

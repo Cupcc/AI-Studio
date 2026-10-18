@@ -1,0 +1,28 @@
+{
+  "version": "codex-cli 0.163.0",
+  "login": "logged_in",
+  "root": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-steer-reference-N3ZtlO",
+  "filename": "steered reference #中文.txt",
+  "token": "steer-ef655f21-79a0-4681-973d-6dc6ad562abd",
+  "events": [
+    {
+      "type": "turn.diff.updated",
+      "state": "unknown",
+      "source": "client:native-turn-bound",
+      "nativeSessionId": "01a14dcb-2587-7602-9725-aab992f7332e",
+      "nativeTurnId": "01a14dcb-261c-7b53-9123-c396cd2f5ffd",
+      "cliVersion": "0.163.0",
+      "protocolVersion": "0.161.0"
+    }
+  ],
+  "answer": "I’ll run the four-second sleep, then reply ready.\nI’ll look for the referenced file and read its verification token.\nready\n\nVerification token: `steer-ef655f21-79a0-4681-973d-6dc6ad562abd`",
+  "startedTurn": "06bf926c-d797-4e79-9a89-a218c0c7a17f",
+  "steeredWhile": "running",
+  "steerAccepted": {
+    "turnId": "06bf926c-d797-4e79-9a89-a218c0c7a17f"
+  },
+  "outcome": "completed",
+  "completedTurn": "06bf926c-d797-4e79-9a89-a218c0c7a17f",
+  "referenceReceived": true,
+  "sameTurn": true
+}

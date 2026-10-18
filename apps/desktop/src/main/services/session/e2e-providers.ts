@@ -1,7 +1,7 @@
-import type { AgentProvider, InputRequestInit, ResumeSessionOptions, SessionSink, TurnContext } from '@ai-studio/agent-adapter'
+import type { AgentProvider, InputRequestInit, ResumeSessionOptions, SessionSink, TurnContext, UserInput } from '@ai-studio/agent-adapter'
 import { FakeProvider } from '@ai-studio/agent-adapter/testing'
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 import { parseReferencedFiles } from './file-reference'
 
 /** `[e2e:markdown]` reply covering the Markdown range of Shell Spec v02 §6 (content mirrors prototype v02). */
@@ -74,12 +74,30 @@ export function createE2eProviders(): AgentProvider[] {
       behavior: {
         onSteer(turn, input) {
           if (input.text.includes('[e2e:steer-error]')) throw new Error('模拟追加失败，输入已保留')
-          runs.get(turn.turnId)?.files.push(...parseReferencedFiles(input.text))
+          runs.get(turn.turnId)?.files.push(...references(turn, input))
         },
         onStartTurn(turn, input, sink) {
-          const run = { turn, sink, remaining: 0, files: parseReferencedFiles(input.text) }
+          const run = { turn, sink, remaining: 0, files: references(turn, input) }
           runs.set(turn.turnId, run)
           turn.signal.addEventListener('abort', () => runs.delete(turn.turnId), { once: true })
+          if (/\[e2e:diff(?:-empty|-failed|-interrupted)?\]/.test(input.text)) {
+            const nativeSessionId = provider.sessions.find(session => session.controller.activeTurn?.turnId === turn.turnId)!.controller.nativeSessionId!
+            const nativeTurnId = `native:${turn.turnId}`
+            sink.bindNativeTurnId(turn.turnId, nativeTurnId)
+            schedule(turn, () => {
+              const empty = input.text.includes('[e2e:diff-empty]')
+              const failed = input.text.includes('[e2e:diff-failed]')
+              const interrupted = input.text.includes('[e2e:diff-interrupted]')
+              const diff = { nativeSessionId, nativeTurnId, source: 'e2e:turn/diff/updated', cliVersion: 'fixture', protocolVersion: '0.161.0', state: empty ? 'empty' as const : 'available' as const,
+                patch: empty ? '' : 'diff --git a/native.txt b/native.txt\n--- a/native.txt\n+++ b/native.txt\n@@ -1 +1 @@\n-before\n+saved-version\n',
+                files: empty ? [] : [{ itemId: 'file-1', path: 'native.txt', change: 'modify' as const, status: failed ? 'failed' as const : 'completed' as const, patch: '@@ -1 +1 @@\n-before\n+saved-version\n' }], truncated: false }
+              sink.turnDiffUpdated(turn.turnId, { ...diff, patch: '+obsolete snapshot' })
+              sink.turnDiffUpdated(turn.turnId, diff)
+              if (failed || interrupted) sink.nativeTurnEnded(turn.turnId, { status: failed ? 'failed' : 'interrupted', ...(failed ? { error: { code: 'provider_error' as const, message: '模拟补丁后的执行失败', retryable: false } } : {}) })
+              else complete(run, '模拟原生补丁已保存。')
+            }, 250)
+            return
+          }
           sink.itemStarted(turn.turnId, { itemId: `${turn.turnId}:message`, kind: 'assistant_message', status: 'in_progress', text: '' })
           sink.itemStarted(turn.turnId, {
             itemId: `${turn.turnId}:tool`, kind: 'command', status: 'in_progress',
@@ -142,6 +160,10 @@ export function createE2eProviders(): AgentProvider[] {
         }
       }
     })
+    function references(turn: TurnContext, input: UserInput): string[] {
+      const cwd = provider.sessions.find(session => session.controller.activeTurn?.turnId === turn.turnId)?.options.cwd
+      return [...parseReferencedFiles(input.text), ...(input.attachments ?? []).flatMap(file => file.kind === 'file' && cwd ? [relative(cwd, file.path)] : [])]
+    }
     return provider
   })
 }

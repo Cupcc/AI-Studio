@@ -1,0 +1,77 @@
+$ node scripts/check-commit.mjs
+Documentation: 0 new issue(s); 4 baseline issue(s) unchanged or removed.
+Code/configuration/unknown or empty index: running all basic checks.
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm -r --if-present run typecheck && pnpm test:scripts && pnpm -r --if-present run test
+$ tsc -p tsconfig.build.json
+Scope: 2 of 3 workspace projects
+$ tsc -p tsconfig.json --noEmit
+$ tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && tsc --noEmit -p tsconfig.e2e.json
+$ vitest run --config scripts/vitest.config.mjs
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/turn-diff
+
+
+ Test Files  1 passed (1)
+      Tests  36 passed (36)
+   Start at  15:04:10
+   Duration  1.65s (tests 92%, import 7%, transform 2%)
+
+Scope: 2 of 3 workspace projects
+$ vitest run
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/turn-diff/packages/agent-adapter
+
+
+ Test Files  18 passed (18)
+      Tests  246 passed (246)
+   Start at  15:04:12
+   Duration  7.78s (tests 90%, transform 7%, import 2%)
+
+$ vitest run
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/turn-diff/apps/desktop
+
+ ❯ |node| src/main/services/project-view/project-view-service.test.ts (7 tests | 1 failed) 1575ms
+   ❯ Project View files, watcher, last-good and boundaries (7)
+     × watches creation and external updates, isolates projects, closes and rescans on reopen 1029ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |node| src/main/services/project-view/project-view-service.test.ts > Project View files, watcher, last-good and boundaries > watches creation and external updates, isolates projects, closes and rescans on reopen
+AssertionError: expected 'empty' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "empty"
+
+ ❯ src/main/services/project-view/project-view-service.test.ts:63:113
+     61|     await h.service.getSnapshot('a', 'architecture')
+     62|     h.write()
+     63|     await expect.poll(() => h.events.findLast(e => e.projectId === 'a'…
+       |                                                                                                                 ^
+     64|     h.write('b', { summary: 'Other project' })
+     65|     expect((await h.service.getSnapshot('b', 'architecture')).snapshot…
+
+Caused by: Error: Matcher did not succeed in time.
+ ❯ src/main/services/project-view/project-view-service.test.ts:63:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 90 passed (91)
+      Tests  1 failed | 1159 passed (1160)
+   Start at  15:04:20
+   Duration  10.00s (tests 60%, environment 26%, transform 7%, import 6%)
+
+Environment  |renderer| jsdom was created 35 times · 20.06s total, 52% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[ELIFECYCLE] Test failed. See above for more details.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/Chris/Projects/AI Stduio.worktrees/
+  │ turn-diff/apps/desktop
+
+[ELIFECYCLE] Command failed with exit code 1.
+[ELIFECYCLE] Command failed with exit code 1.
+husky - pre-commit script failed (code 1)

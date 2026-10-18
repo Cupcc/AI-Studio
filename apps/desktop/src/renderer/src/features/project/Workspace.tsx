@@ -37,7 +37,7 @@ function RightArea({ props, ui, area, viewMode }: { props: ShellSlotProps; ui: U
   const slots = useShellIntegration(), shell = useProjectShell()
   const viewId = props.canvas.mode === 'view' ? props.canvas.viewId : 'overview'
   const title = <span className="right-area__title">{area === 'preview' ? VIEW_NAMES[viewId] : TOOL_NAMES[area]}</span>
-  const tools = TOOL_IDS.map((tool, i) => <button key={tool} className={`icon-button ${area === tool ? 'is-selected' : ''}`} aria-label={TOOL_NAMES[tool]} aria-pressed={area === tool} data-tip={TOOL_NAMES[tool]} data-tip-align={viewMode && i === TOOL_IDS.length - 1 && area === 'preview' ? 'end' : undefined} onClick={() => shell.updateUiState(props.project.id, selectRightArea(ui, tool))}><Icon name={tool} /></button>)
+  const tools = TOOL_IDS.map((tool, i) => <button key={tool} className={`icon-button ${area === tool ? 'is-selected' : ''}`} aria-label={TOOL_NAMES[tool]} aria-pressed={area === tool} data-tip={TOOL_NAMES[tool]} data-tip-align={viewMode && i === TOOL_IDS.length - 1 && area === 'preview' ? 'end' : undefined} onClick={() => { slots.toolSelected?.(props.project.id, tool); shell.updateUiState(props.project.id, selectRightArea(ui, tool)) }}><Icon name={tool} /></button>)
   return <section className={`right-area ${viewMode ? 'right-area--view' : ''} ${area === 'preview' ? 'right-area--preview' : ''}`} aria-label={area === 'preview' ? S.preview : TOOL_NAMES[area]}>
     <header className="canvas-header right-area__header">
       {viewMode ? <>

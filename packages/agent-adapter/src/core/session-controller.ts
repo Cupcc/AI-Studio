@@ -13,6 +13,7 @@ import type {
   ItemStatus,
   ModelInfo,
   NativeTurnEnd,
+  NativeTurnDiff,
   ProviderId,
   QuestionRequest,
   RecoveryReport,
@@ -128,6 +129,7 @@ export interface SessionSink {
   itemDelta(turnId: string, itemId: string, channel: ItemDeltaChannel, delta: string): void;
   itemUpdated(turnId: string, item: ItemSnapshot): void;
   itemCompleted(turnId: string, item: ItemSnapshot): void;
+  turnDiffUpdated(turnId: string, diff: NativeTurnDiff): void;
   /**
    * Registers a Needs Input request. Returns the adapter request id, or `undefined` when the
    * request is not accepted (turn finished, stopping, closed) — the driver must then release
@@ -826,6 +828,11 @@ export class SessionController implements AgentSession {
         }
       },
       turnIdForNative: (nativeTurnId) => this.guard.turnIdForNative(nativeTurnId),
+      turnDiffUpdated: (turnId, diff) => {
+        const turn = this.turnFor(turnId, 'turn.diff.updated');
+        if (!turn || turn.record.nativeTurnId !== diff.nativeTurnId || this.nativeSessionId !== diff.nativeSessionId) return;
+        this.emit('turn.diff.updated', { turnId, diff });
+      },
       itemStarted: (turnId, item) => {
         const turn = this.turnFor(turnId, 'item.started');
         if (!turn) return;

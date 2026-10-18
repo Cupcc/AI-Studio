@@ -1,0 +1,117 @@
+{
+  "version": "codex-cli 0.163.0",
+  "login": "logged_in",
+  "root": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-native-reference-0QNiQu",
+  "scenarios": [
+    {
+      "mode": "native-mention",
+      "diffs": [],
+      "files": [],
+      "answer": "I’ll read the attached reference and extract its verification token.\nmaple-harbor-918",
+      "outcome": "completed"
+    },
+    {
+      "mode": "native-patch",
+      "diffs": [
+        {
+          "nativeSessionId": "01a14dba-9907-7030-86ba-f80f0a9aeecd",
+          "nativeTurnId": "01a14dba-cfa2-7042-8494-067c19291a9c",
+          "source": "codex:turn/diff/updated",
+          "protocolVersion": "0.161.0",
+          "cliVersion": "0.163.0",
+          "state": "unknown",
+          "patch": null,
+          "files": [
+            {
+              "itemId": "exec-e70b50bf-4b38-4b0f-b4d5-5aad45124258",
+              "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-native-reference-0QNiQu/result.txt",
+              "change": "add",
+              "status": "completed",
+              "patch": "native-diff-verified\n"
+            }
+          ],
+          "truncated": false
+        },
+        {
+          "nativeSessionId": "01a14dba-9907-7030-86ba-f80f0a9aeecd",
+          "nativeTurnId": "01a14dba-cfa2-7042-8494-067c19291a9c",
+          "source": "codex:turn/diff/updated",
+          "protocolVersion": "0.161.0",
+          "cliVersion": "0.163.0",
+          "state": "available",
+          "patch": "diff --git a/result.txt b/result.txt\nnew file mode 100644\nindex 0000000000000000000000000000000000000000..29a63b0a297559a04a2bb817a6cb6f1f852f8445\n--- /dev/null\n+++ b/result.txt\n@@ -0,0 +1 @@\n+native-diff-verified\n",
+          "files": [
+            {
+              "itemId": "exec-e70b50bf-4b38-4b0f-b4d5-5aad45124258",
+              "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-native-reference-0QNiQu/result.txt",
+              "change": "add",
+              "status": "completed",
+              "patch": "native-diff-verified\n"
+            }
+          ],
+          "truncated": false
+        },
+        {
+          "nativeSessionId": "01a14dba-9907-7030-86ba-f80f0a9aeecd",
+          "nativeTurnId": "01a14dba-cfa2-7042-8494-067c19291a9c",
+          "source": "codex:turn/diff/updated",
+          "protocolVersion": "0.161.0",
+          "cliVersion": "0.163.0",
+          "state": "available",
+          "patch": "diff --git a/result.txt b/result.txt\nnew file mode 100644\nindex 0000000000000000000000000000000000000000..29a63b0a297559a04a2bb817a6cb6f1f852f8445\n--- /dev/null\n+++ b/result.txt\n@@ -0,0 +1 @@\n+native-diff-verified\n",
+          "files": [
+            {
+              "itemId": "exec-e70b50bf-4b38-4b0f-b4d5-5aad45124258",
+              "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-native-reference-0QNiQu/result.txt",
+              "change": "add",
+              "status": "completed",
+              "patch": "native-diff-verified\n"
+            }
+          ],
+          "truncated": false
+        },
+        {
+          "nativeSessionId": "01a14dba-9907-7030-86ba-f80f0a9aeecd",
+          "nativeTurnId": "01a14dba-cfa2-7042-8494-067c19291a9c",
+          "source": "codex:turn/diff/updated",
+          "protocolVersion": "0.161.0",
+          "cliVersion": "0.163.0",
+          "state": "available",
+          "patch": "diff --git a/result.txt b/result.txt\nnew file mode 100644\nindex 0000000000000000000000000000000000000000..29a63b0a297559a04a2bb817a6cb6f1f852f8445\n--- /dev/null\n+++ b/result.txt\n@@ -0,0 +1 @@\n+native-diff-verified\n",
+          "files": [
+            {
+              "itemId": "exec-e70b50bf-4b38-4b0f-b4d5-5aad45124258",
+              "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-native-reference-0QNiQu/result.txt",
+              "change": "add",
+              "status": "completed",
+              "patch": "native-diff-verified\n"
+            }
+          ],
+          "truncated": false
+        },
+        {
+          "nativeSessionId": "01a14dba-9907-7030-86ba-f80f0a9aeecd",
+          "nativeTurnId": "01a14dba-cfa2-7042-8494-067c19291a9c",
+          "source": "codex:turn/diff/updated",
+          "protocolVersion": "0.161.0",
+          "cliVersion": "0.163.0",
+          "state": "available",
+          "patch": "diff --git a/result.txt b/result.txt\nnew file mode 100644\nindex 0000000000000000000000000000000000000000..29a63b0a297559a04a2bb817a6cb6f1f852f8445\n--- /dev/null\n+++ b/result.txt\n@@ -0,0 +1 @@\n+native-diff-verified\n",
+          "files": [
+            {
+              "itemId": "exec-e70b50bf-4b38-4b0f-b4d5-5aad45124258",
+              "path": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-native-reference-0QNiQu/result.txt",
+              "change": "add",
+              "status": "completed",
+              "patch": "native-diff-verified\n"
+            }
+          ],
+          "truncated": false
+        }
+      ],
+      "files": [],
+      "answer": "I’ll create `result.txt` with the requested line.\nCreated `result.txt` with `native-diff-verified` followed by a newline. No other files changed.",
+      "outcome": "completed"
+    }
+  ]
+}

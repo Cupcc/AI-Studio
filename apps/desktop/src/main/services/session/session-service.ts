@@ -10,6 +10,8 @@ import { SessionStore } from './store'
 import { VIEW_CATALOG, type ViewContext } from '@shared/project-view/types'
 import type { FileReferenceResolver, ProjectPath, ResolvedFileReference } from '@shared/tools/files'
 import { buildUserInput, describeFileReferenceFailures, FILE_REFERENCE_STRATEGY } from './file-reference'
+import type { TurnDiffRecord } from '@shared/tools/turn-diff'
+import { boundNativeDiff } from '@ai-studio/agent-adapter'
 
 type RequestItem = Extract<TranscriptItem, { kind: 'input_request' }>
 type ItemBody = TranscriptItem extends infer T ? T extends TranscriptItem ? Omit<T, 'id' | 'sessionId' | 'turnId' | 'sequence' | 'at'> : never : never
@@ -171,6 +173,24 @@ export class SessionService implements MainSessionPort {
     const hasMore = items.length > bounded
     if (hasMore) items.shift()
     return { session: { ...entry.summary }, items, hasMore, nextBeforeSequence: hasMore ? items[0]!.sequence : null }
+  }
+
+  getTurnDiff(projectId: string, sessionId: string, turnId: string): TurnDiffRecord {
+    const entry = this.entry(sessionId)
+    this.project(projectId)
+    if (entry.summary.projectId !== projectId) throw new Error('Session 不属于此 Project')
+    const turn = this.options.store.turn(sessionId, turnId)
+    if (!turn) throw new Error('轮次不属于此 Session')
+    const saved = this.options.store.turnDiff(turnId)
+    if (saved) return saved
+    return {
+      projectId, sessionId, turnId, provider: entry.summary.cli,
+      nativeSessionId: entry.summary.nativeSessionId ?? '', nativeTurnId: '',
+      source: 'client:missing-native-record', protocolVersion: '', state: entry.summary.cli === 'codex' ? 'unknown' : 'unavailable',
+      patch: null, files: [], truncated: false, revision: 0, receivedAt: turn.started_at,
+      final: turn.ended_at !== null, outcome: turn.outcome as TurnDiffRecord['outcome'],
+      reason: entry.summary.cli === 'codex' ? '此轮没有保存的原生补丁；不能据此判断没有修改。' : '此 CLI 尚未提供可用的原生轮次补丁。'
+    }
   }
 
   async create(request: CreateSessionRequest): Promise<SessionSummary> {
@@ -431,6 +451,16 @@ export class SessionService implements MainSessionPort {
     }
     if (turn.adapterId !== event.turnId) return
     switch (event.type) {
+      case 'turn.diff.updated': {
+        if (event.diff.nativeSessionId !== entry.summary.nativeSessionId) break
+        const previous = this.options.store.turnDiff(turn.id)
+        if (previous && (previous.final || previous.revision >= event.seq || previous.nativeTurnId !== event.diff.nativeTurnId)) break
+        this.options.store.saveTurnDiff(this.scrubDiff(entry, {
+          ...event.diff, projectId: entry.summary.projectId, sessionId: entry.summary.id, turnId: turn.id,
+          provider: entry.summary.cli, revision: event.seq, receivedAt: event.at, final: false, outcome: null
+        }))
+        break
+      }
       case 'turn.completed':
         if (event.stop?.cleanup === 'failed') {
           this.finish(entry, 'failed', event.stop.cleanupReport?.error ?? { code: 'stop_cleanup_failed', message: '停止后的清理或恢复失败', native: { source: 'stop', detail: event.stop } })
@@ -510,6 +540,8 @@ export class SessionService implements MainSessionPort {
       }
       this.flushDisk()
       this.options.store.endTurn(turn.id, outcome, this.now())
+      const diff = this.options.store.turnDiff(turn.id)
+      if (diff) this.options.store.saveTurnDiff(this.scrubDiff(entry, { ...diff, revision: diff.revision + 1, final: true, outcome }))
       entry.summary.activity = 'none'
       entry.summary.lastOutcome = outcome
       entry.summary.stopping = false
@@ -621,6 +653,15 @@ export class SessionService implements MainSessionPort {
       return input
     }
     return walk(value) as T
+  }
+
+  private scrubDiff(entry: Entry, record: TurnDiffRecord): TurnDiffRecord {
+    // IDs, revisions and status enums are structural. Redacting them can break attribution or FK writes.
+    const safe = { ...record, patch: this.scrub(entry, record.patch),
+      ...(record.reason === undefined ? {} : { reason: this.scrub(entry, record.reason) }),
+      files: record.files.map(file => ({ ...file, patch: this.scrub(entry, file.patch), path: this.scrub(entry, file.path),
+        ...(file.oldPath === undefined ? {} : { oldPath: this.scrub(entry, file.oldPath) }) })) }
+    return { ...safe, ...boundNativeDiff(safe) }
   }
 
   private safeResolution(entry: Entry, request: InputRequest, resolution: InputResolution): InputResolution {

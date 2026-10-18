@@ -1,5 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite'
 import type { ComposerDraft, DraftKey, SessionMessage, SessionSummary, TranscriptItem } from '@shared/session/types'
+import type { TurnDiffRecord } from '@shared/tools/turn-diff'
 
 export interface StoredTurn {
   id: string
@@ -69,6 +70,22 @@ export class SessionStore {
 
   endTurn(id: string, outcome: string, at: number): void {
     this.db.prepare('UPDATE session_turns SET outcome=?, ended_at=? WHERE id=?').run(outcome, at, id)
+  }
+
+  turn(sessionId: string, turnId: string): StoredTurn | undefined {
+    return this.db.prepare('SELECT * FROM session_turns WHERE id=? AND session_id=?').get(turnId, sessionId) as unknown as StoredTurn | undefined
+  }
+
+  turnDiff(turnId: string): TurnDiffRecord | null {
+    const row = this.db.prepare('SELECT data FROM turn_diffs WHERE turn_id=?').get(turnId) as { data: string } | undefined
+    return row ? JSON.parse(row.data) : null
+  }
+
+  saveTurnDiff(record: TurnDiffRecord): void {
+    this.db.prepare(`INSERT INTO turn_diffs VALUES (?, ?, ?, ?)
+      ON CONFLICT(turn_id) DO UPDATE SET revision=excluded.revision, final=excluded.final, data=excluded.data
+      WHERE turn_diffs.final=0 AND excluded.revision>turn_diffs.revision`)
+      .run(record.turnId, record.revision, record.final ? 1 : 0, JSON.stringify(record))
   }
 
   lastTurn(sessionId: string, failed = false): StoredTurn | undefined {

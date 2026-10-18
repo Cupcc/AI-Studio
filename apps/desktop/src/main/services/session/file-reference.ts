@@ -6,15 +6,15 @@ import type { SessionCli } from '@shared/session/types'
 
 /**
  * `text`: a path list in the prompt, which both CLIs accept today. `attachments`: the Adapter's structured file
- * attachment (Codex `mention`; Claude throws `unsupported`). No real CLI has been shown to act on either form.
+ * attachment (Codex `mention`; Claude throws `unsupported`). Codex mention was verified on 0.163.0 (2026-10-18).
  */
 export type FileReferenceStrategy = 'text' | 'attachments'
 
 /**
- * Both CLIs use `text` until a real run shows the native `mention` form is honoured; an unverified structured form
- * that the CLI ignores would drop the reference silently. Switching a CLI to `attachments` needs that evidence.
+ * Codex uses its verified native mention input; Claude keeps the textual path reference until separately verified.
+ * Evidence: T20261009-context-tools/evidence/W0-codex-adapter-live.json (2026-10-18).
  */
-export const FILE_REFERENCE_STRATEGY: Record<SessionCli, FileReferenceStrategy> = { codex: 'text', 'claude-code': 'text' }
+export const FILE_REFERENCE_STRATEGY: Record<SessionCli, FileReferenceStrategy> = { codex: 'attachments', 'claude-code': 'text' }
 
 export const FILE_REFERENCE_HEADER = 'Referenced files (paths relative to the Project root; these are references, not file contents):'
 

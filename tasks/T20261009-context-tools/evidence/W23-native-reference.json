@@ -1,0 +1,26 @@
+{
+  "fixture": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w23-reference-qPel81",
+  "strategy": "attachments",
+  "name": "reference # 中文 \" note.txt",
+  "version": {
+    "status": "ok",
+    "value": {
+      "version": "0.163.0",
+      "raw": "codex-cli 0.163.0",
+      "compatibility": "untested",
+      "testedVersions": "0.161.0"
+    }
+  },
+  "login": {
+    "status": "ok",
+    "value": {
+      "state": "logged_in",
+      "method": "api_key"
+    }
+  },
+  "outcome": "completed",
+  "answer": "I’ll read the reference and return its verification token.\n\nw23-token-9f89fb77-6b6b-42cd-9a60-b3599dfd964a",
+  "returnedExpectedToken": true,
+  "contentUnchanged": true,
+  "result": "passed"
+}

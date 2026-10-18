@@ -11,6 +11,7 @@ import type {
   StopPhase,
   StopSummary,
   TurnOutcome,
+  NativeTurnDiff,
 } from './types.js';
 
 /**
@@ -31,6 +32,8 @@ export interface AdapterEventPayloads {
 
   /** Emitted synchronously when input is submitted, before the CLI acknowledges (FR-STATE-001). */
   'turn.started': { turnId: string; startedAt: number };
+  /** Replaces the native record for this exact turn; seq is its revision. */
+  'turn.diff.updated': { turnId: string; diff: NativeTurnDiff };
   /** Terminal state of a turn. Emitted exactly once per turn. */
   'turn.completed': {
     turnId: string;

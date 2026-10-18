@@ -1,0 +1,26 @@
+W23 independent final verification UTC: 2026-10-18T06:58:51.386543+00:00
+Command: ['pnpm', '--filter', '@ai-studio/desktop', 'exec', 'vitest', 'run', '--root', '/Users/Chris/Projects/AI Stduio.worktrees/turn-diff', '--config', '/Users/Chris/Projects/AI Stduio.worktrees/turn-diff/tasks/T20261009-context-tools/evidence/W23-review.config.ts', '--reporter=verbose']
+
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/turn-diff
+
+ ↓ tasks/T20261009-context-tools/evidence/W23-real-codex.test.ts > W23 real Codex: native patch comes through the changed Adapter in a non-Git fixture
+ ↓ tasks/T20261009-context-tools/evidence/W23-native-reference.test.ts > W23 real Codex: current application native mention strategy reads the attached reference
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23: buffers patch before start acknowledgement and locks it to its exact native Turn 71ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23-F1: replacing an oversized aggregate with a small complete patch clears truncation 114ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23-F2: path truncation is reported as incomplete native data 0ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23: old SQLite upgrade preserves history; final revision survives reopen and rejects overwrite 35ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23-F3: secret redaction preserves native identity and schema states 59ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23-F4: redacted patch remains within the stated persistence limit 80ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23: concurrent Sessions with the identical native Turn ID retain independent snapshots 115ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23: runtime replacement keeps old-turn patches out of the next turn 103ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23-F5: provenance lists only the actual native events received 52ms
+ ✓ tasks/T20261009-context-tools/evidence/W23-turn-diff.test.ts > W23-F6: a new turn without any patch retains known native identity and version across completion and restart 58ms
+
+ Test Files  1 passed | 2 skipped (3)
+      Tests  10 passed | 2 skipped (12)
+   Start at  14:58:50
+   Duration  1.34s (transform 53%, tests 37%, import 10%, worker 1%)
+
+
+Exit: 0
