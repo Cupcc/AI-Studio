@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-23",
+  "environment": "macOS isolated Electron, simulated Provider, CDP 9333",
+  "observed_after_done": {
+    "document_hasFocus": true,
+    "main_getWindowFocus_focused": false,
+    "completed_unread_count": 1,
+    "frontmost_application": "loginwindow",
+    "frontmost_pid": 679,
+    "test_app_pid": 72622,
+    "test_app_active": false
+  },
+  "interpretation": "Native foreground is false. Completed unread is expected for this observation. Foreground completion scenario requires unlocked macOS and true native foreground; it remains pending."
+}

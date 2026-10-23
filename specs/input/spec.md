@@ -8,7 +8,7 @@
 | 文档状态 | 草稿 |
 | 覆盖需求 | FR-INPUT-001～FR-INPUT-002；关联 FR-STATE-002（在输入框答复 Needs Input）、FR-SESSION-001（输入区固定在对话下方） |
 | 相关验收 | AC-02、AC-05；05 第 4 节专项测试中的 Model Selector、Stop |
-| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 6、7 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 2.2、6、7 节（宽度对齐、草稿居中）；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；交互原型 v02 |
+| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 6、7 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 2.2、6、7 节（宽度对齐、统一底部 Composer）；[v06 采用记录](../../design/layout-ux-review-v02.md#6-采用记录)；线框图 v02（[design/wireframes](../../design/wireframes/README.md)） |
 | 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-INPUT-001～002、FR-STATE-002、FR-CHAT-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 4、6 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 4、5 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 4、5、6 节 |
 
 ## 1. 问题记录
@@ -56,8 +56,8 @@
 
 #### 布局
 
-1. 输入区固定在 Conversation 下方，内容宽度与消息列相同、左右边缘对齐（最大 720，Shell Spec v02 第 2.2 节）；Session Mode 新对话草稿中与问候语一起居中，发送第一条消息后回到底部（Shell Spec v02 第 6 节；交互原型 v02，2026-10-10 确认）。草稿、Conversation Mode、Project View Conversation 列共用同一组件。
-2. 上部为多行文本输入；底行从左到右：`+`（Context / Attachment）、上下文标签、（右侧）Model Selector、Send / Stop（Shell Spec 第 7 节；UX 第 4 节示意图）。
+1. 输入区固定在 Conversation 下方，内容宽度与消息列相同、左右边缘对齐（最大 720，Shell Spec v02 第 2.2 节）。New Chat、已有 Session、Project View Conversation 列共用底部 Composer，发送第一条消息前后位置一致；问候语与起步示例留在正文区域。依据 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)（2026-10-23 确认），替代交互原型 v02 的草稿输入框居中规则。
+2. 上部为多行文本输入，其后单独一行放置上下文标签；底行从左到右为 `+`（Context / Attachment）、（右侧相邻）Model Selector 与思考强度信号格、Stop / Send。错误与目录提示就近放在框内控制行之下，辅助状态行在框外；空闲不常驻快捷键说明，发送按钮悬停或键盘聚焦时提示 Enter / Shift+Enter（Shell Spec v02 第 7 节；DEC-23）。
 3. 打开 Session 或草稿时输入框获得焦点，可立即输入（UX 第 6 节 Session 打开第 4 项；FR-CHAT-001 第 1 项）。
 
 #### 文本输入与键盘
@@ -71,7 +71,7 @@
 
 #### Context / Attachment 入口与上下文标签
 
-1. `+` 打开 Context / Attachment 菜单（Shell Spec 第 7 节）。菜单提供“从 Files 添加文件”，打开 Files 后由用户选择普通文件并添加到当前草稿 / Session；实现细节见 §1.3。
+1. `+` 打开按来源分组的 Add 菜单：文件入口复用 Files；View 草稿中的当前 View 标签可在移除后重新附加；Skills 列出当前 Project 的真实原生目录，并标明已添加项。Plugins 无原生 catalog 接口时显示明确的不可用状态，不能把原型示例列成真实能力。Files 选择与添加行为见 §1.3；原生图片仍沿用 Files 的“作为图片附加”入口（DEC-23，2026-10-23）。
 2. 上下文标签位：显示当前 View 与从 Files 添加的文件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。本轮实现标签位与数据结构 `context_items: [{type: 'view', viewId} | {type: 'file', path} | {type: 'image', path} | {type: 'skill', id, name}]`；Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。
 3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
    - 当前转换：Codex 原生 mention、Claude 文本路径清单；引用不是文件内容快照。Codex 普通发送与应用 UI 同轮追加的真实证据及其余能力边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
@@ -113,19 +113,35 @@
 1. Needs Input 时输入框可用，输入非空时按钮为 Send。发送后：文字作为用户消息出现在对话中，未答复的卡片按 I-Q2 的规则解决并变为只读（显示“已在输入框回复”），Session 回到 Running，Needs Input 清除（session spec E5）。
 2. Codex 授权请求只接受批准 / 拒绝；W25 Adapter 与 W26 最终包 UI 真实复验确认输入框文字会先通过同一回合 `turn/steer` 交付，再拒绝待处理请求并继续，已落实 I-Q2。Claude 的 `canUseTool` 返回允许 / 拒绝（拒绝可附说明），提问类请求可能接受自由文本；其真实语义按 DEC-16 留待后续验证。
 
+#### 候选输入与控件键盘操作
+
+依据：DEC-23（2026-10-23 确认）、FR-INPUT-001、[v06 §4](../../design/layout-ux-review-v02.md#4-连续操作与键盘)。
+
+- 输入 `@` 读取当前 Project 的真实文件候选，`$` 读取当前 CLI 的真实 Skill catalog；选择后加入当前草稿的上下文标签，不自动发送。异步结果须核对草稿 / Project 身份，沿用既有文件路径与 Skill opaque ID 的主进程校验。
+- `/` 候选依赖 Provider 的原生命令目录；目录接口未接入时显示当前不可用，不列出原型的示例命令，不把普通文本伪装成已执行命令。正文输入仍可保留并按原生 CLI 语义发送。
+- 候选支持方向键、Enter / Tab 选择与 Esc 关闭；输入法组合输入只确认候选，不发送或选择应用候选。模型、思考与 Add 使用按钮展开，提供展开关系和当前选择；方向键 / Home / End 导航，选择或 Esc 后恢复到触发按钮。菜单在当前对话栏内约束宽高并可滚动。
+
 ### FR-INPUT-002 Model Selector
 
 依据：FR-INPUT-002；FR-CHAT-003；FR-SESSION-003（独立模型配置）；01 第 8 节原则 8、20；04 第 4 节；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节（模型目录可读取）与第 6 节；Codex 0.163.0 的同 Session 第二模型切换见 [W25 记录](../../tasks/archive/T20261011-native-cli-parity/evidence/W25-codex-native.md)，Claude 真实链路仍待验证。
 
-1. 位置：输入区底行右侧，Send / Stop 左侧；不在顶部 Tab Bar 设置全局 Model Selector（FR-INPUT-002；Shell Spec 第 7 节）。
+1. 位置：输入区底行右侧，紧邻思考强度信号格，位于 Send / Stop 左侧；不在顶部 Tab Bar 设置全局 Model Selector（FR-INPUT-002；Shell Spec v02 第 7 节）。
 2. 内容：只列出当前 Session（或草稿）所用 CLI 的模型目录，来自 Adapter；不列出其他 CLI 的模型（FR-CHAT-003）。
 3. 默认值：未选择时显示 CLI 原生默认模型，标注“默认”；此时不向 CLI 传入模型覆盖，沿用 CLI 自身配置（01 第 8 节原则 20；04 第 4 节）。原生默认无法读取时显示“CLI 默认”（建议，I-Q6）。
-4. 草稿：按草稿当前 CLI 显示模型目录；草稿更换 CLI 后选择重置为该 CLI 的默认（chat spec C-Q2）。草稿中的选择在创建 Session 时写入 `model`。
+4. 草稿：按草稿当前 CLI 显示模型目录；草稿更换 CLI 后模型与思考强度重置为该 CLI 的默认（chat spec C-Q2）。草稿中的选择在创建 Session 时写入 `model`。
 5. 已有 Session：切换模型写入 `Session.model`，从下一轮开始生效；Running 或 Needs Input 期间也可切换，不影响进行中的轮（建议，I-Q6）。切换后不在对话中插入提示行（建议）。
 6. 恢复：Session 恢复原生会话时按 `Session.model` 重新应用模型选择（04 第 5 节第 6 条“以原 thread.id、cwd 和配置恢复”）。
-7. 目录读取失败：Model Selector 显示当前值并禁用，悬停说明原因；不影响发送（使用当前或默认模型）。
+7. 目录读取失败：Model Selector 显示当前值并禁用，在框内就近说明原因并提供重试；不影响发送（使用当前或默认模型）。
 8. 已保存的模型不在当前目录中：保留用户选择并说明目录未列出；只有实际原生结果证明不可用时才报告对应错误。客户端不擅自换成默认模型，原生若有回退则如实显示实际使用模型；用户可主动重新选择（I-Q6；01 第 8 节原则 24）。
 9. 模型目录可读取不代表每个模型都有访问权限（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 2 节末段）；选择后调用失败按 Error 处理。
+
+#### 思考强度信号与动效
+
+依据：用户 2026-10-23 指令、DEC-23；原生配置语义沿用上文及 [Adapter §3.8](../agent-adapter/spec.md)。
+
+1. 思考档位只来自所选模型的原生 `reasoningEfforts` 目录。触发按钮用四格信号显示强度；档位原名保留在无障碍说明、悬停提示和选择菜单，默认项表示沿用 CLI，不向 CLI 注入自定义档位。`xhigh`、`max`、`ultra` 可使用满格视觉，但提交值保持原样。
+2. 原生目录提供 `max` / `ultra` 时使用可区分的信号格动画。动效表达对应思考档位，不表示 Agent 正在运行或公开其内部思考内容；系统启用“减少动态效果”后保留静态强度标识并停止动画。动画实现由 AI 在既有主题内处理。
+3. 已保存值不在新目录中时仍保留并明确提示，可主动“使用默认”；模型目录读取失败保留设置，显示错误与重试入口，不能静默换档或阻止按当前配置发送。
 
 ## 4. 状态与数据
 

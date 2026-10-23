@@ -15,8 +15,7 @@ export function ConversationHeader({ project, canvas }: ShellSlotProps) {
   const origin = summary?.originViewId
   return <>
     {(summary?.cli ?? draft?.cli) && <CliBadge cli={(summary?.cli ?? draft?.cli)!} />}
-    <span className="session-header__title">{sessionId ? summary?.title ?? '正在加载对话…' : '新对话'}</span>
-    {sessionId && <span className="session-header__cli muted">{cliName(summary?.cli ?? null)}</span>}
+    <span className="session-header__title" title={sessionId ? summary?.title : '新对话'}>{sessionId ? summary?.title ?? '正在加载对话…' : '新对话'}</span>
     {origin && <><span className="session-header__from muted">· 来自 {VIEW_NAMES[origin as ViewId] ?? origin}</span>
       <button className="link-button" disabled={!DEFAULT_VIEW_IDS.includes(origin as ViewId)} onClick={() => {
         useProjectShell.getState().enterView(project.id, origin as ViewId)
@@ -108,7 +107,10 @@ export function SessionConversation({ sessionId, projectId, active }: { sessionI
         {openError && <p role="alert" className="error-message">{openError}</p>}
       </div>
     </div>
-    {away && <button className="conversation-latest" onClick={latest}>回到最新 ↓</button>}
+    {away && <button className="conversation-latest" onClick={() => {
+      latest()
+      ref.current?.parentElement?.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus()
+    }}>回到最新 ↓</button>}
     <Composer draftKey={{ projectId, kind: 'session', sessionId }} active={active} />
   </div>
 }
@@ -118,12 +120,32 @@ export function Conversation({ project, canvas, active }: ShellSlotProps) {
   return <NewChatDraft project={project} active={active} />
 }
 
-/** Session Mode draft: greeting and composer centred together; after the first send the Session layout takes over (Shell Spec v02 §6). */
+const STARTERS = [
+  ['了解项目', '请梳理当前项目的结构和关键入口。'],
+  ['排查问题', '请帮我定位这个问题：\n现象：\n复现步骤：'],
+  ['规划改动', '请先分析这项改动的影响，并给出实施步骤：']
+] as const
+
+/** v06: greeting fills the body; the composer keeps the same bottom position before and after sending. */
 function NewChatDraft({ project, active }: Pick<ShellSlotProps, 'project' | 'active'>) {
-  const cli = useSessions((s) => s.drafts[`${project.id}:draft`]?.cli ?? null)
+  const draft = useSessions((s) => s.drafts[`${project.id}:draft`])
+  const cli = draft?.cli ?? null
+  const ref = useRef<HTMLDivElement>(null)
+  function fillStarter(text: string) {
+    const current = useSessions.getState().drafts[`${project.id}:draft`]
+    if (!current || current.text.trim()) return
+    useSessions.getState().updateDraft({ projectId: project.id, kind: 'new_chat' }, { text })
+    ref.current?.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus()
+  }
   return <div className="session-conversation session-conversation--draft">
-    <div className="session-draft">
-      <div className="session-draft__greeting"><h2>今天要在 {project.name} 中做什么？</h2><p>{cli ? cliName(cli) : 'Agent'} 会直接在 {project.displayPath} 中执行</p></div>
+    <div className="session-draft" ref={ref}>
+      <div className="session-draft__greeting">
+        <h2>今天要在 {project.name} 中做什么？</h2>
+        <p>{cli ? cliName(cli) : 'Agent'} 会直接在 {project.displayPath} 中执行</p>
+        <div className="session-draft__starters" role="group" aria-label="起步示例">
+          {STARTERS.map(([label, text]) => <button key={label} disabled={!draft || !!draft.text.trim()} onClick={() => fillStarter(text)}>{label}</button>)}
+        </div>
+      </div>
       <Composer draftKey={{ projectId: project.id, kind: 'new_chat' }} active={active} />
     </div>
   </div>

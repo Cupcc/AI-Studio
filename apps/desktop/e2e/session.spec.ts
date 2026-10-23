@@ -180,17 +180,18 @@ test('FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and un
   await workspace().getByRole('textbox', { name: 'Session 标题' }).fill('Renamed conversation')
   await workspace().getByRole('textbox', { name: 'Session 标题' }).press('Enter')
   await expect(workspace().locator('.session-header__title')).toHaveText('Renamed conversation')
-  const picker = workspace().getByRole('combobox', { name: 'Model Selector' })
+  const picker = workspace().getByRole('button', { name: 'Model Selector' })
   await expect(picker).toBeEnabled()
-  const model = await picker.locator('option').last().getAttribute('value') ?? ''
-  await picker.selectOption(model)
+  const model = 'e2e-alternate'
+  await picker.click()
+  await workspace().getByRole('button', { name: 'E2E Alternate', exact: true }).click()
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('Unsent follow-up')
   const nativeId = (await sessions()).find((s) => s.id === session.id)!.nativeSessionId
   await expect.poll(async () => page.evaluate(async (id) => (window.studio as unknown as { session: SessionApi }).session.getDraft({ projectId: id.projectId, kind: 'session', sessionId: id.sessionId }), { projectId, sessionId: session.id }).then((draft) => draft.text)).toBe('Unsent follow-up')
   await app.close(); await launch()
   await expect(workspace().locator('.session-header__title')).toHaveText('Renamed conversation')
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue('Unsent follow-up')
-  await expect(workspace().getByRole('combobox', { name: 'Model Selector' })).toHaveValue(model)
+  await expect(workspace().getByRole('button', { name: 'Model Selector' })).toContainText('E2E Alternate')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(workspace().locator('.transcript-turn-end')).toHaveCount(2)
   expect((await sessions()).find((s) => s.id === session.id)!.nativeSessionId).toBe(nativeId)

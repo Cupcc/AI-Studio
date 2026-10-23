@@ -17,6 +17,7 @@
 |---|---|
 | 本轮对齐修订 | 第 3、4、8、11 节依据用户 2026-10-11 对话确认补充，并于 2026-10-11 随任务签收 |
 | Conversation 修订 | 第 2.2、6、7 节依据交互原型 v02 的 2026-10-10 确认补充，并于 2026-10-11 随 [v02 对齐任务](../../tasks/archive/T20261010-prototype-v02-alignment/task.md)签收 |
+| v06 UI 采用 | 用户 2026-10-23 要求对齐 v06 并加入 max / ultra 思考 effort 动效；第 6、7 节改为统一底部 Composer，其他组件采用范围见 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)。本次 diff 待审阅，实施 / 验证与人工验收分别见[本轮任务](../../tasks/archive/T20261023-v06-ui-effort/task.md) |
 | 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 1 节 |
 | 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
 | 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
@@ -115,25 +116,28 @@ Project View Mode 下只高亮当前 View；左侧 Conversation 所用 Session �
 
 打开 Session 时直接定位到底部，不出现从顶部滚动到底部的过程。
 
-Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”；问候语“今天要在 <Project> 中做什么？”、一行“<CLI 名称> 会直接在 <目录> 中执行”（主目录缩写为 `~`）与输入框作为一组，在画布中部略高于中线处居中。发送第一条消息后进入 Session，输入框回到底部，消息从顶部开始。Project View 左列的草稿不居中，见第 8 节（FR-CHAT-001；交互原型 v02，2026-10-10 确认）。
+Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”；问候语“今天要在 <Project> 中做什么？”、一行“<CLI 名称> 会直接在 <目录> 中执行”（主目录缩写为 `~`）留在正文区域，输入框始终固定到底部。正文提供“了解项目 / 排查问题 / 规划改动”三个轻量起步示例，只填入空草稿并聚焦输入框，保留已有附件，不自动发送。发送第一条消息后 Composer 不移位，消息从顶部开始。Project View 左列沿用同一底部组件，见第 8 节（FR-CHAT-001；DEC-23，2026-10-23 确认；替代 v02 的草稿居中规则，旧原型和验收证据保留原基线）。
+
+已有 Session 顶栏保留 CLI 标识与标题，完整 CLI 名称放在提示与无障碍名称；长标题省略并保留完整提示。保留来源 View 及其导航入口。向上阅读时“回到最新”浮在消息列上，不占布局；点击后回到底部并聚焦输入框，阅读位置规则仍见 Session spec §3.2（DEC-23）。
 
 ## 7. 输入区
 
 | 部分 | 规则 | 需求 |
 |---|---|---|
-| 位置与宽度 | 固定在 Conversation 下方，内容宽度与消息列相同（第 2.2 节）；Session Mode 新对话草稿中与问候语一起居中（第 6 节） | FR-SESSION-001、FR-CHAT-001 |
+| 位置与宽度 | New Chat、Session、Project View 共用固定底部 Composer，内容宽度与消息列相同（第 2.2 节）；发送首条消息前后位置一致（第 6 节） | FR-SESSION-001、FR-CHAT-001 |
 | 文本输入 | 多行，自动增高至 8 行后滚动；Enter 发送，Shift+Enter 换行 | FR-INPUT-001 |
-| `+` | 打开 Context / Attachment 菜单 | FR-INPUT-001 |
-| 上下文标签 | 当前 View、从 Files 添加的文件；可单独移除 | FR-VIEW-007、FR-TOOL-001 |
-| Model Selector | 位于输入区底行右侧，列出当前 Session CLI 支持的模型 | FR-INPUT-002 |
+| `+` | 打开按来源分组的 Add 菜单，真实目录与空状态边界见 input spec §3 | FR-INPUT-001 |
+| 上下文标签 | 正文与控制行之间独立一行；当前 View、文件 / 图片 / 原生 Skill，可单独移除 | FR-VIEW-007、FR-TOOL-001 |
+| Model Selector 与思考强度 | 底行右侧相邻排列；思考按钮为四格信号，档位菜单与 max / ultra 动效见 [input spec](../../specs/input/spec.md#思考强度信号与动效) | FR-INPUT-002 |
 | Send / Stop | 输入为空时 Send 禁用；Running 时保留 Stop，并按 CLI 原生能力提供追加／排队发送；两者同时可用时不得用单一按钮隐藏发送 | FR-INPUT-001、input I-Q3 |
+| 提示与键盘 | 错误和目录提示在框内控制行之下；辅助状态行在框外，空闲无快捷键说明，发送按钮按需提示；候选、菜单与焦点恢复见 input spec §3 | FR-INPUT-001、DEC-23 |
 
 ## 8. Project View
 
 | 组件 | 结构与规则 | 需求 |
 |---|---|---|
 | Conversation 列顶栏 | 草稿：“新对话 · <View 名称>”；对话中：CLI 标识 + Session 标题 + 新建对话按钮 | UX P-A |
-| 最近对话块 | 草稿上方显示该 View 最近 3 条对话（按最近用户消息排序）；更早的对话在 Session History 中查找 | UX P-A |
+| 最近对话块 | 草稿的底部输入框上方显示该 View 最近 3 条对话（按最近用户消息排序，无记录时不显示区块；DEC-23）；更早的对话在 Session History 中查找 | UX P-A |
 | 右侧区域顶栏 | 当前内容名称 + 更新时间 + 图标切换组：Preview ｜ Files、Diff、Browser、Terminal | UX P-B |
 | 工具关闭入口 | 工具打开时，图标切换组右侧保留“关闭右侧工具”×；行为见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>) | UX 第 5 节；2026-10-11 确认 |
 | 图标提示 | 悬停 500ms 后在图标下方显示名称 | UX P-B |

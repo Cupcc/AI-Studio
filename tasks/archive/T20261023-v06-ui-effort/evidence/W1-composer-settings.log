@@ -1,0 +1,26 @@
+
+Running 8 tests using 1 worker
+
+(node:90388) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/composer.spec.ts:34:5 › v06 effort keyboard, max / ultra motion, four appearances and reduced motion (5.1s)
+  ✓  2 e2e/composer.spec.ts:63:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (2.4s)
+  ✓  3 e2e/settings.spec.ts:73:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode (2.0s)
+  ✓  4 e2e/settings.spec.ts:91:5 › FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one dialog; ×, Esc and outside close it (1.7s)
+  ✓  5 e2e/settings.spec.ts:118:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart (1.7s)
+[settings] muted text contrast on light glass {
+  aurora: 5.140186901442031,
+  mint: 5.219425605839913,
+  sunset: 5.209379228926235,
+  haze: 5.283658795679195
+}
+  ✓  6 e2e/settings.spec.ts:175:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material (14.7s)
+  ✓  7 e2e/settings.spec.ts:204:5 › FR-SET-002 · AC-08: "Reduce transparency" shows solid with a note, and glass returns when it is off (975ms)
+[settings] muted text contrast in dark {
+  'glass-极光': 7.116832967624057,
+  'glass-无': 4.780845517969554,
+  solid: 6.05631572140189
+}
+  ✓  8 e2e/settings.spec.ts:219:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist (4.9s)
+
+  8 passed (34.2s)

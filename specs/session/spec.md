@@ -85,10 +85,10 @@
 
 1. 打开 Session（从 Session History 点击，或由 FR-PROJ-003 状态恢复）时，Conversation 首帧即定位在最底部，不出现从顶部滚动到底部的过程。实现要求：先加载对话记录的尾部，在首次绘制前完成滚动定位；更早的内容在用户向上滚动时再加载（技术实现见 §5 及负责验收）。
 2. 定位到底部时，末尾的 Needs Input 卡片或 Error 卡片完整可见（AC-05；UX 第 6 节）。
-3. 流式输出逐段追加；用户位于底部时自动跟随；向上滚动后停止跟随并显示“回到最新”（Shell Spec 第 6 节）。
+3. 流式输出逐段追加；用户位于底部时自动跟随；向上滚动后停止跟随并显示“回到最新”；点击后返回底部并聚焦输入框（Shell Spec v02 第 6 节；DEC-23）。
 4. 切换 Project Tab 后返回、或在同一 Project 内从其他 View 返回同一 Session 时：离开时处于底部（跟随中）的，返回后定位到最新位置；离开时已向上滚动的，恢复离开时的位置并显示“回到最新”（建议；依据 UX D-15“恢复离开时的完整状态”，与 FR-STATE-005“点击进入最新位置”在点击路径上一致）。
 5. 对话记录条目（Shell Spec 第 6 节）：用户消息、Agent 消息、工具活动行、Needs Input 卡片、Error 卡片、轮次完成行。条目定义见第 4.4 节。是否显示 CLI 的推理 / 思考内容见 S-Q12。Agent 消息按 Markdown 渲染，用户消息保持纯文本；渲染范围、代码块和链接规则见 Shell Spec v02 第 6 节（交互原型 v02，2026-10-10 确认）。流式输出期间按已到达的文本渲染，未闭合的代码块显示到当前末尾。
-6. 主画布顶栏显示 CLI 标识、Session 标题、CLI 名称；Session 的 `origin_view_id` 不为空时，显示来源 View 和“在 View 中打开”入口（UX 第 6 节 Session 打开；D-02）。该入口通过壳层导航到真实 Project View，并在左列打开原 Session；当前实现与验证见 [Project View 任务](../../tasks/archive/T20261011-project-view-implementation/task.md)。
+6. 主画布顶栏显示 CLI 标识与 Session 标题；完整 CLI 名称保留在标识的提示与无障碍名称，长标题省略但保留完整提示（[DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)，2026-10-23 确认）。Session 的 `origin_view_id` 不为空时，显示来源 View 和“在 View 中打开”入口（UX 第 6 节 Session 打开；D-02）。该入口通过壳层导航到真实 Project View，并在左列打开原 Session；当前实现与验证见 [Project View 任务](../../tasks/archive/T20261011-project-view-implementation/task.md)。
 7. 输入区固定在对话区域下方（FR-SESSION-001），可立即输入（UX 第 6 节 Session 打开第 4 项），细节见 input spec。
 8. 性能：打开 Session 和切换 Session 不等待 CLI；大量历史 Session 时只加载列表所需元数据（04 第 7 节性能）。
 

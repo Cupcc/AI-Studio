@@ -168,7 +168,7 @@ describe('Composer: + menu, tags and Needs Input · I-Q4, FR-INPUT-001', () => {
   const mount = async (key: Parameters<typeof draftId>[0], draft: Partial<ComposerDraft> = {}, extra: Partial<ReturnType<typeof useSessions.getState>> = {}) => {
     useSessions.setState({ providers, drafts: { [draftId(key)]: { ...emptyDraft(), cli: 'codex', ...draft } }, ...extra })
     render(<Composer draftKey={key} active />)
-    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Model Selector' }).hasAttribute('disabled')).toBe(false))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Model Selector' }).hasAttribute('disabled')).toBe(false))
   }
   const openMenu = () => fireEvent.click(screen.getByRole('button', { name: 'Context / Attachment' }))
 
@@ -241,7 +241,7 @@ describe('Composer: + menu, tags and Needs Input · I-Q4, FR-INPUT-001', () => {
     expect(draftOf(sessionKey)).toMatchObject({ text: 'answer', contextItems: [file('src/a.ts')] })
     // Removing the tag lifts the block and the reply goes out as before; the notice disappears with it.
     fireEvent.click(screen.getByRole('button', { name: '移除上下文 src/a.ts' }))
-    expect(screen.queryByRole('status')).toBeNull()
+    expect(screen.queryByText(FILE_REPLY_BLOCKED)).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
     await waitFor(() => expect(api.replyWithText).toHaveBeenCalledWith({ sessionId: 's', text: 'answer' }))
   })
@@ -261,7 +261,7 @@ describe('Composer: + menu, tags and Needs Input · I-Q4, FR-INPUT-001', () => {
     await waitFor(() => expect(api.replyWithText).toHaveBeenCalledWith({ sessionId: 's', text: 'plain answer' }))
     act(() => useSessions.setState({ summaries: { s: summary({ activity: 'none' }) } }))
     useSessions.getState().updateDraft(sessionKey, { text: 'later', contextItems: [file('a.ts')] })
-    expect(screen.queryByRole('status')).toBeNull()
+    expect(screen.queryByText(FILE_REPLY_BLOCKED)).toBeNull()
     await waitFor(() => expect(screen.getByRole('button', { name: 'Send' }).hasAttribute('disabled')).toBe(false))
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
     await waitFor(() => expect(api.send).toHaveBeenCalledWith({ sessionId: 's', text: 'later', contextItems: [file('a.ts')] }))

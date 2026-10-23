@@ -27,7 +27,7 @@
 | Studio 灰度交互原型 | v03 | 探索中：Q1～Q6 已确认（2026-10-11），其余变更待评审；外观保留为“纯色”主题的浅色外观（2026-10-12 确认） | [在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)；源文件 [studio-prototype-v03.html](studio-prototype-v03.html) + [studio-prototype-v03/](studio-prototype-v03/) | v02；[Project View spec](../../specs/project-view/spec.md) §4.2～4.4；FR-TOOL-002、FR-TOOL-004；[T20261011-prototype-v03](../../tasks/T20261011-prototype-v03/task.md) |
 | Studio 灰度交互原型 | v04 | 外观已采用为默认的“毛玻璃”主题，浓淡固定为适中（2026-10-12 确认）；布局与交互同 v03 | 在线原型待发布；源文件 [studio-prototype-v04.html](studio-prototype-v04.html) + [studio-prototype-v04/](studio-prototype-v04/) | v03；用户 2026-10-11～12 对话要求；[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md) |
 | Studio 灰度交互原型 | v05 | 探索中：New Chat Composer 固定到底部，Thinking Effort 收进 Composer 控制行；不代表规格已确认 | [页面布局与输入体验评审](../layout-ux-review-v01.md)；源文件 [studio-prototype-v05.html](studio-prototype-v05.html) + [studio-prototype-v05/](studio-prototype-v05/) | v04；[T20261019-ux-layout-review](../../tasks/archive/T20261019-ux-layout-review/task.md)；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
-| Studio 灰度交互原型 | v06 | 探索中：在 v05 上细化顶栏、空状态、草稿隔离、输入反馈、回到最新与键盘操作；追加信号格思考控件、`@` / `/` / `$` 候选输入与按 CLI 分类的 Add 菜单 | [页面体验评审 v02](../layout-ux-review-v02.md)；源文件 [studio-prototype-v06.html](studio-prototype-v06.html) + [studio-prototype-v06/](studio-prototype-v06/) | v05；[T20261020-prototype-v06](../../tasks/archive/T20261020-prototype-v06/task.md)、[Composer 修订记录](../../tasks/archive/T20261020-v06-composer/task.md)、[Add 菜单记录](../../tasks/archive/T20261020-v06-add-menu/task.md)；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
+| Studio 灰度交互原型 | v06 | UI 采用已授权（2026-10-23）；采用范围及规格 diff 审阅入口见评审 v02。源原型仍为示例数据，不代表应用已验收 | [页面体验评审 v02](../layout-ux-review-v02.md#6-采用记录)；源文件 [studio-prototype-v06.html](studio-prototype-v06.html) + [studio-prototype-v06/](studio-prototype-v06/) | v05；[原型交付](../../tasks/archive/T20261020-prototype-v06/task.md)、[Composer 修订](../../tasks/archive/T20261020-v06-composer/task.md)、[Add 菜单](../../tasks/archive/T20261020-v06-add-menu/task.md)；[桌面实施](../../tasks/archive/T20261023-v06-ui-effort/task.md)；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
 
 ### Studio 灰度交互原型 v01
 
@@ -116,6 +116,8 @@ v04 的布局评审探索稿，详见[页面布局与输入体验评审 v01](../
 
 v05 的连续操作与反馈细化稿，完整发现、取舍与状态定义见[评审 v02](../layout-ux-review-v02.md)。v05 保留作上一轮对照；外观继续沿用 v04。
 
+用户 2026-10-23 已授权桌面 UI 对齐 v06 并加入 max / ultra effort 动效，采用、真实目录差异与规格入口见[采用记录](../layout-ux-review-v02.md#6-采用记录)。以下操作和未实现项描述的是原型文件；桌面实现与验证由[本轮任务](../../tasks/archive/T20261023-v06-ui-effort/task.md)负责，不能用原型截图替代。
+
 - **运行方式**：在仓库根目录执行 `python3 -m http.server 4173 --bind 127.0.0.1`，打开 `http://127.0.0.1:4173/design/prototypes/studio-prototype-v06.html`；最低窗口宽度 1024px。
 - **起始画面**：my-saas 的 New Chat。三个起步示例只填入空草稿，不自动发送；模型与思考设置在框内相邻，思考显示为信号格。输入 `@`、`/`、`$` 时可打开示例文件、命令、Skill 候选；空闲时不常驻快捷键说明。
 - **推荐走查**：
@@ -126,5 +128,5 @@ v05 的连续操作与反馈细化稿，完整发现、取舍与状态定义见[
   5. 打开“运行测试并修复失败用例”，向上滚动，再点击“回到最新”。
   6. 在 Architecture 打开思考菜单，用方向键 / Home / End 移动、Enter 选择、Esc 关闭；在 1024×560、1024×640、1280×800、1440×900 比较边界与布局。
 - **演示数据**：Project / Session / View 与 v05 一致；新增目录失败、一次发送失败、草稿 CLI 可用性开关，以及从项目文件树派生的 `code-review` Skill。所有异常、catalog 与恢复均为脚本模拟，草稿和标签仅在当前页面内存保留。
-- **未实现与采用边界**：见[评审 v02 §5](../layout-ux-review-v02.md#5-验证与未实现范围)。Add 菜单只演示 CLI catalog 的呈现形状：Files 复用工具入口，Skill 可加入上下文；Plugins 没有真实接口时显示空状态，Images 保留禁用项；实际应用、真实 catalog、上传与持久化未同步。
+- **原型未实现边界**：见[评审 v02 §5](../layout-ux-review-v02.md#5-验证与未实现范围)。Add 菜单只演示 CLI catalog 的呈现形状：Files 复用工具入口，Skill 可加入上下文；Plugins 没有真实接口时显示空状态，Images 保留禁用项。本原型不接真实 catalog、上传或持久化，也不包含 max / ultra 动效；桌面采用后的当前状态另见实施任务。
 - **验证**：[任务自检与截图](../../tasks/archive/T20261020-prototype-v06/task.md#验证记录)。

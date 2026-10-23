@@ -157,7 +157,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 ### FR-VIEW-006 Project View Conversation
 
 1. 左侧 Conversation 使用已有的普通 Session / New Chat 组件，不创建特殊 Project Chat、唯一 Project Session 或隐藏聊天记录。
-2. 从导航进入 View：左侧显示新草稿；草稿上方列出该 View 最近 3 条相关 Session（Shell Spec 第 8 节），点击某条在 View 左列打开该 Session。该动作不改变导航中当前 View 的 Selected 状态（P-A）。
+2. 从导航进入 View：左侧显示新草稿；草稿的底部输入框上方列出该 View 最近 3 条相关 Session，无记录时不显示区块（Shell Spec v02 第 8 节；DEC-23，2026-10-23 确认），点击某条在 View 左列打开该 Session。该动作不改变导航中当前 View 的 Selected 状态（P-A）。
 3. 从 Session History 打开在 View 中创建的 Session：进入普通 Conversation Mode；顶栏提供“在 View 中打开”入口，由 Navigation / Session 交互实现（D-02）。
 4. View 左列显示的 Session 满足 Session spec 的“正在查看”条件；完成或错误提醒的清除由 Session 模块处理，Project View 只提供当前显示 Session ID。
 5. View 中的 Session 仍按 Session History 的最近用户消息时间排序；Agent 输出或 Preview 更新不得移动列表。

@@ -1,0 +1,68 @@
+/* v06 Composer: attachments get their own row; model and effort remain neighbours. */
+.composer .composer__box { position: relative; }
+.composer .composer__toolbar { position: static; flex-wrap: nowrap; min-height: 32px; gap: 6px; }
+.composer .composer__tags { flex: none; max-height: 96px; overflow-y: auto; padding: 1px 0; }
+.composer .composer__tag { height: 28px; max-width: min(260px, 100%); }
+.composer .composer__tag button { width: 24px; height: 24px; }
+.composer__settings { min-width: 0; display: flex; align-items: center; gap: 2px; margin-left: auto; }
+.composer__control { min-width: 0; display: flex; }
+.composer__control-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; height: 32px; padding: 0 8px; border-radius: var(--radius-md); color: var(--color-text-3); font-size: var(--font-size-sm); }
+.composer__control-trigger:hover:not(:disabled), .composer__control-trigger[aria-expanded="true"] { background: var(--color-hover); color: var(--color-text); }
+.composer__control-trigger:disabled { opacity: var(--disabled-opacity); }
+.composer__add-control, .composer__effort-control { flex: none; }
+.composer__add-control > button, .composer__effort-control > button { width: 32px; padding: 0; }
+.composer__model-name { max-width: 220px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.composer__model-control > button > svg { flex: none; }
+.composer__control-panel { position: absolute; bottom: 52px; right: 10px; width: min(320px, calc(100% - 20px)); min-width: 0; overflow: auto; overscroll-behavior: contain; z-index: 30; }
+.composer__add-control > .composer__control-panel { left: 10px; right: auto; }
+.composer__control-panel .menu-item { width: 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.composer__control-panel .menu-item > span { flex: 1; min-width: 0; }
+.composer__control-panel .menu-item > svg { flex: none; }
+.composer__menu-heading { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px 5px; font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.composer__menu-heading:not(:first-child) { border-top: 1px solid var(--color-border-soft); margin-top: 5px; }
+.composer__menu-empty { margin: 0; padding: 5px 10px 8px; font-size: var(--font-size-sm); color: var(--color-text-muted); overflow-wrap: anywhere; }
+.composer__add-item { align-items: flex-start; }
+.composer__add-item > svg { margin-top: 3px; }
+.composer__add-item small, .composer__candidate small { display: block; font-size: var(--font-size-xs); color: var(--color-text-muted); line-height: 1.5; font-weight: 400; }
+.composer .composer__notice { margin-top: 0; font-size: var(--font-size-sm); }
+.composer .error-message { margin-top: 0; }
+.composer__status { min-height: 24px; padding-top: 6px; font-size: var(--font-size-xs); line-height: 18px; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.composer__status .text-button, .composer__notice .text-button, .composer .error-message .text-button { margin-left: 8px; font-size: inherit; }
+.composer__suggestions { position: absolute; left: 0; bottom: calc(100% + 8px); width: min(440px, 100%); min-width: 0; max-height: min(300px, 40vh); overflow: auto; overscroll-behavior: contain; z-index: 31; }
+.composer__candidate { width: 100%; min-width: 0; }
+.composer__candidate > span { min-width: 0; flex: 1; overflow-wrap: anywhere; }
+.composer__candidate[aria-selected="true"] { background: var(--color-selected); }
+/* A four-bar signal follows the prototype's 5 / 8 / 12 / 16px scale. */
+.effort-signal { position: relative; display: inline-flex; align-items: flex-end; justify-content: center; gap: 2px; width: 22px; height: 16px; flex: none; color: var(--color-text-3); isolation: isolate; }
+.effort-signal i { display: block; width: 4px; height: 5px; border-radius: 2px; background: currentColor; opacity: .18; transform-origin: center bottom; }
+.effort-signal i:nth-child(2) { height: 8px; }
+.effort-signal i:nth-child(3) { height: 12px; }
+.effort-signal i:nth-child(4) { height: 16px; }
+.effort-signal i.is-on { opacity: 1; }
+.effort-signal--auto i { opacity: .55; }
+.effort-signal--unknown i { opacity: .4; background: transparent; border: 1px solid currentColor; }
+.composer__effort-option .effort-signal { margin-right: 5px; transform: scale(.8); }
+/* Max breathes in an ascending wave; Ultra adds a faster wave and orbiting sparks. */
+.effort-signal--max i { animation: effort-max-wave 2.2s ease-in-out infinite; }
+.effort-signal--max i:nth-child(2) { animation-delay: .14s; }
+.effort-signal--max i:nth-child(3) { animation-delay: .28s; }
+.effort-signal--max i:nth-child(4) { animation-delay: .42s; }
+.effort-signal--max::before { content: ''; position: absolute; inset: 6px -2px -2px; border-radius: 50%; background: currentColor; filter: blur(5px); opacity: .12; animation: effort-max-glow 2.2s ease-in-out infinite; z-index: -1; }
+.effort-signal--ultra { color: var(--color-focus-ring); }
+.effort-signal--ultra i { animation: effort-ultra-wave 1.2s ease-in-out infinite; }
+.effort-signal--ultra i:nth-child(2) { animation-delay: -.3s; }
+.effort-signal--ultra i:nth-child(3) { animation-delay: -.6s; }
+.effort-signal--ultra i:nth-child(4) { animation-delay: -.9s; }
+.effort-signal--ultra::before, .effort-signal--ultra::after { content: ''; position: absolute; width: 3px; height: 3px; border-radius: 50%; background: currentColor; box-shadow: 0 0 5px currentColor; animation: effort-ultra-spark 2.4s ease-in-out infinite; pointer-events: none; }
+.effort-signal--ultra::before { left: -2px; top: 0; }
+.effort-signal--ultra::after { right: -3px; top: 8px; animation-delay: -1.2s; }
+@keyframes effort-max-wave { 0%, 100% { transform: scaleY(1); opacity: 1; } 45% { transform: scaleY(.72); opacity: .55; } }
+@keyframes effort-max-glow { 0%, 100% { opacity: .08; transform: scale(.9); } 50% { opacity: .22; transform: scale(1.15); } }
+@keyframes effort-ultra-wave { 0%, 100% { transform: scaleY(1); opacity: 1; } 50% { transform: scaleY(.5); opacity: .6; } }
+@keyframes effort-ultra-spark { 0%, 100% { transform: translateY(3px) scale(.5); opacity: .25; } 50% { transform: translateY(-3px) scale(1); opacity: .9; } }
+.composer__control-trigger:disabled .effort-signal *, .composer__control-trigger:disabled .effort-signal::before, .composer__control-trigger:disabled .effort-signal::after,
+.project-workspace[hidden] .effort-signal *, .project-workspace[hidden] .effort-signal::before, .project-workspace[hidden] .effort-signal::after { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .effort-signal i, .effort-signal::before, .effort-signal::after { animation: none; transform: none; }
+  .effort-signal--ultra::before, .effort-signal--ultra::after { opacity: .65; }
+}

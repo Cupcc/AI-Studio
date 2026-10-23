@@ -8,7 +8,7 @@
 | 文档状态 | 草稿 |
 | 覆盖需求 | FR-CHAT-001～FR-CHAT-003；关联 FR-VIEW-007（只记录 `origin_view_id`）、FR-NAV-003（Session 命名） |
 | 相关验收 | AC-02、AC-03；05 第 4 节专项测试中的 New Chat 草稿 |
-| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 3、4、8、10 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6 节（新对话草稿）；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；交互原型 v02 |
+| 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 3、4、8、10 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6 节（新对话草稿）；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；[v06 采用记录](../../design/layout-ux-review-v02.md#6-采用记录) |
 | 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-CHAT-001～003、FR-VIEW-007、FR-NAV-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6 节 New Chat、第 10 节 D-01、D-11、D-15、P-A；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 6 节 Project、Session；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 |
 
 ## 1. 未决问题
@@ -18,7 +18,7 @@
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
 | C-Q1 | 未发送草稿在离开、再次点击 New Chat、切换 Project、重启应用时如何处理？ | 每个 Project 保留一份草稿（文本、CLI、模型）；离开不丢弃；再次 New Chat 回到该草稿；切换 Tab 返回恢复（D-15）；由 Session 独立持久化至 session_drafts，重启后恢复。依据：FR-CHAT-001 只规定不创建 Session；D-15、FR-PROJ-003 要求恢复离开时的状态 | 否 | |
-| C-Q2 | 在已有草稿时从 CLI 菜单选择另一个 CLI：新建空草稿，还是改变当前草稿的 CLI？ | 改变当前草稿的 CLI，保留已输入文本，模型重置为新 CLI 的原生默认。草稿未创建 Session，CLI 未锁定（FR-CHAT-003） | 否 | |
+| C-Q2 | 在已有草稿时从 CLI 菜单选择另一个 CLI：新建空草稿，还是改变当前草稿的 CLI？ | 改变当前草稿的 CLI，保留已输入文本，模型与思考强度重置为新 CLI 的原生默认。草稿未创建 Session，CLI 未锁定（FR-CHAT-003） | 否 | |
 | C-Q3 | Project 的 Default CLI 不可用（或两个都不可用）时，New Chat 主按钮如何表现？ | 主按钮仍可点击并打开草稿；草稿内显示不可用原因与安装 / 登录指引（Shell Spec 第 10 节），发送不可用；用户可在 ▾ 菜单中选其他可用 CLI。不自动改写 Project Default CLI | 否 | |
 | C-Q4 | “检测到的第一个可用 CLI”按什么顺序？新 Project 沿用的默认值是创建时的快照，还是始终跟随最近设置？ | 顺序按菜单顺序 Codex CLI → Claude Code（UX 第 6 节 New Chat 第 2 项）；新 Project 在创建时写入快照，之后其他 Project 改默认不影响它（“沿用”指新 Project 的初始值） | 否 | |
 | C-Q6 | 客户端生成名称的方法；Rename 如何对齐 CLI？ | 原生名称优先；尚无名称时可用首条消息首行作为本地显示。按原则 24 核对原生重命名接口并接入，不再以“未验证”决定永久不回写。现有本地重命名与原生名称同步差异列为技术缺口 | 否；技术能力核对 | |
@@ -57,7 +57,7 @@
    2. 可用时调用 session 模块创建 Session：`cli_type` = 草稿 CLI，`model` = 草稿中选择的模型（未选择则为空，使用 CLI 原生默认），`origin_view_id` = 草稿所在 View（Conversation Mode 草稿为空），首条消息与上下文项一并提交。
    3. Session 立即出现在 Session History（今天分组顶部），Main Canvas 从草稿切换为该 Session 的 Conversation，进入 Running（FR-STATE-001）。
    4. 此后 CLI 已锁定（FR-CHAT-003）。CLI 实际调用失败（例如登录状态检测通过但调用失败，[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节末条）时，Session 已存在，显示 Error，规则见 session spec 第 3.7 节。
-4. Conversation Mode 草稿：顶栏显示 CLI 标识与“新对话”；画布中部显示问候语“今天要在 <Project> 中做什么？”和一行“<CLI 名称> 会直接在 <目录> 中执行”（主目录缩写为 `~`），与输入框一起居中；发送第一条消息后输入框回到底部（Shell Spec v02 第 6 节；交互原型 v02，2026-10-10 确认）。Project View 草稿的顶栏为“新对话 · <View 名称>”，布局不居中（Shell Spec 第 8 节）。
+4. Conversation Mode 草稿：顶栏显示 CLI 标识与“新对话”；正文区域显示问候语“今天要在 <Project> 中做什么？”和一行“<CLI 名称> 会直接在 <目录> 中执行”（主目录缩写为 `~`）。Composer 始终贴底，与发送后的 Session 位置一致；正文提供“了解项目 / 排查问题 / 规划改动”三个轻量起步示例，只填入空白草稿并聚焦输入框，不自动发送、不覆盖非空正文，保留已有附件。Project View 草稿仍使用同一底部 Composer（Shell Spec v02 第 6～8 节；[DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)，2026-10-23 确认；替代 v02 草稿输入框居中规则）。
 5. 草稿的保留与离开（建议，C-Q1）：
    - 每个 Project 最多保留一份 Conversation Mode 草稿（文本、CLI、模型）。
    - 离开草稿（点击 Session、View 或切换 Tab）不丢弃草稿；切换 Tab 返回时恢复离开时的完整状态，包括草稿（D-15）。

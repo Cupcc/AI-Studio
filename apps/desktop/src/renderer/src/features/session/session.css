@@ -1,5 +1,6 @@
 /* Session area, aligned to interactive prototype v01 (design/prototypes/studio-prototype-v01.html): .cli .spin .srow .grp .more .ren .hdr .feed .mu .ma .tool .doneln .card .cmd .compose .input .irow .chip .model .send;
-   and to prototype v02 (studio-prototype-v02.html, confirmed 2026-10-10): .feed-in width, .ma Markdown, .cb code blocks, .draft-c centred draft.
+   and to prototype v02 (studio-prototype-v02.html, confirmed 2026-10-10): .feed-in width, .ma Markdown, .cb code blocks;
+   prototype v06 (2026-10-23): bottom draft composer, greeting starters and compact header.
    Shared primitives (.primary-button .secondary-button .icon-button .link-button .text-button .popover .menu-* [data-tip] .sr-only) are in styles/primitives.css; only feature-scoped modifiers live here. */
 
 /* CLI badge and Running spinner */
@@ -34,7 +35,7 @@
 
 /* Conversation header (inside .canvas-header) */
 .session-header__title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-.session-header__cli, .session-header__from { flex: 0 0 auto; font-size: var(--font-size-sm); color: var(--color-text-muted); white-space: nowrap; }
+.session-header__from { flex: 0 0 auto; font-size: var(--font-size-sm); color: var(--color-text-muted); white-space: nowrap; }
 .canvas-header .link-button { flex: 0 0 auto; white-space: nowrap; }
 
 /* Conversation: feed above, composer below; the feed is a grid row so "回到最新" anchors to the composer's top edge */
@@ -47,12 +48,17 @@
 .session-conversation__transcript { --feed-gap: 14px; display: flex; flex-direction: column; flex: none; gap: var(--feed-gap); width: 100%; max-width: var(--feed-max-width); margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-2); }
 .session-conversation > .composer { grid-area: 2 / 1; padding-inline: calc(var(--space-6) + var(--scrollbar-gutter, 0px)); }
 .conversation-latest { grid-area: 1 / 1; align-self: end; justify-self: center; margin-bottom: var(--space-3); padding: var(--space-1) var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-2); background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: 999px; box-shadow: var(--shadow-floating); z-index: 1; }
-/* New chat draft: greeting and composer centred together, slightly above the middle (Shell Spec v02 §6) */
-.session-draft { grid-area: 1 / 1 / -1 / -1; min-height: 0; display: flex; flex-direction: column; justify-content: safe center; gap: var(--draft-gap); padding-bottom: var(--draft-offset); overflow: auto; }
-.session-draft__greeting { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: 0 40px; text-align: center; }
+/* v06: independently scroll the greeting in short windows; reserve the same bottom row for every composer. */
+.session-draft { grid-area: 1 / 1 / -1 / -1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+.session-draft__greeting { grid-area: 1 / 1; align-self: center; max-height: 100%; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-6) var(--space-8); text-align: center; }
 .session-draft__greeting h2 { margin: 0; font-size: var(--font-size-title); font-weight: 500; letter-spacing: -.01em; text-wrap: balance; }
 .session-draft__greeting p { margin: 0; font-size: var(--font-size-note); color: var(--color-text-muted); overflow-wrap: anywhere; }
-.session-draft > .composer { padding-block: 0; }
+.session-draft > .composer { grid-area: 2 / 1; }
+.session-draft__starters { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); margin-top: var(--space-4); }
+.session-draft__starters button { min-height: 34px; padding: 0 13px; font-size: var(--font-size-sm); color: var(--color-text-2); background: var(--color-surface-sub); border: 1px solid var(--color-border-strong); border-radius: 18px; }
+.session-draft__starters button:hover:not(:disabled) { background: var(--color-hover); }
+.session-draft__starters button:disabled { opacity: .45; cursor: default; }
+@media (max-height: 650px) { .session-draft__greeting h2 { font-size: 20px; } .session-draft__starters { margin-top: var(--space-2-5); } }
 .conversation-skeleton { flex: none; width: 100%; max-width: var(--feed-max-width); margin: 0 auto; padding: var(--space-8) var(--space-6); display: grid; gap: 14px; }
 .conversation-skeleton span { height: 16px; background: var(--color-surface-soft); border-radius: var(--radius-sm); }
 .conversation-skeleton span:nth-child(2) { width: 75%; }

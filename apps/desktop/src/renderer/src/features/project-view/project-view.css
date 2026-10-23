@@ -33,13 +33,15 @@
 .view-client-sessions { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid var(--color-border); display: grid; gap: var(--space-5); }
 .view-session-link { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: var(--space-2) 0; color: var(--color-text-2); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .view-session-link:hover { color: var(--color-link); }
-.view-conversation-draft { height: 100%; display: flex; flex-direction: column; min-height: 0; overflow: auto; }
-.view-recent { padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--color-border-soft); }
-.view-draft-prompt { margin-top: auto; padding: var(--space-6); }
-.view-draft-prompt h2 { font-size: var(--font-size-lg); margin: 0 0 var(--space-2); }
-.view-draft-prompt p { line-height: 1.6; }
-.view-cli-select { border: 1px solid var(--color-border); border-radius: var(--radius-xs); background: var(--color-surface); color: var(--color-text-3); padding: var(--space-1); font: inherit; max-width: 150px; }
-.canvas-mode--view .composer__tags { flex: 1 1 150px; }
-.canvas-mode--view .composer__tags:empty { flex-basis: 0; }
+.view-conversation-draft { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto; min-height: 0; overflow: hidden; }
+.view-conversation-draft > .composer { grid-area: 3 / 1; }
+.view-recent { grid-area: 2 / 1; min-height: 0; max-height: min(150px, 25vh); overflow: auto; margin: 0 var(--space-5); padding: var(--space-1-5) 0; border-top: 1px solid var(--color-border-soft); }
+.view-recent h3 { margin: 0; padding: var(--space-1-5) 0; font-size: var(--font-size-xs); font-weight: 400; color: var(--color-text-muted); }
+.view-recent .view-session-link { min-height: 32px; padding: var(--space-1) 0; font-size: var(--font-size-sm); }
+.view-draft-prompt { grid-area: 1 / 1; align-self: center; min-height: 0; max-height: 100%; overflow: auto; padding: 18px var(--space-6); text-align: center; }
+.view-draft-prompt h2 { font-size: 17px; font-weight: 500; margin: 0 0 var(--space-1-5); text-wrap: balance; }
+.view-draft-prompt p { margin: 0; font-size: var(--font-size-sm); line-height: 1.6; }
+.view-header-context { min-width: 0; font-size: var(--font-size-sm); }
+.view-cli-select { flex: 0 1 auto; min-width: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-3); padding: var(--space-1); font: inherit; max-width: 140px; }
 .canvas-mode--view .composer__tag { max-width: min(220px, 100%); min-width: 0; }
 .canvas-mode--view .composer__tag > svg { flex: none; }

@@ -101,7 +101,7 @@
 
 1. Main Canvas 切换为 Project View Mode：左 Conversation、右 Preview（FR-NAV-002；FR-VIEW-005；03 第 6 节“Project View 打开”）。
 2. **不创建 Session**：进入 View 本身不产生 Session，也不进入 Session History（D-01；FR-VIEW-007）。
-3. 左侧 Conversation 为**新对话草稿**；草稿上方列出该 View 最近的对话（Shell 第 8 节：最近 3 条）；这一规则只适用于“从左侧导航进入 View”，即使刚才在同一 View 中打开过某个对话（P-A；D-15）。同一 View 被再次点击的情形见 NAV-Q5。
+3. 左侧 Conversation 为**新对话草稿**；草稿的底部输入框上方列出该 View 最近的对话，无记录时不显示区块（Shell v02 第 8 节：最近 3 条；DEC-23，2026-10-23 确认）；这一规则只适用于“从左侧导航进入 View”，即使刚才在同一 View 中打开过某个对话（P-A；D-15）。同一 View 被再次点击的情形见 NAV-Q5。
 4. 右侧区域显示该 View 的 Preview（不沿用 Session Mode 下已展开的工具），见 `specs/project/spec.md` PROJ-Q3。
 5. 当前 View 作为 Session Context 的一部分（03 第 6 节；FR-VIEW-007，注入方式归 project-view / input）。
 6. 导航在上述动作完成后，才把 `ui_state.main_canvas` 更新为 `view` 分支（`specs/project/spec.md` 4.2），保证重启后恢复。

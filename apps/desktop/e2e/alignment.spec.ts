@@ -10,8 +10,8 @@ import type { SessionSummary } from '../src/shared/session/types'
 // T20261009-prototype-alignment (W3): captures the aligned shell at the three review widths
 // of Shell Spec v01 section 11 and asserts the section 1 layout invariants. Behaviour is
 // covered by the other specs; this file only drives the UI into each visual state.
-// T20261010-prototype-v02-alignment adds the prototype v02 states: Markdown reply, centred
-// new chat draft, and message column edges equal to the composer edges (Shell Spec v02 §2.2).
+// T20261010-prototype-v02-alignment adds Markdown and equal message / composer edges (Shell Spec v02 §2.2).
+// T20261023-v06-ui-effort replaces the centred draft with v06's bottom composer and greeting starters.
 // T20261012-settings-theme runs the layout states in both appearances (Shell Spec v02 §12): glass, the
 // default, adds an 8px gutter right of and below the canvas; solid keeps the original geometry.
 type SessionApi = FeatureBridge<typeof sessionContract>
@@ -136,6 +136,38 @@ test.afterAll(() => {
 for (const each of ['glass', 'solid'] as const) test.describe(`${each} appearance`, () => {
 test.beforeEach(async () => { await useTheme(each) })
 
+test('FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending', async () => {
+  await newChat()
+  const starter = workspace().getByRole('button', { name: '了解项目', exact: true })
+  await expect(starter).toBeEnabled()
+  await atEachWidth('draft', 'session')
+  for (const size of SIZES) {
+    await fit(size)
+    const draft = await workspace().locator('.session-draft').evaluate((node) => {
+      const area = node.getBoundingClientRect(), greeting = node.querySelector('.session-draft__greeting')!.getBoundingClientRect()
+      const composer = node.querySelector('.composer')!.getBoundingClientRect()
+      return { bottomGap: area.bottom - composer.bottom, order: greeting.bottom <= composer.top, fits: node.scrollHeight <= node.clientHeight }
+    })
+    expect(draft.order).toBe(true)
+    expect(draft.fits).toBe(true)
+    expect(Math.abs(draft.bottomGap)).toBeLessThanOrEqual(0.5)
+  }
+  const before = await workspace().locator('.composer__box').evaluate((node) => node.getBoundingClientRect().bottom)
+  await starter.click()
+  await expect(composer()).toHaveValue('请梳理当前项目的结构和关键入口。')
+  await expect(composer()).toBeFocused()
+  await expect(workspace().getByRole('button', { name: '排查问题', exact: true })).toBeDisabled()
+  expect(await sessions()).toHaveLength(0)
+  await workspace().getByRole('button', { name: 'Send', exact: true }).click()
+  await expect(workspace().locator('.session-conversation--draft')).toHaveCount(0)
+  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  const after = await workspace().locator('.composer__box').evaluate((node) => node.getBoundingClientRect().bottom)
+  expect(Math.abs(before - after)).toBeLessThanOrEqual(0.5)
+  await expect(workspace().locator('.canvas-header .session-header__cli')).toHaveCount(0)
+  const title = workspace().locator('.session-header__title')
+  await expect(title).toHaveAttribute('title', await title.innerText())
+})
+
 test('FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440', async () => {
   await newChat()
   await send('实现支付模块的订阅续费与取消。[e2e:delay]')
@@ -210,13 +242,13 @@ test('FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirm
   await workspace().getByRole('button', { name: 'New Chat', exact: true }).first().click()
   await expect(composer()).toBeVisible()
   await assertLayout('draft', 'session', BASE); await snap('draft', BASE.width)
-  // Shell Spec v02 §6: greeting and composer are one group centred slightly above the middle; the header has no CLI name
+  // v06: the greeting stays in the body while the composer uses the bottom row; the header has no duplicate CLI name.
   const draft = await workspace().locator('.session-draft').evaluate((node) => {
-    const area = node.getBoundingClientRect(), greeting = node.querySelector('.session-draft__greeting')!.getBoundingClientRect(), box = node.querySelector('.composer__box')!.getBoundingClientRect()
-    return { above: (greeting.top - area.top) - (area.bottom - box.bottom), order: greeting.bottom <= box.top }
+    const area = node.getBoundingClientRect(), greeting = node.querySelector('.session-draft__greeting')!.getBoundingClientRect(), composer = node.querySelector('.composer')!.getBoundingClientRect()
+    return { bottomGap: area.bottom - composer.bottom, order: greeting.bottom <= composer.top }
   })
   expect(draft.order).toBe(true)
-  expect(draft.above).toBeLessThan(0)
+  expect(Math.abs(draft.bottomGap)).toBeLessThanOrEqual(0.5)
   await expect(workspace().locator('.canvas-header .session-header__cli')).toHaveCount(0)
 
   await workspace().getByRole('button', { name: '选择 CLI', exact: true }).click()
@@ -228,7 +260,7 @@ test('FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirm
 
   await newChat(); await send('长时间运行的模拟对话。[e2e:slow]')
   await expect(workspace().locator('.transcript-agent')).toContainText('正在处理模拟请求')
-  // After the first send the composer is back at the bottom of the conversation
+  // After the first send the composer remains at the bottom of the conversation.
   const bottomGap = await workspace().locator('.session-conversation').evaluate((node) => node.getBoundingClientRect().bottom - node.querySelector('.composer')!.getBoundingClientRect().bottom)
   expect(Math.abs(bottomGap)).toBeLessThanOrEqual(0.5)
   await page.getByRole('button', { name: '右侧边栏', exact: true }).click()

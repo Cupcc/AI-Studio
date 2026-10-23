@@ -164,7 +164,7 @@ export const useSessions = create<SessionStore>()((set, get) => ({
     void get().loadDraft({ projectId, kind: 'new_chat' }).then(() => {
       const key: DraftKey = { projectId, kind: 'new_chat' }, current = get().drafts[draftId(key)] ?? emptyDraft()
       const selected = cli ?? current.cli ?? get().defaultCli[projectId] ?? get().providers.find((p) => p.status === 'available')?.cli ?? null
-      get().updateDraft(key, { cli: selected, ...(selected !== current.cli ? { model: null } : {}) })
+      get().updateDraft(key, { cli: selected, ...(selected !== current.cli ? { model: null, reasoningEffort: null } : {}) })
     })
   },
   async setDefaultCli(projectId, cli) {

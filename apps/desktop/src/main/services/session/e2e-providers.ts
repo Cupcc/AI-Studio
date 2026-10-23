@@ -67,7 +67,7 @@ export function createE2eProviders(): AgentProvider[] {
     const provider: E2eProvider = new E2eProvider(cli, {
       displayName: cli === 'codex' ? 'Codex' : 'Claude Code',
       models: [
-        { id: cli === 'codex' ? 'e2e-codex' : 'e2e-claude', displayName: cli === 'codex' ? 'E2E Codex' : 'E2E Claude', isDefault: true },
+        { id: cli === 'codex' ? 'e2e-codex' : 'e2e-claude', displayName: cli === 'codex' ? 'E2E Codex' : 'E2E Claude', isDefault: true, ...(cli === 'codex' ? { reasoningEfforts: ['minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra'] } : {}) },
         { id: 'e2e-alternate', displayName: 'E2E Alternate' }
       ],
       capabilities: { nativeTitle: true, inputWhileRunning: cli === 'codex' ? 'steer' : 'none' },

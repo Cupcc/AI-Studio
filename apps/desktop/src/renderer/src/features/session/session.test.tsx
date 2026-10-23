@@ -175,7 +175,7 @@ describe('Conversation scrolling · FR-SESSION-001', () => {
 describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
   async function mount(draft: Partial<ComposerDraft> = {}) {
     useSessions.setState({ providers, drafts: { [draftId(key)]: { ...emptyDraft(), cli: 'codex', ...draft } } })
-    render(<Composer draftKey={key} active />); await waitFor(() => expect(screen.getByRole('combobox', { name: 'Model Selector' }).hasAttribute('disabled')).toBe(false))
+    render(<Composer draftKey={key} active />); await waitFor(() => expect(screen.getByRole('button', { name: 'Model Selector' }).hasAttribute('disabled')).toBe(false))
     return screen.getByRole('textbox', { name: '消息' })
   }
   it('handles IME confirmation and Shift+Enter without submitting; successful Send clears and saves the draft', async () => {
@@ -205,13 +205,62 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     const sessionKey = { projectId: 'p', kind: 'session' as const, sessionId: 's' }
     useSessions.setState({ summaries: { s: summary({ activity: 'running', model: 'm1' }) }, drafts: { [draftId(sessionKey)]: { ...emptyDraft(), text: 'Next' } } })
     render(<Composer draftKey={sessionKey} active />)
-    const picker = screen.getByRole('combobox', { name: 'Model Selector' })
+    const picker = screen.getByRole('button', { name: 'Model Selector' })
     await waitFor(() => expect(picker.hasAttribute('disabled')).toBe(false))
-    fireEvent.change(picker, { target: { value: 'm2' } }); await waitFor(() => expect(api.setModel).toHaveBeenCalledWith({ sessionId: 's', model: 'm2' }))
+    fireEvent.click(picker); fireEvent.click(screen.getByRole('button', { name: 'Model Two' })); await waitFor(() => expect(api.setModel).toHaveBeenCalledWith({ sessionId: 's', model: 'm2' }))
     act(() => useSessions.setState({ summaries: { s: summary({ activity: 'none', model: 'removed' }) } }))
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
     expect(api.setModel).not.toHaveBeenCalledWith({ sessionId: 's', model: null })
     await waitFor(() => expect(api.send).toHaveBeenCalledWith(expect.objectContaining({ text: 'Next' })))
+  })
+  it('selects native max/ultra, exposes the current effort, and preserves unknown values across model changes', async () => {
+    vi.mocked(api.getModels).mockResolvedValue({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true, reasoningEfforts: ['low', 'max', 'ultra'] }, { id: 'm2', displayName: 'Model Two' }], error: null })
+    await mount({ text: 'Keep this' })
+    const effort = screen.getByRole('button', { name: 'Reasoning Effort' })
+    fireEvent.click(effort); fireEvent.click(screen.getByRole('button', { name: 'max' }))
+    expect(effort.getAttribute('aria-description')).toBe('思考强度 · max')
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ text: 'Keep this', reasoningEffort: 'max' })
+    fireEvent.click(effort); fireEvent.keyDown(screen.getByRole('button', { name: 'max' }), { key: 'Escape' })
+    expect(document.activeElement).toBe(effort)
+    expect(effort.getAttribute('aria-expanded')).toBe('false')
+    fireEvent.click(effort); fireEvent.click(screen.getByRole('button', { name: 'ultra' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Model Selector' })); fireEvent.click(screen.getByRole('button', { name: 'Model Two' }))
+    expect(screen.getByText('“ultra”不在当前模型目录中。')).toBeTruthy()
+    expect(useSessions.getState().drafts[draftId(key)]!.reasoningEffort).toBe('ultra')
+    fireEvent.click(screen.getByRole('button', { name: '使用默认' }))
+    expect(useSessions.getState().drafts[draftId(key)]!.reasoningEffort).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Reasoning Effort' })).toBeNull()
+  })
+  it('retries a failed model catalog without losing settings and restores model focus', async () => {
+    vi.mocked(api.getModels).mockResolvedValueOnce({ models: [], error: 'offline' }).mockResolvedValueOnce({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true, reasoningEfforts: ['high'] }], error: null })
+    useSessions.setState({ providers, drafts: { [draftId(key)]: { ...emptyDraft(), cli: 'codex', model: 'm1', reasoningEffort: 'high', text: 'Keep this' } } })
+    render(<Composer draftKey={key} active />)
+    const retry = await screen.findByRole('button', { name: '重试' })
+    expect(screen.getByRole('button', { name: 'Model Selector' }).hasAttribute('disabled')).toBe(true)
+    expect(screen.getByRole('button', { name: 'Send' }).hasAttribute('disabled')).toBe(false)
+    retry.focus(); fireEvent.click(retry)
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Model Selector' })))
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ model: 'm1', reasoningEffort: 'high', text: 'Keep this' })
+  })
+  it('adds native Skill suggestions to only the visible draft without sending', async () => {
+    vi.mocked(api.getSkills).mockResolvedValue({ skills: [{ id: 'opaque-skill', name: 'code-review', description: 'Review changes' }], error: null })
+    const input = await mount()
+    fireEvent.change(input, { target: { value: '$co', selectionStart: 3 } })
+    fireEvent.click(await screen.findByRole('option', { name: /code-review/ }))
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ text: '', contextItems: [{ type: 'skill', id: 'opaque-skill', name: 'code-review' }] })
+    expect(api.create).not.toHaveBeenCalled()
+  })
+  it('keeps the @ token and existing attachments when the file limit is reached', async () => {
+    Object.assign(window.studio, { files: {
+      list: vi.fn(async () => ({ status: 'ok', revision: 1, path: '', entries: [{ name: 'extra.ts', kind: 'file' }], truncated: false })),
+      resolveReference: vi.fn(async () => ({ status: 'ok', files: [{ path: 'extra.ts', name: 'extra.ts', size: 1, version: '1' }] }))
+    } })
+    const tags = Array.from({ length: 20 }, (_, i) => ({ type: 'file' as const, path: `existing-${i}.ts` }))
+    const input = await mount({ contextItems: tags })
+    fireEvent.change(input, { target: { value: '@extra', selectionStart: 6 } })
+    fireEvent.click(await screen.findByRole('option', { name: /extra.ts/ }))
+    await screen.findByText('最多添加 20 个文件或图片，请先移除标签。')
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ text: '@extra', contextItems: tags })
   })
   it('shows CLI unavailability reasons and disables selecting that CLI', async () => {
     vi.mocked(api.getProviders).mockResolvedValue([{ ...providers[0]!, status: 'not_logged_in', reason: '请先登录 Codex CLI' }, providers[1]!])

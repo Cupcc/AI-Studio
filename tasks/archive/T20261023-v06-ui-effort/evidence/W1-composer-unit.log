@@ -1,0 +1,8 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/v06-effort/apps/desktop
+
+
+ Test Files  2 passed (2)
+      Tests  58 passed (58)
+   Start at  17:58:37
+   Duration  1.87s (environment 33%, tests 29%, import 24%, transform 13%)
