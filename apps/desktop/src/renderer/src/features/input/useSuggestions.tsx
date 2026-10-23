@@ -103,7 +103,13 @@ export function useSuggestions({ draftKey, text, input, active, cli, skills, loa
     attributes: open ? { role: 'combobox' as const, 'aria-autocomplete': 'list' as const, 'aria-expanded': true, 'aria-controls': listId, 'aria-activedescendant': items.length ? `${listId}-${selected}` : undefined } : {},
     popup: open ? <div className="composer__suggestions popover" style={{ maxHeight: room }}><div className="composer__menu-heading">{kind === '@' ? '引用文件' : kind === '$' ? 'Skills' : '命令'}<span>{kind}</span></div>
       <div id={listId} role="listbox" aria-label={kind === '@' ? '引用文件' : kind === '$' ? 'Skills' : '命令'}>
-        {items.map((item, i) => <button type="button" tabIndex={-1} role="option" id={`${listId}-${i}`} key={item.id} aria-selected={i === selected} className="menu-item composer__candidate" onMouseDown={event => event.preventDefault()} onClick={() => void choose(item)}>
+        {items.map((item, i) => <button type="button" tabIndex={-1} role="option" id={`${listId}-${i}`} key={item.id} aria-selected={i === selected} className="menu-item composer__candidate" onMouseDown={event => event.preventDefault()} onPointerDown={event => {
+          // Directory navigation updates the controlled textarea synchronously. Handle it
+          // at pointer-down so a textarea blur or a slow directory refresh cannot swallow
+          // the click before the browsing anchor is recorded.
+          event.preventDefault()
+          if (item.kind === 'directory') void choose(item)
+        }} onClick={() => { if (item.kind !== 'directory') void choose(item) }}>
           <Icon name={item.kind === 'directory' ? 'files' : item.kind === 'skill' ? 'terminal' : 'file'} size={15} /><span><span>{item.name}</span>{item.detail && <small>{item.detail}</small>}</span>
         </button>)}
       </div>
