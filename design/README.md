@@ -4,6 +4,7 @@ AI Developer Studio V1.0 的设计工作区，用于保存设计资料、参考�
 
 ## 人工审阅入口
 
+- [页面布局与输入体验评审 v02](layout-ux-review-v02.md)：2026-10-20 继续优化的最新方案；可操作稿见[原型 v06](prototypes/README.md#studio-灰度交互原型-v06)，初始布局反馈与竞品观察保留在 [v01](layout-ux-review-v01.md)。
 - [组件修订确认记录](components/shell-spec-v02.md#1-已确认与待确认)。
 - [视觉参数待确定项](visual-direction.md#1-高保真阶段待确定)。
 
@@ -50,13 +51,13 @@ design/
 | 项目 | 采用版本 |
 |---|---|
 | 视觉方向 | [Visual Direction](visual-direction.md)；当前视觉参数见其第 1 节 |
-| 参考截图 | 尚无 |
+| 参考资料 | [参考索引](references/README.md)，含 Codex / Claude 官方图片与来源边界 |
 | 线框图 | v02，见 [wireframes](wireframes/README.md) |
 | 高保真界面 | 尚无 |
 | 应用图标 | 本机采用的版本与确认范围见[图标索引](icons/README.md#本机采用) |
 | 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) 基线；工具行为、原型 v01 对齐后的组件修订与原型 v02 的 Conversation 修订均已确认，见 [Shell Spec v02](components/shell-spec-v02.md)；外观主题与设置见其第 12 节（2026-10-12 确认，diff 待审阅） |
 | 外观主题 | 毛玻璃（默认）取自交互原型 v04，纯色（浅色）取自 v03，均保留；颜色模式默认跟随系统，深色取值与“纯色”名称已按 SET-Q6 / Q7 确认（2026-10-18，[DEC-20](<../docs/07. Decisions.md#dec-20-terminal-视觉取舍与深色主题方案>)）；见 [prototypes](prototypes/README.md#3-原型索引) |
-| 交互原型 | [Studio 灰度交互原型 v02](prototypes/README.md)（Conversation 部分替代 v01，其余继承 v01）；桌面端按 v01 对齐见[已归档任务](../tasks/archive/T20261009-prototype-alignment/task.md)，按 v02 对齐见 [T20261010-prototype-v02-alignment](../tasks/archive/T20261010-prototype-v02-alignment/task.md)（2026-10-11 签收） |
+| 交互原型 | [Studio 灰度交互原型 v02](prototypes/README.md)（Conversation 部分替代 v01，其余继承 v01）；桌面端按 v01 对齐见[已归档任务](../tasks/archive/T20261009-prototype-alignment/task.md)，按 v02 对齐见 [T20261010-prototype-v02-alignment](../tasks/archive/T20261010-prototype-v02-alignment/task.md)（2026-10-11 签收）；最新布局评审探索稿见 [v06](prototypes/README.md#studio-灰度交互原型-v06) |
 
 方案确认后，在本节添加所采用版本的文件链接或原型链接。各版本的状态、确认日期和探索中的版本只记录在对应目录索引；探索稿继续保留在对应目录。
 

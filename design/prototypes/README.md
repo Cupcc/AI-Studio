@@ -26,6 +26,8 @@
 | Studio 灰度交互原型 | v02 | 已确认（2026-10-10） | [在线原型](https://claude.ai/artifact/7i4ULjj3vEo16mqqXYm5E1)；源文件 [studio-prototype-v02.html](studio-prototype-v02.html) + [studio-prototype-v02/](studio-prototype-v02/) | v01；[对照 ChatGPT / Claude 的候选调整](../../tasks/T20261010-conversation-layout/research.md) A1、A2、B1；FR-SESSION-001 |
 | Studio 灰度交互原型 | v03 | 探索中：Q1～Q6 已确认（2026-10-11），其余变更待评审；外观保留为“纯色”主题的浅色外观（2026-10-12 确认） | [在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)；源文件 [studio-prototype-v03.html](studio-prototype-v03.html) + [studio-prototype-v03/](studio-prototype-v03/) | v02；[Project View spec](../../specs/project-view/spec.md) §4.2～4.4；FR-TOOL-002、FR-TOOL-004；[T20261011-prototype-v03](../../tasks/T20261011-prototype-v03/task.md) |
 | Studio 灰度交互原型 | v04 | 外观已采用为默认的“毛玻璃”主题，浓淡固定为适中（2026-10-12 确认）；布局与交互同 v03 | 在线原型待发布；源文件 [studio-prototype-v04.html](studio-prototype-v04.html) + [studio-prototype-v04/](studio-prototype-v04/) | v03；用户 2026-10-11～12 对话要求；[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md) |
+| Studio 灰度交互原型 | v05 | 探索中：New Chat Composer 固定到底部，Thinking Effort 收进 Composer 控制行；不代表规格已确认 | [页面布局与输入体验评审](../layout-ux-review-v01.md)；源文件 [studio-prototype-v05.html](studio-prototype-v05.html) + [studio-prototype-v05/](studio-prototype-v05/) | v04；[T20261019-ux-layout-review](../../tasks/archive/T20261019-ux-layout-review/task.md)；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
+| Studio 灰度交互原型 | v06 | 探索中：在 v05 上细化顶栏、空状态、草稿隔离、输入反馈、回到最新与键盘操作；追加信号格思考控件、`@` / `/` / `$` 候选输入与按 CLI 分类的 Add 菜单 | [页面体验评审 v02](../layout-ux-review-v02.md)；源文件 [studio-prototype-v06.html](studio-prototype-v06.html) + [studio-prototype-v06/](studio-prototype-v06/) | v05；[T20261020-prototype-v06](../../tasks/archive/T20261020-prototype-v06/task.md)、[Composer 修订记录](../../tasks/archive/T20261020-v06-composer/task.md)、[Add 菜单记录](../../tasks/archive/T20261020-v06-add-menu/task.md)；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
 
 ### Studio 灰度交互原型 v01
 
@@ -88,3 +90,41 @@ v03 的副本，只换外观，用于和 v03 的白色原样式并排对比（[T
 - **运行方式**：同 v01；本地查看时打开 `studio-prototype-v04.html`，与 `studio-prototype-v03.html` 对比。
 - **演示控制**：顶部“v04 变更”说明外观并提供内容层浓淡与示例壁纸 A / B；其下为沿用的 v03 变更与验收场景。
 - **未实现**：浏览器中没有真实桌面，原型以示例壁纸代替窗口后方的内容，并把模糊后的壁纸画成一层静态背景；真实的跟随桌面与其他窗口变化、窗口失焦时的变暗需在桌面端用 macOS 原生 vibrancy 实现。
+
+### Studio 灰度交互原型 v05
+
+v04 的布局评审探索稿，详见[页面布局与输入体验评审 v01](../layout-ux-review-v01.md)。本版只调整 New Chat、Composer 与 Thinking Effort 的空间关系，继承 v04 的毛玻璃外观和 v03 / v04 的示例数据。
+
+- **变更**：
+  - New Chat 的问候语留在正文区，Composer 与已有 Session 一样固定在底部；发送后只切换为消息列，输入位置不跳动。
+  - 模型与“思考 · 默认”紧邻排列，菜单锚定控件向上展开，打开和选择不改变输入框高度。
+  - 文件 / View 标签独立成行；支持 360px View 列；运行时分别显示 Send / Stop，发送固定最右。
+  - 示例目录展示默认复位、切换模型后的档位变化与旧值保留；完整状态定义见评审稿 §5。
+- **运行方式**：同 v01；本地查看时打开 `studio-prototype-v05.html`。窗口宽度不小于 1024px。
+- **起始画面**：my-saas 的 New Chat；已有 Session 从左侧历史进入，Project View 从 Overview / Architecture 进入。
+- **推荐走查**：
+  1. 点击“思考 · 默认”，选择“高”；切换模型为“示例模型 B”，重新打开思考菜单，查看旧值保留提示，再选择“默认”。
+  2. 输入并发送第一条消息，观察输入框底边不动；运行中输入补充信息，发送和 Stop 分别可用。
+  3. 打开 Architecture，检查“当前 View”标签与控制行分层；通过加号 → Files → 文件 → 添加到对话补充附件。
+  4. 用 Tab / Enter 操作设置，Esc 关闭弹层；在 1024×640、1280×800、1440×900 下比较布局。
+- **与规格的关系**：本版是探索稿。行为与已确认 spec 不一致时以 spec 为准；用户确认布局后，再回写 [Shell Spec v02](../components/shell-spec-v02.md)、[输入区规格](../../specs/input/spec.md) 与 [New Chat 规格](../../specs/chat/spec.md)。
+- **模拟范围与限制**：只改设计原型，实际 Electron Composer 尚未改动。模型 / effort 是示例目录，无真实 CLI、图片上传、Skill 目录、持久化或目录错误恢复；运行中发送只追加演示消息。其余继承 v04，包含尚未按当前规格更新的历史行为；不作为完整应用或 Claude 发布能力证明。
+- **继承的模拟差异**：附件按 Project 演示，New Chat 会重建演示草稿；不用于验证生产环境的草稿隔离与恢复。
+- **验证**：[任务自检与截图](../../tasks/archive/T20261019-ux-layout-review/task.md#验证记录)。
+
+### Studio 灰度交互原型 v06
+
+v05 的连续操作与反馈细化稿，完整发现、取舍与状态定义见[评审 v02](../layout-ux-review-v02.md)。v05 保留作上一轮对照；外观继续沿用 v04。
+
+- **运行方式**：在仓库根目录执行 `python3 -m http.server 4173 --bind 127.0.0.1`，打开 `http://127.0.0.1:4173/design/prototypes/studio-prototype-v06.html`；最低窗口宽度 1024px。
+- **起始画面**：my-saas 的 New Chat。三个起步示例只填入空草稿，不自动发送；模型与思考设置在框内相邻，思考显示为信号格。输入 `@`、`/`、`$` 时可打开示例文件、命令、Skill 候选；空闲时不常驻快捷键说明。
+- **推荐走查**：
+  1. 点击“排查问题”，编辑三行正文；再次点击 New Chat，确认保留。正文非空时示例禁用。
+  2. 打开加号，检查“文件 / Skills / Plugins / 其他”分类；在 Skills 中添加 `code-review`，确认条目变为“已添加”且上下文标签出现；从 Files 入口打开文件工具。
+  3. 打开“演示控制”→“下次发送模拟失败”，发送后查看保留的正文 / 标签，点击“重试发送”；观察 Session 标题和运行提示。
+  4. 在草稿中模拟“目录读取失败”：模型和思考保留当前值但不能改选，仍可发送；点击“重试读取”恢复。模拟“当前草稿 CLI 可用性”后查看禁用原因，再次切换恢复。
+  5. 打开“运行测试并修复失败用例”，向上滚动，再点击“回到最新”。
+  6. 在 Architecture 打开思考菜单，用方向键 / Home / End 移动、Enter 选择、Esc 关闭；在 1024×560、1024×640、1280×800、1440×900 比较边界与布局。
+- **演示数据**：Project / Session / View 与 v05 一致；新增目录失败、一次发送失败、草稿 CLI 可用性开关，以及从项目文件树派生的 `code-review` Skill。所有异常、catalog 与恢复均为脚本模拟，草稿和标签仅在当前页面内存保留。
+- **未实现与采用边界**：见[评审 v02 §5](../layout-ux-review-v02.md#5-验证与未实现范围)。Add 菜单只演示 CLI catalog 的呈现形状：Files 复用工具入口，Skill 可加入上下文；Plugins 没有真实接口时显示空状态，Images 保留禁用项；实际应用、真实 catalog、上传与持久化未同步。
+- **验证**：[任务自检与截图](../../tasks/archive/T20261020-prototype-v06/task.md#验证记录)。
