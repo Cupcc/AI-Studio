@@ -1,0 +1,189 @@
+{
+  "baseline": "30c96e2 + fix/effort-selection uncommitted diff, after removal of minimal and theme gradient correction",
+  "current": {
+    "effort": "思考强度 · ultra",
+    "overlay": false,
+    "signalAnimations": 0,
+    "signalBars": 5,
+    "tags": [
+      "移除上下文 src/app.ts"
+    ],
+    "text": "切换 Max / Ultra，保留草稿与附件。\n"
+  },
+  "environment": {
+    "dpr": 2,
+    "electronPid": 59994,
+    "fixture": "studio-effort-selection-KM5NT6",
+    "port": 9333,
+    "provider": "simulated",
+    "viewport": [
+      1280,
+      800
+    ]
+  },
+  "review": {
+    "checkpoints": [
+      {
+        "animations": 0,
+        "glassColor": "mint",
+        "gradient": "linear-gradient(110deg, oklab(0.736159 -0.0340834 0.0135012), oklab(0.715848 -0.0179064 -0.0283415) 52%, oklab(0.756923 -0.000814164 0.0444291))",
+        "overlay": false,
+        "scenario": "mint light, no effort selection",
+        "switches": 4,
+        "theme": "glass"
+      },
+      {
+        "focus": "Reasoning Effort",
+        "overlay": false,
+        "scenario": "same ultra selected again",
+        "switches": 4
+      },
+      {
+        "focus": "Reasoning Effort",
+        "overlay": false,
+        "scenario": "browse then Escape",
+        "switches": 4
+      },
+      {
+        "gradient": "linear-gradient(110deg, oklab(0.784259 0.0000356877 0.0000156832), oklab(0.730311 0.0000332189 0.000014596) 52%, oklab(0.654383 0.0000298667 0.0000131011))",
+        "overlays": 0,
+        "scenario": "solid dark, no effort selection",
+        "switches": 4,
+        "theme": "solid"
+      },
+      {
+        "current": "思考强度 · max",
+        "overlay": false,
+        "reduced": true,
+        "scenario": "select max under reduced motion",
+        "switches": 4
+      },
+      {
+        "overlay": false,
+        "reduced": false,
+        "scenario": "disable reduced motion without replay",
+        "switches": 4
+      },
+      {
+        "current": "思考强度 · ultra",
+        "focus": "Reasoning Effort",
+        "overlay": false,
+        "scenario": "keyboard End/Enter ultra completes once",
+        "switches": 5
+      }
+    ],
+    "options": [
+      {
+        "animations": 0,
+        "bars": 5,
+        "filled": 0,
+        "value": "默认"
+      },
+      {
+        "animations": 0,
+        "bars": 5,
+        "filled": 1,
+        "value": "low"
+      },
+      {
+        "animations": 0,
+        "bars": 5,
+        "filled": 2,
+        "value": "medium"
+      },
+      {
+        "animations": 0,
+        "bars": 5,
+        "filled": 3,
+        "value": "high"
+      },
+      {
+        "animations": 0,
+        "bars": 5,
+        "filled": 4,
+        "value": "xhigh"
+      },
+      {
+        "animations": 0,
+        "bars": 5,
+        "filled": 5,
+        "value": "max"
+      },
+      {
+        "animations": 0,
+        "bars": 5,
+        "filled": 5,
+        "value": "ultra"
+      }
+    ],
+    "recordStarted": 197176.70000000295,
+    "started": 103253.60000000894,
+    "switches": [
+      {
+        "at": 126067.90000000596,
+        "duration": "1s",
+        "glassColor": "aurora",
+        "iterations": "1",
+        "pointerEvents": "none",
+        "tags": [
+          "移除上下文 src/app.ts"
+        ],
+        "text": "切换 Max / Ultra，保留草稿与附件。\n",
+        "theme": "glass",
+        "tier": "max"
+      },
+      {
+        "at": 137690.79999999702,
+        "duration": "1.4s",
+        "glassColor": "aurora",
+        "iterations": "1",
+        "pointerEvents": "none",
+        "tags": [
+          "移除上下文 src/app.ts"
+        ],
+        "text": "切换 Max / Ultra，保留草稿与附件。\n",
+        "theme": "glass",
+        "tier": "ultra"
+      },
+      {
+        "at": 198533.60000000897,
+        "duration": "1s",
+        "glassColor": "aurora",
+        "iterations": "1",
+        "pointerEvents": "none",
+        "tags": [
+          "移除上下文 src/app.ts"
+        ],
+        "text": "切换 Max / Ultra，保留草稿与附件。\n",
+        "theme": "glass",
+        "tier": "max"
+      },
+      {
+        "at": 201207.29999999705,
+        "duration": "1.4s",
+        "glassColor": "aurora",
+        "iterations": "1",
+        "pointerEvents": "none",
+        "tags": [
+          "移除上下文 src/app.ts"
+        ],
+        "text": "切换 Max / Ultra，保留草稿与附件。\n",
+        "theme": "glass",
+        "tier": "ultra"
+      },
+      {
+        "at": 460073.299999997,
+        "duration": "1.4s",
+        "glassColor": "mint",
+        "iterations": "1",
+        "pointerEvents": "none",
+        "tags": [
+          "移除上下文 src/app.ts"
+        ],
+        "text": "切换 Max / Ultra，保留草稿与附件。\n",
+        "theme": "solid",
+        "tier": "ultra"
+      }
+    ]
+  }
+}

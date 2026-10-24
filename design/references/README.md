@@ -58,3 +58,11 @@
 | [Codex Browser](desktop-layout/codex-with-browser.png)、[Changes](desktop-layout/codex-with-changes.png)、[Files](desktop-layout/codex-with-file.png) | 对话与右侧工具并排、顶部工具标签；仅作布局参考 |
 | [Claude Chat](desktop-layout/claude-chat.png) | 会话侧栏、底部输入区与控制分组；与 §3 官方教程图片为不同界面，不回写其历史观察 |
 | [Notion Composer](desktop-layout/notion.png) | 思考信号格与框内控制分组；关联 [v06 Composer 任务](../../tasks/archive/T20261020-v06-composer/task.md) |
+
+## 6. 2026-10-24 effort 选择反馈参考
+
+状态：用于用户“五格静态指示、选中时对话框切换”的修正；本产品规则由 [input spec](../../specs/input/spec.md#思考强度信号与动效)负责。只读检查源码，不发送模型请求；不把参考实现的通过结论当作本产品验收。
+
+| 材料 | 来源与基线 | 可见行为 / 使用边界 |
+|---|---|---|
+| Codex CLI Composer 换档反馈 | 官方仓库固定 commit `970111f6cb62cc02fe36a82ea7d71b37a2889c97`：[触发逻辑](https://github.com/openai/codex/blob/970111f6cb62cc02fe36a82ea7d71b37a2889c97/codex-rs/tui/src/bottom_pane/chat_composer.rs#L858)、[一次动效](https://github.com/openai/codex/blob/970111f6cb62cc02fe36a82ea7d71b37a2889c97/codex-rs/tui/src/bottom_pane/effort_ignition.rs)及[样式](https://github.com/openai/codex/blob/970111f6cb62cc02fe36a82ea7d71b37a2889c97/codex-rs/tui/src/bottom_pane/effort_ignition_styles.rs)，2026-10-24 查阅 | 真实改变到 Max / Ultra 后，在 Composer 区域短暂播放一次反馈；初始基线、重复同档和关闭动画时不播。Max 金橙，Ultra 紫 / 粉 / 蓝；保护草稿文字。借鉴触发时机与两档区分，不照搬终端字符绘制，也不证明 Claude CLI 有相同效果 |

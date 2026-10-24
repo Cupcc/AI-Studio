@@ -178,6 +178,53 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     render(<Composer draftKey={key} active />); await waitFor(() => expect(screen.getByRole('button', { name: 'Model Selector' }).hasAttribute('disabled')).toBe(false))
     return screen.getByRole('textbox', { name: '消息' })
   }
+  function nativeEffortCatalog() {
+    vi.mocked(api.getModels).mockResolvedValue({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true, reasoningEfforts: ['high', 'max', 'ultra'] }], error: null })
+  }
+  function chooseEffort(value: string) {
+    fireEvent.click(screen.getByRole('button', { name: 'Reasoning Effort' }))
+    fireEvent.click(screen.getByRole('button', { name: value }))
+  }
+  it('celebrates only a successful changed Session effort; pending, repeated and rejected selections stay quiet', async () => {
+    nativeEffortCatalog()
+    const sessionKey = { projectId: 'p', kind: 'session' as const, sessionId: 's' }
+    useSessions.setState({ providers, summaries: { s: summary({ reasoningEffort: 'high' }) }, drafts: { [draftId(sessionKey)]: { ...emptyDraft(), cli: 'codex' } } })
+    const view = render(<Composer draftKey={sessionKey} active />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Reasoning Effort' }).hasAttribute('disabled')).toBe(false))
+    let accepted!: () => void
+    vi.mocked(api.setReasoningEffort).mockImplementationOnce(() => new Promise<void>(resolve => { accepted = resolve }))
+    chooseEffort('max')
+    expect(view.container.querySelector('[data-effort-transition]')).toBeNull()
+    await act(async () => { accepted() })
+    const transition = view.container.querySelector('[data-effort-transition="max"]')!
+    expect(transition).not.toBeNull()
+    fireEvent.animationEnd(transition)
+    chooseEffort('max')
+    expect(api.setReasoningEffort).toHaveBeenCalledTimes(1)
+    expect(view.container.querySelector('[data-effort-transition]')).toBeNull()
+    vi.mocked(api.setReasoningEffort).mockRejectedValueOnce(new Error('effort rejected'))
+    chooseEffort('ultra')
+    await screen.findByText(/effort rejected/)
+    expect(useSessions.getState().summaries.s?.reasoningEffort).toBe('max')
+    expect(view.container.querySelector('[data-effort-transition]')).toBeNull()
+  })
+  it('keeps restored effort static and cancels rather than replays a transition when reduced motion is enabled', async () => {
+    nativeEffortCatalog()
+    let changed!: () => void
+    const media = { matches: false, addEventListener: (_: string, listener: () => void) => { changed = listener }, removeEventListener: vi.fn() }
+    vi.stubGlobal('matchMedia', () => media)
+    await mount({ reasoningEffort: 'ultra' })
+    expect(document.querySelector('[data-effort-transition]')).toBeNull()
+    chooseEffort('max')
+    expect(document.querySelector('[data-effort-transition="max"]')).not.toBeNull()
+    act(() => { media.matches = true; changed() })
+    expect(document.querySelector('[data-effort-transition]')).toBeNull()
+    chooseEffort('ultra')
+    expect(useSessions.getState().drafts[draftId(key)]?.reasoningEffort).toBe('ultra')
+    expect(document.querySelector('[data-effort-transition]')).toBeNull()
+    act(() => { media.matches = false; changed() })
+    expect(document.querySelector('[data-effort-transition]')).toBeNull()
+  })
   it('handles IME confirmation and Shift+Enter without submitting; successful Send clears and saves the draft', async () => {
     const input = await mount({ text: '中文输入' })
     fireEvent.compositionStart(input); fireEvent.keyDown(input, { key: 'Enter', keyCode: 229 }); fireEvent.compositionEnd(input)

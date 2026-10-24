@@ -1,5 +1,32 @@
 # 验收：T20261023-v06-ui-effort
 
+## 2026-10-24 修正复验（W7）
+
+- 来源：用户本日纠正为最多五格、菜单与信号图标静态，实际选中 max / ultra 时由对话输入框做一次切换反馈；随后补充最低档为 low、ultra 使用随主题变化的渐变。验收依据为[本轮重开范围](task.md#2026-10-24-重开五格与选择切换反馈)及 [input spec](../../../specs/input/spec.md#思考强度信号与动效)。
+- 验收者：W7，`/root/selection_review`，未参与本轮产品实现；只读代码评审，从实际 Electron UI 独立点击、输入、添加文件、换档、切换设置及键盘操作。只读 DOM 和动画事件观察用于留证，没有调用内部接口设置被验收行为。
+- 边界：本地构建、隔离数据、模拟 Provider，不调用真实模型；不新增真实 CLI 兼容性、完整无障碍符合性、系统缩放或打包应用结论。Session 更新失败 / 等待和重启恢复另由下列主 Agent 自动化覆盖，未冒充 W7 独立 UI 执行。
+- 基线与环境：`30c96e2` 加 `fix/effort-selection` 未提交 diff，最终构建已移除模拟目录中的 minimal 并采用主题渐变；macOS 15.6 arm64，1280×800 原生内容窗口、DPR 2。最终 fixture `studio-effort-selection-KM5NT6`、Electron PID 59994、CDP 9333、agent-browser 会话 `effort-w7-review`；仓库外 Project 为 `Effort Switch`，仅注入模拟 Provider / 模型目录及原生目录选择返回值。
+- **AI 修正复验结论：通过。** 五格静态、选中一次输入框反馈、最低 low 与 ultra 主题渐变符合本轮范围。人工状态仍为“需调整；修正后待人工复验”，未写成人工接受。旧 W4 证据仍属于 2026-10-23 基线。
+
+### W7 逐项结果
+
+| 场景 | 独立操作与实际结果 | 结论与证据 |
+|---|---|---|
+| 五格、最低 low、菜单静态 | 从 New Chat 打开菜单；目录为默认、low、medium、high、xhigh、max、ultra，无 minimal。每项正好五格，亮格数依次 1 / 2 / 3 / 4 / 5 / 5；触发按钮与所有选项的动画数均为 0 | 通过：[最终菜单](evidence/W7-final-five-static-menu.png)、[只读观察](evidence/W7-final-ui-observations.json) |
+| max / ultra 选中反馈与输入保护 | 输入草稿并从真实 fixture 文件候选加入 `src/app.ts`，点击 max，再点击 ultra。max 金橙单波、ultra 主题渐变双波扫过 Composer 边界；两轮色带在视频帧中可见，正文和文件标签保持原位。分别约 1s / 1.4s，单次、pointer-events 为 none，结束后移除，静态五格不动 | 通过：[约 7 秒最终预览](evidence/W7-final-effort-preview.mp4)、[max 帧](evidence/W7-final-max-transition.png)、[ultra 帧](evidence/W7-final-ultra-transition.png)、[双波序列](evidence/W7-final-ultra-wave-frames.png) |
+| ultra 渐变跟随主题 | 通过设置从浅色极光切到浅色薄荷，再切到深色纯色。ultra 五格保持满格、连续静态渐变；极光为柔和蓝紫暖色、薄荷转为绿蓝暖色、纯色转为灰阶。实际浅色五格可辨，菜单无溢出；切换主题未增加选中动画事件 | 通过：[极光菜单](evidence/W7-final-five-static-menu.png)、[薄荷菜单](evidence/W7-final-mint-menu.png)、[深色纯色菜单](evidence/W7-final-solid-dark-menu.png) |
+| 重选与浏览不重播 | 当前 ultra 再选 ultra；再次打开菜单后 Escape。选中事件累计数均保持 4、无 Composer 动画节点，焦点返回 Reasoning Effort | 通过：[观察记录 checkpoints](evidence/W7-final-ui-observations.json) |
+| 减少动态效果与键盘 | 以浏览器媒体模拟启用 reduced-motion 后从 ultra 改 max：设置更新但事件数仍为 4、无动画；关闭 reduced-motion 不补播。随后 ArrowDown / End / Enter 选 ultra：累计只新增 1 次，结束后无动画节点，焦点返回按钮 | 通过：[观察记录 checkpoints](evidence/W7-final-ui-observations.json) |
+| Session 异步与恢复边界（主 Agent 自动化，W7 只读核对） | 主 Agent 的单元用例覆盖 Session 更新等待时不播、成功后播、同值不写、失败保留旧值、恢复静态及减少动态效果变更取消；最终 E2E 覆盖四外观一次切换、主题色变化不重播和重启恢复。W7 核对测试 diff 与日志，未代称为独立 UI 操作 | 通过：专项单元 25 / 25、最终相关 Electron 20 / 20；[单元日志](evidence/W1-selection-unit.log)、[Electron 日志](evidence/W1-selection-electron.log) |
+
+### W7 发现、修正与证据边界
+
+首轮 max 扫光可见，ultra 双波在正常缩略观看下不易辨认；W7 将观察交回主 Agent，未参与修复。主 Agent 调整扫光为 ease-in-out、第二波间隔 400ms；并按后续用户指令移除模拟目录 minimal、改为主题渐变。W7 重连新 fixture 后完成上述最终复验，无剩余阻塞发现。[首轮菜单](evidence/W7-five-static-menu.png)与[首轮录像](evidence/W7-effort-selection-full.webm)仅为补充要求前的过程记录，不能证明最终版本通过。
+
+最终[原始录像](evidence/W7-final-effort-15fps.webm)为真实应用约 6.93 秒、15fps 连续录制，包含选择前后静止段；预览仅等比例缩至 1280×800 并转码，未剪辑或修改动作画面。首个 30fps 录制遇到编码器积压而中断，未作为通过证据，改用上述完整 15fps 录制。截图与序列帧均已由 W7 实际查看；只读记录中的前两次选中发生于同一最终构建的录制准备，正式预览记录后两次 max / ultra，键盘复验再增加一次 ultra。
+
+主 Agent 最终基础检查为脚本 36 / 36、Adapter 257 / 257、桌面单元 1178 / 1178、类型检查通过，W7 读取[日志](evidence/W1-selection-code-check.log)核对，未重复执行。W7 收尾复核本次用户纠正、最终 UI diff、input spec 本节、task 重开范围、自动化日志和本验收记录；实现结果与人工复验状态分别保留。
+
 ## 未覆盖与待决事项
 
 - 本轮使用模拟 Provider 验证 UI，不发送真实模型请求；不新增真实 Codex / Claude 集成通过结论。完整无障碍符合性、系统缩放及打包应用未由 W4 验证。
@@ -7,13 +34,13 @@
 
 ## 人工功能验收
 
-- 状态：**待人工验收**。
-- 范围与版本：v06 桌面 UI 对齐、max / ultra 思考信号动效；代码基线、环境与验证边界见下节。
+- 状态：**需调整；修正后待人工复验**（2026-10-24）。用户本日明确纠正了格数与动效位置，原 2026-10-23 AI 通过结论不代表符合本日要求或人工接受。
+- 范围与版本：v06 桌面 UI 对齐，以及本日修正的五格静态信号、最低 low、max / ultra Composer 选中反馈、ultra 主题渐变；本日基线、环境与验证边界见上节 W7，2026-10-23 历史结果见下节 W4。
 - 人工记录：用户 2026-10-23 指令授权实施；尚未收到功能接受确认。实施授权、AI 验收与人工产品验收分别记录。
 
 ## AI 结论与运行环境
 
-- 总体结论：**通过**。本次 UI、动效、候选、草稿隔离与已报告缺陷复验通过；解锁后原生前台发送完成独立复验通过，主 Agent 最终 Electron 回归 53 / 53 通过。人工产品验收仍待进行。
+- 2026-10-23 历史总体结论：**通过**。该基线的 UI、动效、候选、草稿隔离与已报告缺陷复验通过；解锁后原生前台发送完成独立复验通过，主 Agent 最终 Electron 回归 53 / 53 通过。本轮用户纠正后的新要求另由上节 W7 复验，不能沿用历史结论。
 - 验收者：W4，`/root/review_ui`；未参与产品实现，仅只读评审并操作应用、记录证据。
 - 日期与代码基线：2026-10-23；`a0f2132` 加 `feat/v06-effort` 未提交 diff，范围为 Composer / ControlMenu / EffortSignal / useSuggestions、Conversation / Session、Project View 及相应样式。最终候选边界检查与前台发送使用主 Agent 重建后的 renderer；其余截图来自同轮修复后的构建，后续增补未改动所示动效与布局。
 - 平台与应用形态：macOS 15.6 arm64；本地构建 Electron，隔离测试数据，CDP 9333。agent-browser 独立会话 `v06-w4-review`。1024×640 检查使用 CDP viewport emulation，原生窗口尺寸由主 Agent E2E 覆盖。

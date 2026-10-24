@@ -28,6 +28,6 @@
 | 规范 | 版本 | 状态 | 内容 |
 |---|---|---|---|
 | [Shell Layout & Components](shell-spec-v01.md) | v01 | 已确认（2026-10-09），保留作历史依据 | 窗口布局与组件基线；后续工具调整见 v02 |
-| [Shell Layout & Components](shell-spec-v02.md) | v02 | 原基线已确认（2026-10-11）；后续修订见其第 1 节 | 继承 v01 和 v02 Conversation；当前底部 Composer、信号格 effort 与 v06 UI 采用按其第 6、7 节，历史居中稿保留在原型 v02 |
+| [Shell Layout & Components](shell-spec-v02.md) | v02 | 原基线已确认（2026-10-11）；后续修订见其第 1 节 | 继承 v01 和 v02 Conversation；当前底部 Composer、五格静态 effort 与选中切换反馈按其第 6、7 节，历史居中稿保留在原型 v02 |
 
 新增规范时在此登记文件链接、版本与状态。

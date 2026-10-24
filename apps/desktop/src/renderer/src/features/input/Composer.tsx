@@ -28,6 +28,8 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const [skills, setSkills] = useState<SkillCatalogResult | null>(null), [skillsLoading, setSkillsLoading] = useState(false)
   const skillRequest = useRef(0), catalogRequest = useRef(0), filesNote = useId()
   const [notice, setNotice] = useState<string | null>(null), [catalogLoading, setCatalogLoading] = useState(false)
+  const [effortTransition, setEffortTransition] = useState<{ tier: 'max' | 'ultra'; sequence: number } | null>(null)
+  const effortSelection = useRef(0)
   const text = draft?.text ?? '', provider = providers.find(p => p.cli === cli)
   const unavailable = draftKey.kind === 'new_chat' && provider?.status !== 'available'
   const running = session?.activity === 'running', needsInput = session?.activity === 'needs_input'
@@ -39,6 +41,16 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   useEffect(() => { void useSessions.getState().loadDraft(draftKey) }, [id])
   useEffect(() => { if (cli) void useSessions.getState().loadModels(draftKey.projectId, cli) }, [cli, draftKey.projectId])
   useEffect(() => { if (active && draft) input.current?.focus() }, [id, active, !!draft])
+  useEffect(() => {
+    effortSelection.current++; setEffortTransition(null)
+    return () => { effortSelection.current++ }
+  }, [id, cli, active])
+  useEffect(() => {
+    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
+    const changed = () => { if (media?.matches) setEffortTransition(null) }
+    media?.addEventListener('change', changed)
+    return () => media?.removeEventListener('change', changed)
+  }, [])
   useEffect(() => {
     setNotice(null); setSkills(null); setSkillsLoading(false); setCatalogLoading(false)
     skillRequest.current++; catalogRequest.current++
@@ -97,9 +109,18 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
     if (session) void useSessions.getState().setModel(session.id, value)
     else useSessions.getState().updateDraft(draftKey, { model: value })
   }
-  function setEffort(value: string | null) {
-    if (session) void useSessions.getState().setReasoningEffort(session.id, value)
-    else useSessions.getState().updateDraft(draftKey, { reasoningEffort: value })
+  async function setEffort(value: string | null) {
+    if (value === reasoningEffort) return
+    const sequence = ++effortSelection.current
+    setEffortTransition(null)
+    const accepted = session ? await useSessions.getState().setReasoningEffort(session.id, value)
+      : (useSessions.getState().updateDraft(draftKey, { reasoningEffort: value }), true)
+    const tier = value?.toLowerCase()
+    // Celebrate only an accepted user selection in the still-visible Composer.
+    // Loading a stored value, reopening the menu and rejected writes stay quiet.
+    if (!accepted || sequence !== effortSelection.current || !active || !root.current || root.current.closest('[hidden]')
+      || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || tier !== 'max' && tier !== 'ultra') return
+    setEffortTransition({ tier, sequence })
   }
   function addSkill(skill: NonNullable<SkillCatalogResult>['skills'][number]) {
     const current = useSessions.getState().drafts[id]
@@ -120,6 +141,10 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
     : running ? supportsRunningInput ? '正在处理 · 可补充当前任务' : '运行中不可追加输入' : ''
   return <div className="composer" ref={root}>
     <div className="composer__box">
+      {effortTransition && <span key={effortTransition.sequence} aria-hidden="true" data-effort-transition={effortTransition.tier}
+        className={`composer__effort-transition composer__effort-transition--${effortTransition.tier}`} onAnimationEnd={event => {
+          if (event.target === event.currentTarget) setEffortTransition(null)
+        }}><i /><i /></span>}
       {suggestions.popup}
       <textarea ref={input} {...suggestions.attributes} aria-label={needsInput ? '回复 Agent' : '消息'} placeholder={needsInput ? '回复 Agent…' : `向 ${cliName(cli)} 发送消息…`} value={text} maxLength={SESSION_MESSAGE_MAX_LENGTH} disabled={!!loading || !draft} rows={1}
         onChange={event => { useSessions.getState().updateDraft(draftKey, { text: event.target.value }); suggestions.updateCaret() }}
@@ -163,7 +188,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
             {knownModels.map(item => <button className="menu-item" key={item.id} aria-pressed={model === item.id} onClick={() => setModel(item.id)}><span>{item.displayName}</span>{model === item.id && <Icon name="check" size={13} />}</button>)}
             {model && !knownModels.some(item => item.id === model) && <button className="menu-item" aria-pressed onClick={() => setModel(model)}>{model}（目录未列出）<Icon name="check" size={13} /></button>}
           </ControlMenu>
-          {cli === 'codex' && (effortLevels.length > 0 || reasoningEffort) && <ControlMenu key={`effort:${id}:${cli}`} label="Reasoning Effort" title={`思考强度 · ${reasoningEffort ?? '默认'}`} className="composer__effort-control" disabled={!catalog || !!catalog.error || catalogLoading || !!(session && (pending[`effort:${session.id}`] || pending[`model:${session.id}`]))} trigger={<EffortSignal effort={reasoningEffort} />}>
+          {cli === 'codex' && (effortLevels.length > 0 || reasoningEffort) && <ControlMenu key={`effort:${id}:${cli}`} label="Reasoning Effort" title={`思考强度 · ${reasoningEffort ?? '默认'}`} className="composer__effort-control" onOpen={() => setEffortTransition(null)} disabled={!catalog || !!catalog.error || catalogLoading || !!(session && (pending[`effort:${session.id}`] || pending[`model:${session.id}`]))} trigger={<EffortSignal effort={reasoningEffort} />}>
             <div className="composer__menu-heading">思考强度</div>
             {[null, ...effortLevels, ...(effortMissing ? [reasoningEffort] : [])].map(level => <button className="menu-item composer__effort-option" key={level ?? 'default'} aria-pressed={reasoningEffort === level} onClick={() => setEffort(level)}><EffortSignal effort={level} /><span>{level ?? '默认'}{level !== null && effortMissing && level === reasoningEffort ? '（目录未列出）' : ''}</span>{reasoningEffort === level && <Icon name="check" size={13} />}</button>)}
           </ControlMenu>}

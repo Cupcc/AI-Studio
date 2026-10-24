@@ -16,6 +16,19 @@ async function launch() {
   await expect(page.getByTestId('topbar')).toBeVisible()
 }
 async function selectEffort(value: string) { await effort().click(); await panel().getByRole('button', { name: value, exact: true }).click() }
+async function observeEffortSwitches() {
+  await page.evaluate(() => {
+    const switches: { tier: string; iterations: string; pointerEvents: string }[] = []
+    ;(window as unknown as { effortSwitches: typeof switches }).effortSwitches = switches
+    document.addEventListener('animationstart', event => {
+      const target = event.target
+      if (!(target instanceof HTMLElement) || !target.dataset.effortTransition) return
+      const style = getComputedStyle(target)
+      switches.push({ tier: target.dataset.effortTransition, iterations: style.animationIterationCount, pointerEvents: style.pointerEvents })
+    })
+  })
+}
+const switches = () => page.evaluate(() => (window as unknown as { effortSwitches: { tier: string; iterations: string; pointerEvents: string }[] }).effortSwitches)
 test.beforeEach(async () => {
   dir = mkdtempSync(join(tmpdir(), 'studio-composer-'))
   const project = join(dir, 'Project'); mkdirSync(join(project, 'src'), { recursive: true })
@@ -31,33 +44,90 @@ test.beforeEach(async () => {
 })
 test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
 
-test('v06 effort keyboard, max / ultra motion, four appearances and reduced motion', async () => {
+test('five static effort bars; max / ultra ignite only on selection, across four appearances and reduced motion', async () => {
+  await observeEffortSwitches()
   await effort().focus(); await effort().press('ArrowDown'); await page.keyboard.press('End')
   await expect(panel().getByRole('button', { name: 'ultra', exact: true })).toBeFocused()
+  await expect(panel().getByRole('button', { name: 'minimal', exact: true })).toHaveCount(0)
+  for (const [value, filled] of [['low', 1], ['medium', 2], ['high', 3], ['xhigh', 4], ['max', 5], ['ultra', 5]] as const) {
+    const signal = panel().getByRole('button', { name: value, exact: true }).locator('.effort-signal')
+    await expect(signal.locator('i')).toHaveCount(5)
+    await expect(signal.locator('i.is-on')).toHaveCount(filled)
+  }
+  expect(await panel().locator('.effort-signal').evaluateAll(nodes => nodes.every(node => node.getAnimations({ subtree: true }).length === 0))).toBe(true)
   await page.keyboard.press('Escape'); await expect(effort()).toBeFocused(); await expect(panel()).toHaveCount(0)
+  await input().fill('Keep this draft while switching effort')
+  let selections = 0
   for (const theme of ['glass', 'solid'] as const) for (const mode of ['light', 'dark'] as const) {
     // Appearance setup only; effort selection is always through the UI.
     await page.evaluate(async ({ theme, mode }) => { const api = window.studio as StudioApi; await api.settings.setTheme({ theme }); await api.settings.setMode({ mode }) }, { theme, mode })
     for (const value of ['max', 'ultra']) {
       await selectEffort(value)
       await expect(effort()).toHaveAttribute('aria-description', `思考强度 · ${value}`)
-      const bar = effort().locator('.effort-signal i').first()
-      await expect.poll(() => bar.evaluate(node => getComputedStyle(node).animationName)).toBe(`effort-${value}-wave`)
-      await page.emulateMedia({ reducedMotion: 'reduce' })
-      await expect.poll(() => bar.evaluate(node => getComputedStyle(node).animationName)).toBe('none')
-      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await expect.poll(async () => (await switches()).length).toBe(++selections)
+      expect((await switches()).at(-1)).toEqual({ tier: value, iterations: '1', pointerEvents: 'none' })
+      await expect(effort().locator('.effort-signal i')).toHaveCount(5)
+      expect(await effort().locator('.effort-signal').evaluate(node => node.getAnimations({ subtree: true }).length)).toBe(0)
+      await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
+      await expect(input()).toHaveValue('Keep this draft while switching effort')
     }
   }
+  await selectEffort('ultra')
+  expect((await switches()).length).toBe(selections)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await selectEffort('max')
+  await expect(effort()).toHaveAttribute('aria-description', '思考强度 · max')
+  await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
+  expect((await switches()).length).toBe(selections)
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
+  // Keyboard activation gets the same one-shot feedback after the popover closes.
+  await effort().press('ArrowDown'); await page.keyboard.press('End'); await page.keyboard.press('Enter')
+  await expect.poll(async () => (await switches()).length).toBe(++selections)
+  await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
   await input().fill('Persist ultra'); await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
   await expect(effort()).toHaveAttribute('aria-description', '思考强度 · ultra')
   await app.close(); await launch()
+  await observeEffortSwitches()
   await expect(effort()).toHaveAttribute('aria-description', '思考强度 · ultra')
+  await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
+  expect(await switches()).toHaveLength(0)
   await workspace().getByRole('button', { name: 'Model Selector', exact: true }).click()
   await workspace().getByRole('button', { name: 'E2E Alternate', exact: true }).click()
   await expect(workspace().getByText('“ultra”不在当前模型目录中。')).toBeVisible()
   await workspace().getByRole('button', { name: '使用默认', exact: true }).click()
   await expect(effort()).toHaveCount(0)
+})
+
+test('Ultra uses a static gradient that follows the theme palette without replaying selection feedback', async () => {
+  await observeEffortSwitches()
+  await page.evaluate(async () => {
+    const api = window.studio as StudioApi
+    await api.settings.setTheme({ theme: 'glass' }); await api.settings.setMode({ mode: 'light' })
+  })
+  await selectEffort('ultra')
+  await expect.poll(async () => (await switches()).length).toBe(1)
+  await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
+  const gradient = () => effort().locator('.effort-signal i').first().evaluate(node => getComputedStyle(node).backgroundImage)
+  const palettes = new Set<string>()
+  for (const mode of ['light', 'dark'] as const) {
+    await page.evaluate(async mode => { await (window.studio as StudioApi).settings.setMode({ mode }) }, mode)
+    for (const color of ['aurora', 'mint', 'sunset', 'haze', 'none'] as const) {
+      await page.evaluate(async color => { await (window.studio as StudioApi).settings.setGlassColor({ color }) }, color)
+      await expect(page.locator('html')).toHaveAttribute('data-glass-color', color)
+      const image = await gradient()
+      expect(image).toContain('linear-gradient('); palettes.add(image)
+      await expect(effort().locator('.effort-signal i')).toHaveCount(5)
+      expect(await effort().locator('.effort-signal').evaluate(node => node.getAnimations({ subtree: true }).length)).toBe(0)
+    }
+  }
+  expect(palettes.size).toBe(10)
+  await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'solid' }) })
+  const neutral = await gradient()
+  await page.evaluate(async () => { await (window.studio as StudioApi).settings.setGlassColor({ color: 'sunset' }) })
+  expect(await gradient()).toBe(neutral)
+  expect(await switches()).toHaveLength(1)
 })
 
 test('v06 real file candidates, deleted-file recovery, slash boundary and Add grouping', async () => {

@@ -17,7 +17,7 @@
 |---|---|
 | 本轮对齐修订 | 第 3、4、8、11 节依据用户 2026-10-11 对话确认补充，并于 2026-10-11 随任务签收 |
 | Conversation 修订 | 第 2.2、6、7 节依据交互原型 v02 的 2026-10-10 确认补充，并于 2026-10-11 随 [v02 对齐任务](../../tasks/archive/T20261010-prototype-v02-alignment/task.md)签收 |
-| v06 UI 采用 | 用户 2026-10-23 要求对齐 v06 并加入 max / ultra 思考 effort 动效；第 6、7 节改为统一底部 Composer，其他组件采用范围见 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)。本次 diff 待审阅，实施 / 验证与人工验收分别见[本轮任务](../../tasks/archive/T20261023-v06-ui-effort/task.md) |
+| v06 UI 采用 | 用户 2026-10-23 要求对齐 v06；2026-10-24 纠正为五格静态思考指示、实际选中 max / ultra 时输入框一次切换反馈；第 6、7 节采用底部 Composer，范围见 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)。本次 diff 待审阅，实施 / 验证与人工复验分别见[本轮任务](../../tasks/archive/T20261023-v06-ui-effort/task.md) |
 | 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 1 节 |
 | 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
 | 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
@@ -128,7 +128,7 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 | 文本输入 | 多行，自动增高至 8 行后滚动；Enter 发送，Shift+Enter 换行 | FR-INPUT-001 |
 | `+` | 打开按来源分组的 Add 菜单，真实目录与空状态边界见 input spec §3 | FR-INPUT-001 |
 | 上下文标签 | 正文与控制行之间独立一行；当前 View、文件 / 图片 / 原生 Skill，可单独移除 | FR-VIEW-007、FR-TOOL-001 |
-| Model Selector 与思考强度 | 底行右侧相邻排列；思考按钮为四格信号，档位菜单与 max / ultra 动效见 [input spec](../../specs/input/spec.md#思考强度信号与动效) | FR-INPUT-002 |
+| Model Selector 与思考强度 | 底行右侧相邻排列；思考按钮与弹窗均为最多五格的静态信号，选定 max / ultra 后对输入框播放一次切换反馈；映射与边界见 [input spec](../../specs/input/spec.md#思考强度信号与动效) | FR-INPUT-002 |
 | Send / Stop | 输入为空时 Send 禁用；Running 时保留 Stop，并按 CLI 原生能力提供追加／排队发送；两者同时可用时不得用单一按钮隐藏发送 | FR-INPUT-001、input I-Q3 |
 | 提示与键盘 | 错误和目录提示在框内控制行之下；辅助状态行在框外，空闲无快捷键说明，发送按钮按需提示；候选、菜单与焦点恢复见 input spec §3 | FR-INPUT-001、DEC-23 |
 

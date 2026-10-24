@@ -164,6 +164,8 @@
   --color-code-comment: #8a8a84;
   --color-focus-ring: #2563eb;
   --color-focus-ring-soft: #2563eb2e;
+  --color-effort-max: #b06200;
+  --color-effort-max-end: #c84614;
   --color-primary: #1d1d1b;
   --color-primary-hover: #3a3a36;
   --color-on-primary: #ffffff;
@@ -236,6 +238,8 @@
   --color-placeholder: #7a7a7a;
   --color-running: #505050;
   --color-running-track: rgba(0, 0, 0, .14);
+  --color-effort-max: #b06200;
+  --color-effort-max-end: #c84614;
   --color-needs-input-bg: rgba(255, 244, 222, .72);
   --color-needs-input-border: rgba(217, 119, 6, .3);
   --color-error-bg: rgba(254, 236, 233, .72);
@@ -318,6 +322,8 @@
   --color-code-comment: #7c7c7c;
   --color-focus-ring: #4d8eff;
   --color-focus-ring-soft: rgba(77, 142, 255, .28);
+  --color-effort-max: #ffb242;
+  --color-effort-max-end: #ff783c;
   --color-primary: #ececec;
   --color-primary-hover: #ffffff;
   --color-on-primary: #171717;
@@ -362,6 +368,8 @@
   --color-placeholder: #8f8f8f;
   --color-running: #c4c4c4;
   --color-running-track: rgba(255, 255, 255, .16);
+  --color-effort-max: #ffb242;
+  --color-effort-max-end: #ff783c;
   --color-needs-input-bg: rgba(245, 158, 11, .12);
   --color-needs-input-border: rgba(245, 158, 11, .35);
   --color-error-bg: rgba(240, 82, 82, .12);
@@ -422,3 +430,35 @@
 [data-glass-color="sunset"] { --glass-wall: var(--glass-wall-sunset); }
 [data-glass-color="haze"] { --glass-wall: var(--glass-wall-haze); }
 [data-glass-color="none"] { --glass-wall: var(--glass-wall-none); }
+
+/* Ultra borrows the selected wallpaper's hues, with ink mixed in for small bars.
+   Solid and uncoloured glass use the theme's neutral greys. No colour animation. */
+:root {
+  --effort-palette-start: var(--color-text-3);
+  --effort-palette-middle: var(--color-text-muted);
+  --effort-palette-end: var(--color-placeholder);
+  --color-effort-ultra: color-mix(in oklab, var(--effort-palette-start) 76%, var(--color-text-2));
+  --color-effort-ultra-middle: color-mix(in oklab, var(--effort-palette-middle) 76%, var(--color-text-2));
+  --color-effort-ultra-end: color-mix(in oklab, var(--effort-palette-end) 76%, var(--color-text-2));
+  --effort-ultra-gradient: linear-gradient(110deg, var(--color-effort-ultra), var(--color-effort-ultra-middle) 52%, var(--color-effort-ultra-end));
+}
+:root[data-theme="glass"][data-glass-color="aurora"] {
+  --effort-palette-start: #a9c1f2;
+  --effort-palette-middle: #d3bff0;
+  --effort-palette-end: #f4c6b2;
+}
+:root[data-theme="glass"][data-glass-color="mint"] {
+  --effort-palette-start: #bfe3cd;
+  --effort-palette-middle: #b6d5ea;
+  --effort-palette-end: #f0e1b6;
+}
+:root[data-theme="glass"][data-glass-color="sunset"] {
+  --effort-palette-start: #f6c9b4;
+  --effort-palette-middle: #f2c2d6;
+  --effort-palette-end: #e3c6ee;
+}
+:root[data-theme="glass"][data-glass-color="haze"] {
+  --effort-palette-start: #c9d3df;
+  --effort-palette-middle: #c4d5e0;
+  --effort-palette-end: #dcd8d4;
+}
