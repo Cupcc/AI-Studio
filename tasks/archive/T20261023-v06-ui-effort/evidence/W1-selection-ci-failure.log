@@ -1,0 +1,107 @@
+macOS arm64 checks	Electron E2E and native smoke	﻿2026-10-24T00:47:29.1021030Z ##[group]Run pnpm --filter @ai-studio/desktop run test:e2e:built
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:29.1021740Z ^[[36;1mpnpm --filter @ai-studio/desktop run test:e2e:built^[[0m
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:29.1119830Z shell: /bin/bash -e {0}
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:29.1120290Z env:
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:29.1120660Z   CI: true
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:29.1120920Z   HUSKY: 0
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:29.1121310Z   PNPM_HOME: /Users/runner/setup-pnpm/node_modules/.bin
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:29.1121820Z ##[endgroup]
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:29.3138490Z $ playwright test
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:30.4266730Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:30.4268800Z Running 54 tests using 1 worker
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:30.4272550Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:45.4379990Z   ✓   1 e2e/alignment.spec.ts:139:5 › glass appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (14.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:53.4137490Z   ✓   2 e2e/alignment.spec.ts:171:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (7.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:47:59.5606290Z   ✓   3 e2e/alignment.spec.ts:186:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (6.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:05.9785130Z   ✓   4 e2e/alignment.spec.ts:199:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (6.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:10.5354300Z   ✓   5 e2e/alignment.spec.ts:139:5 › solid appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (4.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:15.8185940Z   ✓   6 e2e/alignment.spec.ts:171:5 › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (5.3s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:19.4660230Z   ✓   7 e2e/alignment.spec.ts:186:5 › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (3.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:23.0770440Z   ✓   8 e2e/alignment.spec.ts:199:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (3.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:29.4080530Z   ✓   9 e2e/alignment.spec.ts:210:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (6.3s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:35.5107300Z   ✓  10 e2e/alignment.spec.ts:228:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (6.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:43.4078000Z   ✓  11 e2e/alignment.spec.ts:239:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (7.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:44.3110730Z   ✓  12 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (58ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:44.4131480Z   ✓  13 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (90ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:44.4332200Z   ✓  14 e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer (8ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:44.4666990Z   ✓  15 e2e/app.spec.ts:124:5 › typed preload API works and main validates input (19ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:45.0214560Z   ✓  16 e2e/app.spec.ts:145:5 › new windows and foreign navigation are denied (534ms)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:48:57.6327530Z   ✓  17 e2e/app.spec.ts:157:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (12.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:19.8534340Z   ✓  18 e2e/composer.spec.ts:47:5 › five static effort bars; max / ultra ignite only on selection, across four appearances and reduced motion (22.2s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:24.2771550Z   ✘  19 e2e/composer.spec.ts:103:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback (4.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:28.7303820Z   ✓  20 e2e/composer.spec.ts:133:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (3.8s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:34.3609240Z   ✓  21 e2e/diff.spec.ts:38:5 › FR-TOOL-002: staged, unstaged, untracked, renamed, deleted, mode-only and binary changes against HEAD, refreshed live (5.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:36.4868950Z   ✓  22 e2e/diff.spec.ts:97:5 › FR-TOOL-002 item 3: a clean repository says so, a directory that is not Git never says "no changes" and gets no repository (2.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:38.5319350Z   ✓  23 e2e/diff.spec.ts:118:5 › FR-TOOL-002 item 3: an unborn HEAD explains the missing baseline, lists the files as new and never claims "no changes" (2.0s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:40.6109960Z   ✓  24 e2e/diff.spec.ts:134:5 › FR-TOOL-002: a Project inside a repository shows only its own changes and says where it is (2.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:46.3313970Z   ✓  25 e2e/files.spec.ts:45:5 › FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, special names and failure states (5.7s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:51.0546270Z   ✓  26 e2e/files.spec.ts:130:5 › FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through the simulated Provider, keep input on failure (4.7s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:49:57.0474090Z   ✓  27 e2e/project-view.spec.ts:21:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (6.0s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:00.0180370Z   ✓  28 e2e/project-view.spec.ts:63:5 › removed View label sends without creating helpers, and each View has an independent draft (3.0s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:11.5396270Z   ✓  29 e2e/project.spec.ts:54:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (11.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:14.4113310Z   ✓  30 e2e/project.spec.ts:122:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (2.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:16.8045890Z   ✓  31 e2e/project.spec.ts:141:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (2.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:24.1998350Z   ✓  32 e2e/runtime-tools.spec.ts:79:5 › FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolation, final empty state and Project confirmation (7.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:30.9925710Z   ✓  33 e2e/runtime-tools.spec.ts:174:5 › FR-TOOL-003 / AC-07: real isolated local preview, external redirect choice, overlays, failures and address-only restart (6.8s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:35.5044320Z   ✓  34 e2e/runtime-tools.spec.ts:242:5 › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit (4.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:39.6142010Z   ✓  35 e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (4.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:42.8205080Z   ✓  36 e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser (3.2s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:45.8493310Z   ✓  37 e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (3.0s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:50.4594990Z   ✓  38 e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (4.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:50:53.9541440Z   ✓  39 e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (3.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:00.1567190Z   ✓  40 e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (6.1s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:04.1760960Z   ✓  41 e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (4.0s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:06.4361990Z   ✓  42 e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (2.2s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:10.3128820Z   ✓  43 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (3.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:13.6028770Z   ✓  44 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (3.3s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:19.0705730Z   ✓  45 e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (5.4s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:22.4407290Z   ✓  46 e2e/settings.spec.ts:73:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode (3.3s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:25.4633210Z   ✓  47 e2e/settings.spec.ts:91:5 › FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one dialog; ×, Esc and outside close it (3.0s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:30.1182650Z   ✓  48 e2e/settings.spec.ts:118:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart (4.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:38.5461490Z [settings] muted text contrast on light glass {
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:38.5567830Z   aurora: 5.146742158383028,
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:38.5628530Z   mint: 5.263556092022096,
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:38.5630960Z   sunset: 5.231508931069496,
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:38.5638850Z   haze: 5.331810046824118
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:38.5639830Z }
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:42.5961000Z   ✓  49 e2e/settings.spec.ts:175:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material (12.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:47.2154910Z   ✓  50 e2e/settings.spec.ts:204:5 › FR-SET-002 · AC-08: "Reduce transparency" shows solid with a note, and glass returns when it is off (4.6s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:53.3269790Z [settings] muted text contrast in dark {
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:53.3275820Z   'glass-极光': 7.166667479848126,
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:53.3279730Z   'glass-无': 4.780845517969554,
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:53.3286110Z   solid: 6.05631572140189
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:53.3286630Z }
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:51:56.4668020Z   ✓  51 e2e/settings.spec.ts:219:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist (9.2s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:00.4383400Z   ✓  52 e2e/turn-diff.spec.ts:37:5 › saved native patch survives working-tree edits and restart; toolbar explicitly returns to project scope (3.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:03.9588340Z   ✓  53 e2e/turn-diff.spec.ts:59:5 › unknown and explicit empty records remain distinct and do not replace a selected older turn (3.5s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.8365930Z   ✓  54 e2e/turn-diff.spec.ts:76:5 › failed and interrupted turns keep their saved native records and actual outcomes (2.9s)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.8773420Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.8880490Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.8982440Z [ELIFECYCLE] Command failed with exit code 1.
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.8983520Z   1) e2e/composer.spec.ts:103:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.8984120Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.8996860Z Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9001160Z     Error: expect(received).toBe(expected) // Object.is equality
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9001630Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9001740Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9002380Z   × "pnpm recursive run" failed in /Users/runner/work/AI-Studio/AI-Studio/
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9033440Z   │ apps/desktop
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9033690Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9033850Z     Expected: 10
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9034200Z     Received: 2
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9034350Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9034410Z       123 |     }
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9034690Z       124 |   }
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9035010Z     > 125 |   expect(palettes.size).toBe(10)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9035320Z           |                         ^
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9036080Z       126 |   await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'solid' }) })
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9036840Z       127 |   const neutral = await gradient()
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9037510Z       128 |   await page.evaluate(async () => { await (window.studio as StudioApi).settings.setGlassColor({ color: 'sunset' }) })
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9038380Z         at /Users/runner/work/AI-Studio/AI-Studio/apps/desktop/e2e/composer.spec.ts:125:25
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9038760Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9039290Z     Error Context: ../../.runtime/desktop-e2e/test-results/composer-Ultra-uses-a-stat-0f64e-eplaying-selection-feedback/error-context.md
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9047930Z
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9048050Z   1 failed
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9049120Z     e2e/composer.spec.ts:103:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9049820Z   53 passed (4.6m)
+macOS arm64 checks	Electron E2E and native smoke	2026-10-24T00:52:06.9107110Z ##[error]Process completed with exit code 1.

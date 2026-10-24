@@ -14,6 +14,11 @@ async function launch() {
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
+  // CI may enable Reduce transparency. Appearance tests set the system input explicitly.
+  await app.evaluate(({ nativeTheme }) => {
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => false })
+    nativeTheme.emit('updated')
+  })
 }
 async function selectEffort(value: string) { await effort().click(); await panel().getByRole('button', { name: value, exact: true }).click() }
 async function observeEffortSwitches() {
@@ -61,6 +66,8 @@ test('five static effort bars; max / ultra ignite only on selection, across four
   for (const theme of ['glass', 'solid'] as const) for (const mode of ['light', 'dark'] as const) {
     // Appearance setup only; effort selection is always through the UI.
     await page.evaluate(async ({ theme, mode }) => { const api = window.studio as StudioApi; await api.settings.setTheme({ theme }); await api.settings.setMode({ mode }) }, { theme, mode })
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+    await expect(page.locator('html')).toHaveAttribute('data-scheme', mode)
     for (const value of ['max', 'ultra']) {
       await selectEffort(value)
       await expect(effort()).toHaveAttribute('aria-description', `思考强度 · ${value}`)
@@ -106,6 +113,7 @@ test('Ultra uses a static gradient that follows the theme palette without replay
     const api = window.studio as StudioApi
     await api.settings.setTheme({ theme: 'glass' }); await api.settings.setMode({ mode: 'light' })
   })
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass')
   await selectEffort('ultra')
   await expect.poll(async () => (await switches()).length).toBe(1)
   await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
@@ -113,6 +121,7 @@ test('Ultra uses a static gradient that follows the theme palette without replay
   const palettes = new Set<string>()
   for (const mode of ['light', 'dark'] as const) {
     await page.evaluate(async mode => { await (window.studio as StudioApi).settings.setMode({ mode }) }, mode)
+    await expect(page.locator('html')).toHaveAttribute('data-scheme', mode)
     for (const color of ['aurora', 'mint', 'sunset', 'haze', 'none'] as const) {
       await page.evaluate(async color => { await (window.studio as StudioApi).settings.setGlassColor({ color }) }, color)
       await expect(page.locator('html')).toHaveAttribute('data-glass-color', color)
@@ -124,9 +133,24 @@ test('Ultra uses a static gradient that follows the theme palette without replay
   }
   expect(palettes.size).toBe(10)
   await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'solid' }) })
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'solid')
   const neutral = await gradient()
   await page.evaluate(async () => { await (window.studio as StudioApi).settings.setGlassColor({ color: 'sunset' }) })
   expect(await gradient()).toBe(neutral)
+  // Respect the OS fallback even when the saved preference is glass.
+  await app.evaluate(({ nativeTheme }) => {
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => true })
+    nativeTheme.emit('updated')
+  })
+  await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'glass' }) })
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'solid')
+  expect(await gradient()).toBe(neutral)
+  await app.evaluate(({ nativeTheme }) => {
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => false })
+    nativeTheme.emit('updated')
+  })
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass')
+  expect(await gradient()).not.toBe(neutral)
   expect(await switches()).toHaveLength(1)
 })
 

@@ -64,7 +64,7 @@ created: 2026-10-23
 - 本轮基线：`30c96e2`；worktree `../AI Stduio.worktrees/effort-selection`，分支 `fix/effort-selection`。原始实现与证据保留历史基线。
 - 范围：五格静态图标；max / ultra 仅在用户实际改变并接受当前配置后对 Composer 做一次切换反馈；已有 Session 等待原生更新成功，草稿沿用即时编辑语义，当前内存接受后反馈，不表示磁盘保存完成。默认、恢复、菜单浏览、重选当前值不触发。ultra 仍最多五格，以静态外观区分，不增加第六格。尊重减少动态效果；原生更新失败不播放，保留原生 effort 值。
 - 本轮验收：菜单与触发器均为五格且无循环动画；选择 max / ultra 出现可区分的一次输入框切换反馈并结束；键盘选择同样工作；恢复 / 重选 / 失败 / 减少动态效果不误触发；两主题与深浅外观不溢出、不遮挡正文。使用模拟 Provider，不新增真实 CLI 调用。
-- 本轮状态：2026-10-24 实现、自动化、W7 独立界面验收及主 Agent 收尾复核完成；无阻塞发现，按协议归档。任务完成不代表人工产品接受。
+- 本轮状态：2026-10-24 实现、本地自动化与 W7 独立界面验收通过；合入后新增主题测试的环境隔离遗漏已复现并修正，W7 只读复核通过，按协议收尾归档。人工状态不变。
 - 中间自检：类型检查与构建通过，Session 单元 25 / 25、Composer / alignment / settings Electron 19 / 19；覆盖五格静态、四外观、一次动效结束、键盘、重选、重启与减少动态效果。该结果早于下列补充纠正，最终日志与新版结论另记。
 - 本日补充纠正：用户明确“模型中根本不会有 minimal，最低 low”，删除预设强度映射与模拟目录中的 minimal；目录仍由 Provider 提供，界面不补造档位。用户要求 Ultra“做成渐变”“跟随主题颜色”，采用主题对应的静态五格连续渐变与同色输入框双波；实色 / 无背景色使用中性灰阶。上述 19 / 19 为补充纠正前的中间基线，最终验证与独立结论见下文。
 - 最终自动化：最新构建的 [Composer / alignment / settings Electron 20 / 20](evidence/W1-selection-electron.log) 通过，包含 Ultra 随四种主题背景及无色的浅 / 深色更新、静态渐变、切主题不误播。提交 hook 完整基础检查通过：类型检查、脚本 36 / 36、Adapter 257 / 257、桌面 1178 / 1178，见[日志](evidence/W1-selection-code-check.log)；先前专项 [Session 25 / 25](evidence/W1-selection-unit.log)纳入本轮完整单元。模拟 Provider 不新增真实 CLI 或打包结论。
@@ -74,3 +74,8 @@ created: 2026-10-23
 W6 与主 Agent 按五格、静态信号、选中反馈、最低 low、Ultra 主题渐变、恢复 / 重选 / 失败 / 减少动态效果等同义表述核对。input 为行为与映射负责文档；UX、AC、DEC-23、Shell、设计索引及采用记录已同步，路线图的下一步、整体概况、Conversation / Input / Project View 模块、阶段计划与 AC 进度均已核对。chat / session / navigation / Project View 的其他既有契约没有改变，不制造无关修改。保留原型、W4 与旧真实 CLI / 打包证据的历史基线；本轮人工功能状态仍为需调整、修正后待复验。独立结论见 [acceptance.md](acceptance.md)；归档后统一修复引用和相对路径，提交门禁复核链接。
 
 - W7 独立最终界面验收通过，未参与产品实现；五格静态、无 minimal、Max 单波、Ultra 主题渐变双波、主题变化不重播、键盘焦点、重选 / Esc / 减少动态效果，以及草稿和附件保持均已实际操作核对。主 Agent 查看关键帧完成自检。可查看[短预览](evidence/W7-final-effort-preview.mp4)与[双波关键帧](evidence/W7-final-ultra-wave-frames.png)；逐项范围与模拟边界见验收记录。
+
+### 合入后的 CI 复核
+
+- `3f62ec1` 已合入并推送；[CI 40046462221](https://github.com/Cupcc/AI-Studio/actions/runs/40046462221) 的类型检查与单元通过，Electron 53 / 54。新增主题渐变用例预期十种外观，实际只有两种，见[失败日志](evidence/W1-selection-ci-failure.log)。Composer 测试遗漏系统减少透明度的 fixture，系统开关开启时产品依既有规格正确降级为纯色灰阶；本地临时开启该系统输入已[精确复现相同 10 / 2 失败](evidence/W1-selection-ci-repro.log)。
+- 修复分支 `fix/effort-theme-ci`；只调整 E2E 系统外观 fixture 与有效主题断言，不修改产品源码。固定测试初始系统输入，额外验证开启系统减少透明度后恢复灰阶、关闭后恢复主题渐变，两种变化均不重播。修复后 [Composer 3 / 3](evidence/W1-selection-ci-fix.log) 通过，W7 独立只读复核通过；本地复现确认该环境因素足以导致同一失败，CI 原日志未直接采样系统开关。原 W7 产品界面验收保持适用；本次仅补测试，不新增产品决策或文档契约，负责规格及路线图结论仍适用。提交门禁照常执行，CI 最终状态由修复提交的远端运行记录与本轮交付回复提供。

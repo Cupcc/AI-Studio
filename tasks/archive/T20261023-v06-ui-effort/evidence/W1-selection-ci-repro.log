@@ -1,0 +1,32 @@
+
+Running 1 test using 1 worker
+
+(node:88242) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 e2e/composer.spec.ts:107:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback (5.7s)
+
+
+  1) e2e/composer.spec.ts:107:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 10
+    Received: 2
+
+      127 |     }
+      128 |   }
+    > 129 |   expect(palettes.size).toBe(10)
+          |                         ^
+      130 |   await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'solid' }) })
+      131 |   const neutral = await gradient()
+      132 |   await page.evaluate(async () => { await (window.studio as StudioApi).settings.setGlassColor({ color: 'sunset' }) })
+        at /Users/Chris/Projects/AI Stduio.worktrees/effort-selection/apps/desktop/e2e/composer.spec.ts:129:25
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/composer-Ultra-uses-a-stat-0f64e-eplaying-selection-feedback/error-context.md
+
+  1 failed
+    e2e/composer.spec.ts:107:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /Users/Chris/Projects/AI Stduio.worktrees/
+  │ effort-selection/apps/desktop

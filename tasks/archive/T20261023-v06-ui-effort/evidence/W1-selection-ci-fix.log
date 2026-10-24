@@ -1,0 +1,10 @@
+
+Running 3 tests using 1 worker
+
+(node:88730) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/composer.spec.ts:52:5 › five static effort bars; max / ultra ignite only on selection, across four appearances and reduced motion (18.1s)
+  ✓  2 e2e/composer.spec.ts:110:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback (4.2s)
+  ✓  3 e2e/composer.spec.ts:157:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (2.6s)
+
+  3 passed (25.2s)
