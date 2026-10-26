@@ -1,3 +1,7 @@
+# Core Rules
+1. **意图对齐**：当用户意图不清晰或容易产生歧义时，应先简要复述你理解的意图、执行计划和建议，由用户确认与自己的想法一致后再行动。
+2.  **专业判断**：人类的知识可能有缺陷或不够专业，且往往意识不到自己的指令有误或不够好。AI应结合用户提供的信息、专业知识和项目背景，主动提出更优建议，而不是一味照指令执行和迎合项目背景。例如：用户的目标是A，指令是B，但C能更好地达成A——AI应指出C并说明理由，由用户决定，而不是直接执行B。
+
 # Repository Guidelines
 
 This repository contains the V1.0 specifications, design workspace, development records, and application source for AI Developer Studio, a desktop client built around local projects and CLI agent sessions.
