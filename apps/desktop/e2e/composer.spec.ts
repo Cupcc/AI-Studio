@@ -89,7 +89,7 @@ test('five static effort bars; max / ultra ignite only on selection, across four
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
   // Keyboard activation gets the same one-shot feedback after the popover closes.
-  await effort().press('ArrowDown'); await page.keyboard.press('End'); await page.keyboard.press('Enter')
+  await effort().press('ArrowDown'); await page.keyboard.press('End'); await page.keyboard.press('ArrowUp'); await page.keyboard.press('Enter')
   await expect.poll(async () => (await switches()).length).toBe(++selections)
   await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
   await input().fill('Persist ultra'); await workspace().getByRole('button', { name: 'Send', exact: true }).click()
@@ -105,6 +105,43 @@ test('five static effort bars; max / ultra ignite only on selection, across four
   await expect(workspace().getByText('“ultra”不在当前模型目录中。')).toBeVisible()
   await workspace().getByRole('button', { name: '使用默认', exact: true }).click()
   await expect(effort()).toHaveCount(0)
+})
+
+test('effort precedes model, keeps menu columns aligned, and uses a quiet Max palette', async () => {
+  const model = workspace().getByRole('button', { name: 'Model Selector', exact: true })
+  const effortBox = (await effort().boundingBox())!, modelBox = (await model.boundingBox())!
+  expect(effortBox.x + effortBox.width).toBeLessThanOrEqual(modelBox.x)
+  for (const theme of ['glass', 'solid'] as const) for (const mode of ['light', 'dark'] as const) {
+    await page.evaluate(async ({ theme, mode }) => {
+      await (window.studio as StudioApi).settings.setTheme({ theme })
+      await (window.studio as StudioApi).settings.setMode({ mode })
+    }, { theme, mode })
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+    await expect(page.locator('html')).toHaveAttribute('data-scheme', mode)
+    await selectEffort('max')
+    await effort().click()
+    await expect(panel().getByRole('button', { name: '默认', exact: true })).toHaveCount(0)
+    await expect(panel().locator('.composer__effort-option').first()).toHaveText('low')
+    await page.mouse.move(0, 0)
+    const measure = () => panel().locator('.composer__effort-option').evaluateAll(nodes => nodes.map(node => ({
+      columns: [...node.children].map(child => {
+        const rect = child.getBoundingClientRect()
+        return [rect.x, rect.width]
+      }),
+      background: getComputedStyle(node).backgroundColor,
+      weight: getComputedStyle(node).fontWeight,
+      transform: getComputedStyle(node).transform
+    })))
+    const before = await measure()
+    for (const row of before) expect(row).toEqual(before[0])
+    await expect(panel().locator('.composer__effort-check svg')).toHaveCount(1)
+    expect(await effort().locator('.effort-signal').evaluate(node => getComputedStyle(node).color)).toBe(mode === 'light' ? 'rgb(86, 103, 161)' : 'rgb(170, 183, 234)')
+    await panel().getByRole('button', { name: 'high', exact: true }).click()
+    await effort().click(); await page.mouse.move(0, 0)
+    expect(await measure()).toEqual(before)
+    await panel().getByRole('button', { name: '恢复 CLI 默认', exact: true }).click()
+    await expect(effort()).toHaveAttribute('aria-description', '思考强度 · 默认')
+  }
 })
 
 test('Ultra uses a static gradient that follows the theme palette without replaying selection feedback', async () => {

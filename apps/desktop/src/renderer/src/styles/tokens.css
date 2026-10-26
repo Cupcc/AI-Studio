@@ -164,8 +164,8 @@
   --color-code-comment: #8a8a84;
   --color-focus-ring: #2563eb;
   --color-focus-ring-soft: #2563eb2e;
-  --color-effort-max: #b06200;
-  --color-effort-max-end: #c84614;
+  --color-effort-max: #5667a1;
+  --color-effort-max-end: #7582b7;
   --color-primary: #1d1d1b;
   --color-primary-hover: #3a3a36;
   --color-on-primary: #ffffff;
@@ -238,8 +238,8 @@
   --color-placeholder: #7a7a7a;
   --color-running: #505050;
   --color-running-track: rgba(0, 0, 0, .14);
-  --color-effort-max: #b06200;
-  --color-effort-max-end: #c84614;
+  --color-effort-max: #5667a1;
+  --color-effort-max-end: #7582b7;
   --color-needs-input-bg: rgba(255, 244, 222, .72);
   --color-needs-input-border: rgba(217, 119, 6, .3);
   --color-error-bg: rgba(254, 236, 233, .72);
@@ -322,8 +322,8 @@
   --color-code-comment: #7c7c7c;
   --color-focus-ring: #4d8eff;
   --color-focus-ring-soft: rgba(77, 142, 255, .28);
-  --color-effort-max: #ffb242;
-  --color-effort-max-end: #ff783c;
+  --color-effort-max: #aab7ea;
+  --color-effort-max-end: #c0b9ea;
   --color-primary: #ececec;
   --color-primary-hover: #ffffff;
   --color-on-primary: #171717;
@@ -368,8 +368,8 @@
   --color-placeholder: #8f8f8f;
   --color-running: #c4c4c4;
   --color-running-track: rgba(255, 255, 255, .16);
-  --color-effort-max: #ffb242;
-  --color-effort-max-end: #ff783c;
+  --color-effort-max: #aab7ea;
+  --color-effort-max-end: #c0b9ea;
   --color-needs-input-bg: rgba(245, 158, 11, .12);
   --color-needs-input-border: rgba(245, 158, 11, .35);
   --color-error-bg: rgba(240, 82, 82, .12);

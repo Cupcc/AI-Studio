@@ -128,7 +128,7 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 | 文本输入 | 多行，自动增高至 8 行后滚动；Enter 发送，Shift+Enter 换行 | FR-INPUT-001 |
 | `+` | 打开按来源分组的 Add 菜单，真实目录与空状态边界见 input spec §3 | FR-INPUT-001 |
 | 上下文标签 | 正文与控制行之间独立一行；当前 View、文件 / 图片 / 原生 Skill，可单独移除 | FR-VIEW-007、FR-TOOL-001 |
-| Model Selector 与思考强度 | 底行右侧相邻排列；思考按钮与弹窗均为最多五格的静态信号，选定 max / ultra 后对输入框播放一次切换反馈；映射与边界见 [input spec](../../specs/input/spec.md#思考强度信号与动效) | FR-INPUT-002 |
+| Model Selector 与思考强度 | 底行右侧相邻排列，思考在模型左侧（用户 2026-10-24 修正，diff 待审阅）；思考按钮与弹窗均为最多五格的静态信号，选定 max / ultra 后对输入框播放一次切换反馈；默认辅助操作、选中对齐与配色由 [input spec](../../specs/input/spec.md#思考强度信号与动效)负责 | FR-INPUT-002 |
 | Send / Stop | 输入为空时 Send 禁用；Running 时保留 Stop，并按 CLI 原生能力提供追加／排队发送；两者同时可用时不得用单一按钮隐藏发送 | FR-INPUT-001、input I-Q3 |
 | 提示与键盘 | 错误和目录提示在框内控制行之下；辅助状态行在框外，空闲无快捷键说明，发送按钮按需提示；候选、菜单与焦点恢复见 input spec §3 | FR-INPUT-001、DEC-23 |
 

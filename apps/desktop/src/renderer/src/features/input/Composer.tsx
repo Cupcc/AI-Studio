@@ -133,6 +133,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const effortLevels = selectedModel?.reasoningEfforts ?? []
   const modelMissing = !!model && !!catalog && !catalog.error && !catalog.models.some(item => item.id === model)
   const effortMissing = !!reasoningEffort && !!catalog && !catalog.error && !effortLevels.includes(reasoningEffort)
+  const effortOptions = [...new Set([...effortLevels, ...(effortMissing ? [reasoningEffort] : [])])]
   const modelLabel = model ? selectedModel?.displayName ?? model : nativeDefault ? `${nativeDefault.displayName}（默认）` : 'CLI 默认'
   const suggestions = useSuggestions({ draftKey, text, input, active, cli, skills, loadSkills, report: setNotice })
   const operationError = errors[id] || (session && (errors[`stop:${session.id}`] || errors[`effort:${session.id}`] || errors[`model:${session.id}`]))
@@ -182,16 +183,17 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
           <div className="composer__menu-heading">Plugins</div><p className="composer__menu-empty">当前 CLI 未提供 Plugin 目录</p>
         </ControlMenu>
         <div className="composer__settings">
+          {cli === 'codex' && (effortLevels.length > 0 || reasoningEffort) && <ControlMenu key={`effort:${id}:${cli}`} label="Reasoning Effort" title={`思考强度 · ${reasoningEffort ?? '默认'}`} className="composer__effort-control" onOpen={() => setEffortTransition(null)} disabled={!catalog || !!catalog.error || catalogLoading || !!(session && (pending[`effort:${session.id}`] || pending[`model:${session.id}`]))} trigger={<EffortSignal effort={reasoningEffort} />}>
+            <div className="composer__menu-heading">思考强度</div>
+            {effortOptions.map(level => <button type="button" className="menu-item composer__effort-option" key={level} aria-pressed={reasoningEffort === level} onClick={() => setEffort(level)}><EffortSignal effort={level} /><span className="composer__effort-label">{level}{effortMissing && level === reasoningEffort ? '（目录未列出）' : ''}</span><span className="composer__effort-check" aria-hidden="true">{reasoningEffort === level && <Icon name="check" size={13} />}</span></button>)}
+            {reasoningEffort !== null && <><div className="composer__menu-divider" /><button type="button" className="menu-item composer__effort-reset" onClick={() => setEffort(null)}>恢复 CLI 默认</button></>}
+          </ControlMenu>}
           <ControlMenu key={`model:${id}:${cli}`} label="Model Selector" title={modelLabel} className="composer__model-control" disabled={!cli || !catalog || !!catalog.error || catalogLoading || !!(session && pending[`model:${session.id}`])} trigger={<><span className="composer__model-name">{modelLabel}</span><Icon name="chevron" size={12} /></>}>
             <div className="composer__menu-heading">模型</div>
             <button className="menu-item" aria-pressed={model === null} onClick={() => setModel(null)}><span>{nativeDefault ? `${nativeDefault.displayName}（默认）` : 'CLI 默认'}</span>{model === null && <Icon name="check" size={13} />}</button>
             {knownModels.map(item => <button className="menu-item" key={item.id} aria-pressed={model === item.id} onClick={() => setModel(item.id)}><span>{item.displayName}</span>{model === item.id && <Icon name="check" size={13} />}</button>)}
             {model && !knownModels.some(item => item.id === model) && <button className="menu-item" aria-pressed onClick={() => setModel(model)}>{model}（目录未列出）<Icon name="check" size={13} /></button>}
           </ControlMenu>
-          {cli === 'codex' && (effortLevels.length > 0 || reasoningEffort) && <ControlMenu key={`effort:${id}:${cli}`} label="Reasoning Effort" title={`思考强度 · ${reasoningEffort ?? '默认'}`} className="composer__effort-control" onOpen={() => setEffortTransition(null)} disabled={!catalog || !!catalog.error || catalogLoading || !!(session && (pending[`effort:${session.id}`] || pending[`model:${session.id}`]))} trigger={<EffortSignal effort={reasoningEffort} />}>
-            <div className="composer__menu-heading">思考强度</div>
-            {[null, ...effortLevels, ...(effortMissing ? [reasoningEffort] : [])].map(level => <button className="menu-item composer__effort-option" key={level ?? 'default'} aria-pressed={reasoningEffort === level} onClick={() => setEffort(level)}><EffortSignal effort={level} /><span>{level ?? '默认'}{level !== null && effortMissing && level === reasoningEffort ? '（目录未列出）' : ''}</span>{reasoningEffort === level && <Icon name="check" size={13} />}</button>)}
-          </ControlMenu>}
         </div>
         {(running || needsInput) && <button className={`composer__send is-stop ${stopping ? 'is-busy' : ''}`} aria-label={stopping ? '停止中…' : 'Stop'} data-tip={stopping ? '停止中…' : '停止'} disabled={stopping} onClick={() => { if (session) void useSessions.getState().stop(session.id) }}>{stopping ? <span className="session-spinner session-spinner--inverse" aria-hidden="true" /> : <Icon name="stop" size={14} />}</button>}
         <button className={`composer__send ${busy ? 'is-busy' : ''}`} aria-label={busy ? '发送中…' : 'Send'} data-tip="Enter 发送 · Shift + Enter 换行" data-tip-align="end" disabled={!canSend} onClick={() => void send()}>{busy ? <span className="session-spinner session-spinner--inverse" aria-hidden="true" /> : <Icon name="arrow-up" size={14} />}</button>
