@@ -118,7 +118,7 @@ Running 66 tests using 1 worker
 
     Error Context: ../../.runtime/desktop-e2e/test-results/app-renderer-has-no-Node-js-require-or-raw-ipcRenderer/error-context.md
 
-  2) e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette 
+  2) e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette
 
     TimeoutError: locator.click: Timeout 30000ms exceeded.
     Call log:
@@ -157,7 +157,7 @@ Running 66 tests using 1 worker
 
   2 failed
     e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer ─────────────────────
-    e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette 
+    e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette
   64 passed (4.5m)
 [ELIFECYCLE] Command failed with exit code 1.
 Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL

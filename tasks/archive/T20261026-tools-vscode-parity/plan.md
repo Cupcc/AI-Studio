@@ -26,4 +26,6 @@
 - 组合后的正常提交门禁：类型检查、脚本 36 / Adapter 286 / Desktop 1311 项通过。主 checkout 冻结 lockfile 安装后 build 成功，完整 Electron 初轮为 64 / 66，见[原始运行](evidence/W0-main-merge-e2e.log)。
 - 初轮安全隔离测试仅因精确 preload namespace 清单遗漏新 `menu` / `search` 失败；Main 补上这两个已授权的 typed namespace，保留 Node / require / raw IPC / CSP 与完整键清单断言，生产代码不改。另一项 Composer reset 点击时工作区切到新 launcher 而超时，原因未归因；相同测试源码原样定向复跑成功，不将一次通过写成已找到根因。两项最终定向 2 / 2 通过，见[复验](evidence/W0-main-merge-e2e-recheck.log)；不把此结果记为本机完整套件 66 / 66。
 - 同一生产构建重新生成未签名 arm64 包；带 `STUDIO_ENABLE_CLAUDE_CODE=1` 的打包 smoke PASS，包含 ripgrep、filesRename、SQLite、PTY、Renderer 与 preload；见[报告](evidence/W0-main-merge-packaged-smoke.json)。smoke 使用空 Provider 集，不代替打包菜单 UI；该入口的既有 W7 独立 UI 与最终未变的打包门槛源码仍为依据，不重复模型调用。
-- 最终文档复核：三份 task / acceptance / plan、路线图下一步 / 整体 / 模块 / 阶段 / AC、AC-07 Search 与 AC-08 CLI 映射、README 的开发和包装说明均保留；只更新三任务本次人工接受，其他历史 UI / 本轮 Diff / 附件待验与发布边界沿用原记录。远端 main CI 将在推送后独立执行完整组合门禁。
+- 最终文档复核：三份 task / acceptance / plan、路线图下一步 / 整体 / 模块 / 阶段 / AC、AC-07 Search 与 AC-08 CLI 映射、README 的开发和包装说明均保留；只更新三任务本次人工接受，其他历史 UI / 本轮 Diff / 附件待验与发布边界沿用原记录。远端 main 的完整组合门禁与逐步结果由 [GitHub CI](https://github.com/Cupcc/AI-Studio/actions/workflows/ci.yml)负责，本机结果与远端结果分别记录。
+
+- 2026-10-29 最终清理：main 已普通推送至 `87d75ad`（三项功能 + preload 清单测试修正），三个干净 worktree 已按贡献指南移除；远端任务分支和本地备份 ref 保留原始证据基线。独立复核再次确认最终记录没有把本机 64 / 66 + 定向 2 / 2 写成完整通过，也未混淆 provider-free smoke 和打包菜单 UI。证据日志仅替换主目录前缀并去除两处行末空白，测试内容与结论保留。
