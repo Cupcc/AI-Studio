@@ -1,6 +1,6 @@
 # 工程工具续推计划
 
-依据 [task](task.md) 与用户 2026-10-27「没完成的worktrees 继续推进」。从 997bce7 恢复，不合入 main。
+依据 [task](task.md) 与用户 2026-10-27「没完成的worktrees 继续推进」，从 `997bce7` 恢复。续推阶段不合入 main 的限制已由 2026-10-29「验收通过，合入main」覆盖；当前整理结果见[仅保留 main](#2026-10-29-仅保留-main)。
 
 | Agent | 职责 | 写入范围 | 状态 |
 |---|---|---|---|
@@ -29,3 +29,13 @@
 - 最终文档复核：三份 task / acceptance / plan、路线图下一步 / 整体 / 模块 / 阶段 / AC、AC-07 Search 与 AC-08 CLI 映射、README 的开发和包装说明均保留；只更新三任务本次人工接受，其他历史 UI / 本轮 Diff / 附件待验与发布边界沿用原记录。远端 main 的完整组合门禁与逐步结果由 [GitHub CI](https://github.com/Cupcc/AI-Studio/actions/workflows/ci.yml)负责，本机结果与远端结果分别记录。
 
 - 2026-10-29 最终清理：main 已普通推送至 `87d75ad`（三项功能 + preload 清单测试修正），三个干净 worktree 已按贡献指南移除；远端任务分支和本地备份 ref 保留原始证据基线。独立复核再次确认最终记录没有把本机 64 / 66 + 定向 2 / 2 写成完整通过，也未混淆 provider-free smoke 和打包菜单 UI。证据日志仅替换主目录前缀并去除两处行末空白，测试内容与结论保留。
+
+## 2026-10-29 仅保留 main
+
+- 授权：用户随后明确「删除origin的分叉」「只保留 main，所有的都要整理到main且只保留main」。本节覆盖上方当时保留任务分支 / 备份 ref 的清理结果；历史验证与人工验收基线保持原记录。
+- Main 清理前创建并通过 `git bundle verify` 验证本地恢复副本 `.runtime/git-cleanup/pre-only-main-4f7bcbf.bundle`，包含全部 15 个 ref、完整历史及两份 stash；同目录、同文件名前缀的 `.refs` / `.stashes` 保存原引用与 stash 清单。这些文件被 Git 忽略，不形成图中分叉。
+- W8 `claude_diagnose` 独立只读核对两份旧 stash：`defafc622` 的 xterm 依赖和四份 Browser / Terminal 契约已由 main 完整覆盖；`38e41cdb` 的 46 个文件已整合或归档，原型与截图保留，Codex 运行中发送还包含后续错误传递与竞态修正。无需恢复旧实现；两份 stash 的 index parent 也无额外暂存增量。原整合依据见[工作线整理](../T20261012-worklines-integration/task.md#工作线与恢复)和[工具历史核对](../T20261009-context-tools/plan.md#2026-10-17-worktree-收尾)。
+- 清理结果：已以预期远端 SHA 的 lease 原子删除 `feat/claude-adaptation`、`feat/tools-vscode-parity`、`fix/cli-management` 三个 origin 分支；本地对应分支均为 main 祖先，以 `git branch -d` 删除。已清空两份冗余 stash，并按原 SHA 删除五个 `refs/backup/*`；原始提交保存在 bundle，无需重写 main 历史。
+- 最终核对：本地仅 `refs/heads/main` 与 `refs/remotes/origin/main`；实际 origin heads 仅 main；只有主 checkout 一个 worktree；stash 列表为空；`git log --all --merges` 为空，全部可见引用的提交图线性。三项功能的整理提交均已在 main。
+- 验证：清理前 `4f7bcbf` 的[完整 CI 40876060357](https://github.com/Cupcc/AI-Studio/actions/runs/40876060357) 已通过，含基础检查、完整 Electron、arm64 打包及打包冒烟；本机初轮与定向复跑仍按上节各自基线记录。此次仅清理 Git 引用、补记过程文档，产品代码与测试不变。
+- 文档收尾复核：搜索分支、worktree、backup、stash 与保留 / 恢复表述，核对本任务、CLI / Claude、Context 工具、2026-10-12 整合与 v06 集成记录；当前恢复入口指向本节，日期化历史记录保留。核对路线图下一步 / 整体 / 模块 / 阶段 / 验收、负责规格及决定记录，本次不改变产品范围、实现、验收或下一步，因此不制造规格与路线图改动。

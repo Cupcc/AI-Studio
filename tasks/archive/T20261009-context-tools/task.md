@@ -16,6 +16,8 @@ created: 2026-10-09
 - 基线：应用源码 `9cd17ef`，随后仅更新文档及归档路径。W27 / W28 独立评审、最终包指纹与真实 UI 结果见[总体验收](../T20261009-v1-foundation-slice/acceptance.md)；Main Agent 最终完整 Electron **49 / 49**、基础门禁 **36 / 257 / 1172**、`1.0.0` arm64 打包和 open 冒烟见[最终报告](../T20261009-v1-foundation-slice/report.md)。此前锁屏条件已解除，没有遗留的技术收尾阻塞。
 - 人工接受与技术收尾分开：既有体验确认保留；新增本轮 Diff、推理控制 / 公开输出及图片 / Skill 仍待人工验收。Claude 后续、未观察后代 / 共享 MCP 的证明边界、macOS 13 实机和暂不发布边界继续由总体验收及路线图维护；不改写历史验证或把草稿标成人工确认。
 
+2026-10-29 恢复入口更新：旧 Runtime UI stash 经再次独立核对已被 main 完整覆盖，引用已按用户仅保留 main 的指令删除；本地 bundle 恢复位置与最终清理结果见[仅保留 main](../T20261026-tools-vscode-parity/plan.md#2026-10-29-仅保留-main)。下方保留原阶段的日期与证据。
+
 ## 本轮授权与状态
 
 2026-10-13 用户新指令「推进运行时工具的开发。agents并发」授权启动 Terminal / Browser 及其 Project 关闭、应用退出接缝的开发。按下文阶段 2 / 3 并发实施，正常的本地 PTY / HTTP fixture 调用纳入验证；当时未安排真实模型场景，Files、两类 Diff 与完整 AC-07 仍由本任务跟踪，不将运行时工具阶段等同四工具交付。执行与 worker 分工见 [plan.md](plan.md)。
