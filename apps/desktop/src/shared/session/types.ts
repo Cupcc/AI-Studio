@@ -72,7 +72,7 @@ export interface ConversationPage {
 export interface ProviderSummary {
   cli: SessionCli
   displayName: string
-  status: 'checking' | 'available' | 'not_installed' | 'not_logged_in' | 'unsupported_version' | 'error'
+  status: 'disabled' | 'checking' | 'available' | 'not_installed' | 'not_logged_in' | 'unsupported_version' | 'error'
   reason: string | null
   version: string | null
   compatibility: 'tested' | 'untested' | 'unsupported' | null

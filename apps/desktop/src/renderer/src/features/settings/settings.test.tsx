@@ -6,6 +6,7 @@ import { SettingsDialog } from './SettingsDialog'
 import { installSettingsIntegration, SettingsEntry } from './integration'
 import { useSettings } from './store'
 import { shellIntegration } from '../project/integration'
+import { useSessions } from '../session/store'
 
 const initial = useSettings.getState()
 let state: AppearanceState
@@ -40,6 +41,99 @@ async function openDialog() {
 }
 
 describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
+  it('loads the CLI category, saves one default for all Projects and retries detection', async () => {
+    const previous = useSessions.getState()
+    const provider = { cli: 'codex' as const, displayName: 'Codex CLI', status: 'available' as const, reason: null }
+    const getProviders = vi.fn(async () => [provider])
+    const setGlobalDefaultCli = vi.fn(async () => {})
+    Object.assign(window.studio, { session: { getProviders, getGlobalDefaultCli: async () => 'codex', setGlobalDefaultCli } })
+    useSessions.setState({ providers: [], providersError: null, projects: {}, defaultCli: { p: null, p2: null }, drafts: {} })
+    try {
+      await openDialog()
+      fireEvent.click(screen.getByRole('button', { name: 'CLI' }))
+      const option = await screen.findByRole('radio', { name: /Codex CLI/ })
+      await waitFor(() => expect(option.hasAttribute('disabled')).toBe(false))
+      expect(screen.queryByText('已应用到所有 Project。')).toBeNull()
+      fireEvent.click(option)
+      await screen.findByText('已应用到所有 Project。')
+      expect(setGlobalDefaultCli).toHaveBeenCalledWith({ cli: 'codex' })
+      expect(useSessions.getState().defaultCli).toEqual({ p: 'codex', p2: 'codex' })
+      fireEvent.click(screen.getByRole('button', { name: '重新检测' }))
+      await waitFor(() => expect(getProviders).toHaveBeenCalledWith({ force: true }))
+      await screen.findByRole('button', { name: '重新检测' })
+    } finally { useSessions.setState(previous, true) }
+  })
+
+  it('reports a rejected CLI setting without changing the default or claiming success', async () => {
+    const previous = useSessions.getState()
+    Object.assign(window.studio, { session: {
+      getProviders: async () => [{ cli: 'codex', displayName: 'Codex CLI', status: 'available' }],
+      getGlobalDefaultCli: async () => null, setGlobalDefaultCli: async () => { throw new Error('disk full') }
+    } })
+    useSessions.setState({ providers: [], providersError: null, projects: {}, defaultCli: { p: null }, drafts: {} })
+    try {
+      await openDialog()
+      fireEvent.click(screen.getByRole('button', { name: 'CLI' }))
+      const option = await screen.findByRole('radio', { name: /Codex CLI/ })
+      await waitFor(() => expect(option.hasAttribute('disabled')).toBe(false))
+      fireEvent.click(option)
+      expect((await screen.findByRole('alert')).textContent).toContain('disk full')
+      expect(useSessions.getState().defaultCli.p).toBe('codex') // The sole available CLI was already selected automatically.
+      expect(screen.queryByText('已应用到所有 Project。')).toBeNull()
+    } finally { useSessions.setState(previous, true) }
+  })
+
+  it('groups added and not-added CLI and supports removing all then adding and rechecking', async () => {
+    const previous = useSessions.getState()
+    let providers = [
+      { cli: 'codex', displayName: 'Codex', status: 'available', reason: null },
+      { cli: 'claude-code', displayName: 'Claude Code', status: 'not_logged_in', reason: '请登录' }
+    ]
+    const setCliEnabled = vi.fn(async ({ cli, enabled }: { cli: string; enabled: boolean }) => {
+      providers = providers.map(item => item.cli === cli ? { ...item, status: enabled ? 'checking' : 'disabled' } : item)
+      return providers
+    })
+    const getProviders = vi.fn(async () => providers)
+    Object.assign(window.studio, { session: { getProviders, getGlobalDefaultCli: async () => 'codex', setCliEnabled } })
+    useSessions.setState({ providers: [], providersError: null, projects: {}, defaultCli: {}, drafts: {} })
+    try {
+      await openDialog(); fireEvent.click(screen.getByRole('button', { name: 'CLI' }))
+      const codex = await screen.findByRole('button', { name: '移除 Codex' })
+      await waitFor(() => expect(codex.hasAttribute('disabled')).toBe(false))
+      expect(screen.getByRole('radio', { name: 'Codex' })).toBeTruthy()
+      expect(screen.getByRole('radio', { name: 'Claude Code' }).hasAttribute('disabled')).toBe(true)
+      fireEvent.click(screen.getByRole('button', { name: '处理方法' }))
+      expect(screen.getByText(/在终端完成 Claude Code 登录/)).toBeTruthy()
+      fireEvent.click(codex)
+      await screen.findByRole('button', { name: '添加 Codex' })
+      fireEvent.click(screen.getByRole('button', { name: '移除 Claude Code' }))
+      await waitFor(() => expect(screen.getByRole('button', { name: '重新检测' }).hasAttribute('disabled')).toBe(true))
+      expect(screen.queryAllByRole('radio')).toHaveLength(0)
+      expect(screen.getAllByRole('button', { name: /^添加 / }).map(item => item.getAttribute('aria-label'))).toEqual(['添加 Codex', '添加 Claude Code'])
+      fireEvent.click(screen.getByRole('button', { name: '添加 Codex' }))
+      await waitFor(() => expect(screen.getByRole('button', { name: '重新检测' }).hasAttribute('disabled')).toBe(false))
+      expect(screen.getByText('待检测')).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: '重新检测' }))
+      await waitFor(() => expect(getProviders).toHaveBeenCalledWith({ force: true }))
+      await screen.findByRole('button', { name: '重新检测' })
+    } finally { useSessions.setState(previous, true) }
+  })
+
+  it('retains the added CLI when removing it fails', async () => {
+    const previous = useSessions.getState()
+    Object.assign(window.studio, { session: { getProviders: async () => [{ cli: 'codex', displayName: 'Codex', status: 'available' }],
+      getGlobalDefaultCli: async () => 'codex', setCliEnabled: async () => { throw new Error('disk full') } } })
+    useSessions.setState({ providers: [], providersError: null, projects: {}, drafts: {} })
+    try {
+      await openDialog(); fireEvent.click(screen.getByRole('button', { name: 'CLI' }))
+      const checkbox = await screen.findByRole('button', { name: '移除 Codex' })
+      await waitFor(() => expect(checkbox.hasAttribute('disabled')).toBe(false))
+      fireEvent.click(checkbox)
+      expect((await screen.findByRole('alert')).textContent).toContain('disk full')
+      expect(screen.getByRole('button', { name: '移除 Codex' })).toBe(checkbox)
+    } finally { useSessions.setState(previous, true) }
+  })
+
   it('applies the saved appearance to <html> before the first render and follows main-process changes', async () => {
     state = appearanceOf({ theme: 'solid', glassColor: 'mint', mode: 'dark' }, { dark: true })
     const integration = installSettingsIntegration()

@@ -8,6 +8,7 @@ import type { DraftKey, SkillCatalogResult } from '@shared/session/types'
 import { cliName, draftId, FILE_REPLY_BLOCKED, replyBlockedByFiles, useSessions } from '../session/store'
 import { useProjectShell } from '../project/store'
 import { sessionApi } from '../session/api'
+import { useSettings } from '../settings/store'
 import { Icon } from '../../app/Icon'
 import { ControlMenu } from './ControlMenu'
 import { EffortSignal } from './EffortSignal'
@@ -39,6 +40,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const fileReplyBlocked = replyBlockedByFiles(session, draft)
   const canSend = !!draft && !!text.trim() && !unavailable && (!running || !!supportsRunningInput) && !stopping && !busy && !fileReplyBlocked
   useEffect(() => { void useSessions.getState().loadDraft(draftKey) }, [id])
+  useEffect(() => { if (unavailable) void useSessions.getState().loadProviders() }, [unavailable])
   useEffect(() => { if (cli) void useSessions.getState().loadModels(draftKey.projectId, cli) }, [cli, draftKey.projectId])
   useEffect(() => { if (active && draft) input.current?.focus() }, [id, active, !!draft])
   useEffect(() => {
@@ -204,6 +206,12 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
       {notice && <p className="composer__notice" role="status">{notice}</p>}
       {operationError && <p className="error-message" role="alert">{operationError}{errors[id] && <button className="text-button" disabled={!canSend} onClick={() => void send()}>重试发送</button>}</p>}
     </div>
-    <div className="composer__status" role="status">{status}{unavailable && !cli && providers.filter(item => item.status === 'available').map(item => <button className="text-button" key={item.cli} onClick={() => useSessions.getState().updateDraft(draftKey, { cli: item.cli, model: null, reasoningEffort: null })}>{item.displayName}</button>)}</div>
+    <div className="composer__status" role="status">
+      {status}
+      {unavailable && <>
+        {providers.filter(item => item.status === 'available' && item.cli !== cli).map(item => <button className="text-button" key={item.cli} onClick={() => useSessions.getState().updateDraft(draftKey, { cli: item.cli, model: null, reasoningEffort: null })}>使用 {cliName(item.cli)}</button>)}
+        <button className="text-button" onClick={() => useSettings.getState().openDialog('cli')}>CLI 设置</button>
+      </>}
+    </div>
   </div>
 }

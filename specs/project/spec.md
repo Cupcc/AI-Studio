@@ -106,7 +106,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
 1. 计算 `canonical_path`（3.1.3）。
 2. **已在某个 Tab 中打开**：切换到该 Tab，不新建 Tab，不重复打开（FR-PROJ-001；D-09）。如果操作发起于启动页 Tab，该启动页 Tab 是否保留见 PROJ-Q2。更新该 Project 的 `last_opened_at`（见 3.1.5）。
 3. **已存在 Project 记录但没有打开**（此前打开过、后来关闭）：复用该记录，不创建新记录；其 Session 与 UI 状态保持；在当前启动页 Tab 中打开，并按 FR-PROJ-003 恢复上次状态（3.3）。
-4. **没有记录**：创建新的 Project 记录（字段见第 4 节），`default_cli` 的初值由 chat 模块给出（03 第 6 节 New Chat 第 3 条：沿用最近一次设置的默认值，首次为检测到的第一个可用 CLI；规则归 `specs/chat/`），首次进入 Overview（2.3.3）。
+4. **没有记录**：创建新的 Project 记录（字段见第 4 节），默认 CLI 由 chat 模块解析应用级偏好，不再冻结项目级初值（2026-10-25 确认，规则归 [chat](../chat/spec.md#default-cli-规则)），首次进入 Overview（2.3.3）。
 5. 打开动作发生在启动页 Tab 中时，该 Tab **原位转为**该 Project 的 Tab，Tab 位置不变；Tab 标题为 Project 名称，`name` 默认取所选路径最后一段（提案；同名目录的区分见 PROJ-Q9）。
 6. 通知 session 模块该 Project 已打开，以加载其 Session 数据（第 5 节）。
 
@@ -209,7 +209,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
   - Session：Session History 列表、各 Session 状态与 Conversation、New Chat 草稿。
   - Project View：当前选中的 View、Project View Mode 下左侧 Conversation 与 Preview 状态。
   - Context Panel：展开状态、当前工具、宽度；各工具内部状态（Files 展开的目录、Terminal 的工作目录与会话、Browser 地址）。
-- 下列为窗口级、跨 Project 共享的状态：Tab 集合与顺序、当前 Tab、左侧导航折叠偏好（D-14）、最近 Projects 列表、CLI 可用性检测。Default CLI 属 Project，但其初值沿用“最近一次设置”，该跨 Project 偏好归 `specs/chat/`。
+- 下列为窗口级、跨 Project 共享的状态：Tab 集合与顺序、当前 Tab、左侧导航折叠偏好（D-14）、最近 Projects 列表。CLI 启用 / 默认为应用级偏好，可用性为运行时缓存，规则归 [chat](../chat/spec.md#default-cli-规则) 和 [settings](../settings/spec.md#cli-管理与默认-cli2026-10-25-确认)。
 - 实现约束（技术方案，待实现确认）：渲染进程的所有 Project 相关 store 以 `project_id` 为键，组件通过当前 `project_id` 取值，不使用单例“当前 Project 状态”；切换 Tab 只改变当前 `project_id`。IPC 请求与事件均携带 `project_id`。已关闭的 Project 不保留渲染态。
 
 ### FR-PROJ-003 Project 状态恢复
@@ -312,7 +312,7 @@ Project 记录是新创建的（3.1.4 第 4 步），或没有任何已保存 UI
 | `name` | 显示名；默认取所选路径最后一段；V1 不提供重命名 | 04 第 6 节；提案：默认值与不可改 |
 | `local_path` | 用户首次选择的路径，用于展示 | 04 第 6 节 |
 | `canonical_path` | 解析符号链接后的绝对路径；唯一；用作同一目录判定与 CLI 工作目录 | 提案（3.1.3） |
-| `default_cli` | Project 的 Default CLI；取值与更新规则归 `specs/chat/` | 04 第 6 节；D-11 |
+| `default_cli` | 旧 Project 默认字段，保留兼容回退；当前应用级默认与启用列表归 `specs/chat/`、`specs/settings/` | 04 第 6 节历史模型；DEC-24 |
 | `active_view` / `active_session` | 04 中的两个单值字段；因 D-15 要求恢复 Project View 下左列的对话，本 spec 将其合并进 `ui_state.main_canvas`（见 4.2），不再单独存放 | 04 第 6 节；D-15 |
 | `ui_state` | 见 4.2 | 04 第 6 节 |
 | `last_opened_at` | 最近一次通过 3.1.4 打开的时间，用于最近列表排序 | 提案 |
@@ -377,7 +377,7 @@ Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级�
 
 ### 5.4 与 chat
 
-- 创建 Project 记录后、打开回复前调用 `MainSessionPort.initializeProject(projectId)`，由 Session 服务快照 `default_cli`；正式 Provider ID 为 `codex` / `claude-code`，显示名分别为 Codex CLI / Claude Code。存储与继承规则统一见 [chat §4 / §5.1](../chat/spec.md)。
+- 创建 Project 记录后、打开回复前调用 `MainSessionPort.initializeProject(projectId)`，由 Session 服务解析应用级默认，不写入项目初值快照；正式 Provider ID 为 `codex` / `claude-code`，显示名分别为 Codex CLI / Claude Code。旧 `default_cli` 字段只兼容读取，存储与继承规则统一见 [chat §4 / §5.1](../chat/spec.md)。
 - 草稿 UI 状态（`main_canvas.mode = "draft"`）的内容与保存归 chat；Tab 切换期间草稿文字应保持（D-15），重启后的行为见 PROJ-Q11。
 
 ### 5.5 与 project-view、tools（后续 task）

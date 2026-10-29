@@ -1,0 +1,7 @@
+{
+  "date": "2026-10-28",
+  "commit": "53baac0697edb5a14124292ba931ae4004ca23c4",
+  "sourceDiff": [],
+  "packagedAsarSha256": "f866d5a48ee25deaa4d2a391da1ac70a8f2fdb2f1cfcd06f2a676c2819768740",
+  "fixture": "SQLite backup of W6 isolated test profile; preexisting test Project only, no user profile; initial enabled_clis is [codex]. No tested preference mutated during preparation."
+}

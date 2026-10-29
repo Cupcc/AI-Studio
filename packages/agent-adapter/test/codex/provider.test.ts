@@ -485,6 +485,36 @@ describe('Codex availability', () => {
     expect(report.status).toBe(status); expect(JSON.stringify(report)).not.toContain('secret@example.test');
     expect(report.version).toMatchObject({ value: { compatibility: 'untested' } }); await provider.dispose();
   });
+  describe.each(['stdout', 'stderr'] as const)('login status on %s', (stream) => {
+    it.each([
+      { name: 'configured API key', output: 'API key configured - fake-secret-key\nAuthentication is checked when you send a request.', code: 0, status: 'available', login: { state: 'logged_in', method: 'api_key' } },
+      { name: 'legacy API key login', output: 'Logged in using an API key - fake-secret-key', code: 0, status: 'available', login: { state: 'logged_in', method: 'api_key' } },
+      { name: 'ChatGPT login', output: 'Logged in using ChatGPT fake-account@example.test', code: 0, status: 'available', login: { state: 'logged_in', method: 'chatgpt' } },
+      { name: 'logout with zero exit', output: 'Not logged in', code: 0, status: 'not_logged_in', login: { state: 'logged_out' } },
+      { name: 'logout with nonzero exit', output: 'Not logged in', code: 1, status: 'not_logged_in', login: { state: 'logged_out' } },
+      { name: 'nonzero configured key', output: 'API key configured - fake-secret-key', code: 1, status: 'error' },
+      { name: 'nonzero legacy login', output: 'Logged in using an API key - fake-secret-key', code: 1, status: 'error' },
+      { name: 'unknown successful output', output: 'Unknown status fake-secret-key', code: 0, status: 'error' },
+      { name: 'negated configured key', output: 'No API key configured', code: 0, status: 'error' },
+      { name: 'timed out configured key', output: 'API key configured - fake-secret-key', code: 0, timedOut: true, status: 'error' },
+    ])('$name', async ({ output, code, timedOut = false, status, login }) => {
+      const h = setup();
+      const exec = vi.fn(async (_path, args) => args[0] === '--version'
+        ? { code: 0, signal: null, stdout: 'codex-cli 0.164.0', stderr: '', timedOut: false, truncated: false }
+        : { code, signal: null, stdout: '', stderr: '', [stream]: output, timedOut, truncated: false });
+      const provider = new CodexProvider({ ...h.dependencies, exec });
+      try {
+        const report = await provider.checkAvailability({ environment: options.environment, includeModels: false });
+        expect(report.status).toBe(status);
+        expect(report.login).toMatchObject(login ? { status: 'ok', value: login }
+          : { status: 'failed', error: { code: timedOut ? 'timeout' : 'provider_error' } });
+        expect(JSON.stringify(report)).not.toMatch(/fake-secret-key|fake-account@example\.test/);
+        expect(report.version).toMatchObject({ value: { compatibility: 'untested' } });
+        expect(exec.mock.calls.map(([, args]) => args)).toEqual([['--version'], ['login', 'status']]);
+        expect(h.runtimes).toHaveLength(0);
+      } finally { await provider.dispose(); }
+    });
+  });
   it('reports catalog failure independently of executable/version/login', async () => {
     const h = setup(); h.configure = (server) => server.handle('model/list', () => { throw new Error('catalog unavailable'); });
     const report = await h.provider.checkAvailability({ environment: options.environment, includeModels: true });

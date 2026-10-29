@@ -25,6 +25,7 @@ await provider.dispose();
 - `listSkills({ environment, cwd })` 只查询原生目录，不创建 Thread；`sendUserInput` 支持 file / image / skill 原生附件，宿主负责将用户选择解析为可信路径。
 - `setModel` 只影响下一轮。原生 `model:null` 表示保持已有设置，因此 Adapter 的 `setModel(null)` 会读取该 cwd 的 CLI 有效默认模型，下一轮显式提交它；无配置值时使用原生目录的默认项。
 - 可用性分别检查 executable、`--version`、`login status` 和可选模型目录。认证输出只转换为粗粒度状态，不保留原始输出。模型目录只进行握手与 `model/list`，不创建 Thread。
+- 登录兼容旧版 `Logged in` 与新版 `API key configured`；后者只代表本地已配置 API key，不保证远端认证成功。判定边界见 [Adapter spec §3.11](../../../../specs/agent-adapter/spec.md#311-codex-provider)。
 - 当前类型锁定为 Codex CLI `0.163.0`；已执行方法的证据见[本轮收尾](../../../../tasks/archive/T20261009-v1-foundation-slice/evidence/W26-closure.md)，不宣称全部生成协议通过。其他版本报告 `untested`，不会因版本号不同自动禁止；实验接口缺失时 Stop 走独立 Runtime 兜底。
 
 ## 事件与请求

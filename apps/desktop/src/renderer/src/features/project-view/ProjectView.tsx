@@ -19,7 +19,7 @@ export function ViewConversationHeader(props: ViewSlotProps) {
     <span className="grow" />{sessionId ?
     <button className="text-button" onClick={() => useProjectShell.getState().setViewConversation(props.project.id, { kind: 'draft' })}>新对话</button> :
     <select aria-label="View CLI" className="view-cli-select" value={draft?.cli ?? ''} disabled={!draft} onChange={event => useSessions.getState().updateDraft(key, { cli: event.target.value as 'codex' | 'claude-code', ...(event.target.value !== draft?.cli ? { model: null, reasoningEffort: null } : {}) })}>
-      <option value="" disabled>选择 CLI</option>{providers.map(provider => <option key={provider.cli} value={provider.cli} disabled={provider.status !== 'available'}>{provider.displayName}{provider.status !== 'available' ? ' · 不可用' : ''}</option>)}
+      <option value="" disabled>选择 CLI</option>{providers.filter(provider => provider.status !== 'disabled').map(provider => <option key={provider.cli} value={provider.cli} disabled={provider.status !== 'available'}>{provider.displayName}{provider.status !== 'available' ? ' · 不可用' : ''}</option>)}
     </select>}</>
 }
 export function ViewConversation({ project, canvas, active, viewId }: ViewSlotProps) {

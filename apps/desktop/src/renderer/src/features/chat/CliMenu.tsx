@@ -4,13 +4,14 @@ import type { ShellSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
 import { cliName, useSessions } from '../session/store'
 import { CliBadge } from '../session/Status'
+import { useSettings } from '../settings/store'
 
 export function CliMenu({ project, dismiss }: ShellSlotProps & { dismiss(): void }) {
   const menuId = useId()
   const providers = useSessions((s) => s.providers), selected = useSessions((s) => s.defaultCli[project.id]), error = useSessions((s) => s.errors[`default:${project.id}`])
   const providersError = useSessions((s) => s.providersError), pending = useSessions((s) => s.pending[`default:${project.id}`])
   useEffect(() => { void useSessions.getState().loadProviders() }, [])
-  const clis = providers.map(provider => provider.cli)
+  const clis = providers.filter(provider => provider.status !== 'disabled').map(provider => provider.cli)
   const availability = (cli: SessionCli) => {
     const provider = providers.find((p) => p.cli === cli)
     return { available: provider?.status === 'available', reason: provider?.reason ?? (provider?.status === 'checking' || !provider ? '正在检查 CLI…' : 'CLI 不可用') }
@@ -29,7 +30,9 @@ export function CliMenu({ project, dismiss }: ShellSlotProps & { dismiss(): void
       </button>
     })}
     <div className="menu-divider" />
-    {clis.filter((cli) => cli !== selected).map((cli) => <button className="menu-item session-cli-menu__default" key={cli} disabled={!availability(cli).available || pending} onClick={() => void useSessions.getState().setDefaultCli(project.id, cli)}>将 {cliName(cli)} 设为此 Project 默认</button>)}
+    {providers.length > 0 && clis.length === 0 && <p className="menu-item__sub">尚未启用 CLI</p>}
+    {clis.filter((cli) => cli !== selected).map((cli) => <button className="menu-item session-cli-menu__default" key={cli} disabled={!availability(cli).available || pending} onClick={() => void useSessions.getState().setDefaultCli(project.id, cli)}>将 {cliName(cli)} 设为所有 Project 默认</button>)}
+    <button className="menu-item" onClick={() => { dismiss(); useSettings.getState().openDialog('cli') }}>CLI 设置</button>
     {(error || providersError) && <p role="alert" className="error-message">{error || providersError}</p>}
   </div>
 }

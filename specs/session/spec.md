@@ -385,7 +385,7 @@ FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../too
 | `send`、`answer`、`replyWithText`、`stop`、`retry`、`rename`、`setModel`、`setReasoningEffort` | input / History 操作；答案使用 Adapter `InputResponse` 原生选项结构；`setModel` 下一轮生效 |
 | `list`、`getConversation` | 摘要列表与尾部分页；`beforeSequence` 向前翻页 |
 | `getDraft` / `saveDraft` | 以 `DraftKey` 区分每 Project New Chat 与每 Session 输入草稿；关闭 / 退出 flush 等待在途草稿写入 |
-| `getProviders`、`getModels`、`getSkills`、`getDefaultCli`、`setDefaultCli` | 菜单、模型与 Project 默认值；不为草稿创建原生会话 |
+| `getProviders`、`setCliEnabled`、`getModels`、`getSkills`、`getGlobalDefaultCli`、`setGlobalDefaultCli`、`getDefaultCli`、`setDefaultCli` | 菜单、模型、应用级已添加列表及默认值（兼容旧 Project 默认）；不为草稿创建原生会话。已添加与草稿回退按 [settings spec](../settings/spec.md#cli-管理与默认-cli2026-10-25-确认)，不改变已有 Session CLI / 续聊 |
 | `updateViewing` / `opened` | 展示上下文与显式打开分开；主进程另外核实窗口 focused / visible / 非 minimized |
 | `summaryChanged` / `transcriptChanged` / `providersChanged` | 摘要（含 Project 汇总）、按 ID upsert 的对话条目、CLI 可用性快照 |
 

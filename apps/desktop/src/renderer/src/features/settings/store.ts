@@ -20,11 +20,12 @@ export function applyDocumentTheme(appearance: AppearanceState): void {
 export interface SettingsState {
   appearance: AppearanceState
   dialogOpen: boolean
+  category: 'appearance' | 'cli'
   saveFailed: boolean
   /** Reads the saved appearance; the first render waits for it so it never shows the other look. */
   load(): Promise<void>
   watchEvents(): () => void
-  openDialog(): void
+  openDialog(category?: 'appearance' | 'cli'): void
   closeDialog(): void
   setTheme(theme: ThemePreference): Promise<void>
   setGlassColor(color: GlassColor): Promise<void>
@@ -43,6 +44,7 @@ export const useSettings = create<SettingsState>((set, get) => {
   return {
     appearance: appearanceOf(),
     dialogOpen: false,
+    category: 'appearance',
     saveFailed: false,
     async load() {
       try { receive(await settingsApi().getAppearance()) } catch (error) {
@@ -57,7 +59,7 @@ export const useSettings = create<SettingsState>((set, get) => {
       ]
       return () => unsub.forEach((off) => off())
     },
-    openDialog: () => set({ dialogOpen: true, saveFailed: false }),
+    openDialog: (category = 'appearance') => set({ dialogOpen: true, category, saveFailed: false }),
     closeDialog: () => set({ dialogOpen: false }),
     async setTheme(theme) {
       if (theme !== get().appearance.theme) await save(() => settingsApi().setTheme({ theme }))

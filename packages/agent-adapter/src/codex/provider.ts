@@ -73,10 +73,12 @@ export class CodexProvider implements AgentProvider {
         const result = l.value;
         // Never retain raw authentication output, account identities, or API keys.
         const text = `${result.stdout}\n${result.stderr}`;
+        // Newer CLI versions report local API-key configuration without validating a request.
+        const apiKeyConfigured = /^\s*API key configured\b/im.test(text);
         login = result.timedOut ? failed(adapterError('timeout', 'Codex login check timed out').info)
-          : result.code === 0 && /logged in/i.test(text) ? ok({ state: 'logged_in',
-            ...(/chatgpt/i.test(text) ? { method: 'chatgpt' } : /api key/i.test(text) ? { method: 'api_key' } : {}) })
-          : /not logged in/i.test(text) ? ok({ state: 'logged_out' })
+          : /^\s*not logged in\b/im.test(text) ? ok({ state: 'logged_out' })
+          : result.code === 0 && (apiKeyConfigured || /^\s*logged in\b/im.test(text)) ? ok({ state: 'logged_in',
+            ...(apiKeyConfigured ? { method: 'api_key' } : /chatgpt/i.test(text) ? { method: 'chatgpt' } : /api key/i.test(text) ? { method: 'api_key' } : {}) })
           : failed(adapterError('provider_error', 'Codex login state could not be determined').info);
       } else login = failed(adapterError('provider_error', 'Codex login check could not run').info);
       if (options.includeModels) {

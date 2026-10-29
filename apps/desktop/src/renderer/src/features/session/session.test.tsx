@@ -9,9 +9,11 @@ import { createRendererSessionPort } from './integration'
 import { SessionHistory, historyRows, visibleHistoryRows } from './SessionHistory'
 import { Composer } from '../input/Composer'
 import { CliMenu } from '../chat/CliMenu'
+import { ViewConversationHeader } from '../project-view/ProjectView'
 import { InputRequestCard } from './Transcript'
 import { Conversation, ConversationHeader } from './Conversation'
 import { useProjectShell } from '../project/store'
+import { useSettings } from '../settings/store'
 
 const initial = useSessions.getState(), shellInitial = useProjectShell.getState()
 const project = { id: 'p', name: 'Project', canonicalPath: '/tmp/project', localPath: '/tmp/project', displayPath: '/tmp/project', createdAt: '', lastOpenedAt: '' }
@@ -25,7 +27,8 @@ beforeEach(() => {
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
   vi.stubGlobal('CSS', { escape: (value: string) => value })
   api = {
-    getTurnDiff: vi.fn(async () => { throw new Error('unused') }), list: vi.fn(async () => []), getConversation: vi.fn(async () => ({ session: summary(), items: [], hasMore: false, nextBeforeSequence: null })), create: vi.fn(async () => summary({ activity: 'running', status: 'running' })), send: vi.fn(async () => {}), answer: vi.fn(async () => {}), replyWithText: vi.fn(async () => {}), stop: vi.fn(async () => {}), retry: vi.fn(async () => {}), rename: vi.fn(async ({ title }) => summary({ title, titleSource: 'user' })), setReasoningEffort: vi.fn(async () => {}), setModel: vi.fn(async () => {}), getProviders: vi.fn(async () => providers), getSkills: vi.fn(async () => ({ skills: [], error: null })), getModels: vi.fn(async () => ({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true }, { id: 'm2', displayName: 'Model Two' }], error: null })), getDefaultCli: vi.fn(async () => 'codex' as const), setDefaultCli: vi.fn(async () => {}), getDraft: vi.fn(async () => emptyDraft()), saveDraft: vi.fn(async () => {}), updateViewing: vi.fn(async () => {}), opened: vi.fn(async () => {}), getProjectState: vi.fn(async () => ({ projectId: 'p', attention: null, counts: { running: 0, needsInput: 0 } })), stopProject: vi.fn(async () => ({ stopped: [], failed: [] })), projectClosed: vi.fn(async () => {}),
+    setCliEnabled: vi.fn(async () => providers),
+    getTurnDiff: vi.fn(async () => { throw new Error('unused') }), list: vi.fn(async () => []), getConversation: vi.fn(async () => ({ session: summary(), items: [], hasMore: false, nextBeforeSequence: null })), create: vi.fn(async () => summary({ activity: 'running', status: 'running' })), send: vi.fn(async () => {}), answer: vi.fn(async () => {}), replyWithText: vi.fn(async () => {}), stop: vi.fn(async () => {}), retry: vi.fn(async () => {}), rename: vi.fn(async ({ title }) => summary({ title, titleSource: 'user' })), setReasoningEffort: vi.fn(async () => {}), setModel: vi.fn(async () => {}), getProviders: vi.fn(async () => providers), getSkills: vi.fn(async () => ({ skills: [], error: null })), getModels: vi.fn(async () => ({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true }, { id: 'm2', displayName: 'Model Two' }], error: null })), getGlobalDefaultCli: vi.fn(async () => 'codex' as const), setGlobalDefaultCli: vi.fn(async () => {}), getDefaultCli: vi.fn(async () => 'codex' as const), setDefaultCli: vi.fn(async () => {}), getDraft: vi.fn(async () => emptyDraft()), saveDraft: vi.fn(async () => {}), updateViewing: vi.fn(async () => {}), opened: vi.fn(async () => {}), getProjectState: vi.fn(async () => ({ projectId: 'p', attention: null, counts: { running: 0, needsInput: 0 } })), stopProject: vi.fn(async () => ({ stopped: [], failed: [] })), projectClosed: vi.fn(async () => {}),
     onSummaryChanged: (listener) => { summaryEvent = listener; return () => {} }, onTranscriptChanged: (listener) => { transcriptEvent = listener; return () => {} }, onProvidersChanged: () => () => {}
   }
   Object.defineProperty(window, 'studio', { configurable: true, value: { session: api, project: { updateUiState: async ({ patch }: { patch: object }) => ({ ...defaultUiState(), ...patch }) } } as unknown as StudioApi })
@@ -34,6 +37,115 @@ beforeEach(() => {
 afterEach(async () => { cleanup(); await flushSessionDrafts(); await useProjectShell.getState().flush(); disposers.forEach((off) => off()); vi.unstubAllGlobals() })
 
 describe('Session IPC store · FR-SESSION/STATE · AC-02–05', () => {
+  it('repairs an already-loaded null CLI draft after availability recovers, including View drafts', async () => {
+    const viewKey = { projectId: 'p', kind: 'new_chat', viewId: 'overview' } as const
+    useSessions.setState({ projects: { p: { loaded: true, loading: false, error: null } }, defaultCli: { p: null }, drafts: {
+      [draftId(key)]: { ...emptyDraft(), text: 'Keep this' }, [draftId(viewKey)]: { ...emptyDraft(), contextItems: [{ type: 'view', viewId: 'overview' }] },
+      'p:session:s': { ...emptyDraft(), text: 'Do not change' }
+    } })
+    await useSessions.getState().loadProviders(true)
+    expect(api.getProviders).toHaveBeenCalledWith({ force: true })
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ cli: 'codex', text: 'Keep this' })
+    expect(useSessions.getState().drafts[draftId(viewKey)]).toMatchObject({ cli: 'codex', contextItems: [{ type: 'view', viewId: 'overview' }] })
+    expect(useSessions.getState().drafts['p:session:s']?.cli).toBeNull()
+  })
+
+  it('hides disabled CLI in both new-chat and View selectors', async () => {
+    const available = providers.map(item => item.cli === 'codex' ? { ...item, status: 'disabled' as const } : item)
+    vi.mocked(api.getProviders).mockResolvedValue(available)
+    useSessions.setState({ providers: available })
+    const menu = render(<CliMenu project={project} active canvas={{ mode: 'draft' }} dismiss={() => {}} />)
+    expect(screen.queryByRole('button', { name: 'Codex' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Claude Code' })).toBeTruthy()
+    menu.unmount()
+    render(<ViewConversationHeader project={project} active viewId="overview" canvas={{ mode: 'view', viewId: 'overview', conversation: { kind: 'draft' } }} />)
+    expect(screen.queryByRole('option', { name: 'codex' })).toBeNull()
+    expect(screen.getByRole('option', { name: 'claude-code' })).toBeTruthy()
+  })
+
+  it('repairs disabled new/View drafts but leaves existing Session drafts unchanged', async () => {
+    const draft = { cli: 'codex' as const, model: 'old', reasoningEffort: 'high', text: 'keep', contextItems: [{ type: 'file' as const, path: 'a.ts' }] }
+    useSessions.setState({ projects: { p: { loaded: true, loading: false, error: null } }, defaultCli: { p: 'codex' }, drafts: {
+      'p:draft': draft, 'p:view:overview:draft': draft, 'p:session:s': draft
+    } })
+    useSessions.getState().acceptProviders(providers.map(item => item.cli === 'codex' ? { ...item, status: 'disabled' } : item))
+    for (const id of ['p:draft', 'p:view:overview:draft']) expect(useSessions.getState().drafts[id]).toEqual({ ...draft, cli: 'claude-code', model: null, reasoningEffort: null })
+    expect(useSessions.getState().drafts['p:session:s']).toEqual(draft)
+    useSessions.getState().acceptProviders(providers.map(item => ({ ...item, status: 'disabled' })))
+    expect(useSessions.getState().defaultCli.p).toBeNull()
+    expect(useSessions.getState().drafts['p:draft']).toMatchObject({ cli: null, text: 'keep' })
+  })
+
+  it('ignores a late default recovery after the user chooses another global default', async () => {
+    let resolve!: (cli: 'codex') => void
+    vi.mocked(api.getDefaultCli).mockImplementationOnce(() => new Promise(done => { resolve = done }))
+    useSessions.setState({ projects: { p: { loaded: true, loading: false, error: null } }, defaultCli: { p: null }, drafts: { 'p:draft': emptyDraft() } })
+    const load = useSessions.getState().loadProviders()
+    await waitFor(() => expect(resolve).toBeDefined())
+    useSessions.getState().applyGlobalDefault('claude-code')
+    resolve('codex'); await load
+    expect(useSessions.getState().defaultCli.p).toBe('claude-code')
+    expect(useSessions.getState().drafts['p:draft']?.cli).toBe('claude-code')
+  })
+
+  it('retries merged recovery when a disable event arrives during a default read', async () => {
+    let event!: (value: ProviderSummary[]) => void, resolve!: (cli: 'codex') => void
+    vi.spyOn(api, 'onProvidersChanged').mockImplementation(listener => { event = listener; return () => {} })
+    vi.mocked(api.getDefaultCli).mockResolvedValue('claude-code').mockImplementationOnce(() => new Promise(done => { resolve = done }))
+    disposers.push(watchSessionEvents())
+    useSessions.setState({ projects: { p: { loaded: true, loading: false, error: null } }, defaultCli: { p: null }, drafts: { 'p:draft': emptyDraft() } })
+    event(providers)
+    await waitFor(() => expect(resolve).toBeDefined())
+    event(providers.map(item => item.cli === 'codex' ? { ...item, status: 'disabled' } : item))
+    resolve('codex')
+    await waitFor(() => expect(useSessions.getState().drafts['p:draft']?.cli).toBe('claude-code'))
+    expect(api.getDefaultCli).toHaveBeenCalledTimes(2)
+  })
+
+  it('ignores a stale provider response after a disable event', async () => {
+    let resolve!: (value: ProviderSummary[]) => void
+    vi.mocked(api.getProviders).mockImplementationOnce(() => new Promise(done => { resolve = done }))
+    const load = useSessions.getState().loadProviders()
+    const disabled = providers.map(item => ({ ...item, status: 'disabled' as const }))
+    useSessions.getState().acceptProviders(disabled)
+    resolve(providers); await load
+    expect(useSessions.getState().providers).toEqual(disabled)
+  })
+
+  it('normalizes a late draft and explicit startDraft choice after CLI is disabled', async () => {
+    let resolve!: (draft: ComposerDraft) => void
+    vi.mocked(api.getDraft).mockImplementationOnce(() => new Promise(done => { resolve = done }))
+    const loading = useSessions.getState().loadDraft(key)
+    useSessions.getState().acceptProviders(providers.map(item => ({ ...item, status: 'disabled' })))
+    resolve({ ...emptyDraft(), cli: 'codex', model: 'old', reasoningEffort: 'high', text: 'keep' })
+    await loading
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ cli: null, model: null, reasoningEffort: null, text: 'keep' })
+    useSessions.getState().startDraft('p', 'codex')
+    await waitFor(() => expect(useSessions.getState().drafts[draftId(key)]?.cli).toBeNull())
+  })
+
+  it('does not overwrite a CLI or text chosen while a null draft is resolving its default', async () => {
+    let resolve!: (cli: 'codex') => void
+    vi.mocked(api.getDefaultCli).mockImplementationOnce(() => new Promise(done => { resolve = done }))
+    const load = useSessions.getState().loadDraft(key)
+    await waitFor(() => expect(resolve).toBeDefined())
+    useSessions.getState().updateDraft(key, { cli: 'claude-code', text: 'new text' })
+    resolve('codex'); await load
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ cli: 'claude-code', text: 'new text' })
+  })
+
+  it('opens CLI settings directly from an unavailable Composer without clearing text', async () => {
+    const unavailable = [{ ...providers[0]!, status: 'not_logged_in' as const, reason: '请先登录 Codex CLI' }]
+    vi.mocked(api.getProviders).mockResolvedValue(unavailable)
+    useSessions.setState({ providers: unavailable, drafts: { [draftId(key)]: { ...emptyDraft(), cli: 'codex', text: 'Keep this' } } })
+    render(<Composer draftKey={key} active />)
+    fireEvent.click(screen.getByRole('button', { name: 'CLI 设置' }))
+    expect(useSettings.getState()).toMatchObject({ dialogOpen: true, category: 'cli' })
+    expect(useSessions.getState().drafts[draftId(key)]?.text).toBe('Keep this')
+    expect(screen.getByRole('button', { name: 'Send' }).hasAttribute('disabled')).toBe(true)
+    useSettings.getState().closeDialog()
+  })
+
   it('keeps running input and reports a rejected native send', async () => {
     const runningKey = { projectId: 'p', kind: 'session' as const, sessionId: 's' }
     useSessions.setState({ summaries: { s: summary({ activity: 'running', status: 'running' }) } })
@@ -185,6 +297,24 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Reasoning Effort' }))
     fireEvent.click(screen.getByRole('button', { name: value }))
   }
+  it('places effort before the model, lists only native tiers, and offers a separate default reset', async () => {
+    nativeEffortCatalog()
+    await mount({ text: 'Keep draft' })
+    const effort = screen.getByRole('button', { name: 'Reasoning Effort' })
+    expect(effort.parentElement?.nextElementSibling?.contains(screen.getByRole('button', { name: 'Model Selector' }))).toBe(true)
+    fireEvent.click(effort)
+    expect(screen.queryByRole('button', { name: '默认' })).toBeNull()
+    expect(document.querySelector('.composer__effort-option')?.textContent).toBe('high')
+    fireEvent.click(screen.getByRole('button', { name: 'max' }))
+    fireEvent.click(effort)
+    const options = [...document.querySelectorAll('.composer__effort-option')]
+    expect(options.every(option => option.querySelector('.composer__effort-check'))).toBe(true)
+    expect(document.querySelectorAll('.composer__effort-check svg')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'max' }).getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(screen.getByRole('button', { name: '恢复 CLI 默认' }))
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ text: 'Keep draft', reasoningEffort: null })
+    expect(document.querySelector('[data-effort-transition]')).toBeNull()
+  })
   it('celebrates only a successful changed Session effort; pending, repeated and rejected selections stay quiet', async () => {
     nativeEffortCatalog()
     const sessionKey = { projectId: 'p', kind: 'session' as const, sessionId: 's' }

@@ -54,6 +54,112 @@ function harness(codex = new FakeProvider('codex'), buildViewContext?: SessionSe
 }
 
 describe('Session state, persistence and native continuity · AC-02–05 / FR-STATE-001–007', () => {
+  it('checks only enabled providers and persists an empty enabled list across restart', async () => {
+    const environment = vi.fn(async () => ({ env: {} }))
+    const h = harness(undefined, undefined, { environment })
+    const codex = vi.spyOn(h.codex, 'checkAvailability'), claude = vi.spyOn(h.claude, 'checkAvailability')
+    h.service.setCliEnabled('claude-code', false)
+    expect((await h.service.getProviders(true)).map(item => item.status)).toEqual(['available', 'disabled'])
+    expect(codex).toHaveBeenCalledTimes(1); expect(claude).not.toHaveBeenCalled()
+    h.service.setCliEnabled('codex', false)
+    environment.mockClear()
+    expect((await h.service.getProviders(true)).every(item => item.status === 'disabled')).toBe(true)
+    expect(environment).not.toHaveBeenCalled()
+    expect(await h.service.getGlobalDefaultCli()).toBeNull()
+    await h.restart()
+    expect((await h.service.getProviders()).every(item => item.status === 'disabled')).toBe(true)
+    await expect(h.create()).rejects.toThrow('未启用')
+    await expect(h.service.setGlobalDefaultCli('codex')).rejects.toThrow()
+    h.service.setCliEnabled('codex', true)
+    expect((await h.service.getProviders(true))[0]?.status).toBe('available')
+    expect(await h.service.getGlobalDefaultCli()).toBe('codex')
+    expect(claude).not.toHaveBeenCalled()
+  })
+
+  it('does not enable newly registered CLI when an enabled preference already exists', async () => {
+    const h = harness()
+    h.store.setPreference('enabled_clis', JSON.stringify(['codex']))
+    await h.restart()
+    const probe = vi.spyOn(h.claude, 'checkAvailability')
+    expect((await h.service.getProviders()).find(item => item.cli === 'claude-code')?.status).toBe('disabled')
+    expect(probe).not.toHaveBeenCalled()
+  })
+
+  it('falls back globally when disabling the default without stopping running or historical Sessions', async () => {
+    const h = harness()
+    await h.service.setGlobalDefaultCli('codex')
+    const session = await h.create(); await tick()
+    const draft = { cli: 'codex' as const, model: 'old', reasoningEffort: 'high', text: 'keep', contextItems: [{ type: 'file' as const, path: 'a.ts' }] }
+    const keys = [{ kind: 'new_chat', projectId: 'p' }, { kind: 'new_chat', projectId: 'p2', viewId: 'overview' }] as const
+    for (const key of keys) h.service.saveDraft(key, draft)
+    h.service.setCliEnabled('codex', false)
+    expect(h.summary(session.id).activity).toBe('running')
+    for (const key of keys) expect(await h.service.getDraft(key)).toEqual({ ...draft, cli: 'claude-code', model: null, reasoningEffort: null })
+    expect(await h.service.getDefaultCli('p2')).toBe('claude-code')
+    const runtime = h.native().controller
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'completed' })
+    h.service.send(session.id, { text: 'continue disabled CLI session' }); await tick()
+    expect(h.summary(session.id)).toMatchObject({ cli: 'codex', activity: 'running' })
+    expect(h.service.list('p')).toHaveLength(1)
+    h.service.setCliEnabled('claude-code', false)
+    expect(await h.service.getDraft(keys[0])).toMatchObject({ cli: null, text: 'keep', contextItems: draft.contextItems })
+  })
+
+  it('discards an in-flight detection after disable and re-enable', async () => {
+    const h = harness()
+    const gate = deferred<Awaited<ReturnType<typeof h.codex.checkAvailability>>>()
+    const original = await h.codex.checkAvailability({ environment: { env: {} } })
+    const probe = vi.spyOn(h.codex, 'checkAvailability').mockImplementationOnce(() => gate.promise)
+    const loading = h.service.getProviders(true)
+    await vi.waitFor(() => expect(probe).toHaveBeenCalled())
+    h.service.setCliEnabled('codex', false)
+    h.service.setCliEnabled('codex', true)
+    gate.resolve(original)
+    expect((await loading).find(item => item.cli === 'codex')?.status).toBe('checking')
+    expect((await h.service.getProviders(true)).find(item => item.cli === 'codex')?.status).toBe('available')
+  })
+
+  it('keeps saved and in-memory enablement unchanged on persistence failure', async () => {
+    const h = harness()
+    await h.service.getProviders()
+    vi.spyOn(h.store, 'setPreference').mockImplementationOnce(() => { throw new Error('disk full') })
+    expect(() => h.service.setCliEnabled('codex', false)).toThrow('disk full')
+    expect((await h.service.getProviders())[0]?.status).toBe('available')
+    expect(JSON.parse(h.store.getPreference('enabled_clis')!)).toContain('codex')
+  })
+
+  it('recovers null CLI drafts in multiple Projects and Views without changing their contents', async () => {
+    const h = harness()
+    for (const key of [{ projectId: 'p', kind: 'new_chat' }, { projectId: 'p2', kind: 'new_chat', viewId: 'overview' }] as const) {
+      const draft = { cli: null, model: null, text: 'Keep text', contextItems: [{ type: 'file' as const, path: 'a.ts' }] }
+      h.service.saveDraft(key, draft)
+      expect(await h.service.getDraft(key)).toEqual({ ...draft, cli: 'codex' })
+      expect(h.store.getDraft(key)?.cli).toBe('codex')
+    }
+    expect(h.codex.sessions).toHaveLength(0)
+  })
+
+  it('persists one global default across old/new Projects and restart without changing explicit drafts or Sessions', async () => {
+    const h = harness()
+    await h.service.getDefaultCli('p')
+    await h.service.getDefaultCli('p2')
+    const session = await h.create(); await tick()
+    const key = { projectId: 'p2', kind: 'new_chat' } as const
+    h.service.saveDraft(key, { cli: 'codex', model: null, text: 'explicit', contextItems: [] })
+    await h.service.setGlobalDefaultCli('claude-code')
+    expect(await h.service.getDefaultCli('p')).toBe('claude-code')
+    expect(await h.service.getDefaultCli('p2')).toBe('claude-code')
+    expect((await h.service.getDraft(key)).cli).toBe('codex')
+    expect(h.summary(session.id).cli).toBe('codex')
+    await h.restart()
+    expect(await h.service.getGlobalDefaultCli()).toBe('claude-code')
+    expect(await h.service.getDefaultCli('p2')).toBe('claude-code')
+    h.codex.availability.login = { status: 'ok', value: { state: 'logged_out' } }
+    await h.service.getProviders(true)
+    await expect(h.service.setGlobalDefaultCli('codex')).rejects.toThrow()
+    expect(await h.service.getGlobalDefaultCli()).toBe('claude-code')
+  })
+
   it('awaits steering, retains failures and newer drafts, and records accepted input on its original turn after completion', async () => {
     const gate = deferred<void>()
     const h = harness(new FakeProvider('codex', { capabilities: { inputWhileRunning: 'steer' }, behavior: { onSteer: () => gate.promise } }))
@@ -591,7 +697,7 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     expect(h.codex.sessions).toHaveLength(1)
   })
 
-  it('snapshots initial defaults even while discovery is unavailable, independent of later app preference', async () => {
+  it('uses the application default across Projects after discovery becomes available', async () => {
     const h = harness()
     h.codex.availability.login = { status: 'ok', value: { state: 'logged_out' } }
     h.claude.availability.login = { status: 'ok', value: { state: 'logged_out' } }
@@ -602,7 +708,7 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     await h.service.setDefaultCli('p2', 'claude-code')
     h.codex.availability.login = { status: 'ok', value: { state: 'logged_in' } }
     await h.service.getProviders(true)
-    expect(await h.service.getDefaultCli('p')).toBe('codex')
+    expect(await h.service.getDefaultCli('p')).toBe('claude-code')
   })
 
   it('keeps streaming secret echoes out of checkpoints and protects a late composer save after answer', async () => {

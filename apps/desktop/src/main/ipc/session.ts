@@ -181,9 +181,24 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
       parse: raw => { const value = record(raw, ['sessionId', 'model']); return { sessionId: id(value.sessionId, 'sessionId'), model: model(value.model) } },
       handle: ({ sessionId, model }) => service.setModel(sessionId, model)
     },
-    getProviders: { parse: noInput, handle: () => service.getProviders() },
+    getProviders: { parse: raw => {
+      if (raw === undefined) return undefined
+      const value = record(raw, ['force'])
+      if (typeof value.force !== 'boolean') throw new IpcValidationError('Invalid force')
+      return { force: value.force }
+    }, handle: request => service.getProviders(request?.force) },
+    setCliEnabled: {
+      parse: raw => {
+        const value = record(raw, ['cli', 'enabled'])
+        if (typeof value.enabled !== 'boolean') throw new IpcValidationError('Invalid enabled')
+        return { cli: cli(value.cli), enabled: value.enabled }
+      },
+      handle: ({ cli, enabled }) => service.setCliEnabled(cli, enabled)
+    },
     getSkills: { parse: raw => { const value = record(raw, ['cli', 'projectId']); return { cli: cli(value.cli), projectId: id(value.projectId, 'projectId') } }, handle: ({ cli, projectId }) => service.getSkills(cli, projectId) },
     getModels: { parse: raw => { const value = record(raw, ['cli', 'projectId']); return { cli: cli(value.cli), projectId: id(value.projectId, 'projectId') } }, handle: ({ cli, projectId }) => service.getModels(cli, projectId) },
+    getGlobalDefaultCli: { parse: noInput, handle: () => service.getGlobalDefaultCli() },
+    setGlobalDefaultCli: { parse: raw => { const value = record(raw, ['cli']); return { cli: cli(value.cli) } }, handle: ({ cli }) => service.setGlobalDefaultCli(cli) },
     getDefaultCli: { parse: projectRef, handle: ({ projectId }) => service.getDefaultCli(projectId) },
     setDefaultCli: { parse: raw => { const value = record(raw, ['projectId', 'cli']); return { projectId: id(value.projectId, 'projectId'), cli: cli(value.cli) } }, handle: ({ projectId, cli }) => service.setDefaultCli(projectId, cli) },
     getDraft: { parse: draftKey, handle: key => service.getDraft(key) },

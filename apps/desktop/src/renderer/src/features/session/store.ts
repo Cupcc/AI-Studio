@@ -31,6 +31,7 @@ interface SessionStore {
   projectStates: Record<string, SessionProjectState>
   providers: ProviderSummary[]
   providersError: string | null
+  acceptProviders(providers: ProviderSummary[]): void
   defaultCli: Record<string, SessionCli | null>
   conversations: Record<string, ConversationState>
   drafts: Record<string, ComposerDraft>
@@ -40,7 +41,8 @@ interface SessionStore {
   errors: Record<string, string | null>
   latestRequests: Record<string, number>
   loadProject(projectId: string): Promise<void>
-  loadProviders(): Promise<void>
+  loadProviders(force?: boolean): Promise<void>
+  applyGlobalDefault(cli: SessionCli): void
   loadConversation(sessionId: string, older?: boolean): Promise<void>
   loadDraft(key: DraftKey): Promise<void>
   updateDraft(key: DraftKey, patch: Partial<ComposerDraft>): void
@@ -64,6 +66,7 @@ const draftWrites = new Set<Promise<unknown>>()
 const summaryVersions = new Map<string, number>()
 const transcriptVersions = new Map<string, Map<string, number>>()
 let revision = 0
+let defaultRevision = 0
 function acceptSummary(summary: SessionSummary): void {
   summaryVersions.set(summary.id, ++revision)
   useSessions.setState((s) => ({ summaries: { ...s.summaries, [summary.id]: summary }, projectStates: { ...s.projectStates, [summary.projectId]: projectSessionState(summary.projectId, [...Object.values(s.summaries).filter((v) => v.id !== summary.id), summary]) } }))
@@ -103,6 +106,44 @@ async function operation(key: string, work: () => Promise<void>): Promise<boolea
   finally { useSessions.setState((s) => ({ pending: { ...s.pending, [key]: false } })) }
 }
 
+function fillProjectDrafts(projectId: string, cli: SessionCli): void {
+  const state = useSessions.getState()
+  for (const [id, draft] of Object.entries(state.drafts)) {
+    if (draft.cli) continue
+    const viewPrefix = `${projectId}:view:`
+    const key: DraftKey | null = id === `${projectId}:draft` ? { projectId, kind: 'new_chat' }
+      : id.startsWith(viewPrefix) && id.endsWith(':draft') ? { projectId, kind: 'new_chat', viewId: id.slice(viewPrefix.length, -6) } : null
+    if (key) state.updateDraft(key, { cli })
+  }
+}
+async function fillMissingClis(): Promise<void> {
+  if (!useSessions.getState().providers.some(provider => provider.status === 'available')) return
+  await Promise.all(Object.keys(useSessions.getState().projects).map(projectId => once(`default-recovery:${projectId}`, async () => {
+    while (useSessions.getState().providers.some(item => item.status === 'available')) {
+      const startedAt = defaultRevision, providersAt = providerRevision
+      const cli = await sessionApi().getDefaultCli({ projectId })
+      if (!useSessions.getState().projects[projectId]?.loaded) return
+      // An event can merge into this in-flight recovery. Re-read once for the latest
+      // provider generation instead of dropping the event along with the stale result.
+      if (providersAt !== providerRevision) continue
+      if (!cli || defaultRevision !== startedAt) return
+      useSessions.setState(s => ({ defaultCli: { ...s.defaultCli, [projectId]: cli } }))
+      fillProjectDrafts(projectId, cli)
+      return
+    }
+  })))
+}
+
+let providerRevision = 0
+
+function withoutDisabledCli(draft: ComposerDraft, projectId: string): ComposerDraft {
+  const state = useSessions.getState()
+  if (!draft.cli || !state.providers.some(item => item.cli === draft.cli && item.status === 'disabled')) return draft
+  const available = state.providers.filter(item => item.status === 'available')
+  const cli = available.find(item => item.cli === state.defaultCli[projectId])?.cli ?? available[0]?.cli ?? null
+  return { ...draft, cli, model: null, reasoningEffort: null }
+}
+
 export const useSessions = create<SessionStore>()((set, get) => ({
   summaries: {}, projects: {}, projectStates: {}, providers: [], providersError: null, defaultCli: {}, conversations: {}, drafts: {}, draftLoading: {}, catalogs: {}, pending: {}, errors: {}, latestRequests: {},
   async loadProject(projectId) {
@@ -110,22 +151,52 @@ export const useSessions = create<SessionStore>()((set, get) => ({
     return once(`project:${projectId}`, async () => {
       set((s) => ({ projects: { ...s.projects, [projectId]: { loaded: false, loading: true, error: null } } }))
       const startedAt = revision
+      const defaultStartedAt = defaultRevision
       try {
         const [sessions, state, cli] = await Promise.all([sessionApi().list({ projectId }), sessionApi().getProjectState({ projectId }), sessionApi().getDefaultCli({ projectId })])
         set((s) => {
           const summaries = { ...s.summaries }
           for (const summary of sessions) if ((summaryVersions.get(summary.id) ?? 0) <= startedAt) summaries[summary.id] = summary
-          return { summaries, projectStates: { ...s.projectStates, [projectId]: Object.values(summaries).some((v) => (summaryVersions.get(v.id) ?? 0) > startedAt && v.projectId === projectId) ? projectSessionState(projectId, Object.values(summaries)) : state }, defaultCli: { ...s.defaultCli, [projectId]: cli }, projects: { ...s.projects, [projectId]: { loaded: true, loading: false, error: null } } }
+          return { summaries, projectStates: { ...s.projectStates, [projectId]: Object.values(summaries).some((v) => (summaryVersions.get(v.id) ?? 0) > startedAt && v.projectId === projectId) ? projectSessionState(projectId, Object.values(summaries)) : state }, defaultCli: defaultStartedAt === defaultRevision ? { ...s.defaultCli, [projectId]: cli } : s.defaultCli, projects: { ...s.projects, [projectId]: { loaded: true, loading: false, error: null } } }
         })
         await Promise.all([get().loadProviders(), get().loadDraft({ projectId, kind: 'new_chat' })])
       } catch (error) { set((s) => ({ projects: { ...s.projects, [projectId]: { loaded: false, loading: false, error: String(error) } } })) }
     })
   },
-  async loadProviders() {
+  async loadProviders(force = false) {
     return once('providers', async () => {
-      try { set({ providers: await sessionApi().getProviders(), providersError: null }) }
+      const startedAt = providerRevision
+      try {
+        const providers = await sessionApi().getProviders(force ? { force: true } : undefined)
+        if (startedAt === providerRevision) get().acceptProviders(providers)
+        await fillMissingClis()
+      }
       catch (error) { set({ providersError: String(error) }) }
     })
+  },
+  acceptProviders(providers) {
+    providerRevision++
+    defaultRevision++
+    const disabled = new Set(providers.filter(item => item.status === 'disabled').map(item => item.cli))
+    const available = providers.filter(item => item.status === 'available')
+    const fallback = available[0]?.cli ?? null
+    set(s => ({ providers, providersError: null, defaultCli: Object.fromEntries(Object.entries(s.defaultCli).map(([id, cli]) =>
+      [id, available.some(item => item.cli === cli) ? cli : fallback])) }))
+    // Only new-chat/View drafts are repaired. Session drafts keep their native CLI.
+    for (const [id, draft] of Object.entries(get().drafts)) {
+      if (!draft.cli || !disabled.has(draft.cli)) continue
+      for (const projectId of Object.keys(get().projects)) {
+        const prefix = `${projectId}:view:`
+        const key: DraftKey | null = id === `${projectId}:draft` ? { kind: 'new_chat', projectId }
+          : id.startsWith(prefix) && id.endsWith(':draft') ? { kind: 'new_chat', projectId, viewId: id.slice(prefix.length, -6) } : null
+        if (key) get().updateDraft(key, { cli: get().defaultCli[projectId] ?? fallback, model: null, reasoningEffort: null })
+      }
+    }
+  },
+  applyGlobalDefault(cli) {
+    defaultRevision++
+    set(s => ({ defaultCli: Object.fromEntries([...new Set([...Object.keys(s.defaultCli), ...Object.keys(s.projects)])].map(id => [id, cli])) }))
+    for (const projectId of Object.keys(get().defaultCli)) fillProjectDrafts(projectId, cli)
   },
   async loadConversation(sessionId, older = false) {
     const existing = get().conversations[sessionId] ?? emptyConversation()
@@ -148,9 +219,19 @@ export const useSessions = create<SessionStore>()((set, get) => ({
     if (get().drafts[id]) return
     return once(`draft:${id}`, async () => {
       set((s) => ({ draftLoading: { ...s.draftLoading, [id]: true } }))
+      const defaultStartedAt = defaultRevision
       try {
         const saved = await sessionApi().getDraft(key)
-        set((s) => ({ drafts: { ...s.drafts, [id]: s.drafts[id] ?? { ...saved, cli: saved.cli ?? (key.kind === 'new_chat' ? s.defaultCli[key.projectId] ?? null : s.summaries[key.sessionId]?.cli ?? null) } } }))
+        const resolved = key.kind === 'new_chat' && !saved.cli ? await sessionApi().getDefaultCli({ projectId: key.projectId }) : saved.cli
+        set((s) => {
+          const draft = s.drafts[id] ?? { ...saved, cli: saved.cli ?? (key.kind === 'new_chat' ? s.defaultCli[key.projectId] ?? null : s.summaries[key.sessionId]?.cli ?? null) }
+          return { drafts: { ...s.drafts, [id]: key.kind === 'new_chat' ? withoutDisabledCli(draft, key.projectId) : draft } }
+        })
+        if (key.kind === 'new_chat' && resolved && defaultStartedAt === defaultRevision && !get().providers.some(item => item.cli === resolved && item.status === 'disabled')) {
+          if (!get().drafts[id]?.cli) set(s => ({ drafts: { ...s.drafts, [id]: { ...s.drafts[id]!, cli: resolved } } }))
+        }
+        // Loading is read-only in the renderer: another conversation may be active
+        // by now. Main getDraft owns persisted fallback repair; user edits save normally.
       } catch (error) { set((s) => ({ errors: { ...s.errors, [id]: `输入加载失败：${String(error)}` } })) }
       finally { set((s) => ({ draftLoading: { ...s.draftLoading, [id]: false } })) }
     })
@@ -164,11 +245,15 @@ export const useSessions = create<SessionStore>()((set, get) => ({
     void get().loadDraft({ projectId, kind: 'new_chat' }).then(() => {
       const key: DraftKey = { projectId, kind: 'new_chat' }, current = get().drafts[draftId(key)] ?? emptyDraft()
       const selected = cli ?? current.cli ?? get().defaultCli[projectId] ?? get().providers.find((p) => p.status === 'available')?.cli ?? null
-      get().updateDraft(key, { cli: selected, ...(selected !== current.cli ? { model: null, reasoningEffort: null } : {}) })
+      get().updateDraft(key, withoutDisabledCli({ ...current, cli: selected, ...(selected !== current.cli ? { model: null, reasoningEffort: null } : {}) }, projectId))
     })
   },
   async setDefaultCli(projectId, cli) {
-    await operation(`default:${projectId}`, async () => { await sessionApi().setDefaultCli({ projectId, cli }); set((s) => ({ defaultCli: { ...s.defaultCli, [projectId]: cli } })) })
+    await operation(`default:${projectId}`, async () => {
+      await sessionApi().setDefaultCli({ projectId, cli })
+      set((s) => ({ defaultCli: Object.fromEntries([...new Set([...Object.keys(s.defaultCli), projectId])].map(id => [id, cli as SessionCli])) }))
+      get().applyGlobalDefault(cli)
+    })
   },
   async loadModels(projectId, cli) {
     const id = `${projectId}:${cli}`
@@ -244,7 +329,7 @@ export function watchSessionEvents(): () => void {
       transcriptVersions.set(sessionId, versions)
       useSessions.setState((s) => ({ conversations: { ...s.conversations, [sessionId]: { ...(s.conversations[sessionId] ?? emptyConversation()), items: upsertTranscript(s.conversations[sessionId]?.items ?? [], items) } } }))
     }),
-    api.onProvidersChanged((providers) => useSessions.setState({ providers, providersError: null }))
+    api.onProvidersChanged((providers) => { useSessions.getState().acceptProviders(providers); void fillMissingClis().catch(() => {}) })
   ]
   return () => unsubscribe.forEach((off) => off())
 }

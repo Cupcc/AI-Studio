@@ -93,6 +93,8 @@ export class SessionService implements MainSessionPort {
   private readonly volatileDrafts = new Map<string, ComposerDraft>()
   private readonly catalogs = new Map<string, ModelCatalogResult>()
   private providerSummaries: ProviderSummary[] = []
+  private enabledClis = new Set<SessionCli>()
+  private readonly providerRevisions = new Map<SessionCli, number>()
   private availability?: Promise<ProviderSummary[]>
   private readonly background = new Set<Promise<unknown>>()
   private readonly discoveryAbort = new AbortController()
@@ -112,6 +114,11 @@ export class SessionService implements MainSessionPort {
       if (this.providers.has(provider.id as SessionCli)) throw new Error(`Duplicate provider: ${provider.id}`)
       this.providers.set(provider.id as SessionCli, provider)
     }
+    const savedEnabled = options.store.getPreference('enabled_clis')
+    let enabled: unknown
+    try { enabled = savedEnabled === null ? null : JSON.parse(savedEnabled) } catch { enabled = null }
+    this.enabledClis = new Set(Array.isArray(enabled) ? enabled.filter((cli): cli is SessionCli => this.providers.has(cli)) : this.providers.keys())
+    if (!Array.isArray(enabled)) options.store.setPreference('enabled_clis', JSON.stringify([...this.enabledClis]))
     options.store.finalizeInterruptedHistory()
     for (const summary of options.store.summaries()) {
       const entry: Entry = { summary: { ...summary, stopping: false }, sequence: options.store.nextSequence(summary.id), generation: 0, secrets: new Set() }
@@ -202,6 +209,7 @@ export class SessionService implements MainSessionPort {
   async create(request: CreateSessionRequest): Promise<SessionSummary> {
     this.validateMessage(request)
     this.project(request.projectId)
+    if (!this.enabledClis.has(request.cli)) throw new Error('CLI 未启用，请在 CLI 设置中启用')
     const available = (await this.getProviders()).find(p => p.cli === request.cli)
     if (available?.status !== 'available') throw new Error(available?.reason ?? 'CLI 不可用')
     // Files are re-validated before any state exists, so a refusal leaves no Session behind; ensureCanSubmit below runs after this await.
@@ -209,6 +217,7 @@ export class SessionService implements MainSessionPort {
     const files = paths.length ? await this.resolveFileReferences(request.projectId, paths) : undefined
     if (files) this.project(request.projectId)
     await this.resolveSkills(request.projectId, request.cli, request)
+    if (!this.enabledClis.has(request.cli)) throw new Error('CLI 未启用，请在 CLI 设置中启用')
     const attach = !!request.originViewId && request.viewContextAttached === true && VIEW_CATALOG.some(view => view.id === request.originViewId)
     const viewContext = attach ? this.options.buildViewContext?.(request.projectId, request.originViewId!) : undefined
     const at = this.now()
@@ -907,14 +916,43 @@ export class SessionService implements MainSessionPort {
     if (failed.length) throw new AggregateError(failed.map(result => result.reason), `${failed.length} 个 Runtime 释放失败`)
   }
 
+  private currentProviders(): ProviderSummary[] {
+    return [...this.providers].map(([cli, provider]) => {
+      const saved = this.providerSummaries.find(item => item.cli === cli)
+      if (this.enabledClis.has(cli) && saved) return structuredClone(saved)
+      return { cli, displayName: provider.displayName, status: this.enabledClis.has(cli) ? 'checking' : 'disabled',
+        reason: null, version: null, compatibility: null, checkedAt: 0, capabilities: provider.capabilities }
+    })
+  }
+
+  setCliEnabled(cli: SessionCli, enabled: boolean): ProviderSummary[] {
+    this.provider(cli)
+    if (this.quitting || this.disposed) throw new Error('应用正在退出')
+    if (this.enabledClis.has(cli) === enabled) return this.currentProviders()
+    const next = new Set(this.enabledClis)
+    if (enabled) next.add(cli); else next.delete(cli)
+    // Commit before mutating memory or broadcasting; a failed write leaves the old state intact.
+    this.options.store.setPreference('enabled_clis', JSON.stringify([...next]))
+    this.enabledClis = next
+    this.providerRevisions.set(cli, (this.providerRevisions.get(cli) ?? 0) + 1)
+    this.providerSummaries = this.providerSummaries.filter(item => item.cli !== cli)
+    const summaries = this.currentProviders()
+    this.options.providersChanged?.(summaries)
+    return summaries
+  }
+
   async getProviders(force = false): Promise<ProviderSummary[]> {
     if (this.availability) return this.availability
-    if (!force && this.providerSummaries.length && this.now() - this.availabilityAt < 30_000) return structuredClone(this.providerSummaries)
+    const current = this.currentProviders()
+    if (!current.some(item => item.status !== 'disabled')) return current
+    if (!force && !current.some(item => item.status === 'checking') && this.now() - this.availabilityAt < 30_000) return current
+    const revisions = new Map(this.providerRevisions)
     this.availability = (async () => {
       const environment = await this.options.environment()
       if (this.quitting || this.disposed) return structuredClone(this.providerSummaries)
-      const summaries = await Promise.all([...this.providers.keys()].map(async cli => {
+      const summaries = await Promise.all([...this.providers.keys()].map(async (cli): Promise<ProviderSummary | null> => {
         const provider = this.provider(cli)
+        if (!this.enabledClis.has(cli) || revisions.get(cli) !== this.providerRevisions.get(cli)) return null
         try {
           const report = await provider.checkAvailability({ environment, includeModels: false, signal: this.discoveryAbort.signal })
           return {
@@ -927,10 +965,11 @@ export class SessionService implements MainSessionPort {
           return { cli, displayName: provider.displayName, status: 'error', reason: toErrorInfo(error).message, version: null, compatibility: null, checkedAt: this.now(), capabilities: provider.capabilities } satisfies ProviderSummary
         }
       }))
-      this.providerSummaries = summaries
+      this.providerSummaries = summaries.filter((item): item is ProviderSummary => !!item && this.enabledClis.has(item.cli) && revisions.get(item.cli) === this.providerRevisions.get(item.cli))
       this.availabilityAt = this.now()
-      if (!this.disposed) this.options.providersChanged?.(structuredClone(summaries))
-      return structuredClone(summaries)
+      const result = this.currentProviders()
+      if (!this.disposed) this.options.providersChanged?.(result)
+      return result
     })()
     try { return await this.availability } finally { this.availability = undefined }
   }
@@ -992,21 +1031,20 @@ export class SessionService implements MainSessionPort {
 
   async getDefaultCli(projectId: string): Promise<SessionCli | null> {
     this.project(projectId)
+    const available = await this.getProviders()
+    const usable = (cli: string | null) => this.enabledClis.has(cli as SessionCli) && available.some(item => item.cli === cli && item.status === 'available')
+    const global = this.options.store.getPreference('global_default_cli') ?? this.options.store.getPreference('last_set_default_cli')
+    if (usable(global)) return global as SessionCli
     const saved = this.options.projects.getDefaultCli(projectId)
-    if (this.providers.has(saved as SessionCli)) return saved as SessionCli
-    const preferenceKey = `initial_default_cli:${projectId}`
-    let inherited = this.options.store.getPreference(preferenceKey)
-    if (inherited === null) {
-      inherited = this.options.store.getPreference('last_set_default_cli') ?? ''
-      this.options.store.setPreference(preferenceKey, inherited)
-    }
-    const resolved = this.providers.has(inherited as SessionCli) ? inherited as SessionCli
-      : (await this.getProviders()).find(provider => provider.status === 'available')?.cli ?? null
-    if (this.quitting || this.disposed) return null
-    const changedWhileChecking = this.options.projects.getDefaultCli(projectId)
-    if (this.providers.has(changedWhileChecking as SessionCli)) return changedWhileChecking as SessionCli
-    if (resolved) this.options.projects.setDefaultCli(projectId, resolved)
-    return resolved
+    if (!global && usable(saved)) return saved as SessionCli
+    return available.find(item => this.enabledClis.has(item.cli) && item.status === 'available')?.cli ?? null
+  }
+
+  async getGlobalDefaultCli(): Promise<SessionCli | null> {
+    const available = await this.getProviders()
+    const saved = this.options.store.getPreference('global_default_cli') ?? this.options.store.getPreference('last_set_default_cli')
+    return available.find(item => item.cli === saved && this.enabledClis.has(item.cli) && item.status === 'available')?.cli
+      ?? available.find(item => this.enabledClis.has(item.cli) && item.status === 'available')?.cli ?? null
   }
 
   /** Called by the Project creation handler before it returns a new Project. */
@@ -1020,9 +1058,20 @@ export class SessionService implements MainSessionPort {
     this.project(projectId)
     const provider = (await this.getProviders()).find(provider => provider.cli === cli)
     if (this.quitting || this.disposed) throw new Error('应用正在退出')
-    if (provider?.status !== 'available') throw new Error(provider?.reason ?? 'CLI 不可用')
+    if (!this.enabledClis.has(cli) || provider?.status !== 'available') throw new Error(provider?.reason ?? 'CLI 不可用')
     this.options.store.transaction(() => {
       this.options.projects.setDefaultCli(projectId, cli)
+      this.options.store.setPreference('global_default_cli', cli)
+      this.options.store.setPreference('last_set_default_cli', cli)
+    })
+  }
+
+  async setGlobalDefaultCli(cli: SessionCli): Promise<void> {
+    const provider = (await this.getProviders()).find(provider => provider.cli === cli)
+    if (this.quitting || this.disposed) throw new Error('应用正在退出')
+    if (!this.enabledClis.has(cli) || provider?.status !== 'available') throw new Error(provider?.reason ?? 'CLI 不可用')
+    this.options.store.transaction(() => {
+      this.options.store.setPreference('global_default_cli', cli)
       this.options.store.setPreference('last_set_default_cli', cli)
     })
   }
@@ -1038,7 +1087,16 @@ export class SessionService implements MainSessionPort {
   async getDraft(key: DraftKey): Promise<ComposerDraft> {
     const entry = this.validateDraftKey(key)
     this.closed.delete(key.projectId)
-    const saved = (entry && this.volatileDrafts.get(entry.summary.id)) || this.options.store.getDraft(key)
+    let saved = (entry && this.volatileDrafts.get(entry.summary.id)) || this.options.store.getDraft(key)
+    if (saved && !entry && (!saved.cli || !this.enabledClis.has(saved.cli))) {
+      const cli = await this.getDefaultCli(key.projectId)
+      // A user edit may have arrived while CLI discovery was in flight.
+      saved = this.options.store.getDraft(key) ?? saved
+      if (!saved.cli || !this.enabledClis.has(saved.cli)) {
+        saved = { ...saved, cli, ...(saved.cli && saved.cli !== cli ? { model: null, reasoningEffort: null } : {}) }
+        this.options.store.saveDraft(key, saved)
+      }
+    }
     return saved ?? { cli: entry?.summary.cli ?? await this.getDefaultCli(key.projectId), model: entry?.summary.model ?? null, ...(entry?.summary.reasoningEffort !== undefined ? { reasoningEffort: entry.summary.reasoningEffort } : {}), text: '', contextItems: key.kind === 'new_chat' && key.viewId ? [{ type: 'view', viewId: key.viewId }] : [] }
   }
 

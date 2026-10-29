@@ -19,6 +19,7 @@
 | Conversation 修订 | 第 2.2、6、7 节依据交互原型 v02 的 2026-10-10 确认补充，并于 2026-10-11 随 [v02 对齐任务](../../tasks/archive/T20261010-prototype-v02-alignment/task.md)签收 |
 | v06 UI 采用 | 用户 2026-10-23 要求对齐 v06；2026-10-24 纠正为五格静态思考指示、实际选中 max / ultra 时输入框一次切换反馈；第 6、7 节采用底部 Composer，范围见 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)。本次 diff 待审阅，实施 / 验证与人工复验分别见[本轮任务](../../tasks/archive/T20261023-v06-ui-effort/task.md) |
 | 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 1 节 |
+| CLI 设置分组 | 2026-10-25 用户明确上方已添加、下方未添加、上方点击选默认；第 12 节按 [CLI 管理规格](../../specs/settings/spec.md#cli-管理与默认-cli2026-10-25-确认)更新，diff 待审阅 |
 | 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
 | 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
 | 工具开发准备 | Browser 首轮边界、文件引用贯通与终端合并关闭确认按 DEC-14（2026-10-13 确认）；本次仅同步说明，不修改原型或实现应用，diff 待审阅 |
@@ -193,7 +194,9 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 | 组件 | 尺寸 | 结构 | 状态 |
 |---|---|---|---|
 | 设置对话框 | 640×520，不超出窗口 | 顶部标题“设置”与关闭按钮；左列分类（宽 160），右列内容 | — |
-| 分类项 | 高 32 | 图标 + 名称；V1 只有“外观” | Default / Hover / Selected / Focus |
+| 分类项 | 高 32 | 图标 + 名称；“外观”与“CLI” | Default / Hover / Selected / Focus |
+| CLI 标题栏 | 右侧内容区固定顶部 | 左“CLI”、右“重新检测”；下方独立滚动，不随列表增长位移 | Default / Checking / Disabled / Focus |
+| CLI 分组行 | 行高至少 44 | 上方已添加：默认勾占位 + 名称 + 状态 + 移除；点击可用行设默认。下方未添加：名称 + 添加；无重复默认组 | Default / Selected / Unavailable / Focus；行为由 settings spec 负责 |
 | 模式 | 分段控件，每段高 26 | 跟随系统 / 浅色 / 深色；位于主题之上，打开对话框时焦点在当前项 | Default / Hover / Selected / Focus |
 | 主题选项卡 | 两张并排，等宽 | 毛玻璃（标“默认”）/ 纯色；缩略示意随当前模式与背景颜色变化；选中项带勾选与 2px 描边 | Default / Hover / Selected / Focus |
 | 毛玻璃背景 | 色块直径 28，名称在下 | 仅当主题为毛玻璃时显示；单选组：极光、薄荷、晚霞、海雾、无（SET-Q5）；选中项外加 2 底色边 + 2 文字色描边 | Default / Hover / Selected / Focus |

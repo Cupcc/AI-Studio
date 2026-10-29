@@ -7,7 +7,7 @@ import './settings.css'
 /** Bottom-left entry of the navigation, as in ChatGPT Desktop (FR-SET-001; SET-Q1). */
 export function SettingsEntry() {
   const open = useSettings((state) => state.openDialog)
-  return <button className="navigation__view settings-entry" onClick={open}><Icon name="settings" /><span>{T.entry}</span></button>
+  return <button className="navigation__view settings-entry" onClick={() => open()}><Icon name="settings" /><span>{T.entry}</span></button>
 }
 
 /**

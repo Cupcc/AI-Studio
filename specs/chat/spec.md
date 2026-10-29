@@ -13,27 +13,29 @@
 
 ## 1. 未决问题
 
+2026-10-24 用户反馈补充：默认 CLI 改为应用级偏好；选择一次后所有 Project 的新对话均可直接使用，不要求逐个 Project 重复设置。不可用时，Composer 必须提供可见的 CLI 切换与设置入口。
+
 2026-10-09 参考应用复核见 [Session research](../../tasks/archive/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
 
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
 | C-Q1 | 未发送草稿在离开、再次点击 New Chat、切换 Project、重启应用时如何处理？ | 每个 Project 保留一份草稿（文本、CLI、模型）；离开不丢弃；再次 New Chat 回到该草稿；切换 Tab 返回恢复（D-15）；由 Session 独立持久化至 session_drafts，重启后恢复。依据：FR-CHAT-001 只规定不创建 Session；D-15、FR-PROJ-003 要求恢复离开时的状态 | 否 | |
 | C-Q2 | 在已有草稿时从 CLI 菜单选择另一个 CLI：新建空草稿，还是改变当前草稿的 CLI？ | 改变当前草稿的 CLI，保留已输入文本，模型与思考强度重置为新 CLI 的原生默认。草稿未创建 Session，CLI 未锁定（FR-CHAT-003） | 否 | |
-| C-Q3 | Project 的 Default CLI 不可用（或两个都不可用）时，New Chat 主按钮如何表现？ | 主按钮仍可点击并打开草稿；草稿内显示不可用原因与安装 / 登录指引（Shell Spec 第 10 节），发送不可用；用户可在 ▾ 菜单中选其他可用 CLI。不自动改写 Project Default CLI | 否 | |
-| C-Q4 | “检测到的第一个可用 CLI”按什么顺序？新 Project 沿用的默认值是创建时的快照，还是始终跟随最近设置？ | 顺序按菜单顺序 Codex CLI → Claude Code（UX 第 6 节 New Chat 第 2 项）；新 Project 在创建时写入快照，之后其他 Project 改默认不影响它（“沿用”指新 Project 的初始值） | 否 | |
 | C-Q6 | 客户端生成名称的方法；Rename 如何对齐 CLI？ | 原生名称优先；尚无名称时可用首条消息首行作为本地显示。按原则 24 核对原生重命名接口并接入，不再以“未验证”决定永久不回写。现有本地重命名与原生名称同步差异列为技术缺口 | 否；技术能力核对 | |
 
 ### 1.1 已确认
 
 | 编号 | 问题 | 回答与依据 |
 |---|---|---|
+| C-Q3 | 默认 CLI 不可用或没有可用 CLI 时如何恢复？ | 已由 [CLI 管理规格](../settings/spec.md#cli-管理与默认-cli2026-10-25-确认)确定回退与就近“CLI 设置”入口；用户 2026-10-25 确认；本轮 diff 待审阅 |
+| C-Q4 | 默认顺序与跨 Project 生效？ | 固定 Provider 顺序，默认 / 已添加列表应用级共享；具体已添加、默认与草稿边界由 CLI 管理规格负责（2026-10-25 确认） |
 | C-Q5 | 未验证版本是否禁用？ | 依 [Adapter A-Q1](../agent-adapter/spec.md#1-未决问题) 显示验证状态；不因未验证而禁用，只有有证据的会话集成不兼容才禁用并说明原因。依据 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>)（2026-10-11 确认；diff 待审阅）；兼容验证仍待补齐 |
 
 ## 2. 职责与边界
 
 - 负责：
   - New Chat 草稿：进入、保留、离开，以及首条消息时交给 session 模块创建 Session（FR-CHAT-001；D-01）。
-  - CLI 选择：New Chat 分裂按钮、CLI 菜单、“设为此 Project 默认”、Default CLI 规则、不可用 CLI 的禁用与原因（FR-CHAT-002；UX 第 6 节 New Chat 第 1～5 项；D-11）。
+  - CLI 选择：New Chat 分裂按钮、CLI 菜单、应用级默认 CLI、不可用 CLI 的禁用与原因（FR-CHAT-002；UX 第 6 节 New Chat 第 1～5 项；D-11）。
   - CLI 锁定的产品规则（FR-CHAT-003）。
   - Session 命名方法：原生名称优先，否则客户端生成（FR-NAV-003 命名部分）。
   - 从 Project View 草稿创建 Session 时记录 `origin_view_id`（FR-VIEW-007 最后一段）。
@@ -50,7 +52,7 @@
 
 依据：FR-CHAT-001；UX 第 6 节 New Chat 第 5 项；D-01；01 第 8 节原则 17。
 
-1. 点击 New Chat 主按钮：当前 Project 的 Main Canvas 切换到 Conversation Mode 的新对话草稿，使用该 Project 的 Default CLI，输入框获得焦点，可立即输入。
+1. 点击 New Chat 主按钮：当前 Project 的 Main Canvas 切换到 Conversation Mode 的新对话草稿，使用应用级 Default CLI，输入框获得焦点，可立即输入。
 2. 草稿不是 Session：不写入 Session 记录，不出现在 Session History，不调用 CLI 创建原生会话，也不为读取模型目录而创建原生会话（见第 5.2 节注意事项）。
 3. 草稿中发送第一条消息（规则见 input spec）：
    1. 发送前检查草稿 CLI 的可用性；已知不可用时不发送、不创建 Session，保留输入内容并显示原因（UX 第 6 节 New Chat 第 4 项；避免产生空 Session）。
@@ -67,31 +69,31 @@
 
 ### FR-CHAT-002 CLI 选择
 
-依据：FR-CHAT-002；UX 第 6 节 New Chat 第 1～4 项；D-11；Shell Spec 第 4、10 节；04 第 6 节 Project `default_cli`。
+依据：FR-CHAT-002；UX 第 6 节 New Chat 第 1～4 项；D-11；Shell Spec 第 4、10 节；04 第 6 节旧 Project `default_cli`；现行应用级偏好见本节 Default CLI 规则及 DEC-24。
 
 #### New Chat 分裂按钮与 CLI 菜单
 
-1. 主区：图标 + “New Chat”，使用当前 Project 的 Default CLI（UX 第 6 节 New Chat 第 1 项）。
-2. 右区 ▾：打开 CLI 菜单，按 Codex CLI、Claude Code 顺序列出（UX 第 6 节 New Chat 第 2 项）。每项包含 CLI 名称、默认标记、“设为此 Project 默认”（Shell Spec 第 4 节）。
-3. 点击菜单中的 CLI 名称：打开使用该 CLI 的草稿，不改变 Project Default CLI。已有草稿时改变该草稿的 CLI（建议，C-Q2）。
-4. 点击“设为此 Project 默认”：把该 CLI 写入当前 Project 的 `default_cli`，同时记为应用级“最近一次设置的默认值”；不打开草稿，不影响已有 Session 和已有草稿的 CLI。
+1. 主区：图标 + “New Chat”，使用应用级 Default CLI（UX 第 6 节 New Chat 第 1 项）。
+2. 右区 ▾：打开 CLI 菜单，只列出已添加项，按 Codex CLI、Claude Code 固定顺序（是否纳入当前发布仍遵循 DEC-19）；每项包含名称、默认标记，可将可用项设为所有 Project 默认。底部提供“CLI 设置”，无已添加项时显示空状态（2026-10-25 确认）。
+3. 点击菜单中的 CLI 名称：打开使用该 CLI 的草稿，不改变应用级默认 CLI。已有草稿时改变该草稿的 CLI（建议，C-Q2）。
+4. 点击“设为所有 Project 默认”：把该 CLI 写入应用级默认偏好；不打开草稿，不影响已有 Session 和已有草稿的 CLI。旧版本的 Project 默认值保留为兼容回退值。
 5. 导航折叠时顶栏保留的 New Chat 按钮（D-14）行为与主区相同；按 navigation NAV-Q8 的本轮建议使用单个按钮与 Default CLI，需要切换 CLI 时展开导航使用分裂按钮（待确认）。
 
 #### Default CLI 规则
 
 | 情形 | Default CLI | 依据 |
 |---|---|---|
-| 用户对该 Project 执行过“设为此 Project 默认” | 该值 | UX 第 6 节 New Chat 第 2 项 |
-| 新 Project（首次打开，尚无记录），应用级“最近一次设置的默认值”存在 | 该值；在 Project 创建时写入该 Project（快照，建议，C-Q4） | UX 第 6 节 New Chat 第 3 项 |
-| 首次使用，尚无“最近一次设置的默认值” | 检测到的第一个可用 CLI，按菜单顺序 Codex CLI → Claude Code（顺序为建议，C-Q4）；不写入应用级“最近一次设置的默认值” | UX 第 6 节 New Chat 第 3 项 |
-| 两个 CLI 均不可用 | 暂为空；New Chat 仍打开草稿并显示不可用说明（C-Q3）；之后检测到可用 CLI 时按上一行规则补齐 | Shell Spec 第 10 节 CLI 不可用 |
+| 应用级默认值存在且已启用、检测可用 | 该值，所有 Project 共用 | [CLI 管理规格](../settings/spec.md#cli-管理与默认-cli2026-10-25-确认)，2026-10-25 确认 |
+| 没有应用级偏好，仅有旧版本 Project 默认值且已启用、可用 | 兼容读取旧值；新设置均写入应用级偏好 | 兼容已有数据 |
+| 未设置，或保存的默认值不可用 / 未启用 | 第一个已启用且可用的 CLI，按固定菜单顺序；保留保存的默认偏好，恢复可用后重新采用 | CLI 管理规格 |
+| 没有已启用且可用的 CLI | 暂为空；New Chat 仍打开草稿，Composer 提供“CLI 设置”；之后检测到可用项补齐 | CLI 管理规格 |
 
 #### 可用性与不可用 CLI
 
 1. 每个 CLI 的可用性分为：可用、未安装、未登录（UX 第 6 节 New Chat 第 4 项；agent-adapter task 验收“可用性检测”）。已安装但版本不在 Adapter 支持范围内的处理见 C-Q5。
-2. 菜单中不可用的 CLI 整项禁用（包括“设为此 Project 默认”），并显示原因（“未安装”“未登录”）（Shell Spec 第 4 节 CLI 菜单；第 11 节 Disabled）。
-3. 草稿的 CLI 不可用时（例如 Default CLI 后来退出登录）：草稿内显示“CLI 不可用”说明与安装 / 登录指引（Shell Spec 第 10 节），发送不可用；用户可通过 ▾ 菜单换用其他可用 CLI（C-Q3）。
-4. 可用性检测时机（技术方案，待实现确认）：应用启动时检测一次；打开 CLI 菜单、显示草稿时若缓存超过短时限则重新检测；检测进行中菜单项显示“检测中”，不阻塞打开草稿。
+2. 菜单中不可用的 CLI 整项禁用（包括设置默认），并显示原因（“未安装”“未登录”）（Shell Spec 第 4 节 CLI 菜单；第 11 节 Disabled）。
+3. 草稿的 CLI 不可用时（例如后来退出登录）：Composer 显示原因，并提供“使用 <可用 CLI>”与“CLI 设置”入口；发送不可用。移除已添加 CLI 时，草稿回退和内容保留按 [CLI 管理规格](../settings/spec.md#cli-管理与默认-cli2026-10-25-确认)，不改变已有 Session。
+4. 可用性检测只针对已添加 CLI：启动时检测，打开菜单 / 草稿时按 30 秒缓存按需更新，设置右上“重新检测”强制更新；未添加项不启动检查。组内未检测项显示“待检测”，检测过程不阻塞打开草稿。
 5. 登录状态“可用”不保证调用成功（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节末条）；调用失败按 Error 处理。
 
 ### FR-CHAT-003 Session CLI 锁定
@@ -126,8 +128,8 @@
 
 | 数据 | 字段 | 说明 |
 |---|---|---|
-| Project | `default_cli` | 04 第 6 节；可为空（两个 CLI 均不可用且从未设置时） |
-| 应用偏好 | `last_set_default_cli` | 提案：最近一次通过“设为此 Project 默认”设置的值，供新 Project 继承（UX 第 6 节 New Chat 第 3 项） |
+| Project（旧数据兼容） | `default_cli` | 仅在无应用级偏好时兼容读取；不再作为逐 Project 设置，见下方 §5.1 |
+| 应用偏好 | `global_default_cli`（兼容读取 `last_set_default_cli`） | 所有 Project 的新对话默认 CLI；设置对话框和 CLI 菜单均可修改（2026-10-24 用户反馈） |
 | 草稿（每 Project 一份，另有每个 Project View 一份由 Project View task 定义） | `cli`、`text`、`model`（可空）、`contextItems`；创建参数另带 `originViewId` | 2026-10-09 实现：独立 `session_drafts` 表，`DraftKey = {projectId, kind: 'new_chat'}`。Project UI 只保存当前是否显示草稿；同一事实不重复存储 |
 | CLI 可用性快照 | 每个 CLI：`state`（`available` / `not_installed` / `not_logged_in` / 其他见 C-Q5）、`reason`、`checked_at` | 运行时缓存，不持久化 |
 
@@ -140,9 +142,11 @@
 | 接口 | 说明 | 消费方 |
 |---|---|---|
 | Renderer `startDraft(projectId, cli?)` | 打开或回到草稿；未指定 CLI 则保留草稿 CLI 或使用 Default CLI | 导航 New Chat 主按钮、顶栏 New Chat、CLI 菜单 |
-| IPC `setDefaultCli({projectId, cli})` | 写入 `projects.default_cli` 与 `session_preferences.last_set_default_cli` | CLI 菜单 |
-| MainSessionPort `initializeProject(projectId)` | Project 创建回复前快照默认 CLI；发现失败不阻止打开目录 | Project 模块（project-shell） |
+| IPC `getGlobalDefaultCli()` / `setGlobalDefaultCli({cli})` | 读取 / 写入应用级默认 CLI | 设置对话框、CLI 菜单 |
+| IPC `setDefaultCli({projectId, cli})` | 兼容旧入口，同时更新应用级默认 CLI | CLI 菜单 |
+| MainSessionPort `initializeProject(projectId)` | Project 创建回复前解析有效默认 CLI，不再冻结项目级初值；发现失败不阻止打开目录 | Project 模块（project-shell） |
 | IPC `getProviders()` / `providersChanged` | 版本、登录、兼容性与原因分别来自 Adapter，菜单展示可用性快照 | 导航、草稿、input |
+| IPC `setCliEnabled({cli, enabled})` | 持久化应用级 `enabled_clis` 并广播状态；未启用用 `disabled` 表示，不调用该 Provider 检测；启用后清除旧状态为 `checking`（待检测） | CLI 设置；行为与首次兼容由 settings spec 负责 |
 | Renderer `sendComposer(DraftKey)` → IPC `create` | 首条消息与草稿参数提交；返回新摘要后进入 Session，未接受时保留输入 | input |
 
 ### 5.2 需要 CLI Adapter 提供
