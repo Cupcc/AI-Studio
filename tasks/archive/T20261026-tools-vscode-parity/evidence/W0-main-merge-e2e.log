@@ -1,0 +1,166 @@
+$ playwright test
+
+Running 66 tests using 1 worker
+
+(node:1669) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/alignment.spec.ts:139:5 › glass appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (6.2s)
+  ✓   2 e2e/alignment.spec.ts:171:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (5.6s)
+  ✓   3 e2e/alignment.spec.ts:186:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (4.3s)
+  ✓   4 e2e/alignment.spec.ts:199:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (5.9s)
+  ✓   5 e2e/alignment.spec.ts:139:5 › solid appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (2.3s)
+  ✓   6 e2e/alignment.spec.ts:171:5 › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (3.2s)
+  ✓   7 e2e/alignment.spec.ts:186:5 › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (1.7s)
+  ✓   8 e2e/alignment.spec.ts:199:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.6s)
+  ✓   9 e2e/alignment.spec.ts:210:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (5.3s)
+  ✓  10 e2e/alignment.spec.ts:228:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (5.1s)
+  ✓  11 e2e/alignment.spec.ts:239:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (6.4s)
+  ✓  12 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (73ms)
+  ✓  13 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (63ms)
+  ✘  14 e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer (5ms)
+(node:2369) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 e2e/app.spec.ts:124:5 › typed preload API works and main validates input (122ms)
+  ✓  16 e2e/app.spec.ts:145:5 › new windows and foreign navigation are denied (535ms)
+  ✓  17 e2e/app.spec.ts:157:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (3.1s)
+  ✓  18 e2e/claude-effort.spec.ts:28:5 › FR-INPUT-001: a default Claude draft offers exactly the levels its catalog reports, and the choice follows the Session (2.1s)
+  ✓  19 e2e/cli-default.spec.ts:23:5 › available CLI works in a second Project without selection; global preference survives restart (1.9s)
+  ✓  20 e2e/cli-default.spec.ts:42:5 › unavailable CLI links directly to settings; recheck restores sending without clearing draft (911ms)
+  ✓  21 e2e/cli-default.spec.ts:63:5 › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors (1.7s)
+  ✓  22 e2e/cli-default.spec.ts:95:5 › CLI header action stays fixed with a long list in both themes and colour modes (2.2s)
+  ✓  23 e2e/composer.spec.ts:52:5 › five static effort bars; max / ultra ignite only on selection, across four appearances and reduced motion (18.0s)
+  ✘  24 e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette (31.4s)
+(node:3149) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  25 e2e/composer.spec.ts:147:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback (4.2s)
+  ✓  26 e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (2.2s)
+  ✓  27 e2e/diff.spec.ts:38:5 › FR-TOOL-002: staged, unstaged, untracked, renamed, deleted, mode-only and binary changes against HEAD, refreshed live (5.6s)
+  ✓  28 e2e/diff.spec.ts:97:5 › FR-TOOL-002 item 3: a clean repository says so, a directory that is not Git never says "no changes" and gets no repository (2.1s)
+  ✓  29 e2e/diff.spec.ts:118:5 › FR-TOOL-002 item 3: an unborn HEAD explains the missing baseline, lists the files as new and never claims "no changes" (1.8s)
+  ✓  30 e2e/diff.spec.ts:134:5 › FR-TOOL-002: a Project inside a repository shows only its own changes and says where it is (1.7s)
+  ✓  31 e2e/files.spec.ts:45:5 › FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, special names and failure states (4.7s)
+  ✓  32 e2e/files.spec.ts:130:5 › FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through the simulated Provider, keep input on failure (5.0s)
+  ✓  33 e2e/project-view.spec.ts:21:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (5.4s)
+  ✓  34 e2e/project-view.spec.ts:63:5 › removed View label sends without creating helpers, and each View has an independent draft (1.9s)
+  ✓  35 e2e/project.spec.ts:54:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (8.7s)
+  ✓  36 e2e/project.spec.ts:122:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (870ms)
+  ✓  37 e2e/project.spec.ts:141:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (811ms)
+  ✓  38 e2e/runtime-tools.spec.ts:97:5 › FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolation, final empty state and Project confirmation (6.6s)
+  ✓  39 e2e/runtime-tools.spec.ts:192:5 › FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, mailto choice, menu, shared persistent data (5.6s)
+  ✓  40 e2e/runtime-tools.spec.ts:271:5 › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit (4.8s)
+  ✓  41 e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (3.9s)
+  ✓  42 e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser (2.6s)
+  ✓  43 e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (2.0s)
+  ✓  44 e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (3.8s)
+  ✓  45 e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (3.5s)
+  ✓  46 e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (4.1s)
+  ✓  47 e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (3.4s)
+  ✓  48 e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (1.4s)
+  ✓  49 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (3.4s)
+  ✓  50 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (2.9s)
+  ✓  51 e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (4.6s)
+  ✓  52 e2e/settings.spec.ts:73:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode (2.1s)
+  ✓  53 e2e/settings.spec.ts:91:5 › FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one dialog; ×, Esc and outside close it (1.8s)
+  ✓  54 e2e/settings.spec.ts:118:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart (2.1s)
+[settings] muted text contrast on light glass {
+  aurora: 5.140186901442031,
+  mint: 5.219425605839913,
+  sunset: 5.209379228926235,
+  haze: 5.283658795679195
+}
+  ✓  55 e2e/settings.spec.ts:175:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material (14.8s)
+  ✓  56 e2e/settings.spec.ts:204:5 › FR-SET-002 · AC-08: "Reduce transparency" shows solid with a note, and glass returns when it is off (1.0s)
+[settings] muted text contrast in dark {
+  'glass-极光': 7.116832967624057,
+  'glass-无': 4.780845517969554,
+  solid: 6.05631572140189
+}
+  ✓  57 e2e/settings.spec.ts:219:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist (5.0s)
+  ✓  58 e2e/turn-diff.spec.ts:37:5 › saved native patch survives working-tree edits and restart; toolbar explicitly returns to project scope (1.9s)
+  ✓  59 e2e/turn-diff.spec.ts:59:5 › unknown and explicit empty records remain distinct and do not replace a selected older turn (2.3s)
+  ✓  60 e2e/turn-diff.spec.ts:76:5 › failed and interrupted turns keep their saved native records and actual outcomes (1.5s)
+  ✓  61 e2e/vscode-parity.spec.ts:104:5 › FR-TOOL-001 / DEC-25: explorer context menu, inline new / rename, clipboard, drag, Trash, Git colours and multi-select (4.0s)
+  ✓  62 e2e/vscode-parity.spec.ts:179:5 › FR-TOOL-001 / FR-TOOL-005: ⌘P Quick Open with :line, Search with options, results open in Files, find in folder (6.3s)
+  ✓  63 e2e/vscode-parity.spec.ts:221:5 › FR-TOOL-002 / DEC-25: Diff stays read-only with tree view, inline toggle, change navigation and open in Files (2.3s)
+  ✓  64 e2e/vscode-parity.spec.ts:244:5 › FR-TOOL-004 / DEC-25: ⌘-click links to Browser and Files, find, ⌘K clear, rename and open a Terminal in a folder (5.1s)
+  ✓  65 e2e/vscode-parity.spec.ts:300:5 › FR-TOOL-003 step 3: popups open as tabs, tabs switch and close, favorites and history suggest, site permission prompt (4.6s)
+  ✓  66 e2e/vscode-parity.spec.ts:353:5 › FR-TOOL-004 step 3: ⌘\ splits the Terminal side by side, panes keep their own shells and output (3.5s)
+
+
+  1) e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer ────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+    @@ -22,7 +22,9 @@
+          "settings",
+          "browser",
+          "terminal",
+          "files",
+          "diff",
+    +     "menu",
+    +     "search",
+        ],
+      }
+
+      107 |     }
+      108 |   })
+    > 109 |   expect(probe).toEqual({
+          |                 ^
+      110 |     inlineScriptRan: false,
+      111 |     blockedDirective: 'script-src-elem',
+      112 |     require: 'undefined',
+        at ~/Projects/AI Stduio/apps/desktop/e2e/app.spec.ts:109:17
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/app-renderer-has-no-Node-js-require-or-raw-ipcRenderer/error-context.md
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/app-renderer-has-no-Node-js-require-or-raw-ipcRenderer/error-context.md
+
+  2) e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette 
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.project-workspace:not([hidden])').locator('.composer__effort-control .composer__control-panel').getByRole('button', { name: '恢复 CLI 默认', exact: true })
+        - locator resolved to <button type="button" class="menu-item composer__effort-reset">恢复 CLI 默认</button>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+        - element is visible, enabled and stable
+        - scrolling into view if needed
+        - element is not visible
+      - retrying click action
+        - waiting for element to be visible, enabled and stable
+        - element is not visible
+      - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is not visible
+        - retrying click action
+          - waiting 100ms
+        58 × waiting for element to be visible, enabled and stable
+           - element is not visible
+         - retrying click action
+           - waiting 500ms
+
+
+      140 |     await effort().click(); await page.mouse.move(0, 0)
+      141 |     expect(await measure()).toEqual(before)
+    > 142 |     await panel().getByRole('button', { name: '恢复 CLI 默认', exact: true }).click()
+          |                                                                           ^
+      143 |     await expect(effort()).toHaveAttribute('aria-description', '思考强度 · 默认')
+      144 |   }
+      145 | })
+        at ~/Projects/AI Stduio/apps/desktop/e2e/composer.spec.ts:142:75
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/composer-effort-precedes-m-c1f76-nd-uses-a-quiet-Max-palette/error-context.md
+
+  2 failed
+    e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer ─────────────────────
+    e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette 
+  64 passed (4.5m)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in ~/Projects/AI Stduio/apps/
+  │ desktop

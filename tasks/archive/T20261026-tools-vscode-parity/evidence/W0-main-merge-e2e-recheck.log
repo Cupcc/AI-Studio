@@ -1,0 +1,10 @@
+$ playwright test app.spec.ts composer.spec.ts --grep 'renderer has no|effort precedes' --trace retain-on-failure
+
+Running 2 tests using 1 worker
+
+(node:6945) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer (119ms)
+  ✓  2 e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette (1.8s)
+
+  2 passed (3.8s)
