@@ -1,0 +1,75 @@
+$ node scripts/packaged-smoke.mjs
+{
+  "schema": 1,
+  "ok": true,
+  "app": {
+    "version": "1.0.0",
+    "isPackaged": true,
+    "platform": "darwin",
+    "arch": "arm64",
+    "electron": "44.4.5",
+    "node": "24.21.0"
+  },
+  "launchEnv": {
+    "pathEntryCount": 4,
+    "codexOnLaunchPath": false,
+    "claudeOnLaunchPath": false
+  },
+  "sqlite": {
+    "ok": true,
+    "driver": "node:sqlite",
+    "dbInsideUserData": true,
+    "firstRunApplied": 4,
+    "secondRunApplied": 0,
+    "readBack": true,
+    "sqliteVersion": "3.53.4"
+  },
+  "shellEnv": {
+    "ok": true,
+    "source": "login-shell",
+    "shell": "/bin/zsh",
+    "durationMs": 542,
+    "pathEntryCount": 21
+  },
+  "pty": {
+    "shell": "/bin/zsh",
+    "ok": true,
+    "receivedMarker": true,
+    "exitCode": 0,
+    "durationMs": 95
+  },
+  "terminalScreen": {
+    "ok": true,
+    "serializedMarker": true,
+    "emulatorStateVersion": 1,
+    "xtermVersion": "6.0.0"
+  },
+  "executables": {
+    "codex": {
+      "found": true,
+      "path": "/Users/Chris/.local/bin/codex",
+      "version": "0.164.0"
+    },
+    "claude": {
+      "found": true,
+      "path": "/Users/Chris/.local/bin/claude",
+      "version": "2.1.311"
+    },
+    "git": {
+      "found": true,
+      "path": "/usr/bin/git",
+      "version": "2.39.2"
+    }
+  },
+  "renderer": {
+    "origin": "app://studio",
+    "topBarRendered": true,
+    "nodeGlobalsAbsent": true,
+    "preloadApiWorks": true,
+    "ok": true
+  }
+}
+User data (isolated): /var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/ai-studio-packaged-smoke-7Ehcll
+
+Report: /Users/Chris/Projects/AI Stduio.worktrees/claude-adaptation/.runtime/desktop/packaged-smoke.json
+Result: PASS

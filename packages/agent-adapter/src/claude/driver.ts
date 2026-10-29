@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Options, SDKMessage, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
+import type { EffortLevel, ModelInfo as SDKModelInfo, Options, SDKMessage, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import { deferred, withTimeout } from '../core/async.js';
 import { AsyncQueue } from '../core/async-queue.js';
 import { defaultProcessLister, identityOf, waitForExit, type ProcessInfo } from '../core/process-probe.js';
@@ -39,6 +39,8 @@ interface TurnProcesses {
   queuedAfterInterrupt?: boolean;
 }
 const processKey = (p: ProcessInfo) => `${p.pid}@${p.startedAt}`;
+/** Used only when the model is absent from the native catalog; the CLI accepts any string without error. */
+const SDK_EFFORT_LEVELS: readonly string[] = ['low', 'medium', 'high', 'xhigh', 'max'];
 
 export class ClaudeDriver implements SessionDriver {
   private readonly timeouts;
@@ -47,6 +49,10 @@ export class ClaudeDriver implements SessionDriver {
   private nativeId?: string;
   private model: string | undefined;
   private modelDirty = false;
+  /** `undefined`: never selected; `null`: explicit reset to the model default. */
+  private effort: string | null | undefined;
+  private effortDirty = false;
+  private catalog: SDKModelInfo[] = [];
   private closed = false;
   private disposal?: Promise<void>;
   private readonly processes = new Map<string, TurnProcesses>();
@@ -72,7 +78,7 @@ export class ClaudeDriver implements SessionDriver {
         try {
           await this.slot.start();
           if (startupSignal.aborted) throw adapterError('timeout', 'Claude initialization was cancelled');
-          await this.state!.query!.supportedModels(); // initialize handshake; sends no user prompt
+          this.catalog = await this.state!.query!.supportedModels(); // initialize handshake; sends no user prompt
         } finally { startupSignal.removeEventListener('abort', abort); }
       }, this.timeouts.startupMs, 'Claude initialization', signal);
     } catch (error) {
@@ -132,6 +138,10 @@ export class ClaudeDriver implements SessionDriver {
     if (this.modelDirty) {
       await state.query!.setModel(this.model);
       this.modelDirty = false;
+    }
+    if (this.effortDirty) {
+      await state.query!.applyFlagSettings({ effortLevel: this.effort as EffortLevel | null });
+      this.effortDirty = false;
     }
     const tracking: TurnProcesses = { baseline: new Set(), observed: new Map(), probeFailed: false };
     try { tracking.baseline = new Set((await state.runtime!.snapshotDescendants()).map(processKey)); }
@@ -281,6 +291,8 @@ export class ClaudeDriver implements SessionDriver {
     previous.query!.close();
     if (stop.signal.aborted) throw adapterError('timeout', 'Claude recovery was cancelled');
     await this.current().query!.supportedModels();
+    // Flag settings belong to the replaced process; the replacement starts from CLI defaults.
+    if (typeof this.effort === 'string') this.effortDirty = true;
     this.sink.nativeSessionId(this.nativeId);
     return { status: 'resumed', mayHaveStoppedEarlierBackgroundCommands: true,
       verifiedExited: replaced.previous?.descendants.map(({ pid, command }) => ({ pid, command })),
@@ -300,9 +312,33 @@ export class ClaudeDriver implements SessionDriver {
     this.model = model ?? undefined;
     this.modelDirty = false;
   }
+  /** Next-turn semantics like `setModel`; `null` returns to the model's native default effort. */
+  async setReasoningEffort(effort: string | null): Promise<void> {
+    if (effort !== null) this.assertEffortOffered(effort);
+    if (this.sink.state === 'running' || this.sink.state === 'stopping') {
+      this.effort = effort;
+      this.effortDirty = true;
+      return;
+    }
+    await withTimeout(() => this.current().query!.applyFlagSettings({ effortLevel: effort as EffortLevel | null }), this.timeouts.requestMs, 'Claude reasoning effort change');
+    this.effort = effort;
+    this.effortDirty = false;
+  }
+  /** The CLI acknowledges unknown levels without applying them, so the native catalog is checked here. */
+  private assertEffortOffered(effort: string): void {
+    const wanted = this.model ?? 'default';
+    const row = this.catalog.find((model) => model.value === wanted || model.resolvedModel === wanted);
+    if (row && !row.supportsEffort) throw adapterError('unsupported', `Claude model ${wanted} does not support reasoning effort`);
+    const offered = row ? row.supportedEffortLevels : SDK_EFFORT_LEVELS;
+    if (offered && !offered.includes(effort as EffortLevel)) throw adapterError('invalid_argument', `Claude model ${wanted} does not offer reasoning effort ${effort}`);
+  }
   async listModels(): Promise<ModelInfo[]> {
     const models = await withTimeout(() => this.current().query!.supportedModels(), this.timeouts.requestMs, 'Claude model catalog');
-    return models.map((model) => ({ id: model.value, displayName: model.displayName, description: model.description }));
+    this.catalog = models;
+    return models.map((model) => ({ id: model.value, displayName: model.displayName, description: model.description,
+      // `default` is the CLI's own selection; the app resolves effort levels through it while no model is chosen.
+      ...(model.value === 'default' ? { isDefault: true } : {}),
+      ...(model.supportsEffort && model.supportedEffortLevels?.length ? { reasoningEfforts: model.supportedEffortLevels } : {}) }));
   }
   dispose(): Promise<void> {
     if (!this.disposal) {

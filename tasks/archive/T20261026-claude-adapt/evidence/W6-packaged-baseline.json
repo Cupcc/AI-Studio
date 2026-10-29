@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-28",
+  "commit": "e85d64f420ba14c322995321a81c98112fc3c0bf",
+  "sourceDiff": [],
+  "packagedAsarSha256": "edbd9dd3ff45d6c611d0bf1fb48a544f5f4001b065d7cbfff006881e24e8ae41",
+  "fixture": "W6 isolated Project/window SQLite backup only; no session_preferences or drafts. Provider registration and enabled list initialize through production code. No tested preference seeded.",
+  "switchAtLaunch": "STUDIO_ENABLE_CLAUDE_CODE=1",
+  "compiledGate": "okeOutput ? [] : void 0;\n  const extraProviders = !electron.app.isPackaged && providers === void 0 && process.env.STUDIO_ENABLE_CLAUDE_CODE === \"1\" ? [new (await import(\"@ai-s",
+  "compiledGateReviewed": true
+}

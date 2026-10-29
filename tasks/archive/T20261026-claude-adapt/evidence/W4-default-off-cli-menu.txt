@@ -1,0 +1,31 @@
+New Chat
+CX
+
+选择 CLI 新建对话
+
+CX
+Codex CLI
+默认
+CLI 设置
+PROJECT VIEWS
+Overview
+Progress
+Architecture
+Agent Team
+Business Flow
+SESSIONS
+
+还没有对话
+
+New Chat
+设置
+CX
+新对话
+今天要在 W4 Isolated Project 中做什么？
+
+Codex CLI 会直接在 /var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w4-off-qYjvwZ/W4 Isolated Project 中执行
+
+了解项目
+排查问题
+规划改动
+GPT-6.1 Sol（默认）

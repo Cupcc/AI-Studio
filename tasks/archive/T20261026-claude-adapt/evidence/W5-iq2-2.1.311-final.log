@@ -1,0 +1,64 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/claude-adaptation/packages/agent-adapter
+
+ ↓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+ ↓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+ ↓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+ ↓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":1,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"runtime.started"}
+{"check":"protocol-event","atMs":1,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":1,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":178,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3031,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"item.started","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3461,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3479,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"input.requested","kind":"approval","nativeType":"canUseTool:Bash"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3480,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"input.resolved","resolution":"declined_with_text"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3487,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"item.completed","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":4888,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"item.started","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":5257,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"item.completed","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":5258,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":5546,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"item.completed","itemKind":"assistant_message"}
+{"check":"protocol-event","atMs":5547,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":5547,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":5548,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"approval-declined-with-text","requested":true,"agentUsedText":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":6150,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":6261,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":6261,"sessionId":"dc7c23ac-f253-4e8e-beb1-394600f949fb","type":"session.closed"}
+
+ ✓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2) 6787ms
+ ↓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 5 skipped (6)
+   Start at  14:27:25
+   Duration  7.13s (tests 97%, transform 2%, import 1%)

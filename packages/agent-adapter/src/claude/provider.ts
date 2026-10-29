@@ -19,6 +19,9 @@ export const CLAUDE_CAPABILITIES: ProviderCapabilities = {
   freeTextAnswers: { questions: true, approvals: false }, nativeTitle: false, runtimeRecovery: true,
 };
 
+/** 2.1.310: real streaming, Rule / Skill, resume, model switch, command Stop and effort (T20261026-claude-adapt). */
+const CLAUDE_TESTED_VERSIONS: readonly string[] = ['2.1.294', '2.1.295', '2.1.310'];
+
 /** Official Streaming Input SDK driving the host's installed Claude Code executable. */
 export class ClaudeProvider implements AgentProvider {
   readonly id = 'claude-code';
@@ -50,7 +53,7 @@ export class ClaudeProvider implements AgentProvider {
           const version = parseVersion(result.stdout);
           if (result.timedOut) throw adapterError('timeout', 'Claude version check timed out');
           if (result.code !== 0 || !version) throw adapterError('protocol_error', 'Claude version check failed');
-          return ok({ version, raw: result.stdout.trim(), compatibility: ['2.1.294', '2.1.295'].includes(version) ? 'tested' : 'untested', testedVersions: '2.1.294, 2.1.295' });
+          return ok({ version, raw: result.stdout.trim(), compatibility: CLAUDE_TESTED_VERSIONS.includes(version) ? 'tested' : 'untested', testedVersions: CLAUDE_TESTED_VERSIONS.join(', ') });
         } catch (error) { return failed(toAdapterError(error).info); }
       })(),
       (async (): Promise<CheckResult<LoginInfo>> => {

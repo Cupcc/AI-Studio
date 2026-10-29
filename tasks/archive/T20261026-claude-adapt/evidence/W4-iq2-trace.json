@@ -1,0 +1,283 @@
+{
+  "cli": "2.1.311",
+  "sdk": "0.3.293",
+  "events": [
+    {
+      "atMs": 443,
+      "type": "runtime.started",
+      "runtime": 1
+    },
+    {
+      "atMs": 444,
+      "type": "session.state",
+      "state": "running"
+    },
+    {
+      "atMs": 444,
+      "type": "turn.started",
+      "turnId": "11393acd-bd12-49e5-be45-f7578bbbe178"
+    },
+    {
+      "atMs": 561,
+      "type": "session.native_id"
+    },
+    {
+      "atMs": 3812,
+      "type": "item.started"
+    },
+    {
+      "atMs": 4026,
+      "type": "item.updated"
+    },
+    {
+      "atMs": 4046,
+      "type": "input.requested",
+      "requestId": "9fd4c778-7461-4aee-998b-da59fcf16dbb",
+      "kind": "approval",
+      "nativeType": "canUseTool:Bash",
+      "toolName": "Bash"
+    },
+    {
+      "atMs": 4080,
+      "type": "input.resolved",
+      "resolution": "declined_with_text"
+    },
+    {
+      "atMs": 4086,
+      "type": "item.completed"
+    },
+    {
+      "atMs": 6994,
+      "type": "item.started"
+    },
+    {
+      "atMs": 7240,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 8373,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 9473,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 10682,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 11729,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12513,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12515,
+      "type": "item.completed"
+    },
+    {
+      "atMs": 12515,
+      "type": "item.started"
+    },
+    {
+      "atMs": 12516,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12533,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12540,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12559,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12587,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12597,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12621,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12644,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12665,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12677,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12711,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12715,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12737,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12757,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12782,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12816,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12830,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12843,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12858,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12881,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12900,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12927,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12948,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12974,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 12985,
+      "type": "item.delta"
+    },
+    {
+      "atMs": 13032,
+      "type": "item.completed"
+    },
+    {
+      "atMs": 13032,
+      "type": "turn.completed",
+      "turnId": "11393acd-bd12-49e5-be45-f7578bbbe178",
+      "outcome": "completed"
+    },
+    {
+      "atMs": 13032,
+      "type": "session.state",
+      "state": "idle"
+    },
+    {
+      "atMs": 13033,
+      "type": "diagnostic"
+    },
+    {
+      "atMs": 14708,
+      "type": "runtime.exited",
+      "runtime": 1
+    },
+    {
+      "atMs": 14840,
+      "type": "session.state",
+      "state": "closed"
+    },
+    {
+      "atMs": 14840,
+      "type": "session.closed"
+    }
+  ],
+  "observations": [
+    {
+      "atMs": 444,
+      "phase": "sent",
+      "turnId": "11393acd-bd12-49e5-be45-f7578bbbe178"
+    },
+    {
+      "atMs": 4079,
+      "phase": "approval-observed",
+      "pending": [
+        {
+          "requestId": "9fd4c778-7461-4aee-998b-da59fcf16dbb",
+          "turnId": "11393acd-bd12-49e5-be45-f7578bbbe178",
+          "kind": "approval"
+        }
+      ]
+    },
+    {
+      "atMs": 4080,
+      "phase": "replyWithText",
+      "reply": {
+        "disposition": "declined",
+        "requestIds": [
+          "9fd4c778-7461-4aee-998b-da59fcf16dbb"
+        ]
+      }
+    },
+    {
+      "atMs": 4080,
+      "phase": "poll",
+      "state": "running",
+      "pending": []
+    },
+    {
+      "atMs": 6081,
+      "phase": "poll",
+      "state": "running",
+      "pending": []
+    },
+    {
+      "atMs": 8083,
+      "phase": "poll",
+      "state": "running",
+      "pending": []
+    },
+    {
+      "atMs": 10083,
+      "phase": "poll",
+      "state": "running",
+      "pending": []
+    },
+    {
+      "atMs": 12085,
+      "phase": "poll",
+      "state": "running",
+      "pending": []
+    }
+  ],
+  "outcome": {
+    "completed": true,
+    "state": "idle",
+    "pending": []
+  },
+  "durationMs": 14840
+}

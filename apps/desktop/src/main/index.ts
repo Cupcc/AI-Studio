@@ -102,7 +102,14 @@ async function startRuntime(): Promise<void> {
   const providers = !app.isPackaged && process.env.STUDIO_E2E_PROVIDERS === '1'
     ? createE2eProviders()
     : launch.smokeOutput ? [] : undefined
-  disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl), { providers, runtimeFactory: options => ownership.start(options) })
+  // Claude Code does not ship with V1 (DEC-19). Adaptation work opts in from an unpackaged build; packaged apps ignore the switch.
+  // E2E and native-smoke runs provide their own provider set. Keep the opt-in
+  // real provider out of those modes so a combined environment cannot register
+  // duplicate `claude-code` IDs (and smoke remains provider-free).
+  const extraProviders = !app.isPackaged && providers === undefined && process.env.STUDIO_ENABLE_CLAUDE_CODE === '1'
+    ? [new (await import('@ai-studio/agent-adapter/claude')).ClaudeProvider({ startRuntime: options => ownership.start(options) })]
+    : undefined
+  disposeIpc = registerIpc(ipcMain, core, createSenderPolicy(devServerUrl), { providers, extraProviders, runtimeFactory: options => ownership.start(options) })
   installWindowAppearance(core)
   if (!launch.smokeOutput) {
     const shell = projectShellFor(core)

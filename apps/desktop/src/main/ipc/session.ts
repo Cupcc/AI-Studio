@@ -101,6 +101,8 @@ function response(raw: unknown): InputResponse {
 
 export interface SessionFeatureOptions {
   providers?: readonly AgentProvider[]
+  /** Registered next to Codex when `providers` is not given; the entry point decides (Claude Code opt-in, DEC-19). */
+  extraProviders?: readonly AgentProvider[]
   runtimeFactory?: (options: RuntimeSpawnOptions) => Promise<RuntimeHandle>
   isForeground?: (senderId: number) => boolean
   /** Re-validates Files references at send time; without it a message with file items is refused. */
@@ -118,7 +120,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
   const service = new SessionService({
     store: new SessionStore(core.database().db), projects: shell.projects,
     canOperate: id => !shell.isProjectClosing(id) && !shell.isQuitting(),
-    providers: options.providers ?? [new CodexProvider({ runtimeFactory: options.runtimeFactory })],
+    providers: options.providers ?? [new CodexProvider({ runtimeFactory: options.runtimeFactory }), ...(options.extraProviders ?? [])],
     environment: async () => ({ env: (await core.shellEnv.get()).env }),
     isForeground: options.isForeground ?? isSessionWindowForeground,
     fileReferences: options.fileReferences,

@@ -1,0 +1,8 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/claude-adaptation/apps/desktop
+
+
+ Test Files  2 passed (2)
+      Tests  124 passed (124)
+   Start at  08:04:35
+   Duration  4.06s (tests 78%, environment 8%, transform 7%, import 6%)

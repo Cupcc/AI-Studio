@@ -178,6 +178,6 @@
 | 能力 | 用途 | 需对齐的点 |
 |---|---|---|
 | `listModels(cli)` → `[{id, displayName, isDefault}]` | Model Selector；草稿阶段可用 | 不得为读取目录创建原生会话（chat spec 第 5.2 节） |
-| `setModel` / 发送时携带模型 | 下一轮生效 | Codex W25 Adapter / W26 UI 已真实验证；Claude 真实链路后续 |
+| `setModel` / 发送时携带模型 | 下一轮生效 | Codex W25 Adapter / W26 UI 已真实验证；Claude 在 CLI 2.1.310 的 Adapter 层模型切换已真实验证（[Adapter §3.12 第 9 条](../agent-adapter/spec.md)），应用 UI 链路后续 |
 | `capabilities.inputWhileRunning` | Running 中发送；Adapter 报告并执行 `steer` / `queue` 原生语义，确不支持才为 `none` | I-Q3 已确认；Adapter 须保留 steer / queue 差异 |
 | `capabilities.freeTextAnswers` 与 `replyWithText(text)` | 输入框回复 Needs Input；作用集合由 Adapter 取当前轮的待答复请求 | I-Q2；Adapter 正式契约 |

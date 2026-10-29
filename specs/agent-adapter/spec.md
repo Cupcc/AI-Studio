@@ -12,7 +12,7 @@
 | 来源 | [04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 1～5、7 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 3～6 节；[01. Product Definition](<../../docs/01. Product Definition.md>) 第 8 节原则 19、20；任务 [T20261009-agent-adapter](../../tasks/archive/T20261009-agent-adapter/task.md)；input spec I-Q2、session spec S-Q2（2026-10-09 确认） |
 | 设计记录 | [research.md](../../tasks/archive/T20261009-agent-adapter/research.md) |
 
-> 本文的类型名、方法名与 `packages/agent-adapter/src` 一致；字段的完整定义以代码为准，本文只写行为规则与约束。第 3.11、3.12 节记录已实现的 Provider 行为，并分别列明模拟测试与真实 CLI 验证的边界。按 [DEC-16](../../docs/07.%20Decisions.md#dec-16-v1-真实-cli-验收范围)，当前 V1 新增真实验收只执行 Codex；Claude Code 的实现、模拟结果和历史真实证据保留，真实验收暂缓，且不随当前 V1 发布（DEC-19）。
+> 本文的类型名、方法名与 `packages/agent-adapter/src` 一致；字段的完整定义以代码为准，本文只写行为规则与约束。第 3.11、3.12 节记录已实现的 Provider 行为，并分别列明模拟测试与真实 CLI 验证的边界。按 [DEC-16](../../docs/07.%20Decisions.md#dec-16-v1-真实-cli-验收范围)，当前 V1 新增真实验收只执行 Codex；Claude Code 的实现、模拟结果和历史真实证据保留，且不随当前 V1 发布（DEC-19）；2026-10-26 起按用户指示重新开始 Adapter 层真实验证，结果见第 3.12 节第 9 条，V1 验收范围未变（diff 待审阅）。
 
 ## 1. 未决问题
 
@@ -34,7 +34,7 @@
 | A-Q2 | 扩展能力、提交结果与事件模型以区分 steer / queue，保留消息与原生回合关联；排队不能伪造成当前回合追加 | 主 Agent，2026-10-11；Codex steer 已实现并取得 W24 / W25 / W26 同轮追加及文字拒绝证据，Claude queue 按 DEC-19 保留后续；接口边界见第 3.4、5.5 节 |
 | A-Q3 | 对客户端启动的 Runtime 建立归属记录（宿主实例身份、PID、启动时间、进程组、Session），启动时确认原宿主已失效且进程身份仍匹配后清理；活跃其他实例、共享 MCP、用户终端不得清理。无法确认归属或退出则保留诊断，不声明零残留 | 主 Agent，2026-10-11；依据现有 Runtime 隔离责任（04 第 5 节、本文第 3.9 节）与本次遗留问题处理要求。W26 已实现持久登记与恢复，W27 真实 Node 宿主强杀 / 已观察脱离后代 / 多实例隔离通过；W26 真实 Electron 宿主强杀、启动确认旧归属清理及原 ID 续聊通过，见本文第 3.9 节。未观察进程与外部共享服务不外推；不标成人工确认异常清理已通过 |
 | A-Q4 | I-Q2 先 `turn/steer` 回执，再拒绝原请求，失败保留原请求 | 2026-10-09 已验证，见第 3.11 节；保持历史技术结论 |
-| A-Q5 | 以 CLI 原生加载结果为准核对 user / project / local 配置和 `claude_code` 预设；SDK 参数若未达到同等行为则修正，不能只凭缺省参数名称认定等价 | 主 Agent，2026-10-11；现有实现见第 3.12 节，真实 Rule / Skill 仍待后续 Claude Code 独立验收 |
+| A-Q5 | 以 CLI 原生加载结果为准核对 user / project / local 配置和 `claude_code` 预设；SDK 参数若未达到同等行为则修正，不能只凭缺省参数名称认定等价 | 主 Agent，2026-10-11；现有实现见第 3.12 节；2026-10-26 在 CLI 2.1.310 取得项目 `CLAUDE.md` 与项目 Skill 的真实自动加载证据（第 3.12 节第 9 条），user / local 来源及应用内路径仍待验证 |
 
 ## 2. 职责与边界
 
@@ -146,7 +146,7 @@
 
 1. `setModel(model | null)` 对之后的回合生效，`null` 表示回到 CLI 默认；成功后发出 `model.changed`。不提供逐回合覆盖参数：Codex `turn/start` 的 `model` 本身对后续回合持续有效，Claude 通过 `Query.setModel` 切换，两者统一为“下一轮生效”。
 2. Session 的模型选择由上层持久化（04 第 6 节 `Session.model`），恢复时经 `overrides.model` 传回；未选择时不传，沿用 CLI 自身配置。
-3. `setReasoningEffort(effort | null)` 保存下一轮显式选择；null 重新读取 cwd 的 `config/read.model_reasoning_effort`，缺省时读取所选模型的 `defaultReasoningEffort`，无法解析即拒绝。不能硬编码或以省略参数冒充复位；旧 Session 未设置时不强加 effort（原则 20、24；Input §2；W26 技术实现，2026-10-18，diff 待审阅）。
+3. `setReasoningEffort(effort | null)` 保存下一轮显式选择；null 重新读取 cwd 的 `config/read.model_reasoning_effort`，缺省时读取所选模型的 `defaultReasoningEffort`，无法解析即拒绝。不能硬编码或以省略参数冒充复位；旧 Session 未设置时不强加 effort（原则 20、24；Input §2；W26 技术实现，2026-10-18，diff 待审阅）。Claude 见第 3.12 节第 8 条：档位取自 `supportedModels()`，`null` 由 CLI 回到所选模型的原生默认，同为下一轮生效。
 4. Session 级 `listModels()` 复用该 Session 的 Runtime；Provider 级见第 3.2 节第 5 条。CLI 固定（FR-CHAT-003）：一个 Session 只属于创建它的 Provider，接口中不存在跨 Provider 切换。
 
 ### 3.9 并发与隔离（FR-SESSION-003；04 第 3、5、7 节）
@@ -190,7 +190,12 @@
 4. `message_start` 的 message ID 与内容 index 组成稳定条目 ID，完整 assistant 消息替换 partial 内容，消息及结果 UUID 去重。只有 `result.subtype = success && is_error = false` 成功，主动取消按核心取消意图判断。SDK 给出 `user_message_uuid` 时关联原回合，未给关联字段的新异步帧只能回退到当前回合，不能承诺识别任意旧生产者的乱序流。
 5. `canUseTool` 保留原生说明、工具 ID、建议权限更新与选项顺序；只在原生允许时提供持久授权。`AskUserQuestion` 按原题目与选项回写答案，SDK abort 撤回原请求。输入框拒绝以 `deny.message` 交付文字；Stop / 终态 / dispose 释放所有等待。结构化附件当前前置返回 `unsupported`，不宣称已支持。
 6. Running / Stopping 中改模型先暂存，下一轮提交前调用 `Query.setModel`；空闲时立即设置。Provider 目录探测不发送消息，使用 `persistSession:false` 调用 `supportedModels()` 后关闭。Stop 前后按本轮后代身份取得退出证明；`still_queued` 若仍含本轮输入，或清理无法确认，走旧 Runtime 退出后原 ID 恢复。没有原生 ID 时不以新建代替恢复。
-7. 验证边界：27 项 Claude 模拟测试覆盖上述行为；本机 CLI `2.1.295` 的 executable / version / login 与模型目录探测通过，目录读取前后 transcript 文件集合无新增。真实成功流式、Rule / Skill、恢复、模型切换、命令 Stop / 继续被 session quota（`rate_limit` / `quota_exceeded`）阻断，没有通过。不得用模拟结果代替 AC-02 / AC-03 / AC-05 的真实验收。采样前已脱离的后代、外部 MCP 进程树与宿主崩溃清理仍未验证。
+7. 验证边界（2026-10-09 历史基线；2026-10-26 在 2.1.310 的新增真实结果见第 9 条）：27 项 Claude 模拟测试覆盖上述行为；本机 CLI `2.1.295` 的 executable / version / login 与模型目录探测通过，目录读取前后 transcript 文件集合无新增。真实成功流式、Rule / Skill、恢复、模型切换、命令 Stop / 继续被 session quota（`rate_limit` / `quota_exceeded`）阻断，没有通过。不得用模拟结果代替 AC-02 / AC-03 / AC-05 的真实验收。采样前已脱离的后代、外部 MCP 进程树与宿主崩溃清理仍未验证。
+8. 推理强度（2026-10-26 技术实现，依据 Input §2 与用户同日指示「推进适配claude cli的工作」，diff 待审阅；任务见[Claude 适配推进](../../tasks/archive/T20261026-claude-adapt/task.md)）：`listModels()` 对 `supportsEffort` 的模型把原生 `supportedEffortLevels` 报告为 `reasoningEfforts`，不支持的模型不带该字段；档位不增补、不改名。目录中 CLI 自己的选择行 `default` 标记 `isDefault`，应用在用户未手动选模型时据此解析当前模型的档位。`setReasoningEffort(level)` 通过 `Query.applyFlagSettings({ effortLevel })` 设置：空闲立即应用，Running / Stopping 中暂存到下一轮提交前（与 `setModel` 一致）；`null` 发送 `effortLevel: null`，由 CLI 回到所选模型的原生默认，不硬编码。真实 CLI 对目录外档位（探测值 `ultra`）同样返回成功而不报错，所以按所选（含暂存）模型的初始化目录校验：目录外 → `invalid_argument`，模型不支持 effort → `unsupported`，模型不在目录时回退 SDK 档位集；`null` 不校验。验证过的 Runtime 替换后，已选档位在下一轮提交前重新应用。验证边界：5 项新增模拟测试；CLI `2.1.310` 不发送用户输入的真实检查确认目录带档位、设置成功、目录外档位被拒绝且没有新增 transcript；档位对后续回合的实际影响见第 9 条。
+9. CLI 2.1.310 的 Adapter 层真实验证（2026-10-26，用户同日确认开始真实回合；记录见[W2](../../tasks/archive/T20261026-claude-adapt/evidence/W2-real-claude-2.1.310.md)，Main Agent 自检、非独立验收，diff 待审阅）：SDK 0.3.293 驱动本机 `2.1.310`（claude.ai 登录），在仓库外的临时项目、`haiku` / `sonnet` 与有界回合下通过：目录读取不新增 transcript；项目 `CLAUDE.md` 规则与项目 Skill 在默认 `settingSources` 下自动生效；流式文字增量；按原生 ID 恢复并复述上下文；`setModel` 后实际模型变化；一次命令授权后 Stop，新增后代全部退出（2.1.310 的 Bash 工具经包装 shell，追踪到 2 个进程）、`cleanup = confirmed`、原生 ID 不变并继续；Bash 内 `CLAUDE_EFFORT` 依次为 `low`、`max` 与模型原生默认（`haiku` 为 `medium`）。据此 `2.1.310` 加入 `testedVersions`，仅表示上述场景通过。同日用户批准继续后追加的 Adapter 层真实结果（haiku，空 `settingSources`）：`AskUserQuestion` 既可由卡片选项作答，也可由输入框文字作答（单题且允许自由文本）；待审批命令由输入框文字拒绝（I-Q2）后，Agent 按该文字继续且被拒命令没有执行；两个 Claude Session 并发时，一个仍在运行长命令，另一个完成并可继续，Stop 前者 `cleanup = confirmed` 而后者不受影响（Claude 与 Codex 混合并发未做）。未覆盖：多请求并存的真实答复、Running 中追加 / 排队、结构化附件、user / local 设置来源、脱离后代 / 外部 MCP / 宿主崩溃清理、SDK 0.3.310。
+10. 桌面端接入（2026-10-26，同任务，diff 待审阅）：自 `d2a3f59` 起生产 Provider 列表只含 Codex（落实 DEC-19 的“不随 V1 发布”）。保持该默认，同时提供开发开关：未打包且 `STUDIO_ENABLE_CLAUDE_CODE=1` 时在 Codex 之外注册 `ClaudeProvider`，其 Runtime 交给宿主归属登记，打包产物忽略该开关。接入时发现并移除两处按 CLI 名写死的限制：Composer 只对 `codex` 显示推理强度控件、Session 服务对非 `codex` 拒绝 `setReasoningEffort`；现在由所选模型的原生目录是否带档位决定。应用层真实结果（真实应用、隔离 userData、临时项目、`haiku`，Main Agent 自检，记录见任务 [W3](../../tasks/archive/T20261026-claude-adapt/evidence/W3-app-real-claude.md)）：Claude 被检测为可用并出现在新建对话的 CLI 菜单；未选模型时 effort 菜单列出真实目录的五档；所选档位经应用在 Bash 内被观察到；`AskUserQuestion` 的 Needs Input 卡片、状态点、卡片选项与输入框文字两种作答、另一 Session 并发完成、Stop 后命令进程消失且原 Session 继续均通过。本机用户级设置的权限模式为 `bypassPermissions`，应用按 A-Q5 原样继承，所以 Bash 不弹授权，应用层的授权卡未用真实 Claude 触发，仍仅有模拟与 Adapter 层证据；打包应用、Claude 与 Codex 混合并发、macOS 13 均未覆盖。
+
+11. 后续独立开发验证（2026-10-27～28）：应用内真实授权卡拒绝、等待审批期间的 Codex 混合并发、开发开关关闭与打包边界，以及 CLI 2.1.311 的文字拒绝复验由 [Claude 适配独立验收](../../tasks/archive/T20261026-claude-adapt/acceptance.md) 负责。第 9、10 条保留 2026-10-26 历史基线；其中“未覆盖”不代替当前验收记录，也不把新增开发验证视为 V1 发布或全部 CLI 协议通过。
 
 ### 3.13 工程工具接缝
 
@@ -199,7 +204,7 @@ FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026
 - 文件输入：Codex file → native mention；桌面 Session 经真实接收验证后采用此输入，Claude 保留文本路径清单及结构化附件 `unsupported`。转换由 `main/services/session/file-reference.ts` 负责；模拟普通发送、恢复 / 重试和 Codex 运行中追加保留。真实普通发送、Adapter 同轮 steer 及应用 UI 同轮 steer 引用已验证（应用 UI 证据见工程工具 W24）；Claude 真实接收及运行中追加 / 排队未纳入本次通过。
 - 轮次数据：Codex 已接入 `turn/diff/updated` 聚合替换及完成 `fileChange` 的 patch、类型、路径和完成状态，以 `turn.diff.updated` 转交 Session；新轮绑定先输出 unknown 身份快照。来源、限额及 Git / 非 Git / Shell 的实际覆盖由 Tools §5.3 负责；不假设 Claude 具备同等数据。
 - 事件接收核对 Runtime 代次、Thread / Turn 归属及修订；Adapter 报告 unknown / empty / unavailable / failed 的依据，应用 Session 负责持久化与 App Turn 关联，Adapter 不读当前工作区伪造历史。
-- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。Codex 真实调用按 CLI 实际结果验证，额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；Claude Code 真实验收按 DEC-16 暂缓且不随当前 V1 发布（DEC-19）；阶段 1 的模拟文件引用链路不改变真实 CLI 结果。
+- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。Codex 真实调用按 CLI 实际结果验证，额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；Claude Code 的 V1 真实验收按 DEC-16 暂缓且不随当前 V1 发布（DEC-19），Adapter 层真实验证已于 2026-10-26 重新开始（第 3.12 节第 9 条）；阶段 1 的模拟文件引用链路不改变真实 CLI 结果。
 
 本地审阅依据及官方接口来源见 [工程工具调研 §9](../../tasks/archive/T20261009-context-tools/research.md#9-开发准备审阅2026-10-13)。
 

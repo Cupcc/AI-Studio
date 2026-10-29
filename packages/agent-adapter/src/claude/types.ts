@@ -4,7 +4,7 @@ import type { ProcessLister } from '../core/process-probe.js';
 import type { RuntimeHandle, RuntimeSpawnOptions } from '../core/runtime-process.js';
 
 /** Narrow SDK surface permits deterministic tests without launching the CLI. */
-export type ClaudeQuery = AsyncIterable<SDKMessage> & Pick<Query, 'interrupt' | 'setModel' | 'supportedModels' | 'close'>;
+export type ClaudeQuery = AsyncIterable<SDKMessage> & Pick<Query, 'interrupt' | 'setModel' | 'applyFlagSettings' | 'supportedModels' | 'close'>;
 export type ClaudeQueryFactory = (args: { prompt: AsyncIterable<SDKUserMessage>; options: Options }) => ClaudeQuery;
 
 /** Only these explicit SDK overrides are accepted in SessionOptions.providerOptions. */

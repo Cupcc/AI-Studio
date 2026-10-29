@@ -17,6 +17,8 @@ class MockQuery implements ClaudeQuery {
   readonly output = new AsyncQueue<SDKMessage>();
   readonly inputs: SDKUserMessage[] = [];
   readonly modelChanges: (string | undefined)[] = [];
+  readonly flagSettings: unknown[] = [];
+  catalog: SDKModel[] = [{ value: 'sonnet', displayName: 'Sonnet', description: 'native' }];
   closed = false;
   interruptCalls = 0;
   onInterrupt?: () => void;
@@ -42,7 +44,8 @@ class MockQuery implements ClaudeQuery {
     return { still_queued: this.queued };
   }
   async setModel(model?: string) { this.modelChanges.push(model); }
-  async supportedModels(): Promise<SDKModel[]> { return [{ value: 'sonnet', displayName: 'Sonnet', description: 'native' }]; }
+  async applyFlagSettings(settings: unknown) { this.flagSettings.push(settings); }
+  async supportedModels(): Promise<SDKModel[]> { return this.catalog; }
   close() { this.closed = true; this.output.end(); }
   permission(tool = 'Bash', input: Record<string, unknown> = { command: 'echo test' }, context: Partial<Parameters<CanUseTool>[2]> = {}) {
     return this.options.canUseTool!(tool, input, { toolUseID: randomUUID(), requestId: randomUUID(), signal: new AbortController().signal, ...context });
@@ -61,6 +64,8 @@ interface HarnessConfig {
   failInitialize?: boolean;
   /** Makes every model-catalog request after the handshake fail. */
   failCatalog?: boolean;
+  /** Native model catalog returned by every Query. */
+  catalog?: SDKModel[];
 }
 
 function harness(config: HarnessConfig = {}) {
@@ -71,6 +76,7 @@ function harness(config: HarnessConfig = {}) {
     resolveExecutable: async () => ({ path: '/test/bin/claude', source: 'explicit' }),
     query: (args) => {
       const q = new MockQuery(args.options, args.prompt);
+      if (config.catalog) q.catalog = config.catalog;
       if (config.failInitialize) q.supportedModels = async () => { throw new Error('initialize handshake failed'); };
       if (config.failCatalog) {
         const handshake = q.supportedModels.bind(q);
@@ -499,6 +505,66 @@ describe('Claude Provider — FR-CHAT-003 / FR-STATE-001..003 / AC-02, AC-03, AC
     await complete(session, q); await session.setModel(null); expect(q.modelChanges).toEqual(['opus', undefined]);
   });
 
+  const efforts = (...levels: NonNullable<SDKModel['supportedEffortLevels']>): SDKModel[] => [
+    { value: 'sonnet', displayName: 'Sonnet', description: 'native', supportsEffort: true, supportedEffortLevels: levels },
+    { value: 'haiku', displayName: 'Haiku', description: 'native', supportsEffort: false, supportedEffortLevels: ['low'] },
+  ];
+
+  it('reports the native effort levels of models that support effort', async () => {
+    const { session } = await harness({ catalog: efforts('low', 'medium', 'max') }).session();
+    expect(await session.listModels()).toEqual([
+      { id: 'sonnet', displayName: 'Sonnet', description: 'native', reasoningEfforts: ['low', 'medium', 'max'] },
+      { id: 'haiku', displayName: 'Haiku', description: 'native' },
+    ]);
+  });
+
+  it("marks the CLI's own default row so the app can resolve effort levels before a model is chosen", async () => {
+    const catalog: SDKModel[] = [{ value: 'default', displayName: 'Default (recommended)', description: 'native', supportsEffort: true, supportedEffortLevels: ['low', 'high'] },
+      { value: 'sonnet', displayName: 'Sonnet', description: 'native' }];
+    const { session } = await harness({ catalog }).session();
+    expect(await session.listModels()).toEqual([
+      { id: 'default', displayName: 'Default (recommended)', description: 'native', isDefault: true, reasoningEfforts: ['low', 'high'] },
+      { id: 'sonnet', displayName: 'Sonnet', description: 'native' },
+    ]);
+  });
+
+  it('applies the effort through native flag settings, deferring it while a turn runs, and null restores the model default', async () => {
+    const { session, q } = await harness({ catalog: efforts('low', 'medium', 'high', 'max') }).session();
+    await session.setReasoningEffort('low'); expect(q.flagSettings).toEqual([{ effortLevel: 'low' }]);
+    await sent(session, q); await session.setReasoningEffort('max'); expect(q.flagSettings).toEqual([{ effortLevel: 'low' }]);
+    await complete(session, q); await sent(session, q); expect(q.flagSettings).toEqual([{ effortLevel: 'low' }, { effortLevel: 'max' }]);
+    await complete(session, q); await sent(session, q); expect(q.flagSettings).toHaveLength(2);
+    await complete(session, q); await session.setReasoningEffort(null);
+    expect(q.flagSettings.at(-1)).toEqual({ effortLevel: null });
+  });
+
+  it('rejects effort the selected model does not offer, since the CLI would silently accept it', async () => {
+    const h = harness({ catalog: efforts('low', 'medium') });
+    const { session, q } = await h.session({ overrides: { model: 'sonnet' } });
+    await expect(session.setReasoningEffort('max')).rejects.toMatchObject({ code: 'invalid_argument' });
+    await expect(session.setReasoningEffort('ultra')).rejects.toMatchObject({ code: 'invalid_argument' });
+    await session.setModel('haiku');
+    await expect(session.setReasoningEffort('low')).rejects.toMatchObject({ code: 'unsupported' });
+    expect(q.flagSettings).toEqual([]);
+  });
+
+  it('checks the effort against the pending model and, for an unlisted model, against the SDK levels', async () => {
+    const { session, q } = await harness({ catalog: efforts('low', 'medium') }).session();
+    await session.setModel('claude-custom-model');
+    await expect(session.setReasoningEffort('ultra')).rejects.toMatchObject({ code: 'invalid_argument' });
+    await session.setReasoningEffort('xhigh'); expect(q.flagSettings).toEqual([{ effortLevel: 'xhigh' }]);
+  });
+
+  it('re-applies the chosen effort on the replacement runtime after verified recovery', async () => {
+    const h = harness({ catalog: efforts('low', 'high') }); const { session, q } = await h.session();
+    await session.setReasoningEffort('high'); await sent(session, q); q.interruptFailure = true;
+    expect(await session.stop()).toMatchObject({ summary: { cleanup: 'runtime_restarted' } });
+    const replacement = h.queries[1]!; replacement.init(); await flush();
+    expect(replacement.flagSettings).toEqual([]);
+    await sent(session, replacement); expect(replacement.flagSettings).toEqual([{ effortLevel: 'high' }]);
+    await complete(session, replacement);
+  });
+
   it('probes models without input or native session persistence', async () => {
     const h = harness(); expect(await h.provider.listModels({ environment: options.environment })).toHaveLength(1);
     expect(h.queries[0]!.options.persistSession).toBe(false); expect(h.queries[0]!.inputs).toHaveLength(0);
@@ -529,6 +595,13 @@ describe('Claude availability', () => {
     expect(report.login).toEqual({ status: 'ok', value: { state: loggedIn ? 'logged_in' : 'logged_out', method: 'oauth' } });
     expect(JSON.stringify(report)).not.toContain('private@example.com');
     expect(report.status).toBe(loggedIn ? 'available' : 'not_logged_in');
+  });
+  it.each([['2.1.295', 'tested'], ['2.1.310', 'tested'], ['2.1.311', 'untested']])('classifies CLI %s as %s', async (version, compatibility) => {
+    const p = new ClaudeProvider({ resolveExecutable: async () => ({ path: '/claude', source: 'explicit' }),
+      exec: async (_file, args) => ({ code: 0, signal: null, stderr: '', timedOut: false, truncated: false,
+        stdout: args[0] === '--version' ? `${version} (Claude Code)` : JSON.stringify({ loggedIn: true, authMethod: 'claude.ai' }) }) });
+    const report = await p.checkAvailability({ environment: options.environment });
+    expect(report.version).toMatchObject({ status: 'ok', value: { compatibility, testedVersions: '2.1.294, 2.1.295, 2.1.310' } });
   });
   it('handles malformed authentication output without echoing it', async () => {
     const p = new ClaudeProvider({ resolveExecutable: async () => ({ path: '/claude', source: 'path' }),

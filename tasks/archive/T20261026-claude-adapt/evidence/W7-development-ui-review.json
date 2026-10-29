@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-28",
+  "launch": {
+    "ready": true,
+    "port": 9459,
+    "fixture": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w7-claude-ui-W9YP0n",
+    "project": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w7-claude-ui-W9YP0n/W7 Isolated Project",
+    "userData": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w7-claude-ui-W9YP0n/data",
+    "isPackaged": false,
+    "switch": "STUDIO_ENABLE_CLAUDE_CODE=1",
+    "providerMode": "real",
+    "messagesSentByLauncher": 0
+  },
+  "claudeVersionAtUiCheck": "2.1.312",
+  "databaseRowCounts": {
+    "sessions": 0
+  },
+  "uiUserMessagesSent": 0,
+  "realModelRoundCoverageAdded": false,
+  "note": "Only CLI directory reading and draft effort selection/reset; no Send action. 2.1.312 is not added to testedVersions."
+}

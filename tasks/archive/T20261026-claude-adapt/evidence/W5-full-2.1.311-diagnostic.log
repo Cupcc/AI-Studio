@@ -1,0 +1,585 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/claude-adaptation/packages/agent-adapter
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":0,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"runtime.started"}
+{"check":"protocol-event","atMs":1,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":1,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":91,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":3089,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"item.started","itemKind":"tool_call"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":3390,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":3410,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"item.completed","itemKind":"tool_call"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":4698,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"item.started","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":6172,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"item.completed","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":6173,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":6276,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"item.completed","itemKind":"assistant_message"}
+{"check":"protocol-event","atMs":6276,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":6276,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":6277,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"turn","outcome":"completed","delta":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":6976,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":7146,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":7146,"sessionId":"29e00a0b-9c0b-4964-86a0-c490b8343cfb","type":"session.closed"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":0,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"runtime.started"}
+{"check":"protocol-event","atMs":0,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":0,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":158,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":2340,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":2657,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"item.completed","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":2663,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":2663,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":2663,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"turn","outcome":"completed","delta":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":2704,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":2704,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"model.changed"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":2704,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":2704,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":4617,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":5050,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"item.completed","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":5055,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":5055,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":5055,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"turn","outcome":"completed","delta":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"catalog-rules-skills-resume-model","modelCount":13,"catalogWroteSession":false,"rules":true,"skills":true,"resume":true,"modelChanged":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":5696,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch
+{"check":"protocol-event","atMs":5919,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":5919,"sessionId":"a1eccb49-885e-44ff-8ffd-3678aa63605a","type":"session.closed"}
+
+ ✓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch 15053ms
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":1,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"runtime.started"}
+{"check":"protocol-event","atMs":1,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":1,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":92,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":2610,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"item.started","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3180,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3192,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"input.requested","kind":"approval","nativeType":"canUseTool:Bash"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3192,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"input.resolved","resolution":"answered"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3716,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"session.state","state":"stopping"}
+{"check":"protocol-event","atMs":3716,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"stop.updated"}
+{"check":"protocol-event","atMs":3716,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"stop.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3769,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"stop.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3777,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"item.completed","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3781,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"stop.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3782,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3931,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"stop.updated"}
+{"check":"protocol-event","atMs":3931,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"turn.completed","outcome":"interrupted"}
+{"check":"protocol-event","atMs":3931,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":3998,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":3998,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":5433,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"item.started","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":5851,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"item.completed","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":5852,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":5875,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"item.completed","itemKind":"assistant_message"}
+{"check":"protocol-event","atMs":5875,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":5875,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":5876,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"turn","outcome":"completed","delta":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"approval-stop-process-continue","approvalCount":1,"cleanup":"confirmed","processExited":true,"trackedProcesses":2,"nativeIdPreserved":true,"runtimeRestarted":false}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":6457,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session
+{"check":"protocol-event","atMs":6586,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":6586,"sessionId":"0b53f9fe-189b-4788-a42b-562643c39101","type":"session.closed"}
+
+ ✓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > allows one synthetic command, verifies interrupt child exit, then continues original session 6867ms
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":0,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"runtime.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":18,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":18,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":106,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":2443,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.started","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":2861,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":2868,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"input.requested","kind":"approval","nativeType":"canUseTool:Bash"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":2868,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"input.resolved","resolution":"answered"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":3346,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.completed","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":4622,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.started","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":4866,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.completed","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":4867,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":4893,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.completed","itemKind":"assistant_message"}
+{"check":"protocol-event","atMs":4893,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":4893,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":4894,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":4919,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":4919,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":6342,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.started","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":6796,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.completed","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":6796,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.started","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":7020,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":7023,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"input.requested","kind":"approval","nativeType":"canUseTool:Bash"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":7023,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"input.resolved","resolution":"answered"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":7045,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.completed","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":8199,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":8199,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.completed","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":8212,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":8212,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":8212,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":8238,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":8238,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":9683,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.started","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":9984,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":9988,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"input.requested","kind":"approval","nativeType":"canUseTool:Bash"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":9988,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"input.resolved","resolution":"answered"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":10008,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.completed","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":11314,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":11314,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"item.completed","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":11340,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":11340,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":11341,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"effort-applied","low":"low","max":"max","reset":"medium"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":11943,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default
+{"check":"protocol-event","atMs":12062,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":12062,"sessionId":"8f0c56b4-c405-4009-a0d3-3db1b9a72b25","type":"session.closed"}
+
+ ✓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default 12286ms
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":0,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"runtime.started"}
+{"check":"protocol-event","atMs":0,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":0,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":87,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":2775,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.started","itemKind":"tool_call"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":3239,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":3246,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"input.requested","kind":"question","nativeType":"canUseTool:AskUserQuestion"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":3248,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"input.resolved","resolution":"answered"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":3260,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.completed","itemKind":"tool_call"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":4524,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.started","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":4796,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.completed","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":4796,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":4831,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.completed","itemKind":"assistant_message"}
+{"check":"protocol-event","atMs":4831,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":4831,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":4832,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"turn","outcome":"completed","delta":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":4850,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":4850,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":6573,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.started","itemKind":"tool_call"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":7046,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":7052,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"input.requested","kind":"question","nativeType":"canUseTool:AskUserQuestion"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":7085,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"input.resolved","resolution":"answered"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":7089,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.completed","itemKind":"tool_call"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":8566,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.started","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":8602,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.completed","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":8602,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":8610,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"item.completed","itemKind":"assistant_message"}
+{"check":"protocol-event","atMs":8610,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":8610,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":8611,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"question-card-and-text","card":true,"text":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":9308,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input)
+{"check":"protocol-event","atMs":9647,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":9647,"sessionId":"c91a3046-d00a-4d4c-bc70-9886f18349de","type":"session.closed"}
+
+ ✓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > answers a real AskUserQuestion from the card and from composer text (Needs Input) 9912ms
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":1,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"runtime.started"}
+{"check":"protocol-event","atMs":3,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":3,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":114,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3216,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"item.started","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3586,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3598,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"input.requested","kind":"approval","nativeType":"canUseTool:Bash"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3637,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"input.resolved","resolution":"declined_with_text"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":3643,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"item.completed","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":5706,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"item.started","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":11299,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"item.completed","itemKind":"reasoning"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":11300,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":11909,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"item.completed","itemKind":"assistant_message"}
+{"check":"protocol-event","atMs":11910,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":11910,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":11914,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":12551,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+{"check":"protocol-event","atMs":12666,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":12666,"sessionId":"535cdc0b-a2fa-4fa2-ba90-ba467888e3f8","type":"session.closed"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":0,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"runtime.started"}
+{"check":"protocol-event","atMs":0,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"runtime.started"}
+{"check":"protocol-event","atMs":0,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":0,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":85,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":2645,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"item.started","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":2659,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":2659,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":2973,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"session.native_id"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":3284,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"item.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":3295,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"input.requested","kind":"approval","nativeType":"canUseTool:Bash"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":3295,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"input.resolved","resolution":"answered"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5187,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5411,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"item.completed","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5416,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":5416,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5417,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"turn","outcome":"completed","delta":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5452,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"session.state","state":"stopping"}
+{"check":"protocol-event","atMs":5452,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"stop.updated"}
+{"check":"protocol-event","atMs":5452,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"stop.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5530,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"stop.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5555,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"item.completed","itemKind":"command"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5565,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"stop.updated"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5568,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5930,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"stop.updated"}
+{"check":"protocol-event","atMs":5930,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"turn.completed","outcome":"interrupted"}
+{"check":"protocol-event","atMs":5930,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":5931,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"session.state","state":"running"}
+{"check":"protocol-event","atMs":5931,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"turn.started"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":7210,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"item.started","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":7210,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"item.completed","itemKind":"assistant_message"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":7259,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"turn.completed","outcome":"completed"}
+{"check":"protocol-event","atMs":7259,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"session.state","state":"idle"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":7260,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"diagnostic"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"turn","outcome":"completed","delta":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"concurrent-stop-isolated","runtimes":2,"stopCleanup":"confirmed","otherIdle":true}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":7879,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":7931,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"runtime.exited"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":7994,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":7994,"sessionId":"bcb5d9fd-c944-4003-a31b-769f5c555a7c","type":"session.closed"}
+
+stdout | test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part)
+{"check":"protocol-event","atMs":8046,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"session.state","state":"closed"}
+{"check":"protocol-event","atMs":8046,"sessionId":"c7b1277c-5b2d-488b-af1f-89525c7e6f25","type":"session.closed"}
+
+ × test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2) 13390ms
+   → expected 'The command did not run. The Bash cal…' to contain 'DECLINED_03a1710152af'
+ ✓ test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part) 8482ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+AssertionError: expected 'The command did not run. The Bash cal…' to contain 'DECLINED_03a1710152af'
+
+- Expected
++ Received
+
+- DECLINED_03a1710152af
++ The command did not run. The Bash call returned an error telling me not to run it and to reply with a specific code, so I did not retry. I didn't create `declined-command-ran.txt`.
++
++ If you still want the file created, tell me and I'll run `touch declined-command-ran.txt` again. If the refusal came from a permission setting you chose, I'll leave it alone.
+
+ ❯ test/claude/provider.integration.test.ts:233:20
+    231|       const body = events.filter((event) => event.type === 'item.compl…
+    232|         .map((event) => event.type === 'item.completed' ? event.item.t…
+    233|       expect(body).toContain(marker);
+       |                    ^
+    234|       expect(events.some((event) => event.type === 'input.resolved' &&…
+    235|       await expect(access(join(cwd, 'declined-command-ran.txt'))).reje…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  14:23:18
+   Duration  66.34s (tests 100%)
+
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /Users/Chris/Projects/AI Stduio.worktrees/
+  │ claude-adaptation/packages/agent-adapter

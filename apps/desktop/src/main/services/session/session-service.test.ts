@@ -1315,6 +1315,18 @@ describe('Native controls and attachments · Input §2 / S-Q12 / principle 24', 
     expect(await h.service.getDraft(key)).toMatchObject({ reasoningEffort: null })
   })
 
+  it('applies a Claude Session effort choice at the next turn through the Adapter, like any CLI that reports a catalog', async () => {
+    const h = harness()
+    const session = await h.service.create({ projectId: 'p', cli: 'claude-code', text: 'first', reasoningEffort: 'low' }); await tick()
+    const native = h.claude.sessions[0]!
+    expect(native.driver.callsTo('setReasoningEffort').map(call => call.args)).toEqual([['low']])
+    expect(() => h.service.setReasoningEffort(session.id, 'max')).not.toThrow()
+    expect(h.store.summaries().find(item => item.id === session.id)).toMatchObject({ reasoningEffort: 'max' })
+    native.controller.sink.nativeTurnEnded(native.controller.activeTurn!.turnId, { status: 'completed' })
+    h.service.send(session.id, { text: 'next' }); await tick()
+    expect(native.driver.callsTo('setReasoningEffort').at(-1)!.args).toEqual(['max'])
+  })
+
   it('resolves opaque Skill IDs from the current Project catalog and rejects disabled, foreign and forged selections', async () => {
     const provider = new FakeProvider('codex')
     const listSkills = vi.fn(async () => ({ skills: [{ name: 'example', description: 'Use example', path: '/private/skills/example/SKILL.md', enabled: true }], errors: [] }))

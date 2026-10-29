@@ -1,0 +1,8 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/claude-adaptation/packages/agent-adapter
+
+
+ Test Files  1 passed (1)
+      Tests  48 passed (48)
+   Start at  08:04:17
+   Duration  1.92s (tests 88%, transform 7%, import 5%)

@@ -1,0 +1,41 @@
+{
+  "reviewer": "W6 cli_verify; evidence audit, did not replay real model calls",
+  "reviewDate": "2026-10-28",
+  "originalBaseline": "e85d64f420ba14c322995321a81c98112fc3c0bf",
+  "source": "W4 preserved isolated fixture SQLite, marker file state, launcher and screenshots",
+  "fixtureDbSha256": "e130413fb19642966121b500e9ae067327b3b57b3476c61c2a3e1983e411e0cd",
+  "permissions": {
+    "defaultMode": "default",
+    "askBash": true
+  },
+  "approval": {
+    "command": "touch w4-approval-ran.txt",
+    "response": {
+      "status": "answered",
+      "response": {
+        "kind": "approval",
+        "optionId": "deny",
+        "message": "W4 decline reason"
+      }
+    },
+    "turnOutcome": "completed",
+    "markerExistsNow": false
+  },
+  "mixedConcurrency": {
+    "claudeStart": 1793060410962,
+    "claudeFinished": 1793060612244,
+    "codexStart": 1793060473843,
+    "codexFinished": 1793060499764,
+    "codexText": "CODEX_MIXED_DONE",
+    "codexComplete": true,
+    "claudeFinalOutcome": "completed",
+    "scope": "Claude awaited a Bash approval while Codex completed; not a successful sleep-command concurrent-run proof"
+  },
+  "screenshotsViewed": [
+    "W4-approval-before.png",
+    "W4-approval-card.png",
+    "W4-mixed-claude-waiting.png",
+    "W4-mixed-codex-done.png",
+    "W4-default-off-cli-menu.png"
+  ]
+}

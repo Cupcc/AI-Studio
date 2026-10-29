@@ -1,0 +1,13 @@
+{
+  "pid": 77898,
+  "port": 9458,
+  "isPackaged": true,
+  "developmentFlag": "STUDIO_ENABLE_CLAUDE_CODE=1",
+  "fixture": {
+    "fixture": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w6-claude-packaged-4iaca1a8",
+    "data": "/var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/studio-w6-claude-packaged-4iaca1a8/data"
+  },
+  "appPath": "/Users/Chris/Projects/AI Stduio.worktrees/claude-adaptation/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/MacOS/AI Developer Studio",
+  "realProvider": true,
+  "modelRequestsSent": false
+}

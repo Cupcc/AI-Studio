@@ -1,0 +1,32 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/claude-adaptation/packages/agent-adapter
+
+ ❯ test/claude/provider.integration.test.ts (6 tests | 1 failed) 179245ms
+   ❯ Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls (6)
+     × declines a pending real approval with composer text and the agent continues with it (I-Q2) 93841ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/claude/provider.integration.test.ts > Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls > declines a pending real approval with composer text and the agent continues with it (I-Q2)
+Error: Timed out waiting for synthetic integration result
+ ❯ until test/claude/provider.integration.test.ts:26:9
+     24|   const start = Date.now();
+     25|   while (Date.now() - start < timeoutMs) { const result = read(); if (…
+     26|   throw new Error('Timed out waiting for synthetic integration result'…
+       |         ^
+     27| }
+     28| async function turn(session: AgentSession, events: AdapterEvent[], tex…
+ ❯ test/claude/provider.integration.test.ts:213:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  08:06:10
+   Duration  179.63s (tests 100%)
+
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /Users/Chris/Projects/AI Stduio.worktrees/
+  │ claude-adaptation/packages/agent-adapter

@@ -783,7 +783,6 @@ export class SessionService implements MainSessionPort {
 
   setReasoningEffort(sessionId: string, reasoningEffort: string | null): void {
     const entry = this.entry(sessionId)
-    if (entry.summary.cli !== 'codex') throw new Error('当前 CLI 未公开推理强度接口')
     entry.summary.reasoningEffort = reasoningEffort
     this.publish(entry)
   }
