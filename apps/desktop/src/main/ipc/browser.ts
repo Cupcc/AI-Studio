@@ -1,5 +1,5 @@
 import { browserContract } from '@shared/ipc/browser'
-import type { BrowserBounds, BrowserRef } from '@shared/tools/browser'
+import type { BrowserBounds, BrowserRef, BrowserZoom } from '@shared/tools/browser'
 import type { CoreServices } from '../services/core'
 import { browserFor } from '../services/browser'
 import { defineHandlers, IpcValidationError } from './registry'
@@ -47,6 +47,47 @@ export function createBrowserFeature(core: CoreServices) {
       handle: (request, context) => service.navigate(request, request.url, context.senderId)
     },
     reload: { parse: reference, handle: (request, context) => service.reload(request, context.senderId) },
+    stop: { parse: reference, handle: (request, context) => service.stop(request, context.senderId) },
+    goBack: { parse: reference, handle: (request, context) => service.goBack(request, context.senderId) },
+    goForward: { parse: reference, handle: (request, context) => service.goForward(request, context.senderId) },
+    toggleDevTools: { parse: reference, handle: (request, context) => service.toggleDevTools(request, context.senderId) },
+    zoom: {
+      parse: raw => {
+        const value = expectRecord(raw)
+        const zoom = value.zoom
+        if (zoom !== 'in' && zoom !== 'out' && zoom !== 'reset') throw new IpcValidationError('zoom must be in, out or reset')
+        return { ...reference(value, ['zoom']), zoom: zoom as BrowserZoom }
+      },
+      handle: (request, context) => service.zoom(request, request.zoom, context.senderId)
+    },
+    openInSystemBrowser: { parse: reference, handle: (request, context) => service.openInSystemBrowser(request, context.senderId) },
+    clearData: { parse: reference, handle: (request, context) => service.clearData(request, context.senderId) },
+    dismissNotice: { parse: reference, handle: (request, context) => service.dismissNotice(request, context.senderId) },
+    newTab: {
+      parse: raw => {
+        const value = expectRecord(raw); expectOnlyKeys(value, ['projectId', 'url'])
+        const projectId = expectString(value.projectId, 'projectId', { minLength: 1, maxLength: 100 })
+        return value.url === undefined ? { projectId } : { projectId, url: expectString(value.url, 'url', { maxLength: 8192 }) }
+      },
+      handle: (request, context) => service.newTab(request.projectId, request.url, context.senderId)
+    },
+    selectTab: { parse: reference, handle: (request, context) => service.selectTab(request, context.senderId) },
+    closeTab: { parse: reference, handle: (request, context) => service.closeTab(request, context.senderId) },
+    toggleFavorite: { parse: reference, handle: (request, context) => service.toggleFavorite(request, context.senderId) },
+    suggest: {
+      parse: raw => { const value = expectRecord(raw); expectOnlyKeys(value, ['query']); return { query: expectString(value.query, 'query', { maxLength: 8192 }) } },
+      handle: ({ query }) => service.suggest(query)
+    },
+    clearHistory: { parse: reference, handle: (request, context) => service.clearHistory(request, context.senderId) },
+    answerPermission: {
+      parse: raw => {
+        const value = expectRecord(raw)
+        if (typeof value.allow !== 'boolean') throw new IpcValidationError('allow must be a boolean')
+        return { ...reference(value, ['requestId', 'allow']), requestId: expectString(value.requestId, 'requestId', { minLength: 1, maxLength: 100 }), allow: value.allow }
+      },
+      handle: (request, context) => service.answerPermission(request, request.requestId, request.allow, context.senderId)
+    },
+    resetPermissions: { parse: reference, handle: (request, context) => service.resetPermissions(request, context.senderId) },
     setBounds: {
       parse: raw => {
         const value = expectRecord(raw)

@@ -10,6 +10,8 @@ import { browserContract } from './browser'
 import { terminalContract } from './terminal'
 import { filesContract } from './files'
 import { diffContract } from './diff'
+import { menuContract } from './menu'
+import { searchContract } from './search'
 
 export const contracts = [
   appContract,
@@ -20,7 +22,9 @@ export const contracts = [
   browserContract,
   terminalContract,
   filesContract,
-  diffContract
+  diffContract,
+  menuContract,
+  searchContract
 ] as const
 
 /** Type of `window.studio` as exposed by the preload bridge. */

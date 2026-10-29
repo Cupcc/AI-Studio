@@ -1,4 +1,4 @@
-import { BrowserWindow, WebContentsView, shell as systemShell, webContents } from 'electron'
+import { app, BrowserWindow, WebContentsView, shell as systemShell, webContents } from 'electron'
 import { browserContract } from '@shared/ipc/browser'
 import { getAppMeta, setAppMeta } from '../database/app-meta'
 import type { CoreServices } from '../core'
@@ -32,11 +32,17 @@ export function browserFor(core: CoreServices): BrowserService {
         partition, nodeIntegration: false, nodeIntegrationInWorker: false, nodeIntegrationInSubFrames: false,
         contextIsolation: true, sandbox: true, webSecurity: true, webviewTag: false,
         navigateOnDragDrop: false, safeDialogs: true, disableDialogs: true
-        // No application preload: localhost code never receives window.studio.
+        // No application preload: page code (local or remote) never receives window.studio.
       } }),
       readAddress: id => getAppMeta(core.database().db, `browser.address:${id}`),
       saveAddress: (id, address) => setAppMeta(core.database().db, `browser.address:${id}`, address),
+      readTabs: id => getAppMeta(core.database().db, `browser.tabs:${id}`),
+      saveTabs: (id, value) => setAppMeta(core.database().db, `browser.tabs:${id}`, value),
+      // History, favorites and site permissions are shared by every Project, like the cookies (TOOLS-Q10).
+      storage: { read: key => getAppMeta(core.database().db, key), write: (key, value) => setAppMeta(core.database().db, key, value) },
       changed: state => core.broadcast(browserContract.events.stateChanged, state),
+      focusAddress: event => core.broadcast(browserContract.events.focusAddress, event),
+      downloadsPath: () => app.getPath('downloads'),
       openExternal: url => systemShell.openExternal(url)
     })
     services.set(core, service)

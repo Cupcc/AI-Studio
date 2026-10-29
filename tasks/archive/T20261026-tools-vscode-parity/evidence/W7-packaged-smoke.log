@@ -1,0 +1,86 @@
+$ pnpm --filter @ai-studio/desktop run smoke:packaged -- --out tasks/T20261026-tools-vscode-parity/evidence/W7-packaged-smoke.json
+$ node scripts/packaged-smoke.mjs -- --out tasks/T20261026-tools-vscode-parity/evidence/W7-packaged-smoke.json
+{
+  "schema": 1,
+  "ok": true,
+  "app": {
+    "version": "1.0.0",
+    "isPackaged": true,
+    "platform": "darwin",
+    "arch": "arm64",
+    "electron": "44.4.5",
+    "node": "24.21.0"
+  },
+  "launchEnv": {
+    "pathEntryCount": 4,
+    "codexOnLaunchPath": false,
+    "claudeOnLaunchPath": false
+  },
+  "sqlite": {
+    "ok": true,
+    "driver": "node:sqlite",
+    "dbInsideUserData": true,
+    "firstRunApplied": 4,
+    "secondRunApplied": 0,
+    "readBack": true,
+    "sqliteVersion": "3.53.4"
+  },
+  "shellEnv": {
+    "ok": true,
+    "source": "login-shell",
+    "shell": "/bin/zsh",
+    "durationMs": 814,
+    "pathEntryCount": 21
+  },
+  "pty": {
+    "shell": "/bin/zsh",
+    "ok": true,
+    "receivedMarker": true,
+    "exitCode": 0,
+    "durationMs": 86
+  },
+  "terminalScreen": {
+    "ok": true,
+    "serializedMarker": true,
+    "emulatorStateVersion": 1,
+    "xtermVersion": "6.0.0"
+  },
+  "ripgrep": {
+    "ok": true,
+    "unpacked": true,
+    "listedFixture": true
+  },
+  "filesRename": {
+    "ok": true,
+    "moved": true,
+    "refusedOverwrite": true
+  },
+  "executables": {
+    "codex": {
+      "found": true,
+      "path": "/Users/Chris/.local/bin/codex",
+      "version": "0.164.0"
+    },
+    "claude": {
+      "found": true,
+      "path": "/Users/Chris/.local/bin/claude",
+      "version": "2.1.312"
+    },
+    "git": {
+      "found": true,
+      "path": "/usr/bin/git",
+      "version": "2.39.2"
+    }
+  },
+  "renderer": {
+    "origin": "app://studio",
+    "topBarRendered": true,
+    "nodeGlobalsAbsent": true,
+    "preloadApiWorks": true,
+    "ok": true
+  }
+}
+User data (isolated): /var/folders/kl/bbxxmfd96s9bgl0pldgx3qv40000gp/T/ai-studio-packaged-smoke-jGwmlW
+
+Report: /Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity/apps/desktop/tasks/T20261026-tools-vscode-parity/evidence/W7-packaged-smoke.json
+Result: PASS

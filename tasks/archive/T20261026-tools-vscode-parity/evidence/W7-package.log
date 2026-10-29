@@ -1,0 +1,152 @@
+$ pnpm --filter @ai-studio/agent-adapter run build && pnpm --filter @ai-studio/desktop run package
+$ tsc -p tsconfig.build.json
+$ electron-vite build && electron-builder --mac --arm64 --dir
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 125 modules transformed.
+rendering chunks...
+out/main/directory-reader-worker.js    4.50 kB
+out/main/index.js                    421.89 kB
+✓ built in 423ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 15 modules transformed.
+rendering chunks...
+out/preload/index.js  10.06 kB
+✓ built in 15ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 1472 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                                                0.95 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff      13.14 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-CB9ihrfo.woff      13.16 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2     14.71 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2     14.89 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff      22.10 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2     22.59 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff      23.88 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff      23.92 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2     24.18 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2     24.25 kB
+../../out/renderer/assets/codicon-DF1abBS2.ttf                             153.23 kB
+../../out/renderer/assets/code-C0VoY9X6.css                                  1.12 kB
+../../out/renderer/assets/TerminalScreen-GVL3fBIr.css                        7.11 kB
+../../out/renderer/assets/index-CERYLBSi.css                               124.80 kB
+../../out/renderer/assets/monaco-runtime-CPVWXZLM.css                      167.09 kB
+../../out/renderer/assets/register-BlbTFpFW.js                               0.41 kB
+../../out/renderer/assets/register-CJrei_3N.js                               0.42 kB
+../../out/renderer/assets/register-DMERqr9D.js                               0.42 kB
+../../out/renderer/assets/register-DJZWzOeK.js                               0.43 kB
+../../out/renderer/assets/register-PECBudrg.js                               0.43 kB
+../../out/renderer/assets/register-Duq4sYuy.js                               0.43 kB
+../../out/renderer/assets/register-BUzA2lAC.js                               0.43 kB
+../../out/renderer/assets/register-qvH_4Sw9.js                               0.44 kB
+../../out/renderer/assets/register-D3d3nAxc.js                               0.44 kB
+../../out/renderer/assets/register-2s4OncR2.js                               0.44 kB
+../../out/renderer/assets/register-DQjRTZWX.js                               0.44 kB
+../../out/renderer/assets/register-BfCFivIB.js                               0.45 kB
+../../out/renderer/assets/register-BcJw0Pea.js                               0.45 kB
+../../out/renderer/assets/register-DfWP0TFa.js                               0.45 kB
+../../out/renderer/assets/register-DF07hUZ0.js                               0.45 kB
+../../out/renderer/assets/register-Dk2_u1fL.js                               0.45 kB
+../../out/renderer/assets/register-B_DeWH8S.js                               0.45 kB
+../../out/renderer/assets/register-Dx2uMT4S.js                               0.46 kB
+../../out/renderer/assets/register-CICyTW6A.js                               0.46 kB
+../../out/renderer/assets/register-Cc98-wU0.js                               0.46 kB
+../../out/renderer/assets/register-B6MlbrbU.js                               0.46 kB
+../../out/renderer/assets/register-C8H86k2O.js                               0.47 kB
+../../out/renderer/assets/register-DAGyi_oD.js                               0.47 kB
+../../out/renderer/assets/register-BlYlspEf.js                               0.47 kB
+../../out/renderer/assets/register-CjE8JumO.js                               0.48 kB
+../../out/renderer/assets/register-D_pSM52C.js                               0.48 kB
+../../out/renderer/assets/register-CInooBPr.js                               0.48 kB
+../../out/renderer/assets/register-HFEUyUKs.js                               0.48 kB
+../../out/renderer/assets/register-BJzAE6B1.js                               0.49 kB
+../../out/renderer/assets/register-DZgoOeiP.js                               0.50 kB
+../../out/renderer/assets/register-PXEnIaA_.js                               0.50 kB
+../../out/renderer/assets/register-CuI2Cy6u.js                               0.50 kB
+../../out/renderer/assets/register-BlaCxUW_.js                               0.50 kB
+../../out/renderer/assets/register-BHgAUMXK.js                               0.51 kB
+../../out/renderer/assets/register-BLNIKjFb.js                               0.53 kB
+../../out/renderer/assets/register-4bICBnOT.js                               0.53 kB
+../../out/renderer/assets/register-08aEZqnf.js                               0.57 kB
+../../out/renderer/assets/register-m-53tSE1.js                               0.66 kB
+../../out/renderer/assets/register-D1PF449E.js                               0.73 kB
+../../out/renderer/assets/register-JHK69k8G.js                               0.81 kB
+../../out/renderer/assets/register-Dwu0YVGn.js                               0.83 kB
+../../out/renderer/assets/register-BNX-c51l.js                               0.84 kB
+../../out/renderer/assets/register-BXreesVT.js                               0.85 kB
+../../out/renderer/assets/register-BX0tiwrC.js                               0.91 kB
+../../out/renderer/assets/register-Bahw7DHP.js                               0.93 kB
+../../out/renderer/assets/register-JO2N2iNW.js                               1.11 kB
+../../out/renderer/assets/terminal-font-BrrJ_5zI.js                          1.40 kB
+../../out/renderer/assets/javascript-CrQMPl_H.js                             1.41 kB
+../../out/renderer/assets/_.contribution-CqIcmjeZ.js                         1.52 kB
+../../out/renderer/assets/ini-BcQysCTb.js                                    1.67 kB
+../../out/renderer/assets/bat-Bqkp9Cfu.js                                    2.66 kB
+../../out/renderer/assets/xml-BryuWJ1A.js                                    2.86 kB
+../../out/renderer/assets/dockerfile--oxj0cAH.js                             3.02 kB
+../../out/renderer/assets/lua-hNsuGJkO.js                                    3.43 kB
+../../out/renderer/assets/objective-c-B1L1C5EC.js                            3.48 kB
+../../out/renderer/assets/graphql-BeiGgjIU.js                                3.77 kB
+../../out/renderer/assets/shell-vZEubQ82.js                                  4.48 kB
+../../out/renderer/assets/go-brnMpFrj.js                                     4.49 kB
+../../out/renderer/assets/r-CtqYUQ6l.js                                      4.80 kB
+../../out/renderer/assets/less-B7Qaxw-O.js                                   5.00 kB
+../../out/renderer/assets/tcl-Bb4GCwBr.js                                    5.05 kB
+../../out/renderer/assets/java-Dt3iMn2o.js                                   5.16 kB
+../../out/renderer/assets/kotlin-Ddo1SjA5.js                                 5.20 kB
+../../out/renderer/assets/hcl-CrX1Es2W.js                                    5.21 kB
+../../out/renderer/assets/restructuredtext-B-KQCVu_.js                       5.33 kB
+../../out/renderer/assets/powershell-BXiKvz7Z.js                             5.39 kB
+../../out/renderer/assets/coffee-CzJ5oEdj.js                                 5.51 kB
+../../out/renderer/assets/mdx-CBU_Owpm.js                                    5.87 kB
+../../out/renderer/assets/yaml-DVaZVtxl.js                                   5.92 kB
+../../out/renderer/assets/css-i3rI3_64.js                                    6.10 kB
+../../out/renderer/assets/CodeViewer-hTZ5Nuxl.js                             6.18 kB
+../../out/renderer/assets/rust-B1c0VCeq.js                                   6.27 kB
+../../out/renderer/assets/dart-vLMHv35g.js                                   6.48 kB
+../../out/renderer/assets/python-CoAYmgnb.js                                 6.54 kB
+../../out/renderer/assets/markdown-B0YTnTxW.js                               6.65 kB
+../../out/renderer/assets/swift-CbF6f74o.js                                  6.92 kB
+../../out/renderer/assets/csharp-BJeIuvde.js                                 6.98 kB
+../../out/renderer/assets/CodeDiffViewer-B1jFummN.js                         7.01 kB
+../../out/renderer/assets/html-DfB4bYMF.js                                   7.66 kB
+../../out/renderer/assets/typescript-ByEElR5w.js                             7.95 kB
+../../out/renderer/assets/cpp-CcN6f0ik.js                                    8.22 kB
+../../out/renderer/assets/pug-BxCXwerb.js                                    8.26 kB
+../../out/renderer/assets/vb-Bm6ESA0Q.js                                     8.33 kB
+../../out/renderer/assets/scss-B42qMyAu.js                                   9.07 kB
+../../out/renderer/assets/twig-DvgEGWAV.js                                  10.26 kB
+../../out/renderer/assets/handlebars-LdHH-dUF.js                            10.44 kB
+../../out/renderer/assets/julia-Cm3ItYL_.js                                 10.54 kB
+../../out/renderer/assets/scala-DbVzH-3O.js                                 10.70 kB
+../../out/renderer/assets/php-Bkx1qpkQ.js                                   12.48 kB
+../../out/renderer/assets/protobuf-CndvAUGu.js                              12.68 kB
+../../out/renderer/assets/perl-DC0Z0tlO.js                                  12.82 kB
+../../out/renderer/assets/clojure-fcgFaMHx.js                               13.94 kB
+../../out/renderer/assets/ruby-DCd4DmAr.js                                  15.31 kB
+../../out/renderer/assets/sql-BAGepFCR.js                                   15.56 kB
+../../out/renderer/assets/code-6ZAXz5kx.js                                  16.18 kB
+../../out/renderer/assets/elixir-eLfY1jWH.js                                18.74 kB
+../../out/renderer/assets/solidity-yHOxYChb.js                              26.03 kB
+../../out/renderer/assets/TerminalScreen-DRqX-tNS.js                       488.41 kB
+../../out/renderer/assets/index-DVRsDpOP.js                              1,798.52 kB
+../../out/renderer/assets/monaco-runtime-CYElmfau.js                     5,791.05 kB
+✓ built in 5.34s
+  • electron-builder  version=26.16.1 os=24.6.0
+  • loaded configuration  file=/Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity/apps/desktop/electron-builder.yml
+  • author is missed in the package.json  appPackageFile=/Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity/apps/desktop/package.json
+  • packageManager not detected by file, falling back to environment detection  resolvedPackageManager=pnpm detected=/Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity/apps/desktop
+  • detected workspace root for project using packageManager field  pm=pnpm config=pnpm@12.10.1 resolved=/Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity projectDir=/Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity/apps/desktop
+  • skipped dependencies rebuild  reason=npmRebuild is set to false
+  • packaging       platform=darwin arch=arm64 electron=44.4.5 appOutDir=dist/mac-arm64
+  • downloaded      label=electron progress=100%
+  • downloaded electron zip extracted successfully  output=/Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity/apps/desktop/dist/mac-arm64
+  • searching for node modules  pm=pnpm searchDir=/Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity/apps/desktop
+  • platform-specific optional dependencies not bundled — add them to your project's optionalDependencies if your app requires them (pnpm 10+ does not auto-install transitive platform binaries)  dependencies=["@vscode/ripgrep-darwin-x64@1.18.0","@vscode/ripgrep-linux-arm@1.18.0","@vscode/ripgrep-linux-arm64@1.18.0","@vscode/ripgrep-linux-ia32@1.18.0","@vscode/ripgrep-linux-ppc64@1.18.0","@vscode/ripgrep-linux-riscv64@1.18.0","@vscode/ripgrep-linux-s390x@1.18.0","@vscode/ripgrep-linux-x64@1.18.0","@vscode/ripgrep-win32-arm64@1.18.0","@vscode/ripgrep-win32-ia32@1.18.0","@vscode/ripgrep-win32-x64@1.18.0","@anthropic-ai/claude-agent-sdk-darwin-x64@0.3.293","@anthropic-ai/claude-agent-sdk-linux-arm64@0.3.293","@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.3.293","@anthropic-ai/claude-agent-sdk-linux-x64@0.3.293","@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.3.293","@anthropic-ai/claude-agent-sdk-win32-arm64@0.3.293","@anthropic-ai/claude-agent-sdk-win32-x64@0.3.293"]
+  • afterPack: node-pty spawn-helper executable for darwin-arm64
+  • afterPack: ripgrep executable for darwin-arm64
+  • executing @electron/fuses  electronPath=dist/mac-arm64/AI Developer Studio.app
+  • skipped macOS code signing  reason=identity explicitly is set to null

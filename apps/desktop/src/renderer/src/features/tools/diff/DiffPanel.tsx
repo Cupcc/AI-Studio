@@ -9,6 +9,7 @@ import { InlineText } from './InlineText'
 import { AVAILABILITY, D, type StateMessage } from './strings'
 import './diff.css'
 import { useTurnDiff } from './turn-diff-store'
+import { useDiffViewPrefs } from './diff-view-prefs'
 import { TurnDiffPanel } from './TurnDiffPanel'
 
 export interface DiffPanelProps {
@@ -66,9 +67,10 @@ function Changes({ projectId, active, project, snapshot }: { projectId: string; 
   const { selected } = project
   const ratio = preview ?? project.listRatio
   const entry = selected ? snapshot.files.find(file => file.path === selected.path) ?? null : null
+  const tree = useDiffViewPrefs(state => state.tree)
   return <div className="diff-split" ref={container}>
     <div className="diff-split__list" style={selected ? { flex: `0 1 ${ratio * 100}%` } : undefined}>
-      <FileList files={snapshot.files} selectedPath={selected?.path ?? null} showUntracked={snapshot.status !== 'no_head'} stale={project.error !== null} onSelect={select} />
+      <FileList files={snapshot.files} tree={tree} selectedPath={selected?.path ?? null} showUntracked={snapshot.status !== 'no_head'} stale={project.error !== null} onSelect={select} />
       {!selected && <p className="diff-hint">{D.selectHint}</p>}
     </div>
     {selected && <>
@@ -134,10 +136,12 @@ function ProjectDiffPanel({ projectId, active }: DiffPanelProps) {
   const sums = complete ? totals(snapshot.files) : null
   const title = describes ? `${D.title} · ${baselineLabel(snapshot)}` : D.title
   const watchDown = project?.watch === 'degraded' || project?.watch === 'stopped'
+  const tree = useDiffViewPrefs(state => state.tree)
   return <section className="diff-tool" aria-label={D.title}>
     <header className="diff-header">
       <div className="diff-header__row">
         <h2 className="diff-header__title" title={title}>{title}</h2>
+        <button className="icon-button" aria-label={tree ? D.listView : D.treeView} data-tip={tree ? D.listView : D.treeView} onClick={() => useDiffViewPrefs.getState().set({ tree: !tree })}><Icon name={tree ? 'view-list' : 'view-tree'} size={15} /></button>
         <button className={`icon-button ${project?.loading ? 'is-loading' : ''}`} aria-label={D.refresh} data-tip={D.refresh} data-tip-align="end" disabled={!active} onClick={() => useDiff.getState().reload(projectId)}><Icon name="refresh" size={15} /></button>
       </div>
       {(snapshot && describes && snapshot.files.length > 0 || watchDown || project?.loading) && <div className="diff-header__meta">

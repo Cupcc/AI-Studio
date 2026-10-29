@@ -15,6 +15,7 @@ export const VIEW_NAMES: Record<ViewId, string> = {
 
 export const TOOL_NAMES: Record<ToolId, string> = {
   files: 'Files',
+  search: 'Search',
   diff: 'Diff',
   browser: 'Browser',
   terminal: 'Terminal'
@@ -108,6 +109,13 @@ export const S = {
     openDirectory: '打开本地目录…',
     closeTab: '关闭标签页',
     nextTab: '显示下一个标签页',
-    previousTab: '显示上一个标签页'
+    previousTab: '显示上一个标签页',
+    go: '转到',
+    quickOpen: '快速打开文件…',
+    showFiles: 'Files',
+    showSearch: '在文件中搜索',
+    showDiff: '源代码变更（Diff）',
+    showBrowser: 'Browser',
+    toggleTerminal: '切换 Terminal'
   }
 } as const

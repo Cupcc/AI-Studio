@@ -15,6 +15,9 @@ export interface CodeContent {
 export interface CodeSession {
   /** Shows other content (another file, or a fresh read of the same one) without recreating the editor. */
   show(content: CodeContent): void
+  setWordWrap(on: boolean): void
+  /** Scrolls the 1-based line into the centre and selects it. */
+  revealLine(line: number): void
   /** Remembers the view state under the current key, then destroys the editor, its model and its observers. */
   dispose(): void
 }
@@ -77,6 +80,15 @@ export async function openCodeSession(
         language = id
         monaco.editor.setModelLanguage(textModel, id)
       })
+    },
+    setWordWrap(on) {
+      if (!disposed) editorInstance.updateOptions({ wordWrap: on ? 'on' : 'off' })
+    },
+    revealLine(line) {
+      if (disposed) return
+      const target = Math.max(1, Math.min(textModel.getLineCount(), Math.floor(line)))
+      editorInstance.setSelection({ startLineNumber: target, startColumn: 1, endLineNumber: target, endColumn: textModel.getLineMaxColumn(target) })
+      editorInstance.revealLineInCenter(target)
     },
     dispose() {
       if (disposed) return

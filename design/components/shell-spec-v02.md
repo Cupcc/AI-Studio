@@ -23,6 +23,7 @@
 | 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
 | 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
 | 工具开发准备 | Browser 首轮边界、文件引用贯通与终端合并关闭确认按 DEC-14（2026-10-13 确认）；本次仅同步说明，不修改原型或实现应用，diff 待审阅 |
+| 工具基本操作与 Search | 当前工具行为按 DEC-25（2026-10-26 确认）及 [工具规格 §5.4](../../specs/tools/spec.md#54-vs-code-对齐2026-10-26)；新增 Search、Terminal 分屏和 Browser 共享持久数据取代首轮相应边界，diff 待审阅 |
 | 外观主题与设置 | 第 12 节依据用户 2026-10-12 对话确认新增（[DEC-12](<../../docs/07. Decisions.md#dec-12-外观主题与设置>)）；SET-Q1～Q5 已确认，“纯色”命名与深色取值待确认（[settings spec](../../specs/settings/spec.md) 第 1.1 节）；本次 diff 待审阅 |
 
 本文件中的颜色仅用于区分状态语义，具体色值见交互原型 v01；代码块高亮色见交互原型 v02。尺寸单位为 px。
@@ -139,7 +140,7 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 |---|---|---|
 | Conversation 列顶栏 | 草稿：“新对话 · <View 名称>”；对话中：CLI 标识 + Session 标题 + 新建对话按钮 | UX P-A |
 | 最近对话块 | 草稿的底部输入框上方显示该 View 最近 3 条对话（按最近用户消息排序，无记录时不显示区块；DEC-23）；更早的对话在 Session History 中查找 | UX P-A |
-| 右侧区域顶栏 | 当前内容名称 + 更新时间 + 图标切换组：Preview ｜ Files、Diff、Browser、Terminal | UX P-B |
+| 右侧区域顶栏 | 当前内容名称 + 更新时间 + 图标切换组：Preview ｜ Files、Search、Diff、Browser、Terminal | UX P-B；DEC-25 |
 | 工具关闭入口 | 工具打开时，图标切换组右侧保留“关闭右侧工具”×；行为见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>) | UX 第 5 节；2026-10-11 确认 |
 | 图标提示 | 悬停 500ms 后在图标下方显示名称 | UX P-B |
 | Preview 容器 | 只读，可滚动与缩放；显示“已更新 · 时间”；示例数据标注“示例数据” | FR-VIEW-003；UX D-06 |
@@ -152,9 +153,10 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 |---|---|---|
 | 边栏顶栏 | 工具图标组 + 当前工具名 + 关闭按钮；默认打开该 Project 上次选择的工具 | UX P-C |
 | Files | 目录树，可展开 / 折叠；选中文件后显示“添加到对话” | FR-TOOL-001 |
+| Search | 位于 Files 后的工具入口；查询选项、结果分组与 Files 定位按 [工具规格 §5.4](../../specs/tools/spec.md#54-vs-code-对齐2026-10-26) | FR-TOOL-005；DEC-25 |
 | Diff | 范围标题（“项目变更 · 相对 HEAD”或“本轮变更 · 关联轮次”）+ 文件列表（M / A / D、增删行数）+ 单文件 Diff。项目入口与轮次入口的数据来源见 UX 第 5 节；非 Git 项目显示说明与 Git 初始化指引；本轮记录不可用时提供“查看项目变更”入口 | FR-TOOL-002 |
 | Browser | 地址栏 + 刷新 + 页面区域；默认打开上次地址 | FR-TOOL-003 |
-| Terminal | Project 内的 Terminal Tabs + 新建 / 切换 / 关闭入口；首次打开创建一个实例，默认工作目录为 Project 目录。显示当前 Tab 的终端内容，不做分屏；隐藏面板、切换工具 / Session / Project 保留进程和输出，每个实例与 Agent Runtime 隔离 | FR-TOOL-004 |
+| Terminal | Project 内的 Terminal Tabs + 新建 / 切换 / 关闭 / 分屏入口；首次打开创建一个实例，默认工作目录为 Project 目录。隐藏面板、切换工具 / Session / Project 保留进程和输出，每个实例与 Agent Runtime 隔离；基本操作按工具规格 §5.4 | FR-TOOL-004；DEC-25 |
 
 ## 10. 页面级组件
 

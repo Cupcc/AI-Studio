@@ -38,7 +38,11 @@ function viewerOptions(fontFamily: string, theme: string) {
     matchBrackets: 'never',
     codeLens: false,
     colorDecorators: false,
-    folding: false,
+    // Indentation-based ranges without a language service (DEC-25); controls appear on hover like VS Code.
+    folding: true,
+    foldingStrategy: 'indentation',
+    showFoldingControls: 'mouseover',
+    foldingMaximumRegions: 2000,
     glyphMargin: false,
     stickyScroll: { enabled: false },
     bracketPairColorization: { enabled: false },
@@ -92,6 +96,8 @@ export function diffEditorOptions(fontFamily: string, theme: string, path: strin
     originalEditable: false,
     renderSideBySide: true,
     useInlineViewWhenSpaceIsLimited: true,
+    // The diff gutter has no room for folding; unchanged regions collapse instead.
+    folding: false,
     renderOverviewRuler: false,
     renderMarginRevertIcon: false,
     renderGutterMenu: false,

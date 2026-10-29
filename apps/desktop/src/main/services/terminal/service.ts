@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { TERMINAL_TITLE_LIMIT } from '@shared/tools/terminal'
 import type {
   TerminalAckRequest, TerminalAttachment, TerminalChanged, TerminalCloseResult,
   TerminalCreateRequest, TerminalOutput, TerminalRef, TerminalSnapshot, TerminalSummary
@@ -13,6 +14,8 @@ export const TERMINAL_CHUNK_SIZE = 16 * 1024
 export const TERMINAL_INPUT_LIMIT = 64 * 1024
 export const TERMINAL_PROJECT_LIMIT = 16
 export const TERMINAL_TOTAL_LIMIT = 32
+/** How often running terminals are asked for their foreground process name. */
+export const TERMINAL_PROCESS_POLL_MS = 1500
 
 interface Attachment {
   id: string
@@ -45,11 +48,15 @@ export interface TerminalServiceOptions {
   projectPath(projectId: string): string | null
   canOperate?(projectId: string): boolean
   shellEnv(): Promise<LoginEnvResult>
+  /** Absolute path of a Project directory for `cwd`; rejects paths outside the Project or through links. */
+  resolveCwd?(projectId: string, path: string): Promise<string>
   output(event: TerminalOutput): void
   changed(event: TerminalChanged): void
   spawn?: TerminalSpawner
   screen?: (cols: number, rows: number, respond: (data: string) => void) => TerminalScreen
   newId?: () => string
+  /** Test seam; 0 disables the foreground-process poll. */
+  processPollMs?: number
 }
 
 export interface TerminalService {
@@ -62,6 +69,8 @@ export interface TerminalService {
   input(ref: TerminalRef, data: string): void
   resize(ref: TerminalRef, cols: number, rows: number): Promise<void>
   close(ref: TerminalRef, confirmed: boolean): Promise<TerminalCloseResult>
+  rename(ref: TerminalRef, title: string): TerminalSummary
+  clear(ref: TerminalRef): Promise<void>
   activeTerminals(projectId?: string): TerminalSummary[]
   closeProject(projectId: string): Promise<void>
   closeAll(): Promise<void>
@@ -83,6 +92,27 @@ export function createTerminalService(options: TerminalServiceOptions): Terminal
   const newId = options.newId ?? randomUUID
   let generation = 0
   let disposed = false
+  let poller: ReturnType<typeof setInterval> | undefined
+  const pollMs = options.processPollMs ?? TERMINAL_PROCESS_POLL_MS
+  /** Foreground process names change without output events (e.g. `node` exits back to `zsh`); poll while terminals run. */
+  function pollProcesses(): void {
+    const touched = new Set<string>()
+    for (const instance of instances.values()) {
+      if (instance.summary.state !== 'running' || !instance.process.processName) continue
+      // eslint-disable-next-line no-control-regex
+      const name = instance.process.processName().replace(/[\u0000-\u001F\u007F]/g, '').slice(0, TERMINAL_TITLE_LIMIT)
+      if (!name || name === instance.summary.process) continue
+      instance.summary.process = name
+      touched.add(instance.summary.projectId)
+    }
+    for (const projectId of touched) changed(projectId)
+    if (!instances.size && poller) { clearInterval(poller); poller = undefined }
+  }
+  function ensurePoller(): void {
+    if (poller || !pollMs || disposed) return
+    poller = setInterval(pollProcesses, pollMs)
+    poller.unref?.()
+  }
   const summary = (instance: Instance) => ({ ...instance.summary })
   const list = (projectId: string): TerminalSummary[] => {
     requireProject(projectId)
@@ -193,7 +223,9 @@ export function createTerminalService(options: TerminalServiceOptions): Terminal
       const operation = (async () => {
         const environment = await options.shellEnv()
         canOperate(request.projectId)
-        const cwd = requireProject(request.projectId)
+        const root = requireProject(request.projectId)
+        const cwd = request.cwd ? await (options.resolveCwd?.(request.projectId, request.cwd) ?? Promise.reject(new Error('Terminal directory unavailable'))) : root
+        canOperate(request.projectId)
         let process: TerminalProcess | undefined
         let screen: TerminalScreen
         screen = makeScreen(request.cols, request.rows, (data) => process?.write(data))
@@ -232,6 +264,9 @@ export function createTerminalService(options: TerminalServiceOptions): Terminal
           changed(request.projectId)
         }))
         try { canOperate(request.projectId) } catch (error) { await closeInstance(instance, true); throw error }
+        const name = process.processName?.()
+        if (name) instance.summary.process = name.slice(0, TERMINAL_TITLE_LIMIT)
+        ensurePoller()
         pressure(instance)
         changed(request.projectId)
         return summary(instance)
@@ -321,6 +356,21 @@ export function createTerminalService(options: TerminalServiceOptions): Terminal
       })
     },
     close: (ref, confirmed) => closeInstance(requireInstance(ref), confirmed),
+    rename(ref, title) {
+      const instance = requireInstance(ref)
+      // eslint-disable-next-line no-control-regex
+      const clean = title.replace(/[\u0000-\u001F\u007F]/g, ' ').trim().slice(0, TERMINAL_TITLE_LIMIT)
+      if (!clean) throw new Error('Terminal title must not be empty')
+      instance.summary.title = clean
+      instance.summary.renamed = true
+      changed(ref.projectId)
+      return summary(instance)
+    },
+    clear(ref) {
+      const instance = requireInstance(ref)
+      // After the output already received is parsed, like the renderer's own clear.
+      return serial(instance, async () => { await drain(instance); instance.screen.clear() })
+    },
     activeTerminals: (projectId) => [...instances.values()]
       .filter((instance) => (!projectId || instance.summary.projectId === projectId) && instance.summary.state !== 'exited').map(summary),
     async closeProject(projectId) {
@@ -343,6 +393,7 @@ export function createTerminalService(options: TerminalServiceOptions): Terminal
     },
     async dispose() {
       disposed = true
+      if (poller) { clearInterval(poller); poller = undefined }
       await service.closeAll()
     }
   }

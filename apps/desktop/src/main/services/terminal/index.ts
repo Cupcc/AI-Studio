@@ -1,6 +1,7 @@
 import { terminalContract } from '@shared/ipc/terminal'
 import type { CoreServices } from '../core'
 import { projectShellFor } from '../project'
+import { filesFor } from '../files'
 import { createTerminalService, type TerminalService } from './service'
 
 const services = new WeakMap<CoreServices, TerminalService>()
@@ -15,6 +16,7 @@ export function terminalFor(core: CoreServices): TerminalService {
       projectPath: (id) => shell.projects.getProject(id)?.canonicalPath ?? null,
       canOperate: (id) => !lifecycle.isProjectClosing?.(id) && !lifecycle.isQuitting?.(),
       shellEnv: () => core.shellEnv.get(),
+      resolveCwd: (id, path) => filesFor(core).resolveDirectory(id, path),
       output: (event) => core.broadcast(terminalContract.events.output, event),
       changed: (event) => core.broadcast(terminalContract.events.changed, event)
     })

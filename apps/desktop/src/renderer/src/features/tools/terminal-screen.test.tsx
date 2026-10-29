@@ -35,7 +35,10 @@ vi.mock('@xterm/xterm', () => ({ Terminal: class {
   onData(listener: (data: string) => void) { emulator.input = listener; return { dispose: vi.fn() } }
   resize(cols: number, rows: number) { this.cols = cols; this.rows = rows; emulator.resize(cols, rows) }
   reset = emulator.reset; focus = emulator.focus; blur = emulator.blur; dispose = emulator.dispose
+  attachCustomKeyEventHandler() {}; registerLinkProvider() { return { dispose: vi.fn() } }
+  clear = vi.fn(); selectAll = vi.fn(); hasSelection = () => false; clearSelection = vi.fn()
 } }))
+vi.mock('@xterm/addon-search', () => ({ SearchAddon: class { findNext() { return false }; findPrevious() { return false }; clearDecorations() {} } }))
 vi.mock('@xterm/addon-fit', () => ({ FitAddon: class { fit() {
   emulator.events.push('fit')
   const term = emulator.terms.at(-1)
@@ -49,7 +52,7 @@ beforeEach(() => {
   emulator.writes.length = 0; emulator.terms.length = 0; emulator.opened.length = 0; emulator.events.length = 0; emulator.fitTo = null
   vi.clearAllMocks(); emulator.restore.mockReset()
   vi.stubGlobal('ResizeObserver', class { observe() {}; disconnect() {} })
-  api = { list: vi.fn(), create: vi.fn(), close: vi.fn(), attach: vi.fn().mockResolvedValue(snapshot), detach: vi.fn().mockResolvedValue(undefined), ack: vi.fn().mockResolvedValue(undefined), input: vi.fn().mockResolvedValue(undefined), resize: vi.fn().mockResolvedValue(undefined), onChanged: vi.fn(() => () => {}), onOutput: vi.fn(listener => { output = listener; return () => {} }) }
+  api = { list: vi.fn(), create: vi.fn(), close: vi.fn(), rename: vi.fn(), clear: vi.fn().mockResolvedValue(undefined), attach: vi.fn().mockResolvedValue(snapshot), detach: vi.fn().mockResolvedValue(undefined), ack: vi.fn().mockResolvedValue(undefined), input: vi.fn().mockResolvedValue(undefined), resize: vi.fn().mockResolvedValue(undefined), onChanged: vi.fn(() => () => {}), onOutput: vi.fn(listener => { output = listener; return () => {} }) }
   vi.mocked(terminalApi).mockReturnValue(api)
 })
 afterEach(() => {

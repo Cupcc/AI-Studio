@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-28",
+  "method": "Electron shell.trashItem (real system API, no UI substitution)",
+  "sourceRemoved": true,
+  "destinationVerified": true,
+  "fixtureName": "studio-w7-native-trash-1793169672957.txt",
+  "ok": true
+}

@@ -16,8 +16,12 @@ describe('viewer editor options', () => {
     expect(code).toMatchObject({
       minimap: { enabled: false }, links: false, wordBasedSuggestions: 'off', occurrencesHighlight: 'off', selectionHighlight: false,
       quickSuggestions: false, suggestOnTriggerCharacters: false, hover: { enabled: 'off' }, parameterHints: { enabled: false },
-      codeLens: false, folding: false, colorDecorators: false, stickyScroll: { enabled: false }, bracketPairColorization: { enabled: false }
+      codeLens: false, colorDecorators: false, stickyScroll: { enabled: false }, bracketPairColorization: { enabled: false }
     })
+  })
+
+  it('fold by indentation without a language service, as VS Code does for plain grammars (DEC-25)', () => {
+    expect(code).toMatchObject({ folding: true, foldingStrategy: 'indentation', showFoldingControls: 'mouseover' })
   })
 
   it('let Tab leave the editor (no keyboard trap) and name the editor after the path', () => {

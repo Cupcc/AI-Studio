@@ -8,7 +8,8 @@ export type SessionId = string
 export const DEFAULT_VIEW_IDS = ['overview', 'progress', 'architecture', 'agent-team', 'business-flow'] as const
 export type ViewId = (typeof DEFAULT_VIEW_IDS)[number]
 
-export const TOOL_IDS = ['files', 'diff', 'browser', 'terminal'] as const
+// Search joined as the fifth tool, after Files (FR-TOOL-005, DEC-25). A saved `lastTool` from older versions stays valid.
+export const TOOL_IDS = ['files', 'search', 'diff', 'browser', 'terminal'] as const
 export type ToolId = (typeof TOOL_IDS)[number]
 
 /** What the right area shows in Project View Mode (UX P-B). */
@@ -88,6 +89,8 @@ export interface ShellBootstrap {
 
 /** Commands sent by the application menu (PROJ-Q17). */
 export type MenuCommand = 'newTab' | 'closeTab' | 'openDirectory' | 'nextTab' | 'previousTab'
+  // Tool shortcuts as in VS Code (DEC-25); handled by the tools integration.
+  | 'quickOpen' | 'showFiles' | 'showSearch' | 'showDiff' | 'showBrowser' | 'toggleTerminal'
 
 export interface QuitRequest {
   /** Running + Needs Input sessions across all Projects. */

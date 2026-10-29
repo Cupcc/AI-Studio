@@ -6,7 +6,8 @@ import type { CoreServices } from '../core'
 import { createFilesFeature } from '../../ipc/files'
 
 const service = vi.hoisted(() => ({
-  list: vi.fn(), read: vi.fn(), resolveReference: vi.fn(), subscribe: vi.fn(), unsubscribe: vi.fn(), dispose: vi.fn()
+  list: vi.fn(), read: vi.fn(), resolveReference: vi.fn(), subscribe: vi.fn(), unsubscribe: vi.fn(), dispose: vi.fn(),
+  create: vi.fn(), rename: vi.fn(), move: vi.fn(), copy: vi.fn(), trash: vi.fn(), open: vi.fn(), editors: vi.fn(), index: vi.fn(), readImage: vi.fn()
 }))
 vi.mock('./index', () => ({ filesFor: () => service }))
 
@@ -23,6 +24,26 @@ describe('Files IPC input parsing', () => {
     expect(handlers.resolveReference.parse({ projectId: 'p1', paths: ['a', 'b/c'] })).toEqual({ projectId: 'p1', paths: ['a', 'b/c'] })
     expect(handlers.subscribe.parse({ projectId: 'p1' })).toEqual({ projectId: 'p1' })
     expect(handlers.unsubscribe.parse({ projectId: 'p1', subscriptionId: 's1' })).toEqual({ projectId: 'p1', subscriptionId: 's1' })
+  })
+
+  it('parses the file management requests and refuses hostile names, paths and open targets', () => {
+    expect(handlers.create.parse({ projectId: 'p1', parent: 'src', name: 'a/b.ts', kind: 'file' })).toEqual({ projectId: 'p1', parent: 'src', name: 'a/b.ts', kind: 'file' })
+    expect(() => handlers.create.parse({ projectId: 'p1', parent: 'src', name: 'a', kind: 'symlink' })).toThrow()
+    expect(() => handlers.create.parse({ projectId: 'p1', parent: '../x', name: 'a', kind: 'file' })).toThrow()
+    expect(handlers.rename.parse({ projectId: 'p1', path: 'a.ts', name: 'b.ts' })).toEqual({ projectId: 'p1', path: 'a.ts', name: 'b.ts' })
+    expect(() => handlers.rename.parse({ projectId: 'p1', path: 'a.ts', name: '../b.ts' })).toThrow()
+    expect(() => handlers.rename.parse({ projectId: 'p1', path: 'a.ts', name: '' })).toThrow()
+    expect(handlers.move.parse({ projectId: 'p1', paths: ['a', 'b/c'], target: '' })).toEqual({ projectId: 'p1', paths: ['a', 'b/c'], target: '' })
+    expect(() => handlers.copy.parse({ projectId: 'p1', paths: [], target: '' })).toThrow()
+    expect(() => handlers.copy.parse({ projectId: 'p1', paths: ['/etc/passwd'], target: '' })).toThrow()
+    expect(() => handlers.trash.parse({ projectId: 'p1', paths: Array.from({ length: 501 }, (_, i) => `f${i}`) })).toThrow()
+    expect(handlers.open.parse({ projectId: 'p1', path: 'a.ts', target: 'vscode', line: 3 })).toEqual({ projectId: 'p1', path: 'a.ts', target: 'vscode', line: 3 })
+    expect(() => handlers.open.parse({ projectId: 'p1', path: 'a.ts', target: 'terminal' })).toThrow()
+    expect(() => handlers.open.parse({ projectId: 'p1', path: 'a.ts', target: 'default', url: 'file:///etc/passwd' })).toThrow()
+    expect(() => handlers.open.parse({ projectId: 'p1', path: 'a.ts', target: 'vscode', line: 0 })).toThrow()
+    expect(() => handlers.editors.parse({ any: 1 })).toThrow()
+    expect(handlers.index.parse({ projectId: 'p1' })).toEqual({ projectId: 'p1' })
+    expect(service.create).not.toHaveBeenCalled()
   })
 
   const hostilePaths: [string, unknown][] = [

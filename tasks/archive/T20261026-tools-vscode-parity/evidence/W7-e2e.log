@@ -1,0 +1,22 @@
+
+Running 15 tests using 1 worker
+
+(node:25823) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/diff.spec.ts:38:5 › FR-TOOL-002: staged, unstaged, untracked, renamed, deleted, mode-only and binary changes against HEAD, refreshed live (6.8s)
+  ✓   2 e2e/diff.spec.ts:97:5 › FR-TOOL-002 item 3: a clean repository says so, a directory that is not Git never says "no changes" and gets no repository (2.5s)
+  ✓   3 e2e/diff.spec.ts:118:5 › FR-TOOL-002 item 3: an unborn HEAD explains the missing baseline, lists the files as new and never claims "no changes" (2.2s)
+  ✓   4 e2e/diff.spec.ts:134:5 › FR-TOOL-002: a Project inside a repository shows only its own changes and says where it is (2.4s)
+  ✓   5 e2e/files.spec.ts:45:5 › FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, special names and failure states (5.8s)
+  ✓   6 e2e/files.spec.ts:130:5 › FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through the simulated Provider, keep input on failure (6.2s)
+  ✓   7 e2e/runtime-tools.spec.ts:97:5 › FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolation, final empty state and Project confirmation (9.2s)
+  ✓   8 e2e/runtime-tools.spec.ts:192:5 › FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, mailto choice, menu, shared persistent data (8.2s)
+  ✓   9 e2e/runtime-tools.spec.ts:271:5 › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit (7.3s)
+  ✓  10 e2e/vscode-parity.spec.ts:104:5 › FR-TOOL-001 / DEC-25: explorer context menu, inline new / rename, clipboard, drag, Trash, Git colours and multi-select (5.9s)
+  ✓  11 e2e/vscode-parity.spec.ts:179:5 › FR-TOOL-001 / FR-TOOL-005: ⌘P Quick Open with :line, Search with options, results open in Files, find in folder (7.3s)
+  ✓  12 e2e/vscode-parity.spec.ts:221:5 › FR-TOOL-002 / DEC-25: Diff stays read-only with tree view, inline toggle, change navigation and open in Files (2.8s)
+  ✓  13 e2e/vscode-parity.spec.ts:244:5 › FR-TOOL-004 / DEC-25: ⌘-click links to Browser and Files, find, ⌘K clear, rename and open a Terminal in a folder (5.8s)
+  ✓  14 e2e/vscode-parity.spec.ts:300:5 › FR-TOOL-003 step 3: popups open as tabs, tabs switch and close, favorites and history suggest, site permission prompt (6.8s)
+  ✓  15 e2e/vscode-parity.spec.ts:353:5 › FR-TOOL-004 step 3: ⌘\ splits the Terminal side by side, panes keep their own shells and output (4.2s)
+
+  15 passed (1.4m)

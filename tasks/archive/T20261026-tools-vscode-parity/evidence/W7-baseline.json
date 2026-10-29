@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-28",
+  "commit": "997bce7ce62e03de3a5022415f4e366bb71dec06",
+  "scope": "997bce7 plus current uncommitted code fixes; source read-only by W7",
+  "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+  "sourceSha256": {
+    "apps/desktop/electron-builder.yml": "ef5024141359cd925bf788d1a52d85f855d17248f4a194e15e45cb969c2f09fb",
+    "apps/desktop/electron.vite.config.ts": "d242c22cc7031baeb425d1dce54ce938062fd0c634b41b79dccef3aac562baf4",
+    "apps/desktop/native/project-ripgrep.c": "52ce7286ea8c08c8f400c3e0d1292531839f32ed1a76dbf5f9fc92d37ccc2a4a",
+    "apps/desktop/native/rename-exclusive.c": "e64448c624e52d9049e4ae23e04ad5cdcb46e8a4da5b7850f81cd40a0111a27b",
+    "apps/desktop/scripts/after-pack.cjs": "baad4af0d08b0f0b9e2e5a7ca83d2f1ebef8263682b77c73da9aa1ea5f1d2d9c",
+    "apps/desktop/scripts/build-files-helper.d.mts": "51396f01a9c7d25a696a69fd01448cbef2f8669e32029caa88657ec399421667",
+    "apps/desktop/scripts/build-files-helper.mjs": "69e4f7da039143cd558705bd6a8922ce4253e7e7f7b8765f0ebe8c8c2a4d7475",
+    "apps/desktop/src/main/services/files/file-index.ts": "3e5efb989a365a9f6acacdd5c04d1fdf353e60345bebcef12c36ea982cfd47e7",
+    "apps/desktop/src/main/services/files/operations.test.ts": "4002a0ab2d281aef31d693033d2c5dec6934ff0e40a53f0990cbb7e90d7cbd30",
+    "apps/desktop/src/main/services/files/operations.ts": "ed63f535dfda671ef7e8528783d28d5e4357b76c9761e8433b31191fbb3f763e",
+    "apps/desktop/src/main/services/files/rename-exclusive.ts": "dc3c0c02a6832639648a8068b6dd6be3f750c0ac1cd8030b912b157c4a419e0f",
+    "apps/desktop/src/main/services/files/service.ts": "f0fb353a7c795b4f1f255ae896cb33c9335597cc43b3646787f7bc8d808e10c0",
+    "apps/desktop/src/main/services/search/ripgrep-search.ts": "635dccd393c35e835de4059068e55ef93f70bcd3a3a1c4dff60cfcb18ada0275",
+    "apps/desktop/src/main/services/search/search.test.ts": "8180b38e85ed23d186b93099b2509338b6536cae2de88f699e7c93227e88f6ee",
+    "apps/desktop/src/main/smoke/native-smoke.ts": "435a8a9887cebe1a7d678ac61c6e0b6d6713a9d83826bea449ecba9580e074d0",
+    "apps/desktop/src/renderer/src/features/tools/files/FileTree.tsx": "105781ed4603e07bd274e8f8932b2043552ad8a1adca24c7476e647369262379",
+    "apps/desktop/src/renderer/src/features/tools/files/files-panel.test.tsx": "5b4632be8024cbe2f8a15882324fd359d3d61c28165cf114a96871daea20cf66",
+    "apps/desktop/src/renderer/src/features/tools/search/SearchPanel.tsx": "b6e012fa9e27e79a547ad0c5046d7a6e5f6fa7382d6e08c680e6c85fc18fe121",
+    "apps/desktop/src/renderer/src/features/tools/terminal-links.test.ts": "7b66594fd970c33391101d56c222d435f81f7af41be414ab94d7e8ac959c1389",
+    "apps/desktop/src/renderer/src/features/tools/terminal-links.ts": "134a374b07d7a25bffbc83692b2cc42ff6aa363edd907e95be0c29c40919e63e",
+    "apps/desktop/src/shared/tools/search.ts": "423cf28cc3690248b279a23942769a274aa3f09d49277cecd6f5bd3d1875fd45",
+    "apps/desktop/vitest.config.ts": "123f641d23d413cf902b050a931aad047e1757d72f1fc7df12d41d5fabf35838"
+  },
+  "outputSha256": {
+    "apps/desktop/out/main/index.js": "b87459a044feed64a7331d04aa7daa5f030d570e1ee542d374ad3fa007532843",
+    "apps/desktop/out/native/rename-exclusive": "51adffd082d59b5f8abf59e513545064255a7c071dc97098e58ed5ad3ed28e63",
+    "apps/desktop/out/native/project-ripgrep": "3e9702e24a10eec4b7c943649602c59e41910a5e02d15750eda797c5efd56b46",
+    "apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Resources/files/rename-exclusive": "51adffd082d59b5f8abf59e513545064255a7c071dc97098e58ed5ad3ed28e63",
+    "apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Resources/files/project-ripgrep": "3e9702e24a10eec4b7c943649602c59e41910a5e02d15750eda797c5efd56b46"
+  }
+}

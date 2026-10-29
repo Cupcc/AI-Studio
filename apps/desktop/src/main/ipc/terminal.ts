@@ -3,6 +3,8 @@ import type { TerminalAttachment, TerminalRef } from '@shared/tools/terminal'
 import type { CoreServices } from '../services/core'
 import { terminalFor } from '../services/terminal'
 import { terminalDimensions, TERMINAL_INPUT_LIMIT } from '../services/terminal/service'
+import { FILES_LIMITS, parseProjectPath } from '@shared/tools/files'
+import { TERMINAL_TITLE_LIMIT } from '@shared/tools/terminal'
 import { defineHandlers, IpcValidationError } from './registry'
 import { expectOnlyKeys, expectRecord, expectString } from './validate'
 
@@ -44,12 +46,25 @@ export function createTerminalFeature(core: CoreServices) {
   const service = terminalFor(core)
   return defineHandlers(terminalContract, {
     list: { parse: (raw) => project(record(raw, ['projectId'])), handle: ({ projectId }) => service.list(projectId) },
-    create: { parse: (raw) => { const value = record(raw, ['projectId', 'cols', 'rows']); return { ...project(value), ...dimensions(value) } }, handle: (request) => service.create(request) },
+    create: {
+      parse: (raw) => {
+        const value = record(raw, ['projectId', 'cols', 'rows', 'cwd'])
+        if (value.cwd === undefined) return { ...project(value), ...dimensions(value) }
+        let cwd: string
+        try { cwd = parseProjectPath(expectString(value.cwd, 'cwd', { maxLength: FILES_LIMITS.pathBytes })) } catch (error) {
+          throw new IpcValidationError(error instanceof Error ? error.message : 'invalid cwd')
+        }
+        return { ...project(value), ...dimensions(value), cwd }
+      },
+      handle: (request) => service.create(request)
+    },
     attach: { parse: (raw) => reference(record(raw, refKeys)), handle: (request, ctx) => service.attach(request, ctx.senderId) },
     detach: { parse: (raw) => attachment(record(raw, attachmentKeys)), handle: (request, ctx) => service.detach(request, ctx.senderId) },
     ack: { parse: (raw) => { const value = record(raw, [...attachmentKeys, 'sequence']); return { ...attachment(value), sequence: integer(value.sequence, 'sequence') } }, handle: (request, ctx) => service.ack(request, ctx.senderId) },
     input: { parse: (raw) => { const value = record(raw, [...refKeys, 'data']); return { ...reference(value), data: expectString(value.data, 'data', { minLength: 1, maxLength: TERMINAL_INPUT_LIMIT }) } }, handle: (request) => service.input(request, request.data) },
     resize: { parse: (raw) => { const value = record(raw, [...refKeys, 'cols', 'rows']); return { ...reference(value), ...dimensions(value) } }, handle: (request) => service.resize(request, request.cols, request.rows) },
-    close: { parse: (raw) => { const value = record(raw, [...refKeys, 'confirmed']); if (typeof value.confirmed !== 'boolean') throw new IpcValidationError('confirmed must be boolean'); return { ...reference(value), confirmed: value.confirmed } }, handle: (request) => service.close(request, request.confirmed) }
+    close: { parse: (raw) => { const value = record(raw, [...refKeys, 'confirmed']); if (typeof value.confirmed !== 'boolean') throw new IpcValidationError('confirmed must be boolean'); return { ...reference(value), confirmed: value.confirmed } }, handle: (request) => service.close(request, request.confirmed) },
+    rename: { parse: (raw) => { const value = record(raw, [...refKeys, 'title']); return { ...reference(value), title: expectString(value.title, 'title', { minLength: 1, maxLength: TERMINAL_TITLE_LIMIT }) } }, handle: (request) => service.rename(request, request.title) },
+    clear: { parse: (raw) => reference(record(raw, refKeys)), handle: (request) => service.clear(request) }
   }, () => service.dispose())
 }

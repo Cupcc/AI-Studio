@@ -15,6 +15,8 @@ export interface DiffContent {
 /** One Monaco diff editor with its two models, alive between `openDiffSession` and `dispose`. */
 export interface DiffSession {
   show(content: DiffContent): void
+  configure(options: { sideBySide: boolean; hideUnchanged: boolean }): void
+  goToDiff(direction: 'next' | 'previous'): void
   dispose(): void
 }
 
@@ -101,6 +103,14 @@ export async function openDiffSession(
         monaco.editor.setModelLanguage(originalModel, id)
         monaco.editor.setModelLanguage(modifiedModel, id)
       })
+    },
+    configure({ sideBySide, hideUnchanged }) {
+      if (disposed) return
+      // An explicit choice: the automatic inline fallback for narrow panels applies only to side by side.
+      diffEditor.updateOptions({ renderSideBySide: sideBySide, useInlineViewWhenSpaceIsLimited: sideBySide, hideUnchangedRegions: { enabled: hideUnchanged } })
+    },
+    goToDiff(direction) {
+      if (!disposed) diffEditor.goToDiff(direction)
     },
     dispose() {
       if (disposed) return

@@ -4,7 +4,8 @@ import { createBrowserFeature } from '../../ipc/browser'
 import type { CoreServices } from '../core'
 
 const service = vi.hoisted(() => ({
-  getState: vi.fn(), navigate: vi.fn(), reload: vi.fn(), setBounds: vi.fn(),
+  getState: vi.fn(), navigate: vi.fn(), reload: vi.fn(), stop: vi.fn(), goBack: vi.fn(), goForward: vi.fn(), toggleDevTools: vi.fn(),
+  zoom: vi.fn(), openInSystemBrowser: vi.fn(), clearData: vi.fn(), dismissNotice: vi.fn(), setBounds: vi.fn(),
   setVisible: vi.fn(), focus: vi.fn(), openExternal: vi.fn(), dismissExternal: vi.fn(), dispose: vi.fn()
 }))
 vi.mock('./index', () => ({ browserFor: () => service }))
@@ -28,6 +29,12 @@ describe('Browser IPC boundary', () => {
     expect(() => feature.handlers.navigate.parse({ ...ref, url: 'http://localhost/', script: 'execute' })).toThrow()
     expect(() => feature.handlers.openExternal.parse({ ...ref, requestId: 'id', url: 'https://example.com/' })).toThrow()
     expect(() => feature.handlers.setVisible.parse({ ...ref, visible: 1 })).toThrow()
+    // System-browser opening takes no URL: main reopens the page's own validated address.
+    expect(() => feature.handlers.openInSystemBrowser.parse({ ...ref, url: 'file:///etc/passwd' })).toThrow()
+    expect(() => feature.handlers.zoom.parse({ ...ref, zoom: 3 })).toThrow()
+    expect(feature.handlers.zoom.parse({ ...ref, zoom: 'in' })).toEqual({ ...ref, zoom: 'in' })
+    feature.handlers.zoom.handle({ ...ref, zoom: 'reset' }, { senderId: 4, senderUrl: 'app://studio/' })
+    expect(service.zoom).toHaveBeenCalledWith({ ...ref, zoom: 'reset' }, 'reset', 4)
   })
 
   it.each([

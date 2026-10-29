@@ -45,6 +45,10 @@ export function createDiffFeature(core: CoreServices) {
       },
       handle: (request) => service.getFile(request)
     },
+    getIgnored: {
+      parse: (raw) => ({ projectId: project(record(raw, ['projectId'])) }),
+      handle: ({ projectId }) => service.getIgnored(projectId)
+    },
     subscribe: {
       parse: (raw) => ({ projectId: project(record(raw, ['projectId'])) }),
       handle: ({ projectId }, context) => service.subscribe(projectId, context.senderId)

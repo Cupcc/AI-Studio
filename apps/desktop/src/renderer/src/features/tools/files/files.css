@@ -51,3 +51,64 @@
 .files-note .files-skeleton { width: 40%; }
 @keyframes files-skeleton { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .files-skeleton { animation: none; } }
+
+/* ---- VS Code explorer parity (DEC-25) ---- */
+/* Git and file-type tints: text colours reach 4.5:1 on the solid surfaces of each scheme; icons are non-text (3:1). */
+.files-tool, .search-tool, .quick-open {
+  --git-added: #15803d; --git-modified: #a16207; --git-conflict: #b91c1c; --git-renamed: #0f766e;
+  --file-ts: #2563eb; --file-js: #a16207; --file-json: #b45309; --file-doc: #475569; --file-style: #7c3aed;
+  --file-markup: #c2410c; --file-image: #15803d; --file-code: #0e7490; --file-config: #64748b; --file-folder: #6b7280;
+}
+:root[data-scheme="dark"] .files-tool, :root[data-scheme="dark"] .search-tool, :root[data-scheme="dark"] .quick-open {
+  --git-added: #73c991; --git-modified: #e2c08d; --git-conflict: #f48771; --git-renamed: #6cc4b8;
+  --file-ts: #6ea8fe; --file-js: #e5c07b; --file-json: #e0a96d; --file-doc: #a7b4c6; --file-style: #c4a7ff;
+  --file-markup: #f0a070; --file-image: #7ccf9a; --file-code: #67c8d8; --file-config: #9aa7b8; --file-folder: #a1a1aa;
+}
+.file-icon { flex: none; color: var(--color-text-muted); }
+.file-icon--folder { color: var(--file-folder); }
+.file-icon--ts { color: var(--file-ts); } .file-icon--js { color: var(--file-js); } .file-icon--json { color: var(--file-json); }
+.file-icon--doc { color: var(--file-doc); } .file-icon--style { color: var(--file-style); } .file-icon--markup { color: var(--file-markup); }
+.file-icon--image { color: var(--file-image); } .file-icon--code { color: var(--file-code); } .file-icon--config { color: var(--file-config); }
+
+.files-header .icon-button { flex: none; }
+.files-row.is-marked { background: var(--color-selected); }
+.files-row.is-marked.is-selected { box-shadow: inset 2px 0 0 var(--color-border-focus); }
+.files-row[data-git="added"] .files-row__name, .files-row[data-git="added"] .files-row__git { color: var(--git-added); }
+.files-row[data-git="modified"] .files-row__name, .files-row[data-git="modified"] .files-row__git { color: var(--git-modified); }
+.files-row[data-git="conflict"] .files-row__name, .files-row[data-git="conflict"] .files-row__git { color: var(--git-conflict); }
+.files-row[data-git="renamed"] .files-row__name, .files-row[data-git="renamed"] .files-row__git { color: var(--git-renamed); }
+.files-row__git { flex: none; min-width: 12px; font: 600 var(--font-size-xs) var(--font-mono); text-align: center; }
+.files-row__dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .7; }
+.files-row[data-git="added"] .files-row__dot { color: var(--git-added); }
+.files-row[data-git="modified"] .files-row__dot { color: var(--git-modified); }
+.files-row[data-git="conflict"] .files-row__dot { color: var(--git-conflict); }
+.files-row[data-git="renamed"] .files-row__dot { color: var(--git-renamed); }
+.files-row.is-ignored .files-row__name, .files-row.is-ignored .file-icon { opacity: .55; }
+.files-row.is-cut { opacity: .5; }
+.files-row.is-drop-target, .files-tree.is-drop-target { background: var(--color-selected); box-shadow: inset 0 0 0 1px var(--color-border-focus); }
+.files-row--editing { padding-inline-end: var(--space-2); }
+.files-row__input { flex: 1; min-width: 0; height: 22px; padding: 0 var(--space-1-5); border: 1px solid var(--color-border-focus); border-radius: var(--radius-xs); outline: 0; background: var(--color-control); color: var(--color-text); font: var(--font-size-md) var(--font-sans); }
+.files-tree { min-height: 100%; }
+
+.files-notice { display: flex; flex: none; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3); border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.files-notice[data-tone="warn"] { background: var(--color-needs-input-bg); color: var(--color-text-2); }
+.files-notice span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.files-confirm { flex: none; padding: var(--space-3); border-bottom: 1px solid var(--color-border-strong); background: var(--color-floating); }
+.files-confirm p { margin: 0 0 var(--space-1); font-size: var(--font-size-md); overflow-wrap: anywhere; }
+.files-confirm__actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
+
+.files-tabs { display: flex; flex: none; gap: 1px; overflow-x: auto; border-bottom: 1px solid var(--color-border); scrollbar-width: none; }
+.files-tab { display: flex; flex: none; align-items: center; max-width: 180px; border-inline-end: 1px solid var(--color-border); color: var(--color-text-muted); }
+.files-tab.is-current { background: var(--color-selected); color: var(--color-text); }
+.files-tab.is-preview button[role="tab"] span { font-style: italic; }
+.files-tab button[role="tab"] { display: flex; align-items: center; gap: var(--space-1); min-width: 0; height: 28px; padding: 0 var(--space-1) 0 var(--space-2); border: 0; background: transparent; color: inherit; font: var(--font-size-sm) var(--font-sans); }
+.files-tab button[role="tab"] span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.files-tab__close { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-inline-end: var(--space-1); border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--color-text-muted); opacity: 0; }
+.files-tab:hover .files-tab__close, .files-tab.is-current .files-tab__close, .files-tab__close:focus-visible { opacity: 1; }
+.files-tab__close:hover { background: var(--color-hover); }
+.files-viewer__actions .icon-button.is-selected { background: var(--color-selected); }
+.files-image { display: flex; flex: 1; align-items: center; justify-content: center; min-height: 0; padding: var(--space-3); overflow: auto;
+  background-image: linear-gradient(45deg, var(--color-hover) 25%, transparent 25%, transparent 75%, var(--color-hover) 75%), linear-gradient(45deg, var(--color-hover) 25%, transparent 25%, transparent 75%, var(--color-hover) 75%);
+  background-position: 0 0, 8px 8px; background-size: 16px 16px; }
+.files-image img { max-width: 100%; max-height: 100%; object-fit: contain; image-rendering: auto; }
+.files-markdown { flex: 1; min-height: 0; padding: var(--space-3) var(--space-4); overflow: auto; font-size: var(--font-size-md); line-height: 1.6; }

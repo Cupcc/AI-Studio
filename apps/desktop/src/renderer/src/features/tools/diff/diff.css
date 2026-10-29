@@ -87,3 +87,11 @@
 .turn-diff-selector { display: flex; flex-direction: column; gap: var(--space-1); padding: 0 var(--space-3) var(--space-2); font-size: var(--font-size-sm); }
 .turn-diff-selector select { width: 100%; min-width: 0; padding: var(--space-1); background: var(--color-pane); color: var(--color-text); border: 1px solid var(--color-border); border-radius: var(--radius-xs); }
 .turn-diff-body .diff-patch-wrap { flex: none; min-height: 80px; }
+
+/* VS Code parity (DEC-25): tree grouping and the file diff toolbar. */
+.diff-group__label { display: flex; align-items: center; gap: var(--space-1-5); padding: var(--space-1) var(--space-3) 2px; color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.diff-group__label span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.diff-list--tree .diff-row { padding-inline-start: calc(var(--space-3) + 12px); }
+.diff-file__tools { display: inline-flex; flex: none; align-items: center; gap: 2px; margin-inline-start: auto; }
+.diff-file__tools .icon-button.is-selected { background: var(--color-selected); }
+.diff-list--tree .diff-row__dir { display: none; }

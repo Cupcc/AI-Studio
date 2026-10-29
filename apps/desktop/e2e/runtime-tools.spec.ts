@@ -44,6 +44,24 @@ async function terminalOutputRow(text: string) {
   // A substring can match the echoed command before it has actually executed.
   await expect(workspace().locator('.xterm-rows > div').filter({ hasText: new RegExp(`^${text}$`) })).toHaveCount(1)
 }
+/** Native menus are outside the DOM: the next popup immediately "clicks" the item with this label. */
+async function chooseNativeMenu(label: string) {
+  await app.evaluate(({ Menu }, wanted) => {
+    const original = Menu.buildFromTemplate
+    Menu.buildFromTemplate = (template) => {
+      Menu.buildFromTemplate = original
+      const menu = original(template)
+      menu.popup = (options) => {
+        const find = (items: Electron.MenuItem[]): Electron.MenuItem | undefined => items.map(item => item.label === wanted ? item : item.submenu ? find(item.submenu.items) : undefined).find(Boolean)
+        const item = find(menu.items)
+        if (!item) throw new Error(`No native menu item ${wanted}`)
+        item.click()
+        options?.callback?.()
+      }
+      return menu
+    }
+  }, label)
+}
 async function capture(name: string) { mkdirSync(evidence, { recursive: true }); await page.screenshot({ path: join(evidence, `W0-${name}.png`) }) }
 async function browserInfo() {
   return app.evaluate(({ webContents }) => {
@@ -62,9 +80,9 @@ async function previewText(): Promise<string> {
 test.beforeEach(async () => {
   dir = mkdtempSync(join(tmpdir(), 'studio runtime tools '))
   server = createServer((request, response) => {
-    if (request.url === '/redirect') { response.writeHead(302, { Location: 'https://example.com/' }); response.end(); return }
+    if (request.url === '/redirect') { response.writeHead(302, { Location: 'mailto:dev@example.com' }); response.end(); return }
     response.setHeader('Content-Type', 'text/html')
-    response.end('<!doctype html><title>Runtime fixture</title><h1>Local preview</h1><button onclick="document.cookie=\'test=alpha\';location.reload()">Set cookie</button><p id="cookie"></p><a href="/next">Next local page</a><a href="/redirect">Redirect externally</a><a href="https://example.com/">External link</a><script>document.getElementById("cookie").textContent=document.cookie;document.body.dataset.studio=typeof window.studio;document.body.dataset.node=typeof require;</script>')
+    response.end('<!doctype html><title>Runtime fixture</title><h1>Local preview</h1><button onclick="document.cookie=\'test=alpha; max-age=86400\';location.reload()">Set cookie</button><p id="cookie"></p><a href="/next">Next local page</a><a href="/redirect">Redirect to mail</a><a href="mailto:dev@example.com">Mail link</a><script>document.getElementById("cookie").textContent=document.cookie;document.body.dataset.studio=typeof window.studio;document.body.dataset.node=typeof require;</script>')
   })
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
   address = `http://127.0.0.1:${(server.address() as { port: number }).port}/`
@@ -171,12 +189,15 @@ test('FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolati
   await expect(page.getByRole('heading', { name: 'AI Developer Studio' })).toBeVisible()
 })
 
-test('FR-TOOL-003 / AC-07: real isolated local preview, external redirect choice, overlays, failures and address-only restart', async () => {
+test('FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, mailto choice, menu, shared persistent data', async () => {
   await openProject('Browser Project')
   await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
-  await workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true }).fill(address)
-  await workspace().getByRole('button', { name: '前往地址', exact: true }).click()
+  const addressBar = () => workspace().getByRole('combobox', { name: '网址', exact: true })
+  // No scheme typed: a loopback address is completed with http:// (TOOLS-Q9).
+  await addressBar().fill(address.replace('http://', ''))
+  await workspace().getByRole('button', { name: '前往网址', exact: true }).click()
   await expect.poll(previewText).toContain('Local preview')
+  await expect(addressBar()).toHaveValue(address)
   const info = await browserInfo()
   const isolation = await app.evaluate(async ({ webContents }, id) => webContents.fromId(id)!.executeJavaScript('({studio:typeof window.studio,node:typeof require})'), info!.id)
   expect(isolation).toEqual({ studio: 'undefined', node: 'undefined' })
@@ -184,51 +205,59 @@ test('FR-TOOL-003 / AC-07: real isolated local preview, external redirect choice
   await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
   await expect(page.getByRole('dialog', { name: '设置' })).toBeVisible()
   await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.contentView.children.length)).toBe(0)
-  await capture('browser-settings-overlay')
   await page.getByRole('button', { name: '关闭设置', exact: true }).click()
   await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.contentView.children.length)).toBe(1)
   const preview = app.context().pages().find(candidate => candidate.url() === address)
   expect(preview).toBeDefined()
   await preview!.getByRole('button', { name: 'Set cookie', exact: true }).click()
   await expect.poll(previewText).toContain('test=alpha')
+  // History: back and forward use the page's own navigation history.
   await preview!.getByRole('link', { name: 'Next local page', exact: true }).click()
   await expect.poll(() => browserInfo().then(info => info?.url)).toBe(address + 'next')
-  await preview!.getByRole('link', { name: 'Redirect externally', exact: true }).click()
-  await expect(workspace().getByRole('alertdialog', { name: '在系统浏览器中打开？' })).toBeVisible()
-  await workspace().getByRole('button', { name: '取消', exact: true }).click()
-  await expect(workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true })).toHaveValue(address + 'next')
-  await workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true }).fill(address)
-  await workspace().getByRole('button', { name: '前往地址', exact: true }).click()
+  await workspace().getByRole('button', { name: '后退', exact: true }).click()
   await expect.poll(() => browserInfo().then(info => info?.url)).toBe(address)
-  await workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true }).fill(address + 'redirect')
-  await workspace().getByRole('button', { name: '前往地址', exact: true }).click()
-  await expect(workspace().getByRole('alertdialog', { name: '在系统浏览器中打开？' })).toBeVisible()
-  await capture('browser-external-redirect')
+  await workspace().getByRole('button', { name: '前进', exact: true }).click()
+  await expect.poll(() => browserInfo().then(info => info?.url)).toBe(address + 'next')
+  await expect(addressBar()).toHaveValue(address + 'next')
+  // mailto: (link or redirect) asks before handing over to the system; cancel keeps the page.
+  // Clicked from page script: Playwright would otherwise wait for a navigation that is (correctly) never committed.
+  await preview!.evaluate(() => (document.querySelector('a[href^="mailto:"]') as HTMLAnchorElement).click())
+  await expect(workspace().getByRole('alertdialog', { name: '用系统应用打开？' })).toBeVisible()
+  await capture('browser-mailto-choice')
   await workspace().getByRole('button', { name: '取消', exact: true }).click()
-  expect((await browserInfo())?.url).toBe(address)
-  await expect(workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true })).toHaveValue(address)
-  await expect(workspace().getByRole('heading', { name: '无法加载网页' })).toHaveCount(0)
-  await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.contentView.children.length)).toBe(1)
-  await workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true }).fill('file:///etc/hosts')
-  await workspace().getByRole('button', { name: '前往地址', exact: true }).click()
+  await expect.poll(() => browserInfo().then(info => info?.url)).toBe(address + 'next')
+  await addressBar().fill('file:///etc/hosts')
+  await workspace().getByRole('button', { name: '前往网址', exact: true }).click()
   await expect(workspace().locator('.runtime-tool__error')).toContainText('HTTP / HTTPS')
-  await workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true }).fill(address)
-  await workspace().getByRole('button', { name: '前往地址', exact: true }).click()
+  await addressBar().fill(address)
+  await workspace().getByRole('button', { name: '前往网址', exact: true }).click()
   await expect.poll(previewText).toContain('Local preview')
-  // The cookie is set by the preview's visible button and a real page reload.
+  // The More menu is native; the test picks its items by label.
+  await chooseNativeMenu('放大')
+  await workspace().getByRole('button', { name: '更多 Browser 操作', exact: true }).click()
+  await expect.poll(() => app.evaluate(({ webContents }) => webContents.getAllWebContents().find(wc => wc.getURL().startsWith('http://127.0.0.1:'))?.getZoomFactor())).toBeCloseTo(1.1)
+  await chooseNativeMenu('实际大小（当前 110%）')
+  await workspace().getByRole('button', { name: '更多 Browser 操作', exact: true }).click()
+  await expect.poll(() => app.evaluate(({ webContents }) => webContents.getAllWebContents().find(wc => wc.getURL().startsWith('http://127.0.0.1:'))?.getZoomFactor())).toBeCloseTo(1)
+  // Browsing data is shared by every Project (TOOLS-Q10).
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
   await openProject('Other Browser')
   await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
-  await workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true }).fill(address)
-  await workspace().getByRole('button', { name: '前往地址', exact: true }).click()
+  await addressBar().fill(address)
+  await workspace().getByRole('button', { name: '前往网址', exact: true }).click()
   await expect.poll(() => app.evaluate(({ webContents }) => webContents.getAllWebContents().filter(wc => wc.getURL().startsWith('http://127.0.0.1:')).length)).toBe(2)
-  const cookies = await app.evaluate(async ({ webContents }) => Promise.all(webContents.getAllWebContents().filter(wc => wc.getURL().startsWith('http://127.0.0.1:')).map(wc => wc.executeJavaScript('document.cookie'))))
-  expect(cookies.sort()).toEqual(['', 'test=alpha'])
-  await page.getByRole('tab', { name: 'Browser Project', exact: true }).click()
-  await workspace().getByRole('button', { name: '刷新网页', exact: true }).click()
   await expect.poll(previewText).toContain('test=alpha')
+  await page.getByRole('tab', { name: 'Browser Project', exact: true }).click()
+  // ... and persistent across a restart.
   await closeTestApp(app, page); await launch()
-  await expect(workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true })).toHaveValue(address)
+  await expect(addressBar()).toHaveValue(address)
+  await expect.poll(previewText).toContain('test=alpha')
+  await capture('browser-persistent-cookie')
+  await chooseNativeMenu('清除浏览数据…')
+  await workspace().getByRole('button', { name: '更多 Browser 操作', exact: true }).click()
+  await workspace().getByRole('alertdialog', { name: '清除浏览数据？' }).getByRole('button', { name: '清除', exact: true }).click()
+  await expect(workspace().locator('.browser-notice')).toContainText('已清除')
+  await workspace().getByRole('button', { name: '刷新网页', exact: true }).click()
   await expect.poll(previewText).toContain('Local preview')
   expect(await previewText()).not.toContain('test=alpha')
   await new Promise<void>(resolve => server.close(() => resolve()))
@@ -249,8 +278,8 @@ test('FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup an
   await expect.poll(chainUrl).not.toBe('')
   const url = await chainUrl()
   await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
-  await workspace().getByRole('textbox', { name: '本地 Web 地址', exact: true }).fill(url)
-  await workspace().getByRole('button', { name: '前往地址', exact: true }).click()
+  await workspace().getByRole('combobox', { name: '网址', exact: true }).fill(url)
+  await workspace().getByRole('button', { name: '前往网址', exact: true }).click()
   await expect.poll(previewText).toContain('PTY Server Preview')
   await capture('terminal-server-browser-chain')
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()

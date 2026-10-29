@@ -13,6 +13,11 @@ files:
   - "!**/node_modules/node-pty/{deps,src,third_party,scripts,typings,binding.gyp}"
   - "!**/node_modules/node-pty/prebuilds/win32-*/**"
 extraResources:
+  - from: out/native
+    to: files
+    filter:
+      - rename-exclusive
+      - project-ripgrep
   - from: build
     to: icons
     filter:
@@ -22,6 +27,8 @@ asar: true
 # Native binaries (pty.node, spawn-helper) must live outside the asar archive.
 asarUnpack:
   - "**/node_modules/node-pty/**"
+  # ripgrep (Search, Quick Open) is a native executable and cannot run from inside the archive.
+  - "**/node_modules/@vscode/ripgrep-*/**"
 # node-pty ships N-API prebuilds that load in Electron as-is; no Electron rebuild.
 npmRebuild: false
 afterPack: scripts/after-pack.cjs

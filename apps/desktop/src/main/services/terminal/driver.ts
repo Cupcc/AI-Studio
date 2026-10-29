@@ -9,6 +9,8 @@ export interface TerminalProcess {
   resize(cols: number, rows: number): void
   pause(): void
   resume(): void
+  /** Name of the foreground process (e.g. `zsh`, `node`), as VS Code shows in its terminal tabs. */
+  processName?(): string
   onData(listener: (data: string) => void): { dispose(): void }
   onExit(listener: (exit: { exitCode: number; signal?: number }) => void): { dispose(): void }
   /** Natural PTY exit proves neither root ownership nor exit of observed descendants. */
@@ -80,6 +82,7 @@ export function createPtySpawner(options: { lister?: ProcessLister; gracefulMs?:
       write: (data) => proc.write(data),
       resize: (cols, rows) => proc.resize(cols, rows),
       pause: () => proc.pause(),
+      processName: () => { try { return proc.process } catch { return '' } },
       resume: () => proc.resume(),
       onData: (listener) => proc.onData(listener),
       onExit: (listener) => {

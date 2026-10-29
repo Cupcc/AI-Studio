@@ -469,3 +469,64 @@ describe('directories that fail', () => {
     expect(project()?.dirs.get('')).toMatchObject({ reason: 'unreadable', entries: [] })
   })
 })
+
+describe('VS Code explorer behaviour (DEC-25)', () => {
+  it('keeps a preview tab that the next single-click replaces, pins on request and closes to the neighbour', async () => {
+    await store().activate(id)
+    await store().select(id, 'README.md')
+    await store().select(id, 'src/a.ts')
+    expect(project()!.tabs).toEqual([{ path: 'src/a.ts', pinned: false }])
+    await store().select(id, 'src/a.ts', { pin: true })
+    await store().select(id, 'README.md')
+    expect(project()!.tabs).toEqual([{ path: 'src/a.ts', pinned: true }, { path: 'README.md', pinned: false }])
+    store().closeTab(id, 'README.md')
+    await idle()
+    expect(viewer()).toMatchObject({ path: 'src/a.ts' })
+    store().closeViewer(id)
+    expect(project()!.tabs).toEqual([])
+    expect(viewer()).toBeNull()
+  })
+
+  it('selects one row, toggles with ⌘ and selects a range with ⇧ over the visible order', async () => {
+    await store().activate(id)
+    const order = ['src', 'docs', 'README.md']
+    store().mark(id, 'src', 'replace', order)
+    store().mark(id, 'README.md', 'toggle', order)
+    expect(project()!.marked).toEqual(['src', 'README.md'])
+    store().mark(id, 'docs', 'replace', order)
+    store().mark(id, 'README.md', 'range', order)
+    expect(project()!.marked).toEqual(['docs', 'README.md'])
+  })
+
+  it('reveals a file: expands its folders, selects it and asks the viewer for the line', async () => {
+    await store().activate(id)
+    await store().open(id, 'src/sub/deep.ts', { line: 7 })
+    await idle()
+    expect([...project()!.expanded].sort()).toEqual(['src', 'src/sub'])
+    expect(project()!.marked).toEqual(['src/sub/deep.ts'])
+    expect(project()!.reveal).toMatchObject({ path: 'src/sub/deep.ts', line: 7 })
+    expect(listed()).toEqual(expect.arrayContaining(['src', 'src/sub']))
+  })
+
+  it('follows a rename or move with the tabs, the selection and the expanded folders', async () => {
+    await store().activate(id)
+    await store().toggle(id, 'src')
+    await store().select(id, 'src/a.ts', { pin: true })
+    store().mark(id, 'src/a.ts', 'replace', [])
+    store().moved(id, 'src', 'lib')
+    expect(project()!.tabs).toEqual([{ path: 'lib/a.ts', pinned: true }])
+    expect(project()!.marked).toEqual(['lib/a.ts'])
+    expect(project()!.selected).toBe('lib/a.ts')
+    expect(project()!.expanded.has('lib')).toBe(true)
+  })
+
+  it('opens the inline name input inside a collapsed folder by expanding it first', async () => {
+    await store().activate(id)
+    store().startEdit(id, { mode: 'create', parent: 'docs', kind: 'file' })
+    await idle()
+    expect(project()!.expanded.has('docs')).toBe(true)
+    expect(project()!.edit).toEqual({ mode: 'create', parent: 'docs', kind: 'file' })
+    store().cancelEdit(id)
+    expect(project()!.edit).toBeNull()
+  })
+})

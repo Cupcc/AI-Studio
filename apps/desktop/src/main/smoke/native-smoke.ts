@@ -10,6 +10,11 @@ import { isInsideDirectory, openDatabase } from '../services/database/database'
 import { migrations } from '../services/database/migrations'
 import { runPtySmoke } from '../services/pty/pty-smoke'
 import { createTerminalScreen } from '../services/terminal/screen'
+import { listProjectFiles, ripgrepPath } from '../services/files/file-index'
+import { renameExclusive } from '../services/files/rename-exclusive'
+import { mkdtemp, readFile, realpath, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { findExecutable, probeExecutable, splitPath, type ExecutableProbe } from '../services/shell-env/executables'
 import { resolveLoginEnv, toEnv } from '../services/shell-env/login-env'
 import type { RendererSmokeResult } from './renderer-smoke'
@@ -37,6 +42,9 @@ export interface SmokeReport {
   pty: { ok: boolean; shell: string; receivedMarker: boolean; exitCode?: number; durationMs: number; error?: string }
   /** The packaged app must resolve the external `@xterm/*` packages and their private structures. */
   terminalScreen: { ok: boolean; serializedMarker: boolean; emulatorStateVersion?: number; xtermVersion?: string; error?: string }
+  /** Search and Quick Open run the bundled ripgrep, which must be executable outside the asar archive (DEC-25). */
+  ripgrep?: { ok: boolean; unpacked: boolean; listedFixture: boolean; error?: string }
+  filesRename?: { ok: boolean; moved: boolean; refusedOverwrite: boolean; error?: string }
   executables: Record<string, Omit<ExecutableProbe, 'name'>>
   /** Added by the main entry after loading the real window hidden. */
   renderer?: RendererSmokeResult
@@ -54,6 +62,8 @@ export async function runNativeSmoke(input: SmokeInput): Promise<SmokeReport> {
   const loginEnv = await resolveLoginEnv({ baseEnv: launchEnv })
   const pty = await runPtySmoke({ shell: loginEnv.shell, env: loginEnv.env })
   const terminalScreen = await checkTerminalScreen()
+  const ripgrep = await checkRipgrep()
+  const filesRename = await checkFilesRename()
   const executables: SmokeReport['executables'] = {}
   for (const name of [...SMOKE_EXECUTABLES, ...SMOKE_INFO_EXECUTABLES]) {
     const { name: _ignored, ...probe } = await probeExecutable(name, loginEnv.env)
@@ -80,6 +90,8 @@ export async function runNativeSmoke(input: SmokeInput): Promise<SmokeReport> {
     },
     pty,
     terminalScreen,
+    ripgrep,
+    filesRename,
     executables
   }
   report.ok =
@@ -87,8 +99,42 @@ export async function runNativeSmoke(input: SmokeInput): Promise<SmokeReport> {
     report.shellEnv.ok &&
     pty.ok &&
     terminalScreen.ok &&
+    ripgrep.ok &&
+    filesRename.ok &&
     SMOKE_EXECUTABLES.every((name) => executables[name]?.found && executables[name]?.version)
   return report
+}
+
+async function checkFilesRename(): Promise<NonNullable<SmokeReport['filesRename']>> {
+  let dir: string | null = null
+  try {
+    dir = await realpath(await mkdtemp(join(tmpdir(), 'studio-files-rename-smoke-')))
+    await writeFile(join(dir, 'source.txt'), 'source')
+    await writeFile(join(dir, 'keep.txt'), 'keep')
+    await renameExclusive(join(dir, 'source.txt'), join(dir, 'moved.txt'))
+    const moved = await readFile(join(dir, 'moved.txt'), 'utf8') === 'source'
+    let refusedOverwrite = false
+    try { await renameExclusive(join(dir, 'moved.txt'), join(dir, 'keep.txt')) }
+    catch (error) { refusedOverwrite = (error as NodeJS.ErrnoException).code === 'EEXIST' }
+    refusedOverwrite &&= await readFile(join(dir, 'keep.txt'), 'utf8') === 'keep' && await readFile(join(dir, 'moved.txt'), 'utf8') === 'source'
+    return { ok: moved && refusedOverwrite, moved, refusedOverwrite }
+  } catch (error) {
+    return { ok: false, moved: false, refusedOverwrite: false, error: error instanceof Error ? error.message.slice(0, 200) : 'unknown' }
+  } finally { if (dir) await rm(dir, { recursive: true, force: true }).catch(() => {}) }
+}
+
+async function checkRipgrep(): Promise<NonNullable<SmokeReport['ripgrep']>> {
+  let dir: string | null = null
+  try {
+    const rg = await ripgrepPath()
+    dir = await realpath(await mkdtemp(join(tmpdir(), 'studio-rg-smoke-')))
+    await writeFile(join(dir, 'marker.txt'), 'x')
+    const listed = await listProjectFiles(dir, { rg, timeoutMs: 10_000 })
+    const listedFixture = listed.status === 'ok' && listed.paths.includes('marker.txt')
+    return { ok: listedFixture, unpacked: !rg.includes('app.asar/'), listedFixture, ...(listed.status === 'unavailable' ? { error: listed.reason } : {}) }
+  } catch (error) {
+    return { ok: false, unpacked: false, listedFixture: false, error: error instanceof Error ? error.message.slice(0, 200) : 'unknown' }
+  } finally { if (dir) await rm(dir, { recursive: true, force: true }).catch(() => {}) }
 }
 
 async function checkTerminalScreen(): Promise<SmokeReport['terminalScreen']> {

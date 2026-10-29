@@ -36,6 +36,8 @@ export interface ShellIntegration {
   NewChatBadge?: ComponentType<ShellSlotProps>
   /** Fixed bottom row of the navigation: the settings entry (FR-SET-001). */
   NavigationFooter?: ComponentType<ShellSlotProps>
+  /** Window-level overlay above the workspace (Quick Open). */
+  Overlay?: ComponentType
 }
 
 const placeholderSession: RendererSessionPort = {

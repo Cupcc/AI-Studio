@@ -1,6 +1,9 @@
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { buildFilesHelper } from './scripts/build-files-helper.mjs'
+
+buildFilesHelper()
 
 const alias = {
   '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),

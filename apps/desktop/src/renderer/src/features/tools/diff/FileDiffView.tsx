@@ -6,6 +6,9 @@ import { LazyCodeDiffViewer } from '../code/lazy'
 import { classifyPatch, isModeOnly, omissionNotes, splitPath, twoSidedTexts } from './diff-format'
 import type { DiffFileState } from './diff-store'
 import { InlineText } from './InlineText'
+import { useDiffViewPrefs } from './diff-view-prefs'
+import { showTool } from '../show-tool'
+import { useFiles } from '../files/files-store'
 import { AVAILABILITY, D, KIND_LABEL, KIND_LETTER } from './strings'
 
 /** The stored patch is bounded by the service (1 MiB); this bounds what is turned into elements. */
@@ -46,6 +49,7 @@ function PatchOrEmpty({ patch }: { patch: OkResult['patch'] }) {
 
 function OkView({ projectId, active, result }: { projectId: string; active: boolean; result: OkResult }) {
   const { entry, original, modified, patch } = result
+  const prefs = useDiffViewPrefs()
   const sides = twoSidedTexts(entry, original, modified)
   const notes = omissionNotes(entry, original, modified)
   const modeChange = entry.oldMode !== null && entry.newMode !== null && entry.oldMode !== entry.newMode
@@ -61,7 +65,8 @@ function OkView({ projectId, active, result }: { projectId: string; active: bool
       : <div className="diff-viewer">
         <ViewerBoundary key={entry.path} fallback={<PatchOrEmpty patch={patch} />}>
           <Suspense fallback={<div className="diff-note" role="status">{D.viewerLoading}</div>}>
-            <LazyCodeDiffViewer path={entry.path} original={sides.original} modified={sides.modified} active={active} viewStateKey={`${projectId}:${entry.path}`} />
+            <LazyCodeDiffViewer path={entry.path} original={sides.original} modified={sides.modified} active={active} viewStateKey={`${projectId}:${entry.path}`}
+              sideBySide={prefs.sideBySide} hideUnchanged={prefs.hideUnchanged} {...(prefs.navigate ? { navigate: prefs.navigate } : {})} />
           </Suspense>
         </ViewerBoundary>
       </div>}
@@ -85,11 +90,22 @@ export function FileDiffView({ projectId, active, path, entry, file, onClose, on
   const shown = result?.status === 'ok' ? result.entry : entry
   const { name, dir } = splitPath(path)
   const refreshing = file.loading && result !== null
-  return <section className="diff-file" aria-label={D.fileTitle(path)} aria-busy={file.loading}>
+  const prefs = useDiffViewPrefs()
+  const twoSided = result?.status === 'ok' && twoSidedTexts(result.entry, result.original, result.modified) !== null
+  const exists = shown?.kind !== 'deleted'
+  return <section className="diff-file" aria-label={D.fileTitle(path)} aria-busy={file.loading}
+    onKeyDown={event => { if (twoSided && event.altKey && event.key === 'F5') { event.preventDefault(); prefs.go(event.shiftKey ? 'previous' : 'next') } }}>
     <header className="diff-file__header">
       {shown && <span className={`diff-badge diff-badge--${shown.kind}`} title={KIND_LABEL[shown.kind]} aria-hidden="true">{KIND_LETTER[shown.kind]}</span>}
       <span className="diff-file__path" title={displayName(path)}><span className="diff-row__name">{displayName(name)}</span>{dir && <span className="diff-row__dir">{displayName(dir)}</span>}</span>
       {refreshing && <span className="diff-file__busy" role="status">{D.refreshing}</span>}
+      {twoSided && <span className="diff-file__tools" role="toolbar" aria-label={D.viewTools}>
+        <button className="icon-button" aria-label={D.previousChange} data-tip={`${D.previousChange} ⇧⌥F5`} onClick={() => prefs.go('previous')}><Icon name="chevron-up" size={14} /></button>
+        <button className="icon-button" aria-label={D.nextChange} data-tip={`${D.nextChange} ⌥F5`} onClick={() => prefs.go('next')}><Icon name="chevron" size={14} /></button>
+        <button className={`icon-button ${prefs.sideBySide ? '' : 'is-selected'}`} aria-label={D.inline} aria-pressed={!prefs.sideBySide} data-tip={D.inline} onClick={() => prefs.set({ sideBySide: !prefs.sideBySide })}><Icon name="split" size={14} /></button>
+        <button className={`icon-button ${prefs.hideUnchanged ? 'is-selected' : ''}`} aria-label={D.hideUnchanged} aria-pressed={prefs.hideUnchanged} data-tip={D.hideUnchanged} onClick={() => prefs.set({ hideUnchanged: !prefs.hideUnchanged })}><Icon name="collapse" size={14} /></button>
+      </span>}
+      {exists && <button className="icon-button" aria-label={D.openFile} data-tip={D.openFile} onClick={() => { showTool(projectId, 'files'); void useFiles.getState().open(projectId, path, { pin: true }) }}><Icon name="file" size={14} /></button>}
       <button className="icon-button" aria-label={D.closeFile} data-tip={D.closeFile} data-tip-align="end" onClick={onClose}><Icon name="close" size={14} /></button>
     </header>
     <div className={`diff-file__body ${refreshing ? 'is-refreshing' : ''}`}>

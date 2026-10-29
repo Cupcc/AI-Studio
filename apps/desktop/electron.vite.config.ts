@@ -2,6 +2,9 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'electron-vite'
 import type { Plugin } from 'vite'
+import { buildFilesHelper } from './scripts/build-files-helper.mjs'
+
+buildFilesHelper()
 
 const shared = fileURLToPath(new URL('./src/shared', import.meta.url))
 const renderer = fileURLToPath(new URL('./src/renderer/src', import.meta.url))

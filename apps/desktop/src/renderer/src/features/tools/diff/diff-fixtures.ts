@@ -43,6 +43,7 @@ export function fakeDiffApi(): FakeDiff {
   const api: DiffApi = {
     getSnapshot: vi.fn().mockResolvedValue(snapshot()),
     getFile: vi.fn().mockImplementation(async (request: { path: string }) => okFile(request.path, 100)),
+    getIgnored: vi.fn().mockResolvedValue({ status: 'ok', revision: 1, paths: [], truncated: false }),
     subscribe: vi.fn().mockResolvedValue(subscription()),
     unsubscribe: vi.fn().mockResolvedValue(undefined),
     onInvalidated: vi.fn(listener => { invalidated.add(listener); return () => { invalidated.delete(listener) } }),

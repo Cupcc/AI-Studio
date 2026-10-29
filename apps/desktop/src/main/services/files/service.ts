@@ -1,6 +1,7 @@
 import {
-  parseProjectPath,
-  type FileReadRequest, type FileReadResult, type FileReferenceFailureReason, type FileReferenceRejection,
+  parseProjectPath, projectPathParent,
+  type ExternalEditors, type FileImageResult, type FileIndexResult, type FileOpenRequest, type FileOpenResult,
+  type FileOperationResult, type FileReadRequest, type FileReadResult, type FileReferenceFailureReason, type FileReferenceRejection,
   type FileReferenceResolver, type FileReferenceResult, type FilesChanged, type FilesListResult,
   type FilesSubscription, type FilesWatchChanged, type ProjectPath
 } from '@shared/tools/files'
@@ -8,6 +9,10 @@ import { listDirectory, type ListOutcome } from './list'
 import { readTextFile, type ReadOutcome } from './read'
 import { rejectAll, resolveFileReferences, type ResolveOutcome } from './references'
 import { createFilesWatcher, type FilesWatcherOptions } from './watcher'
+import { listProjectFiles } from './file-index'
+import { readImageFile } from './image'
+import { absoluteOf, copyEntries, createEntry, moveEntries, renameEntry, trashEntries } from './operations'
+import { resolveEntry } from './safe-path'
 
 export const FILES_REQUEST_TIMEOUT_MS = 5000
 /** Slow or stalled volumes cannot take every libuv thread (default pool of 4) away from the rest of the app. */
@@ -26,6 +31,16 @@ export interface FilesServiceOptions {
   locale?: string
   timeoutMs?: number
   concurrency?: number
+  /** System integrations (Electron `shell` / `app` in production). */
+  system?: {
+    trash(absolute: string): Promise<void>
+    reveal(absolute: string): void
+    /** Opens with the default application; resolves to an error message, '' on success (Electron `shell.openPath`). */
+    openPath(absolute: string): Promise<string>
+    openExternal(url: string): Promise<void>
+    editors(): ExternalEditors
+    ripgrep(): Promise<string>
+  }
   /** Test seams, see list.ts / read.ts. */
   hooks?: {
     afterListOpen?: (absolute: string) => Promise<void>
@@ -39,6 +54,18 @@ export interface FilesService extends FileReferenceResolver {
   read(request: FileReadRequest): Promise<FileReadResult>
   /** The renderer-facing form of `resolve`: no absolute paths. */
   resolveReference(projectId: string, paths: readonly ProjectPath[]): Promise<FileReferenceResult>
+  create(projectId: string, parent: ProjectPath, name: string, kind: 'file' | 'directory'): Promise<FileOperationResult>
+  rename(projectId: string, path: ProjectPath, name: string): Promise<FileOperationResult>
+  move(projectId: string, paths: readonly ProjectPath[], target: ProjectPath): Promise<FileOperationResult>
+  copy(projectId: string, paths: readonly ProjectPath[], target: ProjectPath): Promise<FileOperationResult>
+  trash(projectId: string, paths: readonly ProjectPath[]): Promise<FileOperationResult>
+  open(request: FileOpenRequest): Promise<FileOpenResult>
+  editors(): ExternalEditors
+  stat(projectId: string, paths: readonly ProjectPath[]): Promise<('file' | 'directory' | null)[]>
+  index(projectId: string): Promise<FileIndexResult>
+  readImage(projectId: string, path: ProjectPath): Promise<FileImageResult>
+  /** Absolute path of a Project directory, for starting a Terminal there (main-only). */
+  resolveDirectory(projectId: string, path: ProjectPath): Promise<string>
   subscribe(projectId: string, owner: number): FilesSubscription
   unsubscribe(projectId: string, subscriptionId: string, owner: number): void
   detachOwner(owner: number): void
@@ -68,6 +95,8 @@ export function createFilesService(options: FilesServiceOptions): FilesService {
   let disposed = false
   let allEpoch = 0
   const epochs = new Map<string, number>()
+  const mutations = new Map<string, Promise<FileOperationResult>>()
+  const indexes = new Map<string, Set<AbortController>>()
   const timeoutMs = options.timeoutMs ?? FILES_REQUEST_TIMEOUT_MS
   const limited = createLimiter(options.concurrency ?? FILES_CONCURRENCY)
   const nextRevision = () => ++revision
@@ -106,6 +135,33 @@ export function createFilesService(options: FilesServiceOptions): FilesService {
       const value = await Promise.race([task, deadline])
       return stampOf(projectId) === stamp && !disposed ? value : fallback.closing
     } finally { clearTimeout(timer) }
+  }
+
+  function requireSystem(): NonNullable<FilesServiceOptions['system']> {
+    if (!options.system) throw new Error('Files system integration unavailable')
+    return options.system
+  }
+
+  /**
+   * Runs a file operation for an open Project. No request deadline: a large copy may legitimately take long. The
+   * affected directories are announced right away, so the tree refreshes even while the watcher is degraded.
+   */
+  async function operate(projectId: string, dirs: ProjectPath[], work: (root: string) => Promise<FileOperationResult>): Promise<FileOperationResult> {
+    const stamp = stampOf(projectId)
+    const first = dirs[0] ?? ''
+    // Destination checks and the mutation must share one Project queue. Otherwise two rename / move requests can
+    // both see a missing destination and the second fs.rename would replace the first one's data.
+    const previous = mutations.get(projectId)
+    const task = (async (): Promise<FileOperationResult> => {
+      await previous?.catch(() => {})
+      const opened = gate(projectId)
+      if (stampOf(projectId) !== stamp || 'reason' in opened) return { status: 'failed', reason: 'reason' in opened ? opened.reason : 'project_closing', path: first, done: [] }
+      const result = await work(opened.root)
+      if (stampOf(projectId) === stamp && !disposed && (result.status === 'ok' || result.done.length)) options.changed({ projectId, revision: nextRevision(), dirs: [...new Set(dirs)], overflow: false })
+      return result
+    })()
+    mutations.set(projectId, task)
+    try { return await task } finally { if (mutations.get(projectId) === task) mutations.delete(projectId) }
   }
 
   const service: FilesService = {
@@ -150,20 +206,97 @@ export function createFilesService(options: FilesServiceOptions): FilesService {
       // The absolute path stays in the main process.
       return { status: 'ok', files: result.files.map(({ path, name, size, version }) => ({ path, name, size, version })) }
     },
+    async create(projectId, parent, name, kind) {
+      return operate(projectId, [parent], (root) => createEntry(root, parent, name, kind))
+    },
+    async rename(projectId, path, name) {
+      return operate(projectId, [projectPathParent(path)], (root) => renameEntry(root, path, name))
+    },
+    async move(projectId, paths, target) {
+      return operate(projectId, [target, ...paths.map(projectPathParent)], (root) => moveEntries(root, paths, target))
+    },
+    async copy(projectId, paths, target) {
+      return operate(projectId, [target], (root) => copyEntries(root, paths, target))
+    },
+    async trash(projectId, paths) {
+      const system = requireSystem()
+      return operate(projectId, paths.map(projectPathParent), (root) => trashEntries(root, paths, system.trash))
+    },
+    async open(request) {
+      const system = requireSystem()
+      const opened = gate(request.projectId)
+      if ('reason' in opened) return { status: 'failed', reason: opened.reason }
+      const resolved = await absoluteOf(opened.root, request.path)
+      if (!resolved.ok) return { status: 'failed', reason: resolved.reason }
+      const absolute = resolved.value
+      try {
+        if (request.target === 'finder') { system.reveal(absolute); return { status: 'ok' } }
+        if (request.target === 'default') {
+          const error = await system.openPath(absolute)
+          return error ? { status: 'failed', reason: 'failed', detail: error } : { status: 'ok' }
+        }
+        if (!system.editors()[request.target]) return { status: 'failed', reason: 'app_missing' }
+        // vscode://file/<absolute path>[:line] (cursor:// accepts the same form). Each segment is percent-encoded.
+        const line = request.line && Number.isSafeInteger(request.line) && request.line > 0 ? `:${request.line}:1` : ''
+        await system.openExternal(`${request.target}://file${absolute.split('/').map(encodeURIComponent).join('/')}${line}`)
+        return { status: 'ok' }
+      } catch (error) { return { status: 'failed', reason: 'failed', detail: error instanceof Error ? error.message : String(error) } }
+    },
+    editors: () => options.system?.editors() ?? { vscode: false, cursor: false },
+    async stat(projectId, paths) {
+      const opened = gate(projectId)
+      if ('reason' in opened) return paths.map(() => null)
+      return Promise.all(paths.map(async (path) => {
+        try { parseProjectPath(path) } catch { return null }
+        const file = await resolveEntry(opened.root, path, 'file')
+        if (file.ok) return 'file' as const
+        return file.reason === 'not_file' && (await resolveEntry(opened.root, path, 'directory')).ok ? 'directory' as const : null
+      }))
+    },
+    async index(projectId) {
+      const system = requireSystem()
+      const opened = gate(projectId)
+      if ('reason' in opened) return { status: 'unavailable', reason: opened.reason }
+      const controller = new AbortController()
+      let active = indexes.get(projectId)
+      if (!active) { active = new Set(); indexes.set(projectId, active) }
+      active.add(controller)
+      try { return await listProjectFiles(opened.root, { rg: await system.ripgrep(), signal: controller.signal }) }
+      finally { active.delete(controller); if (!active.size && indexes.get(projectId) === active) indexes.delete(projectId) }
+    },
+    async readImage(projectId, path) {
+      const opened = gate(projectId)
+      if ('reason' in opened) return { status: 'unavailable', path, reason: opened.reason }
+      try { parseProjectPath(path) } catch { return { status: 'unavailable', path, reason: 'invalid_path' } }
+      return { ...(await readImageFile(opened.root, path)), path }
+    },
+    async resolveDirectory(projectId, path) {
+      const opened = gate(projectId)
+      if ('reason' in opened) throw new Error(opened.reason === 'project_closing' ? 'Project is closing' : 'Unknown project')
+      const resolved = await absoluteOf(opened.root, path, 'directory')
+      if (!resolved.ok) throw new Error(`Directory unavailable: ${resolved.reason}`)
+      return resolved.value
+    },
     subscribe: (projectId, owner) => watcher.subscribe(projectId, owner),
     unsubscribe: (projectId, subscriptionId, owner) => watcher.unsubscribe(projectId, subscriptionId, owner),
     detachOwner: (owner) => watcher.detachOwner(owner),
     async closeProject(projectId) {
       epochs.set(projectId, (epochs.get(projectId) ?? 0) + 1)
+      for (const controller of indexes.get(projectId) ?? []) controller.abort()
       watcher.closeProject(projectId)
+      await mutations.get(projectId)
     },
     async closeAll() {
       allEpoch++
+      for (const active of indexes.values()) for (const controller of active) controller.abort()
       watcher.closeAll()
+      await Promise.all(mutations.values())
     },
     async dispose() {
       disposed = true
+      for (const active of indexes.values()) for (const controller of active) controller.abort()
       watcher.dispose()
+      await Promise.all(mutations.values())
     }
   }
   return service

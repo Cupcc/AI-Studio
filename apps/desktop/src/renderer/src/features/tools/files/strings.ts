@@ -117,5 +117,50 @@ export const FILES_TEXT = {
   codeFailed: '代码查看器不可用，以纯文本显示',
   added: (name: string) => `已添加到对话：${name}`,
   duplicate: (name: string) => `已在对话中：${name}`,
-  addFailed: '无法确认该文件是否可引用，未添加，请稍后重试'
+  addFailed: '无法确认该文件是否可引用，未添加，请稍后重试',
+  // VS Code explorer parity (DEC-25)
+  newFile: '新建文件',
+  newFolder: '新建文件夹',
+  collapseAll: '全部折叠',
+  newFileLabel: '新文件名',
+  newFolderLabel: '新文件夹名',
+  renameLabel: '新名称',
+  deleteTitle: (count: number, name: string) => count === 1 ? `将“${name}”移到废纸篓？` : `将 ${count} 项移到废纸篓？`,
+  deleteBody: '可从废纸篓恢复。',
+  deleteConfirm: '移到废纸篓',
+  cancel: '取消',
+  copied: '已复制路径',
+  copiedRelative: '已复制相对路径',
+  wrap: '自动换行',
+  preview: '预览',
+  source: '源码',
+  more: '更多文件操作',
+  tabs: '打开的文件',
+  closeTab: (name: string) => `关闭 ${name}`,
+  imageLoading: '正在读取图片…',
+  imageFailed: '无法显示图片'
+} as const
+
+/** Native menu labels; accelerators are display-only (the shortcut is handled where it is bound). */
+export const FILES_MENU = {
+  open: '打开',
+  openToSide: '固定打开',
+  openVSCode: '在 VS Code 中打开',
+  openCursor: '在 Cursor 中打开',
+  openDefault: '用默认应用打开',
+  reveal: '在 Finder 中显示',
+  openTerminal: '在集成终端中打开',
+  findInFolder: '在文件夹中查找…',
+  addToConversation: '添加到对话',
+  newFile: '新建文件…',
+  newFolder: '新建文件夹…',
+  cut: '剪切',
+  copy: '复制',
+  paste: '粘贴',
+  copyPath: '复制路径',
+  copyRelativePath: '复制相对路径',
+  rename: '重命名…',
+  delete: '删除',
+  refresh: '刷新',
+  collapseAll: '全部折叠'
 } as const

@@ -13,11 +13,13 @@ type Phase = { kind: 'loading' } | { kind: 'ready' } | { kind: 'failed'; message
  * error callback, so failures are shown in place. Only the panel decides when two sides exist: a historic patch without both
  * sides must not be faked from the working tree, it goes to a patch view instead.
  */
-export default function CodeDiffViewer({ path, original, modified, active, viewStateKey }: CodeDiffViewerProps) {
+export default function CodeDiffViewer({ path, original, modified, active, viewStateKey, sideBySide = true, hideUnchanged = true, navigate }: CodeDiffViewerProps) {
   const host = useRef<HTMLDivElement>(null)
   const session = useRef<DiffSession | null>(null)
   const latest = useRef<DiffContent>({ path, original, modified, viewStateKey })
   latest.current = { path, original, modified, viewStateKey }
+  const layout = useRef({ sideBySide, hideUnchanged })
+  layout.current = { sideBySide, hideUnchanged }
   const tooLarge = diffTooLarge(original, modified)
   const [phase, setPhase] = useState<Phase>({ kind: 'loading' })
 
@@ -33,6 +35,7 @@ export default function CodeDiffViewer({ path, original, modified, active, viewS
         if (cancelled) { opened.dispose(); return }
         session.current = opened
         opened.show(latest.current)
+        opened.configure(layout.current)
         setPhase({ kind: 'ready' })
       })
       .catch((error: unknown) => {
@@ -47,6 +50,8 @@ export default function CodeDiffViewer({ path, original, modified, active, viewS
   }, [active, tooLarge])
 
   useEffect(() => { session.current?.show({ path, original, modified, viewStateKey }) }, [path, original, modified, viewStateKey])
+  useEffect(() => { session.current?.configure({ sideBySide, hideUnchanged }) }, [sideBySide, hideUnchanged])
+  useEffect(() => { if (navigate) session.current?.goToDiff(navigate.direction) }, [navigate?.direction, navigate?.nonce])
 
   const notice = tooLarge ? { role: 'alert', text: CODE_DIFF_TOO_LARGE }
     : !active ? null

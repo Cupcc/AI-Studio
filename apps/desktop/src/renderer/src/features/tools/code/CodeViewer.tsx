@@ -13,11 +13,11 @@ type Phase = { kind: 'loading' } | { kind: 'ready' } | { kind: 'failed'; message
  * viewer limit: it is created on activation, destroyed (view state saved per `viewStateKey`) on deactivation or unmount,
  * and fed new content through the session instead of being recreated.
  */
-export default function CodeViewer({ path, text, active, viewStateKey, onError }: CodeViewerProps) {
+export default function CodeViewer({ path, text, active, viewStateKey, onError, wordWrap = false, revealLine }: CodeViewerProps) {
   const host = useRef<HTMLDivElement>(null)
   const session = useRef<CodeSession | null>(null)
-  const latest = useRef({ content: { path, text, viewStateKey } as CodeContent, onError })
-  latest.current = { content: { path, text, viewStateKey }, onError }
+  const latest = useRef({ content: { path, text, viewStateKey } as CodeContent, onError, wordWrap, revealLine })
+  latest.current = { content: { path, text, viewStateKey }, onError, wordWrap, revealLine }
   const tooLarge = viewerTextTooLarge(text)
   const [phase, setPhase] = useState<Phase>({ kind: 'loading' })
 
@@ -34,6 +34,8 @@ export default function CodeViewer({ path, text, active, viewStateKey, onError }
         session.current = opened
         // Props may have changed while the font and grammar were loading.
         opened.show(latest.current.content)
+        opened.setWordWrap(latest.current.wordWrap)
+        if (latest.current.revealLine) opened.revealLine(latest.current.revealLine.line)
         setPhase({ kind: 'ready' })
       })
       .catch((error: unknown) => {
@@ -50,6 +52,9 @@ export default function CodeViewer({ path, text, active, viewStateKey, onError }
   }, [active, tooLarge])
 
   useEffect(() => { session.current?.show({ path, text, viewStateKey }) }, [path, text, viewStateKey])
+  useEffect(() => { session.current?.setWordWrap(wordWrap) }, [wordWrap])
+  // After `show` (declared above, so it runs first): a reveal for a file that just arrived targets its new text.
+  useEffect(() => { if (revealLine) session.current?.revealLine(revealLine.line) }, [revealLine?.line, revealLine?.nonce, text])
 
   // Reported once per file, not on every render: the panel shows its own state for files above the service limit.
   useEffect(() => { if (active && tooLarge) latest.current.onError?.(CODE_VIEWER_TOO_LARGE) }, [active, tooLarge, path, viewStateKey])

@@ -2,7 +2,7 @@ import { defineContract, event, invoke } from './contract'
 import type {
   TerminalAckRequest, TerminalAttachment, TerminalChanged, TerminalCloseRequest,
   TerminalCloseResult, TerminalCreateRequest, TerminalInputRequest, TerminalOutput,
-  TerminalRef, TerminalResizeRequest, TerminalSnapshot, TerminalSummary
+  TerminalRef, TerminalRenameRequest, TerminalResizeRequest, TerminalSnapshot, TerminalSummary
 } from '../tools/terminal'
 
 export const terminalContract = defineContract('terminal', {
@@ -14,7 +14,10 @@ export const terminalContract = defineContract('terminal', {
     ack: invoke<TerminalAckRequest, void>('terminal:ack'),
     input: invoke<TerminalInputRequest, void>('terminal:input'),
     resize: invoke<TerminalResizeRequest, void>('terminal:resize'),
-    close: invoke<TerminalCloseRequest, TerminalCloseResult>('terminal:close')
+    close: invoke<TerminalCloseRequest, TerminalCloseResult>('terminal:close'),
+    rename: invoke<TerminalRenameRequest, TerminalSummary>('terminal:rename'),
+    /** ⌘K: clears the Project-held screen too, so a re-attach does not bring the old output back. */
+    clear: invoke<TerminalRef, void>('terminal:clear')
   },
   events: {
     output: event<TerminalOutput>('terminal:output'),

@@ -7,12 +7,14 @@ import { randomUUID } from 'node:crypto'
 import { stat } from 'node:fs/promises'
 import {
   DIFF_LIMITS,
-  type DiffFileRequest, type DiffFileResult, type DiffInvalidated, type DiffSnapshot, type DiffSubscription,
+  DIFF_IGNORED_LIMITS,
+  type DiffFileRequest, type DiffFileResult, type DiffIgnored, type DiffInvalidated, type DiffSnapshot, type DiffSubscription,
   type DiffWatchChanged, type DiffWatchState
 } from '@shared/tools/diff'
 import { queryFile } from './file'
 import type { GitRunner } from './git-runner'
-import { QueryAborted, QueryFailure, sanitizeDetail, type QueryContext } from './query'
+import { failureOfExit, gitStep, QueryAborted, QueryFailure, sanitizeDetail, type QueryContext } from './query'
+import { splitNul, toProjectPath } from './parse'
 import { querySnapshot, type SnapshotParts } from './snapshot'
 import { createDebouncer, createDiffWatcher, type Debouncer, type DiffWatcher, type WatchEventKind, type WatchFn } from './watcher'
 
@@ -38,6 +40,8 @@ export interface DiffServiceOptions {
 export interface DiffService {
   getSnapshot(projectId: string): Promise<DiffSnapshot>
   getFile(request: DiffFileRequest): Promise<DiffFileResult>
+  /** Ignored entries below the Project, for dimming in the Files tree. */
+  getIgnored(projectId: string): Promise<DiffIgnored>
   subscribe(projectId: string, owner?: number): DiffSubscription
   unsubscribe(projectId: string, subscriptionId: string, owner?: number): void
   /** The renderer (a window) went away: drop every subscription it held. */
@@ -254,6 +258,46 @@ export function createDiffService(options: DiffServiceOptions): DiffService {
     return task
   }
 
+  // ---- ignored entries ---------------------------------------------------------------------------------------
+
+  async function getIgnored(projectId: string): Promise<DiffIgnored> {
+    const state = requireState(projectId)
+    const at = ++revision
+    const unavailable = (availability: Extract<DiffIgnored, { status: 'unavailable' }>['availability']): DiffIgnored => ({ status: 'unavailable', revision: at, availability })
+    if (!operable(state)) return unavailable('project_closing')
+    if (state.files.size >= DIFF_FILE_CALL_LIMIT) throw new Error('Too many diff requests in flight')
+    const controller = new AbortController()
+    state.fileControllers.add(controller)
+    const task = (async (): Promise<DiffIgnored> => {
+      try {
+        await requireDirectory(state.root)
+        const result = await gitStep(context(state, controller.signal, DIFF_IGNORED_LIMITS.timeoutMs),
+          ['ls-files', '-z', '--others', '--ignored', '--exclude-standard', '--directory', '--no-empty-directory'],
+          { maxBytes: DIFF_IGNORED_LIMITS.outputBytes })
+        // A capped listing ends early; what was read is still a valid prefix of the NUL-separated output.
+        if (result.code !== 0 && !result.truncated) throw failureOfExit(result, state.root)
+        if (controller.signal.aborted) return unavailable('project_closing')
+        const { tokens, incomplete } = splitNul(result.stdout)
+        const paths: string[] = []
+        for (const token of tokens) {
+          if (paths.length >= DIFF_IGNORED_LIMITS.entries) break
+          const path = toProjectPath(token.toString('utf8').replace(/\/$/, ''))
+          if (path) paths.push(path)
+        }
+        return { status: 'ok', revision: at, paths, truncated: incomplete || result.truncated || tokens.length > paths.length }
+      } catch (error) {
+        if (error instanceof QueryAborted || controller.signal.aborted) return unavailable('project_closing')
+        if (error instanceof QueryFailure) return unavailable(error.availability)
+        return unavailable('failed')
+      } finally {
+        state.fileControllers.delete(controller)
+      }
+    })()
+    state.files.add(task)
+    void task.finally(() => state.files.delete(task))
+    return task
+  }
+
   // ---- subscriptions -----------------------------------------------------------------------------------------
 
   function subscribe(projectId: string, owner = 0): DiffSubscription {
@@ -318,7 +362,7 @@ export function createDiffService(options: DiffServiceOptions): DiffService {
   }
 
   return {
-    getSnapshot, getFile, subscribe, unsubscribe, detachOwner, closeProject, closeAll,
+    getSnapshot, getFile, getIgnored, subscribe, unsubscribe, detachOwner, closeProject, closeAll,
     async dispose() {
       disposed = true
       await closeAll()

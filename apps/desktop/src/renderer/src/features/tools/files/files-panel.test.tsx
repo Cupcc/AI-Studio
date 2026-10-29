@@ -7,9 +7,16 @@ import type { AddFileReferenceResult } from '../../input/add-file-reference'
 import { filesApi } from './api'
 import { createFakeFiles, deferred, dir, file, idle, link, special } from './fake-files'
 import { FilesPanel } from './FilesPanel'
+import { FileTree } from './FileTree'
+import { flattenTree } from './files-tree'
 import { useFiles } from './files-store'
 
 vi.mock('./api', () => ({ filesApi: vi.fn() }))
+// Git decoration has its own tests; here the tree shows no Git state.
+vi.mock('./git-decorations', async () => {
+  const actual = await vi.importActual<typeof import('./git-decorations')>('./git-decorations')
+  return { ...actual, useGitDecorations: () => actual.buildDecorations(null, []) }
+})
 vi.mock('../../input/add-file-reference', () => ({ addFileReference: vi.fn() }))
 const gate = vi.hoisted(() => ({ pending: null as Promise<void> | null }))
 vi.mock('../code/lazy', async () => {
@@ -54,6 +61,15 @@ beforeEach(() => {
 afterEach(() => { cleanup(); store().forget(id); vi.restoreAllMocks() })
 
 describe('opening and the tree', () => {
+  it('includes file, folder and ignored Git state in accessible tree names', () => {
+    const rows = flattenTree(new Map([['', { entries: [dir('src'), file('a.ts'), dir('dist')], truncated: false, reason: null, loading: false, dirty: false }]]), new Set())
+    render(<FileTree rows={rows} selected={null} marked={[]} onToggle={vi.fn()} onOpen={vi.fn()} decorations={{
+      files: new Map([['a.ts', { tone: 'modified', label: '已修改', letter: 'M' }]]), folders: new Map([['src', 'conflict']]), ignored: path => path === 'dist'
+    }} />)
+    expect(screen.getByRole('treeitem', { name: 'a.ts，已修改' })).toBeTruthy()
+    expect(screen.getByRole('treeitem', { name: 'src，包含冲突' })).toBeTruthy()
+    expect(screen.getByRole('treeitem', { name: 'dist，已忽略' })).toBeTruthy()
+  })
   it('makes no call at all while inactive, and starts with a single root listing and a subscription once active', async () => {
     const view = render(panel(false))
     await idle()
@@ -289,14 +305,15 @@ describe('the viewer', () => {
     expect(screen.queryByTestId('code')).toBeNull()
   })
 
-  it('closes with the close button and clears the selection', async () => {
+  it('closes with the close button; the tree keeps its selection like VS Code\'s explorer', async () => {
     render(panel())
     await screen.findByRole('treeitem', { name: 'README.md' })
     await open('README.md')
     fireEvent.click(screen.getByRole('button', { name: '关闭查看器' }))
     expect(screen.queryByRole('region', { name: '文件查看器' })).toBeNull()
     expect(screen.queryByRole('button', { name: '添加到对话' })).toBeNull()
-    expect(row('README.md').getAttribute('aria-selected')).toBe('false')
+    expect(store().projects[id]!.selected).toBeNull()
+    expect(row('README.md').getAttribute('aria-selected')).toBe('true')
   })
 
   it('keeps a visible notice for a deleted file, clears the tree selection, and replaces it when another file is selected', async () => {

@@ -56,7 +56,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
   - New Chat 草稿、Default CLI 的取值与设置规则、CLI 菜单 → `specs/chat/spec.md`。
   - 左侧导航的内部行为（Project Views 列表、Session History、折叠）→ `specs/navigation/spec.md`。
   - Project View 的内容、Conversation 列的内部行为与 Preview → `specs/project-view/spec.md`（后续 task）。
-  - Files / Diff / Browser / Terminal 的内容与资源生命周期 → [tools spec](../tools/spec.md)；四工具入口已接入；项目 Diff 与本轮 Diff 的交付边界见 Tools spec §5.2 / §5.3。
+  - Files / Search / Diff / Browser / Terminal 的内容与资源生命周期 → [tools spec](../tools/spec.md)；四工具入口已接入；项目 Diff 与本轮 Diff 的交付边界见 Tools spec §5.2 / §5.3。
   - 色值、字体、图标等视觉参数（Visual Direction 第 1 节）。
 - V1 范围外（文档未要求，本 spec 不设计）：Tab 拖拽排序与拖出窗口（PROJ-Q10）、多窗口（PROJ-Q16）、Project 重命名与目录迁移（PROJ-Q5）。
 
@@ -222,7 +222,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
 |---|---|---|---|
 | Main Canvas 当前内容 | Project | 以下三种之一：某个 Session 的 Conversation；New Chat 草稿；某个 Project View（含该 View 下左侧 Conversation 所显示的对话：某个 Session，或草稿） | FR-PROJ-003；D-15 |
 | 右侧边栏展开状态 | Project | Session Mode 下是否展开；Project View Mode 下右侧区域显示 Preview 还是某个工具（两种模式是否独立，见 PROJ-Q3） | FR-PROJ-003；03 第 5 节；P-B |
-| 当前工具 | Project | 最近一次选择的工具（Files / Diff / Browser / Terminal），展开时默认显示它（P-C） | FR-PROJ-003；P-C |
+| 当前工具 | Project | 最近一次选择的工具（Files / Search / Diff / Browser / Terminal），展开时默认显示它（P-C） | FR-PROJ-003；P-C |
 | 右侧边栏宽度 | Project | Session Mode 下，范围 320–560，默认 400 | D-13；Shell 第 2.2 节 |
 | Conversation 列宽度 | Project | Project View Mode 下，范围 360–560，默认 440 | Shell 第 2.2 节 |
 | 左侧导航折叠 | **窗口级** | 切换 Project 时保持不变，不属于任何 Project | 03 第 8 节；D-14 |
@@ -326,8 +326,8 @@ Project 记录是新创建的（3.1.4 第 4 步），或没有任何已保存 UI
 | `schema_version` | 整数 | 读取时校验，未知版本回落默认 |
 | `main_canvas` | `{ mode: "session", session_id }` / `{ mode: "draft" }` / `{ mode: "view", view_id, conversation: { kind: "draft" } 或 { kind: "session", session_id } }` | 对应“上一次选中的 Project View 或 Session”与 D-15；`draft` 表示 New Chat 草稿（其文字不在此保存，PROJ-Q11） |
 | `sidebar_open` | 布尔 | Session Mode 下右侧边栏是否展开 |
-| `view_right_area` | `"preview"` / `"files"` / `"diff"` / `"browser"` / `"terminal"` | Project View Mode 下右侧区域显示什么；PROJ-Q3 确认后可能与 `sidebar_open` 合并 |
-| `last_tool` | `"files"` / `"diff"` / `"browser"` / `"terminal"` / 空 | 右侧边栏展开时默认显示的工具；空时用默认工具（PROJ-Q14） |
+| `view_right_area` | `"preview"` / `"files"` / `"search"` / `"diff"` / `"browser"` / `"terminal"` | Project View Mode 下右侧区域显示什么；按已确认 PROJ-Q3 与 `sidebar_open` 分别保存 |
+| `last_tool` | `"files"` / `"search"` / `"diff"` / `"browser"` / `"terminal"` / 空 | 右侧边栏展开时默认显示的工具；空时用默认工具（PROJ-Q14） |
 | `sidebar_width` | 数值，空表示默认 | 320–560 |
 | `view_conversation_width` | 数值，空表示默认 | 360–560 |
 
@@ -349,7 +349,7 @@ Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级�
 
 ## 5. 接口与事件
 
-主进程正式接缝见 [`MainSessionPort`](../../apps/desktop/src/main/services/project/session-port.ts)，Renderer 槽位与接缝见 [`features/project/integration.tsx`](../../apps/desktop/src/renderer/src/features/project/integration.tsx)，IPC 见 [`shared/ipc/project.ts`](../../apps/desktop/src/shared/ipc/project.ts)。2026-10-09 已接入 Session；Project View 与四工具内容已接入（Diff 当前为项目变更）；工具关闭接缝见 [`MainToolPort`](../../apps/desktop/src/main/services/project/tool-port.ts)。
+主进程正式接缝见 [`MainSessionPort`](../../apps/desktop/src/main/services/project/session-port.ts)，Renderer 槽位与接缝见 [`features/project/integration.tsx`](../../apps/desktop/src/renderer/src/features/project/integration.tsx)，IPC 见 [`shared/ipc/project.ts`](../../apps/desktop/src/shared/ipc/project.ts)。2026-10-09 已接入 Session；Project View 与四工具内容已接入（项目 / 本轮 Diff 及 Search 当前范围见 Tools spec）；工具关闭接缝见 [`MainToolPort`](../../apps/desktop/src/main/services/project/tool-port.ts)。
 
 ### 5.1 本模块需要 session 模块提供
 

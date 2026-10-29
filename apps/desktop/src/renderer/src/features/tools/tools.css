@@ -35,3 +35,47 @@
 .browser-preview { position: relative; flex: 1; display: flex; min-height: 0; min-width: 0; overflow: hidden; }
 .browser-loading { flex: none; padding: var(--space-1) var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-muted); }
 .browser-external__url { color: var(--color-text-muted); overflow-wrap: anywhere; }
+.browser-notice { display: flex; align-items: center; gap: var(--space-2); flex: none; padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3); border-bottom: 1px solid var(--color-border); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.browser-notice span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.browser-toolbar .icon-button { flex: none; }
+
+/* VS Code parity (DEC-25): terminal find bar, process label, inline rename. */
+.terminal-find { display: flex; flex: none; align-items: center; gap: 2px; padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--color-border); background: var(--color-floating); }
+.terminal-find input { flex: 1; min-width: 0; height: 24px; padding: 0 var(--space-2); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); outline: 0; background: var(--color-control); color: var(--color-text); font: var(--font-size-sm) var(--font-sans); }
+.terminal-find input:focus { border-color: var(--color-border-focus); }
+.terminal-find input[aria-invalid="true"] { border-color: var(--color-error-border); }
+.terminal-find__none { flex: none; padding: 0 var(--space-1); color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.terminal-find .search-toggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid transparent; border-radius: var(--radius-xs); background: transparent; color: var(--color-text-muted); }
+.terminal-find .search-toggle.is-selected { border-color: var(--color-border-focus); background: var(--color-selected); color: var(--color-text); }
+.terminal-tab__process { flex: none; color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.terminal-tab__rename { width: 120px; height: 22px; margin: 0 var(--space-1); padding: 0 var(--space-1-5); border: 1px solid var(--color-border-focus); border-radius: var(--radius-xs); outline: 0; background: var(--color-control); color: var(--color-text); font: var(--font-size-sm) var(--font-sans); }
+.terminal-group { display: flex; flex: 1; min-width: 0; min-height: 0; }
+.terminal-group.is-stacked { flex-direction: column; }
+.terminal-group.is-split > .terminal-panel + .terminal-panel { border-inline-start: 1px solid var(--color-border-strong); }
+.terminal-group.is-split.is-stacked > .terminal-panel + .terminal-panel { border-inline-start: 0; border-top: 1px solid var(--color-border-strong); }
+.terminal-group.is-split > .terminal-panel.is-focused { box-shadow: inset 0 2px 0 var(--color-border-focus); }
+.terminal-tab.is-split-member { margin-inline-start: -4px; }
+.terminal-tab.is-split.is-group-shown:not(.is-selected) { background: var(--color-hover); }
+
+/* Browser tabs, favorites and address suggestions (step 3, DEC-25). */
+.browser-tabs { display: flex; flex: none; gap: 1px; overflow-x: auto; border-bottom: 1px solid var(--color-border); scrollbar-width: none; }
+.browser-tab { display: flex; flex: 0 1 180px; align-items: center; min-width: 72px; border-inline-end: 1px solid var(--color-border); color: var(--color-text-muted); }
+.browser-tab.is-current { background: var(--color-selected); color: var(--color-text); }
+.browser-tab button[role="tab"] { display: flex; flex: 1; align-items: center; gap: var(--space-1); min-width: 0; height: 28px; padding: 0 var(--space-1) 0 var(--space-2); border: 0; background: transparent; color: inherit; font: var(--font-size-sm) var(--font-sans); }
+.browser-tab button[role="tab"] span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.browser-tab__close { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 18px; height: 18px; margin-inline-end: var(--space-1); border: 0; border-radius: var(--radius-xs); background: transparent; color: var(--color-text-muted); opacity: 0; }
+.browser-tab:hover .browser-tab__close, .browser-tab.is-current .browser-tab__close, .browser-tab__close:focus-visible { opacity: 1; }
+.browser-tab__spinner { flex: none; width: 8px; height: 8px; border: 1.5px solid var(--color-border-strong); border-top-color: var(--color-text-muted); border-radius: 50%; animation: browser-spin .8s linear infinite; }
+@keyframes browser-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .browser-tab__spinner { animation: none; } }
+.browser-address-field { position: relative; display: flex; flex: 1; min-width: 0; }
+.browser-address-field .browser-address { flex: 1; padding-inline-end: 28px; }
+.browser-star { position: absolute; inset: 0 2px 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 24px; border: 0; background: transparent; color: var(--color-text-muted); }
+.browser-star.is-on { color: var(--git-modified, #a16207); }
+.browser-star:disabled { opacity: .4; }
+.browser-suggestions { top: calc(100% + 4px); left: 0; right: 0; max-height: 280px; overflow: auto; padding: var(--space-1); }
+.browser-suggestion { display: flex; align-items: center; gap: var(--space-2); min-height: 26px; padding: 0 var(--space-2); border-radius: var(--radius-xs); font-size: var(--font-size-sm); cursor: default; }
+.browser-suggestion.is-active, .browser-suggestion:hover { background: var(--color-selected); }
+.browser-suggestion svg { flex: none; color: var(--color-text-muted); }
+.browser-suggestion__title { flex: none; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.browser-suggestion__url { flex: 1; min-width: 0; overflow: hidden; color: var(--color-text-muted); font-size: var(--font-size-xs); text-overflow: ellipsis; white-space: nowrap; }

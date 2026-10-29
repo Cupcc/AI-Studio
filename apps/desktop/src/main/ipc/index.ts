@@ -11,11 +11,14 @@ import { createBrowserFeature } from './browser'
 import { createTerminalFeature } from './terminal'
 import { createFilesFeature } from './files'
 import { createDiffFeature } from './diff'
+import { createMenuFeature } from './menu'
+import { createSearchFeature } from './search'
 import { projectShellFor } from '../services/project'
 import { terminalFor } from '../services/terminal'
 import { browserFor } from '../services/browser'
 import { filesFor } from '../services/files'
 import { diffFor } from '../services/diff'
+import { searchFor } from '../services/search'
 import { registerFeatureHandlers, type FeatureHandlers, type MainIpc } from './registry'
 
 /** Every cleanup is attempted; failures are reported together so one stuck tool cannot skip the others. */
@@ -26,7 +29,7 @@ async function attemptAll(message: string, operations: (() => Promise<void>)[]):
 }
 
 export function createFeatures(core: CoreServices, sessionOptions: SessionFeatureOptions = {}): FeatureHandlers[] {
-  const terminal = terminalFor(core), browser = browserFor(core), files = filesFor(core), diff = diffFor(core), shell = projectShellFor(core)
+  const terminal = terminalFor(core), browser = browserFor(core), files = filesFor(core), diff = diffFor(core), search = searchFor(core), shell = projectShellFor(core)
   shell.toolsChanged = () => browser.syncVisibility()
   shell.setToolPort({
     activeTerminals: projectId => terminal.activeTerminals(projectId).map(item => ({
@@ -35,7 +38,8 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
     closeProject: projectId => attemptAll('Project 工具清理失败', [
       async () => { await terminal.closeProject(projectId); await browser.close(projectId) },
       () => files.closeProject(projectId),
-      () => diff.closeProject(projectId)
+      () => diff.closeProject(projectId),
+      () => search.closeProject(projectId)
     ]),
     closeAll: () => attemptAll('工具清理失败', [
       async () => { await terminal.closeAll(); await browser.closeAll() },
@@ -52,7 +56,9 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
     createBrowserFeature(core),
     createTerminalFeature(core),
     createFilesFeature(core),
-    createDiffFeature(core)
+    createDiffFeature(core),
+    createMenuFeature(),
+    createSearchFeature(core)
   ]
 }
 

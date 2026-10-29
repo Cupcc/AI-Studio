@@ -1,0 +1,8 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/tools-vscode-parity/apps/desktop
+
+
+ Test Files  4 passed (4)
+      Tests  126 passed (126)
+   Start at  14:21:20
+   Duration  3.17s (tests 52%, environment 29%, transform 11%, import 8%)

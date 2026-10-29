@@ -1,0 +1,14 @@
+/* Quick Open (⌘P): top-centred like VS Code's picker. */
+.quick-open-backdrop { position: fixed; inset: 0; z-index: 60; display: flex; justify-content: center; padding-top: 72px; }
+.quick-open { display: flex; flex-direction: column; width: min(600px, calc(100vw - 32px)); max-height: min(440px, calc(100vh - 120px)); overflow: hidden;
+  border: 1px solid var(--color-border-strong); border-radius: var(--radius-card); background: var(--color-floating);
+  -webkit-backdrop-filter: var(--backdrop-floating); backdrop-filter: var(--backdrop-floating); box-shadow: var(--shadow-popover); color: var(--color-text); }
+.quick-open__input { flex: none; height: 36px; margin: var(--space-2); padding: 0 var(--space-2); border: 1px solid var(--color-border-focus); border-radius: var(--radius-sm); outline: 0; background: var(--color-control); color: var(--color-text); font: var(--font-size-md) var(--font-sans); }
+.quick-open__list { flex: 0 1 auto; min-height: 0; padding-bottom: var(--space-1); overflow: auto; }
+.quick-open__item { display: flex; align-items: center; gap: var(--space-2); min-height: 26px; padding: 0 var(--space-3); font-size: var(--font-size-sm); cursor: default; }
+.quick-open__item.is-active { background: var(--color-selected); }
+.quick-open__name { flex: none; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quick-open__dir { flex: 1; min-width: 0; overflow: hidden; color: var(--color-text-muted); font-size: var(--font-size-xs); text-overflow: ellipsis; white-space: nowrap; }
+.quick-open__tag { flex: none; color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.quick-open mark { background: transparent; color: var(--color-link); font-weight: 600; }
+.quick-open__status { margin: var(--space-2) var(--space-3); color: var(--color-text-muted); font-size: var(--font-size-sm); }

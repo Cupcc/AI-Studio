@@ -3,9 +3,12 @@ import { memo, useRef, useState, type KeyboardEvent } from 'react'
 import type { DiffFileEntry } from '@shared/tools/diff'
 import { entryLabel, isModeOnly, splitPath } from './diff-format'
 import { D, KIND_LETTER } from './strings'
+import { Icon } from '../../../app/Icon'
 
 export interface FileListProps {
   files: DiffFileEntry[]
+  /** Grouped under their folders (VS Code's "View as Tree"); keyboard order stays the list order. */
+  tree?: boolean
   selectedPath: string | null
   /** With no HEAD every file is untracked: the marker would say nothing, so it is hidden there. */
   showUntracked: boolean
@@ -44,7 +47,7 @@ function Row({ entry, index, selected, tabbable, showUntracked, onSelect, onFocu
 }
 
 /** Listbox of changed files. Arrow keys / Home / End move focus; Enter or Space opens the file (selecting never loads while arrowing). */
-export const FileList = memo(function FileList({ files, selectedPath, showUntracked, stale, onSelect }: FileListProps) {
+export const FileList = memo(function FileList({ files, tree = false, selectedPath, showUntracked, stale, onSelect }: FileListProps) {
   const [focusPath, setFocusPath] = useState<string | null>(null)
   const nodes = useRef(new Map<string, HTMLElement>())
   const focusIndex = Math.max(0, files.findIndex(file => file.path === (focusPath ?? selectedPath)))
@@ -64,8 +67,21 @@ export const FileList = memo(function FileList({ files, selectedPath, showUntrac
     }
   }
   const register = (path: string, node: HTMLElement | null) => { if (node) nodes.current.set(path, node); else nodes.current.delete(path) }
+  const row = (entry: DiffFileEntry, index: number) => <Row key={entry.path} entry={entry} index={index} selected={entry.path === selectedPath} tabbable={index === focusIndex}
+    showUntracked={showUntracked} onSelect={onSelect} onFocusRow={setFocusPath} onKey={onKey} register={register} />
+  if (tree) {
+    // Folder groups in path order; the rows keep their index in `files` so arrow keys move as in the list.
+    const groups = new Map<string, { entry: DiffFileEntry; index: number }[]>()
+    files.forEach((entry, index) => { const dir = splitPath(entry.path).dir; groups.set(dir, [...(groups.get(dir) ?? []), { entry, index }]) })
+    const ordered = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))
+    return <div className={`diff-list diff-list--tree ${stale ? 'is-stale' : ''}`} role="listbox" aria-label={D.listLabel}>
+      {ordered.map(([dir, items]) => <div key={dir || '.'} role="group" aria-label={dir ? displayName(dir) : D.rootFolder} className="diff-group">
+        <div className="diff-group__label" aria-hidden="true"><Icon name="files" size={13} /><span>{dir ? displayName(dir) : D.rootFolder}</span></div>
+        {items.map(item => row(item.entry, item.index))}
+      </div>)}
+    </div>
+  }
   return <div className={`diff-list ${stale ? 'is-stale' : ''}`} role="listbox" aria-label={D.listLabel}>
-    {files.map((entry, index) => <Row key={entry.path} entry={entry} index={index} selected={entry.path === selectedPath} tabbable={index === focusIndex}
-      showUntracked={showUntracked} onSelect={onSelect} onFocusRow={setFocusPath} onKey={onKey} register={register} />)}
+    {files.map((entry, index) => row(entry, index))}
   </div>
 })

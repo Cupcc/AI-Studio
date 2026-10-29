@@ -10,6 +10,7 @@ import { useTerminals } from './terminal-store'
 vi.mock('./api', () => ({ terminalApi: vi.fn(), browserApi: vi.fn() }))
 vi.mock('./files/api', () => ({ filesApi: vi.fn() }))
 vi.mock('./diff/api', () => ({ diffApi: vi.fn() }))
+vi.mock('../../lib/studio', () => ({ studio: () => ({ project: { onMenuCommand: () => () => {} } }) }))
 const previousWindow = useProjectShell.getState().windowState
 afterEach(() => { useProjectShell.setState({ windowState: previousWindow }); useTerminals.getState().forget('lifecycle') })
 

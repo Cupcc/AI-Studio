@@ -5,7 +5,7 @@ import type { BrowserState } from '@shared/tools/browser'
 
 vi.mock('./api', () => ({ browserApi: vi.fn() }))
 it('coalesces a slow resize with newer bounds and an overlay hide before ever showing stale content', async () => {
-  const state: BrowserState = { projectId: 'layout', generation: 'g', revision: 1, address: 'http://localhost/', title: '', status: 'ready', error: null, externalRequest: null, visible: false }
+  const state: BrowserState = { projectId: 'layout', generation: 'g', revision: 1, address: 'http://localhost/', title: '', status: 'ready', error: null, externalRequest: null, visible: false, canGoBack: false, canGoForward: false, devTools: false, zoom: 100, notice: null, tabs: [], favorite: false, permissionRequest: null }
   let resolve!: (state: BrowserState) => void
   const api = { setBounds: vi.fn().mockReturnValueOnce(new Promise(done => { resolve = done })).mockResolvedValue(state), setVisible: vi.fn().mockResolvedValue(state) } as unknown as BrowserApi
   vi.mocked(browserApi).mockReturnValue(api)

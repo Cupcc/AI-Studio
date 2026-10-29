@@ -2,13 +2,16 @@
 import './monaco-environment'
 import * as monaco from 'monaco-editor/editor/editor.api.js'
 // Contributions are opt-in in Monaco 0.57: only what a read-only viewer needs. Everything backed by the language service
-// or the worker (hover, suggestions, links, unicode highlight, folding, ...) is left out on purpose.
+// or the worker (hover, suggestions, links, unicode highlight, ...) is left out on purpose. Folding (indentation ranges,
+// computed on the main thread) and Go to Line (⌃G) were added for VS Code parity (DEC-25).
 import 'monaco-editor/features/codicon/register.js'
 import 'monaco-editor/features/diffEditor/register.js'
 import 'monaco-editor/features/find/register.js'
 import 'monaco-editor/features/clipboard/register.js'
 import 'monaco-editor/features/contextmenu/register.js'
 import 'monaco-editor/features/wordOperations/register.js'
+import 'monaco-editor/features/folding/register.js'
+import 'monaco-editor/features/gotoLine/register.js'
 import { JSON_CONFIGURATION, JSON_MONARCH } from './json-language'
 import { JSON_LANGUAGE, PLAIN_TEXT } from './languages'
 import { LANGUAGE_LOADERS } from './language-loaders'

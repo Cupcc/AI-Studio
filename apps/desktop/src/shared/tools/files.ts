@@ -141,3 +141,66 @@ export interface FilesWatchChanged { projectId: string; revision: number; watch:
 
 /** Shared by the Files and the Diff watcher so both ignore the same trees. */
 export const FILES_WATCH_IGNORED = { anywhere: ['.git'], belowFirstLevel: ['node_modules'] } as const
+
+// ---- File management, quick open and external opening (FR-TOOL-001 2026-10-26, DEC-25, TOOLS-Q11) ----------------
+
+export const FILES_OPERATION_LIMITS = {
+  /** Paths in one move / copy / trash request (a multi-selection). */
+  pathsPerOperation: 500,
+  /** Quick Open index: files listed by ripgrep (respects .gitignore). */
+  indexEntries: 200_000,
+  indexOutputBytes: 64 * 1024 * 1024,
+  indexTimeoutMs: 15_000,
+  /** Largest image shown in the viewer. */
+  imageBytes: 10 * 1024 * 1024
+} as const
+
+export type FileOperationFailure =
+  | 'invalid_path' | 'invalid_name' | 'project_unavailable' | 'project_closing' | 'root'
+  | 'missing' | 'not_directory' | 'exists' | 'excluded' | 'symlink_refused' | 'permission_denied' | 'into_itself' | 'failed'
+/** `paths`: the resulting Project paths. A failure names the path it stopped at; `done` lists what already happened. */
+export type FileOperationResult =
+  | { status: 'ok'; paths: ProjectPath[] }
+  | { status: 'failed'; reason: FileOperationFailure; path: ProjectPath; done: ProjectPath[] }
+
+export interface FileCreateRequest extends FilesProjectRef {
+  /** Directory to create in ('' = Project root). */
+  parent: ProjectPath
+  /** One name, or `a/b/c.ts` to create the missing folders on the way (as VS Code does). */
+  name: string
+  kind: 'file' | 'directory'
+}
+export interface FileRenameRequest extends FilesPathRef { name: string }
+/** Move or copy `paths` into the directory `target`. */
+export interface FileTransferRequest extends FilesProjectRef { paths: ProjectPath[]; target: ProjectPath }
+export interface FilePathsRequest extends FilesProjectRef { paths: ProjectPath[] }
+
+export type ExternalEditor = 'vscode' | 'cursor'
+export type FileOpenTarget = 'default' | 'finder' | ExternalEditor
+export interface FileOpenRequest extends FilesPathRef { target: FileOpenTarget; line?: number }
+export type FileOpenResult = { status: 'ok' } | { status: 'failed'; reason: FileOperationFailure | 'app_missing'; detail?: string }
+/** Editors registered on this Mac (by their URL scheme); only these are offered. */
+export interface ExternalEditors { vscode: boolean; cursor: boolean }
+
+/** Terminal link detection: which of these paths are existing regular files / folders (null: neither, or refused). */
+export type FileKindResult = ('file' | 'directory' | null)[]
+export const FILES_STAT_LIMIT = 64
+
+export type FileIndexResult =
+  | { status: 'ok'; paths: ProjectPath[]; truncated: boolean }
+  | { status: 'unavailable'; reason: 'project_unavailable' | 'project_closing' | 'timeout' | 'failed' }
+
+export type FileImageResult =
+  | { status: 'ok'; path: ProjectPath; mime: string; size: number; base64: string }
+  | { status: 'unavailable'; path: ProjectPath; reason: FileUnavailableReason | 'not_image'; size?: number }
+
+/** Image types the viewer previews, by extension (lower case). SVG is shown as an image, so its scripts never run. */
+export const IMAGE_TYPES: Readonly<Record<string, string>> = {
+  png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', bmp: 'image/bmp',
+  ico: 'image/x-icon', svg: 'image/svg+xml', avif: 'image/avif'
+}
+export function imageTypeOf(path: ProjectPath): string | null {
+  const name = projectPathName(path)
+  const dot = name.lastIndexOf('.')
+  return dot > 0 ? IMAGE_TYPES[name.slice(dot + 1).toLowerCase()] ?? null : null
+}

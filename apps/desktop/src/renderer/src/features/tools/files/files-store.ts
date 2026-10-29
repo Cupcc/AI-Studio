@@ -22,6 +22,11 @@ export type FileViewer =
   | { path: ProjectPath; phase: 'ready'; text: string; version: string; size: number; encoding: FileEncoding; bom: boolean; lineEnding: 'lf' | 'crlf' | 'mixed' | 'none' }
   | { path: ProjectPath; phase: 'unavailable'; reason: FileUnavailableReason; size?: number }
 
+/** An open file in the viewer's tab row. An unpinned tab is VS Code's preview tab: the next single-click replaces it. */
+export interface FileTab { path: ProjectPath; pinned: boolean }
+/** The inline name input in the tree: a new entry under `parent`, or renaming `path`. */
+export type FilesEdit = { mode: 'create'; parent: ProjectPath; kind: 'file' | 'directory' } | { mode: 'rename'; path: ProjectPath }
+
 export interface ProjectFiles {
   /** The loaded set: the Project root and every directory expanded at least once. */
   dirs: ReadonlyMap<ProjectPath, DirListing>
@@ -33,6 +38,14 @@ export interface ProjectFiles {
   watch: FilesWatchState | null
   /** Share of the body height taken by the tree while a file is open. */
   split: number
+  /** Tree selection (⌘-click / ⇧-click multi-selection), independent of the file in the viewer. */
+  marked: ProjectPath[]
+  /** Where a ⇧-click range starts. */
+  anchor: ProjectPath | null
+  tabs: FileTab[]
+  edit: FilesEdit | null
+  /** Line to show in the viewer (Quick Open, Search, Terminal links); `nonce` repeats a request for the same line. */
+  reveal: { path: ProjectPath; line: number; nonce: number } | null
 }
 
 interface FilesStore {
@@ -42,9 +55,23 @@ interface FilesStore {
   /** The panel is hidden or unmounted: unsubscribe. The state stays in memory. */
   deactivate(projectId: string): void
   toggle(projectId: string, path: ProjectPath): Promise<void>
-  /** Opens a file in the viewer. Never touches the conversation. */
-  select(projectId: string, path: ProjectPath): Promise<void>
+  /** Opens a file in the viewer. Never touches the conversation. `pin` keeps the tab (double-click); otherwise it is the preview tab. */
+  select(projectId: string, path: ProjectPath, options?: { pin?: boolean }): Promise<void>
+  /** Closes the viewer's current tab; the neighbour becomes current. */
   closeViewer(projectId: string): void
+  closeTab(projectId: string, path: ProjectPath): void
+  pinTab(projectId: string, path: ProjectPath): void
+  /** Selects in the tree: one row, ⌘ toggle, or ⇧ range over the visible `order`. */
+  mark(projectId: string, path: ProjectPath, mode: 'replace' | 'toggle' | 'range', order: readonly ProjectPath[]): void
+  collapseAll(projectId: string): void
+  /** Expands the ancestors, selects the row and opens the file (optionally at a line), like VS Code's reveal. */
+  open(projectId: string, path: ProjectPath, options?: { line?: number; pin?: boolean }): Promise<void>
+  startEdit(projectId: string, edit: FilesEdit): void
+  cancelEdit(projectId: string): void
+  /** Re-lists these directories now (after a file operation), whatever the watcher reports. */
+  relist(projectId: string, dirs: readonly ProjectPath[]): Promise<void>
+  /** A rename / move: open tabs and the selection follow the entry to its new path. */
+  moved(projectId: string, from: ProjectPath, to: ProjectPath): void
   refresh(projectId: string): Promise<void>
   setSplit(projectId: string, split: number): void
   changed(event: FilesChanged): void
@@ -58,7 +85,11 @@ const RESUBSCRIBE_BASE_MS = 500
 const RESUBSCRIBE_MAX_MS = 10_000
 
 const emptyDir = (): DirListing => ({ entries: [], truncated: false, reason: null, loading: false, dirty: false })
-const emptyProject = (): ProjectFiles => ({ dirs: new Map(), expanded: new Set(), selected: null, viewer: null, watch: null, split: 0.45 })
+const emptyProject = (): ProjectFiles => ({ dirs: new Map(), expanded: new Set(), selected: null, viewer: null, watch: null, split: 0.45, marked: [], anchor: null, tabs: [], edit: null, reveal: null })
+const MAX_TABS = 20
+let revealNonce = 0
+/** Moves a path (or anything under it) from one place to another. */
+const relocate = (path: ProjectPath, from: ProjectPath, to: ProjectPath): ProjectPath | null => path === from ? to : path.startsWith(`${from}/`) ? to + path.slice(from.length) : null
 
 // Module-level bookkeeping, like terminal-store.ts: it must outlive the panel and reset on `forget`.
 const epochs = new Map<string, number>()
@@ -134,6 +165,16 @@ const localReason = (kind: FileEntryKind): FileUnavailableReason | null => kind 
 function pruneBelow(dirs: Map<ProjectPath, DirListing>, expanded: Set<ProjectPath>, root: ProjectPath, { dropRoot, forgetExpansion }: { dropRoot: boolean; forgetExpansion: boolean }) {
   for (const path of [...dirs.keys()]) if (within(path, root) && (dropRoot || path !== root)) dirs.delete(path)
   if (forgetExpansion) for (const path of [...expanded]) if (within(path, root) && (dropRoot || path !== root)) expanded.delete(path)
+}
+
+/** Adds the tab, or replaces the preview tab (VS Code: a single-click opens in the reused preview tab). */
+function withTab(tabs: FileTab[], path: ProjectPath, pin: boolean): FileTab[] {
+  const existing = tabs.find(tab => tab.path === path)
+  if (existing) return pin && !existing.pinned ? tabs.map(tab => tab.path === path ? { ...tab, pinned: true } : tab) : tabs
+  const preview = tabs.findIndex(tab => !tab.pinned)
+  const next = preview >= 0 ? tabs.map((tab, index) => index === preview ? { path, pinned: pin } : tab) : [...tabs, { path, pinned: pin }]
+  // The oldest pinned tabs go first when there are too many.
+  return next.length > MAX_TABS ? next.slice(next.length - MAX_TABS) : next
 }
 
 export const useFiles = create<FilesStore>((set, get) => {
@@ -363,7 +404,10 @@ export const useFiles = create<FilesStore>((set, get) => {
       closed.delete(projectId)
       active.add(projectId)
       if (!project(projectId)) set(state => ({ projects: { ...state.projects, [projectId]: emptyProject() } }))
-      await Promise.all([subscribeProject(projectId), settle(projectId)])
+      // A file opened while the panel was hidden (Quick Open, Search, a Terminal link) is read now.
+      const pending = project(projectId)?.viewer
+      const read = pending?.phase === 'loading' && project(projectId)?.selected === pending.path ? readFile(projectId, pending.path) : Promise.resolve()
+      await Promise.all([subscribeProject(projectId), settle(projectId), read])
     },
 
     deactivate(projectId) {
@@ -384,21 +428,104 @@ export const useFiles = create<FilesStore>((set, get) => {
       await settle(projectId)
     },
 
-    async select(projectId, path) {
+    async select(projectId, path, options = {}) {
       const current = project(projectId)
       if (!current) return
       const kind = entryOf(current, path)?.kind ?? 'file'
       if (kind === 'directory') return get().toggle(projectId, path)
+      const tabs = withTab(current.tabs, path, options.pin ?? false)
       const refused = localReason(kind)
-      if (refused) { patchProject(projectId, { selected: path, viewer: { path, phase: 'unavailable', reason: refused } }); return }
+      if (refused) { patchProject(projectId, { selected: path, tabs, viewer: { path, phase: 'unavailable', reason: refused } }); return }
       const same = current.viewer?.path === path
       // Selecting the open file again keeps what is shown and revalidates it; a failed or deleted state starts over.
-      patchProject(projectId, { selected: path, viewer: same && current.viewer?.phase === 'ready' ? current.viewer : { path, phase: 'loading' } })
+      patchProject(projectId, { selected: path, tabs, viewer: same && current.viewer?.phase === 'ready' ? current.viewer : { path, phase: 'loading' } })
       await readFile(projectId, path)
     },
 
     closeViewer(projectId) {
-      patchProject(projectId, { selected: null, viewer: null })
+      const current = project(projectId)
+      if (!current) return
+      const path = current.viewer?.path ?? current.selected
+      if (path !== null && current.tabs.some(tab => tab.path === path)) get().closeTab(projectId, path)
+      else patchProject(projectId, { selected: null, viewer: null })
+    },
+
+    closeTab(projectId, path) {
+      const current = project(projectId)
+      if (!current) return
+      const index = current.tabs.findIndex(tab => tab.path === path)
+      const tabs = current.tabs.filter(tab => tab.path !== path)
+      if (current.viewer?.path !== path) { patchProject(projectId, { tabs }); return }
+      const next = tabs[Math.min(Math.max(index, 0), tabs.length - 1)]
+      patchProject(projectId, { tabs, selected: null, viewer: null })
+      if (next) void get().select(projectId, next.path, { pin: next.pinned })
+    },
+
+    pinTab(projectId, path) {
+      patchProject(projectId, current => ({ tabs: current.tabs.map(tab => tab.path === path ? { ...tab, pinned: true } : tab) }))
+    },
+
+    mark(projectId, path, mode, order) {
+      patchProject(projectId, current => {
+        if (mode === 'toggle') {
+          const marked = current.marked.includes(path) ? current.marked.filter(item => item !== path) : [...current.marked, path]
+          return { marked, anchor: path }
+        }
+        if (mode === 'range' && current.anchor !== null) {
+          const from = order.indexOf(current.anchor), to = order.indexOf(path)
+          if (from >= 0 && to >= 0) return { marked: order.slice(Math.min(from, to), Math.max(from, to) + 1) }
+        }
+        return { marked: [path], anchor: path }
+      })
+    },
+
+    collapseAll(projectId) {
+      patchProject(projectId, { expanded: new Set() })
+    },
+
+    async open(projectId, path, options = {}) {
+      if (!project(projectId)) set(state => ({ projects: { ...state.projects, [projectId]: emptyProject() } }))
+      const expanded = new Set(project(projectId)!.expanded)
+      for (let dir = projectPathParent(path); dir !== ''; dir = projectPathParent(dir)) expanded.add(dir)
+      patchProject(projectId, { expanded, marked: [path], anchor: path, ...(options.line ? { reveal: { path, line: options.line, nonce: ++revealNonce } } : {}) })
+      void settle(projectId)
+      await get().select(projectId, path, { pin: options.pin ?? false })
+    },
+
+    startEdit(projectId, edit) {
+      const current = project(projectId)
+      if (!current) return
+      if (edit.mode === 'create' && edit.parent !== '' && !current.expanded.has(edit.parent)) {
+        const expanded = new Set(current.expanded); expanded.add(edit.parent)
+        patchProject(projectId, { expanded, edit })
+        void settle(projectId)
+        return
+      }
+      patchProject(projectId, { edit })
+    },
+
+    cancelEdit(projectId) {
+      patchProject(projectId, { edit: null })
+    },
+
+    async relist(projectId, dirs) {
+      const current = project(projectId)
+      if (!current || !active.has(projectId)) return
+      await Promise.all([...new Set(dirs)].filter(dir => dir === '' || current.dirs.has(dir)).map(dir => listDir(projectId, dir, true)))
+    },
+
+    moved(projectId, from, to) {
+      patchProject(projectId, current => {
+        const tabs = current.tabs.map(tab => ({ ...tab, path: relocate(tab.path, from, to) ?? tab.path }))
+        const marked = current.marked.map(path => relocate(path, from, to) ?? path)
+        const expanded = new Set([...current.expanded].map(path => relocate(path, from, to) ?? path))
+        const selected = current.selected === null ? null : relocate(current.selected, from, to) ?? current.selected
+        // The viewer re-reads the file under its new path; the old text stays until the read answers.
+        const viewer = current.viewer && relocate(current.viewer.path, from, to) !== null ? { ...current.viewer, path: relocate(current.viewer.path, from, to)! } : current.viewer
+        return { tabs, marked, expanded, selected, viewer }
+      })
+      const after = project(projectId)
+      if (after?.selected && after.viewer?.path === after.selected) void readFile(projectId, after.selected, true)
     },
 
     async refresh(projectId) {

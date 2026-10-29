@@ -13,12 +13,14 @@ class FakeProcess implements TerminalProcess {
   exited = false
   liveChildren: number[] = []
   probeError?: Error
+  foreground = 'zsh'
   dataListeners = new Set<(data: string) => void>()
   exitListeners = new Set<(exit: { exitCode: number; signal?: number }) => void>()
   write(data: string) { this.writes.push(data) }
   resize(cols: number, rows: number) { this.sizes.push([cols, rows]) }
   pause() { this.paused = true }
   resume() { this.paused = false }
+  processName() { return this.foreground }
   onData(listener: (data: string) => void) { this.dataListeners.add(listener); return { dispose: () => this.dataListeners.delete(listener) } }
   onExit(listener: (exit: { exitCode: number; signal?: number }) => void) { this.exitListeners.add(listener); return { dispose: () => this.exitListeners.delete(listener) } }
   emit(data: string) { for (const listener of this.dataListeners) listener(data) }
@@ -222,5 +224,41 @@ describe('Project-owned user terminals', () => {
     expect(processes[0]!.writes.some((data) => /^\u001b\[\d+;\d+R$/.test(data))).toBe(true)
     const screen = createTerminalScreen(80, 24)
     screen.dispose()
+  })
+})
+
+describe('VS Code-style terminal controls (DEC-25)', () => {
+  it('starts in a Project directory, renames tabs and reports the foreground process', async () => {
+    vi.useFakeTimers()
+    try {
+      const resolveCwd = vi.fn(async (_id: string, path: string) => `/projects/p1/${path}`)
+      const { service, processes, spawns, changes } = fixture({ resolveCwd, processPollMs: 100 })
+      const ref = await service.create({ projectId: 'p1', cols: 80, rows: 24, cwd: 'src/app' })
+      expect(resolveCwd).toHaveBeenCalledWith('p1', 'src/app')
+      expect(spawns[0]!.cwd).toBe('/projects/p1/src/app')
+      expect(ref.process).toBe('zsh')
+      processes[0]!.foreground = 'node'
+      await vi.advanceTimersByTimeAsync(150)
+      expect(changes.at(-1)!.terminals[0]).toMatchObject({ process: 'node' })
+      expect(service.rename(ref, '  dev server\n ')).toMatchObject({ title: 'dev server', renamed: true })
+      expect(() => service.rename(ref, '   ')).toThrow('empty')
+      await expect(service.create({ projectId: 'p1', cols: 80, rows: 24, cwd: 'missing' })).resolves.toBeDefined()
+    } finally { vi.useRealTimers() }
+  })
+
+  it('refuses a start directory when the Project cannot resolve it', async () => {
+    const { service, spawns } = fixture({ resolveCwd: async () => { throw new Error('Directory unavailable: symlink_refused') } })
+    await expect(service.create({ projectId: 'p1', cols: 80, rows: 24, cwd: 'escape' })).rejects.toThrow('symlink_refused')
+    expect(spawns).toEqual([])
+  })
+
+  it('clears the Project-held screen so a re-attach does not restore the old output', async () => {
+    const { service, processes } = fixture({ screen: createTerminalScreen })
+    const ref = await create(service)
+    processes[0]!.emit('old output line\r\n$ ')
+    await service.attach(ref, 1)
+    await service.clear(ref)
+    const snapshot = await service.attach(ref, 1)
+    expect(snapshot.screen).not.toContain('old output line')
   })
 })

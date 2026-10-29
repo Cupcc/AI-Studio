@@ -1,0 +1,12 @@
+{
+  "date": "2026-10-27",
+  "reviewer": "W5",
+  "fixture": "Temporary directory outside repository; many.txt has 20000 ASCII a characters plus newline",
+  "command": "bundled rg --json --max-filesize 5M --max-columns 4000 --max-columns-preview --regexp a .",
+  "observed": {
+    "stdout_bytes": 978500,
+    "submatches_in_single_line": 20000,
+    "line_chars": 20001
+  },
+  "finding": "--json does not make --max-columns a bound; cap submatches/output before offset conversion and avoid quadratic prefix decoding"
+}

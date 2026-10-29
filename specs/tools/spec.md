@@ -6,18 +6,18 @@
 |---|---|
 | 模块 | `tools` |
 | 文档状态 | 已确认（2026-10-13） |
-| 确认范围 | 用户接受本轮审阅建议「accept all, not dev, update all docs」；技术契约为 AI 细化，本次实施 diff 待审阅；不代表开发授权或功能验收；§5.1～§5.3 为运行时、Files / 项目 Diff 与本轮 Diff 的 AI 技术决定和实施记录，不是新增人工产品确认；开发授权见 §5 及负责任务 |
-| 覆盖需求 | FR-TOOL-001～FR-TOOL-004；文件上下文关联 FR-INPUT-001 |
+| 确认范围 | 用户接受本轮审阅建议「accept all, not dev, update all docs」；技术契约为 AI 细化，本次实施 diff 待审阅；不代表开发授权或功能验收；§5.1～§5.4 为运行时、Files / 项目 Diff、本轮 Diff 与 VS Code 对齐 的 AI 技术决定和实施记录，不是新增人工产品确认；开发授权见 §5 及负责任务 |
+| 覆盖需求 | FR-TOOL-001～FR-TOOL-005；文件上下文关联 FR-INPUT-001 |
 | 相关验收 | AC-07；Project 状态隔离关联 AC-01 |
 | 相关设计 | [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节 |
 | 来源 | [02 第 5 节](<../../docs/02. Functional Requirements.md#5-context-panel-与工程工具>)；[03 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)；[04 第 3、5 节及事项 13](<../../docs/04. Technical Requirements.md>)；用户 2026-10-12 对话「accept above suggetions, update all related docs」 |
-| 实施记录 | [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md)、[运行时执行计划](../../tasks/archive/T20261009-context-tools/plan.md)及[验收记录](../../tasks/archive/T20261009-context-tools/acceptance.md)；实现与验收状态以任务为准 |
+| 实施记录 | [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md)、[运行时执行计划](../../tasks/archive/T20261009-context-tools/plan.md)及[验收记录](../../tasks/archive/T20261009-context-tools/acceptance.md)；VS Code 对齐见[本轮任务](../../tasks/archive/T20261026-tools-vscode-parity/task.md)；实现与验收状态以任务为准 |
 
 ## 1. 问题与决定
 
 ### 1.1 未决问题
 
-首轮范围无阻塞产品未决项。TOOLS-Q1 已拆为下节 Q1、Q5、Q6 并确认；一般外站、可选持久化和页面自动化若后续纳入，需另行产品决定，不阻塞首轮本地预览。真实 CLI 能力及 CLI / 上游服务返回结果见第 5 节，不作为已解决的实现问题。
+当前已授权范围无阻塞产品未决项。首轮 TOOLS-Q1 / Q5 的本地导航与内存分区已由 2026-10-26 的 TOOLS-Q9 / Q10 取代；页面自动化仍按 TOOLS-Q6 后续评估。真实 CLI 能力及 CLI / 上游服务返回结果见第 5 节，不作为已解决的实现问题。
 
 ### 1.2 已确认原则
 
@@ -30,12 +30,17 @@
 | TOOLS-Q5 | 每个 Project 使用独立浏览器分区；首轮默认不跨应用重启保存登录数据，上次地址仍保存；可选持久化后续评估 | 从原 TOOLS-Q1 拆出；同上（2026-10-13 确认） |
 | TOOLS-Q6 | 客户端新增的 Agent 页面自动化另行评估；不改变原生 CLI 已有能力的接入要求，不将内嵌 OAuth / 跨站预览列为首轮交付承诺 | 从原 TOOLS-Q1 拆出；同上（2026-10-13 确认） |
 | TOOLS-Q7 | Project 关闭 / 应用退出纳入所有未退出的用户终端，合并一次确认，列出受影响 Session 与 Terminal；包括仅停在 Shell 提示符的实例；失败保留诊断与重试 | 同上（2026-10-13 确认）；确认流程归 [Project spec §3.2.4](../project/spec.md#324-关闭-tab-与确认) |
+| TOOLS-Q8 | 四个工具对齐 VS Code 基本操作并新增 Search 工具；范围见 FR-TOOL-001～005 的 2026-10-26 段落 | 用户 2026-10-26 对话；[DEC-25](<../../docs/07. Decisions.md#dec-25-工程工具对齐-vs-code-基本功能>) |
+| TOOLS-Q9 | Browser 可打开任意 http / https 网址，取代 TOOLS-Q1 的首轮本地限制；其他协议仍经用户选择交给系统应用 | 同上（2026-10-26 确认） |
+| TOOLS-Q10 | Browser 浏览数据所有 Project 共享并跨重启保存，提供清除入口，取代 TOOLS-Q5 的按 Project 内存分区 | 用户选择「所有 Project 共享保存」（2026-10-26 确认） |
+| TOOLS-Q11 | Files 支持文件管理（新建、重命名、移动、复制、删除到废纸篓），不提供内容编辑；用 VS Code / 默认应用打开代替 | 用户选择「不做，提供外部编辑器打开」（2026-10-26 确认） |
+| TOOLS-Q12 | Diff 保持只读，不新增 Git 写操作；只补充视图控制 | 用户选择「保持只读」（2026-10-26 确认） |
 
 ## 2. 职责与边界
 
-FR-TOOL-001～004：本模块负责右侧工具内容、文件及 Git 读取、浏览器实例、用户终端实例与工具内部状态。面板选择、宽度、模式切换由 [Project spec §5.5](../project/spec.md#55-与-project-viewtools后续-task) 负责；对话草稿及上下文标签由 [Input spec](../input/spec.md) 负责；原生 CLI 事件由 [Adapter spec](../agent-adapter/spec.md) 负责。
+FR-TOOL-001～005：本模块负责右侧工具内容、文件管理及只读查看、Git 读取、全文搜索、浏览器实例、用户终端实例与工具内部状态。面板选择、宽度、模式切换由 [Project spec §5.5](../project/spec.md#55-与-project-viewtools后续-task) 负责；对话草稿及上下文标签由 [Input spec](../input/spec.md) 负责；原生 CLI 事件由 [Adapter spec](../agent-adapter/spec.md) 负责。
 
-Project 级资源包括文件树、项目 Diff、Browser 状态、Terminal Tabs；本轮 Diff 以 Session / 原生 Thread / Turn 关联。Renderer 消费受控 IPC 的快照和事件；文件、Git、PTY 与 WebContentsView 由主进程服务管理（04 第 3 节）。
+Project 级资源包括文件树、搜索、项目 Diff、Browser 状态、Terminal Tabs；本轮 Diff 以 Session / 原生 Thread / Turn 关联。Renderer 消费受控 IPC 的快照和事件；文件、Git、PTY 与 WebContentsView 由主进程服务管理（04 第 3 节）。
 
 工具入口和跳转只由用户操作触发。Agent 的输出及文件事件可以更新内容，不改变当前工具、面板可见性或 Workspace 布局（02 Context Panel 操作原则）。
 
@@ -60,10 +65,10 @@ Project 级资源包括文件树、项目 Diff、Browser 状态、Terminal Tabs�
 
 ### FR-TOOL-003 Browser
 
-1. 用户输入本地 Web 地址并导航；支持刷新与恢复上次地址，保留 Project 级状态。开发服务器可由用户 Terminal 运行；当前范围不要求新增自动启动预览、服务器管理器或 Agent 页面自动化（FR-TOOL-003；工程工具任务）。
+1. 用户输入 Web 地址并导航（当前地址范围按 TOOLS-Q9）；支持刷新与恢复上次地址，保留 Project 级状态。开发服务器可由用户 Terminal 运行；当前范围不要求新增自动启动预览、服务器管理器或 Agent 页面自动化（FR-TOOL-003；工程工具任务）。
 2. 主进程持有独立 WebContentsView，网页禁用 Node，开启隔离和 sandbox，不加载应用 Preload、不暴露 `window.studio`。localhost 的脚本同样不能获得应用权限（04 第 3 节；TOOLS-Q2）。
 3. Renderer 通过限定命令传递导航、刷新、布局尺寸及可见性；主进程校验请求与尺寸。网页导航、新窗口、权限请求、下载和系统浏览器打开按各自处理器管理，不能复用主应用的可信 Renderer 身份（技术实现与验证见 §5 及任务验收）。
-4. 页面上下文与主应用分离，不自动继承系统浏览器登录。导航范围、Project 分区和跨重启行为按 TOOLS-Q1、Q5、Q6；普通外站导航、重定向和新窗口请求不能绕过相同入口策略，也不自动打开系统浏览器。网络子资源与顶层导航分别处理，不将本地导航范围误写为禁止页面正常加载外部资源。
+4. 页面上下文与主应用分离，不自动继承系统浏览器登录。导航范围、共享浏览数据和跨重启行为按 TOOLS-Q9、Q10，页面自动化边界按 TOOLS-Q6；普通外站导航、重定向和新窗口请求不能绕过相同入口策略，也不自动打开系统浏览器。网络子资源与顶层导航分别处理，不将本地导航范围误写为禁止页面正常加载外部资源。
 5. 切换工具或 Project 时移除 / 隐藏实际嵌入视图，保存实例及已确认恢复状态；不得把隐藏页面留在当前内容上方。布局 resize、弹层遮挡、焦点返回、加载失败、服务器不可达及渲染进程退出需验证。关闭 Project / 退出应用时显式释放所属 webContents（技术实现与验证见 §5 及任务验收）。
 
 ### FR-TOOL-004 Terminal
@@ -77,7 +82,7 @@ Project 级资源包括文件树、项目 Diff、Browser 状态、Terminal Tabs�
 
 ## 4. 状态与接口
 
-FR-TOOL-001～004：以下为已登记的技术接口，实施与验证结果见 §5 及任务验收；接口必须登记在现有类型化 IPC，不提供通用 shell / fs / execute 接口。
+FR-TOOL-001～005：以下为已登记的技术接口，实施与验证结果见 §5 及任务验收；接口必须登记在现有类型化 IPC，不提供通用 shell / fs / execute 接口。
 
 | 状态 / 资源 | 归属与保存 | 接缝 |
 |---|---|---|
@@ -115,8 +120,8 @@ FR-TOOL-002：AI 技术方案（2026-10-13；2026-10-18 实施见 §5.3）；Ada
 FR-TOOL-003、004：AI 技术方案（2026-10-13）；当前实现与验证见 §5.1 及任务验收。
 
 - Terminal 的 create / attach / input / resize / close 均校验 Project、Terminal ID 与实例代次；attach 返回可重建屏幕的快照和流序号，再衔接增量，避免遗漏或重复。服务维护有界屏幕 / 回滚状态与流量控制；关闭期间拒绝新输入，退出事件与清理结果分开表达。实现时确定缓存阈值，以 ANSI 光标、resize、大量输出及重新附着场景验证，不把无限日志或纯文本尾部作为屏幕恢复方案。
-- Browser 的 navigate / reload / bounds / visibility 命令与加载 / 错误事件绑定 Project 和实例代次；独立内存 session 分区，地址单独持久化。主进程解析 URL，核对协议与回环目标；顶层导航、重定向和新窗口使用一致策略。系统浏览器打开须经用户选择并校验 URL，不接受任意协议执行。
-- 权限请求、权限检查、下载各设显式处理器；未授权能力不自动放行，不关闭 webSecurity 解决预览问题。若后续需要新增权限交互或下载产品能力，记录有归属的产品问题，不在实现中擅自扩大范围。
+- Browser 的 navigate / reload / bounds / visibility 命令与加载 / 错误事件绑定 Project 和实例代次；网页实例按 Project 管理，浏览数据按 TOOLS-Q10 共享持久化，地址单独保存。主进程解析 URL，按 TOOLS-Q9 核对 http / https 协议；顶层导航、重定向和新窗口使用一致策略。系统浏览器打开须经用户选择并校验 URL，不接受任意协议执行。
+- 权限请求、权限检查、下载各设显式处理器；未授权能力不自动放行，不关闭 webSecurity 解决预览问题。按网站权限与下载前询问已纳入 DEC-25，具体实现见 §5.4；未授权能力仍不自动放行。
 - 工具 / Project 切换、窗口 resize 与应用弹层都驱动嵌入视图显隐及 bounds；弹层期间不允许网页覆盖应用控件，结束后恢复焦点。Project 关闭失败不得先移除 Tab 再丢失错误入口。
 
 参考：[Electron 安全指南](https://www.electronjs.org/docs/latest/tutorial/security)、[session 分区](https://www.electronjs.org/docs/latest/api/session)、[xterm.js 流量控制](https://xtermjs.org/docs/guides/flowcontrol/)。官方接口说明不替代本项目验证。
@@ -134,7 +139,7 @@ FR-TOOL-001～004、AC-07：实现前记录正常、异常和回归场景，至�
 FR-TOOL-003 / 004、FR-PROJ-002：以下为主 Agent 在上述开发授权内的技术决定（2026-10-13），不是新增人工产品确认。
 
 - Terminal：主进程 `@xterm/headless` + SerializeAddon 持有屏幕，1000 行回滚；UI 按需加载 xterm。输出分 16 KiB chunk，256 / 64 KiB 水位控制 PTY 暂停 / 恢复；attach 返回屏幕与流序号，快照写入完的首个 ACK 启动增量，迟到的 attachment 不能退订新的显示。屏幕解析背压与 Renderer ACK 背压独立；隐藏或 Renderer 崩溃解除显示订阅，主进程屏幕继续更新。实例上限为 16 / Project、32 / 应用，超限明确反馈；不自动重跑跨重启的命令。屏幕检查点（emulator state schema 1）绑定锁定的 `@xterm/*` 版本（xterm 6.0.0 的私有结构），升级须重跑 ANSI 差分验证（含逐单元格属性 / 链接与将来 VT 状态）。xterm 在运行时注入 `<style>`，生产 CSP 因此对 `style-src-elem` 放宽（DEC-02 例外，用户 2026-10-13 确认），并因 24 位色与 `minimumContrastRatio` 经 `style` 属性写入而对 `style-src-attr` 放宽（用户 2026-10-14 确认），E2E 断言这些样式在构建后的应用里真实生效。配色（AI 技术决定；W5-F13 的视觉取舍由用户于 2026-10-18 确认，见 DEC-20）：每种外观方案（浅 / 深）使用显式 xterm 调色板，不依赖 xterm 默认值；ANSI 0–15 对该方案的名义背景及毛玻璃实测最差背景均 ≥ 4.5:1，默认文字 ≥ 7:1，选区文字 ≥ 4.5:1，光标与反色可读；毛玻璃下视口保持透明。代价：浅色方案的 ANSI 色比常见终端更深，“白 / 黑”在浅 / 深方案中分别是深灰 / 浅灰，经典的前景 / 背景配对对比度偏低；毛玻璃下选区与背景的区分度低于 3:1。xterm 的 `minimumContrastRatio` 取 5.5，使 ANSI / 24 位色背景上及程序自带颜色的文字按单元格调整到可读（xterm 按不透明名义背景计算，毛玻璃浅色的真实像素更暗，取 4.5 时实测仅 3.7–4.3:1，W5-F12）；已确认的视觉代价：反显文字实测约 5.4–6.1:1，低于调色板默认的 14–19:1，块颜色保留（W5-F13、DEC-20）；固定比值不能覆盖壁纸比实测更暗的毛玻璃（亮度 0.65 约需 6.75）；具体取值与测算见 `terminal-theme.ts` 及其测试，真实窗口的实测结果见[验收记录](../../tasks/archive/T20261009-context-tools/acceptance.md)。
-- Browser：每个 Project / 实例代次独立内存分区，导航只接受 HTTP / HTTPS localhost、127/8 或 `::1`；页面的普通网络子资源不受顶层回环限制。地址单独保存在 `app_meta`，无登录状态持久化；窗口恢复时未被选中的后台 Project 不创建 view、不加载已保存地址，首次选中并显示 Browser 后才创建实例并恢复上次地址。应用公共导航 guards 只用于应用窗口，预览 view 自己处理导航、新窗口、权限及下载；Shell 切换及窗口事件先校验显隐，DOM 弹层和原生退出提示均遮挡 / 移除 view。
+- Browser（首轮历史实现；导航与分区已由 §5.4 取代）：每个 Project / 实例代次独立内存分区，导航只接受 HTTP / HTTPS localhost、127/8 或 `::1`；页面的普通网络子资源不受顶层回环限制。地址单独保存在 `app_meta`，无登录状态持久化；窗口恢复时未被选中的后台 Project 不创建 view、不加载已保存地址，首次选中并显示 Browser 后才创建实例并恢复上次地址。应用公共导航 guards 只用于应用窗口，预览 view 自己处理导航、新窗口、权限及下载；Shell 切换及窗口事件先校验显隐，DOM 弹层和原生退出提示均遮挡 / 移除 view。
 - 生命周期：Session Stop 与 Tools 端口分开；Project / 退出合并列出 Session 与 Terminal。确认后等待准确归属清理，失败 / 超时不批准关闭或退出；保留底层实际清理锁，拒绝新 Session / PTY / Browser 操作，直至清理 settled。退出批准前依次停止回合、清理工具，再可逆地释放全部空闲 / 已退役 Session Runtime，任一失败拒绝退出、应用保持打开并可重试；退出失败取消后可继续使用保留的 Project；不把退出通知等同受管资源已清理。
 
 接口登记在 `shared/ipc/browser.ts`、`shared/ipc/terminal.ts`；Project 关闭通过 `MainToolPort` 组合，不提供通用 fs / shell / execute IPC。具体验证与已知边界由验收记录维护。
@@ -164,3 +169,17 @@ FR-TOOL-002、FR-STATE-007、FR-INPUT-001；依据 §4.1 / §4.2、04 第 1 节�
 - 真实环境：macOS 15.6 arm64、Codex 0.163.0，协议类型仍锁定 0.161.0。Git / 非 Git 的原生 `apply_patch` 均收到聚合与完成文件补丁；对应 Shell 写文件均未收到这两类事件。因此该视图只保证展示收到的原生记录，不覆盖所有工作区修改，不宣称整个 0.163.0 协议已兼容。原生 mention 已在 Adapter、应用 UI 及独立特殊路径 fixture 中读出 prompt 未提供的 token；最新 Adapter 与应用 UI 均在命令运行中追加 mention，并在同一 Codex Turn 完成后读出随机 token。CLI 版本 / 场景 / 证据与独立结论见[本轮验收](../../tasks/archive/T20261009-context-tools/acceptance.md#2026-10-18-本轮-diff-独立评审w23)，应用 UI W24 主 Agent 复验见[W24](../../tasks/archive/T20261009-context-tools/evidence/W24-review.md)，实现者回归见[自检记录](../../tasks/archive/T20261009-context-tools/evidence/W0-turn-diff-report.md)。
 
 Claude Code 真实能力仍暂缓且不随当前 V1 发布；以上应用 UI 结果是 Main Agent 技术复验，不扩大完整 AC-07、Codex 原生 Stop 或其他协议专项的通过范围。
+
+### 5.4 VS Code 对齐（2026-10-26）
+
+FR-TOOL-001～005、TOOLS-Q8～Q12、DEC-25：以下为已授权范围内的 AI 实现选择（2026-10-27），diff 待审阅。阶段、验证、当前缺陷与人工验收由[本轮任务](../../tasks/archive/T20261026-tools-vscode-parity/task.md)负责；此前 §5.1 的首轮导航 / 分区描述保留历史基线，不作为现行约束。
+
+- Files 管理：原生上下文菜单只接受类型化项目 / 相对路径与限定动作；每批最多 500 项，逐项返回已完成路径及首个失败原因。创建使用排他打开，删除调用系统废纸篓；复制保留符号链接本身，不读取链接目标。Project 内变更进入串行队列，关闭使旧排队请求失效并等待已开始的变更完成。
+- 不覆盖：macOS 辅助程序打开父目录时使用 `O_NOFOLLOW_ANY`，以 `renameatx_np(RENAME_EXCL)` 发布重命名 / 移动，目标被外部 CLI 或编辑器抢先创建时返回冲突，不回退到可覆盖的 `rename`。复制先写入目标目录下的私有临时目录，再以同一排他重命名发布；失败清理临时目录，避免复制过程中与外部新目录合并。系统不支持排他重命名时明确失败。原语依据：[Apple 对 RENAME_EXCL 的说明](https://developer.apple.com/documentation/foundation/urlresourcevalues/volumesupportsexclusiverenaming)；这不构成对恶意同用户进程持续替换整个目录树的隔离承诺。
+- 辅助程序构建：Vite / Vitest 配置按两个辅助程序源码与编译脚本的摘要缓存调用系统 clang，最低 macOS 13；产物位于忽略的 `out/native/`，打包放入 `Resources/files/`。用户运行产物无需编译器。打包后校验文件存在及执行位，冒烟实际执行移动和拒绝覆盖；既有 fuse 不放宽。
+- 文件树 / 查看：Git 状态复用项目 Diff 快照，被忽略项另行查询；文件、包含变更的目录及被忽略项的可访问名称携带状态。文件类型图标、预览 / 固定 Tab、跳转行、折叠、换行、Markdown 和有界图片查看复用现有只读查看链路，不加入保存接口。
+- Quick Open：内置 ripgrep 列出非忽略文件，禁用用户 ripgrep 配置，输出 NUL 分隔并重新校验 Project 相对路径；Search / 索引共同使用 `project-ripgrep` 启动器，以 `O_NOFOLLOW_ANY` 固定根目录、核对预先校验的 dev / ino 后 `fchdir` 再执行内置 ripgrep；返回前再校验根目录身份，避免目录替换泄露外部结果；最多 200,000 项 / 64 MiB / 15 秒。关闭项目取消正在运行或尚在等待二进制解析的索引；截断 / 超时明确反馈。
+- Search：独立 `search:run` / `search:cancel`，同窗口同项目新查询取消旧查询；ripgrep 支持字面 / 正则、大小写、整词、包含 / 排除，遵守 ignore 文件，不提供替换。最多 10,000 匹配 / 2,000 文件，跳过大于 5 MiB 的文件，20 秒超时，预览每行最多 240 字符；JSON 单记录最多 2 MiB、总输出最多 16 MiB，先截断每行子匹配到剩余预算，再以单次扫描转换 UTF-8 / UTF-16 偏移，避免 minified 文件的无界记录和重复前缀解码；达到任一上限即停止 ripgrep，结果为空时也显示截断提示，不伪装为没有匹配。结果按文件和行分组、UTF-16 范围高亮，点击走 Files 定位入口。
+- Diff：项目差异加入列表 / 树、并排 / 行内、上一处 / 下一处、折叠未变更区域和打开文件；历史原生 patch 继续保持 §5.3 的来源及覆盖边界，任何视图控制都不新增 Git 写操作。
+- Terminal：搜索插件、清屏同步主进程屏幕 / 序号，Tab 可重命名并呈现前台进程；分组保存于本次运行，窄面板上下排列、宽面板左右排列。拖入 Files 路径经 POSIX 引号插入，不自动执行；链接的 UTF-16 文本索引映射到 xterm 单元格，保留中文、引号 / 转义空格和带位置的绝对路径。文件必须经主进程确认属于 Project 且存在才提供点击入口，本地 HTTP 链接转 Browser、其他 HTTP 链接转系统浏览器。
+- Browser：网页实例 / Tab 仍归 Project，浏览数据统一使用 `persist:studio-browser` 并跨重启共享；新增 Tab 最多 12 个 / Project。地址补全、导航历史、收藏、页面缩放、停止 / 后退 / 前进、DevTools 和系统浏览器入口均由限定命令驱动；历史 / 收藏按应用持久化。权限按网站询问并保存决定，下载使用系统保存对话框，清除入口删除共享浏览数据；保持 sandbox / contextIsolation / 无 Node 与无应用 Preload。浏览数据共享取代首轮项目分区，不等同网页获得应用或文件权限。

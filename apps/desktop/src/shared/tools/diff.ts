@@ -88,3 +88,12 @@ export interface DiffSubscription { projectId: string; subscriptionId: string; r
 /** A hint only: the renderer re-queries. */
 export interface DiffInvalidated { projectId: string; revision: number }
 export interface DiffWatchChanged { projectId: string; revision: number; watch: DiffWatchState }
+
+/**
+ * Ignored entries for the Files tree (DEC-25): `git ls-files --others --ignored --exclude-standard --directory`, so an
+ * ignored directory is one entry. Project-relative; a directory's descendants are ignored too.
+ */
+export type DiffIgnored =
+  | { status: 'ok'; revision: number; paths: ProjectPath[]; truncated: boolean }
+  | { status: 'unavailable'; revision: number; availability: DiffAvailability }
+export const DIFF_IGNORED_LIMITS = { entries: 5000, outputBytes: 1_048_576, timeoutMs: 10_000 } as const

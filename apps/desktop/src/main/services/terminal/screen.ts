@@ -9,6 +9,8 @@ export const TERMINAL_SCROLLBACK = 1000
 export interface TerminalScreen {
   write(data: string, done: () => void): void
   resize(cols: number, rows: number): void
+  /** ⌘K: drops the scrollback and moves the prompt line to the top, like xterm's `clear()` in the UI. */
+  clear(): void
   serialize(): string
   emulatorState(): TerminalEmulatorState
   dispose(): void
@@ -29,6 +31,7 @@ export function createTerminalScreen(cols: number, rows: number, respond?: (data
   return {
     write: (data, done) => terminal.write(data, done),
     resize: (nextCols, nextRows) => terminal.resize(nextCols, nextRows),
+    clear: () => terminal.clear(),
     serialize: () => serialize.serialize({ scrollback: TERMINAL_SCROLLBACK }) + carry.snapshot(parser.currentState),
     emulatorState: () => captureTerminalEmulatorState(terminal),
     dispose: () => { response.dispose(); serialize.dispose(); terminal.dispose() }

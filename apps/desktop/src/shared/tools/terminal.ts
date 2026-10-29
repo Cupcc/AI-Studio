@@ -18,13 +18,22 @@ export interface TerminalSummary extends TerminalRef {
   exitCode?: number
   signal?: number
   error?: string
+  /** Foreground process name (VS Code-style tab label), when known. */
+  process?: string
+  /** The user renamed the tab. */
+  renamed?: boolean
 }
 
 export interface TerminalCreateRequest {
   projectId: string
   cols: number
   rows: number
+  /** Project-relative directory to start in (Files "在终端中打开"); the Project root when omitted. */
+  cwd?: string
 }
+
+export const TERMINAL_TITLE_LIMIT = 64
+export interface TerminalRenameRequest extends TerminalRef { title: string }
 
 export interface TerminalAttachment extends TerminalRef {
   attachmentId: string

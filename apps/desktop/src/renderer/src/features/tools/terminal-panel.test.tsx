@@ -13,6 +13,7 @@ beforeEach(() => {
   useTerminals.getState().forget('p'); useTerminals.setState({ projects: {} })
   api = {
     list: vi.fn().mockResolvedValue([]), create: vi.fn().mockResolvedValue(terminal()), close: vi.fn().mockResolvedValue({ status: 'closed' }),
+    rename: vi.fn(), clear: vi.fn().mockResolvedValue(undefined),
     attach: vi.fn(), detach: vi.fn(), ack: vi.fn(), input: vi.fn(), resize: vi.fn(), onChanged: vi.fn(() => () => {}), onOutput: vi.fn(() => () => {})
   }
   vi.mocked(terminalApi).mockReturnValue(api)

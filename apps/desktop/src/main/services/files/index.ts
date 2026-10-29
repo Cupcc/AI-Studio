@@ -1,8 +1,9 @@
-import { webContents } from 'electron'
+import { app, shell as systemShell, webContents } from 'electron'
 import { filesContract } from '@shared/ipc/files'
 import type { CoreServices } from '../core'
 import { projectShellFor } from '../project'
 import { createFilesService, type FilesService } from './service'
+import { ripgrepPath } from './file-index'
 
 const services = new WeakMap<CoreServices, FilesService>()
 
@@ -33,7 +34,15 @@ export function filesFor(core: CoreServices): FilesService {
       canOperate: (id) => !shell.isProjectClosing(id) && !shell.isQuitting(),
       changed: (event) => core.broadcast(filesContract.events.changed, event),
       watchChanged: (event) => core.broadcast(filesContract.events.watchChanged, event),
-      watchOwner: watchWebContents
+      watchOwner: watchWebContents,
+      system: {
+        trash: (absolute) => systemShell.trashItem(absolute),
+        reveal: (absolute) => systemShell.showItemInFolder(absolute),
+        openPath: (absolute) => systemShell.openPath(absolute),
+        openExternal: (url) => systemShell.openExternal(url, { activate: true }),
+        editors: () => ({ vscode: !!app.getApplicationNameForProtocol('vscode://'), cursor: !!app.getApplicationNameForProtocol('cursor://') }),
+        ripgrep: ripgrepPath
+      }
     })
     services.set(core, service)
   }

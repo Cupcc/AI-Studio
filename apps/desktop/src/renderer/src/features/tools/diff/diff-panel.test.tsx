@@ -359,7 +359,7 @@ describe('single-file view', () => {
     await act(async () => gate.release())
     await screen.findByTestId('viewer')
     expect(screen.queryByText('正在加载代码视图…')).toBeNull()
-    expect(gate.props.at(-1)).toEqual({ path: 'src/a.ts', original: 'old', modified: 'new', active: true, viewStateKey: 'p:src/a.ts' })
+    expect(gate.props.at(-1)).toEqual({ path: 'src/a.ts', original: 'old', modified: 'new', active: true, viewStateKey: 'p:src/a.ts', sideBySide: true, hideUnchanged: true })
   })
 
   it('compares an added file with empty content and a deleted file the other way round', async () => {
