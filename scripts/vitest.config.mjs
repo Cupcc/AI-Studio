@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  test: { include: ['scripts/**/*.test.mjs'], environment: 'node' }
+  test: { include: ['scripts/**/*.test.mjs', '.codex/scripts/**/*.test.mjs'], environment: 'node' }
 })

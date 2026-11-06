@@ -1,18 +1,23 @@
-import { spawnSync } from 'node:child_process'
 import { checkDocs } from './check-docs.mjs'
-import { changedPaths, docsOnly, git } from './check-scope.mjs'
+import { changedPaths, docsOnly, git, paths } from './check-scope.mjs'
+import { affectedPlan, inventory, runPlan } from './check-affected.mjs'
 
 // Inspect the actual index, not unstaged edits that might conceal a broken link.
 const head = git(['write-tree']).trim()
 let base
 try { base = git(['rev-parse', '--verify', 'HEAD']).trim() } catch { base = '' }
-const files = base ? changedPaths(base, head) : []
+const files = base ? changedPaths(base, head) : paths(git(['ls-files', '-z']))
 if (!checkDocs({ base, head })) process.exit(1)
-if (docsOnly(files)) {
-  console.log('Documentation-only index: application checks not required.')
+if (!files.length || docsOnly(files)) {
+  console.log('Documentation-only or empty index: application checks not required.')
 } else {
-  console.log('Code/configuration/unknown or empty index: running all basic checks.')
-  const result = spawnSync('pnpm', ['check:code'], { stdio: 'inherit' })
-  if (result.error) throw result.error
-  process.exitCode = result.status ?? 1
+  // Tests execute the worktree: don't let unstaged code conceal a broken index.
+  const unstaged = [...paths(git(['diff', '--name-only', '-z'])),
+    ...paths(git(['ls-files', '--others', '--exclude-standard', '-z']))]
+    .filter(file => !docsOnly([file]))
+  if (unstaged.length) {
+    console.error(`Stage or isolate unstaged non-document changes before checking the index: ${unstaged.join(', ')}`)
+    process.exit(1)
+  }
+  process.exitCode = runPlan(affectedPlan(files, inventory()))
 }

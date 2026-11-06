@@ -2,18 +2,32 @@
 
 ## 测试分层
 
-依据：用户在 2026-10-11 测试流程分析后回复「accept」，确认分层检查与去重方向；[实现任务](../tasks/archive/T20261011-test-workflow/task.md)。实现 diff 待审阅，未改变产品验收标准。
+依据：用户 2026-11-06 要求「应该是哪里改动测试哪里」「优化规则，不要全量跑」；[本次任务](../tasks/T20261106-scoped-checks/task.md)。取代 2026-10-11 的自动全量提交／CI 策略；[历史验证](../tasks/archive/T20261011-test-workflow/task.md)保留原基线。规则 diff 待审阅，未改变产品验收标准。
 
 | 场景 | 执行范围 |
 |---|---|
 | 开发迭代 | 先跑受影响文件／模块的测试；共享 IPC、数据库、Adapter 等跨模块变化扩大回归范围 |
 | 纯文档提交 | 暂存快照的 Markdown 本地链接回归检查；人工或 AI 补充表格／标题预览及负责索引要求的一致性检查 |
-| 代码、配置、未知路径提交 | 文档回归检查＋全 workspace 类型检查、脚本测试与单元测试 |
-| main push / 面向 main 的 PR | 文档与脚本检查；有代码、配置或未知路径变化时，补全量基础检查、E2E、打包及打包冒烟 |
-| 手动 CI | 强制完整自动化，不使用文档豁免 |
+| 代码提交 | 文档回归＋受影响 TypeScript 项目类型检查＋相关单测；本地不自动运行 E2E |
+| main push / 面向 main 的 PR | 文档回归＋同一选择器的受影响检查＋明确选中的 E2E spec；不自动打包 |
+| 空变更、设计素材、任务证据 | 不触发应用测试；文档链接检查仍适用 |
+| 未映射路径／全局配置／缺失比较基线 | 阻断并提示补充影响映射或恢复比较基线；不自动退回全量 |
+| 显式完整命令／手动 CI | 完整基础检查；手动 CI 另运行全量 E2E、打包与冒烟 |
 | 功能／里程碑 | 按 [Task Protocol](../tasks/README.md#acceptance)执行交互、独立、真实 CLI 及人工验收；局部测试不能替代这些要求 |
 
-同一代码／依赖／配置基线的有效结果可引用；改动后重跑受影响检查。局部测试只用于开发反馈，不改变提交门禁。不要依赖 `--changed` 自动发现所有跨包、IPC 或动态加载关系。
+开发、提交、CI 均按影响范围验证。执行前说明改动、测试范围和理由，不把「准备提交／合并」当作全量测试理由。相同代码／依赖／配置／环境基线已有有效结果时引用其来源、时间和覆盖范围，不手工重复门禁将要执行的检查；发生相关变化或冲突修复后重跑受影响部分。当前门禁不缓存测试成功结果，重试提交仍会执行选中的局部检查。
+
+选择器为 [check-affected.mjs](check-affected.mjs)：源码与测试文件作为 [Vitest `related`](https://vitest.dev/guide/cli.html#vitest-related) 的种子，另显式加入模块测试来覆盖 IPC、Adapter 构建产物和动态加载边界。删除／重命名按旧、新路径选中模块；仅修改测试时只选该测试，不触发 E2E。类型检查以受影响的 TS 项目为最小边界，不声称可按单个文件完整检查类型。
+
+影响映射不是全知依赖分析。新增模块、跨模块调用或全局依赖／构建配置变更时，先在选择器中补充有依据的映射和对应回归测试；未知路径失败时不得改为无条件豁免或全量兜底。选中的 E2E 文件缺失／改名时阻断并要求同步映射，单测选择为空也不记作通过。共享边界可能选中多个模块；选择结果须结合 diff 审阅，必要的功能／里程碑验收仍遵循 Task Protocol。
+
+```sh
+# 默认比较 HEAD 与工作树（含未跟踪文件）；只打印计划，不执行测试。
+node scripts/check-affected.mjs --dry-run
+# 执行受影响的类型检查／单测；--ci 才追加选中的 E2E。
+node scripts/check-affected.mjs
+node scripts/check-affected.mjs --base <base-commit> --head HEAD --ci
+```
 
 开发时从仓库根目录执行，例如：
 
@@ -31,7 +45,7 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 
 ### 文档检查边界
 
-- 文档快路径清单由 [check-scope.mjs](check-scope.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README，以及 docs / specs / tasks / templates / design 下的 `.md`。不全局豁免 `.md`；图片、HTML 原型、证据脚本等未知路径仍走完整基础检查。重命名按旧路径和新路径一起判定，空变更也不豁免。
+- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README，以及 docs / specs / tasks / templates / design 下的 `.md`。设计目录及任务 evidence 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定，空变更不启动应用测试。
 - [check-docs.mjs](check-docs.mjs) 解析 Markdown 与 GFM 表格，检查内联／引用式链接、图片目标、Markdown 标题锚点及显式 HTML id/name。跨文档扫描可发现删除文件、改标题造成的未修改文件入链损坏；代码示例中的伪链接不检查。
 - 本地 `check:docs` 默认比较 HEAD 与当前工作树（包含未忽略的未跟踪文件）；提交门禁比较 HEAD 与 Git 暂存快照，未暂存修复和未跟踪目标不能掩盖提交中的断链。
 - 只阻断相对基线新增的问题，历史问题按来源路径、链接和问题类型识别，不借本任务批量清理。`pnpm check:docs --base <commit> --head <commit>` 检查两个快照；`pnpm check:docs --base ''` 对当前工作树做完整审计，可能暴露历史问题。
@@ -71,15 +85,15 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 
 | 时机 | 检查 | 手动执行 |
 |---|---|---|
-| `pre-commit` | 按暂存路径执行上述文档或完整基础检查；任一失败终止提交 | `pnpm check:commit` |
+| `pre-commit` | 按暂存路径执行文档和受影响检查；任一失败终止提交 | `pnpm check:commit` |
 | `commit-msg` | commitlint 检查 Conventional Commits | `pnpm commitlint --edit <提交信息文件>` |
 
 commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写，并允许只用 `!` 或只用 `BREAKING CHANGE:` footer 标记破坏性变更（[commitlint.config.cjs](../commitlint.config.cjs)）。检查不会自动修改文件或暂存区。
 
 边界：
 
-- 类型检查和单元测试检查当前工作树，不是暂存区快照；部分暂存时应确保未暂存改动没有掩盖问题。检查沿用现有构建流程，会更新被 Git 忽略的构建输出。
-- 每次提交都经过门禁，纯文档不启动应用构建／测试；代码路径通过 `check:code` 只构建一次 Adapter 后执行全量基础检查。不自动执行 E2E、打包、真实 CLI 或模型请求。目前没有源码 formatter / linter，因此不引入 lint-staged。
+- 类型检查和单元测试执行当前工作树：代码提交存在未暂存／未跟踪的非文档文件时拒绝运行，要求先暂存本次内容或在隔离 worktree 提交，不自动 stash 或修改用户文件。文档检查始终读取暂存快照。构建只更新被 Git 忽略的输出。
+- 纯文档／空提交不启动应用构建／测试；代码路径使用受影响选择器，需要桌面／Adapter 检查时先构建一次 Adapter。不自动执行 E2E、打包、真实 CLI 或模型请求。`pnpm check:code` 仍是显式全量命令，不再由提交 hook 调用。目前没有源码 formatter / linter。
 - 本地 hooks 可被 `git commit --no-verify` 或 `HUSKY=0` 绕过，不是强制安全边界；远端 CI 见下节。
 - 配置文件纳入版本控制的是 `.husky/pre-commit`、`.husky/commit-msg` 与 `commitlint.config.cjs`；Husky 生成的 `.husky/_/` 自带忽略规则，无需提交。
 
@@ -88,8 +102,9 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 配置：[ci.yml](../.github/workflows/ci.yml)，触发条件、runner、Node 版本、CLI 版本、超时、权限与产物保留期均以该文件为准；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。
 
 - 仅 main push、面向 main 的 PR 与手动触发运行；任务分支备份 push 不再与 PR 重复。main 合入后的验证针对新基线，仍保留。
-- Ubuntu 的 scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照判定，运行脚本测试与文档回归检查。这里只安装根工具依赖并禁用安装脚本，不下载 Electron。缺失／无效比较基线、空 diff 和手动触发均强制应用检查；无基线时文档以 HEAD 为基线，不声称完成历史文档审计。
-- 应用 job 在 macOS arm64 runner 冻结 lockfile 安装并执行 `check:code`，然后桌面构建一次，依次执行包内 `test:e2e:built`、`package:built` 及根 `smoke:packaged`。Adapter 在基础检查时构建一次，桌面产物仅在本 job、同一代码基线内复用，不跨运行缓存构建输出。独立根命令继续自动构建。
+- Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。无效／缺失基线阻断，空 diff 跳过应用；手动 CI 的文档以 HEAD 为基线，不声称历史审计通过。
+- macOS arm64 job 冻结 lockfile 安装，普通事件执行 `check-affected.mjs --ci`：受影响类型检查、相关单测，以及选中的 E2E spec。仅有工作流脚本改动时只执行脚本测试；无 E2E 时不构建桌面或配置显示器。需要 E2E 时构建桌面一次，无自动打包。
+- 仅手动 `workflow_dispatch` 执行 `check:code`、完整 E2E、`package:built` 和 `smoke:packaged`。构建产物只在本 job 的同一基线复用，不跨运行缓存输出。显式根命令保留原语义。
 - CI 设置 `HUSKY=0` 显式运行检查；应用 job 保留依赖安装脚本以安装 Electron 与修复 PTY helper。
 - E2E 前用 `displayplacer` 放大 runner 的虚拟屏幕：默认屏幕会把窗口高度限制到 684px，容纳不下桌面端的布局检查尺寸。此步骤只修改临时 CI runner。
 - E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录；`runtime-tools.spec.ts` 另使用真实本地 Shell / PTY 与回环 HTTP fixture（外站跳转只验证提示，不访问外网）。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。

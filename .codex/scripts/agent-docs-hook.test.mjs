@@ -47,7 +47,8 @@ test('SessionStart baselines pre-existing documentation changes', () => {
   expect(check).not.toHaveBeenCalled()
   write('README.md', '# Changed during session')
   expect(call('PostToolUse').hookSpecificOutput).toBeDefined()
-  expect(call('Stop').decision).toBe('block')
+  // Already reminded and links passed: Stop must not request a redundant turn.
+  expect(call('Stop')).toEqual({})
   expect(check).toHaveBeenCalledTimes(1)
 })
 
@@ -177,7 +178,7 @@ test('detection/storage failures request manual review but never block a continu
 })
 
 test('project configuration matches native tools and sets short finite timeouts', () => {
-  const config = JSON.parse(readFileSync(new URL('../.codex/hooks.json', import.meta.url), 'utf8'))
+  const config = JSON.parse(readFileSync(new URL('../hooks.json', import.meta.url), 'utf8'))
   const start = config.hooks.SessionStart[0]
   expect('startup').toMatch(new RegExp(start.matcher))
   expect(start.hooks[0].timeout).toBe(3)

@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 10
     outputs:
       app: ${{ steps.scope.outputs.app }}
+      base: ${{ steps.scope.outputs.base }}
+      e2e: ${{ steps.scope.outputs.e2e }}
     steps:
       - name: Checkout complete comparison history
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -49,14 +51,10 @@ jobs:
       - name: Install documentation and script-test dependencies only
         run: pnpm --filter ai-developer-studio install --frozen-lockfile --ignore-scripts
 
-      - name: Test workflow scripts
-        run: pnpm test:scripts
-
       - name: Check documentation regressions
         env:
           CHECK_BASE: ${{ steps.scope.outputs.base }}
-        # No baseline (manual / first push): the full app job is mandatory.
-        # Compare docs to HEAD in that case; an exhaustive audit is a separate command.
+        # Manual full CI has no diff baseline; historical docs audit is separate.
         run: pnpm check:docs --base "${CHECK_BASE:-HEAD}" --head HEAD
 
   desktop:
@@ -69,6 +67,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up pnpm
@@ -88,12 +87,15 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck and unit tests
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm check:code
 
       - name: Build desktop once for E2E and packaging
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm --filter @ai-studio/desktop run build
 
       - name: Configure desktop display for layout tests
+        if: needs.scope.outputs.e2e == 'true'
         env:
           HOMEBREW_NO_AUTO_UPDATE: '1'
         run: |
@@ -104,13 +106,22 @@ jobs:
           displayplacer "id:$ci_display_id res:1920x1080 scaling:off origin:(0,0) degree:0"
           displayplacer list
 
+      - name: Check affected modules and selected Electron specs
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          CHECK_BASE: ${{ needs.scope.outputs.base }}
+        run: node scripts/check-affected.mjs --base "$CHECK_BASE" --head HEAD --ci
+
       - name: Electron E2E and native smoke
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm --filter @ai-studio/desktop run test:e2e:built
 
       - name: Package unsigned macOS app
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm --filter @ai-studio/desktop run package:built
 
       - name: Install pinned CLIs for packaged discovery smoke
+        if: github.event_name == 'workflow_dispatch'
         run: |
           npm install --prefix "$RUNNER_TEMP/studio-cli" --no-audit --no-fund \
             @openai/codex@0.161.0 @anthropic-ai/claude-code@2.1.294
@@ -126,6 +137,7 @@ jobs:
           "$ci_cli_bin/claude" --version
 
       - name: Packaged app smoke
+        if: github.event_name == 'workflow_dispatch'
         run: pnpm smoke:packaged
 
       - name: Upload test evidence

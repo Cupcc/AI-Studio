@@ -75,7 +75,8 @@ The repository is a pnpm workspace (`pnpm-workspace.yaml`); Node and pnpm versio
 - `pnpm test:scripts`: test documentation checks, Agent document hooks, and workflow scope selection only.
 - `pnpm check:docs`: check local Markdown link regressions against HEAD; options and manual review boundaries are in `scripts/README.md`.
 - `pnpm check:code`: build the Adapter once, type-check all packages and run all script/unit tests regardless of the changed files.
-- `pnpm check:commit`: check staged documentation and select documentation-only or full basic checks; also run by the `pre-commit` hook. Scope rules are in `scripts/README.md`.
+- `pnpm check:commit`: check staged documentation and affected modules only; also run by the `pre-commit` hook. Unknown scope blocks rather than running everything. Scope rules are in `scripts/README.md`.
+- `node scripts/check-affected.mjs --dry-run`: preview affected checks for HEAD versus the worktree; omit `--dry-run` to execute, add `--ci` only for selected Electron E2E.
 - `pnpm test:e2e`: build the desktop app and run Playwright Electron tests with simulated Session Providers; no model calls.
 - `pnpm package`: build an unsigned macOS arm64 app directory.
 - `pnpm smoke:packaged`: launch the packaged app and check its native dependencies.
@@ -86,6 +87,7 @@ To locate a requirement, its acceptance references, and covering specs: `rg 'FR-
 
 ## Validation Guidelines
 
+- 按改动及直接受影响范围验证，不因提交、合并或重试默认运行全量；执行前简述检查范围和理由。同一代码、依赖、配置、环境基线的有效结果可引用，注明时间与覆盖范围；修复后只重跑受影响检查。完整回归仅在显式安排时执行，未知影响先补充范围。依据：用户 2026-11-06「优化规则，不要全量跑」；具体门禁由 [scripts/README.md](scripts/README.md#测试分层) 负责，规则 diff 待审阅。
 - Preview edited Markdown tables and headings, and check local links.
 - After moving or renaming a file or heading, search for the old path or anchor and fix every link.
 - Run the checks the owning index requires, e.g. the cross-document checks in `docs/00. Documentation Index.md`.

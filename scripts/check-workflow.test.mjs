@@ -133,14 +133,33 @@ test('CI covers the whole push, PR comparison, manual, empty and missing baselin
   commit()
   expect(ciScope('push', { before: docsHead }, cwd).app).toBe(true)
   expect(ciScope('workflow_dispatch', {}, cwd)).toEqual({ app: true, base: '' })
-  expect(ciScope('push', { before: '0'.repeat(40) }, cwd).app).toBe(true)
-  expect(ciScope('push', { before: '1'.repeat(40) }, cwd).app).toBe(true)
-  expect(ciScope('push', { before: git(['rev-parse', 'HEAD'], cwd).trim() }, cwd).app).toBe(true)
+  expect(ciScope('push', { before: '0'.repeat(40) }, cwd).error).toContain('baseline')
+  expect(ciScope('push', { before: '1'.repeat(40) }, cwd).error).toContain('baseline')
+  expect(ciScope('push', { before: git(['rev-parse', 'HEAD'], cwd).trim() }, cwd).app).toBe(false)
 })
 
-test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code'])('commit entry point: %s', kind => {
+test.each(['push', 'workflow_dispatch', 'invalid'])('CI command entry point: %s', kind => {
   const { cwd, write, commit } = repo()
   write('README.md', '# Baseline')
+  const base = commit()
+  write('README.md', '# Updated')
+  commit()
+  write('event.json', JSON.stringify({ before: kind === 'invalid' ? '0'.repeat(40) : base }))
+  const result = spawnSync(process.execPath, [fileURLToPath(new URL('./check-scope.mjs', import.meta.url))], {
+    cwd, encoding: 'utf8', timeout: 10000,
+    env: { ...process.env, GITHUB_EVENT_NAME: kind === 'invalid' ? 'push' : kind,
+      GITHUB_EVENT_PATH: path.join(cwd, 'event.json'), GITHUB_OUTPUT: path.join(cwd, 'output') }
+  })
+  expect(result.error).toBeUndefined()
+  expect(result.status).toBe(kind === 'invalid' ? 1 : 0)
+  if (kind === 'push') expect(result.stdout).toContain('"app":false')
+  if (kind === 'workflow_dispatch') expect(result.stdout).toContain('"app":true')
+})
+
+test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code', 'unknown', 'partial'])('commit entry point: %s', kind => {
+  const { cwd, write, commit } = repo()
+  write('README.md', '# Baseline')
+  write('.gitignore', 'fake-bin/\n')
   commit()
   // Fake only the expensive child command; exercise the real scope and docs entry point.
   write('fake-bin/pnpm', `#!/bin/sh\nprintf 'BASIC_CHECK:%s\\n' "$*"\nexit ${kind === 'failed-code' ? 7 : 0}\n`)
@@ -149,8 +168,10 @@ test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code'])('commit entry
     write('README.md', kind === 'docs' ? '# Updated' : '[missing](missing.md)')
     git(['add', 'README.md'], cwd)
   } else if (kind !== 'empty') {
-    write('source.ts', 'export const changed = true')
-    git(['add', 'source.ts'], cwd)
+    const file = kind === 'unknown' ? 'source.ts' : 'scripts/check-example.mjs'
+    write(file, 'export const changed = true')
+    git(['add', file], cwd)
+    if (kind === 'partial') write(file, 'export const changed = false')
   }
   const result = spawnSync(process.execPath, [fileURLToPath(new URL('./check-commit.mjs', import.meta.url))], {
     cwd, encoding: 'utf8', env: { ...process.env, PATH: `${path.join(cwd, 'fake-bin')}${path.delimiter}${process.env.PATH}` }
@@ -159,8 +180,13 @@ test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code'])('commit entry
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('missing local target')
     expect(result.stdout).not.toContain('BASIC_CHECK')
+  } else if (kind === 'unknown' || kind === 'partial') {
+    expect(result.status).toBe(1)
+    expect(result.stdout).not.toContain('BASIC_CHECK')
+    expect(result.stderr).toContain(kind === 'unknown' ? 'No reliable affected scope' : 'unstaged')
   } else {
     expect(result.status).toBe(kind === 'failed-code' ? 7 : 0)
-    expect(result.stdout.includes('BASIC_CHECK:check:code')).toBe(kind !== 'docs')
+    expect(result.stdout.includes('BASIC_CHECK:exec vitest related')).toBe(['code', 'failed-code'].includes(kind))
+    expect(result.stdout).not.toContain('BASIC_CHECK:check:code')
   }
 })
