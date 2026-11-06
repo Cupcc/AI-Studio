@@ -142,6 +142,7 @@ it('runs the More menu actions and confirms before clearing the shared browsing 
   vi.mocked(api.getState).mockResolvedValue(state({ address: 'https://example.com/', status: 'ready' }))
   render(<BrowserPanel projectId="p" active />)
   const more = await screen.findByRole('button', { name: '更多 Browser 操作' })
+  await waitFor(() => expect((more as HTMLButtonElement).disabled).toBe(false))
   vi.mocked(popupMenu).mockResolvedValueOnce('devtools')
   fireEvent.click(more)
   await waitFor(() => expect(api.toggleDevTools).toHaveBeenCalledWith({ projectId: 'p', generation: 'g1' }))
