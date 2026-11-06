@@ -16,7 +16,7 @@
 
 ## 验收结果
 
-来源为 [任务验收标准](task.md#验收标准) 和 [测试分层](../../scripts/README.md#测试分层)。
+来源为 [任务验收标准](task.md#验收标准) 和 [测试分层](../../../scripts/README.md#测试分层)。
 
 | 场景 | 独立检查及结果 | 结论 |
 |---|---|---|
@@ -50,7 +50,7 @@ pnpm exec vitest run scripts/check-affected.test.mjs --config scripts/vitest.con
 Main 将此前未纳入 Vitest 配置的 `.codex/scripts/agent-docs-hook.test.mjs` 纳入后，发现两处旧测试问题。本评审者独立核对两处测试修正，结论通过：
 
 - 配置相对路径：测试位于 `.codex/scripts/`，`../hooks.json` 正确指向 `.codex/hooks.json`；原 `../.codex/hooks.json` 多了一层 `.codex`。
-- 已提醒且检查成功的 Stop：`handleHook` 只有未提醒或链接失败时才请求续跑；fixture 的 PostToolUse 已设置 notified，check 返回成功，因此预期 `{}` 符合现有代码及 [Agent 文档 Hook](../../scripts/README.md#agent-文档-hook) 的「已提醒且链接通过直接放行」。保留调用次数断言，未削弱链接检查是否执行的验证。
+- 已提醒且检查成功的 Stop：`handleHook` 只有未提醒或链接失败时才请求续跑；fixture 的 PostToolUse 已设置 notified，check 返回成功，因此预期 `{}` 符合现有代码及 [Agent 文档 Hook](../../../scripts/README.md#agent-文档-hook) 的「已提醒且链接通过直接放行」。保留调用次数断言，未削弱链接检查是否执行的验证。
 
 2026-11-06 16:13:51 CST 独立执行：
 
