@@ -15,7 +15,6 @@
 .settings-note { margin: var(--space-3) 0 0; font-size: var(--font-size-sm); line-height: 1.6; color: var(--color-text-muted); }
 .settings-note--notice { padding: var(--space-2) var(--space-2-5); color: var(--color-text-2); background: var(--color-needs-input-bg); border: 1px solid var(--color-needs-input-border); border-radius: var(--radius-sm); }
 .settings-dialog__content .error-message { margin-top: var(--space-2); }
-.settings-note--intro { margin-top: calc(var(--space-1) * -1); margin-bottom: var(--space-4); }
 .settings-dialog__content.cli-settings { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
 .cli-settings__header { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--color-border-soft); }
 .cli-settings__header h3 { margin: 0; }

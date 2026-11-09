@@ -33,7 +33,6 @@ function CliSettings() {
   const [loading, setLoading] = useState(true)
   const [checking, setChecking] = useState(false)
   const [details, setDetails] = useState<SessionCli | null>(null)
-  const [saved, setSaved] = useState(false)
   useEffect(() => {
     let active = true
     void Promise.all([useSessions.getState().loadProviders(), sessionApi().getGlobalDefaultCli()]).then(([, cli]) => {
@@ -42,7 +41,7 @@ function CliSettings() {
     return () => { active = false }
   }, [])
   const refresh = async () => {
-    setChecking(true); setError(null); setSaved(false)
+    setChecking(true); setError(null)
     try {
       await useSessions.getState().loadProviders(true)
       setSelected(await sessionApi().getGlobalDefaultCli())
@@ -50,22 +49,20 @@ function CliSettings() {
     finally { setChecking(false) }
   }
   const toggle = async (cli: SessionCli, enabled: boolean) => {
-    setPending(cli); setError(null); setSaved(false)
+    setPending(cli); setError(null)
     try {
       const next = await sessionApi().setCliEnabled({ cli, enabled })
       useSessions.getState().acceptProviders(next)
-      setSaved(true)
       requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(`[data-cli-action="${cli}"]`)?.focus())
     } catch (reason) { setError(String(reason)) }
     finally { setPending(null) }
   }
   const choose = async (cli: SessionCli) => {
-    setPending(cli); setError(null); setSaved(false)
+    setPending(cli); setError(null)
     try {
       await sessionApi().setGlobalDefaultCli({ cli })
       setSelected(cli)
       useSessions.getState().applyGlobalDefault(cli)
-      setSaved(true)
     } catch (reason) { setError(String(reason)) }
     finally { setPending(null) }
   }
@@ -82,7 +79,6 @@ function CliSettings() {
     <div className="cli-settings__scroll">
       <section aria-labelledby="cli-added-title">
         <h4 id="cli-added-title">已添加</h4>
-        <p className="settings-note settings-note--intro">点击可用的 CLI 设为默认，所有项目共用。</p>
         <div className="cli-settings__list" role="radiogroup" aria-label="默认 CLI">
           {enabled.map(provider => {
             const failed = provider.status !== 'checking' && provider.status !== 'available'
@@ -114,11 +110,9 @@ function CliSettings() {
             </div>
           })}
         </div>
-        {!loading && !enabled.length && <p className="settings-note">尚未添加 CLI，请从下方添加。</p>}
       </section>
-      <section className="cli-settings__not-added" aria-labelledby="cli-not-added-title">
+      {(loading || notAdded.length > 0) && <section className="cli-settings__not-added" aria-labelledby="cli-not-added-title">
         <h4 id="cli-not-added-title">未添加</h4>
-        <p className="settings-note settings-note--intro">未添加的 CLI 不检测，也不出现在新建对话中。</p>
         <div className="cli-settings__list">
           {notAdded.map(provider => {
             const name = provider.displayName || cliName(provider.cli)
@@ -129,10 +123,8 @@ function CliSettings() {
             </div>
           })}
         </div>
-        {!loading && !notAdded.length && <p className="settings-note">已添加全部支持的 CLI。</p>}
-      </section>
+      </section>}
       {(providersError || error) && <p className="error-message" role="alert">{error || providersError}</p>}
-      {saved && !error && <p className="settings-note" role="status">{T.cliSaved}</p>}
     </div>
   </section>
 }
@@ -215,7 +207,6 @@ export function SettingsDialog() {
               })}
             </div>
           </>}
-          <p className="settings-note">{T.appliesImmediately}</p>
           {appearance.theme === 'glass' && appearance.reducedTransparency && <p className="settings-note settings-note--notice" role="status">{T.reducedTransparency}</p>}
           {saveFailed && <p className="error-message" role="alert">{T.saveFailed}</p>}
         </section>}
