@@ -1,7 +1,7 @@
-import { BrowserWindow } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { CodexProvider } from '@ai-studio/agent-adapter/codex'
 import type { AgentProvider, InputResponse, RuntimeHandle, RuntimeSpawnOptions } from '@ai-studio/agent-adapter'
-import { sessionContract, SESSION_MESSAGE_MAX_LENGTH, SESSION_TITLE_MAX_LENGTH } from '@shared/ipc/session'
+import { sessionContract, SESSION_MESSAGE_MAX_LENGTH, SESSION_TITLE_MAX_LENGTH, PASTED_ATTACHMENT_MAX_BYTES } from '@shared/ipc/session'
 import type { ComposerDraft, ContextItem, DraftKey, SessionCli } from '@shared/session/types'
 import { FILES_LIMITS, parseProjectPath, type FileReferenceResolver } from '@shared/tools/files'
 import { SESSION_CLIS } from '@shared/session/types'
@@ -11,6 +11,7 @@ import type { CoreServices } from '../services/core'
 import { projectShellFor } from '../services/project'
 import { SessionService } from '../services/session/session-service'
 import { SessionStore } from '../services/session/store'
+import { PastedAttachments } from '../services/session/pasted-attachments'
 import { defineHandlers, IpcValidationError } from './registry'
 import { expectOnlyKeys, expectRecord, expectString, noInput } from './validate'
 
@@ -38,6 +39,11 @@ function context(value: unknown): ContextItem[] {
   if (!Array.isArray(value) || value.length > 100) throw new IpcValidationError('Invalid contextItems')
   const items = value.map((item): ContextItem => {
     const entry = expectRecord(item)
+    if (entry.type === 'upload') {
+      expectOnlyKeys(entry, ['type', 'id', 'name', 'image'])
+      if (typeof entry.image !== 'boolean') throw new IpcValidationError('Invalid attachment type')
+      return { type: 'upload', id: id(entry.id, 'attachmentId'), name: id(entry.name, 'attachmentName'), image: entry.image }
+    }
     if (entry.type === 'skill') {
       expectOnlyKeys(entry, ['type', 'id', 'name'])
       return { type: 'skill', id: id(entry.id, 'skillId'), name: id(entry.name, 'skillName') }
@@ -52,7 +58,7 @@ function context(value: unknown): ContextItem[] {
     }
     throw new IpcValidationError('Invalid context type')
   })
-  if (items.filter(item => item.type === 'file' || item.type === 'image').length > FILES_LIMITS.referencesPerMessage) throw new IpcValidationError('Too many file references')
+  if (items.filter(item => item.type === 'file' || item.type === 'image' || item.type === 'upload').length > FILES_LIMITS.referencesPerMessage) throw new IpcValidationError('Too many file references')
   return items
 }
 function draftKey(raw: unknown): DraftKey {
@@ -71,8 +77,21 @@ function draftKey(raw: unknown): DraftKey {
   throw new IpcValidationError('Invalid draft key')
 }
 function draft(raw: unknown): ComposerDraft {
-  const value = record(raw, ['cli', 'model', 'reasoningEffort', 'text', 'contextItems'])
-  return { ...(value.reasoningEffort !== undefined ? { reasoningEffort: model(value.reasoningEffort) } : {}), cli: value.cli === null ? null : cli(value.cli), model: model(value.model), text: text(value.text), contextItems: context(value.contextItems) }
+  const value = record(raw, ['cli', 'model', 'reasoningEffort', 'text', 'contextItems', 'inlineReferences'])
+  const draftText = text(value.text), contextItems = context(value.contextItems)
+  if (value.inlineReferences !== undefined && (!Array.isArray(value.inlineReferences) || value.inlineReferences.length > 100)) throw new IpcValidationError('Invalid inline references')
+  const inlineReferences = (value.inlineReferences as unknown[] | undefined)?.map(raw => {
+    const item = record(raw, ['start', 'end', 'item'])
+    const start = item.start, end = item.end
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || (start as number) < 0 || (end as number) <= (start as number) || (end as number) > draftText.length) throw new IpcValidationError('Invalid inline reference range')
+    const parsed = context([item.item])[0]
+    if (!parsed || parsed.type !== 'file' && parsed.type !== 'skill' || !contextItems.some(contextItem => JSON.stringify(contextItem) === JSON.stringify(parsed))) throw new IpcValidationError('Invalid inline reference item')
+    const expected = parsed.type === 'file' ? `@${parsed.path}` : `$${parsed.name}`
+    if (draftText.slice(start as number, end as number) !== expected) throw new IpcValidationError('Inline reference does not match text')
+    return { start: start as number, end: end as number, item: parsed }
+  })
+  if (inlineReferences?.some((item, i) => i > 0 && inlineReferences[i - 1]!.end > item.start)) throw new IpcValidationError('Overlapping inline references')
+  return { ...(value.reasoningEffort !== undefined ? { reasoningEffort: model(value.reasoningEffort) } : {}), cli: value.cli === null ? null : cli(value.cli), model: model(value.model), text: draftText, contextItems, ...(inlineReferences?.length ? { inlineReferences } : {}) }
 }
 function response(raw: unknown): InputResponse {
   const value = expectRecord(raw)
@@ -117,6 +136,7 @@ export function isSessionWindowForeground(senderId: number): boolean {
 /** Register the migration before creating this feature. No real model requests are made by startup. */
 export function createSessionFeature(core: CoreServices, options: SessionFeatureOptions = {}) {
   const shell = projectShellFor(core)
+  const pasted = new PastedAttachments(app.getPath('userData'), () => service.pastedAttachmentReferences())
   const service = new SessionService({
     store: new SessionStore(core.database().db), projects: shell.projects,
     canOperate: id => !shell.isProjectClosing(id) && !shell.isQuitting(),
@@ -124,15 +144,29 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     environment: async () => ({ env: (await core.shellEnv.get()).env }),
     isForeground: options.isForeground ?? isSessionWindowForeground,
     fileReferences: options.fileReferences,
+    pastedAttachment: (projectId, upload) => pasted.resolve(projectId, upload),
     summaryChanged: change => core.broadcast(sessionContract.events.summaryChanged, change),
     transcriptChanged: change => core.broadcast(sessionContract.events.transcriptChanged, change),
     providersChanged: providers => core.broadcast(sessionContract.events.providersChanged, providers),
     buildViewContext: (projectId, viewId) => projectViewsFor(core).buildContext(projectId, viewId, true),
     turnEnded: projectId => { void projectViewsFor(core).refresh(projectId) }
   })
+  pasted.start()
   shell.setSessionPort(service)
   void service.getProviders().catch(() => {})
   return defineHandlers(sessionContract, {
+    pasteAttachment: {
+      parse: raw => {
+        const value = record(raw, ['projectId', 'name', 'mime', 'bytes'])
+        const projectId = id(value.projectId, 'projectId'), name = expectString(value.name, 'name', { maxLength: 512 }), mime = expectString(value.mime, 'mime', { maxLength: 128 })
+        if (!(value.bytes instanceof Uint8Array) || !value.bytes.byteLength || value.bytes.byteLength > PASTED_ATTACHMENT_MAX_BYTES) throw new IpcValidationError('Invalid attachment bytes')
+        return { projectId, name, mime, bytes: value.bytes }
+      },
+      handle: async ({ projectId, name, mime, bytes }) => {
+        if (!shell.projects.getProject(projectId) || shell.isProjectClosing(projectId) || shell.isQuitting()) throw new Error('Project 不可用')
+        return pasted.stage(projectId, name, mime, bytes)
+      }
+    },
     list: { parse: projectRef, handle: ({ projectId }) => service.list(projectId) },
     getTurnDiff: {
       parse: raw => {
@@ -197,6 +231,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
       },
       handle: ({ cli, enabled }) => service.setCliEnabled(cli, enabled)
     },
+    getSkillContent: { parse: raw => { const value = record(raw, ['cli', 'projectId', 'skillId']); return { cli: cli(value.cli), projectId: id(value.projectId, 'projectId'), skillId: id(value.skillId, 'skillId') } }, handle: ({ cli, projectId, skillId }) => service.getSkillContent(cli, projectId, skillId) },
     getSkills: { parse: raw => { const value = record(raw, ['cli', 'projectId']); return { cli: cli(value.cli), projectId: id(value.projectId, 'projectId') } }, handle: ({ cli, projectId }) => service.getSkills(cli, projectId) },
     getModels: { parse: raw => { const value = record(raw, ['cli', 'projectId']); return { cli: cli(value.cli), projectId: id(value.projectId, 'projectId') } }, handle: ({ cli, projectId }) => service.getModels(cli, projectId) },
     getGlobalDefaultCli: { parse: noInput, handle: () => service.getGlobalDefaultCli() },
@@ -220,5 +255,5 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     getProjectState: { parse: projectRef, handle: ({ projectId }) => service.getProjectState(projectId) },
     stopProject: { parse: projectRef, handle: ({ projectId }) => service.stopProjectTurns(projectId) },
     projectClosed: { parse: projectRef, handle: ({ projectId }) => service.projectClosed(projectId) }
-  }, () => service.dispose())
+  }, async () => { await pasted.dispose(); await service.dispose() })
 }

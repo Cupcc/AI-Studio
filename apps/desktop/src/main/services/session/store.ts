@@ -1,5 +1,6 @@
 import type { DatabaseSync } from 'node:sqlite'
 import type { ComposerDraft, DraftKey, SessionMessage, SessionSummary, TranscriptItem } from '@shared/session/types'
+import type { PastedAttachmentReference } from './pasted-attachments'
 import type { TurnDiffRecord } from '@shared/tools/turn-diff'
 
 export interface StoredTurn {
@@ -111,6 +112,18 @@ export class SessionStore {
   lastTurn(sessionId: string, failed = false): StoredTurn | undefined {
     return this.db.prepare(`SELECT * FROM session_turns WHERE session_id=? ${failed ? "AND outcome='failed'" : ''} ORDER BY started_at DESC, rowid DESC LIMIT 1`)
       .get(sessionId) as unknown as StoredTurn | undefined
+  }
+
+  /** All pages of history and failed-turn retry input count, including closed Projects. */
+  pastedAttachmentReferences(): PastedAttachmentReference[] {
+    return this.db.prepare(`WITH messages(projectId, data) AS (
+      SELECT project_id, data FROM session_drafts
+      UNION ALL SELECT s.project_id, t.message FROM session_turns t JOIN sessions s ON s.id=t.session_id
+      UNION ALL SELECT s.project_id, i.data FROM transcript_items i JOIN sessions s ON s.id=i.session_id
+        WHERE json_extract(i.data, '$.kind')='user_message'
+    ) SELECT DISTINCT messages.projectId, json_extract(item.value, '$.id') AS id
+      FROM messages, json_each(messages.data, '$.contextItems') AS item
+      WHERE json_extract(item.value, '$.type')='upload'`).all() as unknown as PastedAttachmentReference[]
   }
 
   private draftKey(key: DraftKey): string {

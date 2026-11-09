@@ -36,8 +36,8 @@ export async function addFileReference({ projectId, canvas, path, type = 'file' 
   if (displayed() !== id) return { status: 'rejected', reason: 'conversation_changed' }
   const draft = useSessions.getState().drafts[id]
   if (!draft) return { status: 'rejected', reason: 'draft_unavailable' }
-  const files = draft.contextItems.filter((item) => item.type === 'file' || item.type === 'image')
-  if (files.some((item) => item.path === path && item.type === type)) return { status: 'duplicate' }
+  const files = draft.contextItems.filter((item) => item.type === 'file' || item.type === 'image' || item.type === 'upload')
+  if (files.some((item) => item.type !== 'upload' && item.path === path && item.type === type)) return { status: 'duplicate' }
   if (files.length >= FILES_LIMITS.referencesPerMessage) return { status: 'rejected', reason: 'limit' }
   useSessions.getState().updateDraft(key, { contextItems: [...draft.contextItems, { type, path }] })
   return { status: 'added' }

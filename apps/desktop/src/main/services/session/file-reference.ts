@@ -5,14 +5,14 @@ import { FILES_LIMITS, type FileReferenceFailureReason, type ProjectPath, type R
 import type { SessionCli } from '@shared/session/types'
 
 /**
- * `text`: a path list in the prompt, which both CLIs accept today. `attachments`: the Adapter's structured file
- * attachment (Codex `mention`; Claude throws `unsupported`). Codex mention was verified on 0.163.0 (2026-10-18).
+ * `text`: a path list in the prompt. `attachments`: the Adapter's structured input contract;
+ * Codex serializes file name/path as text and image/skill as native inputs; Claude throws `unsupported`.
  */
 export type FileReferenceStrategy = 'text' | 'attachments'
 
 /**
- * Codex uses its verified native mention input; Claude keeps the textual path reference until separately verified.
- * Evidence: T20261009-context-tools/evidence/W0-codex-adapter-live.json (2026-10-18).
+ * File serialization belongs to the Adapter, including cache paths outside the Project root.
+ * Evidence: T20261031-inline-attachments (2026-11-01); earlier mention tests did not prove cache-only delivery.
  */
 export const FILE_REFERENCE_STRATEGY: Record<SessionCli, FileReferenceStrategy> = { codex: 'attachments', 'claude-code': 'text' }
 
@@ -25,6 +25,7 @@ export interface BuildUserInputOptions {
   images?: readonly string[]
   filePaths?: readonly string[]
   files: readonly ResolvedFileReference[]
+  uploads?: readonly InputAttachment[]
   text: string
   strategy: FileReferenceStrategy
 }
@@ -37,11 +38,11 @@ const quote = (path: ProjectPath): string => JSON.stringify(path).replace(LINE_S
  * `text`: `[viewContext\n\n]HEADER\n- "path"…\n\nuser text`. Paths are JSON-quoted so spaces, quotes and unicode survive and
  * one file is always one line. Without files the result is exactly what was sent before references existed.
  */
-export function buildUserInput({ viewContextText, files, skills = [], images = [], filePaths, text, strategy }: BuildUserInputOptions): UserInput {
+export function buildUserInput({ viewContextText, files, skills = [], uploads = [], images = [], filePaths, text, strategy }: BuildUserInputOptions): UserInput {
   const body = viewContextText ? `${viewContextText}\n\n${text}` : text
-  if ((images.length || skills.length) && strategy !== 'attachments') throw new Error('当前 CLI 未接入原生附件，消息未发送')
-  if (!files.length && !skills.length) return { text: body }
-  if (strategy === 'attachments') return { text: body, attachments: [...skills, ...files.flatMap(file => {
+  if ((images.length || skills.length || uploads.length) && strategy !== 'attachments') throw new Error('当前 CLI 未接入原生附件，消息未发送')
+  if (!files.length && !skills.length && !uploads.length) return { text: body }
+  if (strategy === 'attachments') return { text: body, attachments: [...skills, ...uploads, ...files.flatMap(file => {
     const aliases = [file.path, ...(file.aliases ?? [])]
     const image = aliases.some(path => images.includes(path))
     const mention = filePaths ? aliases.some(path => filePaths.includes(path)) : !image

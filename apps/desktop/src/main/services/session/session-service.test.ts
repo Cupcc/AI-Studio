@@ -1,3 +1,6 @@
+import { mkdtemp, writeFile, rm } from 'node:fs/promises'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { deferred, type AgentSession, type CreateSessionOptions, type InputRequestInit } from '@ai-studio/agent-adapter'
@@ -1300,6 +1303,30 @@ describe('Native turn Diff persistence and attribution · FR-TOOL-002 / AC-07', 
 
 
 describe('Native controls and attachments · Input §2 / S-Q12 / principle 24', () => {
+  it('resolves staged attachments for create, steer and retry, retaining failed input when the cached file is missing', async () => {
+    const upload = { type: 'upload' as const, id: 'opaque-upload', name: '中文 文件.txt', image: false }
+    const attachment = { kind: 'file' as const, path: '/app/cache/copy.data.txt', name: upload.name }
+    const pastedAttachment = vi.fn(async () => attachment)
+    const h = harness(new FakeProvider('codex', { capabilities: { inputWhileRunning: 'steer' }, behavior: { onSteer: () => {} } }), undefined, { pastedAttachment })
+    const contextItems = [upload]
+    const session = await h.service.create({ projectId: 'p', cli: 'codex', text: 'read', contextItems }); await tick()
+    expect(startInputs(h)[0]).toEqual({ text: 'read', attachments: [attachment] })
+    expect(pastedAttachment).toHaveBeenCalledWith('p', upload)
+    await h.service.send(session.id, { text: 'read again', contextItems })
+    expect(steerInputs(h)[0]).toEqual({ text: 'read again', attachments: [attachment] })
+    const runtime = h.native().controller
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'failed', error: { code: 'provider_error', message: 'fixture failure', retryable: true } })
+    const failed = h.store.lastTurn(session.id)!
+    pastedAttachment.mockRejectedValueOnce(new Error('cached file missing'))
+    await expect(h.service.retry(session.id)).rejects.toThrow('cached file missing')
+    expect(h.store.lastTurn(session.id)!.id).toBe(failed.id)
+    expect(h.store.pastedAttachmentReferences()).toContainEqual({ projectId: 'p', id: upload.id })
+    await h.service.retry(session.id); await tick()
+    expect(h.codex.sessions.flatMap(native => native.driver.callsTo('startTurn')).at(-1)!.args[1]).toMatchObject({ attachments: [attachment] })
+    await expect(h.service.create({ projectId: 'p', cli: 'claude-code', text: 'unsupported', contextItems })).rejects.toThrow('不支持粘贴附件')
+    expect(h.claude.sessions).toHaveLength(0)
+  })
+
   it('snapshots effort per turn and persists the next choice without mutating a running turn', async () => {
     const h = harness()
     const session = await h.service.create({ projectId: 'p', cli: 'codex', text: 'first', reasoningEffort: 'low' }); await tick()
@@ -1360,5 +1387,29 @@ describe('Native controls and attachments · Input §2 / S-Q12 / principle 24', 
     await expect(h.service.send(session.id, { text: 'blocked', contextItems })).rejects.toThrow('符号链接')
     expect(await h.service.getDraft(key)).toMatchObject({ text: 'blocked', contextItems })
     expect(steerInputs(h)).toHaveLength(1)
+  })
+})
+
+
+describe('native Skill content preview', () => {
+  it('reads only a current enabled Project-bound opaque ID, and bounds large content', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'studio-skill-preview-'))
+    cleanups.push(() => rm(dir, { recursive: true, force: true }))
+    const path = join(dir, 'SKILL.md')
+    await writeFile(path, '# Native Skill instructions\n')
+    const listSkills = vi.fn(async () => ({ skills: [{ name: 'preview', description: '', path, enabled: true }], errors: [] }))
+    const h = harness(Object.assign(new FakeProvider('codex'), { listSkills }))
+    const selected = (await h.service.getSkills('codex', 'p')).skills[0]!
+    expect(await h.service.getSkillContent('codex', 'p', selected.id)).toEqual({ name: 'preview', text: '# Native Skill instructions\n', truncated: false })
+    await expect(h.service.getSkillContent('codex', 'p2', selected.id)).rejects.toThrow('不存在')
+    await expect(h.service.getSkillContent('codex', 'p', '/etc/passwd')).rejects.toThrow('不存在')
+    await writeFile(path, 'x'.repeat(300 * 1024))
+    const large = await h.service.getSkillContent('codex', 'p', selected.id)
+    expect(large.text.length).toBe(256 * 1024)
+    expect(large.truncated).toBe(true)
+    await writeFile(path, Buffer.from([1, 0, 2]))
+    await expect(h.service.getSkillContent('codex', 'p', selected.id)).rejects.toThrow('不是文本')
+    listSkills.mockResolvedValue({ skills: [{ name: 'preview', description: '', path, enabled: false }], errors: [] })
+    await expect(h.service.getSkillContent('codex', 'p', selected.id)).rejects.toThrow('禁用')
   })
 })

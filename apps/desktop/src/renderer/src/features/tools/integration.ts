@@ -1,7 +1,8 @@
 import { closeRightSidebar, selectRightArea } from '@shared/project/ui-rules'
 import { currentTool } from '@shared/project/ui-state'
 import { studio } from '../../lib/studio'
-import { registerShellIntegration } from '../project/integration'
+import { registerShellIntegration, shellIntegration } from '../project/integration'
+import { useReferenceInspector } from '../input/reference-preview'
 import { useProjectShell } from '../project/store'
 import { useTerminals, watchTerminals } from './terminal-store'
 import { installFilesIntegration } from './files/integration'
@@ -40,7 +41,11 @@ export function installToolsIntegration(): () => void {
   const unwatch = watchTerminals()
   const uninstallFiles = installFilesIntegration()
   const uninstallDiff = installDiffIntegration()
-  const unregister = registerShellIntegration({ Tool: Tools, Overlay: QuickOpen })
+  const previousToolSelected = shellIntegration().toolSelected
+  const unregister = registerShellIntegration({ Tool: Tools, Overlay: QuickOpen, toolSelected(projectId, area) {
+    previousToolSelected?.(projectId, area)
+    if (area === 'files' && useReferenceInspector.getState().current?.projectId === projectId) useReferenceInspector.setState({ current: null })
+  } })
   const offMenu = studio().project.onMenuCommand(({ command }) => onToolCommand(command))
   // The Quick Open listing is refreshed after files change; opened files become "recent".
   const offChanged = filesApi().onChanged(event => useQuickOpen.getState().invalidate(event.projectId))
@@ -56,6 +61,7 @@ export function installToolsIntegration(): () => void {
       useTerminals.getState().forget(tab.projectId)
       useSearch.getState().forget(tab.projectId)
       useQuickOpen.getState().forget(tab.projectId)
+      if (useReferenceInspector.getState().current?.projectId === tab.projectId) useReferenceInspector.setState({ current: null })
     }
   })
   return () => { unsubscribe(); offOpened(); offChanged(); offMenu(); unregister(); uninstallDiff(); uninstallFiles(); unwatch() }

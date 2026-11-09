@@ -1,0 +1,9 @@
+
+ RUN  v5.0.1 /Users/Chris/Projects/AI Stduio.worktrees/composer-inline/apps/desktop
+
+
+ Test Files  3 passed (3)
+      Tests  41 passed (41)
+   Start at  21:41:54
+   Duration  2.01s (tests 39%, environment 33%, transform 14%, import 14%)
+

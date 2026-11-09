@@ -1,9 +1,9 @@
 import { displayName } from '../../lib/display-path'
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import { SESSION_MESSAGE_MAX_LENGTH } from '@shared/ipc/session'
+import { useEffect, useId, useRef, useState } from 'react'
+import { PASTED_ATTACHMENT_MAX_BYTES } from '@shared/ipc/session'
+import { FILES_LIMITS } from '@shared/tools/files'
 import { VIEW_NAMES } from '@shared/project/strings'
 import type { ViewId } from '@shared/project/types'
-import { selectRightArea } from '@shared/project/ui-rules'
 import type { DraftKey, SkillCatalogResult } from '@shared/session/types'
 import { cliName, draftId, FILE_REPLY_BLOCKED, replyBlockedByFiles, useSessions } from '../session/store'
 import { useProjectShell } from '../project/store'
@@ -13,6 +13,11 @@ import { Icon } from '../../app/Icon'
 import { ControlMenu } from './ControlMenu'
 import { EffortSignal } from './EffortSignal'
 import { useSuggestions } from './useSuggestions'
+import { ReferenceText } from './ReferenceText'
+import { sameReference } from './inline-references'
+import { displayedDraftKey } from './add-file-reference'
+import { showTool } from '../tools/show-tool'
+import type { ComposerInput } from './reference-editor-dom'
 import './composer.css'
 
 export interface ComposerProps { draftKey: DraftKey; active: boolean; originViewId?: string | null }
@@ -25,10 +30,11 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const catalog = useSessions(s => cli ? s.catalogs[`${draftKey.projectId}:${cli}`] : undefined)
   const model = session ? session.model : draft?.model ?? null
   const root = useRef<HTMLDivElement>(null), retryButton = useRef<HTMLButtonElement>(null)
-  const input = useRef<HTMLTextAreaElement>(null), composing = useRef(false), justComposedAt = useRef(0)
+  const input = useRef<ComposerInput>(null), composing = useRef(false), justComposedAt = useRef(0)
   const [skills, setSkills] = useState<SkillCatalogResult | null>(null), [skillsLoading, setSkillsLoading] = useState(false)
   const skillRequest = useRef(0), catalogRequest = useRef(0), filesNote = useId()
   const [notice, setNotice] = useState<string | null>(null), [catalogLoading, setCatalogLoading] = useState(false)
+  const [pasting, setPasting] = useState(0)
   const [effortTransition, setEffortTransition] = useState<{ tier: 'max' | 'ultra'; sequence: number } | null>(null)
   const effortSelection = useRef(0)
   const text = draft?.text ?? '', provider = providers.find(p => p.cli === cli)
@@ -38,7 +44,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const busy = !!pending[id] || !!(session && (pending[`model:${session.id}`] || pending[`effort:${session.id}`]))
   const supportsRunningInput = running && !!provider && provider.capabilities.inputWhileRunning !== 'none'
   const fileReplyBlocked = replyBlockedByFiles(session, draft)
-  const canSend = !!draft && !!text.trim() && !unavailable && (!running || !!supportsRunningInput) && !stopping && !busy && !fileReplyBlocked
+  const canSend = !!draft && !!text.trim() && !unavailable && (!running || !!supportsRunningInput) && !stopping && !busy && !pasting && !fileReplyBlocked
   useEffect(() => { void useSessions.getState().loadDraft(draftKey) }, [id])
   useEffect(() => { if (unavailable) void useSessions.getState().loadProviders() }, [unavailable])
   useEffect(() => { if (cli) void useSessions.getState().loadModels(draftKey.projectId, cli) }, [cli, draftKey.projectId])
@@ -58,16 +64,8 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
     skillRequest.current++; catalogRequest.current++
     return () => { skillRequest.current++; catalogRequest.current++ }
   }, [id, cli])
-  useLayoutEffect(() => {
-    const node = input.current
-    if (!node) return
-    node.style.height = 'auto'
-    const line = Number.parseFloat(getComputedStyle(node).lineHeight) || 20
-    node.style.height = `${Math.min(line * 8, Math.max(line, node.scrollHeight))}px`
-  }, [text])
   function openFiles() {
-    const shell = useProjectShell.getState(), ui = shell.uiStates[draftKey.projectId]
-    if (ui) shell.updateUiState(draftKey.projectId, selectRightArea(ui, 'files'))
+    showTool(draftKey.projectId, 'files')
   }
   async function loadSkills() {
     if (cli !== 'codex') return
@@ -128,6 +126,28 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
     const current = useSessions.getState().drafts[id]
     if (current && !current.contextItems.some(item => item.type === 'skill' && item.id === skill.id)) useSessions.getState().updateDraft(draftKey, { contextItems: [...current.contextItems, { type: 'skill', id: skill.id, name: skill.name }] })
   }
+  async function pasteFiles(files: File[]) {
+    setPasting(count => count + 1)
+    try {
+    for (const file of files) {
+      const current = useSessions.getState().drafts[id], canvas = useProjectShell.getState().uiStates[draftKey.projectId]?.mainCanvas
+      if (!current || !canvas || draftId(displayedDraftKey(draftKey.projectId, canvas)) !== id) return
+      if (current.contextItems.filter(item => item.type === 'file' || item.type === 'image' || item.type === 'upload').length >= FILES_LIMITS.referencesPerMessage) { setNotice(`最多添加 ${FILES_LIMITS.referencesPerMessage} 个文件或图片。`); return }
+      if (!file.size || file.size > PASTED_ATTACHMENT_MAX_BYTES) { setNotice('附件为空或超过 10 MiB。'); continue }
+      try {
+        const bytes = new Uint8Array(await file.arrayBuffer())
+        const canvasAfterRead = useProjectShell.getState().uiStates[draftKey.projectId]?.mainCanvas
+        if (!canvasAfterRead || draftId(displayedDraftKey(draftKey.projectId, canvasAfterRead)) !== id) return
+        const attachment = await sessionApi().pasteAttachment({ projectId: draftKey.projectId, name: file.name || 'pasted-image', mime: file.type, bytes })
+        const latest = useSessions.getState().drafts[id], currentCanvas = useProjectShell.getState().uiStates[draftKey.projectId]?.mainCanvas
+        if (!latest || !currentCanvas || draftId(displayedDraftKey(draftKey.projectId, currentCanvas)) !== id) return
+        if (latest.contextItems.filter(item => item.type === 'file' || item.type === 'image' || item.type === 'upload').length >= FILES_LIMITS.referencesPerMessage) { setNotice(`最多添加 ${FILES_LIMITS.referencesPerMessage} 个文件或图片。`); return }
+        useSessions.getState().updateDraft(draftKey, { contextItems: [...latest.contextItems, attachment] })
+        setNotice(null)
+      } catch (error) { setNotice(`无法粘贴附件：${error instanceof Error ? error.message : String(error)}`) }
+    }
+    } finally { setPasting(count => Math.max(0, count - 1)) }
+  }
   const knownModels = catalog?.models.filter(item => !item.hidden || item.id === model) ?? []
   const nativeDefault = knownModels.find(item => item.isDefault)
   const selectedModel = knownModels.find(item => model ? item.id === model : item.isDefault)
@@ -137,7 +157,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const effortMissing = !!reasoningEffort && !!catalog && !catalog.error && !effortLevels.includes(reasoningEffort)
   const effortOptions = [...new Set([...effortLevels, ...(effortMissing ? [reasoningEffort] : [])])]
   const modelLabel = model ? selectedModel?.displayName ?? model : nativeDefault ? `${nativeDefault.displayName}（默认）` : 'CLI 默认'
-  const suggestions = useSuggestions({ draftKey, text, input, active, cli, skills, loadSkills, report: setNotice })
+  const suggestions = useSuggestions({ draftKey, text, input, active, cli, skills, loadSkills, report: setNotice, inlineReferences: draft?.inlineReferences ?? [] })
   const operationError = errors[id] || (session && (errors[`stop:${session.id}`] || errors[`effort:${session.id}`] || errors[`model:${session.id}`]))
   const status = unavailable ? provider?.reason ?? (!cli ? '请选择已安装并已登录的 CLI。' : '正在检查 CLI…')
     : fileReplyBlocked ? FILE_REPLY_BLOCKED : stopping ? '正在停止…' : needsInput ? '等待回复'
@@ -149,20 +169,42 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
           if (event.target === event.currentTarget) setEffortTransition(null)
         }}><i /><i /></span>}
       {suggestions.popup}
-      <textarea ref={input} {...suggestions.attributes} aria-label={needsInput ? '回复 Agent' : '消息'} placeholder={needsInput ? '回复 Agent…' : `向 ${cliName(cli)} 发送消息…`} value={text} maxLength={SESSION_MESSAGE_MAX_LENGTH} disabled={!!loading || !draft} rows={1}
-        onChange={event => { useSessions.getState().updateDraft(draftKey, { text: event.target.value }); suggestions.updateCaret() }}
-        onClick={suggestions.updateCaret} onSelect={suggestions.updateCaret} onBlur={suggestions.dismiss}
-        onCompositionStart={() => { composing.current = true }} onCompositionEnd={() => { composing.current = false; justComposedAt.current = performance.now(); suggestions.updateCaret() }}
+      {!!draft?.contextItems.some(context => !draft.inlineReferences?.some(ref => sameReference(ref.item, context))) && <div className="composer__tags">{draft.contextItems.map((context, index) => draft.inlineReferences?.some(ref => sameReference(ref.item, context)) ? null : <span className="composer__tag" key={`${context.type}:${index}`} title={context.type === 'file' || context.type === 'image' ? displayName(context.path) : context.type === 'upload' ? displayName(context.name) : undefined}>
+        <Icon name={context.type === 'view' ? 'preview' : context.type === 'skill' ? 'terminal' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? `当前 View · ${VIEW_NAMES[context.viewId as ViewId] ?? context.viewId}` : context.type === 'skill' ? `Skill · ${context.name}` : context.type === 'upload' ? `${context.image ? '图片 · ' : ''}${displayName(context.name)}` : `${context.type === 'image' ? '图片 · ' : ''}${displayName(context.path.split('/').at(-1) ?? context.path)}`}</span>
+        <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : context.type === 'skill' || context.type === 'upload' ? context.name : displayName(context.path)}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}><Icon name="close" size={10} /></button>
+      </span>)}</div>}
+      <ReferenceText key={id} projectId={draftKey.projectId} cli={cli} text={text} references={draft?.inlineReferences ?? []} input={input} attributes={suggestions.attributes}
+        label={needsInput ? '回复 Agent' : '消息'} placeholder={needsInput ? '回复 Agent…' : `向 ${cliName(cli)} 发送消息…`} disabled={!!loading || !draft} report={setNotice}
+        onPaste={event => { const files = Array.from(event.clipboardData.files); if (files.length) { event.preventDefault(); void pasteFiles(files) } }}
+        onChange={value => {
+          const current = useSessions.getState().drafts[id]
+          if (!current) return
+          const items = current.contextItems.filter(item => !current.inlineReferences?.some(ref => sameReference(ref.item, item)) || value.references.some(ref => sameReference(ref.item, item)))
+          for (const ref of value.references) if (!items.some(item => sameReference(ref.item, item))) items.push(ref.item)
+          useSessions.getState().updateDraft(draftKey, { text: value.text, inlineReferences: [...value.references], contextItems: items })
+        }}
+        onCaret={suggestions.updateCaret} onBlur={suggestions.dismiss}
+        onComposition={active => { composing.current = active; if (!active) { justComposedAt.current = performance.now(); suggestions.updateCaret() } }}
         onKeyDown={event => {
           if (event.nativeEvent.isComposing || composing.current || event.keyCode === 229 || performance.now() - justComposedAt.current < 50) return
+          const node = input.current, refs = draft?.inlineReferences ?? []
+          if (node && !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && node.selectionStart === node.selectionEnd) {
+            const caret = node.selectionStart
+            const backward = event.key === 'Backspace' || event.key === 'ArrowLeft', forward = event.key === 'Delete' || event.key === 'ArrowRight'
+            const ref = refs.find(ref => backward ? caret > ref.start && caret <= ref.end : forward && caret >= ref.start && caret < ref.end)
+            if (ref) {
+              event.preventDefault()
+              const deleting = event.key === 'Backspace' || event.key === 'Delete', next = deleting ? text.slice(0, ref.start) + text.slice(ref.end) : text
+              if (deleting) useSessions.getState().updateDraft(draftKey, { text: next })
+              const target = backward || deleting ? ref.start : ref.end
+              requestAnimationFrame(() => { if (input.current?.value === next) input.current.setSelectionRange(target, target) })
+              return
+            }
+          }
           if (suggestions.onKeyDown(event)) return
           if (event.key !== 'Enter' || event.shiftKey) return
           event.preventDefault(); if (canSend) void send()
         }} />
-      {!!draft?.contextItems.length && <div className="composer__tags">{draft.contextItems.map((context, index) => <span className="composer__tag" key={`${context.type}:${index}`} title={context.type === 'file' || context.type === 'image' ? displayName(context.path) : undefined}>
-        <Icon name={context.type === 'view' ? 'preview' : context.type === 'skill' ? 'terminal' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? `当前 View · ${VIEW_NAMES[context.viewId as ViewId] ?? context.viewId}` : context.type === 'skill' ? `Skill · ${context.name}` : `${context.type === 'image' ? '图片 · ' : ''}${displayName(context.path.split('/').at(-1) ?? context.path)}`}</span>
-        <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : context.type === 'skill' ? context.name : displayName(context.path)}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}><Icon name="close" size={10} /></button>
-      </span>)}</div>}
       <div className="composer__toolbar">
         <ControlMenu key={`add:${id}:${cli}`} label="Context / Attachment" title="添加上下文" trigger={<Icon name="plus" size={15} />} className="composer__add-control" disabled={!draft} onOpen={() => { if (cli === 'codex') void loadSkills() }}>
           <div className="composer__menu-heading">Add</div>

@@ -6,13 +6,15 @@ import { diffApi } from './diff/api'
 import { useProjectShell } from '../project/store'
 import { installToolsIntegration } from './integration'
 import { useTerminals } from './terminal-store'
+import { shellIntegration } from '../project/integration'
+import { useReferenceInspector } from '../input/reference-preview'
 
 vi.mock('./api', () => ({ terminalApi: vi.fn(), browserApi: vi.fn() }))
 vi.mock('./files/api', () => ({ filesApi: vi.fn() }))
 vi.mock('./diff/api', () => ({ diffApi: vi.fn() }))
 vi.mock('../../lib/studio', () => ({ studio: () => ({ project: { onMenuCommand: () => () => {} } }) }))
 const previousWindow = useProjectShell.getState().windowState
-afterEach(() => { useProjectShell.setState({ windowState: previousWindow }); useTerminals.getState().forget('lifecycle') })
+afterEach(() => { useProjectShell.setState({ windowState: previousWindow }); useTerminals.getState().forget('lifecycle'); useReferenceInspector.setState({ current: null }) })
 
 it('drops cached terminals when the Project tab closes and creates a new first shell after reopening', async () => {
   const api = {
@@ -27,10 +29,18 @@ it('drops cached terminals when the Project tab closes and creates a new first s
   useProjectShell.setState({ windowState: opened })
   const dispose = installToolsIntegration()
   try {
+    const inspected = { projectId: 'lifecycle', cli: 'codex' as const, item: { type: 'skill' as const, id: 'opaque', name: 'review' } }
+    useReferenceInspector.setState({ current: inspected })
+    shellIntegration().toolSelected?.('other-project', 'files')
+    expect(useReferenceInspector.getState().current).toEqual(inspected)
+    shellIntegration().toolSelected?.('lifecycle', 'files')
+    expect(useReferenceInspector.getState().current).toBeNull()
+    useReferenceInspector.setState({ current: inspected })
     await useTerminals.getState().open('lifecycle')
     expect(useTerminals.getState().projects.lifecycle?.activeId).toBe('t1')
     useProjectShell.setState({ windowState: { tabs: [{ id: 'launcher', kind: 'launcher' }], currentTabId: 'launcher', navCollapsed: false } })
     expect(useTerminals.getState().projects.lifecycle).toBeUndefined()
+    expect(useReferenceInspector.getState().current).toBeNull()
     // Resource-cleanup events can arrive after the tab closes.
     useTerminals.getState().accept('lifecycle', [])
     expect(useTerminals.getState().projects.lifecycle).toBeUndefined()

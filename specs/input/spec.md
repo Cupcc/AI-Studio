@@ -57,12 +57,12 @@
 #### 布局
 
 1. 输入区固定在 Conversation 下方，内容宽度与消息列相同、左右边缘对齐（最大 720，Shell Spec v02 第 2.2 节）。New Chat、已有 Session、Project View Conversation 列共用底部 Composer，发送第一条消息前后位置一致；问候语与起步示例留在正文区域。依据 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)（2026-10-23 确认），替代交互原型 v02 的草稿输入框居中规则。
-2. 上部为多行文本输入，其后单独一行放置上下文标签；底行从左到右为 `+`（Context / Attachment）、（右侧相邻）思考强度信号格与 Model Selector、Stop / Send。思考控件置于模型左侧依据用户 2026-10-24 UI 修正指令；diff 待审阅。错误与目录提示就近放在框内控制行之下，辅助状态行在框外；空闲不常驻快捷键说明，发送按钮悬停或键盘聚焦时提示 Enter / Shift+Enter（Shell Spec v02 第 7 节；DEC-23）。
+2. 输入框内先显示独立附件标签，再显示多行文字输入；通过 `@` 和 `$` 选中的文件 / Skill 留在输入文字的原位置，以有内边距、相邻间距和类型标记的标签呈现，悬停预览、点击打开规则见下文。底行从左到右为 `+`（Context / Attachment）、（右侧相邻）思考强度信号格与 Model Selector、Stop / Send。位置与交互变更依据用户 2026-10-31 指令及对标签过于拥挤的纠正；实现及验证见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。思考控件置于模型左侧依据用户 2026-10-24 UI 修正指令；diff 待审阅。错误与目录提示就近放在框内控制行之下，辅助状态行在框外；空闲不常驻快捷键说明，发送按钮悬停或键盘聚焦时提示 Enter / Shift+Enter（Shell Spec v02 第 7 节；DEC-23）。
 3. 打开 Session 或草稿时输入框获得焦点，可立即输入（UX 第 6 节 Session 打开第 4 项；FR-CHAT-001 第 1 项）。
 
 #### 文本输入与键盘
 
-1. 多行输入，随内容自动增高，最多 8 行，超过后在框内滚动（Shell Spec 第 7 节）。
+1. 多行输入，随内容自动增高，最多 8 行，超过后在框内滚动（Shell Spec 第 7 节）；粘贴与程序化光标定位后，在编辑区内滚动使插入位置可见。
 2. Enter：控件处于可发送状态时发送；否则不发送，也不插入换行（建议）。Shift+Enter：换行（Shell Spec 第 7 节）。
 3. 输入法组合输入（中文、日文等）进行中按 Enter 只确认候选词，不发送；组合输入期间界面刷新不得打断输入（实现要求，原型 v01 已示意）。
 4. 发送成功后清空输入框与已发送的上下文标签；发送失败（例如草稿 CLI 不可用而未发送）时保留内容。
@@ -72,13 +72,31 @@
 #### Context / Attachment 入口与上下文标签
 
 1. `+` 打开按来源分组的 Add 菜单：文件入口复用 Files；View 草稿中的当前 View 标签可在移除后重新附加；Skills 列出当前 Project 的真实原生目录，并标明已添加项。Plugins 无原生 catalog 接口时显示明确的不可用状态，不能把原型示例列成真实能力。Files 选择与添加行为见 §1.3；原生图片仍沿用 Files 的“作为图片附加”入口（DEC-23，2026-10-23）。
-2. 上下文标签位：显示当前 View 与从 Files 添加的文件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。本轮实现标签位与数据结构 `context_items: [{type: 'view', viewId} | {type: 'file', path} | {type: 'image', path} | {type: 'skill', id, name}]`；Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。
+2. 上下文标签位：显示当前 View、从 Files 添加的文件和粘贴附件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。草稿的上下文类型含 View、项目文件、项目图片、Skill 和粘贴附件；行内引用的位置另存草稿。Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。粘贴附件的实施状态与保留事项见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。
 3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
-   - 当前转换：Codex 原生 mention、Claude 文本路径清单；引用不是文件内容快照。Codex 普通发送与应用 UI 同轮追加的真实证据及其余能力边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
-4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件、图片或 Skill 标签时明确阻止答复并保留输入，避免标签被无声清空；运行中发送遵循 Provider 的实际能力。实现与独立验收边界由 [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 维护。
+   - 当前转换由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)负责：Codex 的文件经结构化宿主契约转为明确的本机路径文本引用，图片 / Skill 使用各自原生输入；Claude 文件使用文本路径清单。引用不是文件内容快照；本轮缓存接收及历史验证的边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
+4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件、图片、粘贴附件或 Skill 时明确阻止答复并保留输入，避免附件被无声清空；运行中发送遵循 Provider 的实际能力。既有实现与独立验收边界由 [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 维护。
 
 5. 原生图片由 Files 的「作为图片附加」明确选择，主进程沿用文件路径边界和发送前重校验，传 Codex `localImage`；同一文件可同时保留 file / image 两种显式语义。图片内容和模型是否支持由 CLI 实际结果判定，不能静默改成路径文字（原则 24；2026-10-18 技术实现）。
 6. Codex 的 `+` 菜单按需读取当前 Project 原生 Skill 目录。草稿与历史只存 Project 隔离的 opaque ID / 展示名；主进程在普通 / Running / Retry 发送前重新查询 enabled 目录并解析原生 name / path，拒绝失效或禁用项。Renderer 不得自行提交本机 Skill 路径；原生自动加载与显式选择分别验证。推理强度来自原生模型目录，改选仅影响下一轮，默认复位由 [Adapter §3.8](../agent-adapter/spec.md) 负责（Input §2、原则 20、24；2026-10-18 技术实现，diff 待审阅）。
+
+#### 行内引用标签
+
+依据用户 2026-10-31 对 `$` / `@` 的纠正及后续留白反馈；本次规格 diff 待审阅。
+
+- 选中候选后在原输入位置呈现标签，保留可区分的 `@` / `$` 标记。标签文字与边缘留白，标签之间及与正文之间有间距，长路径可截短显示但真实身份和复制文字不改变；标签整体参与换行。普通输入的同名文字不自动成为可信引用。
+- 鼠标悬停或键盘聚焦时按需读取真实文件内容，展示文件名、内容摘要和“在侧边栏打开”；加载、文件不存在或读取失败须如实呈现。预览最多展示 28 行 / 6000 字符，截断时提示。编辑、滚动或切换 Project 后丢弃过期预览。
+- 点击文件标签打开右侧 Files 对应文件；点击 Skill 标签打开右侧只读 `SKILL.md` 查看器，支持位于 Project 外的原生 Skill。显式选择 Files、从 `+` 添加文件或打开另一个文件时，返回 Files 的文件树 / 文件查看器，不能被 Skill 查看器遮住。
+- 引用作为整项编辑；边界 Backspace / Delete 删除整项并同步上下文。支持跨标签选择、复制纯文本、粘贴纯文本、撤销 / 重做和输入法组合输入；复制后重新粘贴的标签文字需重新选择候选才具有可信身份。草稿保存原始文字、位置和上下文身份，标签留白不写入发送文字。
+
+#### 粘贴附件与缓存生命周期
+
+依据用户 2026-10-31 的文件 / 图片粘贴和缓存自动清理请求；以下生命周期为本轮 AI 技术方案，不表示人工验收通过。
+
+- Finder 文件或剪贴板图片暂存到应用数据目录，不写入 Project；按 Project 隔离，单件非空且不超过 10 MiB。Renderer 仅保存附件 ID、展示名和图片类型；发送前由主进程重新读取元数据并校验文件。
+- 启动及每小时扫描一次，只回收应用自有、无引用且超过 24 小时宽限的 UUID 文件组，包括写入中断的残片。宽限按该组最新文件 mtime 及本次进程最近暂存 / 解析时间计算，**不是最后一个引用移除后的 24 小时**；旧附件解除最后引用后可能在下次扫描回收。
+- 保留所有新对话 / View / Session 草稿、全部历史用户消息、回合输入 / 失败重试和内存临时草稿仍引用的附件。已有引用不自动过期，未增加历史附件总容量上限。
+- 不递归删除目录、不跟随符号链接、不删除未知文件；引用来源读取失败时不执行删除。暂存、解析与扫描串行，退出先停计时器并等待既有操作完成。技术与真实链路证据分别见[任务验收](../../tasks/archive/T20261031-inline-attachments/acceptance.md)。
 
 #### Send / Stop
 
@@ -117,7 +135,7 @@
 
 依据：DEC-23（2026-10-23 确认）、FR-INPUT-001、[v06 §4](../../design/layout-ux-review-v02.md#4-连续操作与键盘)。
 
-- 输入 `@` 读取当前 Project 的真实文件候选，`$` 读取当前 CLI 的真实 Skill catalog；选择后加入当前草稿的上下文标签，不自动发送。异步结果须核对草稿 / Project 身份，沿用既有文件路径与 Skill opaque ID 的主进程校验。
+- 输入 `@` 读取当前 Project 的真实文件候选，`$` 读取当前 CLI 的真实 Skill catalog；选择后在输入文字的原位置显示引用，并加入当前草稿上下文，不自动发送。异步结果须核对草稿 / Project 身份，沿用既有文件路径与 Skill opaque ID 的主进程校验。粘贴的图片 / 文件作为附件显示在输入框内文字上方（用户 2026-10-31 指令）；实现状态及待验证事项见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。
 - `/` 候选依赖 Provider 的原生命令目录；目录接口未接入时显示当前不可用，不列出原型的示例命令，不把普通文本伪装成已执行命令。正文输入仍可保留并按原生 CLI 语义发送。
 - 候选支持方向键、Enter / Tab 选择与 Esc 关闭；输入法组合输入只确认候选，不发送或选择应用候选。模型、思考与 Add 使用按钮展开，提供展开关系和当前选择；方向键 / Home / End 导航，选择或 Esc 后恢复到触发按钮。菜单在当前对话栏内约束宽高并可滚动。
 
@@ -151,7 +169,7 @@
 
 | 数据 | 字段 | 说明 |
 |---|---|---|
-| 每个 Session 的输入草稿 | `text`、`contextItems` | 2026-10-09 实现：内存保存并通过 `saveDraft` 写入独立 `session_drafts` 表（I-Q5）；秘密问题待答复内容只在内存中保留，答复成功或清空后清理 |
+| 每个 Session 的输入草稿 | `text`、`contextItems`、`inlineReferences?` | 通过 `saveDraft` 写入独立 `session_drafts` 表（I-Q5）；行内引用保存原文 start / end 与真实上下文身份。秘密问题待答复内容只在内存中保留，答复成功或清空后清理 |
 | 草稿输入 | 见 chat spec 第 4 节 | — |
 | 控件状态 | 由 `activity`、`stopping`、`pending_requests` 是否为空、输入是否为空、CLI 可用性、`capabilities` 推导 | 不单独存储 |
 | 模型 | `Session.model`（空 = CLI 默认）；草稿 `model` | session spec 第 4.2 节 |
@@ -172,6 +190,8 @@
 | 切换模型 | IPC `setModel({sessionId, model})`；草稿则通过 `saveDraft` 写入 `model` |
 | 推理强度 | IPC `setReasoningEffort({sessionId, reasoningEffort})`；草稿通过 `saveDraft` |
 | 原生Skill目录 | IPC `getSkills({projectId, cli})`；返回opaque ID / 展示名 / 描述，不返回可信路径 |
+| 原生 Skill 内容 | IPC `getSkillContent({projectId, cli, skillId})`；主进程重新匹配该 Project 的 enabled 原生目录，只读普通文本文件，最多 256 KiB，返回内容及截断标记，不接受 Renderer 路径 |
+| 暂存粘贴附件 | IPC `pasteAttachment({projectId, name, mime, bytes})`；返回应用自有附件身份，生命周期见 §3 |
 
 ### 5.2 需要 CLI Adapter 提供（经 session 模块）
 

@@ -35,7 +35,7 @@ test('available CLI works in a second Project without selection; global preferen
   await expect(workspace().getByRole('button', { name: 'Send', exact: true })).toBeEnabled()
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveAttribute('placeholder', '向 Claude Code 发送消息…')
   await app.close(); await launch()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue('second draft')
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('second draft')
   await expect(workspace().getByRole('button', { name: 'Send', exact: true })).toBeEnabled()
 })
 
@@ -56,7 +56,7 @@ test('unavailable CLI links directly to settings; recheck restores sending witho
   await page.getByRole('button', { name: '重新检测' }).click()
   await expect(page.getByRole('radio', { name: 'Codex', exact: true })).toBeEnabled()
   await page.getByRole('button', { name: '关闭设置' }).click()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue('retain me')
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('retain me')
   await expect(workspace().getByRole('button', { name: 'Send', exact: true })).toBeEnabled()
 })
 
@@ -70,7 +70,7 @@ test('enabled CLI are shared across Projects and restart; disabled entries disap
   await expect(page.getByRole('radio', { name: 'Codex', exact: true })).toHaveCount(0)
   await expect(page.getByRole('radio', { name: 'Claude Code', exact: true })).toBeChecked()
   await page.getByRole('button', { name: '关闭设置' }).click()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue('keep draft')
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('keep draft')
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveAttribute('placeholder', '向 Claude Code 发送消息…')
   await workspace().getByRole('button', { name: '选择 CLI' }).click()
   await expect(page.locator('.session-cli-menu').getByRole('button', { name: 'Codex', exact: true })).toHaveCount(0)
@@ -88,7 +88,7 @@ test('enabled CLI are shared across Projects and restart; disabled entries disap
   await page.getByRole('button', { name: '重新检测', exact: true }).click()
   await expect(page.getByRole('radio', { name: 'Codex', exact: true })).toBeChecked()
   await page.getByRole('button', { name: '关闭设置' }).click()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue('keep draft')
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('keep draft')
   await expect(workspace().getByRole('button', { name: 'Send', exact: true })).toBeEnabled()
 })
 

@@ -40,7 +40,14 @@ export interface SessionSummary {
   lastUserMessageAt: number
 }
 
-export type ContextItem = { type: 'view'; viewId: string } | { type: 'file'; path: string } | { type: 'image'; path: string } | { type: 'skill'; id: string; name: string }
+export type ContextItem = { type: 'view'; viewId: string } | { type: 'file'; path: string } | { type: 'image'; path: string } | { type: 'skill'; id: string; name: string } | { type: 'upload'; id: string; name: string; image: boolean }
+
+/** Positions in the editable draft text; the actual references remain in contextItems. */
+export interface InlineReference {
+  start: number
+  end: number
+  item: Extract<ContextItem, { type: 'file' | 'skill' }>
+}
 
 interface TranscriptBase {
   id: string
@@ -85,6 +92,12 @@ export interface SkillCatalogResult {
   error: string | null
 }
 
+export interface SkillContentResult {
+  name: string
+  text: string
+  truncated: boolean
+}
+
 export interface ModelCatalogResult {
   models: ModelInfo[]
   error: string | null
@@ -101,6 +114,7 @@ export interface ComposerDraft {
   model: string | null
   text: string
   contextItems: ContextItem[]
+  inlineReferences?: InlineReference[]
 }
 
 export interface SessionMessage {

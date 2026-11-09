@@ -242,7 +242,9 @@ describe('Codex Provider lifecycle / FR-CHAT-002, FR-CHAT-003, AC-02', () => {
     expect(result).toMatchObject({ outcome: 'completed', nativeDurationMs: 123, model: 'cli-model' });
     expect(recorder.events.filter((e) => e.type === 'item.completed')).toMatchObject([{ item: { text: 'hello world' } }]);
     expect(h.servers[0]!.received.find((r) => r.method === 'turn/start')!.params).toMatchObject({ input: [
-      { type: 'text', text: 'hello', text_elements: [] }, { type: 'mention', name: 'a.ts', path: '/tmp/a.ts' }, { type: 'localImage', path: '/tmp/a.png' },
+      { type: 'text', text: 'hello', text_elements: [] },
+      { type: 'text', text: '\n\nAttached file reference (local path; file contents are not embedded):\n{"name":"a.ts","path":"/tmp/a.ts"}', text_elements: [] },
+      { type: 'localImage', path: '/tmp/a.png' },
     ] });
   });
 
@@ -325,13 +327,30 @@ describe('Codex Provider lifecycle / FR-CHAT-002, FR-CHAT-003, AC-02', () => {
     expect(h.runtimes[0]!.running).toBe(false);
   });
 
-  it('passes explicit image and skill inputs in ordinary and running messages', async () => {
+  it('delivers quoted file paths and native image/skill inputs in ordinary and running messages', async () => {
     const h = setup(); const session = await h.session();
-    const attachments = [{ kind: 'image' as const, path: '/project/pic.png' }, { kind: 'skill' as const, name: 'example', path: '/skills/example/SKILL.md' }];
+    const name = '中文 "附件"\n\u0085\u2028\u2029.txt', path = `/app data/cache/${name}`;
+    const attachments = [{ kind: 'file' as const, name, path }, { kind: 'image' as const, path: '/project/pic.png' }, { kind: 'skill' as const, name: 'example', path: '/skills/example/SKILL.md' }];
     await session.sendUserInput({ text: 'first', attachments });
     await vi.waitFor(() => expect(session.activeTurn?.nativeTurnId).toBeTruthy());
     await session.sendUserInput({ text: 'second', attachments });
-    for (const method of ['turn/start', 'turn/steer']) expect(h.servers[0]!.received.find(r => r.method === method)!.params).toMatchObject({ input: [{ type: 'text' }, { type: 'localImage', path: '/project/pic.png' }, { type: 'skill', name: 'example', path: '/skills/example/SKILL.md' }] });
+    for (const method of ['turn/start', 'turn/steer']) {
+      const { input } = h.servers[0]!.received.find(r => r.method === method)!.params as { input: { type: string; text?: string }[] };
+      expect(input).toMatchObject([{ type: 'text' }, { type: 'text', text_elements: [] }, { type: 'localImage', path: '/project/pic.png' }, { type: 'skill', name: 'example', path: '/skills/example/SKILL.md' }]);
+      const reference = input[1]!.text!.split('\n').at(-1)!;
+      expect(reference).not.toMatch(/[\n\r\u0085\u2028\u2029]/);
+      expect(JSON.parse(reference)).toEqual({ name, path });
+    }
+  });
+
+  it('delivers attachment-only file input with distinct paths and a default filename', async () => {
+    const h = setup(); const session = await h.session();
+    await session.sendUserInput({ text: '', attachments: [{ kind: 'file', path: '/app data/cache/one.txt' }, { kind: 'file', path: '/other/two.txt', name: '用户名称.txt' }] });
+    await vi.waitFor(() => expect(session.activeTurn?.nativeTurnId).toBeTruthy());
+    const { input } = h.servers[0]!.received.find(r => r.method === 'turn/start')!.params as { input: { type: string; text: string; text_elements: unknown[] }[] };
+    expect(input).toHaveLength(2);
+    expect(input.every(item => item.type === 'text' && item.text_elements.length === 0)).toBe(true);
+    expect(input.map(item => JSON.parse(item.text.split('\n').at(-1)!))).toEqual([{ name: 'one.txt', path: '/app data/cache/one.txt' }, { name: '用户名称.txt', path: '/other/two.txt' }]);
   });
 
   it('keeps public reasoning sources and indexes separate and ignores late deltas after the final item', async () => {

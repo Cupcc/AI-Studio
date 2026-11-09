@@ -183,7 +183,7 @@ test('FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through t
   await message.fill('second message')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(workspace().getByText('文件引用失败')).toBeVisible()
-  await expect(message).toHaveValue('second message')
+  await expect(message).toHaveText('second message')
   await expect(fileTags()).toHaveCount(1)
   await capture('files-reference-failed-kept')
 })

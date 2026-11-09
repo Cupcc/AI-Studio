@@ -14,7 +14,7 @@ export const BUILT_IN_PROVIDER_IDS = {
 // ---------------------------------------------------------------------------
 
 export type InputAttachment =
-  /** A local file reference the CLI should consider (Codex `mention`, Claude file reference). */
+  /** A trusted local file reference. Codex serializes its name/path as text; contents are not embedded. */
   | { kind: 'file'; path: string; name?: string }
   /** A local image. */
   | { kind: 'image'; path: string }
@@ -26,7 +26,7 @@ export interface NativeSkillCatalog { skills: NativeSkillInfo[]; errors: { path:
 
 export interface UserInput {
   text: string;
-  /** Providers reject attachment kinds they cannot pass natively (`unsupported`). */
+  /** Providers reject attachment kinds they cannot deliver (`unsupported`). */
   attachments?: readonly InputAttachment[];
 }
 

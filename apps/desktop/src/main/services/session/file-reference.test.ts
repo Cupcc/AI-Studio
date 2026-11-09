@@ -54,6 +54,12 @@ describe('Provider input for Files references · FR-TOOL-001 item 4, Tools §4.1
     })
   })
 
+  it('passes staged file and image attachments unchanged, and refuses a CLI with only text references', () => {
+    const uploads = [{ kind: 'file' as const, path: '/app/cache/a.data.txt', name: '中文 文件.txt' }, { kind: 'image' as const, path: '/app/cache/b.data.png' }]
+    expect(buildUserInput({ files: [], uploads, text: 'read', strategy: 'attachments' })).toEqual({ text: 'read', attachments: uploads })
+    expect(() => buildUserInput({ files: [], uploads, text: 'read', strategy: 'text' })).toThrow('原生附件')
+  })
+
   it('preserves both explicit roles of one file, filesystem aliases, and native Skill inputs', () => {
     const image = { ...file('pic.png'), aliases: ['PIC.png'] }
     const skill = { kind: 'skill' as const, name: 'example', path: '/skills/example/SKILL.md' }

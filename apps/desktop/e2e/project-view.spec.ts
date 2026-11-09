@@ -21,7 +21,7 @@ test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, 
 test('AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart', async () => {
   expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
   await workspace().getByRole('button', { name: '生成 Architecture', exact: true }).click()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue(/生成 Architecture/)
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 Architecture/)
   expect(await workspace().locator('[data-session-row]').count()).toBe(0)
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('重新整理支付模块架构。')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
@@ -63,9 +63,9 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
 test('removed View label sends without creating helpers, and each View has an independent draft', async () => {
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('保留架构草稿')
   await workspace().getByRole('button', { name: 'Progress', exact: true }).click()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue('')
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('')
   await workspace().getByRole('button', { name: 'Architecture', exact: true }).click()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveValue('保留架构草稿')
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('保留架构草稿')
   await workspace().getByRole('button', { name: '移除上下文 architecture' }).click()
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')

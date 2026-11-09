@@ -154,7 +154,7 @@ test('FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom befo
   }
   const before = await workspace().locator('.composer__box').evaluate((node) => node.getBoundingClientRect().bottom)
   await starter.click()
-  await expect(composer()).toHaveValue('请梳理当前项目的结构和关键入口。')
+  await expect(composer()).toHaveText('请梳理当前项目的结构和关键入口。')
   await expect(composer()).toBeFocused()
   await expect(workspace().getByRole('button', { name: '排查问题', exact: true })).toBeDisabled()
   expect(await sessions()).toHaveLength(0)

@@ -22,7 +22,7 @@ await provider.dispose();
 - 通用 overrides：`model`、`approvalPolicy`、`sandboxMode`。`permissionMode` 或未知覆盖项明确拒绝。
 - 可选 `providerOptions`：`config`（原生 JSON 配置对象）、`baseInstructions`、`developerInstructions`、`effort`、`collaborationMode`。默认不传任何额外项；不提供 `history` / `path`，以免绕过恢复的 `threadId`。
 - `setReasoningEffort(effort | null)` 只影响下一轮；显式 null 从该 cwd 有效配置或所选模型原生目录默认解析，取不到时明确失败，不硬编码默认级别。
-- `listSkills({ environment, cwd })` 只查询原生目录，不创建 Thread；`sendUserInput` 支持 file / image / skill 原生附件，宿主负责将用户选择解析为可信路径。
+- `listSkills({ environment, cwd })` 只查询原生目录，不创建 Thread；宿主将用户选择解析为可信路径后，通过 `sendUserInput.attachments` 传入。file 转为标明名称 / 本机路径的 JSON 文本引用，不内联内容；image / skill 分别使用原生 `localImage` / `skill`。文件转换依据及本轮真实接收记录见 [Adapter spec §3.13](../../../../specs/agent-adapter/spec.md#313-工程工具接缝)。
 - `setModel` 只影响下一轮。原生 `model:null` 表示保持已有设置，因此 Adapter 的 `setModel(null)` 会读取该 cwd 的 CLI 有效默认模型，下一轮显式提交它；无配置值时使用原生目录的默认项。
 - 可用性分别检查 executable、`--version`、`login status` 和可选模型目录。认证输出只转换为粗粒度状态，不保留原始输出。模型目录只进行握手与 `model/list`，不创建 Thread。
 - 登录兼容旧版 `Logged in` 与新版 `API key configured`；后者只代表本地已配置 API key，不保证远端认证成功。判定边界见 [Adapter spec §3.11](../../../../specs/agent-adapter/spec.md#311-codex-provider)。

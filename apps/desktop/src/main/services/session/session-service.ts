@@ -1,7 +1,9 @@
+import { open } from 'node:fs/promises'
+import { constants } from 'node:fs'
 import { createHash, randomUUID } from 'node:crypto'
 import { toErrorInfo, type InputAttachment, type NativeSkillInfo, type AdapterEvent, type AdapterErrorInfo, type AgentProvider, type AgentSession, type InputRequest, type InputResolution, type InputResponse, type ItemSnapshot, type ProviderEnvironment } from '@ai-studio/agent-adapter'
 import { initialSessionTitle, projectSessionState, sessionStatus, sortSessions } from '@shared/session/presentation'
-import type { ComposerDraft, ConversationPage, CreateSessionRequest, DraftKey, ModelCatalogResult, SkillCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem } from '@shared/session/types'
+import type { ComposerDraft, ContextItem, ConversationPage, CreateSessionRequest, DraftKey, ModelCatalogResult, SkillCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem } from '@shared/session/types'
 import { SESSION_CLIS } from '@shared/session/types'
 import { SESSION_MESSAGE_MAX_LENGTH, TRANSCRIPT_PAGE_SIZE } from '@shared/ipc/session'
 import type { ProjectService } from '../project/project-service'
@@ -65,6 +67,7 @@ export interface SessionServiceOptions {
   canOperate?(projectId: string): boolean
   /** Re-validates Files references at send time. Without it a message with file items is refused, never sent without them. */
   fileReferences?: FileReferenceResolver
+  pastedAttachment?(projectId: string, upload: Extract<ContextItem, { type: 'upload' }>): Promise<InputAttachment>
 }
 
 /** Paths of a message's file context items, first occurrence kept. */
@@ -217,6 +220,7 @@ export class SessionService implements MainSessionPort {
     const files = paths.length ? await this.resolveFileReferences(request.projectId, paths) : undefined
     if (files) this.project(request.projectId)
     await this.resolveSkills(request.projectId, request.cli, request)
+    await this.resolvePastedAttachments(request.projectId, request.cli, request)
     if (!this.enabledClis.has(request.cli)) throw new Error('CLI 未启用，请在 CLI 设置中启用')
     const attach = !!request.originViewId && request.viewContextAttached === true && VIEW_CATALOG.some(view => view.id === request.originViewId)
     const viewContext = attach ? this.options.buildViewContext?.(request.projectId, request.originViewId!) : undefined
@@ -260,13 +264,14 @@ export class SessionService implements MainSessionPort {
       return task.finally(() => this.background.delete(task))
     }
     this.ensureCanSubmit(entry)
-    if (paths.length || message.contextItems?.some(item => item.type === 'skill')) return this.beginWithFiles(entry, message, paths)
+    if (paths.length || message.contextItems?.some(item => item.type === 'skill' || item.type === 'upload')) return this.beginWithFiles(entry, message, paths)
     this.options.store.transaction(() => this.begin(entry, message))
   }
 
   private async beginWithFiles(entry: Entry, message: SessionMessage, paths: readonly ProjectPath[]): Promise<void> {
     const files = paths.length ? await this.resolveFileReferences(entry.summary.projectId, paths) : []
     await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
+    await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
     // A turn can have begun, Stop or a Project close can have started while the files were read.
     this.ensureCanSubmit(entry)
     this.options.store.transaction(() => this.begin(entry, message, undefined, files))
@@ -318,9 +323,10 @@ export class SessionService implements MainSessionPort {
         runtime = live()
       }
       const skills = await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
+      const uploads = await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
       this.ensureProjectOpen(entry.summary.projectId)
       runtime = live()
-      const result = await runtime.sendUserInput(buildUserInput({ skills, files, filePaths: message.contextItems?.filter(item => item.type === 'file').map(item => item.path), images: message.contextItems?.filter(item => item.type === 'image').map(item => item.path), text: message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli] }))
+      const result = await runtime.sendUserInput(buildUserInput({ skills, uploads, files, filePaths: message.contextItems?.filter(item => item.type === 'file').map(item => item.path), images: message.contextItems?.filter(item => item.type === 'image').map(item => item.path), text: message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli] }))
       if (result.turnId !== turn.adapterId) throw new Error('CLI 返回了不同的回合，输入已保留')
       this.options.store.transaction(() => {
         // Native completion/Stop can arrive before the steering acknowledgement.
@@ -386,10 +392,11 @@ export class SessionService implements MainSessionPort {
       if (turn.reasoningEffort !== undefined) await runtime.setReasoningEffort(turn.reasoningEffort)
       if (entry.turn !== turn || entry.summary.stopping) return
       const skills = await this.resolveSkills(entry.summary.projectId, entry.summary.cli, turn.message)
+      const uploads = await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, turn.message)
       if (entry.turn !== turn || entry.summary.stopping) return
       this.ensureProjectOpen(entry.summary.projectId)
       const result = await runtime.sendUserInput(buildUserInput({
-        skills, viewContextText: turn.viewContext?.text, files: turn.files ?? [], filePaths: turn.message.contextItems?.filter(item => item.type === 'file').map(item => item.path), images: turn.message.contextItems?.filter(item => item.type === 'image').map(item => item.path), text: turn.message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli]
+        skills, uploads, viewContextText: turn.viewContext?.text, files: turn.files ?? [], filePaths: turn.message.contextItems?.filter(item => item.type === 'file').map(item => item.path), images: turn.message.contextItems?.filter(item => item.type === 'image').map(item => item.path), text: turn.message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli]
       }))
       // turn.started is synchronous; a whole turn can finish before this Promise resolves.
       if (entry.turn === turn && !turn.adapterId) {
@@ -749,7 +756,7 @@ export class SessionService implements MainSessionPort {
     const turn = this.options.store.lastTurn(sessionId)
     if (turn?.outcome !== 'failed') throw new Error('没有可重试的失败消息')
     const message: SessionMessage = JSON.parse(turn.message)
-    if (fileReferencePaths(message).length || message.contextItems?.some(item => item.type === 'skill')) {
+    if (fileReferencePaths(message).length || message.contextItems?.some(item => item.type === 'skill' || item.type === 'upload')) {
       if (fileReferencePaths(message).length && !this.options.fileReferences) throw new Error('文件引用不可用')
       return this.retryWithFiles(entry, turn.id, message)
     }
@@ -763,6 +770,7 @@ export class SessionService implements MainSessionPort {
     const paths = fileReferencePaths(message)
     const files = paths.length ? await this.resolveFileReferences(entry.summary.projectId, paths) : []
     await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
+    await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
     this.ensureCanSubmit(entry)
     // Only the same failed turn is retried; a send or another retry may have replaced it meanwhile.
     if (this.options.store.lastTurn(entry.summary.id)?.id !== failedTurnId) throw new Error('没有可重试的失败消息')
@@ -1000,6 +1008,32 @@ export class SessionService implements MainSessionPort {
     } catch (error) { return { skills: [], error: toErrorInfo(error).message } }
   }
 
+  /** Only an enabled native catalog identity can read Skill content; renderer paths are never accepted. */
+  async getSkillContent(cli: SessionCli, projectId: string, skillId: string): Promise<import('@shared/session/types').SkillContentResult> {
+    const catalog = await this.nativeSkills(projectId, cli)
+    const skill = catalog.skills.find(item => item.enabled && this.skillId(projectId, item) === skillId)
+    if (!skill) throw new Error('Skill 已不存在或已禁用，请重新选择')
+    const limit = 256 * 1024
+    const handle = await open(skill.path, constants.O_RDONLY | constants.O_NONBLOCK)
+    try {
+      const stat = await handle.stat()
+      if (!stat.isFile()) throw new Error('Skill 内容不可读取')
+      const buffer = Buffer.alloc(Math.min(stat.size, limit) + 1)
+      const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0)
+      this.ensureProjectOpen(projectId)
+      const content = buffer.subarray(0, Math.min(bytesRead, limit))
+      if (content.includes(0)) throw new Error('Skill 内容不是文本')
+      return { name: skill.name, text: content.toString('utf8'), truncated: bytesRead > limit || stat.size > limit }
+    } finally { await handle.close() }
+  }
+
+  private async resolvePastedAttachments(projectId: string, cli: SessionCli, message: SessionMessage): Promise<InputAttachment[]> {
+    const selected = message.contextItems?.filter(item => item.type === 'upload') ?? []
+    if (!selected.length) return []
+    if (FILE_REFERENCE_STRATEGY[cli] !== 'attachments' || !this.options.pastedAttachment) throw new Error('当前 CLI 不支持粘贴附件，消息未发送')
+    return Promise.all(selected.map(item => this.options.pastedAttachment!(projectId, item)))
+  }
+
   private async resolveSkills(projectId: string, cli: SessionCli, message: SessionMessage): Promise<InputAttachment[]> {
     const selected = message.contextItems?.filter(item => item.type === 'skill') ?? []
     if (!selected.length) return []
@@ -1113,6 +1147,15 @@ export class SessionService implements MainSessionPort {
       this.volatileDrafts.set(entry.summary.id, safe)
       this.options.store.deleteDraft(key)
     } else this.options.store.saveDraft(key, entry ? this.scrub(entry, safe) : safe)
+  }
+
+  pastedAttachmentReferences(): import('./pasted-attachments').PastedAttachmentReference[] {
+    const refs = this.options.store.pastedAttachmentReferences()
+    for (const [sessionId, draft] of this.volatileDrafts) {
+      const projectId = this.entries.get(sessionId)?.summary.projectId
+      if (projectId) for (const item of draft.contextItems) if (item.type === 'upload') refs.push({ projectId, id: item.id })
+    }
+    return refs
   }
 
   private clearComposer(entry: Entry): void {

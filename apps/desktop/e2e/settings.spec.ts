@@ -129,7 +129,7 @@ test('FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was,
   await snap('settings-dialog-solid')
   await page.keyboard.press('Escape')
   await expect(page.getByRole('button', { name: 'Architecture', exact: true })).toHaveAttribute('aria-current', 'page')
-  await expect(page.getByRole('textbox', { name: '消息', exact: true })).toHaveValue('草稿保持不变')
+  await expect(page.getByRole('textbox', { name: '消息', exact: true })).toHaveText('草稿保持不变')
   expect(await page.evaluate(() => [getComputedStyle(document.querySelector('.topbar')!).backgroundColor, getComputedStyle(document.querySelector('.project-tab')!).borderRadius]))
     .toEqual(['rgb(239, 238, 235)', '8px 8px 0px 0px'])
   await snap('solid-architecture-1280')

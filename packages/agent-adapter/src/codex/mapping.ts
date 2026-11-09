@@ -19,7 +19,13 @@ export function nativeInput(input: UserInput): NativeUserInput[] {
   for (const attachment of input.attachments ?? []) {
     if (attachment.kind === 'skill') result.push({ type: 'skill', name: attachment.name, path: attachment.path });
     else if (attachment.kind === 'image') result.push({ type: 'localImage', path: attachment.path });
-    else if (attachment.kind === 'file') result.push({ type: 'mention', name: attachment.name ?? basename(attachment.path), path: attachment.path });
+    else if (attachment.kind === 'file') {
+      // Codex `mention` selects apps/plugins; a filesystem path there contributes no model input.
+      // Keep the host's trusted file identity, but tell the model its path explicitly (never embed contents).
+      const reference = JSON.stringify({ name: attachment.name ?? basename(attachment.path), path: attachment.path })
+        .replace(/[\u0085\u2028\u2029]/g, char => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`);
+      result.push({ type: 'text', text: `\n\nAttached file reference (local path; file contents are not embedded):\n${reference}`, text_elements: [] });
+    }
     else throw adapterError('unsupported', 'Unsupported Codex attachment');
   }
   return result;

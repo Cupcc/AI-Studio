@@ -1,3 +1,5 @@
+import { ReferenceInspector } from './ReferenceInspector'
+import { useReferenceInspector } from '../input/reference-preview'
 import { useEffect, useState } from 'react'
 import { TOOL_NAMES, S } from '@shared/project/strings'
 import type { RightSlotProps } from '../project/integration'
@@ -41,6 +43,8 @@ function NativeViewTool(props: RightSlotProps) {
 }
 
 export function Tools(props: RightSlotProps) {
+  const inspectedProject = useReferenceInspector(s => s.current?.projectId)
+  if (props.area === 'files' && inspectedProject === props.project.id) return <ReferenceInspector projectId={props.project.id} active={props.active} />
   if (props.area === 'terminal' || props.area === 'browser') return <NativeViewTool {...props} />
   if (props.area === 'files') return <FilesPanel projectId={props.project.id} canvas={props.canvas} active={props.active} root={props.project.canonicalPath} viewerHost={props.fileViewerHost} />
   if (props.area === 'search') return <SearchPanel projectId={props.project.id} active={props.active} />

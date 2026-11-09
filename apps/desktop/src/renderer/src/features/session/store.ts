@@ -2,12 +2,13 @@ import { create } from 'zustand'
 import type { ComposerDraft, DraftKey, InputResponse, ModelCatalogResult, ProviderSummary, SessionCli, SessionProjectState, SessionSummary, TranscriptItem } from '@shared/session/types'
 import { projectSessionState } from '@shared/session/presentation'
 import { sessionApi } from './api'
+import { editInlineReferences, sameReference } from '../input/inline-references'
 
 export const emptyDraft = (): ComposerDraft => ({ cli: null, model: null, text: '', contextItems: [] })
 export const draftId = (key: DraftKey): string => key.kind === 'new_chat' ? (key.viewId ? `${key.projectId}:view:${key.viewId}:draft` : `${key.projectId}:draft`) : `${key.projectId}:session:${key.sessionId}`
 /** replyWithText carries text only; sending with file tags would clear them without the CLI ever seeing them. */
 export const FILE_REPLY_BLOCKED = '回复 Agent 时不能附带文件、图片或 Skill，请先移除标签或等待本轮结束'
-export const replyBlockedByFiles = (session: SessionSummary | undefined, draft: ComposerDraft | undefined): boolean => session?.activity === 'needs_input' && !!draft?.contextItems.some((item) => item.type === 'file' || item.type === 'image' || item.type === 'skill')
+export const replyBlockedByFiles = (session: SessionSummary | undefined, draft: ComposerDraft | undefined): boolean => session?.activity === 'needs_input' && !!draft?.contextItems.some((item) => item.type === 'file' || item.type === 'image' || item.type === 'skill' || item.type === 'upload')
 export const cliName = (cli: SessionCli | null): string => cli === 'codex' ? 'Codex CLI' : cli === 'claude-code' ? 'Claude Code' : '选择 CLI'
 
 export interface ConversationState {
@@ -237,7 +238,17 @@ export const useSessions = create<SessionStore>()((set, get) => ({
     })
   },
   updateDraft(key, patch) {
-    const id = draftId(key), draft = { ...(get().drafts[id] ?? emptyDraft()), ...patch }
+    const id = draftId(key), previous = get().drafts[id] ?? emptyDraft()
+    const draft = { ...previous, ...patch }
+    if (patch.text !== undefined && patch.text !== previous.text && patch.inlineReferences === undefined) {
+      const { kept, removed } = editInlineReferences(previous.text, patch.text, previous.inlineReferences ?? [])
+      draft.inlineReferences = kept
+      if (patch.contextItems === undefined && removed.length) draft.contextItems = previous.contextItems.filter(item =>
+        !removed.some(ref => sameReference(ref.item, item)) || kept.some(ref => sameReference(ref.item, item)))
+    }
+    if (patch.contextItems !== undefined && patch.inlineReferences === undefined && draft.inlineReferences) {
+      draft.inlineReferences = (draft.inlineReferences ?? []).filter(ref => draft.contextItems.some(item => sameReference(ref.item, item)))
+    }
     set((s) => ({ drafts: { ...s.drafts, [id]: draft } }))
     writeDraft(key, draft)
   },

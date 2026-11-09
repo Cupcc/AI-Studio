@@ -14,6 +14,7 @@ import { InputRequestCard } from './Transcript'
 import { Conversation, ConversationHeader } from './Conversation'
 import { useProjectShell } from '../project/store'
 import { useSettings } from '../settings/store'
+import { selectEditor } from '../input/reference-editor-dom'
 
 const initial = useSessions.getState(), shellInitial = useProjectShell.getState()
 const project = { id: 'p', name: 'Project', canonicalPath: '/tmp/project', localPath: '/tmp/project', displayPath: '/tmp/project', createdAt: '', lastOpenedAt: '' }
@@ -27,6 +28,8 @@ beforeEach(() => {
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
   vi.stubGlobal('CSS', { escape: (value: string) => value })
   api = {
+    getSkillContent: vi.fn(async () => ({ name: 'code-review', text: '# Review changes', truncated: false })),
+    pasteAttachment: vi.fn(async () => ({ type: 'upload' as const, id: 'attachment', name: 'attachment', image: false })),
     setCliEnabled: vi.fn(async () => providers),
     getTurnDiff: vi.fn(async () => { throw new Error('unused') }), list: vi.fn(async () => []), getConversation: vi.fn(async () => ({ session: summary(), items: [], hasMore: false, nextBeforeSequence: null })), create: vi.fn(async () => summary({ activity: 'running', status: 'running' })), send: vi.fn(async () => {}), answer: vi.fn(async () => {}), replyWithText: vi.fn(async () => {}), stop: vi.fn(async () => {}), retry: vi.fn(async () => {}), rename: vi.fn(async ({ title }) => summary({ title, titleSource: 'user' })), setReasoningEffort: vi.fn(async () => {}), setModel: vi.fn(async () => {}), getProviders: vi.fn(async () => providers), getSkills: vi.fn(async () => ({ skills: [], error: null })), getModels: vi.fn(async () => ({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true }, { id: 'm2', displayName: 'Model Two' }], error: null })), getGlobalDefaultCli: vi.fn(async () => 'codex' as const), setGlobalDefaultCli: vi.fn(async () => {}), getDefaultCli: vi.fn(async () => 'codex' as const), setDefaultCli: vi.fn(async () => {}), getDraft: vi.fn(async () => emptyDraft()), saveDraft: vi.fn(async () => {}), updateViewing: vi.fn(async () => {}), opened: vi.fn(async () => {}), getProjectState: vi.fn(async () => ({ projectId: 'p', attention: null, counts: { running: 0, needsInput: 0 } })), stopProject: vi.fn(async () => ({ stopped: [], failed: [] })), projectClosed: vi.fn(async () => {}),
     onSummaryChanged: (listener) => { summaryEvent = listener; return () => {} }, onTranscriptChanged: (listener) => { transcriptEvent = listener; return () => {} }, onProvidersChanged: () => () => {}
@@ -374,7 +377,7 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     await waitFor(() => expect(api.send).toHaveBeenCalledWith({ sessionId: 's', text: 'Later', contextItems: [] })); expect(screen.getByRole('button', { name: 'Stop' })).toBeTruthy()
     await waitFor(() => expect(useSessions.getState().pending[draftId(sessionKey)]).toBe(false))
     act(() => useSessions.setState({ summaries: { s: summary({ activity: 'needs_input', status: 'needs_input' }) } }))
-    fireEvent.change(input, { target: { value: 'Later' } })
+    input.textContent = 'Later'; fireEvent.input(input)
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
     await waitFor(() => expect(api.replyWithText).toHaveBeenCalledWith({ sessionId: 's', text: 'Later' }))
   })
@@ -422,9 +425,23 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
   it('adds native Skill suggestions to only the visible draft without sending', async () => {
     vi.mocked(api.getSkills).mockResolvedValue({ skills: [{ id: 'opaque-skill', name: 'code-review', description: 'Review changes' }], error: null })
     const input = await mount()
-    fireEvent.change(input, { target: { value: '$co', selectionStart: 3 } })
+    input.textContent = '$co'; selectEditor(input, { text: '$co', references: [] }, 3, 3); fireEvent.input(input)
     fireEvent.click(await screen.findByRole('option', { name: /code-review/ }))
-    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ text: '', contextItems: [{ type: 'skill', id: 'opaque-skill', name: 'code-review' }] })
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ text: '$code-review', contextItems: [{ type: 'skill', id: 'opaque-skill', name: 'code-review' }], inlineReferences: [{ start: 0, end: 12, item: { type: 'skill', id: 'opaque-skill', name: 'code-review' } }] })
+    expect(api.create).not.toHaveBeenCalled()
+  })
+  it.each([{ key: 'Backspace', caret: 12 }, { key: 'Delete', caret: 7 }])('removes a whole inline file with $key and retains the following Skill identity', async ({ key: pressed, caret }) => {
+    const file = { type: 'file' as const, path: 'a.ts' }, skill = { type: 'skill' as const, id: 'opaque', name: 'review' }
+    const input = await mount({ text: 'Review @a.ts $review', contextItems: [file, skill], inlineReferences: [
+      { start: 7, end: 12, item: file }, { start: 13, end: 20, item: skill }
+    ] })
+    selectEditor(input, { text: 'Review @a.ts $review', references: useSessions.getState().drafts[draftId(key)]!.inlineReferences! }, caret, caret)
+    fireEvent.keyDown(input, { key: pressed })
+    expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({
+      text: 'Review  $review', contextItems: [skill], inlineReferences: [{ start: 8, end: 15, item: skill }]
+    })
+    expect(screen.queryByRole('button', { name: '文件引用 a.ts' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Skill 引用 review' })).toBeTruthy()
     expect(api.create).not.toHaveBeenCalled()
   })
   it('keeps the @ token and existing attachments when the file limit is reached', async () => {
@@ -434,7 +451,7 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     } })
     const tags = Array.from({ length: 20 }, (_, i) => ({ type: 'file' as const, path: `existing-${i}.ts` }))
     const input = await mount({ contextItems: tags })
-    fireEvent.change(input, { target: { value: '@extra', selectionStart: 6 } })
+    input.textContent = '@extra'; selectEditor(input, { text: '@extra', references: [] }, 6, 6); fireEvent.input(input)
     fireEvent.click(await screen.findByRole('option', { name: /extra.ts/ }))
     await screen.findByText('最多添加 20 个文件或图片，请先移除标签。')
     expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ text: '@extra', contextItems: tags })

@@ -68,3 +68,27 @@
 @media (prefers-reduced-motion: reduce) {
   .composer__effort-transition, .composer__effort-transition i { animation: none; display: none; }
 }
+
+/* References are real inline boxes: padding and gaps participate in line wrapping and cursor placement. */
+.composer__editable { position: relative; min-width: 0; min-height: 30px; max-height: 240px; padding: 2px 0; outline: none; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: var(--font-size-body); line-height: 30px; caret-color: var(--color-text); }
+.composer__editable:focus-visible { outline: none; }
+.composer__editable[data-empty]::before { position: absolute; top: 2px; left: 0; content: attr(data-placeholder); color: var(--color-placeholder); pointer-events: none; }
+.composer__editable[aria-disabled="true"] { opacity: var(--disabled-opacity); }
+.composer__reference { display: inline-flex; align-items: center; gap: 6px; max-width: calc(100% - 8px); padding: 2px 8px; margin: 1px 3px; vertical-align: baseline; border: 1px solid color-mix(in srgb, var(--color-link) 15%, transparent); border-radius: 6px; font: inherit; font-size: var(--font-size-sm); line-height: 20px; white-space: nowrap; color: var(--color-link); background: color-mix(in srgb, var(--color-link) 7%, var(--color-input)); cursor: pointer; user-select: all; }
+.composer__reference:hover, .composer__reference:focus-visible { background: color-mix(in srgb, var(--color-link) 12%, var(--color-input)); border-color: color-mix(in srgb, var(--color-link) 30%, transparent); }
+.composer__reference-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.composer__reference--skill { color: var(--color-text-2); background: color-mix(in srgb, var(--color-text) 4%, var(--color-input)); border-color: var(--color-border-soft); }
+.composer__reference-marker { flex: none; font-weight: 600; opacity: .7; }
+.composer__reference-preview { position: fixed; z-index: 90; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.composer__reference-preview header { display: flex; align-items: center; gap: 8px; padding: 11px 13px; border-bottom: 1px solid var(--color-border-soft); }
+.composer__reference-preview strong { font-size: var(--font-size-sm); font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.composer__reference-preview pre { margin: 0; padding: 11px 13px; font: var(--font-size-xs)/1.65 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; min-height: 0; color: var(--color-text-2); }
+.composer__reference-preview p { padding: 12px; margin: 0; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.composer__reference-preview footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--color-border-soft); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.composer__reference-preview footer button { display: flex; align-items: center; gap: 4px; }
+.reference-inspector { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+.reference-inspector > header { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 12px; border-bottom: 1px solid var(--color-border-soft); }
+.reference-inspector > header strong { flex: 1; min-width: 0; font-size: var(--font-size-sm); font-weight: 500; overflow-wrap: anywhere; }
+.reference-inspector > header button { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--radius-sm); }
+.reference-inspector > p { margin: 12px; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.reference-inspector > pre { overflow: auto; padding: 12px; white-space: pre-wrap; }

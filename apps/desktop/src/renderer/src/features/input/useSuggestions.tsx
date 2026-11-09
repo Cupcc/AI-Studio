@@ -1,16 +1,19 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react'
-import type { DraftKey, SkillCatalogResult } from '@shared/session/types'
+import type { DraftKey, InlineReference, SkillCatalogResult } from '@shared/session/types'
 import { FILES_LIMITS, isReferenceablePath } from '@shared/tools/files'
 import { Icon } from '../../app/Icon'
 import { filesApi } from '../tools/files/api'
 import { draftId, useSessions } from '../session/store'
 import { displayedDraftKey } from './add-file-reference'
 import { useProjectShell } from '../project/store'
+import { editInlineReferences, sameReference } from './inline-references'
+import { SESSION_MESSAGE_MAX_LENGTH } from '@shared/ipc/session'
+import type { ComposerInput } from './reference-editor-dom'
 
 type Candidate = { id: string; name: string; detail?: string; kind: 'file' | 'directory' | 'skill' }
-export function useSuggestions({ draftKey, text, input, active, cli, skills, loadSkills, report }: {
-  draftKey: DraftKey; text: string; input: RefObject<HTMLTextAreaElement | null>; active: boolean; cli: string | null
-  skills: SkillCatalogResult | null; loadSkills: () => Promise<void>; report: (message: string | null) => void
+export function useSuggestions({ draftKey, text, input, active, cli, skills, loadSkills, report, inlineReferences }: {
+  draftKey: DraftKey; text: string; input: RefObject<ComposerInput | null>; active: boolean; cli: string | null
+  skills: SkillCatalogResult | null; loadSkills: () => Promise<void>; report: (message: string | null) => void; inlineReferences: readonly InlineReference[]
 }) {
   const [caret, setCaret] = useState(0), [dismissed, setDismissed] = useState<string | null>(null), [index, setIndex] = useState(0)
   const [files, setFiles] = useState<Candidate[]>([]), [loading, setLoading] = useState(false), [error, setError] = useState<string | null>(null)
@@ -21,7 +24,7 @@ export function useSuggestions({ draftKey, text, input, active, cli, skills, loa
   const inDirectory = anchor && text.slice(0, anchor.start) === anchor.before && prefix[anchor.start] === '@' && caret > anchor.start && !prefix.slice(anchor.start).includes('\n')
   const match = prefix.match(/(?:^|\s)([@/$])([^\s]*)$/)
   const kind = inDirectory ? '@' : match?.[1], query = inDirectory ? prefix.slice(anchor.start + 1) : match?.[2] ?? '', token = `${id}:${caret}:${text}`
-  const open = active && !!kind && dismissed !== token
+  const open = active && !!kind && dismissed !== token && !inlineReferences.some(ref => caret > ref.start && caret <= ref.end)
   useLayoutEffect(() => {
     if (!open) return
     const measure = () => setRoom(Math.max(40, Math.min(300, (input.current?.closest('.composer__box')?.getBoundingClientRect().top ?? 400) - 100)))
@@ -78,14 +81,19 @@ export function useSuggestions({ draftKey, text, input, active, cli, skills, loa
     }
     const current = useSessions.getState().drafts[id], canvas = useProjectShell.getState().uiStates[draftKey.projectId]?.mainCanvas
     if (ticket !== request.current || !current || current.text !== text || !canvas || draftId(displayedDraftKey(draftKey.projectId, canvas)) !== id) return
-    if (item.kind === 'file' && !current.contextItems.some(tag => tag.type === 'file' && tag.path === item.id) && current.contextItems.filter(tag => tag.type === 'file' || tag.type === 'image').length >= FILES_LIMITS.referencesPerMessage) { report(`最多添加 ${FILES_LIMITS.referencesPerMessage} 个文件或图片，请先移除标签。`); return }
+    if (item.kind === 'file' && !current.contextItems.some(tag => tag.type === 'file' && tag.path === item.id) && current.contextItems.filter(tag => tag.type === 'file' || tag.type === 'image' || tag.type === 'upload').length >= FILES_LIMITS.referencesPerMessage) { report(`最多添加 ${FILES_LIMITS.referencesPerMessage} 个文件或图片，请先移除标签。`); return }
     const context = item.kind === 'file' ? { type: 'file' as const, path: item.id } : { type: 'skill' as const, id: item.id, name: item.name }
-    const duplicate = current.contextItems.some(tag => context.type === 'file' ? tag.type === 'file' && tag.path === context.path : tag.type === 'skill' && tag.id === context.id)
-    useSessions.getState().updateDraft(draftKey, { text: before + after, contextItems: duplicate ? current.contextItems : [...current.contextItems, context] })
-    browsing.current = null; setDismissed(token); setCaret(before.length); report(null)
-    requestAnimationFrame(() => { input.current?.focus(); input.current?.setSelectionRange(before.length, before.length) })
+    const duplicate = current.contextItems.some(tag => sameReference(tag, context))
+    const label = context.type === 'file' ? `@${context.path}` : `$${context.name}`
+    const next = `${before}${label}${after}`, nextCaret = before.length + label.length
+    if (next.length > SESSION_MESSAGE_MAX_LENGTH) { report('引用超过消息长度限制。'); return }
+    const { kept, removed } = editInlineReferences(text, next, current.inlineReferences ?? [])
+    const items = current.contextItems.filter(tag => !removed.some(ref => sameReference(ref.item, tag)) || kept.some(ref => sameReference(ref.item, tag)) || sameReference(tag, context))
+    useSessions.getState().updateDraft(draftKey, { text: next, contextItems: duplicate ? items : [...items, context], inlineReferences: [...kept, { start: before.length, end: nextCaret, item: context }].sort((a, b) => a.start - b.start) })
+    browsing.current = null; setDismissed(`${id}:${nextCaret}:${next}`); setCaret(nextCaret); report(null)
+    requestAnimationFrame(() => { input.current?.focus(); input.current?.setSelectionRange(nextCaret, nextCaret) })
   }
-  function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>): boolean {
+  function onKeyDown(event: KeyboardEvent<HTMLElement>): boolean {
     if (!open || event.nativeEvent.isComposing || event.keyCode === 229) return false
     if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); browsing.current = null; setDismissed(token); return true }
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {

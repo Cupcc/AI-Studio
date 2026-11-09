@@ -8,6 +8,7 @@ import type {
   InputResponse,
   ModelCatalogResult,
   SkillCatalogResult,
+  SkillContentResult,
   ProviderSummary,
   SessionCli,
   SessionMessage,
@@ -22,6 +23,7 @@ import type {
 export const SESSION_TITLE_MAX_LENGTH = 100
 export const SESSION_MESSAGE_MAX_LENGTH = 200_000
 export const TRANSCRIPT_PAGE_SIZE = 100
+export const PASTED_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024
 
 export const sessionContract = defineContract('session', {
   invoke: {
@@ -40,6 +42,7 @@ export const sessionContract = defineContract('session', {
     setModel: invoke<{ sessionId: string; model: string | null }, void>('session:set-model'),
     getProviders: invoke<void | { force: boolean }, ProviderSummary[]>('session:get-providers'),
     setCliEnabled: invoke<{ cli: SessionCli; enabled: boolean }, ProviderSummary[]>('session:set-cli-enabled'),
+    getSkillContent: invoke<{ cli: SessionCli; projectId: string; skillId: string }, SkillContentResult>('session:get-skill-content'),
     getSkills: invoke<{ cli: SessionCli; projectId: string }, SkillCatalogResult>('session:get-skills'),
     getModels: invoke<{ cli: SessionCli; projectId: string }, ModelCatalogResult>('session:get-models'),
     getGlobalDefaultCli: invoke<void, SessionCli | null>('session:get-global-default-cli'),
@@ -48,6 +51,7 @@ export const sessionContract = defineContract('session', {
     setDefaultCli: invoke<{ projectId: string; cli: SessionCli }, void>('session:set-default-cli'),
     getDraft: invoke<DraftKey, ComposerDraft>('session:get-draft'),
     saveDraft: invoke<{ key: DraftKey; draft: ComposerDraft }, void>('session:save-draft'),
+    pasteAttachment: invoke<{ projectId: string; name: string; mime: string; bytes: Uint8Array }, Extract<import('../session/types').ContextItem, { type: 'upload' }>>('session:paste-attachment'),
     updateViewing: invoke<SessionViewing, void>('session:update-viewing'),
     opened: invoke<{ projectId: string; sessionId: string }, void>('session:opened'),
     getProjectState: invoke<{ projectId: string }, SessionProjectState>('session:get-project-state'),

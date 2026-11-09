@@ -201,7 +201,7 @@
 
 FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026-10-13 确认）。文件引用与轮次补丁已接入；逻辑契约以 [Tools §4.1、§4.2](../tools/spec.md#4-状态与接口) 为准，2026-10-18 实施及真实能力边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)。
 
-- 文件输入：Codex file → native mention；桌面 Session 经真实接收验证后采用此输入，Claude 保留文本路径清单及结构化附件 `unsupported`。转换由 `main/services/session/file-reference.ts` 负责；模拟普通发送、恢复 / 重试和 Codex 运行中追加保留。真实普通发送、Adapter 同轮 steer 及应用 UI 同轮 steer 引用已验证（应用 UI 证据见工程工具 W24）；Claude 真实接收及运行中追加 / 排队未纳入本次通过。
+- 文件输入：桌面 `main/services/session/file-reference.ts` 将校验后的文件交给 shared `attachments` 契约；Codex Adapter 将 `kind=file` 转为标有本机路径引用含义的 JSON name / path 文本，不内联内容，不改变 CLI 权限。image / skill 仍分别使用 `localImage` / `skill`。Claude 保留桌面文本路径清单及结构化附件 `unsupported`。2026-11-01 缓存唯一来源的应用验证发现旧 file → native mention 不能提供本地文件输入，故修正 Adapter 序列化；[锁定 0.166.0 源码](https://github.com/openai/codex/blob/rust-v0.166.0/codex-rs/protocol/src/models.rs#L2044-L2101)中 Mention 不直接生成模型内容，`mention` 的目标用于 app / connector / plugin。此前 0.163.0 证据保留历史基线，不能外推为缓存附件接收通过；本轮接收与 start / steer 验证由[输入任务](../../tasks/archive/T20261031-inline-attachments/task.md)负责。Claude 真实接收及运行中追加 / 排队未纳入本次通过。
 - 轮次数据：Codex 已接入 `turn/diff/updated` 聚合替换及完成 `fileChange` 的 patch、类型、路径和完成状态，以 `turn.diff.updated` 转交 Session；新轮绑定先输出 unknown 身份快照。来源、限额及 Git / 非 Git / Shell 的实际覆盖由 Tools §5.3 负责；不假设 Claude 具备同等数据。
 - 事件接收核对 Runtime 代次、Thread / Turn 归属及修订；Adapter 报告 unknown / empty / unavailable / failed 的依据，应用 Session 负责持久化与 App Turn 关联，Adapter 不读当前工作区伪造历史。
 - 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。Codex 真实调用按 CLI 实际结果验证，额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；Claude Code 的 V1 真实验收按 DEC-16 暂缓且不随当前 V1 发布（DEC-19），Adapter 层真实验证已于 2026-10-26 重新开始（第 3.12 节第 9 条）；阶段 1 的模拟文件引用链路不改变真实 CLI 结果。

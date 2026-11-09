@@ -1,0 +1,9 @@
+
+ RUN  v5.0.3 /Users/Chris/Projects/AI Stduio.worktrees/composer-inline/packages/agent-adapter
+
+
+ Test Files  1 passed (1)
+      Tests  66 passed (66)
+   Start at  11:52:07
+   Duration  2.18s (tests 89%, transform 10%, import 2%)
+
