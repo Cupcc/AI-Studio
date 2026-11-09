@@ -25,7 +25,7 @@ created: 2026-10-31
 
 ## 当前状态
 
-在 `feat/composer-inline` 独立 worktree 实现与验证；2026-11-05 按用户「合并到main中，我要pnpm dev测试」要求，已将完整实现与主 checkout 的 Files 查看列整合到 main 工作区，根目录 `pnpm dev` 将使用此版本。原 worktree 保留作为未提交备份；正式提交与 Git 合并尚受环境门禁阻塞，见下节。缓存生命周期已实现并通过独立技术评审。根据用户后续纠正补齐行内交互标签、真实内容预览和侧栏打开；又根据“边框贴文字、拥挤”的反馈改为实际参与排版的原子标签，使用 DOM 编辑区域保留真实 padding / margin，替代不能容纳留白的 textarea 镜像。未增加依赖。
+在 `feat/composer-inline` 独立 worktree 实现与验证；2026-11-05 按用户「合并到main中，我要pnpm dev测试」要求，已将完整实现与主 checkout 的 Files 查看列整合到 main 工作区，根目录 `pnpm dev` 将使用此版本。11-09 已通过正常门禁形成附件提交 `075f524`，含独有的 7 份 Electron E2E 适配；类型检查、Adapter 287 项与桌面 371 项通过。当前合入 / 推送 / 清理见[11-09 集成记录](../../T20261109-main-integration/task.md)，下节环境阻塞为历史记录。缓存生命周期已实现并通过独立技术评审。根据用户后续纠正补齐行内交互标签、真实内容预览和侧栏打开；又根据“边框贴文字、拥挤”的反馈改为实际参与排版的原子标签，使用 DOM 编辑区域保留真实 padding / margin，替代不能容纳留白的 textarea 镜像。未增加依赖。
 
 2026-11-01 验收 App 经 `.runtime/attachment-review/Electron.app` 的开发签名运行器加载本 worktree 构建，真实 Provider 为 Codex 0.166.0；当时已启动供人工验收。此运行器用于本地开发，不作为打包分发验证；当前手动测试入口改为主 checkout 的 `pnpm dev`，勿同时启动两份共用 userData 的开发 App。最终独立结论及人工状态见 [acceptance.md](acceptance.md)，不能沿用旧输入区的人工接受。
 

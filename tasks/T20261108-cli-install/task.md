@@ -42,3 +42,5 @@ created: 2026-11-08
 实现已完成并提交于 `a50ec2e`（独立 worktree `../AI Stduio.worktrees/cli-install`）；任务进入 verifying。安装服务、双 CLI Provider、独立连接配置和配置修订快照已接入。用户随后要求先核实配置机制并参考 CC Switch；研究结果与实现边界见 [机制研究](research.md)。
 
 本轮收尾复核：已核对 settings spec 的 CLI 管理与连接配置、agent-adapter spec 的 ProviderEnvironment、DEC-19 历史边界与 DEC-27 新确认、路线图下一步 / 模块状态 / 验收进度；已更新负责文档。保留项：未执行 Electron agent-browser 交互验收、真实网关请求、打包应用验证与人工产品验收；一键安装真实网络流程仅完成实现与进程单测，未在本轮重复执行。
+
+2026-11-09：按用户“全部整合，并清理所有 worktree/本地任务分支”授权，安装与连接实现整合为 `ce94716`；保留附件缓存与设置文案规则。类型检查、Adapter 287 项、桌面 305 项通过。DEC 编号碰撞已改为 DEC-27，Adapter 连接节改为 §3.14。当前 Git 交付进度见 [集成记录](../T20261109-main-integration/task.md)，本任务保持 verifying，未完成的功能验收不因提交而关闭。
