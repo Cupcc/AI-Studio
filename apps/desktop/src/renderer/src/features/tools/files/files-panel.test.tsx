@@ -360,38 +360,36 @@ describe('the viewer', () => {
     expect(screen.getByLabelText('src/a.ts').textContent).toBe('REPORT')
   })
 
-  it('can be resized with the keyboard within its limits', async () => {
-    render(panel())
-    await screen.findByRole('treeitem', { name: 'README.md' })
-    expect(screen.queryByRole('separator')).toBeNull()
-    await open('README.md')
-    const separator = screen.getByRole('separator')
-    expect(separator.getAttribute('aria-valuenow')).toBe('45')
-    fireEvent.keyDown(separator, { key: 'ArrowDown' })
-    expect(separator.getAttribute('aria-valuenow')).toBe('50')
-    fireEvent.keyDown(separator, { key: 'ArrowUp' }); fireEvent.keyDown(separator, { key: 'ArrowUp' })
-    expect(separator.getAttribute('aria-valuenow')).toBe('40')
-    fireEvent.keyDown(separator, { key: 'End' })
-    expect(separator.getAttribute('aria-valuenow')).toBe('80')
-    fireEvent.keyDown(separator, { key: 'ArrowDown' })
-    expect(separator.getAttribute('aria-valuenow')).toBe('80')
-    fireEvent.keyDown(separator, { key: 'Home' })
-    expect(separator.getAttribute('aria-valuenow')).toBe('20')
+  it('renders the viewer in the supplied column and removes it when closed', async () => {
+    const host = document.createElement('div')
+    document.body.append(host)
+    try {
+      const view = render(panel(true, { viewerHost: host }))
+      await screen.findByRole('treeitem', { name: 'README.md' })
+      await open('README.md')
+      expect(within(host).getByTestId('code').textContent).toBe('hello readme')
+      expect(view.container.querySelector('.files-viewer-pane')).toBeNull()
+      expect(within(view.container).getByRole('tree', { name: '项目文件' })).toBeTruthy()
+      fireEvent.click(within(host).getByRole('button', { name: '关闭查看器' }))
+      expect(host.childElementCount).toBe(0)
+    } finally { host.remove() }
   })
 
-  it('resizes by dragging the splitter', async () => {
-    render(panel())
-    await screen.findByRole('treeitem', { name: 'README.md' })
-    await open('README.md')
-    const body = document.querySelector('.files-body') as HTMLElement
-    body.getBoundingClientRect = () => ({ top: 100, height: 400, bottom: 500, left: 0, right: 300, width: 300, x: 0, y: 100, toJSON() {} })
-    const separator = screen.getByRole('separator')
-    fireEvent.pointerDown(separator, { pointerId: 1 })
-    fireEvent.pointerMove(separator, { pointerId: 1, clientY: 300 })
-    expect(separator.getAttribute('aria-valuenow')).toBe('50')
-    fireEvent.pointerUp(separator, { pointerId: 1 })
-    fireEvent.pointerMove(separator, { pointerId: 1, clientY: 140 })
-    expect(separator.getAttribute('aria-valuenow')).toBe('50')
+  it('waits for a column host and removes the portal on tool unmount', async () => {
+    const host = document.createElement('div')
+    document.body.append(host)
+    try {
+      const view = render(panel(true, { viewerHost: null }))
+      fireEvent.click(await screen.findByRole('treeitem', { name: 'README.md' }))
+      await waitFor(() => expect(store().projects[id]?.viewer?.phase).toBe('ready'))
+      expect(screen.queryByTestId('code')).toBeNull()
+      view.rerender(panel(true, { viewerHost: host }))
+      expect(await within(host).findByTestId('code')).toBeTruthy()
+      view.unmount()
+      expect(host.childElementCount).toBe(0)
+      render(panel(true, { viewerHost: host }))
+      expect(await within(host).findByTestId('code')).toBeTruthy()
+    } finally { host.remove() }
   })
 })
 

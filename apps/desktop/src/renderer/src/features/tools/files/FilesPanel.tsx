@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
+import { useEffect, useMemo, useState, type MouseEvent } from 'react'
+import { createPortal } from 'react-dom'
 import type { MainCanvas } from '@shared/project/types'
 import { projectPathName, projectPathParent, type ProjectPath } from '@shared/tools/files'
 import { Icon } from '../../../app/Icon'
@@ -12,7 +13,7 @@ import {
 } from './file-actions'
 import { FileTree, type TreeKeyAction } from './FileTree'
 import { FileViewer } from './FileViewer'
-import { entryOf, SPLIT_MAX, SPLIT_MIN, useFiles } from './files-store'
+import { entryOf, useFiles } from './files-store'
 import { flattenTree, type EntryRow } from './files-tree'
 import { useGitDecorations } from './git-decorations'
 import { displayName, FILES_MENU, FILES_TEXT } from './strings'
@@ -21,7 +22,6 @@ import './files.css'
 
 const NO_DIRS = new Map(), NO_EXPANDED = new Set<string>(), NO_MARKS: string[] = []
 const FOCUS_REFRESH_MS = 2000
-const SPLIT_STEP = 0.05
 
 export interface FilesPanelProps {
   projectId: string
@@ -33,9 +33,10 @@ export interface FilesPanelProps {
   root?: string
   /** Accepted for parity with the other panels. The Files tool has no native view, so nothing is covered. */
   overlayBlocked?: boolean
+  viewerHost?: HTMLElement | null
 }
 
-export function FilesPanel({ projectId, canvas, active, root = '' }: FilesPanelProps) {
+export function FilesPanel({ projectId, canvas, active, root = '', viewerHost }: FilesPanelProps) {
   const state = useFiles(s => s.projects[projectId])
   const clipboard = useFilesClipboard()
   const decorations = useGitDecorations(projectId, active)
@@ -43,8 +44,6 @@ export function FilesPanel({ projectId, canvas, active, root = '' }: FilesPanelP
   const [notice, setNotice] = useState<ActionMessage | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<ProjectPath[] | null>(null)
   const [adding, setAdding] = useState(false)
-  const body = useRef<HTMLDivElement>(null)
-  const dragging = useRef(false)
 
   useEffect(() => {
     if (!active) return
@@ -67,7 +66,6 @@ export function FilesPanel({ projectId, canvas, active, root = '' }: FilesPanelP
 
   const rows = useMemo(() => flattenTree(state?.dirs ?? NO_DIRS, state?.expanded ?? NO_EXPANDED), [state?.dirs, state?.expanded])
   const viewer = state?.viewer ?? null
-  const split = state?.split ?? 0.45
   const selected = state?.selected ?? null
   const marked = state?.marked ?? NO_MARKS
   // Adding is offered for the selected regular file only (a symlink or special file has nothing to reference).
@@ -177,23 +175,25 @@ export function FilesPanel({ projectId, canvas, active, root = '' }: FilesPanelP
     if (paths?.length) say(await trashEntries(projectId, paths))
   }
 
-  const resize = (ratio: number) => files.setSplit(projectId, ratio)
-  function onSplitKey(event: KeyboardEvent<HTMLDivElement>) {
-    const moves: Record<string, number> = { ArrowUp: split - SPLIT_STEP, ArrowDown: split + SPLIT_STEP, Home: SPLIT_MIN, End: SPLIT_MAX }
-    const next = moves[event.key]
-    if (next === undefined) return
-    event.preventDefault(); resize(next)
-  }
-  function onSplitMove(event: PointerEvent<HTMLDivElement>) {
-    const rect = body.current?.getBoundingClientRect()
-    if (dragging.current && rect && rect.height > 0) resize((event.clientY - rect.top) / rect.height)
-  }
   /** New entries go into the selected folder, or next to the selected file, as VS Code does. */
   const newTarget = (): ProjectPath => {
     const last = marked.at(-1)
     if (!last || !state) return ''
     return entryOf(state, last)?.kind === 'directory' ? last : projectPathParent(last)
   }
+
+  const viewerContent = viewer && <div className="files-tool files-viewer-pane">
+    <FileViewer
+      projectId={projectId} viewer={viewer} canAdd={canAdd} active={active} tabs={state?.tabs ?? []} reveal={state?.reveal ?? null}
+      message={message?.path === viewer.path ? message : null} adding={adding}
+      onAdd={() => void add()} onAddImage={() => void add(selected, 'image')} onClose={() => { files.closeViewer(projectId); setMessage(null) }}
+      onRetry={() => void files.refresh(projectId)}
+      onSelectTab={(path, pinned) => void files.select(projectId, path, { pin: pinned })}
+      onCloseTab={path => files.closeTab(projectId, path)}
+      onPinTab={path => files.pinTab(projectId, path)}
+      onNotice={say}
+    />
+  </div>
 
   return <div className="files-tool">
     <div className="files-header">
@@ -212,8 +212,8 @@ export function FilesPanel({ projectId, canvas, active, root = '' }: FilesPanelP
         <button className="danger-button button--small" autoFocus onClick={() => void confirmTrash()}>{FILES_TEXT.deleteConfirm}</button>
       </div>
     </div>}
-    <div className="files-body" ref={body}>
-      <div className="files-tree-pane" style={viewer ? { flex: `${split} 1 0px` } : undefined}
+    <div className="files-body">
+      <div className="files-tree-pane"
         onContextMenu={event => { if (event.target === event.currentTarget) { event.preventDefault(); void onContextMenu(null, event) } }}>
         <FileTree rows={rows} selected={selected} marked={marked} decorations={decorations} edit={state?.edit ?? null} projectId={projectId}
           cut={clipboard.cut && clipboard.projectId === projectId ? clipboard.paths : []}
@@ -226,28 +226,7 @@ export function FilesPanel({ projectId, canvas, active, root = '' }: FilesPanelP
           onEditCommit={name => void commitEdit(name)}
           onEditCancel={() => files.cancelEdit(projectId)} />
       </div>
-      {viewer && <>
-        <div
-          className="files-splitter" role="separator" aria-orientation="horizontal" aria-label={FILES_TEXT.splitter} tabIndex={0}
-          aria-valuemin={Math.round(SPLIT_MIN * 100)} aria-valuemax={Math.round(SPLIT_MAX * 100)} aria-valuenow={Math.round(split * 100)}
-          onKeyDown={onSplitKey}
-          onPointerDown={event => { dragging.current = true; event.currentTarget.setPointerCapture?.(event.pointerId) }}
-          onPointerMove={onSplitMove}
-          onPointerUp={() => { dragging.current = false }} onPointerCancel={() => { dragging.current = false }}
-        />
-        <div className="files-viewer-pane" style={{ flex: `${1 - split} 1 0px` }}>
-          <FileViewer
-            projectId={projectId} viewer={viewer} canAdd={canAdd} active={active} tabs={state?.tabs ?? []} reveal={state?.reveal ?? null}
-            message={message?.path === viewer.path ? message : null} adding={adding}
-            onAdd={() => void add()} onAddImage={() => void add(selected, 'image')} onClose={() => { files.closeViewer(projectId); setMessage(null) }}
-            onRetry={() => void files.refresh(projectId)}
-            onSelectTab={(path, pinned) => void files.select(projectId, path, { pin: pinned })}
-            onCloseTab={path => files.closeTab(projectId, path)}
-            onPinTab={path => files.pinTab(projectId, path)}
-            onNotice={say}
-          />
-        </div>
-      </>}
+      {viewerContent && (viewerHost === undefined ? viewerContent : viewerHost ? createPortal(viewerContent, viewerHost) : null)}
     </div>
   </div>
 }

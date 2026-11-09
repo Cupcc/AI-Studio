@@ -62,6 +62,11 @@
 /* Right area: Session Mode sidebar and Project View Mode area (white with a tool, preview colour with Preview) */
 .right-pane { position: relative; flex: 0 0 var(--pane-width); width: var(--pane-width); min-width: var(--sidebar-min-width); background: var(--color-pane); border-left: 1px solid var(--color-border); }
 .canvas-mode--view .right-pane { flex: 1; width: auto; min-width: var(--view-right-min-width); }
+.file-viewer-column { display: none; }
+.file-viewer-column:has(.files-viewer-pane) { display: flex; flex: 1 1 0; min-width: 0; min-height: 0; overflow: hidden; background: var(--color-pane); border-left: 1px solid var(--color-border); }
+.canvas-mode:has(.files-viewer-pane) .conversation-pane { flex: 1 1 0; width: auto; min-width: 0; }
+.canvas-mode--view:has(.files-viewer-pane) .conversation-pane { flex-basis: var(--pane-width); }
+.canvas-mode:has(.files-viewer-pane) .right-pane { flex: 0 1 var(--pane-width); min-width: 200px; }
 .right-area { display: flex; flex-direction: column; height: 100%; background: var(--color-pane); }
 .right-area--preview { background: var(--color-surface-preview); }
 .right-area__header { gap: var(--space-0); padding: 0 var(--space-2) 0 var(--space-2-5); }

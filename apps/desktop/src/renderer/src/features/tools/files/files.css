@@ -6,7 +6,7 @@
 .files-watch.is-degraded { border-color: var(--color-needs-input-border); background: var(--color-needs-input-bg); color: var(--color-text-2); }
 .files-body { display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .files-tree-pane { flex: 1 1 auto; min-height: var(--files-tree-min); overflow: auto; }
-.files-viewer-pane { display: flex; flex-direction: column; min-height: var(--files-viewer-min); }
+.files-viewer-pane { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; }
 
 .files-tree { padding: var(--space-1) 0; }
 .files-row { display: flex; align-items: center; gap: var(--space-1-5); min-height: var(--files-row-height); padding-inline-end: var(--space-2); font-size: var(--font-size-md); cursor: default; user-select: none; }
@@ -21,11 +21,6 @@
 .files-row__badge { flex: none; padding: 0 var(--space-1-5); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xs); color: var(--color-text-muted); font-size: var(--font-size-xs); font-style: normal; }
 .files-note { display: flex; align-items: center; gap: var(--space-2); min-height: var(--files-row-height); padding-inline-end: var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
 .files-note--error { color: var(--color-text-2); }
-
-.files-splitter { position: relative; flex: none; height: var(--resize-hit-width); margin: -1px 0; cursor: row-resize; touch-action: none; }
-.files-splitter::after { content: ""; position: absolute; inset: calc(var(--resize-hit-width) / 2 - 1px) 0 auto; height: 1px; background: var(--color-border-strong); }
-.files-splitter:hover::after, .files-splitter:focus-visible::after { background: var(--color-border-focus); }
-.files-splitter:focus-visible { outline-offset: -2px; }
 
 .files-viewer { display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .files-viewer__header { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); padding: var(--space-1-5) var(--space-2) var(--space-1-5) var(--space-3); }

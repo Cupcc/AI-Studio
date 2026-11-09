@@ -18,7 +18,7 @@ export interface RendererSessionPort {
 }
 
 export interface ShellSlotProps { project: ProjectRecord; canvas: MainCanvas; active: boolean }
-export interface RightSlotProps extends ShellSlotProps { area: RightArea }
+export interface RightSlotProps extends ShellSlotProps { area: RightArea; fileViewerHost?: HTMLElement | null }
 export interface ViewSlotProps extends ShellSlotProps { viewId: ViewId }
 export interface ShellIntegration {
   openTurnDiff?(ref: TurnDiffRef): void

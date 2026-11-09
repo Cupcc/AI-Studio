@@ -276,6 +276,8 @@ Project 记录是新创建的（3.1.4 第 4 步），或没有任何已保存 UI
 
 本节为窗口骨架的唯一出处，navigation、project-view、tools 各 spec 引用本节，不重复尺寸。数值随 Shell 于 2026-10-09 确认；Shell 第 1 节要求按 1024 / 1280 / 1440 宽度复核，在[已归档的 T20261009-prototype-alignment](../../tasks/archive/T20261009-prototype-alignment/task.md)中完成。
 
+Files 查看文件时新增内容列；这一状态下的布局及窄窗口压缩见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)，下表与压缩顺序适用于未打开该内容列的状态（用户 2026-10-30 请求）。
+
 #### 3.4.1 区域与尺寸
 
 | 区域 | 默认 | 范围 | 规则 |

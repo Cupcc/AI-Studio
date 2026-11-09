@@ -33,7 +33,7 @@ function ResizeHandle({ width, min, max, direction, label, onPreview, onCommit }
       target.addEventListener('pointermove', move); target.addEventListener('pointerup', finish); target.addEventListener('pointercancel', cancel)
     }} />
 }
-function RightArea({ props, ui, area, viewMode }: { props: ShellSlotProps; ui: UiState; area: RightArea; viewMode: boolean }) {
+function RightArea({ props, ui, area, viewMode, fileViewerHost }: { props: ShellSlotProps; ui: UiState; area: RightArea; viewMode: boolean; fileViewerHost: HTMLElement | null }) {
   const slots = useShellIntegration(), shell = useProjectShell()
   const viewId = props.canvas.mode === 'view' ? props.canvas.viewId : 'overview'
   const title = <span className="right-area__title">{area === 'preview' ? VIEW_NAMES[viewId] : TOOL_NAMES[area]}</span>
@@ -51,7 +51,7 @@ function RightArea({ props, ui, area, viewMode }: { props: ShellSlotProps; ui: U
     </header>
     <div className="right-area__content">{area === 'preview'
       ? slots.Preview ? <slots.Preview {...props} viewId={viewId} /> : <div className="canvas-placeholder"><Icon name={viewId} size={28} /><h2>{VIEW_NAMES[viewId]}</h2><p>{S.placeholderPreview(VIEW_NAMES[viewId])}</p></div>
-      : slots.Tool ? <slots.Tool {...props} area={area} /> : <div className="canvas-placeholder"><Icon name={area} size={28} /><h2>{TOOL_NAMES[area]}</h2><p>{S.placeholderTool(TOOL_NAMES[area])}</p></div>}
+      : slots.Tool ? <slots.Tool {...props} area={area} fileViewerHost={fileViewerHost} /> : <div className="canvas-placeholder"><Icon name={area} size={28} /><h2>{TOOL_NAMES[area]}</h2><p>{S.placeholderTool(TOOL_NAMES[area])}</p></div>}
     </div>
   </section>
 }
@@ -63,6 +63,7 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
   const ref = useRef<HTMLDivElement>(null)
   const [available, setAvailable] = useState(window.innerWidth - (shell.windowState.navCollapsed ? 0 : 248))
   const [dragWidth, setDragWidth] = useState<number | null>(null)
+  const [fileViewerHost, setFileViewerHost] = useState<HTMLDivElement | null>(null)
   useEffect(() => {
     const node = ref.current!
     const measure = () => { if (node.clientWidth) setAvailable(node.clientWidth) }
@@ -85,9 +86,10 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
         </div>
         {view && <ResizeHandle width={width} min={VIEW_CONVERSATION_WIDTH.min} max={Math.min(VIEW_CONVERSATION_WIDTH.max, available - 400)} direction={1} label={S.resizeConversation} onPreview={setDragWidth} onCommit={(w) => shell.updateUiState(projectId, { viewConversationWidth: w })} />}
       </section>
+      <div className="file-viewer-column" ref={setFileViewerHost} />
       {(view || ui.sidebarOpen) && <div className="right-pane">
         {!view && <ResizeHandle width={width} min={SIDEBAR_WIDTH.min} max={Math.min(SIDEBAR_WIDTH.max, available - 400)} direction={-1} label={S.resizeSidebar} onPreview={setDragWidth} onCommit={(w) => shell.updateUiState(projectId, { sidebarWidth: w })} />}
-        <RightArea props={props} ui={ui} area={view ? ui.viewRightArea : currentTool(ui)} viewMode={view} />
+        <RightArea props={props} ui={ui} area={view ? ui.viewRightArea : currentTool(ui)} viewMode={view} fileViewerHost={fileViewerHost} />
       </div>}
     </main>
   </div>
