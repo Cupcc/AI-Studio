@@ -1,6 +1,6 @@
 ---
 id: T20261109-main-integration
-status: verifying
+status: done
 fr: []
 ac: []
 specs: []
@@ -26,7 +26,7 @@ created: 2026-11-09
 - 原生 fs.watch 探针已恢复；旧 EMFILE / DNS 记录保留原日期。未重复全量测试，未绕过 hook。一次 Files commit-msg 因正文超长拒绝后，缩短说明并通过正常门禁。
 - `8be4dbd` 已快进到主 checkout 并普通推送；已清理 5 个额外 worktree 和 6 个本地任务分支，仅保留 main，远端也仅 main，无 stash。备份清单核对确认待删 worktree 在备份后未发生新改动，再恢复 / 移除其已保留的文件；未强制删除脏 worktree。
 - 首轮 [CI](https://github.com/Cupcc/AI-Studio/actions/runs/42557516895) 文档检查、Adapter 287 项、桌面 50 文件 764 项通过；Electron 48 / 53 通过，5 项失败。本轮不将该 CI 报为通过。
-- 待完成：焦点与测试接缝修复的正式提交、推送及该版本 CI，然后关闭本次 Git 集成记录。
+- 焦点与测试接缝修复已提交、普通推送为 `f069a0d`；[修复后 CI](https://github.com/Cupcc/AI-Studio/actions/runs/42558708628) 全部通过：文档、受影响类型检查、10 文件 216 项单测、19 项 Electron E2E。其余未改变基线的检查沿用首轮结果，不重复全量测试。
 
 ## 文档同步复核
 
@@ -41,3 +41,9 @@ Files 仍缺 AI 交互检查，CLI 安装 / 连接仍缺 GUI、真实网关和�
 - 5 项失败场景本机定向复测全部通过，见[日志](evidence/W0-failed-scenarios-retest.log)。最终焦点选择器同时覆盖 textbox / combobox 形态；重建后再次运行两主题起步示例和回到最新，3 项通过，见[最终焦点日志](evidence/W0-final-focus-retest.log)。现有失败 E2E 是修复前证据，未放宽焦点要求。
 - Main Agent 使用 agent-browser 操作最终构建的实际 Electron 应用，隔离临时 userData / Project、模拟 Provider，仅替换原生目录选择器。打开 Project → New Chat → 了解项目，正文填入且消息编辑器获得焦点；接着从 @ 选择 src/app.ts、用 End 追加 @source、进入带空格目录并选择第二文件，两个标签完整；设置 → CLI → Claude Code 后选中态正确。查看了[焦点截图](evidence/W0-starter-focus.png)、[双引用截图](evidence/W0-two-references.png)和[CLI 选中截图](evidence/W0-cli-selection.png)。没有调用模型，也不据此补记 CLI 安装、网关、文件查看列或其他功能的完整验收。
 - 文档影响仅为本任务的实际 Git / 验证状态；Input、Session、UX 对既有焦点行为的要求未改变。负责规格、路线图与人工验收状态保持原边界。
+
+## 收尾
+
+Main Agent 于 2026-11-09 完成本次 Git 集成范围核对并关闭记录。当前代码基线 `f069a0d` 已推送且 CI 通过，额外 worktree / 本地任务分支均已清理，main 与 origin/main 一致，工作区干净、无 stash，本轮无 merge commit 或 main 强推。最后仅提交本记录归档与入链修正，代码与上述成功 CI 的基线相同。
+
+最终复核包括所有原工作区变更清单与独有 E2E、最终源码 diff、Markdown 标题 / 表格与本地链接，以及路线图下一步 / 整体 / 模块 / 阶段 / 验收、负责决定和相关任务。更新 Git 集成状态、编号冲突和当前 CLI 注册事实；保留历史验证与旧包范围、Files / CLI 的待验项目、附件人工待验及 Todos 未实施状态。本轮局部焦点修复由 Main Agent 自检，不伪称独立功能验收。归档后修正全部入链并搜索旧路径；本机恢复备份及过程日志保留在 Git 忽略的 `.runtime/git-consolidation-20261109/`。
