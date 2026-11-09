@@ -103,7 +103,7 @@
 2. 切换 Session、切换 Project Tab、进入 Project View 都不打断其他 Session 的执行（AC-03；UX 第 6 节 Project 切换）。
 3. 隔离：首阶段每个活动 Session 使用独立 Runtime（04 第 3 节“开发前 CLI 校验”；agent-adapter task）。一个 Session 的 Stop、崩溃、兜底恢复不得影响其他 Session、其他 Project 或用户 Terminal（04 第 5 节第 7 条；04 第 7 节稳定性）。
 4. 并行 Session 的事件处理不得阻塞 Renderer（04 第 7 节性能）。高频文本增量在主进程合并后按帧推送（技术实现见 §5 及负责验收）。
-5. 多个 Session 共享同一 Project 目录；V1 非目标与并行写入风险遵循 [01 第 4 节](<../../docs/01. Product Definition.md#4-v1-非目标范围>)，不把冲突检测转交给其他客户端模块。04 第 1 节第 7、8 项已关闭为范围结论（2026-10-11 确认，DEC-11）。
+5. 当前 V1 的普通 Session 共享同一 Project 目录；V1 非目标与并行写入风险遵循 [01 第 4 节](<../../docs/01. Product Definition.md#4-v1-非目标范围>)，不把冲突检测转交给其他客户端模块（2026-10-11 确认，DEC-11）。后续 To-dos 的逻辑 Project 与隔离 execution root 由 [FR-TODO-004](../agent-todos/spec.md#fr-todo-004-隔离执行)负责，04 第 1 节第 8 项已按 DEC-26 更新；不据此宣称普通 Session 已有 Worktree 隔离。
 
 ### 3.5 FR-STATE-001 Running
 
@@ -217,7 +217,7 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 1. 某 Project 的注意力值 = 该 Project 所有 Session 显示状态中优先级最高的一个：Needs Input > Error > Completed Unread；Running 和无状态不参与；没有时为空。
 2. 本模块对所有已打开 Project 计算该值并在变化时推送。是否显示由壳层决定：非当前 Tab 显示在 Tab 上；左侧导航折叠时，当前 Project 的值显示在展开按钮上；当前 Tab 不显示（UX 第 7、8 节）。
 3. 只输出一个值，不输出数量（UX 第 7 节“只显示一个点，不显示数量”）。关闭确认所需的数量单独提供（第 3.13 节）。
-4. 不提供跨 Project 的列表（01 第 4 节非目标：跨 Project Attention Inbox）。
+4. 当前 V1 不提供跨 Project 列表；后续收件箱由 [Agent To-dos](../agent-todos/spec.md#fr-todo-003-跨-project-总收件箱)聚合本模块事件并去重（DEC-26），不改变普通 Session 的现有状态与提醒清除契约。
 
 ## 4. 状态与数据
 

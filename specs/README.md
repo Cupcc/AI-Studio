@@ -48,4 +48,5 @@
 | `project-view/` | FR-VIEW-001～FR-VIEW-008 | [spec.md](project-view/spec.md) |
 | `tools/` | FR-TOOL-001～FR-TOOL-005 | [spec.md](tools/spec.md) |
 | `settings/` | FR-SET-001～FR-SET-002 | [spec.md](settings/spec.md) |
+| `agent-todos/` | FR-TODO-001～FR-TODO-009；增量范围 / 阶段见 [02 §8](<../docs/02. Functional Requirements.md#8-后续阶段agent-to-dos>)与[路线图 §4.1](<../docs/06. Development Roadmap.md#41-agent-to-dos-分阶段建设规划>) | [spec.md](agent-todos/spec.md) |
 | `agent-adapter/` | 无 FR 前缀；承接 [04. Technical Requirements](<../docs/04. Technical Requirements.md>) 第 4、5 节与 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md) | [spec.md](agent-adapter/spec.md) |

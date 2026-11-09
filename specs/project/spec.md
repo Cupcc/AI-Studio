@@ -165,7 +165,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
 
 1. 仅**非当前**的 Project Tab 显示；当前 Tab 不显示，相关状态已在左侧 Session History 可见。
 2. 一个 Tab 只显示**一个**点，取该 Project 中优先级最高的注意力状态：Needs Input > Error > Completed Unread。点色分别为橙、红、绿（Shell 第 5 节）。
-3. 不显示数量，不显示 Running，不提供跨 Project 的统一列表（Attention Inbox 为 V1 非目标，01 第 4 节）。
+3. 当前 V1 Tab 不显示数量、不显示 Running，不提供统一列表；后续跨 Project 总收件箱已由 DEC-26 纳入，范围和聚合细则见 [Agent To-dos](../agent-todos/spec.md#fr-todo-003-跨-project-总收件箱)。不将新规划写成当前 Tab 已实现。
 4. 启动页 Tab 与已关闭的 Project 不显示。
 5. 数据由 session 模块提供（5.1）；project 模块只负责订阅并渲染，不自行推导状态。状态变化后 Tab 上的点应随之更新，无需切换 Tab。
 6. 点消失的时机：对应状态被 session 模块清除（如用户在该 Project 内查看了 Session），或该 Tab 变为当前 Tab。回到该 Project 后，展示中的 Session 是否因此被视为“已查看”，见 PROJ-Q13。
