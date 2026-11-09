@@ -1,3 +1,4 @@
+import { codexConnectionOptions } from './connection-options.js';
 import { isAbsolute } from 'node:path';
 import { tmpdir } from 'node:os';
 import { adapterError } from '../errors.js';
@@ -58,7 +59,7 @@ export class CodexProvider implements AgentProvider {
       executable = ok(found);
       const results = await Promise.allSettled([
         this.exec(found.path, ['--version'], { env: options.environment.env, timeoutMs: options.timeoutMs, signal: options.signal }),
-        this.exec(found.path, ['login', 'status'], { env: options.environment.env, timeoutMs: options.timeoutMs, signal: options.signal }),
+        options.environment.connection ? Promise.resolve(null) : this.exec(found.path, ['login', 'status'], { env: options.environment.env, timeoutMs: options.timeoutMs, signal: options.signal }),
       ]);
       const v = results[0];
       if (v.status === 'fulfilled') {
@@ -69,7 +70,9 @@ export class CodexProvider implements AgentProvider {
             : failed(adapterError('protocol_error', 'Codex version check failed').info);
       } else version = failed(codexError(v.reason, 'version').info);
       const l = results[1];
-      if (l.status === 'fulfilled') {
+      if (options.environment.connection) {
+        login = ok({ state: 'logged_in', method: 'host_api_key' });
+      } else if (l.status === 'fulfilled' && l.value) {
         const result = l.value;
         // Never retain raw authentication output, account identities, or API keys.
         const text = `${result.stdout}\n${result.stderr}`;
@@ -177,8 +180,9 @@ export class CodexProvider implements AgentProvider {
       catalog = await withTimeout(async (bounded) => {
         const combined = AbortSignal.any([this.lifetime.signal, bounded, ...(signal ? [signal] : [])]);
         combined.throwIfAborted();
-        runtime = await this.dependencies.runtimeFactory({ command: executable.path, args: ['app-server', '--listen', 'stdio://'],
-          cwd, env: environment.env, label: 'codex catalog', generation: 1, lister: this.dependencies.processLister });
+        const connectionOptions = codexConnectionOptions(environment);
+        runtime = await this.dependencies.runtimeFactory({ command: executable.path, args: ['app-server', '--listen', 'stdio://', ...connectionOptions.args],
+          cwd, env: connectionOptions.env, label: 'codex catalog', generation: 1, lister: this.dependencies.processLister });
         if (combined.aborted) { await runtime.terminate(); combined.throwIfAborted(); }
         connection = new CodexConnection(runtime, timeoutMs);
         await connection.initialize(combined);

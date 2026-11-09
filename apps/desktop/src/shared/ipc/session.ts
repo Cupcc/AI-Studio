@@ -1,4 +1,6 @@
+import type { CliConnection, SaveCliConnection, ConnectionTestResult } from '../session/cli-connection'
 import { defineContract, event, invoke } from './contract'
+import type { CliInstallation } from '../session/cli-installation'
 import type { TurnDiffRecord, TurnDiffRef } from '../tools/turn-diff'
 import type {
   ComposerDraft,
@@ -40,6 +42,12 @@ export const sessionContract = defineContract('session', {
     rename: invoke<{ sessionId: string; title: string }, SessionSummary>('session:rename'),
     setReasoningEffort: invoke<{ sessionId: string; reasoningEffort: string | null }, void>('session:set-reasoning-effort'),
     setModel: invoke<{ sessionId: string; model: string | null }, void>('session:set-model'),
+    getCliConnections: invoke<void, CliConnection[]>('session:get-cli-connections'),
+    saveCliConnection: invoke<SaveCliConnection, CliConnection>('session:save-cli-connection'),
+    testCliConnection: invoke<{ cli: SessionCli }, ConnectionTestResult>('session:test-cli-connection'),
+    getCliInstallations: invoke<void, CliInstallation[]>('session:get-cli-installations'),
+    installCli: invoke<{ cli: SessionCli }, void>('session:install-cli'),
+    cancelCliInstallation: invoke<{ cli: SessionCli }, void>('session:cancel-cli-installation'),
     getProviders: invoke<void | { force: boolean }, ProviderSummary[]>('session:get-providers'),
     setCliEnabled: invoke<{ cli: SessionCli; enabled: boolean }, ProviderSummary[]>('session:set-cli-enabled'),
     getSkillContent: invoke<{ cli: SessionCli; projectId: string; skillId: string }, SkillContentResult>('session:get-skill-content'),
@@ -61,6 +69,8 @@ export const sessionContract = defineContract('session', {
   events: {
     summaryChanged: event<SessionSummaryChange>('session:summary-changed'),
     transcriptChanged: event<TranscriptChange>('session:transcript-changed'),
+    cliConnectionsChanged: event<CliConnection[]>('session:cli-connections-changed'),
+    cliInstallationsChanged: event<CliInstallation[]>('session:cli-installations-changed'),
     providersChanged: event<ProviderSummary[]>('session:providers-changed')
   }
 })

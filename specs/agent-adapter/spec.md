@@ -197,6 +197,15 @@
 
 11. 后续独立开发验证（2026-10-27～28）：应用内真实授权卡拒绝、等待审批期间的 Codex 混合并发、开发开关关闭与打包边界，以及 CLI 2.1.311 的文字拒绝复验由 [Claude 适配独立验收](../../tasks/archive/T20261026-claude-adapt/acceptance.md) 负责。第 9、10 条保留 2026-10-26 历史基线；其中“未覆盖”不代替当前验收记录，也不把新增开发验证视为 V1 发布或全部 CLI 协议通过。
 
+### 3.13 应用连接覆盖
+
+CLI 连接配置由桌面主进程保存与注入，Adapter 不读写用户配置文件。`ProviderEnvironment.connection` 是可选的宿主连接快照，包含 Base URL、认证方式和仅在主进程解密后的 API Key；未设置时 Adapter 保持本机 CLI 配置行为。
+
+- Codex 在每个 app-server / model catalog Runtime 启动时传递 `-c` provider 覆盖，API Key 只放入子进程环境；availability 的登录检查在应用配置模式下以宿主管理凭据为准。
+- Claude 在每个 SDK Runtime 与 availability 检查中设置 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1`、`ANTHROPIC_BASE_URL` 和对应认证变量，清理继承的冲突变量。
+- 覆盖必须同时用于 Session、恢复、模型目录和可用性检查；Session 绑定创建时的连接修订，不在运行中静默切换。
+- 连接配置机制验证基线与未覆盖项见[CLI 配置研究](../../tasks/T20261108-cli-install/research.md)。真实网关协议、鉴权和旧版本兼容性仍需按 CLI 单独验收。
+
 ### 3.13 工程工具接缝
 
 FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026-10-13 确认）。文件引用与轮次补丁已接入；逻辑契约以 [Tools §4.1、§4.2](../tools/spec.md#4-状态与接口) 为准，2026-10-18 实施及真实能力边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)。

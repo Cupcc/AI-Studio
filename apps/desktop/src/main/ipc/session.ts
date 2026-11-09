@@ -1,5 +1,9 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, safeStorage } from 'electron'
+import type { SaveCliConnection } from '@shared/session/cli-connection'
+import { CliConnections, validateBaseUrl } from '../services/session/cli-connection'
 import { CodexProvider } from '@ai-studio/agent-adapter/codex'
+import { ClaudeProvider } from '@ai-studio/agent-adapter/claude'
+import { CliInstaller, cliEnvironment } from '../services/session/cli-installation'
 import type { AgentProvider, InputResponse, RuntimeHandle, RuntimeSpawnOptions } from '@ai-studio/agent-adapter'
 import { sessionContract, SESSION_MESSAGE_MAX_LENGTH, SESSION_TITLE_MAX_LENGTH, PASTED_ATTACHMENT_MAX_BYTES } from '@shared/ipc/session'
 import type { ComposerDraft, ContextItem, DraftKey, SessionCli } from '@shared/session/types'
@@ -26,6 +30,20 @@ function record(raw: unknown, keys: readonly string[]) {
   const value = expectRecord(raw)
   expectOnlyKeys(value, keys)
   return value
+}
+function connectionRequest(raw: unknown): SaveCliConnection {
+  const value = expectRecord(raw)
+  const provider = cli(value.cli)
+  if (value.mode === 'local') {
+    expectOnlyKeys(value, ['cli', 'mode'])
+    return { cli: provider, mode: 'local' }
+  }
+  expectOnlyKeys(value, ['cli', 'mode', 'baseUrl', 'model', 'auth', 'apiKey'])
+  if (value.mode !== 'app' || (value.auth !== 'api_key' && value.auth !== 'bearer')) throw new IpcValidationError('Invalid connection mode or authentication')
+  const baseUrl = validateBaseUrl(expectString(value.baseUrl, 'baseUrl', { minLength: 1, maxLength: 2048 }))
+  const apiKey = value.apiKey === undefined ? undefined : expectString(value.apiKey, 'apiKey', { minLength: 1, maxLength: 8192 })
+  if (apiKey && /[\r\n\0]/.test(apiKey)) throw new IpcValidationError('Invalid API Key')
+  return { cli: provider, mode: 'app', baseUrl, model: model(value.model), auth: value.auth, ...(apiKey ? { apiKey } : {}) }
 }
 function projectRef(raw: unknown) { const value = record(raw, ['projectId']); return { projectId: id(value.projectId, 'projectId') } }
 function sessionRef(raw: unknown) { const value = record(raw, ['sessionId']); return { sessionId: id(value.sessionId, 'sessionId') } }
@@ -120,8 +138,6 @@ function response(raw: unknown): InputResponse {
 
 export interface SessionFeatureOptions {
   providers?: readonly AgentProvider[]
-  /** Registered next to Codex when `providers` is not given; the entry point decides (Claude Code opt-in, DEC-19). */
-  extraProviders?: readonly AgentProvider[]
   runtimeFactory?: (options: RuntimeSpawnOptions) => Promise<RuntimeHandle>
   isForeground?: (senderId: number) => boolean
   /** Re-validates Files references at send time; without it a message with file items is refused. */
@@ -137,11 +153,18 @@ export function isSessionWindowForeground(senderId: number): boolean {
 export function createSessionFeature(core: CoreServices, options: SessionFeatureOptions = {}) {
   const shell = projectShellFor(core)
   const pasted = new PastedAttachments(app.getPath('userData'), () => service.pastedAttachmentReferences())
+  const store = new SessionStore(core.database().db)
+  const connections = new CliConnections(store, {
+    available: () => safeStorage.isAsyncEncryptionAvailable(),
+    encrypt: value => safeStorage.encryptStringAsync(value),
+    decrypt: async value => (await safeStorage.decryptStringAsync(value)).result
+  })
   const service = new SessionService({
-    store: new SessionStore(core.database().db), projects: shell.projects,
+    store, projects: shell.projects,
     canOperate: id => !shell.isProjectClosing(id) && !shell.isQuitting(),
-    providers: options.providers ?? [new CodexProvider({ runtimeFactory: options.runtimeFactory }), ...(options.extraProviders ?? [])],
-    environment: async () => ({ env: (await core.shellEnv.get()).env }),
+    providers: options.providers ?? [new CodexProvider({ runtimeFactory: options.runtimeFactory }), new ClaudeProvider({ startRuntime: options.runtimeFactory })],
+    environment: async (cli, sessionId) => connections.environment(cli, cliEnvironment((await core.shellEnv.get()).env), sessionId),
+    bindConnection: (sessionId, cli) => connections.bind(sessionId, cli),
     isForeground: options.isForeground ?? isSessionWindowForeground,
     fileReferences: options.fileReferences,
     pastedAttachment: (projectId, upload) => pasted.resolve(projectId, upload),
@@ -152,6 +175,11 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     turnEnded: projectId => { void projectViewsFor(core).refresh(projectId) }
   })
   pasted.start()
+  const installer = new CliInstaller({
+    shellEnv: core.shellEnv,
+    changed: states => core.broadcast(sessionContract.events.cliInstallationsChanged, states),
+    installed: async () => { await service.getProviders(); await service.getProviders(true) }
+  })
   shell.setSessionPort(service)
   void service.getProviders().catch(() => {})
   return defineHandlers(sessionContract, {
@@ -166,6 +194,26 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
         if (!shell.projects.getProject(projectId) || shell.isProjectClosing(projectId) || shell.isQuitting()) throw new Error('Project 不可用')
         return pasted.stage(projectId, name, mime, bytes)
       }
+    },
+    getCliConnections: { parse: noInput, handle: () => connections.list() },
+    saveCliConnection: { parse: connectionRequest, handle: async request => {
+      const saved = await connections.save(request)
+      core.broadcast(sessionContract.events.cliConnectionsChanged, connections.list())
+      await service.connectionChanged(request.cli)
+      return saved
+    } },
+    testCliConnection: {
+      parse: raw => { const value = record(raw, ['cli']); return { cli: cli(value.cli) } },
+      handle: ({ cli }) => connections.test(cli)
+    },
+    getCliInstallations: { parse: noInput, handle: () => installer.snapshot() },
+    installCli: {
+      parse: raw => { const value = record(raw, ['cli']); return { cli: cli(value.cli) } },
+      handle: ({ cli }) => installer.install(cli)
+    },
+    cancelCliInstallation: {
+      parse: raw => { const value = record(raw, ['cli']); return { cli: cli(value.cli) } },
+      handle: ({ cli }) => installer.cancel(cli)
     },
     list: { parse: projectRef, handle: ({ projectId }) => service.list(projectId) },
     getTurnDiff: {
@@ -255,5 +303,5 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     getProjectState: { parse: projectRef, handle: ({ projectId }) => service.getProjectState(projectId) },
     stopProject: { parse: projectRef, handle: ({ projectId }) => service.stopProjectTurns(projectId) },
     projectClosed: { parse: projectRef, handle: ({ projectId }) => service.projectClosed(projectId) }
-  }, async () => { await pasted.dispose(); await service.dispose() })
+  }, async () => { await installer.dispose(); await pasted.dispose(); await service.dispose() })
 }

@@ -53,7 +53,8 @@ export interface SessionServiceOptions {
   store: SessionStore
   projects: ProjectService
   providers: readonly AgentProvider[]
-  environment(): Promise<ProviderEnvironment>
+  environment(cli: SessionCli, sessionId?: string): Promise<ProviderEnvironment>
+  bindConnection?(sessionId: string, cli: SessionCli): void
   summaryChanged?(change: SessionSummaryChange): void
   transcriptChanged?(change: TranscriptChange): void
   providersChanged?(providers: ProviderSummary[]): void
@@ -238,6 +239,7 @@ export class SessionService implements MainSessionPort {
     try {
       this.options.store.transaction(() => {
         this.options.store.saveSummary(summary)
+        this.options.bindConnection?.(summary.id, summary.cli)
         this.begin(entry, request, viewContext, files)
         this.options.store.deleteDraft({ projectId: request.projectId, kind: 'new_chat', ...(request.originViewId ? { viewId: request.originViewId } : {}) })
       })
@@ -367,7 +369,8 @@ export class SessionService implements MainSessionPort {
       if (entry.summary.stopping) return
       let runtime = entry.runtime
       if (!runtime || runtime.state === 'closed') {
-        const environment = await this.options.environment()
+        const environment = await this.options.environment(entry.summary.cli, entry.summary.id)
+        if (environment.connection) entry.secrets.add(environment.connection.apiKey)
         if (entry.turn !== turn || entry.summary.stopping) return
         const project = this.project(entry.summary.projectId)
         const provider = this.provider(entry.summary.cli)
@@ -932,6 +935,14 @@ export class SessionService implements MainSessionPort {
     })
   }
 
+  async connectionChanged(cli: SessionCli): Promise<ProviderSummary[]> {
+    this.providerRevisions.set(cli, (this.providerRevisions.get(cli) ?? 0) + 1)
+    this.providerSummaries = this.providerSummaries.filter(item => item.cli !== cli)
+    this.catalogs.clear()
+    await this.availability
+    return this.getProviders(true)
+  }
+
   setCliEnabled(cli: SessionCli, enabled: boolean): ProviderSummary[] {
     this.provider(cli)
     if (this.quitting || this.disposed) throw new Error('应用正在退出')
@@ -955,12 +966,12 @@ export class SessionService implements MainSessionPort {
     if (!force && !current.some(item => item.status === 'checking') && this.now() - this.availabilityAt < 30_000) return current
     const revisions = new Map(this.providerRevisions)
     this.availability = (async () => {
-      const environment = await this.options.environment()
       if (this.quitting || this.disposed) return structuredClone(this.providerSummaries)
       const summaries = await Promise.all([...this.providers.keys()].map(async (cli): Promise<ProviderSummary | null> => {
         const provider = this.provider(cli)
         if (!this.enabledClis.has(cli) || revisions.get(cli) !== this.providerRevisions.get(cli)) return null
         try {
+          const environment = await this.options.environment(cli)
           const report = await provider.checkAvailability({ environment, includeModels: false, signal: this.discoveryAbort.signal })
           return {
             cli, displayName: provider.displayName, status: report.status, reason: report.reason?.message ?? null,
@@ -990,7 +1001,7 @@ export class SessionService implements MainSessionPort {
     this.ensureProjectOpen(projectId)
     const provider = this.provider(cli)
     if (!provider.listSkills) throw new Error('当前 CLI 未公开 Skill 目录')
-    const environment = await this.options.environment()
+    const environment = await this.options.environment(cli)
     this.ensureProjectOpen(projectId)
     const task = provider.listSkills({ environment, cwd: project.canonicalPath, signal: this.discoveryAbort.signal })
     this.background.add(task)
@@ -1050,9 +1061,9 @@ export class SessionService implements MainSessionPort {
     const project = this.project(projectId)
     const task = (async (): Promise<ModelCatalogResult> => {
       try {
-        const environment = await this.options.environment()
+        const environment = await this.options.environment(cli)
         if (this.quitting || this.disposed || this.closing.has(projectId) || this.closed.has(projectId) || this.options.canOperate?.(projectId) === false) return { models: [], error: 'Project 正在关闭或应用正在退出' }
-        const models = await this.provider(cli).listModels({ environment, cwd: project.canonicalPath, signal: this.discoveryAbort.signal })
+        const models = environment.connection?.model ? [{ id: environment.connection.model, displayName: environment.connection.model, isDefault: true }] : await this.provider(cli).listModels({ environment, cwd: project.canonicalPath, signal: this.discoveryAbort.signal })
         const result = { models: models.filter(model => !model.hidden), error: null }
         this.catalogs.set(`${projectId}:${cli}`, result)
         return result

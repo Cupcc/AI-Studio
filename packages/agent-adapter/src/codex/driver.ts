@@ -1,3 +1,4 @@
+import { codexConnectionOptions } from './connection-options.js';
 import { adapterError } from '../errors.js';
 import type { SessionOptionsBase, Unsubscribe } from '../provider.js';
 import type { CleanupReport, InputResponse, ModelInfo, NativeTurnDiff, RecoveryReport, UserInput } from '../types.js';
@@ -70,8 +71,9 @@ export class CodexDriver implements SessionDriver {
     this.slot = new RuntimeSlot(async (generation) => {
       this.operationSignal?.throwIfAborted();
       if (this.disposed) throw adapterError('disposed', 'Codex Session is disposed');
-      const runtime = await dependencies.runtimeFactory({ command: executable, args: ['app-server', '--listen', 'stdio://'],
-        sessionId: sink.sessionId, cwd: options.cwd, env: options.environment.env, label: 'codex app-server', generation, lister: dependencies.processLister, terminate });
+      const connectionOptions = codexConnectionOptions(options.environment);
+      const runtime = await dependencies.runtimeFactory({ command: executable, args: ['app-server', '--listen', 'stdio://', ...connectionOptions.args],
+        sessionId: sink.sessionId, cwd: options.cwd, env: connectionOptions.env, label: 'codex app-server', generation, lister: dependencies.processLister, terminate });
       if (this.operationSignal?.aborted || this.disposed) {
         await runtime.terminate(terminate);
         throw adapterError('disposed', 'Runtime startup was cancelled');

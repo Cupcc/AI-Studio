@@ -1,3 +1,4 @@
+import { claudeConnectionEnvironment } from './connection-options.js';
 import { randomUUID } from 'node:crypto';
 import type { EffortLevel, ModelInfo as SDKModelInfo, Options, SDKMessage, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import { deferred, withTimeout } from '../core/async.js';
@@ -97,7 +98,7 @@ export class ClaudeDriver implements SessionDriver {
     const ready = deferred<RuntimeHandle>();
     const sdkOptions: Options = {
       ...this.extras,
-      cwd: this.options.cwd, env: { ...this.options.environment.env }, pathToClaudeCodeExecutable: this.executable,
+      cwd: this.options.cwd, env: { ...claudeConnectionEnvironment(this.options.environment) }, pathToClaudeCodeExecutable: this.executable,
       includePartialMessages: true,
       systemPrompt: this.extras.systemPrompt ?? { type: 'preset', preset: 'claude_code' },
       ...(this.nativeId ? { resume: this.nativeId } : {}),

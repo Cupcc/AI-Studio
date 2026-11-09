@@ -1,3 +1,4 @@
+import { claudeConnectionEnvironment } from './connection-options.js';
 import { isAbsolute } from 'node:path';
 import { tmpdir } from 'node:os';
 import { query } from '@anthropic-ai/claude-agent-sdk';
@@ -38,7 +39,7 @@ export class ClaudeProvider implements AgentProvider {
   }
 
   async checkAvailability(options: AvailabilityOptions): Promise<AvailabilityReport> {
-    const env = options.environment.env;
+    const env = claudeConnectionEnvironment(options.environment);
     const resolve = this.dependencies.resolveExecutable ?? resolveExecutable;
     const exec = this.dependencies.exec ?? execBounded;
     let executable;

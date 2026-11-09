@@ -20,7 +20,16 @@ export type Unsubscribe = () => void;
  * Process environment supplied by the host. The desktop app resolves the user's
  * login-shell environment (06 §6); the adapter never reads `process.env` implicitly.
  */
+export interface ProviderConnection {
+  baseUrl: string;
+  apiKey: string;
+  auth: 'api_key' | 'bearer';
+  model?: string;
+}
+
 export interface ProviderEnvironment {
+  /** Host-owned connection. Applies to probes and sessions without writing native configuration. */
+  connection?: ProviderConnection;
   /** Environment for every spawned CLI process. Must contain PATH unless `executablePath` is set. */
   env: Readonly<Record<string, string | undefined>>;
   /** Explicit CLI executable; skips PATH discovery when set. */
