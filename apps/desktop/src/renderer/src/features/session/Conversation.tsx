@@ -109,7 +109,7 @@ export function SessionConversation({ sessionId, projectId, active }: { sessionI
     </div>
     {away && <button className="conversation-latest" onClick={() => {
       latest()
-      ref.current?.parentElement?.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus()
+      ref.current?.parentElement?.querySelector<HTMLElement>('.composer__editable')?.focus()
     }}>回到最新 ↓</button>}
     <Composer draftKey={{ projectId, kind: 'session', sessionId }} active={active} />
   </div>
@@ -135,7 +135,7 @@ function NewChatDraft({ project, active }: Pick<ShellSlotProps, 'project' | 'act
     const current = useSessions.getState().drafts[`${project.id}:draft`]
     if (!current || current.text.trim()) return
     useSessions.getState().updateDraft({ projectId: project.id, kind: 'new_chat' }, { text })
-    ref.current?.querySelector<HTMLTextAreaElement>('.composer textarea')?.focus()
+    ref.current?.querySelector<HTMLElement>('.composer__editable')?.focus()
   }
   return <div className="session-conversation session-conversation--draft">
     <div className="session-draft" ref={ref}>

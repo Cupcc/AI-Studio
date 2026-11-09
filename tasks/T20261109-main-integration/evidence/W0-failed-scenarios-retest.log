@@ -1,0 +1,147 @@
+$ electron-vite build && playwright test alignment.spec.ts cli-default.spec.ts composer.spec.ts --grep 'draft composer stays|available CLI works|enabled CLI are shared|v06 real file candidates'
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 128 modules transformed.
+rendering chunks...
+out/main/directory-reader-worker.js    4.50 kB
+out/main/index.js                    455.26 kB
+✓ built in 463ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 15 modules transformed.
+rendering chunks...
+out/preload/index.js  10.87 kB
+✓ built in 17ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 1478 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                                                0.95 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff      13.14 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-CB9ihrfo.woff      13.16 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2     14.71 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2     14.89 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff      22.10 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2     22.59 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff      23.88 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff      23.92 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2     24.18 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2     24.25 kB
+../../out/renderer/assets/codicon-DF1abBS2.ttf                             153.23 kB
+../../out/renderer/assets/code-C0VoY9X6.css                                  1.12 kB
+../../out/renderer/assets/TerminalScreen-GVL3fBIr.css                        7.11 kB
+../../out/renderer/assets/index-DVQ6iOrQ.css                               131.06 kB
+../../out/renderer/assets/monaco-runtime-CPVWXZLM.css                      167.09 kB
+../../out/renderer/assets/register-DfIDzmuI.js                               0.41 kB
+../../out/renderer/assets/register-YZFD9be1.js                               0.42 kB
+../../out/renderer/assets/register-BvWXECMw.js                               0.42 kB
+../../out/renderer/assets/register-DnO2rSIN.js                               0.43 kB
+../../out/renderer/assets/register-0K6t5pSm.js                               0.43 kB
+../../out/renderer/assets/register-BSjuSAaY.js                               0.43 kB
+../../out/renderer/assets/register-avKn5vkM.js                               0.43 kB
+../../out/renderer/assets/register-BJPhh_Q_.js                               0.44 kB
+../../out/renderer/assets/register-B157qpC1.js                               0.44 kB
+../../out/renderer/assets/register-Db70BlUZ.js                               0.44 kB
+../../out/renderer/assets/register-BU_x0SbE.js                               0.44 kB
+../../out/renderer/assets/register-DsQvpkHA.js                               0.45 kB
+../../out/renderer/assets/register-CVyIK36Q.js                               0.45 kB
+../../out/renderer/assets/register-Bym-KdWL.js                               0.45 kB
+../../out/renderer/assets/register-B6domGbD.js                               0.45 kB
+../../out/renderer/assets/register-DqPIbwJk.js                               0.45 kB
+../../out/renderer/assets/register-XmyWldpl.js                               0.45 kB
+../../out/renderer/assets/register-D7X73W_M.js                               0.46 kB
+../../out/renderer/assets/register-CARNRQYh.js                               0.46 kB
+../../out/renderer/assets/register-CUE8J3FZ.js                               0.46 kB
+../../out/renderer/assets/register-Cxj5PCjy.js                               0.46 kB
+../../out/renderer/assets/register-AHxGjLOZ.js                               0.47 kB
+../../out/renderer/assets/register-WoTowP37.js                               0.47 kB
+../../out/renderer/assets/register-BpYxmpxb.js                               0.47 kB
+../../out/renderer/assets/register-C3MG-8vU.js                               0.48 kB
+../../out/renderer/assets/register-C04wL_Du.js                               0.48 kB
+../../out/renderer/assets/register-B3F2pY6z.js                               0.48 kB
+../../out/renderer/assets/register-DSfpvoN0.js                               0.48 kB
+../../out/renderer/assets/register-DgK7NuFj.js                               0.49 kB
+../../out/renderer/assets/register-DERAa8ZP.js                               0.50 kB
+../../out/renderer/assets/register-Cm2Lo9z8.js                               0.50 kB
+../../out/renderer/assets/register-DGsg9aST.js                               0.50 kB
+../../out/renderer/assets/register-4SCzi41c.js                               0.50 kB
+../../out/renderer/assets/register-B0Aj_3OX.js                               0.51 kB
+../../out/renderer/assets/register-DQBv4AAc.js                               0.53 kB
+../../out/renderer/assets/register-CPEF1wI5.js                               0.53 kB
+../../out/renderer/assets/register-D70FV0ap.js                               0.57 kB
+../../out/renderer/assets/register-CwtHOWmj.js                               0.66 kB
+../../out/renderer/assets/register-CJ7VkE5o.js                               0.73 kB
+../../out/renderer/assets/register-BtZzMzmO.js                               0.81 kB
+../../out/renderer/assets/register-CiJv1w3X.js                               0.83 kB
+../../out/renderer/assets/register-CMYbdaZg.js                               0.84 kB
+../../out/renderer/assets/register-dlbtzgTq.js                               0.85 kB
+../../out/renderer/assets/register-Buz8UADy.js                               0.91 kB
+../../out/renderer/assets/register-BqXFjZ5E.js                               0.93 kB
+../../out/renderer/assets/register-L5p8z-9g.js                               1.11 kB
+../../out/renderer/assets/terminal-font-BrrJ_5zI.js                          1.40 kB
+../../out/renderer/assets/javascript-DWVDj3wR.js                             1.41 kB
+../../out/renderer/assets/_.contribution-Cs4Sod8E.js                         1.52 kB
+../../out/renderer/assets/ini-BcQysCTb.js                                    1.67 kB
+../../out/renderer/assets/bat-Bqkp9Cfu.js                                    2.66 kB
+../../out/renderer/assets/xml-Ep4IAyiz.js                                    2.86 kB
+../../out/renderer/assets/dockerfile--oxj0cAH.js                             3.02 kB
+../../out/renderer/assets/lua-hNsuGJkO.js                                    3.43 kB
+../../out/renderer/assets/objective-c-B1L1C5EC.js                            3.48 kB
+../../out/renderer/assets/graphql-BeiGgjIU.js                                3.77 kB
+../../out/renderer/assets/shell-vZEubQ82.js                                  4.48 kB
+../../out/renderer/assets/go-brnMpFrj.js                                     4.49 kB
+../../out/renderer/assets/r-CtqYUQ6l.js                                      4.80 kB
+../../out/renderer/assets/less-B7Qaxw-O.js                                   5.00 kB
+../../out/renderer/assets/tcl-Bb4GCwBr.js                                    5.05 kB
+../../out/renderer/assets/java-Dt3iMn2o.js                                   5.16 kB
+../../out/renderer/assets/kotlin-Ddo1SjA5.js                                 5.20 kB
+../../out/renderer/assets/hcl-CrX1Es2W.js                                    5.21 kB
+../../out/renderer/assets/restructuredtext-B-KQCVu_.js                       5.33 kB
+../../out/renderer/assets/powershell-BXiKvz7Z.js                             5.39 kB
+../../out/renderer/assets/coffee-CzJ5oEdj.js                                 5.51 kB
+../../out/renderer/assets/mdx-5nlN_JrH.js                                    5.87 kB
+../../out/renderer/assets/yaml-DYEluEZl.js                                   5.92 kB
+../../out/renderer/assets/css-i3rI3_64.js                                    6.10 kB
+../../out/renderer/assets/CodeViewer-CI5S31Mp.js                             6.18 kB
+../../out/renderer/assets/rust-B1c0VCeq.js                                   6.27 kB
+../../out/renderer/assets/dart-vLMHv35g.js                                   6.48 kB
+../../out/renderer/assets/python-ClZvVx1h.js                                 6.54 kB
+../../out/renderer/assets/markdown-B0YTnTxW.js                               6.65 kB
+../../out/renderer/assets/swift-CbF6f74o.js                                  6.92 kB
+../../out/renderer/assets/csharp-BJeIuvde.js                                 6.98 kB
+../../out/renderer/assets/CodeDiffViewer-BB2Do4eY.js                         7.01 kB
+../../out/renderer/assets/html-BSUX7b6i.js                                   7.66 kB
+../../out/renderer/assets/typescript-DnHDST33.js                             7.95 kB
+../../out/renderer/assets/cpp-CcN6f0ik.js                                    8.22 kB
+../../out/renderer/assets/pug-BxCXwerb.js                                    8.26 kB
+../../out/renderer/assets/vb-Bm6ESA0Q.js                                     8.33 kB
+../../out/renderer/assets/scss-B42qMyAu.js                                   9.07 kB
+../../out/renderer/assets/twig-DvgEGWAV.js                                  10.26 kB
+../../out/renderer/assets/handlebars-C02uno_i.js                            10.44 kB
+../../out/renderer/assets/julia-Cm3ItYL_.js                                 10.54 kB
+../../out/renderer/assets/scala-DbVzH-3O.js                                 10.70 kB
+../../out/renderer/assets/php-Bkx1qpkQ.js                                   12.48 kB
+../../out/renderer/assets/protobuf-CndvAUGu.js                              12.68 kB
+../../out/renderer/assets/perl-DC0Z0tlO.js                                  12.82 kB
+../../out/renderer/assets/clojure-fcgFaMHx.js                               13.94 kB
+../../out/renderer/assets/ruby-DCd4DmAr.js                                  15.31 kB
+../../out/renderer/assets/sql-BAGepFCR.js                                   15.56 kB
+../../out/renderer/assets/code-BqnG1Ma-.js                                  16.18 kB
+../../out/renderer/assets/elixir-eLfY1jWH.js                                18.74 kB
+../../out/renderer/assets/solidity-yHOxYChb.js                              26.03 kB
+../../out/renderer/assets/TerminalScreen-LgofVQFI.js                       488.41 kB
+../../out/renderer/assets/index-5bofM960.js                              1,848.38 kB
+../../out/renderer/assets/monaco-runtime-BcK3uaiG.js                     5,791.05 kB
+✓ built in 5.35s
+
+Running 5 tests using 1 worker
+
+(node:83101) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/alignment.spec.ts:139:5 › glass appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (7.0s)
+  ✓  2 e2e/alignment.spec.ts:139:5 › solid appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (2.5s)
+  ✓  3 e2e/cli-default.spec.ts:23:5 › available CLI works in a second Project without selection; global preference survives restart (1.8s)
+  ✓  4 e2e/cli-default.spec.ts:63:5 › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors (2.0s)
+  ✓  5 e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (2.4s)
+
+  5 passed (16.3s)

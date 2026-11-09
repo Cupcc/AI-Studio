@@ -213,6 +213,7 @@ test('v06 real file candidates, deleted-file recovery, slash boundary and Add gr
   await expect(input()).toHaveText('@src/app.ts')
   await expect(input().locator('.composer__reference--file')).toContainText('app.ts')
   // Type beside the first atomic reference; replacing the entire editor intentionally removes it.
+  await input().press('End')
   await input().pressSequentially(' @source')
   await workspace().getByRole('option', { name: /source files/ }).click()
   await expect(input()).toHaveText('@src/app.ts @source files/')
