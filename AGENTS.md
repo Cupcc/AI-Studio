@@ -1,97 +1,39 @@
-# Core Rules
-1. **意图对齐**：当用户意图不清晰或容易产生歧义时，应先简要复述你理解的意图、执行计划和建议，由用户确认与自己的想法一致后再行动。
-2.  **专业判断**：人类的知识可能有缺陷或不够专业，且往往意识不到自己的指令有误或不够好。AI应结合用户提供的信息、专业知识和项目背景，主动提出更优建议，而不是一味照指令执行和迎合项目背景。例如：用户的目标是A，指令是B，但C能更好地达成A——AI应指出C并说明理由，由用户决定，而不是直接执行B。
+# 仓库协作规则
 
-# Repository Guidelines
+AI Developer Studio 是围绕本地项目与 CLI Agent Session 的桌面客户端。项目结构见 [README](README.md#仓库结构)。本文件只保留全局约束与按需读取入口。
 
-This repository contains the V1.0 specifications, design workspace, development records, and application source for AI Developer Studio, a desktop client built around local projects and CLI agent sessions.
+## 核心原则
 
-This file holds repository-wide rules only. Branch, commit, pull request, and merge rules live in [CONTRIBUTING.md](CONTRIBUTING.md); read it before starting work. Each directory's naming, metadata, status, and review rules live in the index listed below; read it before editing there.
-
-## Project Structure & Module Organization
-
-| Path | Contents | Index and rules |
-|---|---|---|
-| `docs/` | Numbered product and technical specifications, development roadmap, and decision log | `docs/00. Documentation Index.md` |
-| `specs/` | Long-lived module specs and their FR mapping | `specs/README.md` |
-| `tasks/` | Task records; applicability and organization are defined in the task protocol | `tasks/README.md` |
-| `templates/` | Templates for task, plan, acceptance, report, and spec documents | Used as described in `tasks/README.md` and `specs/README.md` |
-| `design/` | Visual direction, references, wireframes, screens, components, and prototypes | `design/README.md` |
-| `apps/desktop/` | Electron + React + TypeScript desktop client (electron-vite) | `apps/desktop/README.md` |
-| `packages/` | Workspace packages without Electron dependencies, e.g. `packages/agent-adapter/` (CLI Adapter) | Module spec in `specs/` |
-| `scripts/` | Git hooks, CI, and the real-CLI preflight script | `scripts/README.md` |
-| `.runtime/` | Local scratch output such as logs, caches, and temporary runs; git-ignored and safe to delete | — |
+- 意图不清或容易产生歧义时，先简述理解、计划与建议，待用户确认后行动。
+- 以项目目标判断方案，给出明确建议、理由与主要取舍。发现明显更优方案时，先说明收益与切换成本；涉及人类决策或偏离明确指令时，由用户决定。现有方案合理时简述理由并沿用。
+- 建议须有具体收益。重要的最佳实践判断引用当前官方文档或可靠来源，易变工具先核实。因范围或兼容性沿用较弱方案时，说明约束；实施遵循现有约定，额外改进单独提出。
+- 每项事实只在负责文档维护，其他位置引用。需求注明上游章节或带日期的对话依据。
+- 按改动及直接影响范围验证，执行前说明范围与理由；提交、合并或重试不默认触发全量。具体门禁与结果复用见[测试分层](scripts/README.md#测试分层)。
+- 功能实现优先，不过度防御，冗余设计。
 
 ## Authorship & Review
 
-All documents are drafted and maintained by AI agents. Humans communicate decisions in conversation and review changes.
+- 人类决定产品目标、范围、优先级、用户可见行为、验收标准及重大成本、兼容性、数据安全取舍。AI 负责授权内的实现选择、技术评审、验证和任务收尾；按影响判断边界，不按目录判断。
+- 没有对话中的明确确认，不得标记文档已确认或产品已验收。已确认内容的变更须提供 diff 与摘要；任务完成不代表人工验收。
+- 对话决定落稿、确认日期、未决问题与审阅方式见[文档维护与审阅](CONTRIBUTING.md#7-文档维护与审阅)。
 
-- A decision made in conversation takes effect only after it is written into the responsible document and the human has reviewed the diff. Record the confirmation date next to it, e.g. `（2026-10-08 确认）`.
-- Never mark a document human-confirmed or a product delivery human-accepted without explicit human confirmation in conversation. Cite that confirmation in the commit message. Task completion and archiving are owned by the main agent under [Task Protocol](tasks/README.md#lifecycle); they do not imply human acceptance.
-- Humans decide product goals, scope, priorities, user-visible behavior, acceptance criteria, and material cost, compatibility or data-safety tradeoffs. AI agents handle implementation choices within that authority, technical review, verification and task closure. Judge the boundary by the decision's impact, not its directory. This division follows the user's 2026-10-11 confirmation “apply, update related docs”; the resulting policy diff remains subject to human review.
-- Never silently change confirmed content; present the change as a diff with a summary. Drafts may be revised freely.
-- Keep each fact in one document and link to it elsewhere. Indexes, templates, and summaries point to the owning document instead of restating its rules or status. Cite the source of every requirement: an upstream document section or a dated confirmation.
-- Record anything unclear as an open question (`未决问题`), with its owner and whether it blocks work. AI resolves technical questions within the authorized scope; product decisions go to the human. Do not present assumptions or AI decisions as human confirmation.
+## 按需读取
 
-The review each area needs is defined in its index (see the table above).
+开始修改前读[贡献指南 §1–2](CONTRIBUTING.md#1-开始一项工作)与 [Task Protocol 的适用条件](tasks/README.md#when-to-create-a-task)，再按下表读取相关章节。修改目录前必须读取其负责索引，不必预读无关手册。
 
-## Recommendations
+| 工作内容                                     | 必读入口                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| 分支、worktree、提交、PR、合并               | [CONTRIBUTING.md §2–6](CONTRIBUTING.md#2-分支规范)                       |
+| 创建或执行需记录的任务                       | [tasks/README.md](tasks/README.md)                                       |
+| 界面改动、复杂或高风险改动、功能或里程碑验收 | [验收要求](tasks/README.md#acceptance)，小改动也须遵守适用要求           |
+| 修改文档、记录对话决定或同步状态             | [文档维护与审阅](CONTRIBUTING.md#7-文档维护与审阅)                       |
+| 修改 `docs/`                                 | [文档索引](<docs/00. Documentation Index.md>)                            |
+| 修改 `specs/`、workspace 模块                | [模块索引](specs/README.md)及对应 spec                                   |
+| 修改 `design/`                               | [设计索引](design/README.md)                                             |
+| 修改 `apps/desktop/`                         | [桌面开发说明](apps/desktop/README.md)                                   |
+| 安装、运行、构建、测试、修改脚本或 CI        | [scripts/README.md](scripts/README.md)的相关章节                         |
+| 使用或修改 `templates/`                      | [任务协议](tasks/README.md)或[模块索引](specs/README.md)，按模板用途选择 |
 
-Every suggestion, plan, review, and answer, whether about product, design, process, documentation, or code, aims at the best option for the project's goals, judged by current best practice. The existing setup and the user's instructions are inputs to weigh, not the limit of what to consider; the user may not know a better option exists.
+## 文档同步与收尾复核
 
-- Give a clear recommended decision with its reasons and main tradeoffs, not just a list of options.
-- When the existing setup or an instruction falls short of a better option in a way that matters, say so before acting: name the better option, why it fits this project, and what switching would cost. Do not silently inherit the current approach or carry out an instruction you believe is worse. If the existing approach holds up, keep it and say why briefly.
-- The decision boundary in Authorship & Review still applies: within AI authority, choose the best option directly; for human-owned decisions or an explicit instruction, give the recommendation, then follow the human's final decision.
-- If you follow a weaker option for consistency, scope, or a confirmed decision, label it as a constraint, not as the best option.
-- Base best-practice claims on current official documentation or well-established sources, and cite them when the choice matters; check fast-moving tooling instead of relying on memory.
-- Recommend a change only for a concrete benefit. When implementing, follow existing conventions and raise improvements separately instead of mixing them into unrelated work.
-
-This rule follows the user's 2026-10-13 requests; the wording remains subject to human review.
-
-## Working on Tasks
-
-Read `tasks/README.md` before creating or executing a task.
-
-### 文档同步与收尾复核
-
-依据用户 2026-10-17 对文档漂移复盘建议的「apply」确认；本次规则 diff 待审阅。
-
-- 触发时机：对话决定落稿、实现或验证结果改变现有事实时，检查文档影响；提交前和回复工作完成前，复核最终 diff。没有提交的工作也必须完成复核。
-- 按决定或事实追踪影响，不只按修改文件检查。先明确本次改变了什么、哪些条件仍未解决，再核对负责文档、决定记录、路线图、验收要求和相关任务；按主题、编号、引用与同义表述搜索，不能只搜索原句。
-- 路线图须同时核对“下一步、整体概况、模块状态、阶段计划、验收进度”；相关记录须检查下一步、负责人、阻塞条件、完成条件和状态摘要。已决定事项不得继续写成待人决定，同一文件不同章节也须一致。
-- 保持事实的唯一负责文档，其他位置优先引用；历史验证记录保留原基线和结论，当前总结链接新决定。范围确认、代码实现、验证通过和人工验收分别记录，不互相代替。
-- 链接、格式或语法检查通过不代表语义一致。复核发现的遗漏应在本轮修正；无法修正的列明原因和影响，不报告为全部同步完成。
-- 收尾在已有任务记录中简述已核对的文档及章节、更新项和保留项理由；无需任务记录的小改动在最终回复中简述。检查没有影响的文档不必制造修改。
-- Agent 修改文档后的自动提醒、收尾链接检查、性能边界与信任启用步骤见 [Agent 文档 Hook](scripts/README.md#agent-文档-hook)；hook 不代替上述语义复核。
-
-## Build, Test, and Development Commands
-
-The repository is a pnpm workspace (`pnpm-workspace.yaml`); Node and pnpm versions are pinned by `engines` and `packageManager` in the root `package.json`. Dependency build scripts must be allow-listed under `allowBuilds` in `pnpm-workspace.yaml`. Run commands from the repository root; paths containing spaces are supported.
-
-- `pnpm install`: install dependencies, the Electron binary, and local Git hooks.
-- `pnpm dev`: start the desktop app in development mode.
-- `pnpm typecheck`: type-check every workspace package.
-- `pnpm test`: run workflow-script tests and every package's unit tests (Vitest); no real CLI or model calls.
-- `pnpm test:scripts`: test documentation checks, Agent document hooks, and workflow scope selection only.
-- `pnpm check:docs`: check local Markdown link regressions against HEAD; options and manual review boundaries are in `scripts/README.md`.
-- `pnpm check:code`: build the Adapter once, type-check all packages and run all script/unit tests regardless of the changed files.
-- `pnpm check:commit`: check staged documentation and affected modules only; also run by the `pre-commit` hook. Unknown scope blocks rather than running everything. Scope rules are in `scripts/README.md`.
-- `node scripts/check-affected.mjs --dry-run`: preview affected checks for HEAD versus the worktree; omit `--dry-run` to execute, add `--ci` only for selected Electron E2E.
-- `pnpm test:e2e`: build the desktop app and run Playwright Electron tests with simulated Session Providers; no model calls.
-- `pnpm package`: build an unsigned macOS arm64 app directory.
-- `pnpm smoke:packaged`: launch the packaged app and check its native dependencies.
-
-Command options, outputs, and runtime conventions: `apps/desktop/README.md`. Git hooks, CI, and the real-CLI preflight (sends real model requests; not an application test): `scripts/README.md`. No formatter, linter, or coverage threshold is configured. Keep this list current when root scripts change.
-
-To locate a requirement, its acceptance references, and covering specs: `rg 'FR-PROJ-001|AC-01' docs specs`. Task queries and the evidence search exclusion: `tasks/README.md`. Quote paths containing spaces when reading individual files.
-
-## Validation Guidelines
-
-- 按改动及直接受影响范围验证，不因提交、合并或重试默认运行全量；执行前简述检查范围和理由。同一代码、依赖、配置、环境基线的有效结果可引用，注明时间与覆盖范围；修复后只重跑受影响检查。完整回归仅在显式安排时执行，未知影响先补充范围。依据：用户 2026-11-06「优化规则，不要全量跑」；具体门禁由 [scripts/README.md](scripts/README.md#测试分层) 负责，规则 diff 待审阅。
-- Preview edited Markdown tables and headings, and check local links.
-- After moving or renaming a file or heading, search for the old path or anchor and fix every link.
-- Run the checks the owning index requires, e.g. the cross-document checks in `docs/00. Documentation Index.md`.
-
-## Commit & Pull Request Guidelines
-
-Follow [CONTRIBUTING.md](CONTRIBUTING.md) for branch workflow, Conventional Commits, PR contents, human review, and merging into `main`. That document owns these rules and distinguishes proposed policy from enabled remote enforcement.
+对话决定落稿、实现或验证结果改变事实时，按[贡献指南的复核流程](CONTRIBUTING.md#文档同步与收尾复核)检查关联文档。提交前及回复完成前复核最终 diff；未提交的工作也须执行。

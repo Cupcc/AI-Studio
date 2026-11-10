@@ -24,7 +24,7 @@ const plan = files => affectedPlan(files, available)
 const commandText = value => value.commands.flat().join(' ')
 
 test('docs, evidence and empty diff do not run application checks', () => {
-  for (const files of [[], ['README.md'], ['tasks/T-example/evidence/check.mjs']]) {
+  for (const files of [[], ['README.md'], ['docs/08. System Architecture.html'], ['tasks/T-example/evidence/check.mjs']]) {
     expect(plan(files)).toMatchObject({ commands: [], e2e: [], unknown: [] })
   }
 })

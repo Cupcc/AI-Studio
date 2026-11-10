@@ -159,9 +159,6 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const modelLabel = model ? selectedModel?.displayName ?? model : nativeDefault ? `${nativeDefault.displayName}（默认）` : 'CLI 默认'
   const suggestions = useSuggestions({ draftKey, text, input, active, cli, skills, loadSkills, report: setNotice, inlineReferences: draft?.inlineReferences ?? [] })
   const operationError = errors[id] || (session && (errors[`stop:${session.id}`] || errors[`effort:${session.id}`] || errors[`model:${session.id}`]))
-  const status = unavailable ? provider?.reason ?? (!cli ? '请选择已安装并已登录的 CLI。' : '正在检查 CLI…')
-    : fileReplyBlocked ? FILE_REPLY_BLOCKED : stopping ? '正在停止…' : needsInput ? '等待回复'
-    : running ? supportsRunningInput ? '正在处理 · 可补充当前任务' : '运行中不可追加输入' : ''
   return <div className="composer" ref={root}>
     <div className="composer__box">
       {effortTransition && <span key={effortTransition.sequence} aria-hidden="true" data-effort-transition={effortTransition.tier}
@@ -242,18 +239,17 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
         {(running || needsInput) && <button className={`composer__send is-stop ${stopping ? 'is-busy' : ''}`} aria-label={stopping ? '停止中…' : 'Stop'} data-tip={stopping ? '停止中…' : '停止'} disabled={stopping} onClick={() => { if (session) void useSessions.getState().stop(session.id) }}>{stopping ? <span className="session-spinner session-spinner--inverse" aria-hidden="true" /> : <Icon name="stop" size={14} />}</button>}
         <button className={`composer__send ${busy ? 'is-busy' : ''}`} aria-label={busy ? '发送中…' : 'Send'} data-tip="Enter 发送 · Shift + Enter 换行" data-tip-align="end" disabled={!canSend} onClick={() => void send()}>{busy ? <span className="session-spinner session-spinner--inverse" aria-hidden="true" /> : <Icon name="arrow-up" size={14} />}</button>
       </div>
+      {unavailable && <p className="composer__notice" role="status">
+        {provider?.reason ?? (!cli ? '请选择已安装并已登录的 CLI。' : '正在检查 CLI…')}
+        {providers.filter(item => item.status === 'available' && item.cli !== cli).map(item => <button className="text-button" key={item.cli} onClick={() => useSessions.getState().updateDraft(draftKey, { cli: item.cli, model: null, reasoningEffort: null })}>使用 {cliName(item.cli)}</button>)}
+        <button className="text-button" onClick={() => useSettings.getState().openDialog('cli')}>CLI 设置</button>
+      </p>}
+      {fileReplyBlocked && <p className="composer__notice" role="status">{FILE_REPLY_BLOCKED}</p>}
       {catalog?.error && <p className="composer__notice" role="status">模型目录不可用 · 可发送 <button ref={retryButton} className="text-button" disabled={catalogLoading} onClick={() => void retryCatalog()}>{catalogLoading ? '正在重试…' : '重试'}</button></p>}
       {modelMissing && <p className="composer__notice">模型目录未列出当前选择，发送时仍交由 CLI 处理。</p>}
       {effortMissing && <p className="composer__notice">“{reasoningEffort}”不在当前模型目录中。<button className="text-button" onClick={() => setEffort(null)}>使用默认</button></p>}
       {notice && <p className="composer__notice" role="status">{notice}</p>}
       {operationError && <p className="error-message" role="alert">{operationError}{errors[id] && <button className="text-button" disabled={!canSend} onClick={() => void send()}>重试发送</button>}</p>}
-    </div>
-    <div className="composer__status" role="status">
-      {status}
-      {unavailable && <>
-        {providers.filter(item => item.status === 'available' && item.cli !== cli).map(item => <button className="text-button" key={item.cli} onClick={() => useSessions.getState().updateDraft(draftKey, { cli: item.cli, model: null, reasoningEffort: null })}>使用 {cliName(item.cli)}</button>)}
-        <button className="text-button" onClick={() => useSettings.getState().openDialog('cli')}>CLI 设置</button>
-      </>}
     </div>
   </div>
 }

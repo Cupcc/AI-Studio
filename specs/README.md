@@ -45,7 +45,8 @@
 | `chat/` | FR-CHAT-001～FR-CHAT-003 | [spec.md](chat/spec.md) |
 | `session/` | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007 | [spec.md](session/spec.md) |
 | `input/` | FR-INPUT-001～FR-INPUT-002 | [spec.md](input/spec.md) |
-| `project-view/` | FR-VIEW-001～FR-VIEW-008 | [spec.md](project-view/spec.md) |
+| `project-view/` | FR-VIEW-001～FR-VIEW-008；默认 View 与扩展接缝 | [spec.md](project-view/spec.md) |
+| `workbench/` | FR-VIEW-002、FR-WB-001～FR-WB-008；自定义工作台 | [spec.md](workbench/spec.md) |
 | `tools/` | FR-TOOL-001～FR-TOOL-005 | [spec.md](tools/spec.md) |
 | `settings/` | FR-SET-001～FR-SET-002 | [spec.md](settings/spec.md) |
 | `agent-todos/` | FR-TODO-001～FR-TODO-009；增量范围 / 阶段见 [02 §8](<../docs/02. Functional Requirements.md#8-后续阶段agent-to-dos>)与[路线图 §4.1](<../docs/06. Development Roadmap.md#41-agent-to-dos-分阶段建设规划>) | [spec.md](agent-todos/spec.md) |

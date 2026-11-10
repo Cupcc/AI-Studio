@@ -10,7 +10,8 @@ export function paths(output) {
 
 const documentation = new Set([
   'AGENTS.md', 'CONTRIBUTING.md', 'README.md', 'scripts/README.md',
-  'apps/desktop/README.md', 'packages/agent-adapter/src/codex/README.md'
+  'apps/desktop/README.md', 'packages/agent-adapter/src/codex/README.md',
+  'docs/08. System Architecture.html'
 ])
 
 export function docsOnly(files) {

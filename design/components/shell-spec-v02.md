@@ -132,7 +132,7 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 | 上下文标签 | 独立附件位于输入文字上方；`@` 文件与 `$` Skill 为原位标签，留白、悬停内容预览、点击侧栏与编辑规则见 [input spec](../../specs/input/spec.md#行内引用标签)（用户 2026-10-31 指令及留白纠正，diff 待审阅） | FR-VIEW-007、FR-TOOL-001 |
 | Model Selector 与思考强度 | 底行右侧相邻排列，思考在模型左侧（用户 2026-10-24 修正，diff 待审阅）；思考按钮与弹窗均为最多五格的静态信号，选定 max / ultra 后对输入框播放一次切换反馈；默认辅助操作、选中对齐与配色由 [input spec](../../specs/input/spec.md#思考强度信号与动效)负责 | FR-INPUT-002 |
 | Send / Stop | 输入为空时 Send 禁用；Running 时保留 Stop，并按 CLI 原生能力提供追加／排队发送；两者同时可用时不得用单一按钮隐藏发送 | FR-INPUT-001、input I-Q3 |
-| 提示与键盘 | 错误和目录提示在框内控制行之下；辅助状态行在框外，空闲无快捷键说明，发送按钮按需提示；候选、菜单与焦点恢复见 input spec §3 | FR-INPUT-001、DEC-23 |
+| 提示与键盘 | 提示位置与框外留白遵循 [input spec §3 布局](../../specs/input/spec.md#布局)（2026-11-10 后续修订，diff 待审阅）；快捷键、候选、菜单与焦点恢复见同节 | FR-INPUT-001、DEC-23 |
 
 ## 8. Project View
 

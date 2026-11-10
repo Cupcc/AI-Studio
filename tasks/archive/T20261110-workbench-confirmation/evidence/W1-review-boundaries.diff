@@ -1,0 +1,537 @@
+--- a/design/README.md
++++ b/design/README.md
+@@ -4,7 +4,7 @@
+ 
+ ## 人工审阅入口
+ 
+-- 自定义工作台的方向与原型范围见 [09 确认记录](<../docs/09. Workbench Discussion.md>)；后续原型按 [03 工作台交互](<../docs/03. UX Specification.md#用户自定义工作台>)设计并评审。现有 v06 不作为新增工作台的交付证据。
++- 自定义工作台的已接受方向与待评审问题见 [09 讨论记录](<../docs/09. Workbench Discussion.md>)；下一步参考 [03 交互草案](<../docs/03. UX Specification.md#用户自定义工作台>)制作原型，设计评审后再定稿和实施。现有 v06 不作为新增工作台的交付证据。
+ 
+ - [页面布局与输入体验评审 v02](layout-ux-review-v02.md#6-采用记录)：v06 UI 已于 2026-10-23 授权采用；按 2026-10-24 反馈修正五格静态思考指示与选中切换反馈，规格 diff 待审阅，后续菜单对齐与 Max 配色修正见[后续任务](../tasks/archive/T20261024-effort-menu-polish/task.md)；原实施 / 验证与人工复验见[本轮任务](../tasks/archive/T20261023-v06-ui-effort/task.md)；历史可操作稿见[原型 v06](prototypes/README.md#studio-灰度交互原型-v06)，初始布局反馈与竞品观察保留在 [v01](layout-ux-review-v01.md)。
+ - [组件修订确认记录](components/shell-spec-v02.md#1-已确认与待确认)。
+--- a/docs/00. Documentation Index.md
++++ b/docs/00. Documentation Index.md
+@@ -22,13 +22,13 @@
+ | [02. 功能需求](<02. Functional Requirements.md>) | 模块功能、FR 编号和 P0 / P1 优先级 |
+ | [03. 交互规格](<03. UX Specification.md>) | 页面布局、导航、状态表现和交互规则 |
+ | [04. 技术要求](<04. Technical Requirements.md>) | 技术栈、CLI 集成、运行隔离和技术待决事项 |
+-| [05. 验收标准](<05. Acceptance Criteria.md>) | V1 核心场景及需求对应关系；To-dos 草案与工作台原型验收单列 |
++| [05. 验收标准](<05. Acceptance Criteria.md>) | V1 核心场景及需求对应关系；To-dos 与工作台验证场景草案单列 |
+ | [决定记录](<07. Decisions.md>) | 产品与技术方案的选择、依据和确认状态 |
+ | [08. 系统架构与建设状态](<08. System Architecture.html>) | 交互式架构全景、关键数据流及模块状态快照；进度依据见 06 及相关任务；[制作与自检记录](../tasks/T20261011-system-architecture/task.md) |
+ 
+ ## 专项方案与确认记录
+ 
+-[09. 用户自定义 AI 工作台](<09. Workbench Discussion.md>)：工作台推荐答案的确认与取舍入口。正式需求见 [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>)，详细行为见 [workbench spec](../specs/workbench/spec.md)，下一步与阶段状态见 [06 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。
++[09. 用户自定义 AI 工作台](<09. Workbench Discussion.md>)：工作台已接受方向与原型后待评审问题的入口。候选需求见 [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>)，详细候选方案见 [workbench spec 草案](../specs/workbench/spec.md)，下一步与阶段状态见 [06 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。
+ 
+ ## 相关资料
+ 
+--- a/docs/01. Product Definition.md
++++ b/docs/01. Product Definition.md
+@@ -12,10 +12,11 @@
+ | 核心用户 | AI 开发者、独立开发者，以及使用本地 Project 与 CLI 完成创作任务的用户 |
+ | 文档状态 | 已确认（2026-10-09） |
+ | 文档职责 | 定义产品背景、定位、V1 目标与非目标、目标用户、核心场景、核心概念、产品原则和成功标准。 |
++| 工作台增量状态 | 推荐方向已接受；详细设计与验收细化为草案，待原型评审 |
+ | 主要读者 | 产品、设计、研发负责人、项目负责人 |
+ 
+ 
+-工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++工作台推荐方向已接受，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。用户 2026-11-10 随后明确：原型尚未设计，需原型后再评审的内容不能提前确认。新增详细需求、交互、技术方案及验收细化均为设计输入草案，待原型评审后定稿；本文件既有确认状态不覆盖这些草案。
+ 
+ ## 1. 项目背景
+ 
+@@ -41,7 +42,7 @@
+ 
+ ### 产品定义
+ 
+-本产品是一款面向开发与创作任务的桌面 AI 工作台，以本地 Project 和 CLI Session 为基础。自定义工作台的产品方向与首个五图原型范围于 2026-11-10 确认，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。
++本产品是一款面向开发与创作任务的桌面 AI 工作台，以本地 Project 和 CLI Session 为基础。自定义工作台的产品方向于 2026-11-10 接受，以五图场景开展原型设计，具体设计待评审，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。
+ 
+ 核心产品模型为：
+ 
+@@ -99,7 +100,7 @@
+ 11. 提供 Files、Search、Diff、Browser、Terminal 工程辅助工具，基本操作对齐 VS Code（Search 与对齐范围于 2026-10-26 确认，DEC-25）；
+ 12. 保持界面结构简单，不演变成传统重型 IDE。
+ 
+-自定义工作台作为 P1 增量建设，先交付五图原型；需求见 [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>)，阶段安排见[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。这项方向确认不改变既有 V1 功能的实现与验收记录。
++自定义工作台作为 P1 增量方向，先设计五图交互原型并评审，再定稿实现范围；需求见 [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>)，阶段安排见[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。这项方向确认不改变既有 V1 功能的实现与验收记录。
+ 
+ ## 4. V1 非目标范围
+ 
+--- a/docs/02. Functional Requirements.md
++++ b/docs/02. Functional Requirements.md
+@@ -10,10 +10,11 @@
+ | 当前阶段 | MVP / 原型设计阶段 |
+ | 文档状态 | 已确认（2026-10-09） |
+ | 文档职责 | 维护 V1 的 FR 编号、功能行为、Project View 功能定义、工程工具功能以及 MVP 功能范围。 |
++| 工作台增量状态 | 推荐方向已接受；详细设计与验收细化为草案，待原型评审 |
+ | 主要读者 | 产品、研发、测试、产品设计 |
+ 
+ 
+-工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++工作台推荐方向已接受，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。用户 2026-11-10 随后明确：原型尚未设计，需原型后再评审的内容不能提前确认。新增详细需求、交互、技术方案及验收细化均为设计输入草案，待原型评审后定稿；本文件既有确认状态不覆盖这些草案。
+ 
+ ## 1. 需求管理约定
+ 
+@@ -429,7 +430,7 @@
+ - Security；
+ - Requirements。
+ 
+-新增扩展采用工作台包与 Project 内实例，进入当前项目导航。包可包含自定义 Web 页面与结构化定义，声明式组件用于模板；创建、内容写回和生命周期由 FR-WB-001～008 规定（2026-11-10 确认，DEC-28）。默认五个 View 不在首个原型中迁移。
++新增扩展采用工作台包与 Project 内实例，进入当前项目导航。包可包含自定义 Web 页面与结构化定义，声明式组件用于模板；创建、内容写回和生命周期见 FR-WB-001～008 候选需求（方向于 2026-11-10 接受，细节待原型评审，DEC-28）。默认五个 View 不在首个原型中迁移。
+ 
+ ---
+ 
+@@ -948,7 +949,7 @@
+ 
+ ## 9. 用户自定义工作台
+ 
+-来源：2026-11-10 用户审阅并全部接受 [09 的 WB-Q1～Q12](<09. Workbench Discussion.md#2-讨论问题确认记录>)，见 DEC-28。以下为 P1 增量需求，首个原型覆盖范围由[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)维护；既有五个默认 View 不迁移。详细行为由 [workbench spec](../specs/workbench/spec.md)负责。
++来源：2026-11-10 用户审阅并全部接受 [09 的 WB-Q1～Q12](<09. Workbench Discussion.md#2-讨论问题确认记录>)，见 DEC-28。以下为 P1 增量的候选需求，保留编号便于原型评审追踪，未标记为已定稿。原型设计重点与阶段由[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)维护；既有五个默认 View 不迁移。详细候选行为由 [workbench spec 草案](../specs/workbench/spec.md)负责；原型评审后再据结论确认。
+ 
+ ### FR-WB-001 创建与编辑
+ 
+--- a/docs/03. UX Specification.md
++++ b/docs/03. UX Specification.md
+@@ -10,10 +10,11 @@
+ | 当前阶段 | MVP / 原型设计阶段 |
+ | 文档状态 | 已确认（2026-10-09；新增文案规则于 2026-11-07 确认，diff 待审阅） |
+ | 文档职责 | 定义全局信息架构、主界面结构、页面切换行为、状态视觉规则和 UI 设计约束；不重新定义功能语义。 |
++| 工作台增量状态 | 推荐方向已接受；详细设计与验收细化为草案，待原型评审 |
+ | 主要读者 | 产品设计、UI、前端、产品经理 |
+ 
+ 
+-工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++工作台推荐方向已接受，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。用户 2026-11-10 随后明确：原型尚未设计，需原型后再评审的内容不能提前确认。新增详细需求、交互、技术方案及验收细化均为设计输入草案，待原型评审后定稿；本文件既有确认状态不覆盖这些草案。
+ 
+ ## 确认记录
+ 
+@@ -208,7 +209,7 @@
+ 
+ ### 用户自定义工作台
+ 
+-来源：FR-WB-001～008、DEC-28（2026-11-10 确认）。宿主提供“添加工作台”，支持 AI 对话创建和内置模板。预览先展示草稿；“添加至当前项目”创建实例并加入导航，不触发出图。来源、能力与权限说明随原型设计评审，能力声明不等于授权。
++来源：FR-WB-001～008 候选需求、DEC-28。以下是待原型设计与评审的交互方案，没有已确认的界面或流程。方案中宿主提供“添加工作台”，支持 AI 对话创建和内置模板。预览先展示草稿；“添加至当前项目”创建实例并加入导航，不触发出图。来源、能力与权限说明随原型设计评审，能力声明不等于授权。
+ 
+ 从导航打开实例后，复用左侧普通 Conversation 与右侧工作台页面。页面允许选择内容、预览产物和填写可编辑的指令草稿，发起模型调用仍由用户发送。每次发送前能查看并移除工作台上下文；“第三张”等位置表达以发送时顺序解析，目标不唯一时先澄清。
+ 
+--- a/docs/04. Technical Requirements.md
++++ b/docs/04. Technical Requirements.md
+@@ -10,9 +10,10 @@
+ | 当前阶段 | MVP / 原型设计阶段 |
+ | 文档状态 | 已确认（2026-10-09） |
+ | 文档职责 | 承接产品需求的技术边界、CLI 集成原则、Runtime 隔离、概念数据模型、非功能要求和技术待决事项。 |
++| 工作台增量状态 | 推荐方向已接受；详细设计与验收细化为草案，待原型评审 |
+ | 主要读者 | 技术负责人、客户端研发、架构、基础设施、产品 |
+ 
+-工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++工作台推荐方向已接受，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。用户 2026-11-10 随后明确：原型尚未设计，需原型后再评审的内容不能提前确认。新增详细需求、交互、技术方案及验收细化均为设计输入草案，待原型评审后定稿；本文件既有确认状态不覆盖这些草案。
+ 
+ ## 1. 技术设计阶段验证与待决事项
+ 
+@@ -348,7 +349,7 @@
+ 
+ ## 10. 自定义工作台技术要求
+ 
+-来源：FR-WB-001～008、DEC-28（2026-11-10 确认）。复用现有 Project、Session、SQLite 与导航，增加包登记、实例、定义修订、位置版本、产物与执行记录。详细数据职责和提交规则由[工作台规格](../specs/workbench/spec.md)维护，以下为跨模块约束。
++来源：FR-WB-001～008 候选需求、DEC-28。以下为原型的技术输入草案，具体方案须验证，涉及用户行为或数据取舍的细节随设计评审定稿。拟复用现有 Project、Session、SQLite 与导航，增加包登记、实例、定义修订、位置版本、产物与执行记录。详细数据职责和提交规则由[工作台规格](../specs/workbench/spec.md)维护，以下为拟验证的跨模块约束。
+ 
+ - 默认 View 的 JSON 文件与声明式 Renderer 保留；自定义工作台有独立的隔离页面入口，不向原 Renderer 塞入可执行脚本。
+ - 页面无 Node 或应用 Preload。SDK、消息来源和资源地址均限定当前实例；容器选择须通过隔离、加载与销毁验证。
+--- a/docs/05. Acceptance Criteria.md
++++ b/docs/05. Acceptance Criteria.md
+@@ -10,12 +10,13 @@
+ | 当前阶段 | MVP / 原型设计阶段 |
+ | 文档状态 | 已确认（2026-10-09） |
+ | 文档职责 | 维护 V1 核心端到端验收场景，并建立核心 AC 与 FR 的追踪关系。 |
++| 工作台增量状态 | 推荐方向已接受；详细设计与验收细化为草案，待原型评审 |
+ | 主要读者 | 测试、产品、研发、项目负责人 |
+ 
+ 
+ > 本文档维护 V1 基线及已注明来源的增量要求。如与 Product Definition 或 Functional Requirements 冲突，以文档索引定义的优先级为准。
+ 
+-工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++工作台推荐方向已接受，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。用户 2026-11-10 随后明确：原型尚未设计，需原型后再评审的内容不能提前确认。新增详细需求、交互、技术方案及验收细化均为设计输入草案，待原型评审后定稿；本文件既有确认状态不覆盖这些草案。
+ 
+ ## 1. 验收使用原则
+ 
+@@ -207,7 +208,7 @@
+ 
+ ### 3.2 工作台原型追踪矩阵
+ 
+-来源：FR-WB-001～008，具体场景见第 6 节。以下场景尚未执行，不继承 AC-06 的通过结论。
++来源：FR-WB-001～008 候选需求，具体场景草案见第 6 节。映射供原型设计和评审使用，评审后再定稿；既未确认最终验收条款，也未执行验收，不继承 AC-06 的通过结论。
+ 
+ | 需求 | 验收场景 | 主题 |
+ |---|---|---|
+@@ -251,7 +252,7 @@
+ 
+ ## 6. 自定义工作台原型验收
+ 
+-来源：用户 2026-11-10 全部接受工作台讨论稿推荐，包括原 §9 的原型判断标准；现归入本节，关联 FR 见 §3.2。首个原型及后续范围由[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)负责。以下为验收要求，不是已执行结果。
++本节从讨论稿原 §9 的验证建议整理而来，属于验证场景草案；用户接受推荐方向，不代表这些细化条款已经过原型评审。关联候选 FR 见 §3.2。首个原型及后续范围由[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)负责。当前先用这些场景检查原型设计的完整性；原型评审后修订并确认实现验收标准。以下真实 CLI、安全和恢复场景用于后续技术验证，不要求先完成真实功能再让用户评审交互设计。
+ 
+ 前置条件：macOS 桌面应用、隔离测试 Project、五图模板、已配置的一条真实 CLI 与出图路径。同项目和另一 Project 的额外实例可用 fixture 准备，仅用于隔离验证；错误与冲突可注入，但须注明范围。
+ 
+@@ -268,4 +269,4 @@
+ 
+ 先用本地 fixture 验证绑定、失败与恢复，再跑声明支持范围内的真实 CLI 和出图路径。模拟不能证明真实出图、参考图输入或停止成功；记录工具版本、能力缺口、费用展示和错误反馈，不用路径引用冒充模型已读取图片。
+ 
+-原型按[任务验收要求](../tasks/README.md#acceptance)完成开发者自检、实际界面操作与截图、独立 AI 评审，再提交人工产品验收。包导入导出、完整多实例管理、包升级卸载和实例删除清理不以本节通过视为已交付，实施前补充相应决定与验收场景。
++交互原型先进行设计评审，由产品负责人确认交互与取舍。规格定稿并实现后，再按[任务验收要求](../tasks/README.md#acceptance)完成开发者自检、实际界面操作与截图、独立 AI 验收和人工产品验收。包导入导出、完整多实例管理、包升级卸载和实例删除清理不以本节通过视为已交付，实施前补充相应决定与验收场景。
+--- a/docs/06. Development Roadmap.md
++++ b/docs/06. Development Roadmap.md
+@@ -13,7 +13,7 @@
+ 
+ ## 1. 下一步
+ 
+-用户自定义工作台的 WB-Q1～Q12 推荐答案已于 2026-11-10 全部接受（DEC-28）。当前完成正式文档同步，原型尚未开工；下一步按 [§4.2](#42-自定义工作台原型)建设五图工作台，再完成验证、独立 AI 评审和人工产品验收。具体出图能力与容器在原型中核实，不重问已确认方向。
++工作台推荐方向已接受，详细设计未确认（DEC-28）。下一步按 [§4.2](#42-自定义工作台原型)制作五图交互原型，先评审设计并修改、定稿，再实施功能。用户 2026-11-10 已指出不能在原型设计前确认需原型后评审的问题。当前原型设计、设计评审与功能实现均未开始。
+ 
+ 当前新增任务 [T20261108-cli-install](../tasks/T20261108-cli-install/task.md) 已实现并进入验证：所有支持 CLI 的设置展示、Codex / Claude Code 一键安装，以及不修改本机文件的应用独立连接配置。Claude Code 正式 Provider 已按 DEC-27 注册；真实连接、打包和人工验收仍未完成，不能沿用历史“暂不发布”的结论作为本轮通过证据。
+ 
+@@ -47,6 +47,7 @@
+ | v06 UI 与思考选择反馈 | 审阅[采用记录与规格 diff](../design/layout-ux-review-v02.md#6-采用记录)，按[本轮任务](../tasks/archive/T20261023-v06-ui-effort/task.md#人工产品验收)复验五格、输入框切换反馈与 Ultra 主题渐变 | 2026-10-24 人工反馈为“需调整”；五格／Ultra 修正版相关 Electron 自动化与 W7 独立界面验收通过，新体验不在 2026-10-18 人工接受基线中 | 旧版技术验收已完成；待人工复验；菜单对齐与 Max 后续修正的当前验证及人工复验见[局部修正任务](../tasks/archive/T20261024-effort-menu-polish/task.md) |
+ | Claude Code 后续发布评估 | 本轮开发入口 / effort / Needs Input 已于 2026-10-29 人工验收；已按 DEC-19 的 11-08 后续确认启用正式 Provider，新增路径仍须验证 | 开发适配与当前证据见[独立验收](../tasks/archive/T20261026-claude-adapt/acceptance.md)；授权卡与混合等待不再列为无证据，历史超时及兼容边界保留 | 启用范围已确认；真实安装 / 连接与打包验证仍待完成 |
+ | GitHub Release 发布物 | 目标版本见 DEC-21；签名 / 公证 / 校验和发布前再决定；Release Notes 与最终发布方式待后续安排 | 发布准备仅生成和留存产物，暂不创建或上传 Release，见 DEC-22 | 不阻塞实施与技术验证；发布前再处理 |
++| 工作台原型设计 | 原型完成后体验并评审创建、编辑、生成反馈、内容选择与生命周期操作 | 推荐方向已接受，具体设计尚未确认 | 不阻塞原型设计；相关设计须评审后再定稿实施 |
+ | To-dos 增量规划 | 审阅 §4.1 的阶段安排及 spec TODO-Q1～Q6 的默认 / 生命周期 / 安全细节 | 完整功能及总收件箱已决定，不重问是否纳入；本次只做规划 | 不阻塞规划交付；对应阶段实施前解决其阻塞细节并取得实施授权 |
+ 
+ 真实 Codex 调用不设置应用级轮数、费用或额度护栏。模型访问、额度、限流以及发生限流后的停止或错误结果由 Codex CLI / 上游服务提供方决定；应用只传递用户请求、接收 CLI 结果并按 Adapter 状态映射展示，不自行重试、自动换模型或截断调用。用户显式选择的模型仍按输入规格传给 CLI。
+@@ -55,7 +56,7 @@
+ 
+ ## 2. 整体概况
+ 
+-自定义工作台已确认范围并形成正式规格，处于原型建设前；尚无实现、真实出图或产品验收证据，见 §4.2。
++自定义工作台方向已接受，需求、规格与验证场景为设计输入草案；原型设计与设计评审未完成，尚未进入功能实现，见 §4.2。
+ 
+ Files 新布局的实现与验收状态由[布局任务](../tasks/T20261030-file-viewer-column/task.md)负责；以下历史结论保留原基线。
+ 
+@@ -106,7 +107,7 @@
+ |---|---|---|---|---|
+ | [Project Knowledge](../tasks/archive/T20261011-project-view-implementation/task.md) | 已实现并集成 | 内置 Schema、安全有界读取、watch/补扫、revision 与 last-good；不自动生成或修复 | 单测、模拟 Electron、独立安全探针与真实 CLI 写盘更新通过；人工结论见[验收记录](../tasks/archive/T20261011-project-view-implementation/acceptance.md#人工功能验收) | 当前范围无技术待办 |
+ | [默认 Project View](../tasks/archive/T20261011-project-view-implementation/task.md) | 已实现并集成；共享输入控件修正已实现 | 五类 JSON 定义、受信 Renderer、Preview 滚动缩放/局部错误、普通 View Session、首条可移除 Context、Overview 固定摘要；底部 Composer、顶栏和最近对话位置 | 既有 AC-06 与人工结论见[验收记录](../tasks/archive/T20261011-project-view-implementation/acceptance.md#人工功能验收)；v06 草稿与中间基线保留，共享输入控件五格／Ultra 修正版相关 Electron 自动化与 W7 独立界面验收通过，见[v06 任务](../tasks/archive/T20261023-v06-ui-effort/task.md) | 旧版共享输入控件技术范围已收尾，人工需调整后复验；既有 View 内容范围无技术待办；菜单对齐与 Max 后续修正的当前验证及人工复验见[局部修正任务](../tasks/archive/T20261024-effort-menu-polish/task.md) |
+-| [自定义工作台](../specs/workbench/spec.md) | 范围已确认，原型未开始（P1） | FR-WB-001～008、正式规格与 AC-WB-01～08 | 文档自检；功能未验证 | 按 §4.2 建设五图原型，核实真实出图与隔离，再评审 |
++| [自定义工作台](../specs/workbench/spec.md) | 方向已接受，原型设计未开始（P1） | FR-WB-001～008 与 AC-WB-01～08 草案 | 无原型设计评审结论；功能未验证 | 先设计原型并评审，再定稿规格与实现范围 |
+ | [设置与外观](../tasks/archive/T20261012-settings-theme/task.md) | 已实现，人工体验已验收 | 设置入口、毛玻璃 / 纯色主题、背景色与跟随系统 / 浅色 / 深色模式，SQLite 持久化 | 自检与模拟 AC-08 通过；人工体验已验收；SET-Q6 / Q7 已按 DEC-20 确认；独立、真实系统开关及打包验收按该任务免做授权 | 既有外观范围无待办；CLI 管理新增修正已通过技术与人工验收（2026-10-29），见[本轮任务](../tasks/archive/T20261024-cli-default/task.md)；旧基线不扩大。 |
+ 
+ 实现基线与未覆盖项由[本轮任务](../tasks/archive/T20261011-project-view-implementation/task.md)负责；Project View 的原有人工接受记录保留，本次路线图现有功能体验的确认见[总体验收](../tasks/archive/T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。范围依据：FR-VIEW-001～008、[功能需求第 3、4 节](<02. Functional Requirements.md>)及 DEC-04～07。
+@@ -196,16 +197,18 @@
+ 
+ ### 4.2 自定义工作台原型
+ 
+-来源：用户 2026-11-10 接受 WB-Q1～Q12 推荐，并要求先更新文档，再建设原型、评审（DEC-28）。本节维护工作台的范围与顺序，不调整 To-dos 的阶段安排，也不设固定发布日期。
+-
+-首个原型覆盖一个随应用提供的五图模板、AI 对话创建与编辑、隔离预览、添加至当前 Project、实例导航，以及一条真实 CLI 与出图路径。完整流程为创建、预览、添加、打开、生成五图、局部修改、重启恢复；部分失败、旧版本保护、页面隔离、停用与 Session Stop 随主流程验证。安装只服务这条流程，不先建设独立插件管理中心。
++来源：用户 2026-11-10 接受推荐方向，随后明确纠正必须先做原型设计，再评审依赖原型的问题。方向确认、设计评审、功能实现和产品验收是不同阶段；本节不调整 To-dos 安排或设定发布日期。
++
++五图交互原型拟呈现创建、编辑、预览、添加至项目、从导航打开、生成反馈、局部修改、版本恢复与生命周期操作。先用可交互界面和明确标注的示例状态评审操作与反馈；真实 CLI、出图工具、隔离和存储恢复在后续技术验证中检查。设计原型不冒充真实功能，真实功能的完成也不能替代设计评审。
+ 
+ | 阶段 | 交付与退出条件 | 当前状态 |
+ |---|---|---|
+-| 文档同步 | 推荐答案转为正式 FR、规格与 AC，移除过时约束；核对关联文档和链接，提供同步 diff | 本次文档交付，见[任务记录](../tasks/archive/T20261110-workbench-confirmation/task.md) |
+-| 原型建设 | 验证容器与 CLI 命令桥，完成主流程及异常处理；先 fixture 后真实出图，开发者自检覆盖 AC-WB-01～08 | 未开始 |
+-| 独立 AI 评审 | 未参与实现的 Agent 操作实际应用，检查权限、存储和跨模块契约，独立验证真实链路；缺陷修复后复验 | 未开始 |
+-| 人工产品验收 | 提供可运行原型、核心操作、证据和已知限制，由产品负责人判断体验与作品质量 | 待原型与技术评审完成 |
++| 文档方向同步 | 分清已接受方向与候选设计，不提前确认评审问题 | 确认范围已纠正，见[任务记录](../tasks/archive/T20261110-workbench-confirmation/task.md) |
++| 原型设计 | 制作可交互五图原型，呈现主流程、异常状态和待选方案；列明需要评审的问题 | 未开始；下一步 |
++| 设计评审与修改 | AI 检查设计完整性，产品负责人体验原型，决定交互和产品取舍；按反馈修改 | 待原型设计完成 |
++| 规格定稿与实施安排 | 将真实评审结论写回需求、规格和验收标准，明确实现范围与技术验证项 | 待设计评审 |
++| 功能实现与验证 | 按定稿范围接入真实 CLI 和出图路径，验证隔离、绑定、失败与恢复，完成自检和所需独立 AI 验收 | 未开始 |
++| 人工产品验收 | 体验已实现功能，核对证据、未覆盖项与已知限制 | 待实现及技术验收完成 |
+ 
+ 原型后的阶段再评估本地包导入、包与实例导出、完整多实例管理、升级卸载、数据清理与开发工具。同项目和跨项目的额外实例 fixture 只用于验证隔离，不代表管理界面交付。实例删除是否同时 Stop、记录期限与永久清理在对应功能实施前由产品负责人决定，见[规格 §1](../specs/workbench/spec.md#1-职责与后续事项)。
+ 
+@@ -213,7 +216,7 @@
+ 
+ ## 5. 验收进度
+ 
+-工作台 AC-WB-01～08 已按接受的原型判断标准落稿，全部未执行；尚未进行独立 AI 评审或人工产品验收。标准见 [05 §6](<05. Acceptance Criteria.md#6-自定义工作台原型验收>)，后续实施任务记录运行环境与结果，不继承默认 View 的 AC-06 通过结论。
++工作台 AC-WB-01～08 为验证场景草案，待原型设计评审后定稿，全部未执行；目前连设计评审也未开始。草案见 [05 §6](<05. Acceptance Criteria.md#6-自定义工作台原型验收>)，后续实施任务记录运行环境与结果，不继承默认 View 的 AC-06 通过结论。
+ 
+ 新增 To-dos 的 AC-TODO-01～06 均为**验收草案、未执行**，不能复用下表 AC-01～AC-08 的完成结论。当前仅有[规划任务](../tasks/archive/T20261031-agent-todos-roadmap/task.md)的文档自检；每阶段的检查 / 真实 CLI / 独立评审 / 人工接受分别记录。
+ 
+--- a/docs/07. Decisions.md
++++ b/docs/07. Decisions.md
+@@ -265,10 +265,10 @@
+ 
+ ### DEC-28 用户自定义工作台
+ 
+-已确认（2026-11-10） · 用户已审阅 [09 的 WB-Q1～Q12](<09. Workbench Discussion.md#2-讨论问题确认记录>)并全部接受推荐答案，要求将相关文档旧描述替换为新方案。
+-
+-产品纳入开发之外的创作任务。采用 Web 页面配结构化定义、包与 Project 内实例分离的小型宿主，复用现有导航和普通 CLI Session；默认五个 View 在原型阶段保留。详细行为归 [FR-WB-001～008](<02. Functional Requirements.md#9-用户自定义工作台>)与[工作台规格](../specs/workbench/spec.md)。
++已确认推荐方向（2026-11-10）；具体设计待原型评审。用户接受 [09 的推荐](<09. Workbench Discussion.md#2-讨论问题确认记录>)，随后明确指出原型尚未设计，不能提前确认需要原型后再评审的问题。
++
++产品纳入开发之外的创作任务。采用 Web 页面配结构化定义、包与 Project 内实例分离的小型宿主，复用现有导航和普通 CLI Session；默认五个 View 在原型阶段保留。具体候选行为见 [FR-WB-001～008 草案](<02. Functional Requirements.md#9-用户自定义工作台>)与[工作台规格草案](../specs/workbench/spec.md)，须结合原型评审后定稿。
+ 
+ 这让用户能自由设计页面，同时按稳定位置更新真实产物；代价是新增页面隔离、SDK、宿主提交和状态备份责任。参考 Harness 的插件组织方式，不整体复制其框架或承诺包兼容。
+ 
+-按文档同步、五图原型、验证与评审推进，范围和阶段状态见[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。推荐中保留的工具可行性与后续产品细节见规格 §1；本决定不代表接口已稳定、原型已实现或产品已验收。
++按方向落稿、原型设计、设计评审与修改、规格定稿、功能实现与验收推进，阶段状态见[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。推荐中保留的工具可行性与后续产品细节见规格 §1；本决定不确认原型后的设计结论，不将规格草案或验证场景视为已批准的实现基线。
+--- a/docs/08. System Architecture.html
++++ b/docs/08. System Architecture.html
+@@ -63,7 +63,7 @@
+   </section>
+   <section id="flows-panel" class="flow-panel" role="tabpanel" aria-labelledby="tab-flows" hidden><h2>关键数据流</h2><p class="flow-intro">按一次用户操作追踪模块。状态标注当前步骤；模块已有成果，不代表规划中的扩展已接通。</p><div id="flows"></div></section>
+   <section id="inventory-panel" class="inventory-panel" role="tabpanel" aria-labelledby="tab-inventory" hidden><h2>模块建设清单</h2><p class="flow-intro">每一项对应全景中的一个节点。点击名称查看源码、规格与验收依据。</p><div class="table-wrap"><table class="inventory"><thead><tr><th scope="col">模块 / 层级</th><th scope="col">建设状态</th><th scope="col">当前成果</th><th scope="col">待完成 / 验证边界</th></tr></thead><tbody id="inventory"></tbody></table></div></section>
+-  <section class="below"><h2>距离完整 V1，还缺什么</h2><div class="gap-list"><div><h3>项目知识与五类 View</h3><p>Project Knowledge、五类 View 与普通 Session / View Context 已实现；真实 AC-06、独立复验及人工体验已有结果，当前最终包检查见总体验收。</p></div><div><h3>四类工具与对话关联</h3><p>Files / 项目 Diff / 文件引用及 Terminal / Browser 已接入；本轮补丁持久化与对话入口已接入，Codex 0.163.0 普通原生引用、应用 UI 同轮引用和 patch 已有真实证据；W24 已完成四工具综合 Main Agent 技术复验，W25 补充 Adapter Stop / 模型 / 并发与进程清理子集，W28最终包独立四工具 / 原生布局 / 错误 / 清理重试通过；新增体验人工验收及原生覆盖边界继续保留，Claude Code 暂缓，阶段交付不等同完整 AC-07。</p></div><div><h3>真实 CLI 与发布收口</h3><p>当前 V1 已取得 Codex Adapter 的真实 Stop、恢复、模型切换、并发和进程清理子集证据；W26 已补真实 UI Stop / 第二模型 / 并发与完成提醒；新增原生输入输出、等待和Electron宿主恢复已在最终包独立通过。Claude Code 实现与历史证据保留，真实验收暂缓且不随当前 V1 发布（DEC-19）。最终v1.0.0 arm64包与open冒烟已通过并留存；暂不创建或上传GitHub Release。</p></div></div><p class="future"><strong>扩展范围：</strong>自定义工作台方向与五图原型范围已确认，原型尚未开始；范围与建设顺序见<a href="06.%20Development%20Roadmap.md#42-自定义工作台原型">路线图 §4.2</a>，详细行为见<a href="../specs/workbench/spec.md">工作台规格</a>。本图保留既有实现快照，其他扩展与当前状态见<a href="06.%20Development%20Roadmap.md">路线图</a>及<a href="04.%20Technical%20Requirements.md">技术要求</a>。</p></section>
++  <section class="below"><h2>距离完整 V1，还缺什么</h2><div class="gap-list"><div><h3>项目知识与五类 View</h3><p>Project Knowledge、五类 View 与普通 Session / View Context 已实现；真实 AC-06、独立复验及人工体验已有结果，当前最终包检查见总体验收。</p></div><div><h3>四类工具与对话关联</h3><p>Files / 项目 Diff / 文件引用及 Terminal / Browser 已接入；本轮补丁持久化与对话入口已接入，Codex 0.163.0 普通原生引用、应用 UI 同轮引用和 patch 已有真实证据；W24 已完成四工具综合 Main Agent 技术复验，W25 补充 Adapter Stop / 模型 / 并发与进程清理子集，W28最终包独立四工具 / 原生布局 / 错误 / 清理重试通过；新增体验人工验收及原生覆盖边界继续保留，Claude Code 暂缓，阶段交付不等同完整 AC-07。</p></div><div><h3>真实 CLI 与发布收口</h3><p>当前 V1 已取得 Codex Adapter 的真实 Stop、恢复、模型切换、并发和进程清理子集证据；W26 已补真实 UI Stop / 第二模型 / 并发与完成提醒；新增原生输入输出、等待和Electron宿主恢复已在最终包独立通过。Claude Code 实现与历史证据保留，真实验收暂缓且不随当前 V1 发布（DEC-19）。最终v1.0.0 arm64包与open冒烟已通过并留存；暂不创建或上传GitHub Release。</p></div></div><p class="future"><strong>扩展范围：</strong>自定义工作台方向已接受，五图原型尚未设计，具体设计待原型评审；范围与建设顺序见<a href="06.%20Development%20Roadmap.md#42-自定义工作台原型">路线图 §4.2</a>，详细行为见<a href="../specs/workbench/spec.md">工作台规格</a>。本图保留既有实现快照，其他扩展与当前状态见<a href="06.%20Development%20Roadmap.md">路线图</a>及<a href="04.%20Technical%20Requirements.md">技术要求</a>。</p></section>
+  </div>
+  <aside class="inspector" id="inspector" aria-label="模块详情"><div id="detail"></div><button class="locate" id="locate">在架构图中定位</button></aside>
+ </main>
+@@ -96,7 +96,7 @@
+  {"id":"shell","name":"工作区与导航壳层","status":"done","group":"ui","summary":"Project Tabs / Navigation / Context Panel 容器","milestone":"界面与容器范围已签收","built":["多项目切换、布局恢复、导航分区与可调整侧栏。","原型 v01 的视觉对齐和工具关闭交互已于 2026-10-11 签收。"],"gaps":["完成范围只涵盖壳层；四工具内容及其交付边界见各自节点。"],"refs":["alignment","shell","coreaccept"],"code":"apps/desktop/src/renderer/src/features/project/Workspace.tsx","req":"FR-PROJ-002 FR-PROJ-003 FR-NAV-001 FR-NAV-002 AC-01 AC-07"},
+  {"id":"conversation","name":"Conversation 呈现","status":"wip","group":"ui","summary":"Markdown / 工具记录 / 代码复制 / 阅读布局","milestone":"既有呈现已验收；新增原生公开输出与 Diff 入口已实现","built":["Agent Markdown、代码高亮与复制、工具活动和轮次完成信息。","草稿居中、消息与输入区等宽；2026-10-11 签收。"],"gaps":["本轮 Diff、公开工具正文与推理 / 附件新增体验待人工验收；当前技术证据见总体验收。","不补造 CLI 未公开的正文；原生覆盖边界由能力矩阵负责。"],"refs":["markdown","alignment"],"code":"apps/desktop/src/renderer/src/features/session/Conversation.tsx","req":"FR-SESSION-001 FR-STATE-007 AC-02"},
+  {"id":"composer","name":"输入与 Session 交互","status":"wip","group":"ui","summary":"CLI / Model / 草稿 / Send / Stop / Needs Input","milestone":"当前Codex技术接缝独立通过，新增体验待人工验收","built":["首条消息创建 Session；CLI 固定；模型 / 推理强度选择、CLI 默认复位、文本草稿与原生等待答复。","Files 文件 / 图片与原生目录 Skill 标签，发送前主进程重新校验。","W26 真实图片识别、Rule / Skill、审批接受及同轮文字拒绝通过；默认复位由原生记录确认。"],"gaps":["推理强度 / 公开输出、图片 / Skill新增体验待人工验收。","Claude Code 按 DEC-19 后续独立验收。"],"refs":["inputspec","session","sessionaccept","coreaccept"],"code":"apps/desktop/src/renderer/src/features/input/Composer.tsx","req":"FR-CHAT-001 FR-CHAT-002 FR-CHAT-003 FR-INPUT-001 FR-INPUT-002 FR-STATE-001 FR-STATE-002 FR-STATE-003 FR-STATE-004 FR-STATE-005 FR-STATE-006 FR-SESSION-002 FR-SESSION-003 FR-NAV-003 AC-02 AC-03 AC-04 AC-05"},
+- {"id":"views-ui","name":"五类 Project View 与 Preview","status":"done","group":"ui","width":"wide","summary":"Overview / Progress / Architecture / Agent Team / Business Flow","milestone":"AC-06 已独立验证，现有功能人工体验已验收","built":["五类默认 View、受信组件 Preview、缩放 / 错误 / last-good。","View 内普通 Session、最近对话及首条可移除 View Context 已接入。"],"gaps":["自定义工作台已确认，原型未开始；当前范围与下一步见路线图 §4.2、DEC-28。","最终产品检查见总体验收，原独立 AC-06 基线保留。"],"refs":["views","viewtask","decisions"],"code":"apps/desktop/src/renderer/src/features/project-view","codeLabel":"Project View 实现","req":"FR-VIEW-001 FR-VIEW-003 FR-VIEW-004 FR-VIEW-005 FR-VIEW-006 FR-VIEW-007 FR-VIEW-008 AC-06"},
++ {"id":"views-ui","name":"五类 Project View 与 Preview","status":"done","group":"ui","width":"wide","summary":"Overview / Progress / Architecture / Agent Team / Business Flow","milestone":"AC-06 已独立验证，现有功能人工体验已验收","built":["五类默认 View、受信组件 Preview、缩放 / 错误 / last-good。","View 内普通 Session、最近对话及首条可移除 View Context 已接入。"],"gaps":["自定义工作台方向已接受，原型设计与评审未开始；候选范围与下一步见路线图 §4.2、DEC-28。","最终产品检查见总体验收，原独立 AC-06 基线保留。"],"refs":["views","viewtask","decisions"],"code":"apps/desktop/src/renderer/src/features/project-view","codeLabel":"Project View 实现","req":"FR-VIEW-001 FR-VIEW-003 FR-VIEW-004 FR-VIEW-005 FR-VIEW-006 FR-VIEW-007 FR-VIEW-008 AC-06"},
+  {"id":"tools-ui","name":"Context 工具内容","status":"wip","group":"ui","width":"wide","summary":"Files / Diff / Browser / Terminal · 用户主动打开","milestone":"四工具最终包独立技术联验通过，新增Diff待人工验收","built":["Terminal Tabs、按需 xterm、隐藏恢复、面板内关闭确认与最后一个 Tab 空状态。","Browser 地址栏、刷新、外站选择、失败与原生 view 显隐；Project 级布局保持。"],"gaps":["本轮Diff新体验待人工验收；现有四工具体验已接受。","原生补丁覆盖及Claude后续边界见工具验收。"],"refs":["tools","toolaccept","roadmap","fr"],"code":"apps/desktop/src/renderer/src/features/tools/Tools.tsx","req":"FR-TOOL-001 FR-TOOL-002 FR-TOOL-003 FR-TOOL-004 AC-07"},
+  {"id":"ipc","name":"类型化 IPC / window.studio","status":"done","group":"bridge","width":"full","summary":"沙箱 Preload · invoke + events · 四工具已登记","milestone":"运行时工具使用受控契约，非通用 shell / execute","built":["声明式契约生成 Preload；主进程核对处理器、发送方、参数与 Project / 实例代次。","Terminal 附着 / 序号 / ACK 和 Browser 导航 / bounds / 显隐独立登记；预览网页不加载应用 Preload。"],"gaps":["各功能通过专用类型化契约访问；不提供通用Shell或文件系统接口。","当前登记、发送方与参数校验范围见源码及独立验收。"],"refs":["desktop","toolaccept","decisions"],"code":"apps/desktop/src/shared/ipc/contracts.ts","req":"04 §3 DEC-02"},
+  {"id":"project","name":"Project Service","status":"done","group":"services","summary":"目录身份 / 最近项目 / UI 状态 / 关闭与退出","milestone":"当前范围实现与独立清理超时重试验证完成","built":["目录选择与 canonical path、Project 多 Tab 状态和最近项目持久化。","SessionPort 与 MainToolPort 分离；Session / Terminal 一次合并确认，实际清理 settled 前保持锁。","失败 / 超时保留 Project 与诊断；成功关闭才释放 View，重复原生退出请求不叠加弹窗。"],"gaps":["当前范围无待执行技术工作；历史目录/权限场景边界保留在原验收。","新增输入输出体验的人工入口由总体验收负责。"],"refs":["shell","shellaccept","coreaccept","toolaccept"],"code":"apps/desktop/src/main/services/project/index.ts","req":"FR-PROJ-001 FR-PROJ-002 FR-PROJ-003 AC-01"},
+--- a/docs/09. Workbench Discussion.md
++++ b/docs/09. Workbench Discussion.md
+@@ -1,17 +1,18 @@
+-# 用户自定义 AI 工作台确认记录
++# 用户自定义 AI 工作台方向与待评审设计
+ 
+ ## 文档信息
+ 
+ | 项目 | 内容 |
+ |---|---|
+-| 文档状态 | 已确认（2026-11-10） |
++| 文档状态 | 草稿 |
++| 确认范围 | 推荐方向已接受；具体设计待原型设计与评审 |
+ | 文档职责 | 记录工作台方向的确认、主要取舍与负责文档入口 |
+ | 最后更新 | 2026-11-10 |
+ | 确认依据 | 用户 2026-11-10 对话：“讨论问题按照你的推荐，我已经审阅。全都接受。”并要求更新相关文档、替换旧描述 |
+ | 同步记录 | [文档同步任务](../tasks/archive/T20261110-workbench-confirmation/task.md) |
+ | 外部参考 | [DeepSeek Harness 固定版本调研](references/deepseek-harness/README.md) |
+ 
+-WB-Q1～Q12 的推荐答案全部接受。详细行为已归入 [工作台规格](../specs/workbench/spec.md)，需求、交互、技术要求、验收和阶段状态由下表所列文档分别维护。本文不再保留未采用的方案或过时限制。已确认设计不代表实现完成或产品验收通过；本次同步 diff 供审阅，不重开已解决的产品问题。
++用户接受 WB-Q1～Q12 的推荐，作为后续原型设计的方向；这不表示尚未设计的交互、需原型验证的方案或评审结论已经确认。用户随后明确指出原型尚未设计，不能提前确定需要原型后再评审的问题（2026-11-10）。详细候选方案见[工作台规格草案](../specs/workbench/spec.md)；当前先做原型设计，再评审并定稿，之后才进入功能实现与验收。
+ 
+ ## 1. 已确认方向
+ 
+@@ -19,38 +20,38 @@
+ 
+ 采用复用现有 Project、导航和 Session 的小型插件宿主，包与 Project 内实例分离。参考 Harness 的声明与生命周期组织方式，不整体搬入运行框架，不承诺包兼容。收益是沿用现有客户端边界，代价是自行维护包校验、SDK、隔离与开发说明。
+ 
+-宿主管理实例状态，产物保存在 Project 内；备份需要同时覆盖项目文件和宿主状态。包分享与带成果的实例导出分开，避免误带对话或凭据。具体行为由规格负责，原型范围由路线图负责。
++宿主管理实例状态，产物保存在 Project 内；备份需要同时覆盖项目文件和宿主状态。包分享与带成果的实例导出分开，避免误带对话或凭据。这些是设计采用的推荐方向；具体保存、备份与分享体验仍需设计评审。候选行为由规格草案负责，阶段安排由路线图负责。
+ 
+ ## 2. 讨论问题确认记录
+ 
+-以下各项均于 2026-11-10 按原推荐答案确认，后续实现细节按负责规格处理。
++以下分别记录已接受的推荐方向和仍需设计、验证或评审的部分。接受方向不消除原问题的后续评审时点。
+ 
+-| 编号 | 已确认主题 | 负责位置 |
+-|---|---|---|
+-| WB-Q1 | 纳入开发之外的创作工作 | [01 产品定位与用户](<01. Product Definition.md#2-产品定位>) |
+-| WB-Q2 | 自定义 Web 页面配结构化定义 | [规格 §3](../specs/workbench/spec.md#3-fr-wb-002-页面与-ai-共享工作要求) |
+-| WB-Q3 | 对话 / 模板创建、编辑预览与添加至 Project | [规格 §2](../specs/workbench/spec.md#2-fr-wb-001-创建与编辑体验) |
+-| WB-Q4 | 内容生成与结构编辑分开 | [规格 §2](../specs/workbench/spec.md#2-fr-wb-001-创建与编辑体验) |
+-| WB-Q5 | 校验后展示成功结果并保留旧版 | [规格 §5](../specs/workbench/spec.md#5-fr-wb-005-部分结果并发和恢复) |
+-| WB-Q6 | 原型验证一条真实 CLI 与出图路径 | [规格 §4.4](../specs/workbench/spec.md#44-出图能力独立于工作台)；具体工具仍待核实 |
+-| WB-Q7 | 包分享与成果导出分开 | [规格 §6.3](../specs/workbench/spec.md#63-存储分享与改版) |
+-| WB-Q8 | 原型保留五个默认 View，之后评估迁移 | [路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>) |
+-| WB-Q9 | 宿主管理绑定，明确备份依赖 | [规格 §6.3](../specs/workbench/spec.md#63-存储分享与改版) |
+-| WB-Q10 | 包与实例分离的小型宿主 | [规格 §6](../specs/workbench/spec.md#6-fr-wb-006007-包实例与保存) |
+-| WB-Q11 | 安装、固定、停用、移除分别处理 | [规格 §6.2](../specs/workbench/spec.md#62-导航与生命周期) |
+-| WB-Q12 | 停用保留执行，删除撤销写回并保留可恢复成果 | [规格 §6.2](../specs/workbench/spec.md#62-导航与生命周期)；删除是否 Stop、期限与彻底清理仍在实施前确定 |
++| 编号 | 已接受的推荐方向 | 尚待设计、验证或评审 | 负责位置 |
++|---|---|---|---|
++| WB-Q1 | 纳入开发之外的创作工作 | 首期用户场景与原型取舍 | [01 产品定位与用户](<01. Product Definition.md#2-产品定位>) |
++| WB-Q2 | 自定义 Web 页面配结构化定义 | 页面结构、交互与隔离可行性 | [规格 §3](../specs/workbench/spec.md#3-fr-wb-002-页面与-ai-共享工作要求) |
++| WB-Q3 | 对话 / 模板创建、编辑预览与添加至 Project | 创建、编辑、预览、添加的入口与完整流程 | [规格 §2](../specs/workbench/spec.md#2-fr-wb-001-创建与编辑体验) |
++| WB-Q4 | 内容生成与结构编辑分开 | 编辑与生成的切换方式、提示和误操作处理 | [规格 §2](../specs/workbench/spec.md#2-fr-wb-001-创建与编辑体验) |
++| WB-Q5 | 校验后展示成功结果并保留旧版 | 生成状态、替换反馈、历史恢复和质量确认体验 | [规格 §5](../specs/workbench/spec.md#5-fr-wb-005-部分结果并发和恢复) |
++| WB-Q6 | 原型验证一条真实 CLI 与出图路径 | 具体 CLI、出图工具、参考图、费用与停止能力 | [规格 §4.4](../specs/workbench/spec.md#44-出图能力独立于工作台)；具体工具仍待核实 |
++| WB-Q7 | 包分享与成果导出分开 | 导入导出流程、资源与数据范围 | [规格 §6.3](../specs/workbench/spec.md#63-存储分享与改版) |
++| WB-Q8 | 原型保留五个默认 View，之后评估迁移 | 原型评审后再决定迁移、隐藏与排序 | [路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>) |
++| WB-Q9 | 宿主管理绑定，明确备份依赖 | 保存恢复与备份体验、具体存储实现 | [规格 §6.3](../specs/workbench/spec.md#63-存储分享与改版) |
++| WB-Q10 | 包与实例分离的小型宿主 | 宿主接口、包格式和实例管理的可行性 | [规格 §6](../specs/workbench/spec.md#6-fr-wb-006007-包实例与保存) |
++| WB-Q11 | 安装、固定、停用、移除分别处理 | 各操作的呈现、权限说明和多实例管理 | [规格 §6.2](../specs/workbench/spec.md#62-导航与生命周期) |
++| WB-Q12 | 停用保留执行，删除撤销写回并保留可恢复成果 | 生命周期交互、删除是否 Stop、保留期限与永久清理 | [规格 §6.2](../specs/workbench/spec.md#62-导航与生命周期)；删除是否 Stop、期限与彻底清理仍在实施前确定 |
+ 
+-## 3. 正式文档与后续工作
++## 3. 负责文档与后续工作
+ 
+ | 内容 | 负责文档 |
+ |---|---|
+ | 产品目标与范围 | [01 产品定义](<01. Product Definition.md>) |
+-| FR、优先级与范围 | [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>) |
+-| 宿主交互 | [03 工作台交互](<03. UX Specification.md#用户自定义工作台>) |
+-| 技术边界 | [04 §10](<04. Technical Requirements.md#10-自定义工作台技术要求>) |
+-| 详细行为与后续事项 | [工作台规格](../specs/workbench/spec.md) |
+-| 验收场景 | [05 §6](<05. Acceptance Criteria.md#6-自定义工作台原型验收>) |
++| 候选需求与范围 | [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>) |
++| 宿主交互草案 | [03 工作台交互](<03. UX Specification.md#用户自定义工作台>) |
++| 技术方案输入 | [04 §10](<04. Technical Requirements.md#10-自定义工作台技术要求>) |
++| 详细候选行为与后续事项 | [工作台规格](../specs/workbench/spec.md) |
++| 验证场景草案 | [05 §6](<05. Acceptance Criteria.md#6-自定义工作台原型验收>) |
+ | 建设顺序与当前状态 | [06 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>) |
+ | 跨模块决定 | [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>) |
+ 
+-后续按文档同步、原型建设、开发者自检、独立 AI 评审、人工产品验收推进。技术可行性在原型阶段验证；新增产品取舍单独提出，不反复确认本表已接受的答案。
++后续按文档方向同步、原型设计、设计评审与修改、规格定稿、功能实现、测试与产品验收推进。设计评审包含 AI 检查和产品负责人对交互与取舍的确认；不能用实现后的技术验收代替设计评审。当前未完成原型设计，也未取得这些设计细节的评审结论。
+--- a/specs/input/spec.md
++++ b/specs/input/spec.md
+@@ -72,7 +72,7 @@
+ #### Context / Attachment 入口与上下文标签
+ 
+ 1. `+` 打开按来源分组的 Add 菜单：文件入口复用 Files；View 草稿中的当前 View 标签可在移除后重新附加；Skills 列出当前 Project 的真实原生目录，并标明已添加项。这里的 Plugins 指 CLI 原生插件，自定义工作台的创建入口由[工作台规格](../workbench/spec.md)负责。原生 Plugins 无 catalog 接口时显示明确的不可用状态，不能把原型示例列成真实能力。Files 选择与添加行为见 §1.3；原生图片仍沿用 Files 的“作为图片附加”入口（DEC-23，2026-10-23）。
+-2. 上下文标签位：显示当前 View、从 Files 添加的文件和粘贴附件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。草稿的上下文类型含 View、项目文件、项目图片、Skill 和粘贴附件；行内引用的位置另存草稿。Conversation Mode 下不出现 View 标签；默认 View 标签的出现规则与首条注入方式由 [Project View spec](../project-view/spec.md)决定。自定义工作台每次发送前展示可移除的当前实例上下文并读取最新目标状态，移除后本轮不自动写回；详细规则见 [workbench §4.2](../workbench/spec.md#42-向-ai-提供任务上下文)（FR-WB-003，2026-11-10 确认，本次同步 diff 待审阅）。粘贴附件的实施状态与保留事项见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。
++2. 上下文标签位：显示当前 View、从 Files 添加的文件和粘贴附件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。草稿的上下文类型含 View、项目文件、项目图片、Skill 和粘贴附件；行内引用的位置另存草稿。Conversation Mode 下不出现 View 标签；默认 View 标签的出现规则与首条注入方式由 [Project View spec](../project-view/spec.md)决定。自定义工作台每次发送前展示可移除的当前实例上下文并读取最新目标状态，移除后本轮不自动写回；详细规则见 [workbench §4.2](../workbench/spec.md#42-向-ai-提供任务上下文)（FR-WB-003，2026-11-10 接受方向，具体接缝为待原型评审的设计草案）。粘贴附件的实施状态与保留事项见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。
+ 3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
+    - 当前转换由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)负责：Codex 的文件经结构化宿主契约转为明确的本机路径文本引用，图片 / Skill 使用各自原生输入；Claude 文件使用文本路径清单。引用不是文件内容快照；本轮缓存接收及历史验证的边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
+ 4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件、图片、粘贴附件或 Skill 时明确阻止答复并保留输入，避免附件被无声清空；运行中发送遵循 Provider 的实际能力。既有实现与独立验收边界由 [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 维护。
+--- a/specs/navigation/spec.md
++++ b/specs/navigation/spec.md
+@@ -97,7 +97,7 @@
+ 
+ #### 工作台实例导航
+ 
+-来源：FR-VIEW-002、FR-WB-006、DEC-28（2026-11-10 确认，本次同步 diff 待审阅）。宿主从当前 Project 的实例目录生成入口，按 `instanceId` 定位并核实 Project 与固定包版本；名称和图标取实例设置及包声明的默认值。默认五项保持现状，不把工作台实例塞入默认 View ID 枚举。
++来源：FR-VIEW-002、FR-WB-006、DEC-28（2026-11-10 接受方向，具体接缝为待原型评审的设计草案）。宿主从当前 Project 的实例目录生成入口，按 `instanceId` 定位并核实 Project 与固定包版本；名称和图标取实例设置及包声明的默认值。默认五项保持现状，不把工作台实例塞入默认 View ID 枚举。
+ 
+ 点击实例打开对应工作台，不因打开或安装自动创建 Session / 出图。导航选中状态仍由 Main Canvas 决定；重命名不改变实例 ID。固定、停用、删除及错误入口由[工作台生命周期](../workbench/spec.md#62-导航与生命周期)负责，具体呈现在原型中评审。
+ 
+--- a/specs/session/spec.md
++++ b/specs/session/spec.md
+@@ -54,7 +54,7 @@
+   - Session History 的分组、排序呈现、滚动、Rename 交互：见 [Navigation spec](../navigation/spec.md)。本文提供排序字段与状态。
+   - Tab 注意力点的渲染、关闭确认对话框的 UI、折叠按钮注意力点的渲染：Project 壳层（[T20261009-project-shell](../../tasks/archive/T20261009-project-shell/task.md)）。
+   - CLI 协议、进程管理、Stop 的资源清理细节：CLI Adapter（[Adapter spec](../agent-adapter/spec.md)）。本文只以抽象接口描述所需能力（第 5.1 节）。
+-  - 默认 View 的 Conversation 列与首条上下文由 [Project View spec](../project-view/spec.md)负责；自定义工作台的逐次上下文、执行范围和产物发布由 [workbench spec](../workbench/spec.md)负责。两者使用普通 Session，本模块维护会话、查看状态和 Stop（FR-WB-003、005，2026-11-10 确认，本次同步 diff 待审阅）。
++  - 默认 View 的 Conversation 列与首条上下文由 [Project View spec](../project-view/spec.md)负责；自定义工作台的逐次上下文、执行范围和产物发布由 [workbench spec](../workbench/spec.md)负责。两者使用普通 Session，本模块维护会话、查看状态和 Stop（FR-WB-003、005，2026-11-10 接受方向，具体接缝为待原型评审的设计草案）。
+   - 轮次原生文件记录与 Diff 联动（依赖 FR-TOOL-002、04 第 1 节第 13 项与 [context-tools task](../../tasks/archive/T20261009-context-tools/task.md)；组件修订见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节）。
+ 
+ ## 3. 行为细则
+--- a/specs/workbench/spec.md
++++ b/specs/workbench/spec.md
+@@ -5,25 +5,26 @@
+ | 项目 | 内容 |
+ |---|---|
+ | 模块 | `workbench` |
+-| 文档状态 | 已确认（2026-11-10） |
++| 文档状态 | 草稿 |
++| 确认范围 | 推荐方向已接受；详细设计待原型评审，未定稿 |
+ | 覆盖需求 | FR-VIEW-002、FR-WB-001～FR-WB-008 |
+ | 相关验收 | [AC-WB-01～08](<../../docs/05. Acceptance Criteria.md#6-自定义工作台原型验收>) |
+ | 来源 | 用户 2026-11-10 对话：已审阅 09 的讨论问题，全部接受推荐答案，要求替换相关文档旧描述；确认记录见 [09](<../../docs/09. Workbench Discussion.md>)、[DEC-28](<../../docs/07. Decisions.md#dec-28-用户自定义工作台>) |
+ | 文档职责 | 维护包与实例、位置与产物、上下文、宿主提交、页面隔离及生命周期的详细行为 |
+ 
+-本文承接已审阅讨论稿的行为，未把技术示意升级为稳定 API。文档同步 diff 待审阅；方向与已接受行为无需重复确认。实现、验证和人工验收分别由[路线图](<../../docs/06. Development Roadmap.md#42-自定义工作台原型>)与后续实施任务记录。
++本文整理原型设计的候选方案，不是已确认的完整实现规格。第 2～8 节描述拟验证的交互、数据与技术方案；即使使用陈述句，也不表示已通过设计评审。用户 2026-11-10 明确纠正：原型尚未设计，依赖原型的问题须在设计后评审。评审通过后按结论修订并确认相应条目，再据此实施；阶段见[路线图](<../../docs/06. Development Roadmap.md#42-自定义工作台原型>)。
+ 
+ ## 1. 职责与后续事项
+ 
+ 本模块复用 Project、Navigation 和普通 CLI Session，负责自定义页面及其内容状态。五个默认 View 继续由 [Project View spec](../project-view/spec.md)负责；不把默认 View 的声明式限制、首条 Context 和只读 Preview 套用到工作台。
+ 
+-WB-Q1～Q12 的推荐答案已全部接受，映射见 [09 确认记录](<../../docs/09. Workbench Discussion.md#2-讨论问题确认记录>)。以下是推荐答案中明确保留的后续工作，不再讨论是否采用工作台方向。
++WB-Q1～Q12 的方向与待评审部分分别见 [09 讨论记录](<../../docs/09. Workbench Discussion.md#2-讨论问题确认记录>)。原型设计需呈现创建、编辑、使用、更新和生命周期的连续操作；不能只核对以下技术或后续事项，就把其余详细行为标为已确认。
+ 
+ | 事项 | 负责人 | 解决时点与影响 |
+ |---|---|---|
+ | 一条真实 CLI 与出图路径：本地文件、参考图、费用展示、Stop、错误反馈 | 实施 Agent 核实能力；新增付费服务或权限取舍由产品负责人决定 | 真实出图验证前；未验证不得宣称支持 |
+ | iframe 或独立 WebContents、命令桥或 MCP、Schema / SDK 字段、资源限额与存储目录 | 实施 Agent | 原型中验证并记录；改变行为、费用或数据权限时交产品负责人 |
+-| 来源与权限说明、创建 / 编辑入口、固定与停用操作的呈现 | 实施 Agent 设计，产品负责人评审 | 原型评审；声明能力不自动授予权限 |
++| 创建 / 编辑 / 预览 / 添加流程、上下文和目标选择、生成反馈 / 版本恢复、固定 / 停用 / 移除、来源与权限说明 | 设计 Agent 制作原型，AI 检查，产品负责人评审 | 原型设计后、对应功能实现前；按评审结论定稿 |
+ | 删除是否同时 Stop、可恢复记录期限与永久清理 | 产品负责人 | 删除与清理功能实施前；不阻塞首个原型的创建、生成、停用和恢复 |
+ | 导入导出体验、完整多实例管理、默认 View 的迁移 / 隐藏 / 排序 | 产品负责人 | 原型评估后的对应阶段；不纳入首个原型 |
+ 
+@@ -170,7 +171,7 @@
+ 
+ 宿主先确认执行记录归属及目标范围，再检查文件确实存在、能够解码、符合尺寸和类型要求。通过后导入为稳定产物，记录来源并提交绑定，最后返回产物 ID、位置新版本或具体失败原因。AI 的“已经完成”回复不能代替这次提交。
+ 
+-首个原型先验证薄的本地命令桥，让已有 CLI 的 Shell 工具调用宿主操作；命令桥使用宿主发放且限定本次执行范围的连接凭据。页面不持有这些凭据。原型需验证发现、连接、退出清理和错误回传后才能确定采用。若 CLI 无法稳定调用命令桥，再评估 MCP 作为传输方式，业务校验仍由同一宿主服务负责。
++后续技术验证拟先尝试薄的本地命令桥，让已有 CLI 的 Shell 工具调用宿主操作；命令桥使用宿主发放且限定本次执行范围的连接凭据。页面不持有这些凭据。原型需验证发现、连接、退出清理和错误回传后才能确定采用。若 CLI 无法稳定调用命令桥，再评估 MCP 作为传输方式，业务校验仍由同一宿主服务负责。
+ 
+ [MCP 工具规范的 2025-06-18 版本](https://modelcontextprotocol.io/specification/2025-06-18/server/tools)提供输入 Schema、输出 Schema 与结构化结果的协议参考。它不证明当前 Codex 或 Claude 接入已经支持本方案；具体配置与能力须在原型中验证。
+ 
+@@ -186,7 +187,7 @@
+ 
+ 把“当前位置的内容”和“正在尝试的新结果”分别记录。更新失败时保留当前图片，失败原因属于本次尝试。页面只能展示实际收到的进度；工具不提供逐图进度时显示处理中，不估算虚假的百分比。
+ 
+-| 情况 | 行为 |
++| 情况 | 候选处理方式（待验证与评审） |
+ |---|---|
+ | 五张图只成功三张 | 已接收的三张可用；其余标明失败或未返回，重试时明确目标 |
+ | 工具成功，但提交失败 | 保留暂存产物，先重试提交，避免再次付费生成 |
+@@ -248,7 +249,7 @@
+ 
+ 以下动作分别处理，避免隐藏入口时意外丢失成果。下表描述目标行为，首个原型的覆盖范围见[路线图 §4.2](<../../docs/06. Development Roadmap.md#42-自定义工作台原型>)。
+ 
+-| 动作或情况 | 行为 |
++| 动作或情况 | 候选行为（待原型评审） |
+ |---|---|
+ | 安装包、添加实例 | 安装登记可用包版本；添加实例才使它归属当前 Project 并获得导航入口。首期可由“添加至当前项目”合并完成 |
+ | 打开实例 | 按需加载页面，绑定当前实例的 SDK；不因安装或应用启动加载所有页面 |
+@@ -261,7 +262,7 @@
+ | 页面加载失败或崩溃 | 宿主显示错误与重试入口，对话和已保存成果仍可用；修复或回退包版本后重新加载，不自动重做生成 |
+ | 重启应用 | 恢复实例目录、固定状态、已选包版本与已提交绑定；只加载当前需要展示的页面，不自动启用已停用实例 |
+ 
+-上述行为已确认；具体入口位置、来源与权限展示在原型中设计并评审。删除实例时是否同时停止运行中的 Session、可恢复记录保存多久、何时彻底删除文件，须在相应操作实施前确定，不能把卸载页面、Stop 和清空数据合成一个动作。停用后的产物提交仍须经过第 4.3 节的校验；用户显式停止执行时按第 5 节撤销后续发布权限。
++上表为已接受方向下的候选生命周期方案，具体行为与操作呈现须结合原型评审；当前没有原型评审结论。删除实例时是否同时停止运行中的 Session、可恢复记录保存多久、何时彻底删除文件，须在相应操作实施前确定，不能把卸载页面、Stop 和清空数据合成一个动作。停用后的产物提交仍须经过第 4.3 节的校验；用户显式停止执行时按第 5 节撤销后续发布权限。
+ 
+ ### 6.3 存储、分享与改版
+ 
+@@ -285,7 +286,7 @@
+ 
+ [Electron 官方安全说明](https://www.electronjs.org/docs/latest/tutorial/security)要求谨慎处理不可信代码，关闭不可信内容的 Node 集成、保持上下文隔离，并校验 IPC 发送方。这里的容器与接口方案是基于这些要求提出的设计，不能仅凭启用某个开关认定完成隔离验证。
+ 
+-外部机制的源码依据与可借鉴范围统一见 [Harness 调研](../../docs/references/deepseek-harness/README.md)。本规格的隔离页面、受限 SDK 和产物发布边界是本项目已确认的设计要求，不能从参考项目采用了插件机制推导出这些边界已经验证。
++外部机制的源码依据与可借鉴范围统一见 [Harness 调研](../../docs/references/deepseek-harness/README.md)。本草案的隔离页面、受限 SDK 和产物发布边界是待验证的设计方案，不能从参考项目采用了插件机制推导出这些边界已经验证。
+ 
+ 
+ ## 8. 模块接缝与实现验证
+--- a/tasks/archive/T20261110-workbench-confirmation/task.md
++++ b/tasks/archive/T20261110-workbench-confirmation/task.md
+@@ -7,33 +7,36 @@
+ created: 2026-11-10
+ ---
+ 
+-# 工作台确认与正式文档同步
++# 工作台方向同步与确认范围纠正
+ 
+ ## 目标与依据
+ 
+-用户 2026-11-10 已审阅 `docs/09. Workbench Discussion.md` 的推荐答案并全部接受，要求更新相关文档、用新描述替换旧描述，随后建设原型并评审。本任务交付文档同步，后续原型由独立实施任务跟踪。
++用户 2026-11-10 已审阅 `docs/09. Workbench Discussion.md` 的推荐答案并全部接受，要求更新相关文档、用新描述替换旧描述，随后建设原型并评审。用户随后明确纠正：原型尚未设计，不能确认依赖原型设计后再评审的问题。本任务按该纠正交付方向与草案的分层同步；后续先设计原型并评审，再定稿实施。
+ 
+ ## 范围与决定
+ 
+-- 推荐答案的确认落入 [DEC-28](<../../../docs/07. Decisions.md#dec-28-用户自定义工作台>)；完整行为迁入 [workbench spec](../../../specs/workbench/spec.md)，09 保留确认与取舍入口。
++- 推荐答案的确认落入 [DEC-28](<../../../docs/07. Decisions.md#dec-28-用户自定义工作台>)；候选行为归入 [workbench spec 草案](../../../specs/workbench/spec.md)，09 分列已接受方向与待原型评审事项。
+ - 同步 01～07、索引、默认 View 与导航 / 输入 / Session 接缝、README、设计入口及架构快照中的扩展描述；保留无关工作区改动。
+ - 已接受推荐中明确保留的技术核实与后续产品细节继续由规格 §1 管理，不推定具体 CLI、付费服务、容器或永久删除规则已确定。
+-- 原型范围与实施 / 评审 / 人工验收顺序由[路线图 §4.2](<../../../docs/06. Development Roadmap.md#42-自定义工作台原型>)负责。本任务不实现原型，不调用出图服务，不提交或推送。
++- 原型设计、设计评审、定稿及后续实现验收顺序由[路线图 §4.2](<../../../docs/06. Development Roadmap.md#42-自定义工作台原型>)负责。本任务不实现原型，不调用出图服务，不提交或推送。
+ 
+ ## 交付标准
+ 
+-- [x] WB-Q1～Q12 全部记为已接受，旧的“尚未确认方向”和自定义扩展必须声明式的约束已替换。
+-- [x] FR-WB-001～008、AC-WB-01～08 和详细规格有对应关系，默认五个 View 保留规则与新工作台规则清楚区分。
++- [x] WB-Q1～Q12 分清推荐方向接受与待原型后评审的内容，详细规格恢复草案；旧的自定义扩展必须声明式约束不重新引入。
++- [x] FR-WB-001～008、AC-WB-01～08 作为候选需求与验证场景对应，供原型评审；默认 View 的既有规则不受草案状态影响。
+ - [x] 下一步、整体、模块、阶段、验收状态及旧调研任务的当前指向一致；不把确认或文档交付标为功能实现 / 验收通过。
+ - [x] 文档链接、标题 / 表格 / 示例结构与本轮增量 diff 检查通过；记录已核对和保留内容。
+ 
+-以上为本次对话要求与文档维护规则下的文档交付标准，不代表 AC 已执行。普通文档同步由主 Agent 自检，无需独立功能验收；原型实施后的独立评审仍必需。
++以上为本次对话要求与文档维护规则下的文档交付标准，不代表 AC 已执行。普通文档同步由主 Agent 自检；设计原型完成后先评审交互与取舍，后续功能实施再按协议独立验收。
+ 
+ ## 收尾
+ 
+ - 主 Agent 负责。本轮开始时 main 已有未提交文档与输入区代码，保留原状，不切换分支或同步 main。本轮仅修改文档，使用工作前快照复核增量，原型代码后续在隔离 worktree 中实施。
+-- 2026-11-10，主 Agent 自检收尾并归档。基线为 `3deffa4` 加会话开始时的未提交修改；[本轮独立 diff](evidence/W0-document-sync.diff)相对此次会话工作前快照生成，排除原有修改及本任务记录，供文档审阅。
++- 2026-11-10，主 Agent 自检收尾并归档。基线为 `3deffa4` 加会话开始时的未提交修改；[首次同步 diff](evidence/W0-document-sync.diff)保留当时快照，其中扩大确认范围的结论有误；当前以[确认范围修正 diff](evidence/W1-review-boundaries.diff)和负责文档为准。
+ - 验证：`pnpm check:docs` 无新增问题，4 个历史基线问题未扩大；Markdown / GFM 解析检查 22 份文档、114 个表格、483 个标题和 2 个 JSON 示例，结构通过；8 项 FR 与 8 项 AC 对应检查通过；架构 HTML 内嵌脚本语法通过；最终增量 diff 与 `git diff --check` 已复核。归档后复查链接。
+ - 语义复核：01 产品定位与用户、02 FR 与优先级、03 交互、04 技术边界、05 验收与追踪矩阵、07 DEC-04～07 / DEC-28、工作台与 Project View / Navigation / Input / Session 规格已同步；06 的下一步、整体、模块、阶段、验收五处均更新。09 只维护确认与取舍入口，详细行为迁入规格，原型范围和验收分别由 06、05 负责。
+ - 索引、README、设计入口、08 扩展摘要、参考调查的负责文档链接及两个旧讨论任务的后续指向已核对。默认 View 的有效规则、历史原型 / 实现 / 验收证据保持原基线；To-dos、CLI 安装、治理及输入区代码的原有修改不属本次确认，不改其状态。应用未改动，不运行应用测试。
+-- 本次确认只覆盖已审阅的工作台推荐，不代表其他草稿获确认、原型已实现或功能已验收。同步 diff 供用户审阅，后续按路线图建设原型；未提交、未推送。
++- 2026-11-10 后续纠正：用户指出原型尚未设计，不能确认需要原型后评审的问题。主 Agent 的错误是把推荐方向接受扩展成详细设计确认，并用实现后的验收替代设计评审。前述链接、结构检查未能识别该语义错误，不作为确认范围正确的证据。
++- 已纠正 09 与工作台规格状态、01～05 增量状态、DEC-28、路线图的下一步 / 整体 / 模块 / 阶段 / 人工事项 / 验收，以及导航、输入、Session、设计和架构入口。WB-Q1～Q12 的待设计 / 验证 / 评审部分逐项列出；FR 和 AC 保留编号但恢复草案。保留已接受方向及默认 View 的既有规则，不伪造原型设计或评审结果。
++- 当前顺序为方向同步 → 原型设计 → 设计评审与修改 → 规格定稿 → 功能实现与技术验收 → 人工产品验收。功能实现不再是设计评审的前提。原型尚未设计，本次只修正文档，未提交、未推送。
++- 修正验证：复核本轮增量 diff、状态与阶段语义，检查 Markdown 表格 / 标题及链接回归；检查结果见本次对话。

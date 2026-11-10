@@ -4,6 +4,8 @@ AI Developer Studio V1.0 的设计工作区，用于保存设计资料、参考�
 
 ## 人工审阅入口
 
+- 自定义工作台的已接受方向与待评审问题见 [09 讨论记录](<../docs/09. Workbench Discussion.md>)；下一步按 [09 暂采纳方案](<../docs/09. Workbench Discussion.md#22-未确定事项>)和 [03 交互草案](<../docs/03. UX Specification.md#用户自定义工作台>)直接制作原型，设计评审后再定稿和实施。现有 v06 不作为新增工作台的交付证据。
+
 - [页面布局与输入体验评审 v02](layout-ux-review-v02.md#6-采用记录)：v06 UI 已于 2026-10-23 授权采用；按 2026-10-24 反馈修正五格静态思考指示与选中切换反馈，规格 diff 待审阅，后续菜单对齐与 Max 配色修正见[后续任务](../tasks/archive/T20261024-effort-menu-polish/task.md)；原实施 / 验证与人工复验见[本轮任务](../tasks/archive/T20261023-v06-ui-effort/task.md)；历史可操作稿见[原型 v06](prototypes/README.md#studio-灰度交互原型-v06)，初始布局反馈与竞品观察保留在 [v01](layout-ux-review-v01.md)。
 - [组件修订确认记录](components/shell-spec-v02.md#1-已确认与待确认)。
 - [视觉参数待确定项](visual-direction.md#1-高保真阶段待确定)。

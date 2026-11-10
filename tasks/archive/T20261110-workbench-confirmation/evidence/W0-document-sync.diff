@@ -1,0 +1,1449 @@
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,6 @@
+ # AI Developer Studio
+ 
+-以本地项目为中心的轻量桌面 AI 开发工作台：统一管理 Codex CLI、Claude Code 等 CLI Agent 的 Session，并通过 AI 生成的 Project View 帮助开发者持续理解项目状态。V1 首发 macOS。
++以本地项目为中心的轻量桌面 AI 工作台：统一管理 Codex CLI、Claude Code 等 CLI Agent 的 Session，通过 Project View 理解项目状态，并支持面向开发与创作的自定义工作台方向。V1 首发 macOS。自定义工作台尚处于原型建设前，范围和进度见[路线图](<docs/06. Development Roadmap.md#42-自定义工作台原型>)。
+ 
+ 产品定位、V1 目标与核心概念见 [01. 产品定义](<docs/01. Product Definition.md>)；当前阶段、进度和下一步见 [06. V1 建设计划与进度](<docs/06. Development Roadmap.md>)。
+ 
+--- a/design/README.md
++++ b/design/README.md
+@@ -3,6 +3,8 @@
+ AI Developer Studio V1.0 的设计工作区，用于保存设计资料、参考图片、界面方案和交互原型，逐步确定产品的视觉与操作体验。
+ 
+ ## 人工审阅入口
++
++- 自定义工作台的方向与原型范围见 [09 确认记录](<../docs/09. Workbench Discussion.md>)；后续原型按 [03 工作台交互](<../docs/03. UX Specification.md#用户自定义工作台>)设计并评审。现有 v06 不作为新增工作台的交付证据。
+ 
+ - [页面布局与输入体验评审 v02](layout-ux-review-v02.md#6-采用记录)：v06 UI 已于 2026-10-23 授权采用；按 2026-10-24 反馈修正五格静态思考指示与选中切换反馈，规格 diff 待审阅，后续菜单对齐与 Max 配色修正见[后续任务](../tasks/archive/T20261024-effort-menu-polish/task.md)；原实施 / 验证与人工复验见[本轮任务](../tasks/archive/T20261023-v06-ui-effort/task.md)；历史可操作稿见[原型 v06](prototypes/README.md#studio-灰度交互原型-v06)，初始布局反馈与竞品观察保留在 [v01](layout-ux-review-v01.md)。
+ - [组件修订确认记录](components/shell-spec-v02.md#1-已确认与待确认)。
+--- a/docs/00. Documentation Index.md
++++ b/docs/00. Documentation Index.md
+@@ -22,13 +22,13 @@
+ | [02. 功能需求](<02. Functional Requirements.md>) | 模块功能、FR 编号和 P0 / P1 优先级 |
+ | [03. 交互规格](<03. UX Specification.md>) | 页面布局、导航、状态表现和交互规则 |
+ | [04. 技术要求](<04. Technical Requirements.md>) | 技术栈、CLI 集成、运行隔离和技术待决事项 |
+-| [05. 验收标准](<05. Acceptance Criteria.md>) | V1 核心场景及需求对应关系；To-dos 增量验收草案单列 |
++| [05. 验收标准](<05. Acceptance Criteria.md>) | V1 核心场景及需求对应关系；To-dos 草案与工作台原型验收单列 |
+ | [决定记录](<07. Decisions.md>) | 产品与技术方案的选择、依据和确认状态 |
+ | [08. 系统架构与建设状态](<08. System Architecture.html>) | 交互式架构全景、关键数据流及模块状态快照；进度依据见 06 及相关任务；[制作与自检记录](../tasks/T20261011-system-architecture/task.md) |
+ 
+-## 讨论草案
++## 专项方案与确认记录
+ 
+-[09. 用户自定义 AI 工作台](<09. Workbench Discussion.md>)：讨论用户创建工作台插件、导航与生命周期，以及 Web 页面、内容约束、AI 生成和产物绑定的配合方式，给出五图工作台的原型建议。正式需求与建设状态仍由上述负责文档维护。
++[09. 用户自定义 AI 工作台](<09. Workbench Discussion.md>)：工作台推荐答案的确认与取舍入口。正式需求见 [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>)，详细行为见 [workbench spec](../specs/workbench/spec.md)，下一步与阶段状态见 [06 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。
+ 
+ ## 相关资料
+ 
+--- a/docs/01. Product Definition.md
++++ b/docs/01. Product Definition.md
+@@ -9,12 +9,14 @@
+ | 文档类型 | Product Definition / 产品定义 |
+ | 当前阶段 | MVP / 原型设计阶段 |
+ | 目标平台 | 桌面客户端；V1 首发 macOS 13 Ventura 或更高版本、Apple Silicon arm64；Intel / x64、Windows / Linux 不在 V1（2026-10-17 确认，见 [DEC-15](<07. Decisions.md#dec-15-v1-macos-arm64-兼容范围>)） |
+-| 核心用户 | AI 开发者、独立开发者 |
++| 核心用户 | AI 开发者、独立开发者，以及使用本地 Project 与 CLI 完成创作任务的用户 |
+ | 文档状态 | 已确认（2026-10-09） |
+ | 文档职责 | 定义产品背景、定位、V1 目标与非目标、目标用户、核心场景、核心概念、产品原则和成功标准。 |
+ | 主要读者 | 产品、设计、研发负责人、项目负责人 |
+ 
+ 
++工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++
+ ## 1. 项目背景
+ 
+ 随着 Codex CLI、Claude Code 等 AI Coding Agent 的成熟，开发者的软件开发方式正在由“人工操作 IDE 完成编码”逐渐转变为“通过自然语言驱动 Agent 完成开发”。
+@@ -25,7 +27,7 @@
+ - Codex CLI、Claude Code 等 CLI Agent 可以直接操作本地工程，但多项目、多 Session 和执行状态管理不够直观；
+ - Cursor 等 AI IDE 具备完整工程能力，但继承了传统 IDE 的复杂界面和较高的信息密度，对于以 AI Agent 为主要开发方式的用户而言较为厚重。
+ 
+-因此，本项目计划开发一款以 **本地项目为核心、AI 对话为主要交互方式、CLI Agent 为执行引擎** 的轻量桌面开发工作台。
++因此，本项目计划开发一款以 **本地项目为核心、AI 对话为主要交互方式、CLI Agent 为执行引擎** 的轻量桌面 AI 工作台。
+ 
+ 产品重点不是重新实现完整 IDE，而是解决以下问题：
+ 
+@@ -39,19 +41,19 @@
+ 
+ ### 产品定义
+ 
+-本产品是一款面向 AI 开发者和独立开发者的桌面 AI 开发工作台。
++本产品是一款面向开发与创作任务的桌面 AI 工作台，以本地 Project 和 CLI Session 为基础。自定义工作台的产品方向与首个五图原型范围于 2026-11-10 确认，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。
+ 
+ 核心产品模型为：
+ 
+-**Local Project + CLI Session + AI Conversation + Project Knowledge + Project View**
+-
+-用户通过对话向 Codex CLI、Claude Code 等 Agent 提出需求，由 Agent 直接操作本地工程；客户端负责组织项目、Session、项目知识及工程工具，并提供统一的可视化工作环境。
++**Local Project + CLI Session + AI Conversation + Project Knowledge + Project View / Workbench**
++
++用户通过对话向 Codex CLI、Claude Code 等 Agent 提出需求，由 Agent 直接操作本地工程；客户端负责组织项目、Session、项目知识、工作台产物及工程工具，并提供统一的可视化工作环境。
+ 
+ ---
+ 
+ ### 一句话定位
+ 
+-**以本地项目为中心，统一管理 Codex、Claude Code 等 CLI Agent Session，并通过 AI 动态项目视图帮助开发者完成开发和持续理解项目状态的轻量 AI Developer Studio。**
++**以本地项目为中心，统一管理 Codex、Claude Code 等 CLI Agent Session，通过项目视图理解项目状态，并通过自定义工作台完成开发与创作的轻量 AI Developer Studio。**
+ 
+ ---
+ 
+@@ -97,6 +99,8 @@
+ 11. 提供 Files、Search、Diff、Browser、Terminal 工程辅助工具，基本操作对齐 VS Code（Search 与对齐范围于 2026-10-26 确认，DEC-25）；
+ 12. 保持界面结构简单，不演变成传统重型 IDE。
+ 
++自定义工作台作为 P1 增量建设，先交付五图原型；需求见 [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>)，阶段安排见[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。这项方向确认不改变既有 V1 功能的实现与验收记录。
++
+ ## 4. V1 非目标范围
+ 
+ 以下能力不属于原 V1 MVP 核心范围；其中 To-dos 相关能力已获用户确认纳入增量建设规划，按 [DEC-26](<07. Decisions.md#dec-26-agent-to-dos-完整借鉴与分阶段建设>)分阶段交付，不回填为当前 V1 已实现功能：
+@@ -144,6 +148,10 @@
+ - 不希望额外维护复杂项目管理系统；
+ - 希望通过普通 CLI Session 请求 Agent 整理项目进度、架构及业务状态（生成触发遵循 FR-VIEW-003，不指客户端后台自动分析）。
+ 
++#### 使用 AI 创作的本地项目用户
++
++使用现有 CLI 和本地素材，希望按自己的页面组织、生成与修改内容。首个原型覆盖五个图片位置，不提前承诺文章、表格或视频编辑器。
++
+ ## 6. 核心使用场景
+ 
+ ### 打开已有项目
+@@ -217,6 +225,10 @@
+ 
+ ---
+ 
++### 创建并使用创作工作台
++
++用户通过对话或模板创建五图工作台，在隔离预览中调整布局，添加至 Project 后生成图片，并选择其中一张继续修改。具体交互由 [03 工作台交互](<03. UX Specification.md#用户自定义工作台>)负责。
++
+ ### 查看代码修改
+ 
+ 用户手动打开右侧 Diff。
+@@ -243,10 +255,10 @@
+ 
+ Project 是以下内容的容器：
+ 
+-- 本地源码；
++- 本地源码与创作素材；
+ - CLI Session；
+ - Project Knowledge；
+-- Project Views；
++- Project Views 与工作台实例；
+ - UI 状态；
+ - 工具状态。
+ 
+@@ -305,7 +317,11 @@
+ 
+ **Project Knowledge → Structured Data → View Rendering → AI Generated UI**
+ 
+-V1 中的 “AI Generated UI” 指 Agent 在客户端提供的受信组件范围内声明式设计 View，不生成可执行的 HTML / JavaScript；自由 HTML 推迟到 P1 / 自定义 View（[DEC-05](<07. Decisions.md>)，2026-10-09 确认）。
++五个默认 View 使用宿主受信组件进行声明式渲染。自定义扩展采用工作台包，允许隔离的 HTML、CSS 和 JavaScript 配结构化定义；默认 View 在原型阶段保留现状，见 [DEC-05](<07. Decisions.md#dec-05-project-view-渲染>)与 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)。
++
++### Workbench
++
++工作台用于交互和持续生成内容。包描述页面与工作要求，Project 内实例保存用户设置、产物和绑定。页面与 AI 共用结构化定义，宿主校验产物并提交到稳定位置，详细概念见[工作台规格](../specs/workbench/spec.md)。
+ 
+ ---
+ 
+@@ -340,8 +356,8 @@
+ 10. 历史 Session 无事件时不显示 Idle；
+ 11. 一轮 Agent 完成后显示 Completed Unread 提醒；
+ 12. 点击 Session 即视为已查看结果；
+-13. Project View 本质是 Project Knowledge 的可视化；
+-14. Project View 的数据与展示必须分离；
++13. 默认 Project View 是 Project Knowledge 的可视化；自定义工作台组织可交互内容和产物；
++14. Project View 的数据与展示分离；工作台的定义、页面和产物绑定分别管理；
+ 15. Project View 不绑定唯一长期 Session；
+ 16. Project View 内的 Conversation 仍是普通 CLI Session；
+ 17. New Chat 创建的所有 Session 都必须出现在 Session History；
+--- a/docs/02. Functional Requirements.md
++++ b/docs/02. Functional Requirements.md
+@@ -13,6 +13,8 @@
+ | 主要读者 | 产品、研发、测试、产品设计 |
+ 
+ 
++工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++
+ ## 1. 需求管理约定
+ 
+ - `P0`：V1 MVP 必须交付。
+@@ -427,11 +429,13 @@
+ - Security；
+ - Requirements。
+ 
+-新增 View 后进入 Project View Navigation。
++新增扩展采用工作台包与 Project 内实例，进入当前项目导航。包可包含自定义 Web 页面与结构化定义，声明式组件用于模板；创建、内容写回和生命周期由 FR-WB-001～008 规定（2026-11-10 确认，DEC-28）。默认五个 View 不在首个原型中迁移。
+ 
+ ---
+ 
+ ### FR-VIEW-003 View 内容动态生成
++
++本节描述默认五个 View；工作台内容生成与结构编辑的区分见 FR-WB-001、FR-WB-004。
+ 
+ Project View 不采用完全固定的传统 Dashboard 模板。
+ 
+@@ -644,6 +648,8 @@
+ - Result。
+ 
+ ## 4. Project View 工作模式
++
++以下为默认 View 的基线；工作台复用普通 Session，逐次上下文与页面交互按第 9 节处理。
+ 
+ ### FR-VIEW-005 左右布局
+ 
+@@ -883,7 +889,7 @@
+ | Project View | 左 Conversation / 右 Preview | P0 |
+ | Project View | AI Generated View | P0 |
+ | Project View | Knowledge / View 分离 | P0 |
+-| Project View | 自定义 View | P1 |
++| Project View / Workbench | 用户自定义工作台，先建设五图原型（第 9 节） | P1 |
+ | Tools | Files | P0 |
+ | Tools | Search | P1（2026-10-26 确认纳入，DEC-25） |
+ | Tools | Diff | P0 |
+@@ -939,3 +945,39 @@
+ ### FR-TODO-009 设置、模板与清理
+ 
+ 支持全局默认 / Project 覆盖 / 单任务配置、可复用任务模板、分阶段附加指令、初始化 / preflight、Worktree 位置、合入 / 清理偏好及原生支持下的恢复前压缩。提供搜索、看板 / 列表、拖拽、延后、归档 / 恢复、删除和独立清理入口。任务、会话、分支、Worktree 的删除影响必须分开显示；存在未保存或未交付工作时不能静默清理。
++
++## 9. 用户自定义工作台
++
++来源：2026-11-10 用户审阅并全部接受 [09 的 WB-Q1～Q12](<09. Workbench Discussion.md#2-讨论问题确认记录>)，见 DEC-28。以下为 P1 增量需求，首个原型覆盖范围由[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)维护；既有五个默认 View 不迁移。详细行为由 [workbench spec](../specs/workbench/spec.md)负责。
++
++### FR-WB-001 创建与编辑
++
++用户通过 AI 对话或内置模板创建包，隔离预览后添加至当前 Project。编辑工作台产生草稿，预览后应用到当前实例；日常生成只更新内容，不隐式改结构。创建、加载和安装不自动出图。验收：AC-WB-01、AC-WB-02。
++
++### FR-WB-002 结构化定义与稳定位置
++
++页面与 AI 共用稳定位置 ID、类型和约束。页面顺序变化不改变已发送请求的目标；定义的机器约束与风格等质量目标分别判断。验收：AC-WB-02、AC-WB-03。
++
++### FR-WB-003 普通 Session 与逐次上下文
++
++复用普通 CLI Session，每次发送读取当前实例、定义、位置版本、用户选择和可用能力。上下文可见、可移除；移除后本轮作为普通对话，不自动写回工作台。不创建隐藏会话。验收：AC-WB-03。
++
++### FR-WB-004 真实产物与宿主提交
++
++AI 通过已授权能力产生本地文件，宿主校验归属、目标范围与文件后导入并提交绑定。逐项成功结果直接显示并保留旧版，不以 AI 完成声明代替产物，不以文件校验代替作品质量验收。验收：AC-WB-03、AC-WB-04。
++
++### FR-WB-005 失败、并发与恢复
++
++保留已成功结果和失败前内容；提交重试复用文件并按操作 ID 幂等处理。旧版本结果不得静默覆盖当前位置。Stop 撤销后续发布权限，重启恢复已提交状态，不自动重新生成。验收：AC-WB-04、AC-WB-05、AC-WB-06、AC-WB-08。
++
++### FR-WB-006 包、实例与生命周期
++
++包与 Project 内实例分离，由宿主提供导航。安装、添加、取消固定、停用、删除和包卸载分别处理；页面卸载与 Session Stop 分开。停用保留已授权执行，删除撤销写回并保留可恢复成果。完整生命周期分阶段交付，未决删除细节见规格 §1。验收：AC-WB-01、AC-WB-07、AC-WB-08；后续管理界面另补验收。
++
++### FR-WB-007 保存、改版与分享
++
++包文件与实例产物保存在本地，宿主数据库管理实例、绑定、历史和执行记录。明确项目文件与宿主状态的备份依赖；编辑保留稳定位置绑定，包升级由用户选择。后续分享时，包默认不带成果，带成果分享通过实例导出恢复状态与资源，不携带对话或凭据。原型验收：AC-WB-02、AC-WB-06；分享阶段另补导入导出验收。
++
++### FR-WB-008 页面隔离与能力边界
++
++自定义页面与应用主 Renderer 隔离，无 Node、应用 Preload、数据库或 CLI 凭据访问。SDK 仅作用于当前实例，宿主校验消息来源、参数和资源范围；能力声明不能自行授权，页面加载失败不影响宿主对话或已保存成果。验收：AC-WB-07、AC-WB-08。
+--- a/docs/03. UX Specification.md
++++ b/docs/03. UX Specification.md
+@@ -13,13 +13,15 @@
+ | 主要读者 | 产品设计、UI、前端、产品经理 |
+ 
+ 
++工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++
+ ## 确认记录
+ 
+ - 第 5 节工具关闭入口补充依据用户 2026-10-11 对话确认，并随原型 v01 对齐任务于 2026-10-11 签收；验收证据见[归档验收记录](../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)。
+ - v06 UI 按用户 2026-10-23 指令采用；2026-10-24 用户纠正为最多五格静态思考指示，并在实际选中 max / ultra 时对 Composer 输入框播放一次切换反馈，弹窗信号不播放动画。范围见 [DEC-23](<07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)；本次规格 diff 待审阅，人工功能验收需调整后复验。
+ - UI 文案减法规则依据用户 2026-11-07 确认补充；本次规格 diff 待审阅。
+ 
+-> 本文档由 V1.0 原始 PRD 重组而来。除文档治理、交叉引用和追踪关系外，不新增产品需求；如与 Product Definition 或 Functional Requirements 冲突，以文档索引定义的优先级为准。
++> 本文档维护 V1 基线及已注明来源的增量要求。如与 Product Definition 或 Functional Requirements 冲突，以文档索引定义的优先级为准。
+ 
+ ## 1. 规范边界
+ 
+@@ -55,7 +57,7 @@
+ │   │   ├── Architecture
+ │   │   ├── Agent Team
+ │   │   ├── Business Flow
+-│   │   └── Custom Views
++│   │   └── 工作台实例（自定义页面）
+ │   │
+ │   └── Sessions
+ │       ├── Session A
+@@ -204,6 +206,16 @@
+ 
+ ---
+ 
++### 用户自定义工作台
++
++来源：FR-WB-001～008、DEC-28（2026-11-10 确认）。宿主提供“添加工作台”，支持 AI 对话创建和内置模板。预览先展示草稿；“添加至当前项目”创建实例并加入导航，不触发出图。来源、能力与权限说明随原型设计评审，能力声明不等于授权。
++
++从导航打开实例后，复用左侧普通 Conversation 与右侧工作台页面。页面允许选择内容、预览产物和填写可编辑的指令草稿，发起模型调用仍由用户发送。每次发送前能查看并移除工作台上下文；“第三张”等位置表达以发送时顺序解析，目标不唯一时先澄清。
++
++“编辑工作台”与日常生成分开。更新某张图片期间继续显示旧图；新结果校验后直接展示，旧版可恢复。部分失败显示真实结果与失败原因，不虚构进度。页面切换、停用、Stop 和删除按[工作台生命周期](../specs/workbench/spec.md#62-导航与生命周期)呈现为不同动作。
++
++首个原型的界面覆盖与后续管理入口见[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。默认五个 View 保持现状。
++
+ ### Project 切换
+ 
+ 用户点击顶部其他 Project：
+@@ -243,7 +255,7 @@
+ 
+ - Project Knowledge 尚未生成时，Preview 显示空状态和“生成 <View 名称>”入口；点击后把可编辑的生成指令填入左侧输入框，由用户发送（FR-VIEW-003）；
+ - Overview 中的 Recent Sessions、Needs Input、Recently Completed 来自客户端 Session 数据，Knowledge 为空时也直接显示；
+-- Preview 只读，支持滚动与缩放，修改通过 Conversation 完成；
++- 五个默认 View 的 Preview 只读，支持滚动与缩放，修改通过 Conversation 完成；自定义工作台按本节的[工作台交互](#用户自定义工作台)处理；
+ - Agent 更新 Knowledge 或 View 后 Preview 自动刷新，并显示“已更新”时间；刷新不改变 Workspace 布局；
+ - 渲染失败时保留上一次成功渲染的版本，并显示错误提示。
+ 
+@@ -386,7 +398,7 @@
+ | D-03 | Needs Input 以 Conversation 末尾的等待卡片呈现，用户答复后清除 | FR-STATE-002；第 6、7 节 | 已确认 |
+ | D-04 | Error 以错误卡片呈现，查看后清除列表提醒，再次发送消息时尝试恢复 | FR-STATE-003；第 6、7 节 | 已确认 |
+ | D-05 | Project View 左侧正在显示的 Session 视为用户正在查看 | FR-STATE-004 | 已确认 |
+-| D-06 | Knowledge 为空时不自动生成，由用户触发；Preview 只读、自动刷新，渲染失败时保留上一版 | FR-VIEW-003；第 6 节 | 已确认 |
++| D-06 | 默认五个 View 的 Knowledge 为空时不自动生成，由用户触发；其 Preview 只读、自动刷新，渲染失败时保留上一版 | FR-VIEW-003；第 6 节 | 已确认 |
+ | D-07 | 非当前 Project 的 Tab 显示单个注意力点 | FR-PROJ-002；第 7 节 | 已确认 |
+ | D-08 | Project Diff 保持原范围；新增原生“本轮变更”的规则见 FR-TOOL-002 与 DEC-08 | FR-TOOL-002；[DEC-08](<07. Decisions.md#dec-08-diff-范围与原生轮次变更>) | 原规则已确认；补充于 2026-10-10 确认 |
+ | D-09 | 启动页、`+` Tab 与已打开目录的处理 | FR-PROJ-001；第 6 节 | 已确认 |
+--- a/docs/04. Technical Requirements.md
++++ b/docs/04. Technical Requirements.md
+@@ -12,6 +12,8 @@
+ | 文档职责 | 承接产品需求的技术边界、CLI 集成原则、Runtime 隔离、概念数据模型、非功能要求和技术待决事项。 |
+ | 主要读者 | 技术负责人、客户端研发、架构、基础设施、产品 |
+ 
++工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
++
+ ## 1. 技术设计阶段验证与待决事项
+ 
+ 事项编号保持不变，供跨文档引用；确认依据见 [07. Decisions](<07. Decisions.md>)。
+@@ -35,15 +37,15 @@
+ |---|---|
+ | 1 | Project Knowledge 实际存储格式（已定：每个 View 一份带 `schemaVersion` 的 JSON，见 DEC-04）； |
+ | 2 | Project Knowledge 是否存储在 Project 内部隐藏目录（已定：`.ai-studio/`，默认被 Git 忽略，见 DEC-04）； |
+-| 3 | AI Generated View 的 HTML 渲染及安全沙箱方案（V1 已定：只做受信组件的声明式渲染，自由 HTML 沙箱推迟到 P1，见 DEC-05）； |
++| 3 | 默认五个 View 使用声明式渲染；自定义工作台采用隔离 Web 页面配结构化定义，容器在原型中验证（DEC-05、DEC-28）； |
+ | 7 | 同文件冲突检测已明确为 V1 非目标，不再待设计；职责与风险边界见 01 第 4 节（2026-10-11 确认，DEC-11）； |
+ | 8 | 当前 V1 基线未提供自动 Worktree / Branch 隔离（DEC-11）；2026-10-31 已由 DEC-26 纳入 To-dos 增量规划，不再待决定是否建设，具体版本未定。Git 只读 Diff 仍由 FR-TOOL-002 负责，新增任务 Git 写操作与隔离边界见下方 To-dos 技术输入； |
+-| 10 | Project View Context 如何注入不同 CLI（已定：首条消息前附加可移除的英文文本块，见 DEC-06）； |
+-| 11 | Project View 数据自动更新时机及权限边界（已定：客户端不自动生成，只监视、校验并刷新只读 Preview，见 DEC-07）； |
++| 10 | 默认 View 首条消息附加可移除的英文文本块；工作台每次发送读取最新目标状态（DEC-06、FR-WB-003）； |
++| 11 | 默认 View 监视文件并刷新只读 Preview；工作台由宿主校验并提交产物绑定，两者都不自动生成（DEC-07、FR-WB-004）； |
+ 
+ ## 2. 技术设计约束
+ 
+-> 本文档由 V1.0 原始 PRD 重组而来。除文档治理、交叉引用和追踪关系外，不新增产品需求；如与 Product Definition 或 Functional Requirements 冲突，以文档索引定义的优先级为准。
++> 本文档维护 V1 基线及已注明来源的增量要求。如与 Product Definition 或 Functional Requirements 冲突，以文档索引定义的优先级为准。
+ 
+ 技术方案必须服从 Product Definition 与 Functional Requirements，不得通过实现便利改变以下产品语义：
+ 
+@@ -343,3 +345,16 @@
+ - 外部 Issue / PR / webhook 文本作为不可信数据，凭据与日志分离；阶段验收不能只跑模拟 Provider，需验证当次声明支持的真实 CLI、Git 和平台写回。
+ 
+ Codeg 架构参考：[Architecture](https://docs.codeg.app/reference/architecture)。本轮不复制上游代码或资产；未来选取源码前核对固定提交、逐文件许可、依赖及署名 / 修改说明，不因根目录许可证自动认定所有素材均可直接复制。
++
++## 10. 自定义工作台技术要求
++
++来源：FR-WB-001～008、DEC-28（2026-11-10 确认）。复用现有 Project、Session、SQLite 与导航，增加包登记、实例、定义修订、位置版本、产物与执行记录。详细数据职责和提交规则由[工作台规格](../specs/workbench/spec.md)维护，以下为跨模块约束。
++
++- 默认 View 的 JSON 文件与声明式 Renderer 保留；自定义工作台有独立的隔离页面入口，不向原 Renderer 塞入可执行脚本。
++- 页面无 Node 或应用 Preload。SDK、消息来源和资源地址均限定当前实例；容器选择须通过隔离、加载与销毁验证。
++- 宿主是实例绑定的唯一写入入口。先稳定导入文件，再原子提交绑定和操作记录；重复操作、版本冲突、Stop 后迟到提交与崩溃恢复均可验证。
++- 工作台每次发送准备新的上下文与执行范围，不能复用默认 View 仅首条注入的策略；包编辑与产物发布使用不同入口。
++- 原型先验证本地命令桥的发现、连接、权限范围、错误回传与退出清理；不可行时评估 MCP。当前 CLI 支持普通对话不等于支持出图，具体路径与参考图能力须实测。
++- 包与实例导出分开。首期备份依赖项目文件和宿主数据库，不保证仅复制项目目录即可恢复；不改变 DEC-04 的现有 Git 忽略策略。
++
++Schema、SDK 名称、包目录、容器和传输选择仍是待原型落定的技术项；后续事项与决策边界见[规格 §1](../specs/workbench/spec.md#1-职责与后续事项)。实现与安全验证尚未完成，不以采用设计作为通过证据。
+--- a/docs/05. Acceptance Criteria.md
++++ b/docs/05. Acceptance Criteria.md
+@@ -13,7 +13,9 @@
+ | 主要读者 | 测试、产品、研发、项目负责人 |
+ 
+ 
+-> 本文档由 V1.0 原始 PRD 重组而来。除文档治理、交叉引用和追踪关系外，不新增产品需求；如与 Product Definition 或 Functional Requirements 冲突，以文档索引定义的优先级为准。
++> 本文档维护 V1 基线及已注明来源的增量要求。如与 Product Definition 或 Functional Requirements 冲突，以文档索引定义的优先级为准。
++
++工作台增量依据用户 2026-11-10 审阅并全部接受的推荐答案同步，见 [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>)；本次同步 diff 待审阅，不改变其他条目的确认或验收状态。
+ 
+ ## 1. 验收使用原则
+ 
+@@ -203,6 +205,21 @@
+ | FR-TODO-008 | AC-TODO-03 / 04 / 05 / 06 | 本地 / 自动合入与仓库交付 |
+ | FR-TODO-009 | AC-TODO-01 / 02 / 03 / 04 / 05 / 06 | 配置、模板、原生压缩、可见性和清理 |
+ 
++### 3.2 工作台原型追踪矩阵
++
++来源：FR-WB-001～008，具体场景见第 6 节。以下场景尚未执行，不继承 AC-06 的通过结论。
++
++| 需求 | 验收场景 | 主题 |
++|---|---|---|
++| FR-VIEW-002、FR-WB-001 | AC-WB-01、AC-WB-02 | 创建、安装与编辑 |
++| FR-WB-002 | AC-WB-02、AC-WB-03 | 稳定位置与内容约束 |
++| FR-WB-003 | AC-WB-03 | 普通 Session、逐次上下文与局部修改 |
++| FR-WB-004 | AC-WB-03、AC-WB-04 | 真实产物、校验与提交 |
++| FR-WB-005 | AC-WB-04、AC-WB-05、AC-WB-06、AC-WB-08 | 失败、并发、恢复与 Stop |
++| FR-WB-006 | AC-WB-01、AC-WB-07、AC-WB-08 | 实例导航、隔离与原型生命周期 |
++| FR-WB-007 | AC-WB-02、AC-WB-06 | 编辑与保存；导出、升级管理后续单列 |
++| FR-WB-008 | AC-WB-07、AC-WB-08 | 页面权限、资源与故障隔离 |
++
+ ## 4. 当前验收覆盖边界
+ 
+ 退出与异常清理专项按 [04 第 5 节的责任边界](<04. Technical Requirements.md#退出与异常清理责任边界>) 验证正常退出清理、失败诊断、异常后归属检查及误清理防护；不得将“任何异常退出即时零残留”或清理共享 / 归属不明的外部进程列为验收要求。受管进程清理和既有 Stop 退出证据仍须验证，不以范围澄清将未通过项改为通过（2026-10-11 确认；DEC-11）。
+@@ -231,3 +248,24 @@
+ | AC-TODO-06 仓库协作与规模 | 专用远端测试仓库 / 测试账号，普通任务和 Issue / PR 任务；浏览 / 筛选、按意图启动、创建 / 更新 PR、规则扫描和 webhook；三类平台分别执行 | 来源 / 目标 / fork 正确，不信任正文中的越权指令；凭据不入日志；重复或断网重试不重复创建 / 回写。PR 已发布不冒充已合并；无权限 / 限流保留本地成果。大量历史分页 / 筛选 / 清理与备份恢复不丢记录 | 平台模拟协议 + GitHub、GitLab、Gitea / Forgejo 真实指定链路；独立安全评审；阶段 6 验证前由 AI 制定并记录数据规模 / 耗时测量基线，做性能和当前包复验，不泛称全部兼容 |
+ 
+ 以上各阶段人工接受独立于 Git 合入、应用 Task Done 及本仓库开发 task 归档；未来实施任务负责保存实际基线、证据、未覆盖项和人工反馈，路线图只链接其当前结论。
++
++## 6. 自定义工作台原型验收
++
++来源：用户 2026-11-10 全部接受工作台讨论稿推荐，包括原 §9 的原型判断标准；现归入本节，关联 FR 见 §3.2。首个原型及后续范围由[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)负责。以下为验收要求，不是已执行结果。
++
++前置条件：macOS 桌面应用、隔离测试 Project、五图模板、已配置的一条真实 CLI 与出图路径。同项目和另一 Project 的额外实例可用 fixture 准备，仅用于隔离验证；错误与冲突可注入，但须注明范围。
++
++| 场景 | 用户操作或故障条件 | 可观察结果 |
++|---|---|---|
++| AC-WB-01 创建与添加 | 从宿主入口通过 AI 创建五图包，预览中修改布局，再添加至当前 Project，从导航打开 | 草稿与安装版本可区分；打开正确实例；安装和打开均不自动出图；普通 Session 可在历史中找到 |
++| AC-WB-02 编辑保护 | 生成图片后编辑布局并保留位置 ID，预览后应用；另检查新增、删除有内容位置与类型变化 | 排版变化保留绑定；新增位置为空；删除说明影响并保留可恢复记录；类型变化重验绑定；同包其他实例不被改写 |
++| AC-WB-03 真实生成与目标 | 用真实 CLI 和出图工具生成五图，再只生成封面、选中森林场景修改；改变排列后按“第三张”发消息；移除工作台上下文后发送 | 产物为可解码真实文件且来源可追溯；只更新发送时目标；续聊使用最新状态；缺少能力或目标不明时明确反馈；移除上下文的回合不自动写回；参考图能力按实测记录 |
++| AC-WB-04 部分失败与提交重试 | 制造两项出图失败、一次提交失败、不可解码文件或不符约束的产物；重试提交 | 成功结果和旧图保留；无效文件被拒绝并说明原因；已有暂存产物可复用，提交重试不再次出图；重新生成由用户显式触发 |
++| AC-WB-05 幂等、冲突与历史 | 重复提交同一操作；同 ID 提交不同内容；两个 Session 更新同一位置及不同位置；生成中改变定义；恢复旧图 | 同操作无重复绑定，不同内容被拒绝；旧位置版本与旧定义结果保留为候选并报告冲突；不同位置的有效更新可分别接受；旧图可恢复 |
++| AC-WB-06 保存与恢复 | 保存并重启，再打开和局部修改；在导入 / 绑定边界中断应用；删除外部源文件或实例产物 | 恢复最后已提交状态，不自动出图；未完成尝试待核对；绑定不指向未写完文件；稳定导入后不依赖临时源文件；产物缺失有诊断；备份依赖说明准确 |
++| AC-WB-07 实例与页面边界 | 同项目和跨项目同包 fixture 尝试访问其他实例、伪造消息、访问非授权路径、调用 Node / Preload；关闭页面后继续发消息 | 请求被拒绝，无跨实例 / 跨项目泄漏；页面只拿当前实例受控资源；卸载后订阅与接口失效，宿主仍可用 |
++| AC-WB-08 生命周期与 Stop | 生成期间切换页面、停用再启用；通过 Session Stop 停止；页面加载失败 / 崩溃后重试 | 页面卸载不误停 Session；停用期间已授权执行可继续提交；Stop 后迟到结果被拒绝；页面故障不丢对话和成果，重载不重新生成 |
++
++先用本地 fixture 验证绑定、失败与恢复，再跑声明支持范围内的真实 CLI 和出图路径。模拟不能证明真实出图、参考图输入或停止成功；记录工具版本、能力缺口、费用展示和错误反馈，不用路径引用冒充模型已读取图片。
++
++原型按[任务验收要求](../tasks/README.md#acceptance)完成开发者自检、实际界面操作与截图、独立 AI 评审，再提交人工产品验收。包导入导出、完整多实例管理、包升级卸载和实例删除清理不以本节通过视为已交付，实施前补充相应决定与验收场景。
+--- a/docs/06. Development Roadmap.md
++++ b/docs/06. Development Roadmap.md
+@@ -7,11 +7,14 @@
+ | 产品 | AI Developer Studio |
+ | 目标版本 | V1.0，首发 macOS |
+ | 文档状态 | 已确认（2026-10-09） |
+-| 最后更新 | 2026-11-09 |
++| 最后更新 | 2026-11-10 |
+ | 文档职责 | 汇总下一步、模块进度、交付缺口和阶段安排 |
+ | 进度依据 | [总体验收](../tasks/archive/T20261009-v1-foundation-slice/acceptance.md)（当前 W28 独立结论与历史技术基线分别保留）；[现有功能人工体验全部通过](../tasks/archive/T20261009-v1-foundation-slice/acceptance.md#人工功能验收)（2026-10-18 确认）；后续专项：[原型 v01 复验](../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)、[原型 v02 对齐](../tasks/archive/T20261010-prototype-v02-alignment/task.md)、[核心交互验收](../tasks/archive/T20261011-core-interaction-acceptance/task.md) |
+ 
+ ## 1. 下一步
++
++用户自定义工作台的 WB-Q1～Q12 推荐答案已于 2026-11-10 全部接受（DEC-28）。当前完成正式文档同步，原型尚未开工；下一步按 [§4.2](#42-自定义工作台原型)建设五图工作台，再完成验证、独立 AI 评审和人工产品验收。具体出图能力与容器在原型中核实，不重问已确认方向。
++
+ 当前新增任务 [T20261108-cli-install](../tasks/T20261108-cli-install/task.md) 已实现并进入验证：所有支持 CLI 的设置展示、Codex / Claude Code 一键安装，以及不修改本机文件的应用独立连接配置。Claude Code 正式 Provider 已按 DEC-27 注册；真实连接、打包和人工验收仍未完成，不能沿用历史“暂不发布”的结论作为本轮通过证据。
+ 
+ 
+@@ -52,6 +55,8 @@
+ 
+ ## 2. 整体概况
+ 
++自定义工作台已确认范围并形成正式规格，处于原型建设前；尚无实现、真实出图或产品验收证据，见 §4.2。
++
+ Files 新布局的实现与验收状态由[布局任务](../tasks/T20261030-file-viewer-column/task.md)负责；以下历史结论保留原基线。
+ 
+ 输入区最新修正已完成独立技术收尾，当前界面、缓存清理与真实接收证据及人工待验入口见[输入任务](../tasks/archive/T20261031-inline-attachments/task.md)。以下整体统计及打包结论均保留原版本，不包含本轮开发构建中的输入变更。
+@@ -75,7 +80,7 @@
+ 
+ 依据：[阶段报告](../tasks/archive/T20261009-v1-foundation-slice/report.md)、[总体验收](../tasks/archive/T20261009-v1-foundation-slice/acceptance.md)。
+ 
+-V1 范围见[产品定义第 3、4 节](<01. Product Definition.md>)和[功能需求第 6 节](<02. Functional Requirements.md>)。自定义 View 属于 P1；Windows / Linux 不在首发验收范围。
++V1 范围见[产品定义第 3、4 节](<01. Product Definition.md>)和[功能需求第 6 节](<02. Functional Requirements.md>)。自定义工作台属于 P1 增量，按 §4.2 推进；Windows / Linux 不在首发验收范围。
+ 
+ ## 3. 模块进度
+ 
+@@ -101,7 +106,7 @@
+ |---|---|---|---|---|
+ | [Project Knowledge](../tasks/archive/T20261011-project-view-implementation/task.md) | 已实现并集成 | 内置 Schema、安全有界读取、watch/补扫、revision 与 last-good；不自动生成或修复 | 单测、模拟 Electron、独立安全探针与真实 CLI 写盘更新通过；人工结论见[验收记录](../tasks/archive/T20261011-project-view-implementation/acceptance.md#人工功能验收) | 当前范围无技术待办 |
+ | [默认 Project View](../tasks/archive/T20261011-project-view-implementation/task.md) | 已实现并集成；共享输入控件修正已实现 | 五类 JSON 定义、受信 Renderer、Preview 滚动缩放/局部错误、普通 View Session、首条可移除 Context、Overview 固定摘要；底部 Composer、顶栏和最近对话位置 | 既有 AC-06 与人工结论见[验收记录](../tasks/archive/T20261011-project-view-implementation/acceptance.md#人工功能验收)；v06 草稿与中间基线保留，共享输入控件五格／Ultra 修正版相关 Electron 自动化与 W7 独立界面验收通过，见[v06 任务](../tasks/archive/T20261023-v06-ui-effort/task.md) | 旧版共享输入控件技术范围已收尾，人工需调整后复验；既有 View 内容范围无技术待办；菜单对齐与 Max 后续修正的当前验证及人工复验见[局部修正任务](../tasks/archive/T20261024-effort-menu-polish/task.md) |
+-| [自定义 View](<02. Functional Requirements.md>) | 未开始（P1） | 需求已记录 | 未验证 | P0 完成后评估，尚无实施排期 |
++| [自定义工作台](../specs/workbench/spec.md) | 范围已确认，原型未开始（P1） | FR-WB-001～008、正式规格与 AC-WB-01～08 | 文档自检；功能未验证 | 按 §4.2 建设五图原型，核实真实出图与隔离，再评审 |
+ | [设置与外观](../tasks/archive/T20261012-settings-theme/task.md) | 已实现，人工体验已验收 | 设置入口、毛玻璃 / 纯色主题、背景色与跟随系统 / 浅色 / 深色模式，SQLite 持久化 | 自检与模拟 AC-08 通过；人工体验已验收；SET-Q6 / Q7 已按 DEC-20 确认；独立、真实系统开关及打包验收按该任务免做授权 | 既有外观范围无待办；CLI 管理新增修正已通过技术与人工验收（2026-10-29），见[本轮任务](../tasks/archive/T20261024-cli-default/task.md)；旧基线不扩大。 |
+ 
+ 实现基线与未覆盖项由[本轮任务](../tasks/archive/T20261011-project-view-implementation/task.md)负责；Project View 的原有人工接受记录保留，本次路线图现有功能体验的确认见[总体验收](../tasks/archive/T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。范围依据：FR-VIEW-001～008、[功能需求第 3、4 节](<02. Functional Requirements.md>)及 DEC-04～07。
+@@ -189,7 +194,26 @@
+ 
+ 开工前：按 spec TODO-Q1～Q6 解决本阶段真正阻塞的行为 / 数据安全决定，确定当次 CLI 与验收环境，再建立实施任务；不预先创建一批空任务或要求人再次确认整套能力是否要做。阶段状态变更同时更新本路线图的下一步、整体、模块与验收摘要。
+ 
++### 4.2 自定义工作台原型
++
++来源：用户 2026-11-10 接受 WB-Q1～Q12 推荐，并要求先更新文档，再建设原型、评审（DEC-28）。本节维护工作台的范围与顺序，不调整 To-dos 的阶段安排，也不设固定发布日期。
++
++首个原型覆盖一个随应用提供的五图模板、AI 对话创建与编辑、隔离预览、添加至当前 Project、实例导航，以及一条真实 CLI 与出图路径。完整流程为创建、预览、添加、打开、生成五图、局部修改、重启恢复；部分失败、旧版本保护、页面隔离、停用与 Session Stop 随主流程验证。安装只服务这条流程，不先建设独立插件管理中心。
++
++| 阶段 | 交付与退出条件 | 当前状态 |
++|---|---|---|
++| 文档同步 | 推荐答案转为正式 FR、规格与 AC，移除过时约束；核对关联文档和链接，提供同步 diff | 本次文档交付，见[任务记录](../tasks/archive/T20261110-workbench-confirmation/task.md) |
++| 原型建设 | 验证容器与 CLI 命令桥，完成主流程及异常处理；先 fixture 后真实出图，开发者自检覆盖 AC-WB-01～08 | 未开始 |
++| 独立 AI 评审 | 未参与实现的 Agent 操作实际应用，检查权限、存储和跨模块契约，独立验证真实链路；缺陷修复后复验 | 未开始 |
++| 人工产品验收 | 提供可运行原型、核心操作、证据和已知限制，由产品负责人判断体验与作品质量 | 待原型与技术评审完成 |
++
++原型后的阶段再评估本地包导入、包与实例导出、完整多实例管理、升级卸载、数据清理与开发工具。同项目和跨项目的额外实例 fixture 只用于验证隔离，不代表管理界面交付。实例删除是否同时 Stop、记录期限与永久清理在对应功能实施前由产品负责人决定，见[规格 §1](../specs/workbench/spec.md#1-职责与后续事项)。
++
++默认五个 View 在原型阶段保留，迁移到工作台协议及隐藏 / 排序规则在原型评估后再决定。插件市场、任意后端插件和其他内容类型另定范围。原型通过不代表完整插件平台完成。
++
+ ## 5. 验收进度
++
++工作台 AC-WB-01～08 已按接受的原型判断标准落稿，全部未执行；尚未进行独立 AI 评审或人工产品验收。标准见 [05 §6](<05. Acceptance Criteria.md#6-自定义工作台原型验收>)，后续实施任务记录运行环境与结果，不继承默认 View 的 AC-06 通过结论。
+ 
+ 新增 To-dos 的 AC-TODO-01～06 均为**验收草案、未执行**，不能复用下表 AC-01～AC-08 的完成结论。当前仅有[规划任务](../tasks/archive/T20261031-agent-todos-roadmap/task.md)的文档自检；每阶段的检查 / 真实 CLI / 独立评审 / 人工接受分别记录。
+ 
+--- a/docs/07. Decisions.md
++++ b/docs/07. Decisions.md
+@@ -55,7 +55,7 @@
+ 
+ 已确认（2026-10-09） · Q1、Q2、Q6、Q11
+ 
+-Knowledge 与 View Definition 存在 Project 的 `.ai-studio/`，每个 View 使用独立、带 `schemaVersion` 的 JSON 文件。目录默认被 Git 忽略；客户端读取和校验 Knowledge，不修改内容。
++默认五个 View 的 Knowledge 与 View Definition 存在 Project 的 `.ai-studio/`，每个 View 使用独立、带 `schemaVersion` 的 JSON 文件。目录默认被 Git 忽略；客户端读取和校验 Knowledge，不修改内容。
+ 
+ Agent 可直接通过 CLI 文件工具更新，无需额外写入工具或项目外权限。分文件减少并行 Session 的写入冲突；存储格式与路径由规格维护。
+ 
+@@ -63,23 +63,23 @@
+ 
+ 已确认（2026-10-09） · Q3、Q4、Q5
+ 
+-V1 使用经 Schema 校验的声明式 JSON。Agent 只能选择受信组件、布局和数据绑定，不能提供 HTML、脚本或任意 CSS；失败时保留上次成功版本并提示错误。
+-
+-这使事实与展示分离，并限制 Agent 输出的执行能力，代价是 View 设计受组件范围约束。自由 HTML 沙箱留到后续自定义 View，启用前须做原型验证。
++默认五个 View 使用经 Schema 校验的声明式 JSON。Agent 在该入口只能选择受信组件、布局和数据绑定；失败时保留上次成功版本并提示错误。自定义工作台采用独立的隔离 Web 页面入口，见 DEC-28（2026-11-10 确认）。
++
++这使事实与展示分离，并限制 Agent 输出的执行能力，代价是 View 设计受组件范围约束。自定义工作台的容器与接口须通过原型验证，不复用默认 View 的声明式入口执行脚本。
+ 
+ ### DEC-06 View Context 注入
+ 
+ 已确认（2026-10-09） · Q7、Q8、Q10、Q12
+ 
+-从 View 发起的首条消息附加独立英文文本块，包含当前 View、文件路径和少量编辑规则，不内联 Knowledge。Codex 与 Claude 使用同一文本；用户可移除"当前 View"标签，移除后不注入，但保留 `origin_view_id`。
+-
+-选择可见、可移除的消息上下文，避免修改用户的 AGENTS.md / CLAUDE.md。V1 不使用隐藏的系统提示、打包 Skill 或 Claude hooks 注入。
++从默认 View 发起的首条消息附加独立英文文本块，包含当前 View、文件路径和少量编辑规则，不内联 Knowledge。Codex 与 Claude 使用同一文本；用户可移除"当前 View"标签，移除后不注入，但保留 `origin_view_id`。
++
++选择可见、可移除的消息上下文，避免修改用户的 AGENTS.md / CLAUDE.md。默认 View 不使用隐藏的系统提示、打包 Skill 或 Claude hooks 注入。工作台每次发送的上下文按 FR-WB-003 处理。
+ 
+ ### DEC-07 Project View 刷新与权限
+ 
+ 已确认（2026-10-09） · Q9
+ 
+-客户端不自动发起 AI 生成。Project 打开期间监视 `.ai-studio/`，并在打开 Project、回合结束、窗口聚焦时补扫，校验通过后刷新只读 Preview。刷新不切换当前内容，多步更新的中间错误延后提示。
++客户端不自动发起 AI 生成。Project 打开期间监视 `.ai-studio/`，并在打开 Project、回合结束、窗口聚焦时补扫，校验通过后刷新默认 View 的只读 Preview。刷新不切换当前内容，多步更新的中间错误延后提示。
+ 
+ 这样可及时呈现 Agent 的文件修改，同时遵守不自动生成、无隐藏对话和失败保留上次成功渲染的要求。
+ 
+@@ -260,3 +260,15 @@
+ 保留毛玻璃和纯色两种主题，默认毛玻璃；颜色模式默认跟随系统，也可选浅色或深色。毛玻璃使用 macOS 原生材质和预设背景色，不提供浓淡调节或自定义颜色。
+ 
+ 两种主题满足不同外观偏好，共用布局与交互。系统降低透明度时使用纯色；名称和深色配色补充见 DEC-20。行为与组合验证要求由 [settings spec](../specs/settings/spec.md)及[桌面端运行时约定](../apps/desktop/README.md#4-运行时约定)维护，实施见[设置与外观任务](../tasks/archive/T20261012-settings-theme/task.md)。
++
++## 自定义工作台
++
++### DEC-28 用户自定义工作台
++
++已确认（2026-11-10） · 用户已审阅 [09 的 WB-Q1～Q12](<09. Workbench Discussion.md#2-讨论问题确认记录>)并全部接受推荐答案，要求将相关文档旧描述替换为新方案。
++
++产品纳入开发之外的创作任务。采用 Web 页面配结构化定义、包与 Project 内实例分离的小型宿主，复用现有导航和普通 CLI Session；默认五个 View 在原型阶段保留。详细行为归 [FR-WB-001～008](<02. Functional Requirements.md#9-用户自定义工作台>)与[工作台规格](../specs/workbench/spec.md)。
++
++这让用户能自由设计页面，同时按稳定位置更新真实产物；代价是新增页面隔离、SDK、宿主提交和状态备份责任。参考 Harness 的插件组织方式，不整体复制其框架或承诺包兼容。
++
++按文档同步、五图原型、验证与评审推进，范围和阶段状态见[路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>)。推荐中保留的工具可行性与后续产品细节见规格 §1；本决定不代表接口已稳定、原型已实现或产品已验收。
+--- a/docs/08. System Architecture.html
++++ b/docs/08. System Architecture.html
+@@ -63,7 +63,7 @@
+   </section>
+   <section id="flows-panel" class="flow-panel" role="tabpanel" aria-labelledby="tab-flows" hidden><h2>关键数据流</h2><p class="flow-intro">按一次用户操作追踪模块。状态标注当前步骤；模块已有成果，不代表规划中的扩展已接通。</p><div id="flows"></div></section>
+   <section id="inventory-panel" class="inventory-panel" role="tabpanel" aria-labelledby="tab-inventory" hidden><h2>模块建设清单</h2><p class="flow-intro">每一项对应全景中的一个节点。点击名称查看源码、规格与验收依据。</p><div class="table-wrap"><table class="inventory"><thead><tr><th scope="col">模块 / 层级</th><th scope="col">建设状态</th><th scope="col">当前成果</th><th scope="col">待完成 / 验证边界</th></tr></thead><tbody id="inventory"></tbody></table></div></section>
+-  <section class="below"><h2>距离完整 V1，还缺什么</h2><div class="gap-list"><div><h3>项目知识与五类 View</h3><p>Project Knowledge、五类 View 与普通 Session / View Context 已实现；真实 AC-06、独立复验及人工体验已有结果，当前最终包检查见总体验收。</p></div><div><h3>四类工具与对话关联</h3><p>Files / 项目 Diff / 文件引用及 Terminal / Browser 已接入；本轮补丁持久化与对话入口已接入，Codex 0.163.0 普通原生引用、应用 UI 同轮引用和 patch 已有真实证据；W24 已完成四工具综合 Main Agent 技术复验，W25 补充 Adapter Stop / 模型 / 并发与进程清理子集，W28最终包独立四工具 / 原生布局 / 错误 / 清理重试通过；新增体验人工验收及原生覆盖边界继续保留，Claude Code 暂缓，阶段交付不等同完整 AC-07。</p></div><div><h3>真实 CLI 与发布收口</h3><p>当前 V1 已取得 Codex Adapter 的真实 Stop、恢复、模型切换、并发和进程清理子集证据；W26 已补真实 UI Stop / 第二模型 / 并发与完成提醒；新增原生输入输出、等待和Electron宿主恢复已在最终包独立通过。Claude Code 实现与历史证据保留，真实验收暂缓且不随当前 V1 发布（DEC-19）。最终v1.0.0 arm64包与open冒烟已通过并留存；暂不创建或上传GitHub Release。</p></div></div><p class="future"><strong>扩展范围：</strong>自定义 View 与自由 HTML 沙箱、一般外站内嵌、可选登录持久化、Agent 页面自动化、Windows / Linux、写入协调、冲突检测及自动 Worktree / Branch 隔离保留为后续评估，不插入当前 V1 工作；Git 只读 Diff 按 FR-TOOL-002 交付（2026-10-11 确认，DEC-11）。<a href="04.%20Technical%20Requirements.md">查看边界依据</a></p></section>
++  <section class="below"><h2>距离完整 V1，还缺什么</h2><div class="gap-list"><div><h3>项目知识与五类 View</h3><p>Project Knowledge、五类 View 与普通 Session / View Context 已实现；真实 AC-06、独立复验及人工体验已有结果，当前最终包检查见总体验收。</p></div><div><h3>四类工具与对话关联</h3><p>Files / 项目 Diff / 文件引用及 Terminal / Browser 已接入；本轮补丁持久化与对话入口已接入，Codex 0.163.0 普通原生引用、应用 UI 同轮引用和 patch 已有真实证据；W24 已完成四工具综合 Main Agent 技术复验，W25 补充 Adapter Stop / 模型 / 并发与进程清理子集，W28最终包独立四工具 / 原生布局 / 错误 / 清理重试通过；新增体验人工验收及原生覆盖边界继续保留，Claude Code 暂缓，阶段交付不等同完整 AC-07。</p></div><div><h3>真实 CLI 与发布收口</h3><p>当前 V1 已取得 Codex Adapter 的真实 Stop、恢复、模型切换、并发和进程清理子集证据；W26 已补真实 UI Stop / 第二模型 / 并发与完成提醒；新增原生输入输出、等待和Electron宿主恢复已在最终包独立通过。Claude Code 实现与历史证据保留，真实验收暂缓且不随当前 V1 发布（DEC-19）。最终v1.0.0 arm64包与open冒烟已通过并留存；暂不创建或上传GitHub Release。</p></div></div><p class="future"><strong>扩展范围：</strong>自定义工作台方向与五图原型范围已确认，原型尚未开始；范围与建设顺序见<a href="06.%20Development%20Roadmap.md#42-自定义工作台原型">路线图 §4.2</a>，详细行为见<a href="../specs/workbench/spec.md">工作台规格</a>。本图保留既有实现快照，其他扩展与当前状态见<a href="06.%20Development%20Roadmap.md">路线图</a>及<a href="04.%20Technical%20Requirements.md">技术要求</a>。</p></section>
+  </div>
+  <aside class="inspector" id="inspector" aria-label="模块详情"><div id="detail"></div><button class="locate" id="locate">在架构图中定位</button></aside>
+ </main>
+@@ -96,7 +96,7 @@
+  {"id":"shell","name":"工作区与导航壳层","status":"done","group":"ui","summary":"Project Tabs / Navigation / Context Panel 容器","milestone":"界面与容器范围已签收","built":["多项目切换、布局恢复、导航分区与可调整侧栏。","原型 v01 的视觉对齐和工具关闭交互已于 2026-10-11 签收。"],"gaps":["完成范围只涵盖壳层；四工具内容及其交付边界见各自节点。"],"refs":["alignment","shell","coreaccept"],"code":"apps/desktop/src/renderer/src/features/project/Workspace.tsx","req":"FR-PROJ-002 FR-PROJ-003 FR-NAV-001 FR-NAV-002 AC-01 AC-07"},
+  {"id":"conversation","name":"Conversation 呈现","status":"wip","group":"ui","summary":"Markdown / 工具记录 / 代码复制 / 阅读布局","milestone":"既有呈现已验收；新增原生公开输出与 Diff 入口已实现","built":["Agent Markdown、代码高亮与复制、工具活动和轮次完成信息。","草稿居中、消息与输入区等宽；2026-10-11 签收。"],"gaps":["本轮 Diff、公开工具正文与推理 / 附件新增体验待人工验收；当前技术证据见总体验收。","不补造 CLI 未公开的正文；原生覆盖边界由能力矩阵负责。"],"refs":["markdown","alignment"],"code":"apps/desktop/src/renderer/src/features/session/Conversation.tsx","req":"FR-SESSION-001 FR-STATE-007 AC-02"},
+  {"id":"composer","name":"输入与 Session 交互","status":"wip","group":"ui","summary":"CLI / Model / 草稿 / Send / Stop / Needs Input","milestone":"当前Codex技术接缝独立通过，新增体验待人工验收","built":["首条消息创建 Session；CLI 固定；模型 / 推理强度选择、CLI 默认复位、文本草稿与原生等待答复。","Files 文件 / 图片与原生目录 Skill 标签，发送前主进程重新校验。","W26 真实图片识别、Rule / Skill、审批接受及同轮文字拒绝通过；默认复位由原生记录确认。"],"gaps":["推理强度 / 公开输出、图片 / Skill新增体验待人工验收。","Claude Code 按 DEC-19 后续独立验收。"],"refs":["inputspec","session","sessionaccept","coreaccept"],"code":"apps/desktop/src/renderer/src/features/input/Composer.tsx","req":"FR-CHAT-001 FR-CHAT-002 FR-CHAT-003 FR-INPUT-001 FR-INPUT-002 FR-STATE-001 FR-STATE-002 FR-STATE-003 FR-STATE-004 FR-STATE-005 FR-STATE-006 FR-SESSION-002 FR-SESSION-003 FR-NAV-003 AC-02 AC-03 AC-04 AC-05"},
+- {"id":"views-ui","name":"五类 Project View 与 Preview","status":"done","group":"ui","width":"wide","summary":"Overview / Progress / Architecture / Agent Team / Business Flow","milestone":"AC-06 已独立验证，现有功能人工体验已验收","built":["五类默认 View、受信组件 Preview、缩放 / 错误 / last-good。","View 内普通 Session、最近对话及首条可移除 View Context 已接入。"],"gaps":["自定义 View / 自由 HTML 属于 P1，未列为 V1 下一步。","最终产品检查见总体验收，原独立 AC-06 基线保留。"],"refs":["views","viewtask","decisions"],"code":"apps/desktop/src/renderer/src/features/project-view","codeLabel":"Project View 实现","req":"FR-VIEW-001 FR-VIEW-003 FR-VIEW-004 FR-VIEW-005 FR-VIEW-006 FR-VIEW-007 FR-VIEW-008 AC-06"},
++ {"id":"views-ui","name":"五类 Project View 与 Preview","status":"done","group":"ui","width":"wide","summary":"Overview / Progress / Architecture / Agent Team / Business Flow","milestone":"AC-06 已独立验证，现有功能人工体验已验收","built":["五类默认 View、受信组件 Preview、缩放 / 错误 / last-good。","View 内普通 Session、最近对话及首条可移除 View Context 已接入。"],"gaps":["自定义工作台已确认，原型未开始；当前范围与下一步见路线图 §4.2、DEC-28。","最终产品检查见总体验收，原独立 AC-06 基线保留。"],"refs":["views","viewtask","decisions"],"code":"apps/desktop/src/renderer/src/features/project-view","codeLabel":"Project View 实现","req":"FR-VIEW-001 FR-VIEW-003 FR-VIEW-004 FR-VIEW-005 FR-VIEW-006 FR-VIEW-007 FR-VIEW-008 AC-06"},
+  {"id":"tools-ui","name":"Context 工具内容","status":"wip","group":"ui","width":"wide","summary":"Files / Diff / Browser / Terminal · 用户主动打开","milestone":"四工具最终包独立技术联验通过，新增Diff待人工验收","built":["Terminal Tabs、按需 xterm、隐藏恢复、面板内关闭确认与最后一个 Tab 空状态。","Browser 地址栏、刷新、外站选择、失败与原生 view 显隐；Project 级布局保持。"],"gaps":["本轮Diff新体验待人工验收；现有四工具体验已接受。","原生补丁覆盖及Claude后续边界见工具验收。"],"refs":["tools","toolaccept","roadmap","fr"],"code":"apps/desktop/src/renderer/src/features/tools/Tools.tsx","req":"FR-TOOL-001 FR-TOOL-002 FR-TOOL-003 FR-TOOL-004 AC-07"},
+  {"id":"ipc","name":"类型化 IPC / window.studio","status":"done","group":"bridge","width":"full","summary":"沙箱 Preload · invoke + events · 四工具已登记","milestone":"运行时工具使用受控契约，非通用 shell / execute","built":["声明式契约生成 Preload；主进程核对处理器、发送方、参数与 Project / 实例代次。","Terminal 附着 / 序号 / ACK 和 Browser 导航 / bounds / 显隐独立登记；预览网页不加载应用 Preload。"],"gaps":["各功能通过专用类型化契约访问；不提供通用Shell或文件系统接口。","当前登记、发送方与参数校验范围见源码及独立验收。"],"refs":["desktop","toolaccept","decisions"],"code":"apps/desktop/src/shared/ipc/contracts.ts","req":"04 §3 DEC-02"},
+  {"id":"project","name":"Project Service","status":"done","group":"services","summary":"目录身份 / 最近项目 / UI 状态 / 关闭与退出","milestone":"当前范围实现与独立清理超时重试验证完成","built":["目录选择与 canonical path、Project 多 Tab 状态和最近项目持久化。","SessionPort 与 MainToolPort 分离；Session / Terminal 一次合并确认，实际清理 settled 前保持锁。","失败 / 超时保留 Project 与诊断；成功关闭才释放 View，重复原生退出请求不叠加弹窗。"],"gaps":["当前范围无待执行技术工作；历史目录/权限场景边界保留在原验收。","新增输入输出体验的人工入口由总体验收负责。"],"refs":["shell","shellaccept","coreaccept","toolaccept"],"code":"apps/desktop/src/main/services/project/index.ts","req":"FR-PROJ-001 FR-PROJ-002 FR-PROJ-003 AC-01"},
+@@ -112,7 +112,7 @@
+  {"id":"terminal","name":"用户 Terminal Tabs","status":"done","group":"tools","summary":"xterm.js + node-pty / 每 Tab 独立 PTY","milestone":"PTY / 屏幕恢复及最终四工具联验已通过","built":["新建 / 切换 / 关闭与 Project cwd；Session Stop 不清理用户 PTY。","主进程 headless 屏幕、流量水位、ANSI + 锁版 emulator checkpoint；恢复成功再 ACK。","PID / 启动时间归属检查；自然 Shell exit 不等同所有受管子进程退出，失败保留确认与重试。"],"gaps":["现有人工体验已验收；私有 xterm 状态升级必须重验。","重启不恢复原 PTY 或自动重跑命令；清理不误认领外部 / 未知身份进程。"],"refs":["toolspec","tools","toolaccept","decisions","tech"],"code":"apps/desktop/src/main/services/terminal/service.ts","req":"FR-TOOL-004 FR-PROJ-002 AC-01 AC-07"},
+  {"id":"sqlite","name":"SQLite / 本地持久化","status":"done","group":"data","summary":"userData/studio.sqlite3 · node:sqlite","milestone":"最终包持久化及新旧异常条目恢复已验证","built":["向前迁移与 CoreServices 统一访问。","Project、Session 原生映射、transcript、回合、草稿和 UI 状态。"],"gaps":["新旧中断条目保护与重复启动不重放均已验证。","数据库位于应用userData；历史及原生补丁不从当前工作区回填。"],"refs":["desktop","skeleton","session","decisions"],"code":"apps/desktop/src/main/services/database/migrations/index.ts","req":"04 §3 §6 DEC-01"},
+  {"id":"shell-env","name":"Shell 环境 / CLI 发现","status":"done","group":"data","summary":"登录 Shell PATH / 可执行文件 / 版本 / 登录","milestone":"最终open冒烟通过登录Shell与原生依赖","built":["Finder 启动时恢复 login + interactive Shell 环境，超时回退。","将环境传给 Provider；报告可执行文件、版本、登录、模型目录能力。"],"gaps":["发现已登录不等于模型额度可用；不保存认证凭据到UI数据库。"],"refs":["desktop","skeleton","adapter"],"code":"apps/desktop/src/main/services/shell-env/login-env.ts","req":"04 §3"},
+- {"id":"knowledge-files","name":"Project Knowledge 文件","status":"done","group":"data","summary":".ai-studio/knowledge/*.json + views/*.view.json","milestone":"知识与展示文件链路已实现，真实 AC-06 已验证","built":["带 schemaVersion 的 JSON、独立 View Definition、初始化辅助指南与 Schema。","文件监视 / 补扫 / realpath / revision 和 last-good；原生 CLI 按用户请求更新。"],"gaps":["V1 只执行受信组件，不执行自由 HTML。","既有人工接受范围与原证据由 Project View 任务维护。"],"refs":["views","decisions"],"req":"FR-VIEW-004 DEC-04 DEC-05"},
++ {"id":"knowledge-files","name":"Project Knowledge 文件","status":"done","group":"data","summary":".ai-studio/knowledge/*.json + views/*.view.json","milestone":"知识与展示文件链路已实现，真实 AC-06 已验证","built":["带 schemaVersion 的 JSON、独立 View Definition、初始化辅助指南与 Schema。","文件监视 / 补扫 / realpath / revision 和 last-good；原生 CLI 按用户请求更新。"],"gaps":["默认五个 View 只执行受信组件；自定义工作台采用独立隔离入口，尚未实现。","既有人工接受范围与原证据由 Project View 任务维护。"],"refs":["views","decisions"],"req":"FR-VIEW-004 DEC-04 DEC-05"},
+  {"id":"patches","name":"轮次补丁持久化","status":"wip","group":"data","summary":"按 App Turn / 原生身份保存聚合与文件补丁","milestone":"迁移、修订冻结和历史恢复已验证","built":["turn_diffs 按 App Turn 保存原生记录；终态冻结，重启不读工作区回填。","来源、版本、unknown / empty / unavailable / failed、截断与 outcome 分别保存。"],"gaps":["新增功能待人工验收；完整 AC-07 技术边界见工程工具记录。","Shell 或外部工具修改可能没有原生 patch，不能解释为零变更。"],"refs":["tools","toolresearch","tech"],"req":"FR-TOOL-002 04 §1 事项13"},
+  {"id":"cli-processes","name":"Codex / Claude CLI 子进程","status":"external","group":"external","summary":"本机安装 · 原生会话 / 配置 / 登录 / 工具","milestone":"外部依赖，非客户端建设模块","built":["Adapter 启动本机 CLI，与 App Session 保持 1:1 原生会话关系。","CLI 自身负责模型访问与原生配置；CLI Runtime 按 Session 隔离。"],"gaps":["CLI 版本、认证与额度影响可用性；当前 V1 真实验收只启动 Codex，Claude Code 暂不调用。"],"refs":["tech","adapter"],"req":"04 §2 §4"},
+  {"id":"project-files","name":"本地 Project 目录","status":"external","group":"external","summary":"源码 / Git 工作区 / CLI 原生规则","milestone":"一个 Project 对应一个本地目录","built":["CLI 在对应 Project cwd 中运行；多个 Session 可共享该目录。"],"gaps":["Session 进程隔离不等于文件系统隔离；并行写入风险见 DEC-11。","自动 Worktree / Branch 隔离不在 V1；Git 只读项目 Diff 与原生轮次 Diff 已实现。"],"refs":["tech","fr"],"req":"FR-PROJ-001 04 §1"},
+--- a/docs/09. Workbench Discussion.md
++++ b/docs/09. Workbench Discussion.md
+@@ -1,350 +1,56 @@
+-# 用户自定义 AI 工作台讨论草案
++# 用户自定义 AI 工作台确认记录
+ 
+ ## 文档信息
+ 
+ | 项目 | 内容 |
+ |---|---|
+-| 文档状态 | 草稿 |
+-| 文档职责 | 讨论可由用户创建和安装到 Project 的工作台插件，说明页面、AI 任务与产物的关系及原型验证范围 |
+-| 主要读者 | 产品负责人、工作台开发者、桌面客户端开发者 |
++| 文档状态 | 已确认（2026-11-10） |
++| 文档职责 | 记录工作台方向的确认、主要取舍与负责文档入口 |
+ | 最后更新 | 2026-11-10 |
+-| 需求来源 | 2026-11-10 用户对话：不同工作内容需要不同 Web 页面，以五个出图位置为例；随后关注 DeepSeek Harness 左上角的插件形式，希望用户能自己创建，提出参考或复制 Harness，并要求将调研写入本地 references、更新当前讨论稿 |
+-| 关联基线 | [产品定义](<01. Product Definition.md>)、[FR-VIEW-002～008](<02. Functional Requirements.md#fr-view-002-project-view-可扩展>)、[Project View spec](../specs/project-view/spec.md)、[DEC-04～07](<07. Decisions.md#dec-04-project-knowledge-存储>) |
+-| 起草记录 | [初稿](../tasks/archive/T20261110-workbench-discussion/task.md)、[插件方向调研与修订](../tasks/archive/T20261110-workbench-plugins/task.md) |
+-| 外部参考 | [DeepSeek Harness 固定版本调研](references/deepseek-harness/README.md)，用于比较插件组织方式，不作为本产品的已确认需求 |
++| 确认依据 | 用户 2026-11-10 对话：“讨论问题按照你的推荐，我已经审阅。全都接受。”并要求更新相关文档、替换旧描述 |
++| 同步记录 | [文档同步任务](../tasks/archive/T20261110-workbench-confirmation/task.md) |
++| 外部参考 | [DeepSeek Harness 固定版本调研](references/deepseek-harness/README.md) |
+ 
+-本文提出的交互、接口、存储和阶段范围均为讨论建议。用户已授权调研和修订文档，尚未确认具体设计或实施范围。正式需求、已确认决定及建设排期仍以其负责文档为准。
++WB-Q1～Q12 的推荐答案全部接受。详细行为已归入 [工作台规格](../specs/workbench/spec.md)，需求、交互、技术要求、验收和阶段状态由下表所列文档分别维护。本文不再保留未采用的方案或过时限制。已确认设计不代表实现完成或产品验收通过；本次同步 diff 供审阅，不重开已解决的产品问题。
+ 
+-## 1. 推荐方向
++## 1. 已确认方向
+ 
+-用户定义一个适合自己工作的页面，AI 读取页面对应的任务结构和约束，通过现有 CLI Session 完成工作，再把产物绑定到页面里的指定位置。页面持续显示当前成果，用户可以选择其中一项继续修改。
++用户能通过 AI 对话或模板创建自己的工作台，用自定义 Web 页面呈现内容，通过现有 CLI Session 生成和局部修改产物。采用页面配结构化定义的方式，让页面设计自由与稳定位置定位同时成立。声明式组件继续用于模板；宿主管理产物绑定并校验写回。
+ 
+-建议把工作台作为可创建、安装和启停的插件。插件包包含 Web 页面、结构化工作台定义和声明文件；宿主读取声明，在当前 Project 的左侧导航提供实例入口。页面和 AI 共用工作台定义，产物绑定由宿主管理。这样，用户既能做出自己的界面，也能在其中持续生成和修改内容。
++采用复用现有 Project、导航和 Session 的小型插件宿主，包与 Project 内实例分离。参考 Harness 的声明与生命周期组织方式，不整体搬入运行框架，不承诺包兼容。收益是沿用现有客户端边界，代价是自行维护包校验、SDK、隔离与开发说明。
+ 
+-建议先做一个复用现有 Project、Session 和导航的小型宿主。参考 [Harness 调研](references/deepseek-harness/README.md)中的声明、加载与卸载方式，不整体搬入 Cordis，也不承诺 Harness 插件兼容。收益是保留现有 CLI 与项目边界，只增加工作台所需能力；代价是本项目需维护包校验、生命周期、页面 SDK 和开发说明，无法直接获得完整插件生态。整体复制会扩大依赖、服务运行和兼容维护范围，是否值得应由具体复用需求决定。
++宿主管理实例状态，产物保存在 Project 内；备份需要同时覆盖项目文件和宿主状态。包分享与带成果的实例导出分开，避免误带对话或凭据。具体行为由规格负责，原型范围由路线图负责。
+ 
+-首个原型建议验证“创建 → 预览 → 添加至项目 → 从导航打开 → 生成五图与局部修改 → 重启恢复”。页面允许自定义 HTML、CSS 和 JavaScript，使用固定版本的小型 SDK。AI 对话生成和随应用提供的模板用于起步；本地包导入、分享、插件市场、通用可视化搭建器和任意后端插件分阶段评估，不纳入首个原型。
++## 2. 讨论问题确认记录
+ 
+-## 2. 五图工作台的完整体验
++以下各项均于 2026-11-10 按原推荐答案确认，后续实现细节按负责规格处理。
+ 
+-### 2.1 创建工作台
++| 编号 | 已确认主题 | 负责位置 |
++|---|---|---|
++| WB-Q1 | 纳入开发之外的创作工作 | [01 产品定位与用户](<01. Product Definition.md#2-产品定位>) |
++| WB-Q2 | 自定义 Web 页面配结构化定义 | [规格 §3](../specs/workbench/spec.md#3-fr-wb-002-页面与-ai-共享工作要求) |
++| WB-Q3 | 对话 / 模板创建、编辑预览与添加至 Project | [规格 §2](../specs/workbench/spec.md#2-fr-wb-001-创建与编辑体验) |
++| WB-Q4 | 内容生成与结构编辑分开 | [规格 §2](../specs/workbench/spec.md#2-fr-wb-001-创建与编辑体验) |
++| WB-Q5 | 校验后展示成功结果并保留旧版 | [规格 §5](../specs/workbench/spec.md#5-fr-wb-005-部分结果并发和恢复) |
++| WB-Q6 | 原型验证一条真实 CLI 与出图路径 | [规格 §4.4](../specs/workbench/spec.md#44-出图能力独立于工作台)；具体工具仍待核实 |
++| WB-Q7 | 包分享与成果导出分开 | [规格 §6.3](../specs/workbench/spec.md#63-存储分享与改版) |
++| WB-Q8 | 原型保留五个默认 View，之后评估迁移 | [路线图 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>) |
++| WB-Q9 | 宿主管理绑定，明确备份依赖 | [规格 §6.3](../specs/workbench/spec.md#63-存储分享与改版) |
++| WB-Q10 | 包与实例分离的小型宿主 | [规格 §6](../specs/workbench/spec.md#6-fr-wb-006007-包实例与保存) |
++| WB-Q11 | 安装、固定、停用、移除分别处理 | [规格 §6.2](../specs/workbench/spec.md#62-导航与生命周期) |
++| WB-Q12 | 停用保留执行，删除撤销写回并保留可恢复成果 | [规格 §6.2](../specs/workbench/spec.md#62-导航与生命周期)；删除是否 Stop、期限与彻底清理仍在实施前确定 |
+ 
+-建议在宿主提供的“添加工作台”入口中选择 AI 对话创建或已有模板。选择 AI 创建后进入普通 Session，由用户发送要求：“帮我做一个品牌插画工作台，有封面、角色和三个场景，共五个位置。横向排列，允许放大预览。”AI 依据开发说明生成插件包，宿主先检查声明与位置绑定，再在隔离预览中展示空位置。预览使用草稿状态，不能写入已有实例或自动启动出图。
++## 3. 正式文档与后续工作
+ 
+-用户在预览中核对位置名称、用途和约束，也能继续对话调整布局。选择“添加至当前项目”后，宿主登记包版本、创建 Project 内实例并加入左侧导航；添加动作不生成图片。安装前如何展示来源、能力与权限仍需设计，不能把声明中的能力请求视为已经授权。
++| 内容 | 负责文档 |
++|---|---|
++| 产品目标与范围 | [01 产品定义](<01. Product Definition.md>) |
++| FR、优先级与范围 | [02 §9](<02. Functional Requirements.md#9-用户自定义工作台>) |
++| 宿主交互 | [03 工作台交互](<03. UX Specification.md#用户自定义工作台>) |
++| 技术边界 | [04 §10](<04. Technical Requirements.md#10-自定义工作台技术要求>) |
++| 详细行为与后续事项 | [工作台规格](../specs/workbench/spec.md) |
++| 验收场景 | [05 §6](<05. Acceptance Criteria.md#6-自定义工作台原型验收>) |
++| 建设顺序与当前状态 | [06 §4.2](<06. Development Roadmap.md#42-自定义工作台原型>) |
++| 跨模块决定 | [DEC-28](<07. Decisions.md#dec-28-用户自定义工作台>) |
+ 
+-建议提供独立的“编辑工作台”入口，通过 AI 对话或本地文件编辑生成草稿版本，再预览并应用。调整布局、标题、颜色或位置定义属于工作台设计；日常对话生成图片只更新内容。导入别人分享的本地包是后续创建方式，阶段范围见第 9 节。
+-
+-| 稳定位置 ID | 页面名称 | 内容要求示例 |
+-|---|---|---|
+-| `cover` | 封面 | 横图，保留标题留白 |
+-| `character` | 主角 | 方图，角色外观作为后续场景参考 |
+-| `scene-forest` | 森林场景 | 横图，使用同一主角 |
+-| `scene-city` | 城市场景 | 横图，使用同一主角 |
+-| `scene-night` | 夜晚场景 | 横图，使用同一主角 |
+-
+-这些是可由用户编辑的示例要求。跨图片的角色一致性属于生成目标，系统不能仅凭文件格式检查宣称达成。
+-
+-### 2.2 对话生成与预览
+-
+-1. 用户从当前 Project 的左侧导航打开这个工作台实例，在对话中要求“以纸艺风格生成这一整套五张图”。
+-2. 发送时，宿主记录本次工作台实例、定义版本、页面顺序、用户选中的位置及当前内容版本。输入区显示可查看的工作台上下文，未明确的目标由 AI 读取这份快照后解析，必要时澄清。
+-3. AI 读取各位置要求及可用能力。若当前 CLI 没有可用的出图工具，界面说明缺少什么能力，保留草稿和已有成果。
+-4. AI 调用已配置的出图工具，生成真实图片文件。宿主逐项校验并接收产物，把图片绑定到稳定位置 ID。
+-5. 页面订阅绑定变化，图片逐张出现。成功三张、失败两张时显示真实的部分结果，失败位置可以单独重试。
+-
+-页面有五个位置，只表示可容纳五项内容。用户说“先做封面”时只生成封面；“把空位置补齐”时才以当前空位置为目标。进入页面、刷新或恢复应用均不自动发起生成。
+-
+-### 2.3 指定位置继续修改
+-
+-用户选中森林场景，输入“背景改成夜晚，人物不变”。本次发送携带 `scene-forest`、当前图片引用和本次约束。生成期间继续显示旧图并标记更新状态；新图校验成功后替换当前绑定，旧版本可恢复。
+-
+-用户说“第三张”时，按发送时的页面顺序解析为稳定位置 ID，并在上下文中显示对应名称。同一消息发出后，即使用户调整排列，返回结果也仍绑定到原目标。没有唯一对应对象时，AI 应先澄清目标。
+-
+-## 3. 页面与 AI 如何共享工作要求
+-
+-### 3.1 可选方案及取舍
+-
+-| 方案 | 收益 | 主要限制 | 建议 |
+-|---|---|---|---|
+-| AI 直接读页面文字、DOM 或截图推断 | 普通网页也能尝试接入 | 排序、布局、语言变化容易破坏定位，任务完成与写入结果难校验 | 用于导入页面时辅助识别，生成定义后让用户核对 |
+-| 完全使用宿主的声明式组件 | 与现有 View 接近，校验与渲染容易控制 | 用户的页面设计受组件集合限制 | 提供为模板和简单工作台的实现方式 |
+-| 自定义 Web 页面配结构化定义 | 页面可自由设计，AI 有明确的内容位置与输出要求 | 需要页面接口、隔离容器和产物发布协议 | 推荐作为目标方案，并用小原型验证 |
+-
+-后续若支持导入已有 HTML 页面，需要补全内容位置和绑定关系才能成为可写入的 AI 工作台。仅把网页显示在应用中，不能保证 AI 正确更新它。
+-
+-### 3.2 工作台需要描述的信息
+-
+-| 概念 | 职责 | 五图示例 |
+-|---|---|---|
+-| 工作台插件包 | 可安装、复用的页面、内容定义、默认约束与能力声明；模板是创建包的起点 | 品牌插画包及其版本 |
+-| 工作台实例 | 某个 Project 中实际使用的工作台及用户设置 | 当前品牌的插画工作台 |
+-| 内容位置 | 可被独立寻址和更新的内容单元，有稳定 ID、名称、类型和约束 | `scene-forest` 接收一张图片 |
+-| 产物 | 实际文件或有结构的数据，有类型、来源和版本 | 一张生成的 PNG 图片 |
+-| 绑定 | 记录某个位置当前使用哪个产物版本 | `scene-forest` 使用图片 A 的第二版 |
+-| 执行记录 | 关联用户指令、Session 回合、目标位置及提交结果 | 本次只修改森林场景 |
+-
+-“内容位置”不必是矩形占位框。文章段落、表格数据集、视频片段也可以是独立内容单元。首个原型只验证图片类型，不提前承诺这些编辑器均已支持。
+-
+-包中的定义同时驱动页面标签、要求说明和 AI 上下文，避免分别维护页面提示词与 AI 提示词。每个可写入位置在页面接口中显式登记绑定，开发预览检查缺失和重复绑定。自定义页面仍可能写错展示逻辑，因此还需运行实际页面核对。
+-
+-### 3.3 约束的来源和强度
+-
+-约束分为可机器校验的要求和需要判断的目标。例如文件类型、图片尺寸和每个位置的数量可以检查；风格、构图和人物一致性需要 AI 或用户判断。两类结果分别显示，文件校验通过不等于内容已经被用户接受。
+-
+-建议按以下顺序处理要求：
+-
+-1. 宿主权限与实际工具能力决定哪些操作可执行，工作台文本不能提升权限。
+-2. 当前工作台定义决定位置类型、必需字段与用户设置的约束。
+-3. 本次用户指令补充任务目标，可以在定义允许的范围内临时覆盖偏好。
+-
+-用户指令与必需约束冲突时，先说明冲突并确认是否调整工作台要求。修改工作台定义须进入编辑流程，不让一次出图请求顺带改变页面结构。模板说明、素材文字与外部内容保留来源，不伪装成宿主或用户的高优先级指令。
+-
+-## 4. 推荐的运行结构
+-
+-```mermaid
+-flowchart LR
+-    User[用户对话与页面选择] --> Context[宿主生成本次任务上下文]
+-    Definition[工作台定义] --> Context
+-    Definition --> Page[工作台 Web 页面]
+-    Context --> Session[现有 CLI Session]
+-    Session --> Tool[已配置的出图工具]
+-    Tool --> Artifact[真实产物文件]
+-    Session --> Publish[提交位置与产物对应关系]
+-    Artifact --> Publish
+-    Publish --> Host[宿主校验并保存绑定]
+-    Host --> Page
+-```
+-
+-宿主负责包登记、Project 内实例、左侧导航、Session、执行记录、产物接收和页面运行环境。页面负责实例内部的呈现、内容选择和输入。AI 负责理解任务、选择已有能力并提交结果。插件不能通过页面脚本替换宿主导航或接管 Session 生命周期。
+-
+-### 4.1 页面 SDK 与 AI 开发说明
+-
+-建议提供一份随宿主版本维护的开发说明，包含包布局、声明 Schema、SDK 类型、五图示例、隔离限制和错误处理。AI 创建工作台时读取同一份说明与模板，通过包校验和预览反馈修正代码。开发说明面向页面作者；第 4.2 节的任务上下文面向使用工作台的 AI，两者分开，避免日常出图加载整份开发手册。
+-
+-首期 SDK 只封装少量页面操作，以下名称仅是讨论示意，不是已实现或稳定的 API：
+-
+-| 示意操作 | 用途与边界 |
+-|---|---|
+-| `getInstance()` | 读取宿主绑定的当前实例、定义和状态，不由页面自由指定其他实例 |
+-| `subscribe()` | 接收当前实例的状态变化，返回取消订阅方法 |
+-| `resolveArtifact()` | 将当前实例已授权的产物 ID 解析为受控预览地址 |
+-| `selectSlots()` | 报告当前选中的稳定位置 ID，由宿主校验 |
+-| `setDraft()` | 将指令放入用户可编辑的对话草稿，不自动发送 |
+-
+-开始模型调用继续由用户发送触发，页面加载或渲染不能自行创建隐藏 Session。
+-
+-页面通过产物 ID 获取可预览资源，不接触任意本机路径、应用数据库、CLI 凭据或整个 `window.studio`。停止某次生成由 Session 负责；关闭或切换页面只解除显示和订阅。
+-
+-### 4.2 向 AI 提供任务上下文
+-
+-每次从工作台发送消息时，建议提供当前实例 ID、定义版本、目标位置、位置内容版本、用户要求及可用能力。位置很多时只传相关摘要，并提供按 ID 读取完整定义和状态的入口。
+-
+-图片引用是否能被模型读取或作为出图工具的参考图，需要按具体 CLI 和工具验证。一个文件路径不能自动等同于模型已看过图片。参考图无法使用时，应说明能力缺口，不声称保持了角色一致性。
+-
+-建议保留用户可见、可移除的工作台上下文。移除后按普通对话处理，本轮不附带自动写回工作台的目标。已有 Session 再次发送时也读取最新位置状态，避免沿用第一轮的旧布局或旧图片。
+-
+-### 4.3 AI 通过宿主提交结果
+-
+-建议先定义两个核心操作，名称仅用于讨论：
+-
+-| 操作 | 作用 | 关键输入或输出 |
+-|---|---|---|
+-| `read_workbench` | 读取本次可操作范围及最新状态 | 定义版本、位置 ID、约束、当前位置版本、可用产物 |
+-| `publish_outputs` | 提交一项或多项位置更新，返回真实接收结果 | 执行 ID、幂等操作 ID、定义版本、位置版本、产物文件引用 |
+-
+-下面是一张图片的提交示意，尚未定义正式接口或文件布局：
+-
+-```json
+-{
+-	"runId": "run-18",
+-	"operationId": "publish-forest-2",
+-	"definitionRevision": 3,
+-	"outputs": [
+-		{
+-			"slotId": "scene-forest",
+-			"expectedSlotRevision": 1,
+-			"stagedPath": "staging/run-18/forest-night.png"
+-		}
+-	]
+-}
+-```
+-
+-宿主先确认执行记录归属及目标范围，再检查文件确实存在、能够解码、符合尺寸和类型要求。通过后导入为稳定产物，记录来源并提交绑定，最后返回产物 ID、位置新版本或具体失败原因。AI 的“已经完成”回复不能代替这次提交。
+-
+-首个原型建议通过薄的本地命令桥，让已有 CLI 的 Shell 工具调用宿主操作；命令桥使用宿主发放且限定本次执行范围的连接凭据。页面不持有这些凭据。原型需验证发现、连接、退出清理和错误回传后才能确定采用。若 CLI 无法稳定调用命令桥，再评估 MCP 作为传输方式，业务校验仍由同一宿主服务负责。
+-
+-[MCP 工具规范的 2025-06-18 版本](https://modelcontextprotocol.io/specification/2025-06-18/server/tools)提供输入 Schema、输出 Schema 与结构化结果的协议参考。它不证明当前 Codex 或 Claude 接入已经支持本方案；具体配置与能力须在原型中验证。
+-
+-### 4.4 出图能力独立于工作台
+-
+-工作台声明需要 `image.generate`，并可声明参考图编辑等可选能力。能力标识在这里代表产品需求，具体调用方式由当前 CLI 的工具、Skill、MCP 或经确认的服务接入承担。
+-
+-首期需选定一条真实可用的出图路径，核对输出文件、参考图支持、停止行为、费用展示及错误反馈。工作台只能请求已授权的能力，不通过页面脚本保存密钥或静默切换付费服务。支持某个 CLI 对话，不等于已经具备出图能力。
+-
+-宿主的范围校验约束工作台接口，不能收回 CLI 本身已有的本地文件或 Shell 权限。原生 CLI 的执行边界仍按现有 Adapter 与权限配置处理。
+-
+-## 5. 部分结果、并发和恢复
+-
+-建议把“当前位置的内容”和“正在尝试的新结果”分别记录。更新失败时保留当前图片，失败原因属于本次尝试。页面只能展示实际收到的进度；工具不提供逐图进度时显示处理中，不估算虚假的百分比。
+-
+-| 情况 | 推荐行为 |
+-|---|---|
+-| 五张图只成功三张 | 已接收的三张可用；其余标明失败或未返回，重试时明确目标 |
+-| 工具成功，但提交失败 | 保留暂存产物，先重试提交，避免再次付费生成 |
+-| 同一次提交被重复发送 | 通过操作 ID 返回原结果；同 ID 携带不同内容时拒绝 |
+-| 两个 Session 同时修改同一位置 | 比较位置版本，后到的旧版本结果保留为候选并报告冲突，不静默覆盖 |
+-| 不同位置同时生成 | 按位置版本校验，允许互不冲突的更新分别提交 |
+-| 用户停止执行 | 保留已接收成果，关闭该执行记录的后续发布权限；迟到结果不能直接替换当前位置 |
+-| 应用关闭或异常退出 | 恢复最后已提交绑定；未完成尝试标为待核对，不自动重新出图；原生执行能否继续由 CLI 能力决定 |
+-| 生成期间修改位置类型或删除位置 | 新定义发布后，旧定义下的未提交结果保留为候选，需要重新确认映射 |
+-| 外部文件被删除 | 显示资源缺失并保留绑定诊断，不把空白区域当作有效成果 |
+-
+-宿主接收文件时先完成稳定导入，再原子提交绑定与操作记录。崩溃留下的未引用产物可以后续清理，不允许绑定指向尚未写完的文件。一次批量提交中多个目标一起校验、一起更新；需要逐张预览时分别提交，每次使用不同操作 ID。
+-
+-重试提交可以依赖幂等操作 ID 避免重复绑定。重试生成可能再次产生费用，首期建议由用户显式发起，并尽量复用已经生成的文件。跨位置依赖需要显式记录：若场景依赖角色图，先生成角色；角色改变后标记受影响场景需要检查，不自动重做全部场景。
+-
+-## 6. 插件包、项目实例与保存
+-
+-### 6.1 包和实例的标识
+-
+-插件包描述一种工作台，实例记录它在某个 Project 中的使用情况，产物与绑定属于实例。建议宿主用 `pluginId + version` 标识包版本，用 `projectId + instanceId` 定位实例。`instanceId` 由宿主分配，不使用包名或用户可改的标题代替。包的 `version`、实例所用的定义修订号和位置内容版本各有用途，不能混用。
+-
+-同一个包可以在多个 Project 使用，也可以在同一 Project 创建多个实例。例如“品牌 A”和“品牌 B”使用相同五图布局，但设置、图片、草稿和执行记录彼此独立。编辑当前实例时生成独立草稿修订，不能改写其他实例固定使用的包版本；将改动保存为可复用的新包版本属于后续分享流程。
+-
+-以下是最小包布局的讨论示意，不代表已确定的项目目录或实现文件：
+-
+-```text
+-brand-illustration/
+-├── manifest.json
+-├── workbench.json
+-├── index.html
+-├── main.js
+-└── style.css
+-```
+-
+-`workbench.json` 描述稳定位置 ID、类型与约束，页面通过 SDK 绑定这些位置。`manifest.json` 声明包身份、入口和所需能力，例如：
+-
+-```json
+-{
+-	"schemaVersion": 1,
+-	"pluginId": "local.brand-illustration",
+-	"version": "0.1.0",
+-	"title": "品牌插画",
+-	"sdkVersion": "1",
+-	"entry": "index.html",
+-	"definition": "workbench.json",
+-	"navigation": {
+-		"title": "品牌插画",
+-		"icon": "image"
+-	},
+-	"capabilities": ["image.generate"]
+-}
+-```
+-
+-字段、版本规则、图标取值与 SDK 均待原型确定。声明只表达所需能力，不能授予权限。入口必须解析到包内受控资源；宿主不按声明执行安装脚本或加载任意后端代码。首期不提供通用后端插件入口。
+-
+-### 6.2 导航与生命周期
+-
+-包的 `navigation` 提供实例入口的默认名称和图标，宿主负责渲染、排序和选中状态。导航的稳定标识绑定 `instanceId`，打开时由宿主解析所属 Project 与固定包版本，不使用 `pluginId` 作为唯一路由。用户修改实例名称不会改变 ID，也不会重命名同包的其他实例。
+-
+-建议把以下动作区分开，避免隐藏入口时意外丢失成果。下表描述目标行为，首个原型的覆盖范围见第 9 节。
+-
+-| 动作或情况 | 推荐行为 |
+-|---|---|
+-| 安装包、添加实例 | 安装登记可用包版本；添加实例才使它归属当前 Project 并获得导航入口。首期可由“添加至当前项目”合并完成 |
+-| 打开实例 | 按需加载页面，绑定当前实例的 SDK；不因安装或应用启动加载所有页面 |
+-| 切换或关闭页面 | 释放页面订阅和运行资源；Session 与已授权的产物提交继续由宿主管理 |
+-| 取消固定 | 只隐藏左侧入口，保留实例、运行状态和成果；从工作台管理入口可重新打开或固定 |
+-| 停用实例 | 卸载页面并拒绝新的页面请求，保留入口状态和已有成果；再次启用时从已提交状态读取 |
+-| 停用期间已有 Session 继续运行 | 建议允许已授权执行继续提交产物；停用页面不等于停止生成，停止按钮仍调用 Session 的 Stop |
+-| 删除实例 | 移除活动入口，撤销该实例未完成执行的发布权限；迟到结果不能写回，普通 Session 历史保留，成果默认保留为可恢复记录 |
+-| 包被停用或尝试卸载 | 停用包影响所有引用实例的页面，数据保留；仍被引用的包版本建议阻止直接卸载，先处理实例去向 |
+-| 页面加载失败或崩溃 | 宿主显示错误与重试入口，对话和已保存成果仍可用；修复或回退包版本后重新加载，不自动重做生成 |
+-| 重启应用 | 恢复实例目录、固定状态、已选包版本与已提交绑定；只加载当前需要展示的页面，不自动启用已停用实例 |
+-
+-这些入口和默认行为仍需产品确认。删除实例时是否同时停止运行中的 Session、可恢复记录保存多久、何时彻底删除文件，须在相应操作实施前确定，不能把卸载页面、Stop 和清空数据合成一个动作。停用后的产物提交仍须经过第 4.3 节的校验；用户显式停止执行时按第 5 节撤销后续发布权限。
+-
+-### 6.3 存储、分享与改版
+-
+-建议把定义和页面文件保存在可导出的本地工作台包中，实例产物放在当前 Project 的专用目录。宿主数据库保存实例、当前绑定、版本历史与执行记录，作为运行状态的唯一写入入口。工作台使用协议只开放产物更新，不提供直接修改绑定数据库的接口；包文件的修改走编辑工作台流程。
+-
+-这项存储选择便于原子更新绑定、检测并发版本和记录执行来源，代价是项目文件与宿主状态需要一起备份。若希望仅复制项目目录就能完整恢复工作台，应在实施前重新评估项目内状态文件方案及其并发写入规则。
+-
+-图片记录为产物 ID 和受控目录内的相对路径，页面不依赖生成工具的临时绝对路径。实例固定使用一个已校验的包版本；升级失败时应能回到先前版本与对应定义，不能只回退页面而遗留不兼容的绑定。
+-
+-后续分享阶段，导出包默认包含声明、定义与页面，不携带项目图片、对话或凭据。导出带成果的实例时，需要同时导出状态快照与产物，再通过导入恢复绑定。只复制 Project 文件夹不保证迁移宿主数据库中的状态；具体导入体验在实施前确认。
+-
+-建议编辑工作台时生成草稿版本，在预览通过后应用到实例。仅改变排版时保留位置 ID 与已有内容；新增位置保持为空；删除有内容的位置时说明影响并保留可恢复记录。位置类型变化需要重新检查绑定，不能把旧图片误当成新类型的数据。包升级由用户选择应用，不直接改写所有实例。
+-
+-当前 `.ai-studio/` 的 Git 忽略策略由 [DEC-04](<07. Decisions.md#dec-04-project-knowledge-存储>)负责。新包的具体目录、备份与 Git 分享方式需单独落规格，不能在引入工作台时悄悄改变现有忽略策略。
+-
+-## 7. 自定义 Web 页面的运行边界
+-
+-建议将用户生成的页面运行在与应用主 Renderer 隔离的容器中。具体使用沙箱 iframe 还是独立 WebContents，由原型核对资源加载、性能、消息归属和销毁行为后决定。
+-
+-无论选择哪种容器，页面都不获得 Node 或应用 Preload。资源通过受控地址提供，默认只允许工作台包和当前实例产物；页面请求经小型消息接口到宿主，由宿主检查消息来源、实例范围和参数。页面卸载后注销订阅，故障时保留宿主对话和已经保存的成果。
+-
+-[Electron 官方安全说明](https://www.electronjs.org/docs/latest/tutorial/security)要求谨慎处理不可信代码，关闭不可信内容的 Node 集成、保持上下文隔离，并校验 IPC 发送方。这里的容器与接口方案是基于这些要求提出的设计，不能仅凭启用某个开关认定完成隔离验证。
+-
+-外部机制的源码依据与可借鉴范围统一见 [Harness 调研](references/deepseek-harness/README.md)。本草案的隔离页面、受限 SDK 和产物发布边界是本项目的设计建议，不能从参考项目采用了插件机制推导出这些边界已经验证。
+-
+-## 8. 与现有产品的关系
+-
+-现有需求已经允许后续新增 View，Knowledge 与展示分离、普通 Session 执行和刷新保留上次有效结果也可继续复用。本方案新增的是可交互工作台、位置与产物模型、宿主写入协议，以及自定义页面运行能力。
+-
+-| 负责文档 | 当前约定或范围 | 若采纳本方案，需要明确的变化 |
+-|---|---|---|
+-| [01 产品定义](<01. Product Definition.md>) | 围绕本地项目和 CLI Agent 的开发工作台 | 创作型工作台是否属于正式产品目标，首期支持哪些用户 |
+-| [02 FR-VIEW-002～008](<02. Functional Requirements.md#fr-view-002-project-view-可扩展>) | 自定义 View 为 P1，数据与展示分离 | 工作台实例、产物绑定、局部修改与恢复的新行为 |
+-| [03 交互规格](<03. UX Specification.md>)、[Navigation spec](../specs/navigation/spec.md) | 现有 View 导航、Conversation 与 Preview 布局 | 包安装与实例入口、编辑和预览、固定与停用、内容选择及多个实例的呈现 |
+-| [04 技术要求](<04. Technical Requirements.md>)、[DEC-04～07](<07. Decisions.md#dec-04-project-knowledge-存储>) | 项目 JSON、声明式渲染、首条 Context、只读 Preview | 宿主写入状态、每次发送的目标上下文、自定义页面与消息接口 |
+-| [Project View spec](../specs/project-view/spec.md#fr-view-002-project-view-可扩展) | 自定义 View 复用声明式 Renderer，任意 HTML 不能作为默认扩展接口 | 本草案推荐的 Web 页面模式须明确调整该约束，不能直接按旧规格实施 |
+-| [05 验收标准](<05. Acceptance Criteria.md>) | AC-06 覆盖现有 Project View | 新增真实出图、定向绑定、版本冲突与页面隔离场景 |
+-| [06 建设计划与进度](<06. Development Roadmap.md>) | 自定义 View 未开始，尚无实施排期 | 方向和原型范围确认后再安排阶段，不将草案写成已开工功能 |
+-
+-首个原型建议以新增工作台入口承载，保留当前五个 View 的行为。原型验证后，再决定默认 View 是否迁移为同一工作台协议，以及用户是否可隐藏、重排默认入口。这样可以先证明工作台体验，再评估迁移成本。
+-
+-## 9. 首个原型与判断标准
+-
+-本节是验证建议，不是已批准的实施计划或正式验收条款。
+-
+-首个原型覆盖一个随应用提供的五图模板、AI 对话创建与编辑、隔离预览、添加至当前 Project、实例导航，以及一个真实 CLI 和一条真实出图路径。用户完成创建和安装后生成五张图片，再指定其中一张修改。保存、重启、部分失败和旧版本保护与这条主流程一起验证。包的安装只服务这条流程，不先建设独立插件管理中心。
+-
+-| 要回答的问题 | 验证操作 | 可观察结果 |
+-|---|---|---|
+-| 创建是否真的形成可使用的插件 | 让 AI 创建包，在预览中修正一处布局，再添加至 Project 并从导航打开 | 草稿与已安装版本可区分，入口打开正确实例，不自动生成图片 |
+-| 编辑是否保护已有成果 | 生成图片后进入编辑，调整布局并保留位置 ID，再预览应用 | 内容绑定保持，其他实例不被同步改写 |
+-| AI 是否知道每个位置的含义 | 使用同一模板分别要求生成五张图和只生成封面 | 只更新本次目标，类型与数量符合定义 |
+-| 自定义页面是否影响定位 | 改变位置顺序与页面布局，再修改选中的一张 | 仍按稳定位置 ID 更新，其他绑定不变 |
+-| 产物是否真实可用 | 通过选定 CLI 调用真实出图工具并发布 | 文件可解码、页面可预览、来源可追溯，非占位图或文字完成声明 |
+-| 失败是否可继续 | 制造两项生成失败和一次提交失败 | 成功结果保留，提交重试不重新生成图片 |
+-| 多次更新是否保护旧成果 | 重复提交、同时修改同一位置、恢复旧图 | 无重复绑定、无静默覆盖，历史可恢复 |
+-| 状态是否可恢复 | 重启应用，再打开工作台并局部修改 | 已提交成果保留，任务不会因恢复而自动重新执行 |
+-| 页面接口是否只作用于当前实例 | 在同一 Project 和另一 Project 各准备同包实例 fixture，请求非当前实例资源、伪造消息、关闭页面后继续发送请求 | 宿主拒绝越界请求，无跨实例或跨项目内容泄漏 |
+-| 生命周期是否与 Session 一致 | 生成期间切换页面、停用再启用，另行执行 Stop；让页面加载失败后重试 | 页面卸载不误停 Session，Stop 后迟到提交被拒绝，重载不丢已保存成果 |
+-
+-先用本地 fixture 验证绑定与恢复，再执行声明支持范围内的真实 CLI 和出图路径。模拟结果不能证明真实出图、参考图输入或停止成功。后续功能交付按 [Task Protocol](../tasks/README.md#acceptance)安排实际界面操作、独立 AI 验收和人工产品验收。
+-
+-原型后的下一阶段再评估本地包导入、包与实例导出、完整多实例管理、升级与卸载、数据清理策略和开发工具。首期用额外实例 fixture 检查同项目与跨项目隔离，不代表多实例管理界面已交付。默认 View 迁移、插件市场、任意后端插件与更多内容类型需要另行确定范围，不以五图原型通过作为完整插件平台已完成的依据。
+-
+-## 10. 待讨论问题
+-
+-以下均由产品负责人决定，不阻塞本次草案交付。“实施前”表示对应行为写入正式规格前需要答案。
+-
+-| 编号 | 问题 | 推荐答案与主要取舍 | 决策时点 |
+-|---|---|---|---|
+-| WB-Q1 | 工作台是否支持开发之外的创作任务 | 支持，以本地 Project 和现有 CLI Session 为基础；会扩大产品定位，需明确首期用户与范围 | 方向确认时 |
+-| WB-Q2 | 自定义 Web 页面是否作为目标能力 | 是，页面与结构化定义配套；声明式组件保留为起步模板，新增页面隔离与接口成本 | 方向确认时 |
+-| WB-Q3 | 用户如何创建和修改工作台 | 首期支持对话生成、内置模板起步、编辑预览和添加至 Project；本地包导入与分享随后评估，不先建设通用拖拽编辑器 | 原型实施前 |
+-| WB-Q4 | 生成请求是否能同时修改工作台结构 | 默认只更新内容；结构修改通过明确的编辑入口，减少误改定义 | 原型实施前 |
+-| WB-Q5 | 成功产物是否直接替换当前位置 | 校验通过后逐项展示并保留旧版；人工确认用于作品质量判断，不要求每张图重复点击才能预览 | 原型实施前 |
+-| WB-Q6 | 首期采用哪个 CLI 和出图能力 | 选当前可用且能返回本地产物的一条真实路径；工具、参考图支持、费用与停止能力尚需核实 | 真实出图验证前 |
+-| WB-Q7 | 工作台包与成果如何分享 | 包默认不带成果；带成果分享走实例导出，避免误带对话或凭据；需增加导入与资源恢复逻辑 | 分享功能实施前 |
+-| WB-Q8 | 默认五个 View 是否改成工作台模板 | 原型阶段保留现状，验证后再决定迁移、隐藏与排序规则 | 原型评估后 |
+-| WB-Q9 | 是否要求复制项目目录即可恢复全部工作台状态 | 建议宿主管理绑定，实例导出留到分享阶段；首期需说明备份依赖。若目录自包含是必要目标，实施前调整存储设计 | 存储实现前 |
+-| WB-Q10 | 工作台是否采用包与 Project 内实例分离的小型宿主 | 建议采用，复用现有导航和 Session；参考 Harness 的组织方式，不整体复制其运行框架或承诺包兼容 | 方向确认时 |
+-| WB-Q11 | 安装、固定、停用和移除分别如何呈现 | 建议按第 6.2 节区分，能力声明不自动授权；来源与权限展示、入口位置和多实例管理需设计 | 对应界面实施前 |
+-| WB-Q12 | 停用和删除如何影响运行中的生成与数据 | 停用只卸载页面，已授权执行仍可提交；删除撤销写回、保留可恢复成果。删除是否同时 Stop、保留期限与彻底清理须明确 | 生命周期实施前 |
+-
+-技术评估由实施任务负责，重点包括页面容器选择、命令桥或 MCP 的接入可行性、定义版本升级、存储恢复和产物限额。若技术选择改变上述用户行为、费用或数据权限，回到对应产品问题讨论。
++后续按文档同步、原型建设、开发者自检、独立 AI 评审、人工产品验收推进。技术可行性在原型阶段验证；新增产品取舍单独提出，不反复确认本表已接受的答案。
+--- a/docs/references/README.md
++++ b/docs/references/README.md
+@@ -26,7 +26,7 @@
+ | [Claude Desktop](https://academy.claude.com/tutorials/navigating-the-claude-desktop-app) · [Claude Code 桌面文档](https://code.claude.com/docs/en/desktop) | 产品资料、已有截图、后续实机观察 | Composer、Conversation、上下文、权限、Diff | 输入与附件分组、文件上下文、权限请求、代码审阅和预览。可研究通用对话与开发任务如何在桌面中衔接，并对照 Claude Code 原生能力。 |
+ | [ChatGPT Desktop](https://help.openai.com/en/articles/9703738-chatgpt-macos-app-release-notes) · [Work with Apps](https://help.openai.com/en/articles/10119604-work-with-apps-on-macos) | 产品资料、后续实机观察 | 应用布局、Conversation、Composer、上下文 | 对话层级、输入区、伴随窗口和应用上下文入口。重点观察留白、信息密度及上下文反馈，为本 app 的轻量桌面体验提供对照。 |
+ 
+-Codeg To-dos 的已定范围与建设顺序见[路线图 §4.1](<../06. Development Roadmap.md#41-agent-to-dos-分阶段建设规划>)；自定义工作台仍见[讨论草案](<../09. Workbench Discussion.md>)。本清单不新增产品需求、排期或技术选型。
++Codeg To-dos 的已定范围与建设顺序见[路线图 §4.1](<../06. Development Roadmap.md#41-agent-to-dos-分阶段建设规划>)；自定义工作台的确认见 [09](<../09. Workbench Discussion.md>)，详细行为见[工作台规格](../../specs/workbench/spec.md)。本清单不新增产品需求、排期或技术选型。
+ 
+ ## 补充参考项目
+ 
+@@ -54,7 +54,7 @@
+ ## 建议先展开的调查
+ 
+ 1. **Codeg**：围绕已规划的 To-dos，串起创建、执行、等待、审阅、继续修改和交付，找出各状态的入口与恢复方式。
+-2. **OpenDesign、DeepSeek Harness、MCP Apps**：Harness 的[首轮源码调查](deepseek-harness/README.md)已完成，后续补创建到卸载的实机观察；OpenDesign 与 MCP Apps 继续分别调查工作台操作和页面与宿主通信，服务于自定义工作台讨论。
++2. **OpenDesign、DeepSeek Harness、MCP Apps**：Harness 的[首轮源码调查](deepseek-harness/README.md)已完成，后续补创建到卸载的实机观察；OpenDesign 与 MCP Apps 继续分别调查工作台操作和页面与宿主通信，服务于自定义工作台原型验证。
+ 3. **Codex、Claude Desktop、ChatGPT Desktop、cmux**：用相同场景比较输入、运行、等待介入、完成未读和切回会话，补足当前桌面交互的参考。
+ 
+ 其他项目按具体模块需要展开。这是调查建议，顺序可随当前工作调整。
+--- a/docs/references/deepseek-harness/README.md
++++ b/docs/references/deepseek-harness/README.md
+@@ -5,7 +5,7 @@
+ | 项目 | 内容 |
+ |---|---|
+ | 文档状态 | 草稿 |
+-| 文档职责 | 记录 DeepSeek Harness 的源码事实、复用价值与调查边界；AI Studio 的工作台方案由[讨论稿](<../../09. Workbench Discussion.md>)维护 |
++| 文档职责 | 记录 DeepSeek Harness 的源码事实、复用价值与调查边界；AI Studio 的确认依据见 [09](<../../09. Workbench Discussion.md>)，详细行为由[工作台规格](../../../specs/workbench/spec.md)维护 |
+ | 调研日期 | 2026-11-10 |
+ | 源码基线 | 官方仓库 `deepseek-ai/deepseek-harness`，commit `fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159` |
+ | 调查方式 | 阅读固定版本的官方文档、入口源码、包声明与出货的 Creator skill；未安装依赖、启动 Harness、生成或安装插件，也未执行上游测试 |
+@@ -86,7 +86,7 @@
+ 
+ ## 6. 我们的判断：哪些做法值得参考
+ 
+-以下是基于上述源码的适配判断，不是上游承诺，也不新增 AI Studio 的已确认需求。具体包协议、权限、界面和原型范围只在[工作台讨论稿](<../../09. Workbench Discussion.md>)维护。
++以下是基于上述源码的适配判断，不是上游承诺，也不新增 AI Studio 的已确认需求。AI Studio 的详细行为由[工作台规格](../../../specs/workbench/spec.md)维护，原型范围由[路线图 §4.2](<../../06. Development Roadmap.md#42-自定义工作台原型>)维护。
+ 
+ | AI Studio 相关模块 | 可参考的做法与收益 | 适配成本或限制 |
+ |---|---|---|
+@@ -104,7 +104,7 @@
+ 
+ 本轮已回答左侧入口到面板、Creator 草稿入口、包声明和生命周期职责。下一轮如需评估真实体验，应在隔离的测试 profile 中走通创建、检查草稿、生成、安装、打开、停用、再启用与卸载，并观察缺少 Workspace、加载失败、断线和版本变化。这些步骤尚未执行，不能列为通过。
+ 
+-当前调查支持继续讨论工作台方案，不足以决定第三方插件的信任模型、分发机制或兼容性承诺。产品待决项与实施建议见[工作台讨论稿](<../../09. Workbench Discussion.md>)；其他项目的调查顺序见[参考项目索引](../README.md#建议先展开的调查)。
++调查提供源码参考，不代替本产品的权限、分发或兼容性决定。已确认方向见 [09](<../../09. Workbench Discussion.md>)，后续技术核实与产品细节见[工作台规格 §1](../../../specs/workbench/spec.md#1-职责与后续事项)；其他项目的调查顺序见[参考项目索引](../README.md#建议先展开的调查)。
+ 
+ [project]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/README.md#L5-L15
+ [sidebar-contract]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/packages/client/ui-sidebar/README.md#L40-L44
+--- a/specs/README.md
++++ b/specs/README.md
+@@ -45,7 +45,8 @@
+ | `chat/` | FR-CHAT-001～FR-CHAT-003 | [spec.md](chat/spec.md) |
+ | `session/` | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007 | [spec.md](session/spec.md) |
+ | `input/` | FR-INPUT-001～FR-INPUT-002 | [spec.md](input/spec.md) |
+-| `project-view/` | FR-VIEW-001～FR-VIEW-008 | [spec.md](project-view/spec.md) |
++| `project-view/` | FR-VIEW-001～FR-VIEW-008；默认 View 与扩展接缝 | [spec.md](project-view/spec.md) |
++| `workbench/` | FR-VIEW-002、FR-WB-001～FR-WB-008；自定义工作台 | [spec.md](workbench/spec.md) |
+ | `tools/` | FR-TOOL-001～FR-TOOL-005 | [spec.md](tools/spec.md) |
+ | `settings/` | FR-SET-001～FR-SET-002 | [spec.md](settings/spec.md) |
+ | `agent-todos/` | FR-TODO-001～FR-TODO-009；增量范围 / 阶段见 [02 §8](<../docs/02. Functional Requirements.md#8-后续阶段agent-to-dos>)与[路线图 §4.1](<../docs/06. Development Roadmap.md#41-agent-to-dos-分阶段建设规划>) | [spec.md](agent-todos/spec.md) |
+--- a/specs/input/spec.md
++++ b/specs/input/spec.md
+@@ -71,8 +71,8 @@
+ 
+ #### Context / Attachment 入口与上下文标签
+ 
+-1. `+` 打开按来源分组的 Add 菜单：文件入口复用 Files；View 草稿中的当前 View 标签可在移除后重新附加；Skills 列出当前 Project 的真实原生目录，并标明已添加项。Plugins 无原生 catalog 接口时显示明确的不可用状态，不能把原型示例列成真实能力。Files 选择与添加行为见 §1.3；原生图片仍沿用 Files 的“作为图片附加”入口（DEC-23，2026-10-23）。
+-2. 上下文标签位：显示当前 View、从 Files 添加的文件和粘贴附件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。草稿的上下文类型含 View、项目文件、项目图片、Skill 和粘贴附件；行内引用的位置另存草稿。Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。粘贴附件的实施状态与保留事项见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。
++1. `+` 打开按来源分组的 Add 菜单：文件入口复用 Files；View 草稿中的当前 View 标签可在移除后重新附加；Skills 列出当前 Project 的真实原生目录，并标明已添加项。这里的 Plugins 指 CLI 原生插件，自定义工作台的创建入口由[工作台规格](../workbench/spec.md)负责。原生 Plugins 无 catalog 接口时显示明确的不可用状态，不能把原型示例列成真实能力。Files 选择与添加行为见 §1.3；原生图片仍沿用 Files 的“作为图片附加”入口（DEC-23，2026-10-23）。
++2. 上下文标签位：显示当前 View、从 Files 添加的文件和粘贴附件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。草稿的上下文类型含 View、项目文件、项目图片、Skill 和粘贴附件；行内引用的位置另存草稿。Conversation Mode 下不出现 View 标签；默认 View 标签的出现规则与首条注入方式由 [Project View spec](../project-view/spec.md)决定。自定义工作台每次发送前展示可移除的当前实例上下文并读取最新目标状态，移除后本轮不自动写回；详细规则见 [workbench §4.2](../workbench/spec.md#42-向-ai-提供任务上下文)（FR-WB-003，2026-11-10 确认，本次同步 diff 待审阅）。粘贴附件的实施状态与保留事项见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。
+ 3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
+    - 当前转换由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)负责：Codex 的文件经结构化宿主契约转为明确的本机路径文本引用，图片 / Skill 使用各自原生输入；Claude 文件使用文本路径清单。引用不是文件内容快照；本轮缓存接收及历史验证的边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
+ 4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件、图片、粘贴附件或 Skill 时明确阻止答复并保留输入，避免附件被无声清空；运行中发送遵循 Provider 的实际能力。既有实现与独立验收边界由 [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 维护。
+--- a/specs/navigation/spec.md
++++ b/specs/navigation/spec.md
+@@ -26,7 +26,7 @@
+ | NAV-Q3 | Rename 的标题长度上限是多少？ | 最多 100 个字符，输入时限制，粘贴时截断，列表中单行省略显示。依据：文档无规定；100 足以描述一次对话，同时避免数据与布局问题。具体数值由人确认 | 否 | |
+ | NAV-Q5 | 已处于某个 View 的 Project View Mode 时，再次点击导航中同一个 View 的行为：忽略，还是回到新草稿 / 回到 Preview？ | 忽略（不改变左列当前对话与右侧区域）。依据：P-A 的“新草稿”限定为“进入 View”；左列顶栏已提供“新建对话”按钮（Shell 第 8 节），无需用导航承担该功能；避免意外丢弃草稿 | 否 | |
+ | NAV-Q6 | Session Mode 下停留在 New Chat 草稿时，导航是否有条目高亮（例如 New Chat 按钮呈 Selected）？ | 无任何条目高亮，New Chat 按钮也不呈 Selected。依据：03 第 8 节与 Shell 第 4 节只规定 Session 项与 View 项的 Selected；New Chat 按钮的状态仅列 Default / Hover / Focus | 否 | |
+-| NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），Project Views 区域过高时如何处理：独立滚动、限制高度、折叠？ | V1 首发只有五项，不设计该情形；P1 实现时再定，建议 Project Views 区域设最大高度并内部滚动，保证 SESSIONS 区域始终可见。依据：FR-VIEW-002 为 P1；03 第 8 节要求 Session History 可持续增长 | 否 | |
++| NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），Project Views 区域过高时如何处理：独立滚动、限制高度、折叠？ | 工作台实例进入当前 Project 导航，原型中设计区域高度和滚动；完整多实例管理后续评估。依据：DEC-28、FR-WB-006；03 第 8 节要求 Session History 可持续增长 | 否 | |
+ | NAV-Q8 | 折叠后顶栏的 New Chat 按钮、以及空状态中的 New Chat 按钮，是否也带 CLI 下拉？ | 都只是单个按钮，使用 Default CLI，不带下拉；需要选其他 CLI 时展开导航，用顶部分裂按钮。依据：Shell 第 3 节顶栏写“New Chat 按钮”，第 4 节导航写“分裂按钮”，第 10 节空状态写“New Chat”，措辞不同；FR-CHAT-002 只要求提供扩展入口。该决定由 `specs/chat/` 最终确认 | 否 | |
+ | NAV-Q9 | V1 没有删除或归档 Session 的入口，列表只增不减，是否符合预期？ | 符合，V1 不提供。依据：02 与 03 均未定义删除 / 归档；“不添加文档之外的需求”；04 第 7 节要求大量历史 Session 不卡顿，说明按只增长设计 | 否 | |
+ | NAV-Q10 | 左侧导航的折叠状态是否随应用重启保留？ | 保留（与窗口级状态一起保存）。依据：03 第 8 节称之为“窗口级偏好”，偏好通常持久；与 `specs/project/spec.md` PROJ-Q1 一并确认 | 否 | |
+@@ -95,6 +95,12 @@
+ 
+ 每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 4 节）。图标采用交互原型 v01。五项在任何 Project 中始终显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。
+ 
++#### 工作台实例导航
++
++来源：FR-VIEW-002、FR-WB-006、DEC-28（2026-11-10 确认，本次同步 diff 待审阅）。宿主从当前 Project 的实例目录生成入口，按 `instanceId` 定位并核实 Project 与固定包版本；名称和图标取实例设置及包声明的默认值。默认五项保持现状，不把工作台实例塞入默认 View ID 枚举。
++
++点击实例打开对应工作台，不因打开或安装自动创建 Session / 出图。导航选中状态仍由 Main Canvas 决定；重命名不改变实例 ID。固定、停用、删除及错误入口由[工作台生命周期](../workbench/spec.md#62-导航与生命周期)负责，具体呈现在原型中评审。
++
+ #### 3.2.2 点击 View 的导航契约
+ 
+ 点击某个 View，导航保证（细节行为归 `specs/project-view/`）：
+--- a/specs/project-view/spec.md
++++ b/specs/project-view/spec.md
+@@ -11,7 +11,7 @@
+ | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、6、8、10 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
+ | 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 3、6、1、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；T20261009-project-view；2026-10-10 起草；用户明确“我都已经全部确定了”（2026-10-11 确认） |
+ 
+-> 本规格把已确认的 DEC-04～07 落成可实现的模块边界。
++> 本规格负责默认五个 View 的 DEC-04～07 行为。自定义扩展按用户 2026-11-10 确认的 DEC-28 由[工作台规格](../workbench/spec.md)负责，本次同步 diff 待审阅。
+ 
+ 来源简称：Project 指 [Project spec](../project/spec.md)；Session 指 [Session spec](../session/spec.md)。其余简称与标注约定见 [specs/README.md](../README.md) 第 3 节。
+ 
+@@ -26,7 +26,7 @@
+ | 编号 | 问题 | 回答（确认日期） |
+ |---|---|---|
+ | PV-Q1 | Knowledge 是否放在 Project 内 `.ai-studio/`，并默认 Git 忽略？ | 是；每个 View 一份带 `schemaVersion` 的 JSON，`.gitignore` 内容为 `*`（2026-10-09，DEC-04）。 |
+-| PV-Q2 | V1 是否采用受信组件声明式渲染，推迟自由 HTML / JavaScript？ | 是；自由 HTML 推迟到 P1 / 自定义 View（2026-10-09，DEC-05）。 |
++| PV-Q2 | 默认 View 与自定义扩展分别如何渲染？ | 默认五个 View 使用受信组件；自定义工作台使用隔离 Web 页面配结构化定义（默认基线 2026-10-09；自定义扩展 2026-11-10 确认，DEC-05、DEC-28）。 |
+ | PV-Q3 | View Context 是否首条消息前附加可移除的英文文本块？ | 是；不内联 Knowledge，移除后仍保留 `originViewId`（2026-10-09，DEC-06）。 |
+ | PV-Q4 | 客户端是否只监视、校验和刷新，不自动生成或修复 Knowledge？ | 是；打开、回合结束和重新聚焦时补扫，渲染失败保留上一版（2026-10-09，DEC-07）。 |
+ | PV-Q5 | 默认 View Definition 是否内置，Project 文件仅可覆盖？ | 是（2026-10-09，T20261009-project-view Q4）。 |
+@@ -53,7 +53,7 @@
+   - Session 生命周期、Conversation 内容、状态提醒、CLI Runtime、首条消息创建 → [Session spec](../session/spec.md)、[Chat spec](../chat/spec.md)、[Agent Adapter spec](../agent-adapter/spec.md)。
+   - 输入区的通用布局、Model Selector、Send / Stop → [Input spec](../input/spec.md)。本模块只提供 View Context 标签和创建参数。
+   - Files、Search、Diff、Browser、Terminal 的内容 → [tools spec](../tools/spec.md)；Project View Mode 下它们复用右侧区域切换契约，切换内容不释放工具的 Project 级资源（DEC-10，2026-10-12 确认）。既有内容见[工程工具任务](../../tasks/archive/T20261009-context-tools/task.md)，Search 与新增工具能力见[对齐任务](../../tasks/archive/T20261026-tools-vscode-parity/task.md)。
+-  - 自定义 View 的创建入口和自由 HTML / JavaScript 渲染。自定义 View 为 P1；自由 HTML 按 DEC-05 推迟到后续方案。
++  - 自定义工作台的包、实例、创建入口、隔离 HTML / JavaScript、逐次上下文和产物提交 → [workbench spec](../workbench/spec.md)（FR-WB-001～008）。
+ 
+ ## 3. 行为细则
+ 
+@@ -83,9 +83,9 @@
+ 
+ ### FR-VIEW-002 Project View 可扩展
+ 
+-1. V1 只预留扩展点：View 目录、Schema、Renderer Registry 和导航数据结构不得把五个 ID 写死为不可扩展的数据库枚举。
+-2. 自定义 View 创建入口、导航排序、权限和迁移不在本轮实现；实现阶段只保证未知 View 文件不会破坏默认 View。
+-3. 自定义 View 进入 P1 task 时，必须复用本规格的数据 / 展示分离和声明式 Renderer，不得以任意 HTML 作为默认扩展接口。
++1. 默认 View 保留扩展边界：View 目录、Schema、Renderer Registry 和导航数据结构不得把五个 ID 写死为不可扩展的数据库枚举。
++2. 自定义扩展采用包与 Project 内实例，使用[工作台规格](../workbench/spec.md)的创建、导航、权限与存储规则。默认 View 在原型阶段不迁移，未知 View 文件不能破坏默认 View。
++3. 自定义工作台使用 Web 页面配结构化定义，由独立容器隔离运行；声明式组件可作为模板，不限制工作台只能复用本 Renderer（2026-11-10 确认，DEC-28）。
+ 
+ ### FR-VIEW-003 View 内容动态生成
+ 
+@@ -337,7 +337,7 @@
+ 
+ 1. Renderer 使用固定组件映射，不使用动态 `import()`、`eval`、`new Function`、`dangerouslySetInnerHTML`。
+ 2. Preview 不拥有 Node.js、文件系统、Shell、凭据或任意 IPC 能力；Renderer 只接收已经校验的 DTO。
+-3. 如果未来引入自由 HTML，必须另立 P1 规格和 Electron 沙箱原型，不能复用本阶段的声明式入口。
++3. 自定义工作台按[独立规格](../workbench/spec.md)建设页面隔离原型；本阶段声明式入口仍不执行 HTML 或脚本。
+ 
+ ## 7. 验证清单
+ 
+--- a/specs/session/spec.md
++++ b/specs/session/spec.md
+@@ -54,7 +54,7 @@
+   - Session History 的分组、排序呈现、滚动、Rename 交互：见 [Navigation spec](../navigation/spec.md)。本文提供排序字段与状态。
+   - Tab 注意力点的渲染、关闭确认对话框的 UI、折叠按钮注意力点的渲染：Project 壳层（[T20261009-project-shell](../../tasks/archive/T20261009-project-shell/task.md)）。
+   - CLI 协议、进程管理、Stop 的资源清理细节：CLI Adapter（[Adapter spec](../agent-adapter/spec.md)）。本文只以抽象接口描述所需能力（第 5.1 节）。
+-  - Project View Mode 的 Conversation 列与 View 上下文注入（[T20261009-project-view](../../tasks/archive/T20261009-project-view/task.md)）；本文只定义该列中的 Session 如何计入“正在查看”。
++  - 默认 View 的 Conversation 列与首条上下文由 [Project View spec](../project-view/spec.md)负责；自定义工作台的逐次上下文、执行范围和产物发布由 [workbench spec](../workbench/spec.md)负责。两者使用普通 Session，本模块维护会话、查看状态和 Stop（FR-WB-003、005，2026-11-10 确认，本次同步 diff 待审阅）。
+   - 轮次原生文件记录与 Diff 联动（依赖 FR-TOOL-002、04 第 1 节第 13 项与 [context-tools task](../../tasks/archive/T20261009-context-tools/task.md)；组件修订见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节）。
+ 
+ ## 3. 行为细则
+--- a/tasks/archive/T20261110-workbench-discussion/task.md
++++ b/tasks/archive/T20261110-workbench-discussion/task.md
+@@ -36,7 +36,7 @@
+ 
+ ## 收尾
+ 
+-- 2026-11-10，主 Agent 自检并关闭本次文档交付任务。基线为 `3deffa4` 加既有未提交文档修改；本次范围只有 [讨论草案](../../../docs/09.%20Workbench%20Discussion.md)、[索引新增入口](../../../docs/00.%20Documentation%20Index.md#讨论草案)和本记录。
++- 2026-11-10，主 Agent 自检并关闭本次文档交付任务。基线为 `3deffa4` 加既有未提交文档修改；本次范围只有 [讨论草案](../../../docs/09.%20Workbench%20Discussion.md)、[索引新增入口](../../../docs/00.%20Documentation%20Index.md#专项方案与确认记录)和本记录。
+ - 验证：`pnpm check:docs` 为 0 个新增问题，4 个历史基线问题未扩大；`git diff --check` 通过；通过 remark 与 GFM 解析核对标题层级、表格列数，JSON 提交示例可解析。没有代码变更，不运行应用测试。
+ - 语义复核：核对 01 产品定位、02 FR-VIEW、03 布局、04 技术边界、05 AC-06、07 DEC-04～07，以及 Project View 和 Navigation spec。核对 06 的下一步、整体概况、模块状态、阶段计划与验收进度。当前正式事实未变，保留这些文档及历史实现任务；新增方案和待决问题只由草案负责。
+-- 草案仍待产品讨论与 diff 审阅，问题负责人和决策时点见草案第 10 节。没有阻塞本次文档交付的事项；`done` 不表示方案已确认、功能已验收或获得实施授权。未提交、未推送。
++- 当时草案交付和检查结论保留原基线。后续用户于 2026-11-10 审阅并全部接受推荐答案，当前确认、正式规格与下一步见[文档同步任务](../T20261110-workbench-confirmation/task.md)；本任务完成不代表功能验收。未提交、未推送。
+--- a/tasks/archive/T20261110-workbench-plugins/task.md
++++ b/tasks/archive/T20261110-workbench-plugins/task.md
+@@ -37,4 +37,4 @@
+ - 来源复核：主 Agent 对照固定源码核对导航与主面板、Creator 草稿、Host 启停、模块清理等关键行为。调查只证明已阅读的源码与文档，不声称实机验证或完整依赖许可审计。
+ - 检查结果：`pnpm check:docs` 为 0 个新增问题，4 个历史基线问题未扩大；remark / GFM 检查 6 份文档、23 个表格及标题层级通过，2 个 JSON 示例可解析，27 条固定 commit 来源的文件与行号有效。本轮增量 diff 与空白已复核；归档后再次检查链接与旧路径。
+ - 语义复核：已核对 01 产品定义、02 FR-VIEW、03 交互、04 技术、05 AC-06、07 DEC-04～07、Project View 和 Navigation spec；路线图核对下一步、整体概况、模块状态、阶段计划和验收进度。正式事实未变，保留这些文档及历史实现任务；参考索引新增专项调查入口，讨论稿新增插件方案与 WB-Q10～12，主文档索引更新内容摘要。
+-- 产品范围、权限、删除与 Stop、备份和数据保留仍按讨论稿待决表处理，由产品负责人在相应阶段决定，不阻塞本次草案交付。文档仍待 diff 审阅，`done` 不表示设计已确认或功能已验收。本次未实现功能，未运行应用测试，未提交或推送。
++- 后续用户于 2026-11-10 审阅并全部接受 WB-Q1～Q12 推荐答案，当前确认与正式规格见[文档同步任务](../T20261110-workbench-confirmation/task.md)。推荐中保留的后续事项由工作台规格 §1 负责；当时调研与检查结论保留原基线。本次调研未实现功能，未运行应用测试，未提交或推送。
+--- a/specs/workbench/spec.md
++++ b/specs/workbench/spec.md
+@@ -0,0 +1,300 @@
++# 用户自定义工作台
++
++## 文档信息
++
++| 项目 | 内容 |
++|---|---|
++| 模块 | `workbench` |
++| 文档状态 | 已确认（2026-11-10） |
++| 覆盖需求 | FR-VIEW-002、FR-WB-001～FR-WB-008 |
++| 相关验收 | [AC-WB-01～08](<../../docs/05. Acceptance Criteria.md#6-自定义工作台原型验收>) |
++| 来源 | 用户 2026-11-10 对话：已审阅 09 的讨论问题，全部接受推荐答案，要求替换相关文档旧描述；确认记录见 [09](<../../docs/09. Workbench Discussion.md>)、[DEC-28](<../../docs/07. Decisions.md#dec-28-用户自定义工作台>) |
++| 文档职责 | 维护包与实例、位置与产物、上下文、宿主提交、页面隔离及生命周期的详细行为 |
++
++本文承接已审阅讨论稿的行为，未把技术示意升级为稳定 API。文档同步 diff 待审阅；方向与已接受行为无需重复确认。实现、验证和人工验收分别由[路线图](<../../docs/06. Development Roadmap.md#42-自定义工作台原型>)与后续实施任务记录。
++
++## 1. 职责与后续事项
++
++本模块复用 Project、Navigation 和普通 CLI Session，负责自定义页面及其内容状态。五个默认 View 继续由 [Project View spec](../project-view/spec.md)负责；不把默认 View 的声明式限制、首条 Context 和只读 Preview 套用到工作台。
++
++WB-Q1～Q12 的推荐答案已全部接受，映射见 [09 确认记录](<../../docs/09. Workbench Discussion.md#2-讨论问题确认记录>)。以下是推荐答案中明确保留的后续工作，不再讨论是否采用工作台方向。
++
++| 事项 | 负责人 | 解决时点与影响 |
++|---|---|---|
++| 一条真实 CLI 与出图路径：本地文件、参考图、费用展示、Stop、错误反馈 | 实施 Agent 核实能力；新增付费服务或权限取舍由产品负责人决定 | 真实出图验证前；未验证不得宣称支持 |
++| iframe 或独立 WebContents、命令桥或 MCP、Schema / SDK 字段、资源限额与存储目录 | 实施 Agent | 原型中验证并记录；改变行为、费用或数据权限时交产品负责人 |
++| 来源与权限说明、创建 / 编辑入口、固定与停用操作的呈现 | 实施 Agent 设计，产品负责人评审 | 原型评审；声明能力不自动授予权限 |
++| 删除是否同时 Stop、可恢复记录期限与永久清理 | 产品负责人 | 删除与清理功能实施前；不阻塞首个原型的创建、生成、停用和恢复 |
++| 导入导出体验、完整多实例管理、默认 View 的迁移 / 隐藏 / 排序 | 产品负责人 | 原型评估后的对应阶段；不纳入首个原型 |
++
++## 2. FR-WB-001 创建与编辑体验
++
++### 2.1 创建工作台
++
++在宿主提供的“添加工作台”入口中选择 AI 对话创建或已有模板。选择 AI 创建后进入普通 Session，由用户发送要求：“帮我做一个品牌插画工作台，有封面、角色和三个场景，共五个位置。横向排列，允许放大预览。”AI 依据开发说明生成插件包，宿主先检查声明与位置绑定，再在隔离预览中展示空位置。预览使用草稿状态，不能写入已有实例或自动启动出图。
++
++用户在预览中核对位置名称、用途和约束，也能继续对话调整布局。选择“添加至当前项目”后，宿主登记包版本、创建 Project 内实例并加入左侧导航；添加动作不生成图片。安装前如何展示来源、能力与权限仍需设计，不能把声明中的能力请求视为已经授权。
++
++提供独立的“编辑工作台”入口，通过 AI 对话或本地文件编辑生成草稿版本，再预览并应用。调整布局、标题、颜色或位置定义属于工作台设计；日常对话生成图片只更新内容。导入别人分享的本地包是后续创建方式，阶段范围见[路线图 §4.2](<../../docs/06. Development Roadmap.md#42-自定义工作台原型>)。
++
++| 稳定位置 ID | 页面名称 | 内容要求示例 |
++|---|---|---|
++| `cover` | 封面 | 横图，保留标题留白 |
++| `character` | 主角 | 方图，角色外观作为后续场景参考 |
++| `scene-forest` | 森林场景 | 横图，使用同一主角 |
++| `scene-city` | 城市场景 | 横图，使用同一主角 |
++| `scene-night` | 夜晚场景 | 横图，使用同一主角 |
++
++这些是可由用户编辑的示例要求。跨图片的角色一致性属于生成目标，系统不能仅凭文件格式检查宣称达成。
++
++### 2.2 对话生成与预览
++
++1. 用户从当前 Project 的左侧导航打开这个工作台实例，在对话中要求“以纸艺风格生成这一整套五张图”。
++2. 发送时，宿主记录本次工作台实例、定义版本、页面顺序、用户选中的位置及当前内容版本。输入区显示可查看的工作台上下文，未明确的目标由 AI 读取这份快照后解析，必要时澄清。
++3. AI 读取各位置要求及可用能力。若当前 CLI 没有可用的出图工具，界面说明缺少什么能力，保留草稿和已有成果。
++4. AI 调用已配置的出图工具，生成真实图片文件。宿主逐项校验并接收产物，把图片绑定到稳定位置 ID。
++5. 页面订阅绑定变化，图片逐张出现。成功三张、失败两张时显示真实的部分结果，失败位置可以单独重试。
++
++页面有五个位置，只表示可容纳五项内容。用户说“先做封面”时只生成封面；“把空位置补齐”时才以当前空位置为目标。进入页面、刷新或恢复应用均不自动发起生成。
++
++### 2.3 指定位置继续修改
++
++用户选中森林场景，输入“背景改成夜晚，人物不变”。本次发送携带 `scene-forest`、当前图片引用和本次约束。生成期间继续显示旧图并标记更新状态；新图校验成功后替换当前绑定，旧版本可恢复。
++
++用户说“第三张”时，按发送时的页面顺序解析为稳定位置 ID，并在上下文中显示对应名称。同一消息发出后，即使用户调整排列，返回结果也仍绑定到原目标。没有唯一对应对象时，AI 应先澄清目标。
++
++## 3. FR-WB-002 页面与 AI 共享工作要求
++
++### 3.1 页面与结构化定义
++
++采用自定义 Web 页面配结构化定义。声明式组件用于内置模板和简单工作台；AI 按定义中的稳定位置 ID 定位，不能只凭 DOM、截图或文字顺序写回。选择理由见 [09 已确认方向](<../../docs/09. Workbench Discussion.md#1-已确认方向>)。
++
++后续导入已有 HTML 时，须补全内容位置和绑定关系并让用户核对。仅显示网页不代表已经具备内容写回能力。
++
++### 3.2 工作台需要描述的信息
++
++| 概念 | 职责 | 五图示例 |
++|---|---|---|
++| 工作台插件包 | 可安装、复用的页面、内容定义、默认约束与能力声明；模板是创建包的起点 | 品牌插画包及其版本 |
++| 工作台实例 | 某个 Project 中实际使用的工作台及用户设置 | 当前品牌的插画工作台 |
++| 内容位置 | 可被独立寻址和更新的内容单元，有稳定 ID、名称、类型和约束 | `scene-forest` 接收一张图片 |
++| 产物 | 实际文件或有结构的数据，有类型、来源和版本 | 一张生成的 PNG 图片 |
++| 绑定 | 记录某个位置当前使用哪个产物版本 | `scene-forest` 使用图片 A 的第二版 |
++| 执行记录 | 关联用户指令、Session 回合、目标位置及提交结果 | 本次只修改森林场景 |
++
++“内容位置”不必是矩形占位框。文章段落、表格数据集、视频片段也可以是独立内容单元。首个原型只验证图片类型，不提前承诺这些编辑器均已支持。
++
++包中的定义同时驱动页面标签、要求说明和 AI 上下文，避免分别维护页面提示词与 AI 提示词。每个可写入位置在页面接口中显式登记绑定，开发预览检查缺失和重复绑定。自定义页面仍可能写错展示逻辑，因此还需运行实际页面核对。
++
++### 3.3 约束的来源和强度
++
++约束分为可机器校验的要求和需要判断的目标。例如文件类型、图片尺寸和每个位置的数量可以检查；风格、构图和人物一致性需要 AI 或用户判断。两类结果分别显示，文件校验通过不等于内容已经被用户接受。
++
++按以下顺序处理要求：
++
++1. 宿主权限与实际工具能力决定哪些操作可执行，工作台文本不能提升权限。
++2. 当前工作台定义决定位置类型、必需字段与用户设置的约束。
++3. 本次用户指令补充任务目标，可以在定义允许的范围内临时覆盖偏好。
++
++用户指令与必需约束冲突时，先说明冲突并确认是否调整工作台要求。修改工作台定义须进入编辑流程，不让一次出图请求顺带改变页面结构。模板说明、素材文字与外部内容保留来源，不伪装成宿主或用户的高优先级指令。
++
++## 4. FR-WB-003～004 上下文与产物提交
++
++```mermaid
++flowchart LR
++    User[用户对话与页面选择] --> Context[宿主生成本次任务上下文]
++    Definition[工作台定义] --> Context
++    Definition --> Page[工作台 Web 页面]
++    Context --> Session[现有 CLI Session]
++    Session --> Tool[已配置的出图工具]
++    Tool --> Artifact[真实产物文件]
++    Session --> Publish[提交位置与产物对应关系]
++    Artifact --> Publish
++    Publish --> Host[宿主校验并保存绑定]
++    Host --> Page
++```
++
++宿主负责包登记、Project 内实例、左侧导航、Session、执行记录、产物接收和页面运行环境。页面负责实例内部的呈现、内容选择和输入。AI 负责理解任务、选择已有能力并提交结果。插件不能通过页面脚本替换宿主导航或接管 Session 生命周期。
++
++### 4.1 页面 SDK 与 AI 开发说明
++
++提供一份随宿主版本维护的开发说明，包含包布局、声明 Schema、SDK 类型、五图示例、隔离限制和错误处理。AI 创建工作台时读取同一份说明与模板，通过包校验和预览反馈修正代码。开发说明面向页面作者；第 4.2 节的任务上下文面向使用工作台的 AI，两者分开，避免日常出图加载整份开发手册。
++
++首期 SDK 只封装少量页面操作，以下名称仅是接口示意，不是已实现或稳定的 API：
++
++| 示意操作 | 用途与边界 |
++|---|---|
++| `getInstance()` | 读取宿主绑定的当前实例、定义和状态，不由页面自由指定其他实例 |
++| `subscribe()` | 接收当前实例的状态变化，返回取消订阅方法 |
++| `resolveArtifact()` | 将当前实例已授权的产物 ID 解析为受控预览地址 |
++| `selectSlots()` | 报告当前选中的稳定位置 ID，由宿主校验 |
++| `setDraft()` | 将指令放入用户可编辑的对话草稿，不自动发送 |
++
++开始模型调用继续由用户发送触发，页面加载或渲染不能自行创建隐藏 Session。
++
++页面通过产物 ID 获取可预览资源，不接触任意本机路径、应用数据库、CLI 凭据或整个 `window.studio`。停止某次生成由 Session 负责；关闭或切换页面只解除显示和订阅。
++
++### 4.2 向 AI 提供任务上下文
++
++每次从工作台发送消息时，提供当前实例 ID、定义版本、目标位置、位置内容版本、用户要求及可用能力。位置很多时只传相关摘要，并提供按 ID 读取完整定义和状态的入口。
++
++图片引用是否能被模型读取或作为出图工具的参考图，需要按具体 CLI 和工具验证。一个文件路径不能自动等同于模型已看过图片。参考图无法使用时，应说明能力缺口，不声称保持了角色一致性。
++
++保留用户可见、可移除的工作台上下文。移除后按普通对话处理，本轮不附带自动写回工作台的目标。已有 Session 再次发送时也读取最新位置状态，避免沿用第一轮的旧布局或旧图片。
++
++### 4.3 AI 通过宿主提交结果
++
++宿主提供读取和提交两类核心操作，以下名称为待原型验证的接口示意：
++
++| 操作 | 作用 | 关键输入或输出 |
++|---|---|---|
++| `read_workbench` | 读取本次可操作范围及最新状态 | 定义版本、位置 ID、约束、当前位置版本、可用产物 |
++| `publish_outputs` | 提交一项或多项位置更新，返回真实接收结果 | 执行 ID、幂等操作 ID、定义版本、位置版本、产物文件引用 |
++
++下面是一张图片的提交示意，尚未定义正式接口或文件布局：
++
++```json
++{
++	"runId": "run-18",
++	"operationId": "publish-forest-2",
++	"definitionRevision": 3,
++	"outputs": [
++		{
++			"slotId": "scene-forest",
++			"expectedSlotRevision": 1,
++			"stagedPath": "staging/run-18/forest-night.png"
++		}
++	]
++}
++```
++
++宿主先确认执行记录归属及目标范围，再检查文件确实存在、能够解码、符合尺寸和类型要求。通过后导入为稳定产物，记录来源并提交绑定，最后返回产物 ID、位置新版本或具体失败原因。AI 的“已经完成”回复不能代替这次提交。
++
++首个原型先验证薄的本地命令桥，让已有 CLI 的 Shell 工具调用宿主操作；命令桥使用宿主发放且限定本次执行范围的连接凭据。页面不持有这些凭据。原型需验证发现、连接、退出清理和错误回传后才能确定采用。若 CLI 无法稳定调用命令桥，再评估 MCP 作为传输方式，业务校验仍由同一宿主服务负责。
++
++[MCP 工具规范的 2025-06-18 版本](https://modelcontextprotocol.io/specification/2025-06-18/server/tools)提供输入 Schema、输出 Schema 与结构化结果的协议参考。它不证明当前 Codex 或 Claude 接入已经支持本方案；具体配置与能力须在原型中验证。
++
++### 4.4 出图能力独立于工作台
++
++工作台声明需要 `image.generate`，并可声明参考图编辑等可选能力。能力标识在这里代表产品需求，具体调用方式由当前 CLI 的工具、Skill、MCP 或经确认的服务接入承担。
++
++首期需选定一条真实可用的出图路径，核对输出文件、参考图支持、停止行为、费用展示及错误反馈。工作台只能请求已授权的能力，不通过页面脚本保存密钥或静默切换付费服务。支持某个 CLI 对话，不等于已经具备出图能力。
++
++宿主的范围校验约束工作台接口，不能收回 CLI 本身已有的本地文件或 Shell 权限。原生 CLI 的执行边界仍按现有 Adapter 与权限配置处理。
++
++## 5. FR-WB-005 部分结果、并发和恢复
++
++把“当前位置的内容”和“正在尝试的新结果”分别记录。更新失败时保留当前图片，失败原因属于本次尝试。页面只能展示实际收到的进度；工具不提供逐图进度时显示处理中，不估算虚假的百分比。
++
++| 情况 | 行为 |
++|---|---|
++| 五张图只成功三张 | 已接收的三张可用；其余标明失败或未返回，重试时明确目标 |
++| 工具成功，但提交失败 | 保留暂存产物，先重试提交，避免再次付费生成 |
++| 同一次提交被重复发送 | 通过操作 ID 返回原结果；同 ID 携带不同内容时拒绝 |
++| 两个 Session 同时修改同一位置 | 比较位置版本，后到的旧版本结果保留为候选并报告冲突，不静默覆盖 |
++| 不同位置同时生成 | 按位置版本校验，允许互不冲突的更新分别提交 |
++| 用户停止执行 | 保留已接收成果，关闭该执行记录的后续发布权限；迟到结果不能直接替换当前位置 |
++| 应用关闭或异常退出 | 恢复最后已提交绑定；未完成尝试标为待核对，不自动重新出图；原生执行能否继续由 CLI 能力决定 |
++| 生成期间修改位置类型或删除位置 | 新定义发布后，旧定义下的未提交结果保留为候选，需要重新确认映射 |
++| 外部文件被删除 | 显示资源缺失并保留绑定诊断，不把空白区域当作有效成果 |
++
++宿主接收文件时先完成稳定导入，再原子提交绑定与操作记录。崩溃留下的未引用产物可以后续清理，不允许绑定指向尚未写完的文件。一次批量提交中多个目标一起校验、一起更新；需要逐张预览时分别提交，每次使用不同操作 ID。
++
++重试提交可以依赖幂等操作 ID 避免重复绑定。重试生成可能再次产生费用，首期由用户显式发起，并尽量复用已经生成的文件。跨位置依赖需要显式记录：若场景依赖角色图，先生成角色；角色改变后标记受影响场景需要检查，不自动重做全部场景。
++
++## 6. FR-WB-006～007 包、实例与保存
++
++### 6.1 包和实例的标识
++
++插件包描述一种工作台，实例记录它在某个 Project 中的使用情况，产物与绑定属于实例。宿主用 `pluginId + version` 标识包版本，用 `projectId + instanceId` 定位实例。`instanceId` 由宿主分配，不使用包名或用户可改的标题代替。包的 `version`、实例所用的定义修订号和位置内容版本各有用途，不能混用。
++
++同一个包可以在多个 Project 使用，也可以在同一 Project 创建多个实例。例如“品牌 A”和“品牌 B”使用相同五图布局，但设置、图片、草稿和执行记录彼此独立。编辑当前实例时生成独立草稿修订，不能改写其他实例固定使用的包版本；将改动保存为可复用的新包版本属于后续分享流程。
++
++以下是最小包布局的技术示意，不代表已确定的项目目录或实现文件：
++
++```text
++brand-illustration/
++├── manifest.json
++├── workbench.json
++├── index.html
++├── main.js
++└── style.css
++```
++
++`workbench.json` 描述稳定位置 ID、类型与约束，页面通过 SDK 绑定这些位置。`manifest.json` 声明包身份、入口和所需能力，例如：
++
++```json
++{
++	"schemaVersion": 1,
++	"pluginId": "local.brand-illustration",
++	"version": "0.1.0",
++	"title": "品牌插画",
++	"sdkVersion": "1",
++	"entry": "index.html",
++	"definition": "workbench.json",
++	"navigation": {
++		"title": "品牌插画",
++		"icon": "image"
++	},
++	"capabilities": ["image.generate"]
++}
++```
++
++字段、版本规则、图标取值与 SDK 均待原型确定。声明只表达所需能力，不能授予权限。入口必须解析到包内受控资源；宿主不按声明执行安装脚本或加载任意后端代码。首期不提供通用后端插件入口。
++
++### 6.2 导航与生命周期
++
++包的 `navigation` 提供实例入口的默认名称和图标，宿主负责渲染、排序和选中状态。导航的稳定标识绑定 `instanceId`，打开时由宿主解析所属 Project 与固定包版本，不使用 `pluginId` 作为唯一路由。用户修改实例名称不会改变 ID，也不会重命名同包的其他实例。
++
++以下动作分别处理，避免隐藏入口时意外丢失成果。下表描述目标行为，首个原型的覆盖范围见[路线图 §4.2](<../../docs/06. Development Roadmap.md#42-自定义工作台原型>)。
++
++| 动作或情况 | 行为 |
++|---|---|
++| 安装包、添加实例 | 安装登记可用包版本；添加实例才使它归属当前 Project 并获得导航入口。首期可由“添加至当前项目”合并完成 |
++| 打开实例 | 按需加载页面，绑定当前实例的 SDK；不因安装或应用启动加载所有页面 |
++| 切换或关闭页面 | 释放页面订阅和运行资源；Session 与已授权的产物提交继续由宿主管理 |
++| 取消固定 | 只隐藏左侧入口，保留实例、运行状态和成果；从工作台管理入口可重新打开或固定 |
++| 停用实例 | 卸载页面并拒绝新的页面请求，保留入口状态和已有成果；再次启用时从已提交状态读取 |
++| 停用期间已有 Session 继续运行 | 允许已授权执行继续提交产物；停用页面不等于停止生成，停止按钮仍调用 Session 的 Stop |
++| 删除实例 | 移除活动入口，撤销该实例未完成执行的发布权限；迟到结果不能写回，普通 Session 历史保留，成果默认保留为可恢复记录 |
++| 包被停用或尝试卸载 | 停用包影响所有引用实例的页面，数据保留；仍被引用的包版本阻止直接卸载，先处理实例去向 |
++| 页面加载失败或崩溃 | 宿主显示错误与重试入口，对话和已保存成果仍可用；修复或回退包版本后重新加载，不自动重做生成 |
++| 重启应用 | 恢复实例目录、固定状态、已选包版本与已提交绑定；只加载当前需要展示的页面，不自动启用已停用实例 |
++
++上述行为已确认；具体入口位置、来源与权限展示在原型中设计并评审。删除实例时是否同时停止运行中的 Session、可恢复记录保存多久、何时彻底删除文件，须在相应操作实施前确定，不能把卸载页面、Stop 和清空数据合成一个动作。停用后的产物提交仍须经过第 4.3 节的校验；用户显式停止执行时按第 5 节撤销后续发布权限。
++
++### 6.3 存储、分享与改版
++
++定义和页面文件保存在可导出的本地工作台包中，实例产物放在当前 Project 的专用目录。宿主数据库保存实例、当前绑定、版本历史与执行记录，作为运行状态的唯一写入入口。工作台使用协议只开放产物更新，不提供直接修改绑定数据库的接口；包文件的修改走编辑工作台流程。
++
++这项存储选择便于原子更新绑定、检测并发版本和记录执行来源，代价是项目文件与宿主状态需要一起备份。首期不要求项目目录自包含全部状态。
++
++图片记录为产物 ID 和受控目录内的相对路径，页面不依赖生成工具的临时绝对路径。实例固定使用一个已校验的包版本；升级失败时应能回到先前版本与对应定义，不能只回退页面而遗留不兼容的绑定。
++
++后续分享阶段，导出包默认包含声明、定义与页面，不携带项目图片、对话或凭据。导出带成果的实例时，需要同时导出状态快照与产物，再通过导入恢复绑定。只复制 Project 文件夹不保证迁移宿主数据库中的状态；具体导入体验在实施前确认。
++
++编辑工作台时生成草稿版本，在预览通过后应用到实例。仅改变排版时保留位置 ID 与已有内容；新增位置保持为空；删除有内容的位置时说明影响并保留可恢复记录。位置类型变化需要重新检查绑定，不能把旧图片误当成新类型的数据。包升级由用户选择应用，不直接改写所有实例。
++
++当前 `.ai-studio/` 的 Git 忽略策略由 [DEC-04](<../../docs/07. Decisions.md#dec-04-project-knowledge-存储>)负责。新包的具体目录、备份与 Git 分享方式需单独落规格，不能在引入工作台时悄悄改变现有忽略策略。
++
++## 7. FR-WB-008 自定义页面运行边界
++
++用户生成的页面运行在与应用主 Renderer 隔离的容器中。具体使用沙箱 iframe 还是独立 WebContents，由原型核对资源加载、性能、消息归属和销毁行为后决定。
++
++无论选择哪种容器，页面都不获得 Node 或应用 Preload。资源通过受控地址提供，默认只允许工作台包和当前实例产物；页面请求经小型消息接口到宿主，由宿主检查消息来源、实例范围和参数。页面卸载后注销订阅，故障时保留宿主对话和已经保存的成果。
++
++[Electron 官方安全说明](https://www.electronjs.org/docs/latest/tutorial/security)要求谨慎处理不可信代码，关闭不可信内容的 Node 集成、保持上下文隔离，并校验 IPC 发送方。这里的容器与接口方案是基于这些要求提出的设计，不能仅凭启用某个开关认定完成隔离验证。
++
++外部机制的源码依据与可借鉴范围统一见 [Harness 调研](../../docs/references/deepseek-harness/README.md)。本规格的隔离页面、受限 SDK 和产物发布边界是本项目已确认的设计要求，不能从参考项目采用了插件机制推导出这些边界已经验证。
++
++
++## 8. 模块接缝与实现验证
++
++| 调用方 | 本模块提供 | 调用方负责 |
++|---|---|---|
++| Navigation / Project | 当前 Project 的实例目录、稳定实例标识、固定和启用状态 | 宿主入口、选中状态、Project 切换与恢复 |
++| Input / Session | 每次发送的工作台快照、执行范围与提交结果 | 可移除上下文、用户发送、普通会话与 Stop；关闭页面不误停会话 |
++| CLI Adapter | 受限的读取 / 提交通道及明确错误 | 原生工具调用、权限与会话恢复，不假设所有 CLI 均具备出图能力 |
++| 页面容器 | 当前实例 SDK 和受控资源地址 | 隔离加载、消息来源校验、销毁与故障恢复 |
++
++接口名、字段、表结构与包目录在原型中定稿，并同步开发说明；本规格不表示这些接口已经存在。存储变化、页面隔离和跨模块契约须按 [Task Protocol](../../tasks/README.md#acceptance)独立评审。原型范围与顺序由路线图负责，验收场景由 05 负责。

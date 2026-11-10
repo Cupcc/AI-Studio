@@ -11,7 +11,7 @@
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、6、8、10 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
 | 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 3、6、1、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；T20261009-project-view；2026-10-10 起草；用户明确“我都已经全部确定了”（2026-10-11 确认） |
 
-> 本规格把已确认的 DEC-04～07 落成可实现的模块边界。
+> 本规格负责默认五个 View 的 DEC-04～07 行为。自定义扩展按用户 2026-11-10 确认的 DEC-28 由[工作台规格](../workbench/spec.md)负责，本次同步 diff 待审阅。
 
 来源简称：Project 指 [Project spec](../project/spec.md)；Session 指 [Session spec](../session/spec.md)。其余简称与标注约定见 [specs/README.md](../README.md) 第 3 节。
 
@@ -26,7 +26,7 @@
 | 编号 | 问题 | 回答（确认日期） |
 |---|---|---|
 | PV-Q1 | Knowledge 是否放在 Project 内 `.ai-studio/`，并默认 Git 忽略？ | 是；每个 View 一份带 `schemaVersion` 的 JSON，`.gitignore` 内容为 `*`（2026-10-09，DEC-04）。 |
-| PV-Q2 | V1 是否采用受信组件声明式渲染，推迟自由 HTML / JavaScript？ | 是；自由 HTML 推迟到 P1 / 自定义 View（2026-10-09，DEC-05）。 |
+| PV-Q2 | 默认 View 与自定义扩展分别如何渲染？ | 默认五个 View 使用受信组件；自定义工作台使用 Web 页面配结构化定义，按功能优先选择容器（默认基线 2026-10-09；自定义扩展 2026-11-10 对话调整，DEC-05、DEC-28；diff 待审阅）。 |
 | PV-Q3 | View Context 是否首条消息前附加可移除的英文文本块？ | 是；不内联 Knowledge，移除后仍保留 `originViewId`（2026-10-09，DEC-06）。 |
 | PV-Q4 | 客户端是否只监视、校验和刷新，不自动生成或修复 Knowledge？ | 是；打开、回合结束和重新聚焦时补扫，渲染失败保留上一版（2026-10-09，DEC-07）。 |
 | PV-Q5 | 默认 View Definition 是否内置，Project 文件仅可覆盖？ | 是（2026-10-09，T20261009-project-view Q4）。 |
@@ -53,7 +53,7 @@
   - Session 生命周期、Conversation 内容、状态提醒、CLI Runtime、首条消息创建 → [Session spec](../session/spec.md)、[Chat spec](../chat/spec.md)、[Agent Adapter spec](../agent-adapter/spec.md)。
   - 输入区的通用布局、Model Selector、Send / Stop → [Input spec](../input/spec.md)。本模块只提供 View Context 标签和创建参数。
   - Files、Search、Diff、Browser、Terminal 的内容 → [tools spec](../tools/spec.md)；Project View Mode 下它们复用右侧区域切换契约，切换内容不释放工具的 Project 级资源（DEC-10，2026-10-12 确认）。既有内容见[工程工具任务](../../tasks/archive/T20261009-context-tools/task.md)，Search 与新增工具能力见[对齐任务](../../tasks/archive/T20261026-tools-vscode-parity/task.md)。
-  - 自定义 View 的创建入口和自由 HTML / JavaScript 渲染。自定义 View 为 P1；自由 HTML 按 DEC-05 推迟到后续方案。
+  - 自定义工作台的包、实例、创建入口、HTML / JavaScript 页面、逐次上下文和产物提交 → [workbench spec](../workbench/spec.md)（FR-WB-001～008）。
 
 ## 3. 行为细则
 
@@ -83,9 +83,9 @@
 
 ### FR-VIEW-002 Project View 可扩展
 
-1. V1 只预留扩展点：View 目录、Schema、Renderer Registry 和导航数据结构不得把五个 ID 写死为不可扩展的数据库枚举。
-2. 自定义 View 创建入口、导航排序、权限和迁移不在本轮实现；实现阶段只保证未知 View 文件不会破坏默认 View。
-3. 自定义 View 进入 P1 task 时，必须复用本规格的数据 / 展示分离和声明式 Renderer，不得以任意 HTML 作为默认扩展接口。
+1. 默认 View 保留扩展边界：View 目录、Schema、Renderer Registry 和导航数据结构不得把五个 ID 写死为不可扩展的数据库枚举。
+2. 自定义扩展采用包与 Project 内实例，使用[工作台规格](../workbench/spec.md)的创建、导航、权限与存储规则。默认 View 在原型阶段不迁移，未知 View 文件不能破坏默认 View。
+3. 自定义工作台使用 Web 页面配结构化定义，通过独立页面入口运行；声明式组件可作为模板，不限制工作台只能复用本 Renderer（2026-11-10 确认，DEC-28）。
 
 ### FR-VIEW-003 View 内容动态生成
 
@@ -337,7 +337,7 @@ Project Shell 只负责把当前 `UiState.mainCanvas.view` 和 `viewRightArea` �
 
 1. Renderer 使用固定组件映射，不使用动态 `import()`、`eval`、`new Function`、`dangerouslySetInnerHTML`。
 2. Preview 不拥有 Node.js、文件系统、Shell、凭据或任意 IPC 能力；Renderer 只接收已经校验的 DTO。
-3. 如果未来引入自由 HTML，必须另立 P1 规格和 Electron 沙箱原型，不能复用本阶段的声明式入口。
+3. 自定义工作台按[独立规格](../workbench/spec.md)建设功能原型；本阶段声明式入口仍不执行 HTML 或脚本。
 
 ## 7. 验证清单
 

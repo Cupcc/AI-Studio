@@ -47,14 +47,15 @@ test('fixture environment excludes inherited Git repository and index overrides'
 test.each([
   ['README.md'], ['AGENTS.md'], ['CONTRIBUTING.md'], ['docs/中文 文档.md'],
   ['tasks/archive/T-example/task.md'], ['specs/session/spec.md'], ['templates/task.md'],
-  ['design/README.md'], ['apps/desktop/README.md'], ['scripts/README.md']
+  ['design/README.md'], ['apps/desktop/README.md'], ['scripts/README.md'],
+  ['docs/08. System Architecture.html']
 ])('allows documented path %s', file => expect(docsOnly([file])).toBe(true))
 
 test.each([
   'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', '.github/workflows/ci.yml',
   '.husky/pre-commit', 'scripts/check-scope.mjs', 'apps/desktop/src/help.md',
   'docs/example.ts', 'design/prototypes/index.html', 'tasks/T/evidence/check.mjs',
-  'unknown.md', 'docs/README.MD'
+  'unknown.md', 'docs/README.MD', 'docs/unknown.html'
 ])('does not exempt code, config or unknown path %s', file => {
   expect(docsOnly(['README.md', file])).toBe(false)
 })

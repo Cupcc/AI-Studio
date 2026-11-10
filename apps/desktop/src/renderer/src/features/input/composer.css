@@ -27,8 +27,7 @@
 .composer__add-item small, .composer__candidate small { display: block; font-size: var(--font-size-xs); color: var(--color-text-muted); line-height: 1.5; font-weight: 400; }
 .composer .composer__notice { margin-top: 0; font-size: var(--font-size-sm); }
 .composer .error-message { margin-top: 0; }
-.composer__status { min-height: 24px; padding-top: 6px; font-size: var(--font-size-xs); line-height: 18px; color: var(--color-text-muted); overflow-wrap: anywhere; }
-.composer__status .text-button, .composer__notice .text-button, .composer .error-message .text-button { margin-left: 8px; font-size: inherit; }
+.composer__notice .text-button, .composer .error-message .text-button { margin-left: 8px; font-size: inherit; }
 .composer__suggestions { position: absolute; left: 0; bottom: calc(100% + 8px); width: min(440px, 100%); min-width: 0; max-height: min(300px, 40vh); overflow: auto; overscroll-behavior: contain; z-index: 31; }
 .composer__candidate { width: 100%; min-width: 0; }
 .composer__candidate > span { min-width: 0; flex: 1; overflow-wrap: anywhere; }

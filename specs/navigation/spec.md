@@ -26,7 +26,7 @@
 | NAV-Q3 | Rename 的标题长度上限是多少？ | 最多 100 个字符，输入时限制，粘贴时截断，列表中单行省略显示。依据：文档无规定；100 足以描述一次对话，同时避免数据与布局问题。具体数值由人确认 | 否 | |
 | NAV-Q5 | 已处于某个 View 的 Project View Mode 时，再次点击导航中同一个 View 的行为：忽略，还是回到新草稿 / 回到 Preview？ | 忽略（不改变左列当前对话与右侧区域）。依据：P-A 的“新草稿”限定为“进入 View”；左列顶栏已提供“新建对话”按钮（Shell 第 8 节），无需用导航承担该功能；避免意外丢弃草稿 | 否 | |
 | NAV-Q6 | Session Mode 下停留在 New Chat 草稿时，导航是否有条目高亮（例如 New Chat 按钮呈 Selected）？ | 无任何条目高亮，New Chat 按钮也不呈 Selected。依据：03 第 8 节与 Shell 第 4 节只规定 Session 项与 View 项的 Selected；New Chat 按钮的状态仅列 Default / Hover / Focus | 否 | |
-| NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），Project Views 区域过高时如何处理：独立滚动、限制高度、折叠？ | V1 首发只有五项，不设计该情形；P1 实现时再定，建议 Project Views 区域设最大高度并内部滚动，保证 SESSIONS 区域始终可见。依据：FR-VIEW-002 为 P1；03 第 8 节要求 Session History 可持续增长 | 否 | |
+| NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），Project Views 区域过高时如何处理：独立滚动、限制高度、折叠？ | 工作台实例进入当前 Project 导航，原型中设计区域高度和滚动；完整多实例管理后续评估。依据：DEC-28、FR-WB-006；03 第 8 节要求 Session History 可持续增长 | 否 | |
 | NAV-Q8 | 折叠后顶栏的 New Chat 按钮、以及空状态中的 New Chat 按钮，是否也带 CLI 下拉？ | 都只是单个按钮，使用 Default CLI，不带下拉；需要选其他 CLI 时展开导航，用顶部分裂按钮。依据：Shell 第 3 节顶栏写“New Chat 按钮”，第 4 节导航写“分裂按钮”，第 10 节空状态写“New Chat”，措辞不同；FR-CHAT-002 只要求提供扩展入口。该决定由 `specs/chat/` 最终确认 | 否 | |
 | NAV-Q9 | V1 没有删除或归档 Session 的入口，列表只增不减，是否符合预期？ | 符合，V1 不提供。依据：02 与 03 均未定义删除 / 归档；“不添加文档之外的需求”；04 第 7 节要求大量历史 Session 不卡顿，说明按只增长设计 | 否 | |
 | NAV-Q10 | 左侧导航的折叠状态是否随应用重启保留？ | 保留（与窗口级状态一起保存）。依据：03 第 8 节称之为“窗口级偏好”，偏好通常持久；与 `specs/project/spec.md` PROJ-Q1 一并确认 | 否 | |
@@ -94,6 +94,12 @@
 5. Business Flow
 
 每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 4 节）。图标采用交互原型 v01。五项在任何 Project 中始终显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。
+
+#### 工作台实例导航
+
+来源：FR-VIEW-002、FR-WB-006、DEC-28（2026-11-10 接受方向，具体接缝为待原型评审的设计草案）。宿主从当前 Project 的实例目录生成入口，按 `instanceId` 定位并核实 Project 与固定包版本；名称和图标取实例设置及包声明的默认值。默认五项保持现状，不把工作台实例塞入默认 View ID 枚举。
+
+点击实例打开对应工作台，不因打开或安装自动创建 Session / 出图。导航选中状态仍由 Main Canvas 决定；重命名不改变实例 ID。固定、停用、删除及错误入口由[工作台生命周期](../workbench/spec.md#62-导航与生命周期)负责，具体呈现在原型中评审。
 
 #### 3.2.2 点击 View 的导航契约
 

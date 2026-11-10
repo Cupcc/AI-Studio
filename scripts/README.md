@@ -1,5 +1,29 @@
 # 开发脚本与 Hooks
 
+## 开发命令
+
+仓库使用 pnpm workspace。Node 与 pnpm 版本由根 [package.json](../package.json) 的 `engines` 和 `packageManager` 指定；依赖构建脚本须加入 [pnpm-workspace.yaml](../pnpm-workspace.yaml) 的 `allowBuilds`。从仓库根目录执行命令，路径支持空格。
+
+下表为常用根命令；修改根 scripts 时同步维护。按[测试分层](#测试分层)选择检查范围。
+
+| 命令 | 用途 |
+|---|---|
+| `pnpm install` | 安装依赖、Electron 二进制和本地 Git hooks |
+| `pnpm dev` | 启动桌面应用开发模式 |
+| `pnpm build` | 构建所有 workspace 包 |
+| `pnpm typecheck` | 检查所有 workspace 包的类型 |
+| `pnpm test` | 运行脚本测试与各包单元测试，不调用真实 CLI 或模型 |
+| `pnpm test:scripts` | 仅测试文档检查、Agent 文档 Hook 与工作流范围选择 |
+| `pnpm check:docs` | 相对 HEAD 检查本地 Markdown 链接回归，见[检查边界](#文档检查边界) |
+| `pnpm check:code` | 构建 Adapter，并执行所有包类型检查和全部脚本、单元测试 |
+| `pnpm check:commit` | 检查暂存文档及受影响模块；未知范围阻断，pre-commit 使用同一入口 |
+| `node scripts/check-affected.mjs --dry-run` | 预览 HEAD 与工作树之间的检查范围；去掉 `--dry-run` 执行，`--ci` 追加选中的 E2E |
+| `pnpm test:e2e` | 构建桌面应用并运行模拟 Session Provider 的 Electron E2E，不调用模型 |
+| `pnpm package` | 构建未签名的 macOS arm64 应用目录 |
+| `pnpm smoke:packaged` | 启动打包应用并检查原生依赖 |
+
+桌面命令选项、输出和运行约定见[桌面开发说明](../apps/desktop/README.md#1-命令)。真实 CLI 预检会发送模型请求，见[开发前 CLI 校验](#开发前-cli-校验)，不属于应用测试。当前未配置源码 formatter、linter 或覆盖率阈值。
+
 ## 测试分层
 
 依据：用户 2026-11-06 要求「应该是哪里改动测试哪里」「优化规则，不要全量跑」；[本次任务](../tasks/archive/T20261106-scoped-checks/task.md)。取代 2026-10-11 的自动全量提交／CI 策略；[历史验证](../tasks/archive/T20261011-test-workflow/task.md)保留原基线。规则 diff 待审阅，未改变产品验收标准。
@@ -45,16 +69,16 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 
 ### 文档检查边界
 
-- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README，以及 docs / specs / tasks / templates / design 下的 `.md`。设计目录及任务 evidence 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定，空变更不启动应用测试。
+- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README、已登记的架构 HTML 文档，以及 docs / specs / tasks / templates / design 下的 `.md`。设计目录及任务 evidence 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定，空变更不启动应用测试。
 - [check-docs.mjs](check-docs.mjs) 解析 Markdown 与 GFM 表格，检查内联／引用式链接、图片目标、Markdown 标题锚点及显式 HTML id/name。跨文档扫描可发现删除文件、改标题造成的未修改文件入链损坏；代码示例中的伪链接不检查。
 - 本地 `check:docs` 默认比较 HEAD 与当前工作树（包含未忽略的未跟踪文件）；提交门禁比较 HEAD 与 Git 暂存快照，未暂存修复和未跟踪目标不能掩盖提交中的断链。
 - 只阻断相对基线新增的问题，历史问题按来源路径、链接和问题类型识别，不借本任务批量清理。`pnpm check:docs --base <commit> --head <commit>` 检查两个快照；`pnpm check:docs --base ''` 对当前工作树做完整审计，可能暴露历史问题。
 - 不访问外链，不检查 HTML 内 href、非 Markdown 文件锚点或文档内容语义，也不是 Markdown 排版 linter。表格／标题预览、移动后的旧路径搜索、FR/AC 一致性及确认规则仍按负责索引执行。
-- 决策与状态的语义复核按 [AGENTS.md 文档同步与收尾复核](../AGENTS.md#文档同步与收尾复核) 执行；提交 hook 的链接检查结果不表示关联文档已同步，未提交工作也须在回复完成前复核。
+- 决策与状态的语义复核按 [贡献指南的文档同步与收尾复核](../CONTRIBUTING.md#文档同步与收尾复核) 执行；提交 hook 的链接检查结果不表示关联文档已同步，未提交工作也须在回复完成前复核。
 
 ## Agent 文档 Hook
 
-依据：用户 2026-10-17 明确要求 Agent 修改文档时触发 hook，并回复「approve and apply，注意轻量级，不要拖缓运行」。配置为 [.codex/hooks.json](../.codex/hooks.json)，处理脚本为 [agent-docs-hook.mjs](../.codex/scripts/agent-docs-hook.mjs)。文档复核规则仍由 [AGENTS.md](../AGENTS.md#文档同步与收尾复核) 负责。
+依据：用户 2026-10-17 明确要求 Agent 修改文档时触发 hook，并回复「approve and apply，注意轻量级，不要拖缓运行」。配置为 [.codex/hooks.json](../.codex/hooks.json)，处理脚本为 [agent-docs-hook.mjs](../.codex/scripts/agent-docs-hook.mjs)。文档复核规则仍由 [贡献指南](../CONTRIBUTING.md#文档同步与收尾复核) 负责。
 
 | 时点 | 行为与开销 |
 |---|---|
@@ -79,7 +103,7 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 
 ## 本地 Commit 门禁
 
-依据：[仓库指南](../AGENTS.md) 的开发命令与 [贡献指南](../CONTRIBUTING.md) 第 3 节的提交约定；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
+依据：[开发命令](#开发命令)与 [贡献指南](../CONTRIBUTING.md) 第 3 节的提交约定；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
 
 根目录执行 `pnpm install` 时，`prepare` 自动通过 Husky 安装 hooks；已有依赖时可用 `pnpm prepare` 重新安装。Git 客户端的 PATH 必须能找到根 `package.json` 要求的 Node 与 pnpm。若 GUI 客户端找不到版本管理器安装的 Node / pnpm，按 [Husky 官方说明](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis) 配置用户级初始化文件，不在仓库硬编码个人路径。
 

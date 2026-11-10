@@ -10,7 +10,7 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 
 ## 1. 命令
 
-根命令列表见[仓库指南](../../AGENTS.md)的 Build, Test, and Development Commands。本节只补充桌面包相关的细节。
+常用根命令见[开发命令](../../scripts/README.md#开发命令)。本节只补充桌面包相关的细节。
 
 桌面包通过 workspace 依赖 `@ai-studio/agent-adapter`。根命令会先构建该包；直接使用 `pnpm --filter @ai-studio/desktop …` 时，需先运行 `pnpm --filter @ai-studio/agent-adapter build`。
 

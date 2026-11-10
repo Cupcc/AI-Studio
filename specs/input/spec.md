@@ -57,7 +57,7 @@
 #### 布局
 
 1. 输入区固定在 Conversation 下方，内容宽度与消息列相同、左右边缘对齐（最大 720，Shell Spec v02 第 2.2 节）。New Chat、已有 Session、Project View Conversation 列共用底部 Composer，发送第一条消息前后位置一致；问候语与起步示例留在正文区域。依据 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)（2026-10-23 确认），替代交互原型 v02 的草稿输入框居中规则。
-2. 输入框内先显示独立附件标签，再显示多行文字输入；通过 `@` 和 `$` 选中的文件 / Skill 留在输入文字的原位置，以有内边距、相邻间距和类型标记的标签呈现，悬停预览、点击打开规则见下文。底行从左到右为 `+`（Context / Attachment）、（右侧相邻）思考强度信号格与 Model Selector、Stop / Send。位置与交互变更依据用户 2026-10-31 指令及对标签过于拥挤的纠正；实现及验证见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。思考控件置于模型左侧依据用户 2026-10-24 UI 修正指令；diff 待审阅。错误与目录提示就近放在框内控制行之下，辅助状态行在框外；空闲不常驻快捷键说明，发送按钮悬停或键盘聚焦时提示 Enter / Shift+Enter（Shell Spec v02 第 7 节；DEC-23）。
+2. 输入框内先显示独立附件标签，再显示多行文字输入；通过 `@` 和 `$` 选中的文件 / Skill 留在输入文字的原位置，以有内边距、相邻间距和类型标记的标签呈现，悬停预览、点击打开规则见下文。底行从左到右为 `+`（Context / Attachment）、（右侧相邻）思考强度信号格与 Model Selector、Stop / Send。位置与交互变更依据用户 2026-10-31 指令及对标签过于拥挤的纠正；实现及验证见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。思考控件置于模型左侧依据用户 2026-10-24 UI 修正指令；diff 待审阅。错误、目录、CLI 不可用与附件阻止答复的提示按需放在框内控制行之下；框外不保留辅助状态行或空白占位，不重复显示运行／等待／停止状态（用户 2026-11-10 对话要求移除输入区下方状态行；本次 diff 待审阅）。空闲不常驻快捷键说明，发送按钮悬停或键盘聚焦时提示 Enter / Shift+Enter（Shell Spec v02 第 7 节；DEC-23）。
 3. 打开 Session 或草稿时输入框获得焦点，可立即输入（UX 第 6 节 Session 打开第 4 项；FR-CHAT-001 第 1 项）。
 
 #### 文本输入与键盘
@@ -71,8 +71,8 @@
 
 #### Context / Attachment 入口与上下文标签
 
-1. `+` 打开按来源分组的 Add 菜单：文件入口复用 Files；View 草稿中的当前 View 标签可在移除后重新附加；Skills 列出当前 Project 的真实原生目录，并标明已添加项。Plugins 无原生 catalog 接口时显示明确的不可用状态，不能把原型示例列成真实能力。Files 选择与添加行为见 §1.3；原生图片仍沿用 Files 的“作为图片附加”入口（DEC-23，2026-10-23）。
-2. 上下文标签位：显示当前 View、从 Files 添加的文件和粘贴附件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。草稿的上下文类型含 View、项目文件、项目图片、Skill 和粘贴附件；行内引用的位置另存草稿。Conversation Mode 下不出现 View 标签；View 标签的出现规则与注入方式由 Project View task 决定。粘贴附件的实施状态与保留事项见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。
+1. `+` 打开按来源分组的 Add 菜单：文件入口复用 Files；View 草稿中的当前 View 标签可在移除后重新附加；Skills 列出当前 Project 的真实原生目录，并标明已添加项。这里的 Plugins 指 CLI 原生插件，自定义工作台的创建入口由[工作台规格](../workbench/spec.md)负责。原生 Plugins 无 catalog 接口时显示明确的不可用状态，不能把原型示例列成真实能力。Files 选择与添加行为见 §1.3；原生图片仍沿用 Files 的“作为图片附加”入口（DEC-23，2026-10-23）。
+2. 上下文标签位：显示当前 View、从 Files 添加的文件和粘贴附件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。草稿的上下文类型含 View、项目文件、项目图片、Skill 和粘贴附件；行内引用的位置另存草稿。Conversation Mode 下不出现 View 标签；默认 View 标签的出现规则与首条注入方式由 [Project View spec](../project-view/spec.md)决定。自定义工作台每次发送前展示可移除的当前实例上下文并读取最新目标状态，移除后本轮不自动写回；详细规则见 [workbench §4.2](../workbench/spec.md#42-向-ai-提供任务上下文)（FR-WB-003，2026-11-10 接受方向，具体接缝为待原型评审的设计草案）。粘贴附件的实施状态与保留事项见[任务](../../tasks/archive/T20261031-inline-attachments/task.md)。
 3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
    - 当前转换由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)负责：Codex 的文件经结构化宿主契约转为明确的本机路径文本引用，图片 / Skill 使用各自原生输入；Claude 文件使用文本路径清单。引用不是文件内容快照；本轮缓存接收及历史验证的边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
 4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件、图片、粘贴附件或 Skill 时明确阻止答复并保留输入，避免附件被无声清空；运行中发送遵循 Provider 的实际能力。既有实现与独立验收边界由 [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 维护。
