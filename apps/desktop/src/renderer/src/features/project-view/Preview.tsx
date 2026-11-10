@@ -1,6 +1,7 @@
 import { Component, useEffect, type ErrorInfo, type ReactNode } from 'react'
 import { hasRenderableContent } from '@shared/project-view/schema'
 import { VIEW_NAMES } from '@shared/project/strings'
+import type { BuiltinViewId } from '@shared/project/types'
 import type { ViewSnapshot } from '@shared/project-view/types'
 import type { ViewSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
@@ -24,7 +25,7 @@ export class RenderBoundary extends Component<{ snapshot: ViewSnapshot; children
     return <MemoViewRenderer snapshot={this.props.snapshot} />
   }
 }
-export function Preview({ project, viewId }: ViewSlotProps) {
+export function Preview({ project, viewId }: ViewSlotProps & { viewId: BuiltinViewId }) {
   const id = `${project.id}:${viewId}`
   const state = useProjectViews(s => s.states[id]), zoom = useProjectViews(s => s.zoom[id] ?? 1)
   useEffect(() => { void useProjectViews.getState().load(project.id, viewId) }, [project.id, viewId])

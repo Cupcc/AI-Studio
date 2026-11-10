@@ -1,9 +1,11 @@
 import { expect, it, vi } from 'vitest'
 import type { WebContents } from 'electron'
-import { installWebContentsGuards } from './hardening'
+import { handleAppProtocol, installWebContentsGuards } from './hardening'
 
 const openExternal = vi.hoisted(() => vi.fn())
-vi.mock('electron', () => ({ shell: { openExternal }, net: {}, protocol: {}, session: {} }))
+const handle = vi.hoisted(() => vi.fn())
+const fetch = vi.hoisted(() => vi.fn(async () => new Response('renderer')))
+vi.mock('electron', () => ({ shell: { openExternal }, net: { fetch }, protocol: { handle }, session: {} }))
 
 it('installs app navigation policy only on its explicit owner, not window-typed preview pages', () => {
   const owner = { setWindowOpenHandler: vi.fn(), on: vi.fn() }
@@ -19,4 +21,18 @@ it('installs app navigation policy only on its explicit owner, not window-typed 
   preventDefault.mockClear()
   navigation({ preventDefault }, 'app://studio/index.html')
   expect(preventDefault).not.toHaveBeenCalled()
+})
+
+it('routes only app://workbench requests to the plugin asset handler and preserves renderer routing', async () => {
+  const workbench = vi.fn(async () => new Response('plugin'))
+  handleAppProtocol('/renderer', workbench)
+  const listener = handle.mock.calls.at(-1)![1]
+  const pluginRequest = new Request('app://workbench/project/draft/id/revision/index.html')
+  expect(await (await listener(pluginRequest)).text()).toBe('plugin')
+  expect(workbench).toHaveBeenCalledWith(pluginRequest)
+  expect(await (await listener(new Request('app://studio/index.html'))).text()).toBe('renderer')
+  expect(fetch).toHaveBeenCalledWith('file:///renderer/index.html')
+  expect((await listener(new Request('app://unknown/index.html'))).status).toBe(404)
+  handleAppProtocol('/renderer')
+  expect((await handle.mock.calls.at(-1)![1](pluginRequest)).status).toBe(404)
 })

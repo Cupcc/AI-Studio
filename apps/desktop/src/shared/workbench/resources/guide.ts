@@ -1,0 +1,37 @@
+export const AUTHORING_GUIDE = `# AI Studio 工作台开发说明 · SDK 1
+
+宿主提供普通 HTML/CSS/JavaScript 页面插件。无需 npm、构建工具或后端进程。可使用多个包内静态文件；入口必须为 HTML。
+
+## 包布局
+
+- manifest.json：按 manifest.schema.json 描述 schemaVersion、pluginId、version、sdkVersion、title、entry、capabilities。
+- index.html（或 entry 指定的 HTML）：页面；CSS、JS、图片可以是包内相对路径。
+- 不要把 node_modules、构建缓存、凭据或项目文件复制进包。每个文件不超过 2 MiB；包不超过 16 MiB 或 128 个文件。
+- 宿主检查所有包文件及入口，拒绝绝对路径、..、符号链接和特殊文件。HTML 的本地 src/href（包括脚本、样式和图片）应指向存在的包内文件。
+- 宿主不会运行安装脚本、Node 插件或后端代码。不要访问 window.studio、数据库或其他实例。
+- 这里只在草稿目录中编辑，已应用 packages 目录由宿主维护。应用更新由用户在预览后触发；不要直接改 packages 或 SQLite。
+
+## 页面 SDK
+
+宿主在页面入口之前注入 window.workbench；不需要自行加载 SDK。完整签名见 sdk.d.ts。
+
+- getInstance()：返回当前绑定目标、manifest、state、stateRevision、pageUrl、enabled。
+- updateState(state, expectedRevision)：写当前目标的 JSON 状态并返回新快照。期望版本必须与最近快照一致；冲突时重新读取、让用户确认后重试，不能悄悄覆盖。状态上限 1 MiB。
+- subscribe(listener)：接收当前目标状态更新，返回取消订阅函数；页面卸载时清理监听。用新的快照更新显示。
+- setDraft(text)：填入可编辑的对话草稿。它不发送请求、不调用模型。用户仍需点击 Send。
+- 能力分别为 state.read、state.write、conversation.draft，按实际使用在 manifest 声明。仅声明不会增加其他宿主能力。
+
+每个页面只绑定一个目标。草稿预览的状态与实例状态隔离；首次添加保留草稿中已保存的状态，编辑应用保留实例当前已保存状态。页面应兼容空对象并提供默认显示。包版本变化不会自动迁移状态，请保持已有字段可读。
+
+页面启动、刷新、切换或恢复不能自动发起模型请求。异步 API 必须显示真实错误；不要把文件生成成功、包校验成功和页面操作成功混为一谈。
+
+## 创建与验证
+
+1. 读取本目录的 manifest.schema.json 和 sdk.d.ts；模板见 template.html。
+2. 编辑用户指定的草稿目录，保留 manifest.json 与有效入口。版本有变化时更新 version。
+3. 写完整文件后，在宿主点击“刷新预览”。宿主返回包校验或页面运行错误；根据具体错误修正草稿。
+4. 在预览中实际操作按钮与保存状态，并确认重新打开仍能恢复。
+5. 用户选择添加或应用后才更新项目实例；不能仅凭文件存在报告已添加或验收完成。
+
+开发资料由当前宿主版本维护。不要猜测不存在的 SDK、命令桥或 MCP；图片生成、位置绑定、市场、导入分享和通用后端插件不在 SDK 1 的范围。
+`

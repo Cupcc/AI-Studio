@@ -1,0 +1,40 @@
+$ playwright test app.spec.ts:83 cli-default.spec.ts:63 composer.spec.ts:194 alignment.spec.ts:199
+
+Running 5 tests using 1 worker
+
+(node:27892) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/alignment.spec.ts:199:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (4.6s)
+  ✓  2 e2e/alignment.spec.ts:199:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.5s)
+  ✓  3 e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer (15ms)
+  ✓  4 e2e/cli-default.spec.ts:63:5 › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors (1.4s)
+  ✘  5 e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (30.9s)
+
+
+  1) e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping 
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.project-workspace:not([hidden])').getByRole('option', { name: /source files/ })
+
+
+      225 |   })).toBe('@src/app.ts')
+      226 |   await input().pressSequentially(' @source')
+    > 227 |   await workspace().getByRole('option', { name: /source files/ }).click()
+          |                                                                   ^
+      228 |   await expect(input()).toHaveText('@src/app.ts @source files/')
+      229 |   await workspace().getByRole('option', { name: /entry.ts/ }).click()
+      230 |   await expect(input().locator('.composer__reference--file')).toHaveCount(2)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/composer.spec.ts:227:67
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/composer-v06-real-file-can-bea24-h-boundary-and-Add-grouping/error-context.md
+
+  1 failed
+    e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping 
+  4 passed (39.2s)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/workbench-plugins/apps/desktop
+

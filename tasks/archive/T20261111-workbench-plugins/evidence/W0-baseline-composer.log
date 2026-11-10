@@ -1,0 +1,46 @@
+$ playwright test composer.spec.ts:194
+
+Running 1 test using 1 worker
+
+(node:29841) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (8.3s)
+
+
+  1) e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  locator('.project-workspace:not([hidden])').getByLabel('消息', { exact: true })
+    Expected: "@src/app.ts @source files/"
+    Received: " @source files/@src/app.ts"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" locator('.project-workspace:not([hidden])').getByLabel('消息', { exact: true }) with timeout 5000ms
+      - waiting for locator('.project-workspace:not([hidden])').getByLabel('消息', { exact: true })
+        2 × locator resolved to <div role="combobox" aria-label="消息" aria-expanded="true" aria-multiline="true" aria-controls="_r_a_" contenteditable="true" aria-autocomplete="list" class="composer__editable" data-placeholder="向 Codex CLI 发送消息…">…</div>
+          - unexpected value " @source files/@src/app.ts"
+        12 × locator resolved to <div role="combobox" aria-label="消息" aria-expanded="true" aria-multiline="true" aria-controls="_r_a_" contenteditable="true" aria-autocomplete="list" class="composer__editable" aria-activedescendant="_r_a_-0" data-placeholder="向 Codex CLI 发送消息…">…</div>
+           - unexpected value " @source files/@src/app.ts"
+
+
+      217 |   await input().pressSequentially(' @source')
+      218 |   await workspace().getByRole('option', { name: /source files/ }).click()
+    > 219 |   await expect(input()).toHaveText('@src/app.ts @source files/')
+          |                         ^
+      220 |   await workspace().getByRole('option', { name: /entry.ts/ }).click()
+      221 |   await expect(input().locator('.composer__reference--file')).toHaveCount(2)
+      222 |   await input().pressSequentially(' Check referenced file')
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-baseline/apps/desktop/e2e/composer.spec.ts:219:25
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/composer-v06-real-file-can-bea24-h-boundary-and-Add-grouping/error-context.md
+
+  1 failed
+    e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping 
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/workbench-baseline/apps/desktop
+

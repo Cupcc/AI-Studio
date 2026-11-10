@@ -1,0 +1,463 @@
+$ playwright test workbench.spec.ts alignment.spec.ts app.spec.ts cli-default.spec.ts composer.spec.ts files.spec.ts project-view.spec.ts project.spec.ts runtime-tools.spec.ts session.spec.ts settings.spec.ts
+
+Running 55 tests using 1 worker
+
+(node:17692) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/alignment.spec.ts:139:5 › glass appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (4.0s)
+  ✓   2 e2e/alignment.spec.ts:171:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (5.0s)
+  ✓   3 e2e/alignment.spec.ts:186:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (3.4s)
+  ✓   4 e2e/alignment.spec.ts:199:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (4.4s)
+  ✓   5 e2e/alignment.spec.ts:139:5 › solid appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (2.2s)
+  ✓   6 e2e/alignment.spec.ts:171:5 › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (3.5s)
+  ✓   7 e2e/alignment.spec.ts:186:5 › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (2.0s)
+  ✓   8 e2e/alignment.spec.ts:199:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.5s)
+  ✓   9 e2e/alignment.spec.ts:210:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (4.4s)
+  ✓  10 e2e/alignment.spec.ts:228:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (4.2s)
+  ✓  11 e2e/alignment.spec.ts:239:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (5.1s)
+  ✓  12 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (7ms)
+  ✓  13 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (36ms)
+  ✘  14 e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer (3ms)
+(node:19356) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 e2e/app.spec.ts:124:5 › typed preload API works and main validates input (32ms)
+  ✓  16 e2e/app.spec.ts:145:5 › new windows and foreign navigation are denied (511ms)
+  ✓  17 e2e/app.spec.ts:157:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (3.2s)
+  ✓  18 e2e/cli-default.spec.ts:23:5 › available CLI works in a second Project without selection; global preference survives restart (1.1s)
+  ✓  19 e2e/cli-default.spec.ts:42:5 › unavailable CLI links directly to settings; recheck restores sending without clearing draft (702ms)
+  ✘  20 e2e/cli-default.spec.ts:63:5 › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors (6.3s)
+(node:20198) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  21 e2e/cli-default.spec.ts:95:5 › CLI header action stays fixed with a long list in both themes and colour modes (2.4s)
+  ✓  22 e2e/composer.spec.ts:52:5 › five static effort bars; max / ultra ignite only on selection, across four appearances and reduced motion (18.0s)
+  ✓  23 e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette (1.9s)
+  ✓  24 e2e/composer.spec.ts:147:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback (3.5s)
+  ✘  25 e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (6.1s)
+(node:21037) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  26 e2e/files.spec.ts:45:5 › FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, special names and failure states (4.3s)
+  ✓  27 e2e/files.spec.ts:130:5 › FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through the simulated Provider, keep input on failure (3.9s)
+  ✓  28 e2e/project-view.spec.ts:21:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (4.8s)
+  ✓  29 e2e/project-view.spec.ts:63:5 › removed View label sends without creating helpers, and each View has an independent draft (1.6s)
+  ✓  30 e2e/project.spec.ts:54:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (5.8s)
+  ✓  31 e2e/project.spec.ts:122:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (765ms)
+  ✓  32 e2e/project.spec.ts:141:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (560ms)
+  ✓  33 e2e/runtime-tools.spec.ts:97:5 › FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolation, final empty state and Project confirmation (5.3s)
+  ✓  34 e2e/runtime-tools.spec.ts:192:5 › FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, mailto choice, menu, shared persistent data (4.5s)
+  ✓  35 e2e/runtime-tools.spec.ts:271:5 › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit (3.6s)
+  ✘  36 e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (5.4s)
+(node:23517) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  37 e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser (5.4s)
+(node:23781) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  38 e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (5.4s)
+(node:23909) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  39 e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (5.4s)
+(node:24217) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  40 e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (5.4s)
+(node:24411) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  41 e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (5.4s)
+(node:24553) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  42 e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (5.4s)
+(node:24804) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  43 e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (5.4s)
+(node:24976) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  44 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (5.4s)
+(node:25126) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  45 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (5.4s)
+(node:25292) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  46 e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (5.4s)
+(node:25457) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  47 e2e/settings.spec.ts:73:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode (1.4s)
+  ✓  48 e2e/settings.spec.ts:91:5 › FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one dialog; ×, Esc and outside close it (1.4s)
+  ✓  49 e2e/settings.spec.ts:118:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart (1.6s)
+[settings] muted text contrast on light glass {
+  aurora: 5.140186901442031,
+  mint: 5.219425605839913,
+  sunset: 5.209379228926235,
+  haze: 5.283658795679195
+}
+  ✓  50 e2e/settings.spec.ts:175:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material (10.3s)
+  ✓  51 e2e/settings.spec.ts:204:5 › FR-SET-002 · AC-08: "Reduce transparency" shows solid with a note, and glass returns when it is off (931ms)
+[settings] muted text contrast in dark {
+  'glass-极光': 7.116832967624057,
+  'glass-无': 4.780845517969554,
+  solid: 6.05631572140189
+}
+  ✓  52 e2e/settings.spec.ts:219:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist (3.8s)
+  ✓  53 e2e/workbench.spec.ts:32:5 › AC-WB mechanism: template, state, navigation, disable/reopen and restart (2.0s)
+  ✓  54 e2e/workbench.spec.ts:62:5 › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance (1.2s)
+  ✓  55 e2e/workbench.spec.ts:99:5 › AC-WB mechanism: refuses to apply files changed after the displayed preview (863ms)
+
+
+  1) e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer ────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 1
+
+    @@ -24,7 +24,8 @@
+          "terminal",
+          "files",
+          "diff",
+          "menu",
+          "search",
+    +     "workbench",
+        ],
+      }
+
+      107 |     }
+      108 |   })
+    > 109 |   expect(probe).toEqual({
+          |                 ^
+      110 |     inlineScriptRan: false,
+      111 |     blockedDirective: 'script-src-elem',
+      112 |     require: 'undefined',
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/app.spec.ts:109:17
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/app-renderer-has-no-Node-js-require-or-raw-ipcRenderer/error-context.md
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/app-renderer-has-no-Node-js-require-or-raw-ipcRenderer/error-context.md
+
+  2) e2e/cli-default.spec.ts:63:5 › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByRole('button', { name: '重新检测', exact: true })
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" getByRole('button', { name: '重新检测', exact: true }) with timeout 5000ms
+      - waiting for getByRole('button', { name: '重新检测', exact: true })
+        14 × locator resolved to <button class="secondary-button button--small cli-settings__refresh">重新检测</button>
+           - unexpected value "enabled"
+
+
+      82 |   await page.getByRole('button', { name: '移除 Claude Code', exact: true }).focus()
+      83 |   await page.keyboard.press('Space')
+    > 84 |   await expect(page.getByRole('button', { name: '重新检测', exact: true })).toBeDisabled()
+         |                                                                         ^
+      85 |   await expect(page.getByRole('radio')).toHaveCount(0)
+      86 |   await page.getByRole('button', { name: '添加 Codex', exact: true }).click()
+      87 |   await expect(page.getByRole('button', { name: '重新检测', exact: true })).toBeEnabled()
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/cli-default.spec.ts:84:73
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/cli-default-enabled-CLI-ar-3d7d8-nly-from-new-chat-selectors/error-context.md
+
+  3) e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  locator('.project-workspace:not([hidden])').getByLabel('消息', { exact: true })
+    Expected: "@src/app.ts @source files/"
+    Received: " @source files/@src/app.ts"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" locator('.project-workspace:not([hidden])').getByLabel('消息', { exact: true }) with timeout 5000ms
+      - waiting for locator('.project-workspace:not([hidden])').getByLabel('消息', { exact: true })
+        2 × locator resolved to <div role="combobox" aria-label="消息" aria-expanded="true" aria-multiline="true" aria-controls="_r_a_" contenteditable="true" aria-autocomplete="list" class="composer__editable" data-placeholder="向 Codex CLI 发送消息…">…</div>
+          - unexpected value " @source files/@src/app.ts"
+        12 × locator resolved to <div role="combobox" aria-label="消息" aria-expanded="true" aria-multiline="true" aria-controls="_r_a_" contenteditable="true" aria-autocomplete="list" class="composer__editable" aria-activedescendant="_r_a_-0" data-placeholder="向 Codex CLI 发送消息…">…</div>
+           - unexpected value " @source files/@src/app.ts"
+
+
+      217 |   await input().pressSequentially(' @source')
+      218 |   await workspace().getByRole('option', { name: /source files/ }).click()
+    > 219 |   await expect(input()).toHaveText('@src/app.ts @source files/')
+          |                         ^
+      220 |   await workspace().getByRole('option', { name: /entry.ts/ }).click()
+      221 |   await expect(input().locator('.composer__reference--file')).toHaveCount(2)
+      222 |   await input().pressSequentially(' Check referenced file')
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/composer.spec.ts:219:25
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/composer-v06-real-file-can-bea24-h-boundary-and-Add-grouping/error-context.md
+
+  4) e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-02-FR-CHAT-001--fa569-ive-tool-row-and-completion/error-context.md
+
+  5) e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-02-FR-SESSION-0-ee1ce-pened-in-the-system-browser/error-context.md
+
+  6) e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-03-FR-SESSION-0-70b62--only-the-displayed-Session/error-context.md
+
+  7) e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-04-FR-STATE-004-e0208-s-it-and-reveals-the-latest/error-context.md
+
+  8) e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-05-FR-STATE-002-01951-e-approval-or-composer-text/error-context.md
+
+  9) e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-SESSION-002-FR--9b7dc-sent-input-survive-relaunch/error-context.md
+
+  10) e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-STATE-003-005-S-ac86c--resumes-the-same-native-ID/error-context.md
+
+  11) e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-STATE-002-I-Q2--90847--and-remains-a-user-message/error-context.md
+
+  12) e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-PROJ-002-FR-SES-68f88-tive-conversation-on-reopen/error-context.md
+
+  13) e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-PROJ-002-FR-SES-2447f-tive-conversation-on-reopen/error-context.md
+
+  14) e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-SESSION-001-ope-fa8a3-g-until-returning-to-latest/error-context.md
+
+  14 failed
+    e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer ─────────────────────
+    e2e/cli-default.spec.ts:63:5 › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors 
+    e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping 
+    e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion 
+    e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser 
+    e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session 
+    e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest 
+    e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text 
+    e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch 
+    e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID 
+    e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message 
+    e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen 
+    e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen 
+    e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest 
+  41 passed (3.4m)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/workbench-plugins/apps/desktop
+

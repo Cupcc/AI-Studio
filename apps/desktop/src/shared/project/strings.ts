@@ -1,16 +1,24 @@
 // Shell UI copy in one place (NAV-Q13 recommendation: Chinese copy with
 // English product terms). Proposed wording from the project / navigation
 // specs; final copy is pending review.
-import type { OpenFailureReason, ToolId, ViewId } from './types'
+import type { BuiltinViewId, OpenFailureReason, ToolId } from './types'
+import { isBuiltinViewId } from './ui-state'
+import { isWorkbenchViewId } from '../workbench/types'
 
 export const PRODUCT_NAME = 'AI Developer Studio'
 
-export const VIEW_NAMES: Record<ViewId, string> = {
+export const VIEW_NAMES: Record<BuiltinViewId, string> = {
   overview: 'Overview',
   progress: 'Progress',
   architecture: 'Architecture',
   'agent-team': 'Agent Team',
   'business-flow': 'Business Flow'
+}
+
+export function viewName(viewId: string): string {
+  if (isBuiltinViewId(viewId)) return VIEW_NAMES[viewId]
+  if (isWorkbenchViewId(viewId)) return viewId.startsWith('workbench-draft:') ? '工作台草稿' : '工作台'
+  return viewId
 }
 
 export const TOOL_NAMES: Record<ToolId, string> = {

@@ -1,0 +1,494 @@
+[
+  {
+    "file": "apps/desktop/out/main/directory-reader-worker.js",
+    "sha256": "dea5556da0cb7566233c5cadbe6e3315fae7a95ae0ce9a69a24c0ed1920ecfe5"
+  },
+  {
+    "file": "apps/desktop/out/main/index.js",
+    "sha256": "e7ff75f44f69875e788f6d161991738c559d05159fe8fcd34c42bf1e5488bba1"
+  },
+  {
+    "file": "apps/desktop/out/native/project-ripgrep",
+    "sha256": "ab250cf3302ea97c5864e435f97064b93979c19c92edb18e18a33a1f56637ffc"
+  },
+  {
+    "file": "apps/desktop/out/native/project-ripgrep.sha256",
+    "sha256": "6cad8c16cd1cc7afa055c2a826a3f6a4a80311c3a073a9196af8c547b1f6a8e6"
+  },
+  {
+    "file": "apps/desktop/out/native/rename-exclusive",
+    "sha256": "870f1bfe74134048deabb2a0f8c9e74595ad2d68f503dc8800c6ec3b5a53fed9"
+  },
+  {
+    "file": "apps/desktop/out/native/rename-exclusive.sha256",
+    "sha256": "69ce7a5bc18d5f0fd663ca638777075db97eeeeb8b9bbd7bd940d5b82f17a0e4"
+  },
+  {
+    "file": "apps/desktop/out/preload/index.js",
+    "sha256": "39cd9971c71500fe7dbe689c76662516806a15259b5822341dc46249597c02ea"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/CodeDiffViewer-qSZPBp6V.js",
+    "sha256": "336817aaf5d0e2bc392e343e585a0a0fb5b234bc95e3e203217c541bfd5b0980"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/CodeViewer-DAov3O35.js",
+    "sha256": "8a005ed311ca65b46d950167dfe1b04b2c599b75c6aaf49bfcef6c22f99e7d57"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/TerminalScreen-DRx3rQwG.js",
+    "sha256": "2d04334f05f74f3ecc086b2eac0d557bc668ce8661b9499d0bf35cdc9625ee4a"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/TerminalScreen-GVL3fBIr.css",
+    "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/_.contribution-DFBRDwvt.js",
+    "sha256": "26227c19371930b5b5a92fb0960306c32480501abe5658f12830e8b96c705846"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/bat-Bqkp9Cfu.js",
+    "sha256": "3fd52043375275296bdb6c1fbe7c31ff6c92f7ec434ea5959c8ddaa04bc41692"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/clojure-fcgFaMHx.js",
+    "sha256": "c99b6f24163380c1151f7624cb1d9eee131da9670c1d013ffd6c1fdbe3285f8e"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/code-C0VoY9X6.css",
+    "sha256": "202caee8ff6a6c8c0b3f4d2f8510da52900f717349e9431a1586cf987f75ea5b"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/code-C56JUkVt.js",
+    "sha256": "aa7867f06b3cae2de50b01a0d6cfaed85856c5713e946949d8b95be653b013c7"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/codicon-DF1abBS2.ttf",
+    "sha256": "77f902557231f95c4c71ae517d09a1a842753656f5f665086b3e5ad8095538da"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/coffee-CzJ5oEdj.js",
+    "sha256": "145992ac56cc603f11b7a7ae234b40a92e3655a753e74ae3867e4b24317758ee"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/cpp-CcN6f0ik.js",
+    "sha256": "73f96424fd9137735331550679f215d9e0bed8e38ff738b27a07773c6929739a"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/csharp-BJeIuvde.js",
+    "sha256": "eecfd273316271b620c04842d7b0e503642eb6cac7fc88fe5bd23fff9d6da0d6"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/css-i3rI3_64.js",
+    "sha256": "b6c08b9befa78e247161c65df931715c7ce576dd52b0d45e2e565caadfea7ca4"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/dart-vLMHv35g.js",
+    "sha256": "a3177ce042f793f7d643cf20b88955f3d469751beb93a3ab817d6074a7633028"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/dockerfile--oxj0cAH.js",
+    "sha256": "31ed5c0216d0e570f8121af0ad2f80cd214c2ca7f0e75f3f8703b3821d4ad032"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/elixir-eLfY1jWH.js",
+    "sha256": "d956b7475c871fa55e92898a7c80177fb4dcf2a307f073c6f9a1c5b1b473efb8"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/go-brnMpFrj.js",
+    "sha256": "51ec81e3fe4ed722ea25bfa1785dda19bdf69b0b2e642d270a91ccec410cf40f"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/graphql-BeiGgjIU.js",
+    "sha256": "ab9be553cf7ad12822291b133cfe92bb1e1506a42808bcb71b9ca565c0c787bb"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/handlebars-HUhPHBMr.js",
+    "sha256": "a39847e7f35b31af84d8e624a25c1e8bd06374f504f0d8c9a1999f8c0ad3c02f"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/hcl-CrX1Es2W.js",
+    "sha256": "83328b85960a88e4c66c330578ab59b0e0fb1a016967ff6ccb9868af181b82f6"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/html-BqR7OADt.js",
+    "sha256": "07a5485e1629800dcbbbe8f87d7217f121b8abf31ce8ae9f01c0419fc3d89b35"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff",
+    "sha256": "328d50b6ece9ca25c46eea3e885ba497f6237f2fb84ef7b92f88e14a1a25e381"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2",
+    "sha256": "08949f728dc52d528e69b1667d15c89a5686a4ee9a296ff90983985f99c380f7"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-mono-latin-500-normal-CB9ihrfo.woff",
+    "sha256": "09f018c58556e5801ecc49d5b5275dcff4c73311c2af6b88e31c51d76d076a9d"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2",
+    "sha256": "01d285447409c8a588692162439a038b8cbd7871309ee20267b0d2d91c6e8e22"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2",
+    "sha256": "3b646991d30055a93a4ecc499713d4347953a74a947ecab435ab72070cbdab0e"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff",
+    "sha256": "828907bfd14855c880789878bd2b38ffd284a6c27c8b80f6069900f70dae3901"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2",
+    "sha256": "0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff",
+    "sha256": "8d2c7b2eca91869d447851a9c8bd07edf629b26025eacb882291e03b384b4e35"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff",
+    "sha256": "7861a349af1e925a80d56547c2c9e0b1e9f6a9002a9a6867351da2f05122ad21"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2",
+    "sha256": "8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/index-B41AORWc.css",
+    "sha256": "d2aae3312ba89a771c30eeb860bba025f4ed1c39514643298effa0ff09f199d2"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/index-BKpA7WKu.js",
+    "sha256": "83dbf56a67c817c1c9d6d8b92c416e2c8ed58253dbf00e9a318d086aed0ae8c2"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ini-BcQysCTb.js",
+    "sha256": "054867421acb33d253b78e466463ad2dbed0a270c463046ed86a5cebeb91e30b"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/java-Dt3iMn2o.js",
+    "sha256": "b57d1d340b5587b2cf2c680b95290c00ccced50795d2a3a481d67ebbac1613b1"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/javascript-BXAhg2Sh.js",
+    "sha256": "bad7bed7dd6b6bde6e1345ecc8c6faed0d849d8a83b356e6aa8d2c9e103e9f28"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/julia-Cm3ItYL_.js",
+    "sha256": "a22d72944935fd6039a40dcea5a818fcd70d016c7e35e321c3cf31d0d9543174"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/kotlin-Ddo1SjA5.js",
+    "sha256": "a440f155088f75ffcf627b6aef7d962b941960e0df80913e5746365a2fb1a1fe"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/less-B7Qaxw-O.js",
+    "sha256": "1766c3efc5a1471c644a68c3cc890f122cfd4aeb32b794b6ff60801d44cb0ed9"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/lua-hNsuGJkO.js",
+    "sha256": "220b07c43bd9c0f89af29ec10523a128cfcb03ebaf48b68c06ad8e4402624fe4"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/markdown-B0YTnTxW.js",
+    "sha256": "37bcba78f0ca8fd6e723379d9956777e2a31756b3d0339d67322d7e5f8fcaf07"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/mdx-CiuBH76Y.js",
+    "sha256": "8c15af5923329c89f464138dc4eab528820b3af7074e5f03b76164e9b05eced2"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/monaco-runtime-CPVWXZLM.css",
+    "sha256": "7b8d34043e7b05ce0e13118420c386cc8e2e2c442573295a8d44db06338b13ae"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/monaco-runtime-D-Nq5L1I.js",
+    "sha256": "bdd8a2d4abc1cf6789c2a7e9eae784a913a2935683bb8fc506e6b377f971fa5a"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/objective-c-B1L1C5EC.js",
+    "sha256": "821604add0e4a82faf7b7e909d06258756e60335f6e4e618f6ca140892b0e222"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/perl-DC0Z0tlO.js",
+    "sha256": "7cb374e77ba8ddc64f5c46d669f94b86f94abcd511b6f4db8feeb7805cf8d8ad"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/php-Bkx1qpkQ.js",
+    "sha256": "a4121441f69b5d73a2eb0cb2ff16db2dd4524f4b4ca6fb1dc07c923a9d52045a"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/powershell-BXiKvz7Z.js",
+    "sha256": "7b17e4299214b17cbece7ffca271239a90226674f1404c59864c5969099a3620"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/protobuf-CndvAUGu.js",
+    "sha256": "4112401558cb1f367fbe6a7deb57ce33ac480eba77294e17a686bd8dd9e4145c"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/pug-BxCXwerb.js",
+    "sha256": "771237a4b27cb262eac010b528a58b3fa0bafc4c302a34274ab55404dc29c721"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/python-BHml6RTN.js",
+    "sha256": "3eec87c2122d5a20d01acc0891c3c61c4973ddfd27f3c31fcf4c237a044bc1a2"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/r-CtqYUQ6l.js",
+    "sha256": "40a071c68ac506b7dc02730d1ba1729045dc49c35b97a03000c7ebc9a1bc445a"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register--gflsloW.js",
+    "sha256": "5c9a09632d5cb62b8661250f9ac5afc4be8ab975878ca0965ac34b2cb927c364"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register--jnTTvEL.js",
+    "sha256": "9ef085bebd92256882f45be333e0a9e7f3947d4c247968d7973727c55a2e98b6"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-43FmvZ2r.js",
+    "sha256": "def5e8246c06ce65df5317806c5ce5a9d42ee2ff7907e2919189ecb540079d09"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-B0wSwAUk.js",
+    "sha256": "748e0a6e30f42e55c21e76fa373a6d6858e8be7cd04081098f3dc1f397c4bcac"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-B4snIBd7.js",
+    "sha256": "0190ff5946f66fcb9e362809ce69dfebef373c99a79906fc9373585fb75e23e7"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-B4uM7Bdw.js",
+    "sha256": "94e2b0fb17128a0c92fbda3886f56461a946dbd45e84d9316f38c71e1a716442"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-B8KW2X1q.js",
+    "sha256": "a692c5afb53d07160bcdbe7aeceed027cac74433c12d221d04da88252435e4a6"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-B8XCuWjE.js",
+    "sha256": "d5216252c0478f571dff275a561b74389edabd1f46a54ebb784df25f80e966a8"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-BAqjHjKX.js",
+    "sha256": "102f54a228e767bd6a9966d3a700d3015d253c9e9b6942d55fe9e123e6b75420"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-BOzJ0Y65.js",
+    "sha256": "bafd8eaf83c87f277ea56644d328f13290924db45d19455b807c39c745ce782d"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-BQIOMsX3.js",
+    "sha256": "70b6b0d4c95a85e518df4788fd1c4d5d3b1c75ba2163208e2f496a625e3f047b"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-BVCFJUuI.js",
+    "sha256": "a45f1cf026fdb717f5036cf9422957379ae3f67ee7415400aa04e1a619d2c2f1"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-BhE3ZlVn.js",
+    "sha256": "8c18ecae34b982501f123ebf20b1d63326763f9aa943eaf203d87d7c0073328f"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-Bi4SYPPN.js",
+    "sha256": "8e4bbf5251bdeb0f9b264de38288bf0a8c0b4bc5e7ea2832a90daed0bf937f22"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-Bq6T9Wa3.js",
+    "sha256": "829a4594de96edd5b8d6af1b821bdaf7e129ba6e6277db423e9b7b637725b7eb"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-BscTfMfe.js",
+    "sha256": "f5a417a2569fa757b997fd165a637881f43b4045320aa33278428a2227466512"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-C3LiifUJ.js",
+    "sha256": "e9dd834500e791801c40848642b5b9544fbc9c2ddef130864a0baf7c1f97a7f0"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-C4NP2N3r.js",
+    "sha256": "87779ae8249d69cfc2e179b64324fe2d7b4e394950e3eee2e124da0f035af632"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-C4UcKTuw.js",
+    "sha256": "651b79a997b7a6a34be058f6aa0062ba9d43aa34ace83ec1e48e0e85e9be6e9d"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-C8KulZbf.js",
+    "sha256": "b9d7b3abf581421e636a6efd5b357f8f0daec4658129d83c2f92ce77be45f80f"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-CVL3SdvY.js",
+    "sha256": "fda667b12b682ee142d5f3b3ad2825b68c7d0cdcd180c4594cb0a9a21fc82c41"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-Cb7AxjBs.js",
+    "sha256": "5c8cecec2589565cabc76cb3cd97efdcb5f41ea334ae03b9f1cfe579b9355693"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-CgBL4Zi4.js",
+    "sha256": "5d389eee5b244d34f1d0a6976417387be816519a1f7e2139bb5059bcfeaf62b2"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-CjrEPubM.js",
+    "sha256": "b81561ac4450753b5e74812879cda22a22728d2d4dd0fa59fe4075a52eee2ce0"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-CmWhEu1O.js",
+    "sha256": "7faca3b85e7fcca51f5272b29bb7b27eec89b86d41f6eae9f0750c92146f3b23"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-CwThdMmn.js",
+    "sha256": "99cf9d3b964ea01fab80744ea2c2959d3cb47ef8616aaecff0cbc812181e19a8"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-Cys3Vk26.js",
+    "sha256": "109924cb590b0c4652288e94df4347fda1e0e5e02f86ed00425b20e00218df6c"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-Cz_x98aK.js",
+    "sha256": "d3ebec55d33f3d663471e642a034dc87a72075af20868c0eba29031a8922f3ee"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-D35yNmg2.js",
+    "sha256": "9813f2a6a55326f4e04990df2512efe317eb12469dcd8d203f7b269e68f4d4fe"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DKUFqfi4.js",
+    "sha256": "a726ea20332e041f20ac75f4508d6e19be091b0f1da879998f8f6367f34e2fb1"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DOfMJ8ZO.js",
+    "sha256": "5220f47f4d9b2769e23df9c5753f80ef8a3fa76e08bc15a63ae963c2fc722e44"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DR2dr3uv.js",
+    "sha256": "59babd22a8a0af2885f06f8530609a78101f23cee9bc779fee5c5dd9f0c428ea"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DTZ6yYRt.js",
+    "sha256": "6d3ed1e52ae750943bcf69bc7c1dcbf8dad41574a9e6c7bef6be6c51b6066a80"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DXet_n--.js",
+    "sha256": "8b39639f53cb9705dfc38691df4346a2212aadd26ff1aa4ce7d9e64245da840a"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DYWZugt6.js",
+    "sha256": "499862b5308f73e1b39c04580adc7f76bf07281bf0235d643d10864444b01814"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DgaDJbwj.js",
+    "sha256": "b8a3e94b485d0a5b4a2814fdb262e1af6fb49fcb3d7dbb51397e66610266c122"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DmoeKDmk.js",
+    "sha256": "5d424dcd701ca1769a1431915424d09e35ce15e53f7056aef97c6c063762af0f"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DrNvgvLt.js",
+    "sha256": "306b205a7157d18c4ea7fb33dc1ed139d0424c2c7df247db87d7cc1c4be45f2c"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DuD5XNrD.js",
+    "sha256": "671d5d227e92f3176f77a2a5a7f3ff190b5b89379ee46a9c50cbedb9a5e243c7"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-DyXky12w.js",
+    "sha256": "83e7a2391ac0ba4888cf7030f81c6053fade414c088323a36fc75b08aeb8c573"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-FJdUj96m.js",
+    "sha256": "6f65c68718aa8a87425a184724a1a62fc0ceb00cb9f2aa1df3f7400d9f6474d7"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-I-x0bFXm.js",
+    "sha256": "912bcb13a1709e12b05ee49defd1b257cf6940c64c6d2a054b4a31d03f364d08"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-JlN_W-pe.js",
+    "sha256": "5224098f24e1efcce5ee68202bddf4e80152f32672b558a91b674e7413a69f03"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-MczopOaj.js",
+    "sha256": "a8eecb7ca9a5361c3f37247a7add6219deffaddb5d150329d819935c9ba83ba3"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-RHWr-UM0.js",
+    "sha256": "24c6fa4995c2bc32bf06d3e53e77f2e51febe12f93bf6e171d0a62cd51ef1c09"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/register-l6BuaEXh.js",
+    "sha256": "0a1bdea5c8c9bde8322cd35edf7db6eeb6235b31dc92f58257134394e662383c"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/restructuredtext-B-KQCVu_.js",
+    "sha256": "22840fbdf575d8fc1072580de88ed5ab7a0c50aacc599380b80bc7863f7fa1a3"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/ruby-DCd4DmAr.js",
+    "sha256": "8e86381844accf9bdadd1437494022f149c809480f39d4f73b27c4a285be6e92"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/rust-B1c0VCeq.js",
+    "sha256": "74ddf1037db1c7da8aadda3450880055bf713b901113e238212593a72fe1328f"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/scala-DbVzH-3O.js",
+    "sha256": "3ac928a84b2125e5502c2d0c26b4c9198cc1dfa7114373df41c33130c7a682e2"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/scss-B42qMyAu.js",
+    "sha256": "0cf4c39e29be8c17c2e40ec266866a72828b184a4d9b996982293bc674723431"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/shell-vZEubQ82.js",
+    "sha256": "3e8e7f1afc74bab95f19ff67aefe10051cac9fa91354258b8e2db31e9d2c4dd5"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/solidity-yHOxYChb.js",
+    "sha256": "ffc5cb7adb15fc311b95a105aeec9e0ca9f651bb5a8caa219eb522c409f4d70a"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/sql-BAGepFCR.js",
+    "sha256": "3d8142b5345fb48e8a4bcc26887d334261f6671dc9af96670ccba5268c6acd45"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/swift-CbF6f74o.js",
+    "sha256": "29443b66b0f2e7d74953c2a3fa2eb946fd5c70f66ceee4e3f5758324643834f2"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/tcl-Bb4GCwBr.js",
+    "sha256": "dd61ba6dade27e7b7e72dfd6b74b7c2b22acde0d3922c62d68fed6c9024b9ba0"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/terminal-font-BrrJ_5zI.js",
+    "sha256": "f275f5596313481919bbd2a29798a1699a57682e8cb304084f4be967f1da51f2"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/twig-DvgEGWAV.js",
+    "sha256": "e8d39bfe95a99cacd368a1048357d3b08621398f995898f8c73b70ca24b65c96"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/typescript-DVSeykIx.js",
+    "sha256": "624955e19464e2e3e0a5700be802c8d650fbf7f440e47d11bd97a0d7a32c2535"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/vb-Bm6ESA0Q.js",
+    "sha256": "dea7c9ad23f5644ebdc84739626fa4ea98fc8af08ba2c5c529fde7b422a126c5"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/xml-DB570lOr.js",
+    "sha256": "37954d7d9eff60d77b1eebbbb26f9a9c3dc044d25dd038d3091523d72e0007ab"
+  },
+  {
+    "file": "apps/desktop/out/renderer/assets/yaml-Dk6O-sso.js",
+    "sha256": "f701992d3aa8cb710ccb81d64003586cae21856f1c290d9b847eec02745f9835"
+  },
+  {
+    "file": "apps/desktop/out/renderer/index.html",
+    "sha256": "e0e0d6974b2e32326a6a8c1b59ca6ee5f6ee2df09a1af54a8dd7659a87cc4ef9"
+  }
+]

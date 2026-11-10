@@ -218,6 +218,27 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     expect(detached.originViewId).toBe('architecture'); expect(detached.viewContextAttached).toBe(false)
     expect(calls).toBe(1)
   })
+  it('creates a workbench editor Session through the existing provider and keeps its draft isolated', async () => {
+    const viewId = 'workbench-draft:creator-one'
+    const h = harness(new FakeProvider('codex'), (projectId, originViewId) => ({
+      originViewId, paths: ['.ai-studio/workbench/sdk/README.md'],
+      text: `Edit the plugin draft in ${projectId}; preserve the installed instance.`
+    }))
+    const key = { projectId: 'p', kind: 'new_chat' as const, viewId }
+    const draft = await h.service.getDraft(key)
+    expect(draft.contextItems).toEqual([{ type: 'view', viewId }])
+    h.service.saveDraft(key, { ...draft, text: '做一个计数器' })
+    const ordinary = await h.service.getDraft({ projectId: 'p', kind: 'new_chat' })
+    expect(ordinary.text).toBe('')
+    const session = await h.service.create({ projectId: 'p', cli: 'codex', text: '做一个计数器', originViewId: viewId, viewContextAttached: true })
+    await tick()
+    expect(session.originViewId).toBe(viewId)
+    expect(session.viewContextAttached).toBe(true)
+    expect(JSON.stringify(h.native().driver.callsTo('startTurn'))).toContain('preserve the installed instance')
+    expect(h.items(session.id)[0]).toMatchObject({ text: '做一个计数器', viewContextPaths: ['.ai-studio/workbench/sdk/README.md'] })
+    expect(JSON.stringify(h.items(session.id))).not.toContain('preserve the installed instance')
+  })
+
   it('isolates View drafts and preserves removed labels across reload', async () => {
     const h = harness(), key = { projectId: 'p', kind: 'new_chat' as const, viewId: 'architecture' }
     const initial = await h.service.getDraft(key)

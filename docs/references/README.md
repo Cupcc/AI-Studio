@@ -54,7 +54,7 @@ Codeg To-dos 的已定范围与建设顺序见[路线图 §4.1](<../06. Developm
 ## 建议先展开的调查
 
 1. **Codeg**：围绕已规划的 To-dos，串起创建、执行、等待、审阅、继续修改和交付，找出各状态的入口与恢复方式。
-2. **OpenDesign、DeepSeek Harness、MCP Apps**：Harness 的[首轮源码调查](deepseek-harness/README.md)已完成，后续补创建到卸载的实机观察；OpenDesign 与 MCP Apps 继续分别调查工作台操作和页面与宿主通信，服务于自定义工作台原型验证。
+2. **OpenDesign、DeepSeek Harness、MCP Apps**：Harness 的[首轮源码调查](deepseek-harness/README.md)已完成，后续按架构设计需要查阅创建、加载与宿主通信机制，实机比较按需开展，不作为插件建设的前置门槛；OpenDesign 与 MCP Apps 的进一步调查按业务和接口需要安排。
 3. **Codex、Claude Desktop、ChatGPT Desktop、cmux**：用相同场景比较输入、运行、等待介入、完成未读和切回会话，补足当前桌面交互的参考。
 
 其他项目按具体模块需要展开。这是调查建议，顺序可随当前工作调整。

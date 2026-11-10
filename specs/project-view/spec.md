@@ -84,7 +84,7 @@
 ### FR-VIEW-002 Project View 可扩展
 
 1. 默认 View 保留扩展边界：View 目录、Schema、Renderer Registry 和导航数据结构不得把五个 ID 写死为不可扩展的数据库枚举。
-2. 自定义扩展采用包与 Project 内实例，使用[工作台规格](../workbench/spec.md)的创建、导航、权限与存储规则。默认 View 在原型阶段不迁移，未知 View 文件不能破坏默认 View。
+2. 自定义扩展采用包与 Project 内实例，使用[工作台规格](../workbench/spec.md)的创建、导航、权限与存储规则。默认 View 在插件机制阶段不迁移，未知 View 文件不能破坏默认 View。
 3. 自定义工作台使用 Web 页面配结构化定义，通过独立页面入口运行；声明式组件可作为模板，不限制工作台只能复用本 Renderer（2026-11-10 确认，DEC-28）。
 
 ### FR-VIEW-003 View 内容动态生成
@@ -337,7 +337,7 @@ Project Shell 只负责把当前 `UiState.mainCanvas.view` 和 `viewRightArea` �
 
 1. Renderer 使用固定组件映射，不使用动态 `import()`、`eval`、`new Function`、`dangerouslySetInnerHTML`。
 2. Preview 不拥有 Node.js、文件系统、Shell、凭据或任意 IPC 能力；Renderer 只接收已经校验的 DTO。
-3. 自定义工作台按[独立规格](../workbench/spec.md)建设功能原型；本阶段声明式入口仍不执行 HTML 或脚本。
+3. 自定义工作台按[独立规格](../workbench/spec.md)先设计插件架构，再建设机制和接入业务；本阶段声明式入口仍不执行 HTML 或脚本。
 
 ## 7. 验证清单
 

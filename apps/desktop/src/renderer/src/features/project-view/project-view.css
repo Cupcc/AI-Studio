@@ -41,6 +41,7 @@
 .view-draft-prompt { grid-area: 1 / 1; align-self: center; min-height: 0; max-height: 100%; overflow: auto; padding: 18px var(--space-6); text-align: center; }
 .view-draft-prompt h2 { font-size: 17px; font-weight: 500; margin: 0 0 var(--space-1-5); text-wrap: balance; }
 .view-draft-prompt p { margin: 0; font-size: var(--font-size-sm); line-height: 1.6; }
+.view-header-new-chat { flex: 0 0 auto; white-space: nowrap; }
 .view-header-context { min-width: 0; font-size: var(--font-size-sm); }
 .view-cli-select { flex: 0 1 auto; min-width: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-3); padding: var(--space-1); font: inherit; max-width: 140px; }
 .canvas-mode--view .composer__tag { max-width: min(220px, 100%); min-width: 0; }

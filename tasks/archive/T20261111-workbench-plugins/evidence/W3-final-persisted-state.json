@@ -1,0 +1,61 @@
+{
+  "instances": [
+    {
+      "id": "e34f8d1c-0eb0-4fc4-b221-8423948f0639",
+      "project_id": "11fc1881-ffec-4ca7-b375-50401913c8cc",
+      "plugin_id": "workbench-2322b819-6b4d-40eb-925c-735a9c9b58b9",
+      "package_revision": "e088cdbc5a4a0ffad296ef1a522148033a9d287a9d3aabfea33421b7709601e6",
+      "title": "随手记",
+      "enabled": 1,
+      "state": {
+        "count": 0,
+        "note": "W3 第二个Project独立笔记"
+      },
+      "state_revision": 1
+    },
+    {
+      "id": "229a176e-3d24-4e6c-a5ba-7a353053ee0f",
+      "project_id": "2c19e28f-b5e2-4f58-bde0-eb9fab1b8259",
+      "plugin_id": "workbench-80ca4770-8f35-4b35-b918-be5e09d9166f",
+      "package_revision": "04f5d5e1ffa8df53076afcfa9a47af81f5166c5e4125574a8e44be5acf43df38",
+      "title": "W3 阅读进度",
+      "enabled": 1,
+      "state": {
+        "count": 2,
+        "note": "W3 真实创建页面的笔记"
+      },
+      "state_revision": 0
+    },
+    {
+      "id": "33fad6f2-adb7-4980-a225-f62706eae6aa",
+      "project_id": "2c19e28f-b5e2-4f58-bde0-eb9fab1b8259",
+      "plugin_id": "workbench-2322b819-6b4d-40eb-925c-735a9c9b58b9",
+      "package_revision": "d89dc4e2a0c255123ff8d7cd41ad4505eda8e0c0aa21c4871de11ec8d00b08a1",
+      "title": "W3 编辑后的随手记",
+      "enabled": 1,
+      "state": {
+        "count": 1,
+        "note": "W3 模板已保存笔记"
+      },
+      "state_revision": 0
+    },
+    {
+      "id": "c05df8d5-7fc2-4d60-8bf2-7e92ab93300f",
+      "project_id": "2c19e28f-b5e2-4f58-bde0-eb9fab1b8259",
+      "plugin_id": "workbench-2322b819-6b4d-40eb-925c-735a9c9b58b9",
+      "package_revision": "e088cdbc5a4a0ffad296ef1a522148033a9d287a9d3aabfea33421b7709601e6",
+      "title": "随手记",
+      "enabled": 1,
+      "state": {},
+      "state_revision": 0
+    }
+  ],
+  "sessionCount": 1,
+  "turnOutcomes": [
+    {
+      "outcome": "completed",
+      "count": 2
+    }
+  ],
+  "scope": "read-only final isolated test database, no user configuration or credentials"
+}

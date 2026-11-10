@@ -93,3 +93,11 @@ scripts/                       postinstall、afterPack、打包冒烟脚本
 [Tools spec §5.4](../../specs/tools/spec.md#54-vs-code-对齐2026-10-26) 负责行为、限额和安全边界。构建及 Vitest 配置通过 `scripts/build-files-helper.mjs` 编译 `native/rename-exclusive.c` 与 `native/project-ripgrep.c`，需要 Xcode Command Line Tools 的 clang；源码 / 编译参数未变时复用 `out/native/`。打包产物放入 `Resources/files/`，无需用户安装编译工具；`smoke:packaged` 的 `filesRename` 同时检查移动与拒绝同名覆盖。重命名辅助程序不执行 Shell、不复制文件、不回退覆盖；目标文件系统不支持 `RENAME_EXCL` 时操作失败。
 
 `e2e/vscode-parity.spec.ts` 以隔离 Project、本地 HTTP / PTY 和模拟 Provider 覆盖新增文件管理 / Quick Open / Search、Diff 控件、Terminal 链接 / 查找 / 清屏 / 分屏、Browser 多 Tab / 收藏 / 权限与跨 Project / 重启 Cookie；原生菜单选择、系统废纸篓和目录选择使用 fixture，不代替实际原生菜单走查。
+
+## 6. 工作台插件
+
+最小工作台机制的职责、协议和存储由 [workbench spec §9](../../specs/workbench/spec.md#9-fr-wb-001006008-最小插件机制实现契约)负责。入口为 Project 导航的“添加工作台”；模板和 AI 创建都使用独立草稿，再预览并添加。创建与编辑复用普通 CLI Session。
+
+`shared/workbench/` 保存清单规则、SDK、开发说明与模板；`main/services/workbench/` 负责包资源、固定修订和 SQLite 实例状态；`renderer/features/workbench/` 负责导航、预览与 iframe 通信。新增操作先修改 typed IPC，不把插件操作接到任意 `window.studio` 转发接口。
+
+开发及机制验收记录见[实施任务](../../tasks/archive/T20261111-workbench-plugins/task.md)。真实 Codex 与实际 UI 验证单列，不以模拟 Provider 的自动化通过代替。五图和产物服务属于后续业务。

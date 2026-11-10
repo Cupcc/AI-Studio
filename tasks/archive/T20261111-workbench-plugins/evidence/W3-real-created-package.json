@@ -1,0 +1,29 @@
+{
+  "generatedManifest": {
+    "schemaVersion": 1,
+    "pluginId": "workbench-80ca4770-8f35-4b35-b918-be5e09d9166f",
+    "version": "1.0.1",
+    "sdkVersion": 1,
+    "title": "W3 阅读计数",
+    "entry": "index.html",
+    "capabilities": [
+      "state.read",
+      "state.write",
+      "conversation.draft"
+    ]
+  },
+  "files": [
+    {
+      "path": "index.html",
+      "sha256": "f95bc1d66c8fdcc0b3b926fcb859e163a12918552bc16abc029fed9d94d7bab8",
+      "bytes": 6398
+    },
+    {
+      "path": "manifest.json",
+      "sha256": "bf3163bb7bf895036b1db8fd8e5d3ce6feeee8000259e775eaf64c92b3ab2d45",
+      "bytes": 272
+    }
+  ],
+  "guideAvailable": true,
+  "scope": "after first real Codex turn, before W3 edits or second turn"
+}

@@ -30,7 +30,7 @@ export const CSP_PRODUCTION = [
   "base-uri 'none'",
   "form-action 'none'",
   "object-src 'none'",
-  "frame-src 'none'",
+  "frame-src app://workbench",
   "worker-src 'none'"
 ].join('; ')
 
@@ -44,7 +44,7 @@ export const CSP_DEVELOPMENT = [
   "base-uri 'none'",
   "form-action 'none'",
   "object-src 'none'",
-  "frame-src 'none'",
+  "frame-src app://workbench",
   "worker-src 'none'"
 ].join('; ')
 

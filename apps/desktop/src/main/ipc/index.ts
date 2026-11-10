@@ -13,6 +13,7 @@ import { createFilesFeature } from './files'
 import { createDiffFeature } from './diff'
 import { createMenuFeature } from './menu'
 import { createSearchFeature } from './search'
+import { createWorkbenchFeature } from './workbench'
 import { projectShellFor } from '../services/project'
 import { terminalFor } from '../services/terminal'
 import { browserFor } from '../services/browser'
@@ -51,6 +52,7 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
     createAppFeature(core, sessionOptions.isForeground ?? isSessionWindowForeground),
     createProjectFeature(core),
     createProjectViewFeature(core),
+    createWorkbenchFeature(core),
     createSessionFeature(core, { ...sessionOptions, fileReferences: sessionOptions.fileReferences ?? files }),
     createSettingsFeature(core),
     createBrowserFeature(core),

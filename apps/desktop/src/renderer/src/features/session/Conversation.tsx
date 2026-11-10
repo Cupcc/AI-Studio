@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
-import { DEFAULT_VIEW_IDS, type ViewId } from '@shared/project/types'
-import { VIEW_NAMES } from '@shared/project/strings'
+import { isViewId } from '@shared/project/ui-state'
+import { useViewTitle } from '../workbench/use-view-title'
 import type { ShellSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
 import { Composer } from '../input/Composer'
@@ -13,12 +13,14 @@ export function ConversationHeader({ project, canvas }: ShellSlotProps) {
   const summary = useSessions((s) => sessionId ? s.summaries[sessionId] : undefined)
   const draft = useSessions((s) => s.drafts[`${project.id}:draft`])
   const origin = summary?.originViewId
+  const originTitle = useViewTitle(project.id, origin ?? '')
   return <>
     {(summary?.cli ?? draft?.cli) && <CliBadge cli={(summary?.cli ?? draft?.cli)!} />}
     <span className="session-header__title" title={sessionId ? summary?.title : '新对话'}>{sessionId ? summary?.title ?? '正在加载对话…' : '新对话'}</span>
-    {origin && <><span className="session-header__from muted">· 来自 {VIEW_NAMES[origin as ViewId] ?? origin}</span>
-      <button className="link-button" disabled={!DEFAULT_VIEW_IDS.includes(origin as ViewId)} onClick={() => {
-        useProjectShell.getState().enterView(project.id, origin as ViewId)
+    {origin && <><span className="session-header__from muted">· 来自 {originTitle}</span>
+      <button className="link-button" disabled={!isViewId(origin)} onClick={() => {
+        if (!isViewId(origin)) return
+        useProjectShell.getState().enterView(project.id, origin)
         useProjectShell.getState().setViewConversation(project.id, { kind: 'session', sessionId: sessionId! })
       }} title={origin}>在 View 中打开</button></>}
   </>

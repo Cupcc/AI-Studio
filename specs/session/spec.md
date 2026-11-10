@@ -54,7 +54,7 @@
   - Session History 的分组、排序呈现、滚动、Rename 交互：见 [Navigation spec](../navigation/spec.md)。本文提供排序字段与状态。
   - Tab 注意力点的渲染、关闭确认对话框的 UI、折叠按钮注意力点的渲染：Project 壳层（[T20261009-project-shell](../../tasks/archive/T20261009-project-shell/task.md)）。
   - CLI 协议、进程管理、Stop 的资源清理细节：CLI Adapter（[Adapter spec](../agent-adapter/spec.md)）。本文只以抽象接口描述所需能力（第 5.1 节）。
-  - 默认 View 的 Conversation 列与首条上下文由 [Project View spec](../project-view/spec.md)负责；自定义工作台的逐次上下文、执行范围和产物发布由 [workbench spec](../workbench/spec.md)负责。两者使用普通 Session，本模块维护会话、查看状态和 Stop（FR-WB-003、005，2026-11-10 接受方向，具体接缝为待原型评审的设计草案）。
+  - 默认 View 的 Conversation 列与首条上下文由 [Project View spec](../project-view/spec.md)负责；自定义工作台的逐次上下文、执行范围和产物发布由 [workbench spec](../workbench/spec.md)负责。两者使用普通 Session，本模块维护会话、查看状态和 Stop（FR-WB-003、005，2026-11-10 接受方向，2026-11-11 调整为插件架构先行，此处业务接缝留到后续业务阶段设计与评审）。
   - 轮次原生文件记录与 Diff 联动（依赖 FR-TOOL-002、04 第 1 节第 13 项与 [context-tools task](../../tasks/archive/T20261009-context-tools/task.md)；组件修订见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节）。
 
 ## 3. 行为细则

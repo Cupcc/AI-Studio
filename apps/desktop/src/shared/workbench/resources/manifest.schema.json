@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI Studio Workbench manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "pluginId", "version", "sdkVersion", "title", "entry", "capabilities"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "pluginId": { "type": "string", "maxLength": 80, "pattern": "^[a-z][a-z0-9-]*$" },
+    "version": { "type": "string", "maxLength": 64, "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][\\w.-]+)?$" },
+    "sdkVersion": { "const": 1 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "entry": { "type": "string", "minLength": 1, "maxLength": 512, "description": "HTML path relative to this package; no absolute path, backslash, empty component, . or .." },
+    "capabilities": { "type": "array", "uniqueItems": true, "items": { "enum": ["state.read", "state.write", "conversation.draft"] } }
+  }
+}

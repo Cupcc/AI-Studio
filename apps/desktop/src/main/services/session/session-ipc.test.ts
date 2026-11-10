@@ -70,6 +70,8 @@ describe('Session IPC boundary · FR-STATE-004/005, S-Q1', () => {
     expect(() => f.handlers.getConversation.parse({ sessionId: 's', limit: 1.5 })).toThrow()
     expect(() => f.handlers.updateViewing.parse({ projectId: 'p', sessionId: 's', foreground: 'true' })).toThrow()
     expect(() => f.handlers.getDraft.parse({ projectId: 'p', kind: 'new_chat', sessionId: 's' })).toThrow()
+    expect(f.handlers.getDraft.parse({ projectId: 'p', kind: 'new_chat', viewId: 'workbench-draft:abc-123' })).toMatchObject({ viewId: 'workbench-draft:abc-123' })
+    expect(() => f.handlers.getDraft.parse({ projectId: 'p', kind: 'new_chat', viewId: 'workbench:../other' })).toThrow()
     expect(() => f.handlers.answer.parse({ sessionId: 's', requestId: 'r', response: { kind: 'answers', answers: { q: { optionIds: 'not-array' } } } })).toThrow()
     expect(() => f.handlers.answer.parse({ sessionId: 's', requestId: 'r', response: { kind: 'approval', optionId: 'allow', shellCommand: 'ignored?' } })).toThrow()
   })

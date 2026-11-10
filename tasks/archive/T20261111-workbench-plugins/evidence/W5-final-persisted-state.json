@@ -1,0 +1,74 @@
+{
+  "scope": "read-only isolated W5 database; no credentials or user settings",
+  "sessionCount": 0,
+  "turnCount": 0,
+  "instances": [
+    {
+      "id": "da737171-3648-4733-af24-5ab33e1677df",
+      "title": "随手记",
+      "enabled": 1,
+      "package_revision": "f40b221928d872127fa6cb2275d0801af1043153c17b1ff1de20ff7b0c80af42",
+      "state": {
+        "count": 1,
+        "note": "W5 保存与恢复笔记"
+      },
+      "state_revision": 0
+    }
+  ],
+  "drafts": [
+    {
+      "key": "project:27eed4b9-24c3-4695-a0ee-a5bce21a3ae2",
+      "text": "@src/app.ts @source files/entry.ts W5 continuous typing @src/app.ts",
+      "inlineReferences": [
+        {
+          "start": 0,
+          "end": 11,
+          "item": {
+            "type": "file",
+            "path": "src/app.ts"
+          }
+        },
+        {
+          "start": 12,
+          "end": 34,
+          "item": {
+            "type": "file",
+            "path": "source files/entry.ts"
+          }
+        },
+        {
+          "start": 56,
+          "end": 67,
+          "item": {
+            "type": "file",
+            "path": "src/app.ts"
+          }
+        }
+      ]
+    },
+    {
+      "key": "project:27eed4b9-24c3-4695-a0ee-a5bce21a3ae2:view:architecture",
+      "text": "W5 separate architecture draft",
+      "inlineReferences": []
+    },
+    {
+      "key": "project:27eed4b9-24c3-4695-a0ee-a5bce21a3ae2:view:workbench-draft:1e5d1b03-93db-459d-be74-65b2604a85d6",
+      "text": "@src/app.ts W5 template draft\nW5 保存与恢复笔记",
+      "inlineReferences": [
+        {
+          "start": 0,
+          "end": 11,
+          "item": {
+            "type": "file",
+            "path": "src/app.ts"
+          }
+        }
+      ]
+    },
+    {
+      "key": "project:27eed4b9-24c3-4695-a0ee-a5bce21a3ae2:view:workbench:da737171-3648-4733-af24-5ab33e1677df",
+      "text": "W5 instance editable draft\nW5 保存与恢复笔记",
+      "inlineReferences": []
+    }
+  ]
+}

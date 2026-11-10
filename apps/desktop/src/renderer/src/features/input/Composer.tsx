@@ -2,8 +2,8 @@ import { displayName } from '../../lib/display-path'
 import { useEffect, useId, useRef, useState } from 'react'
 import { PASTED_ATTACHMENT_MAX_BYTES } from '@shared/ipc/session'
 import { FILES_LIMITS } from '@shared/tools/files'
-import { VIEW_NAMES } from '@shared/project/strings'
-import type { ViewId } from '@shared/project/types'
+import { titleForView } from '../workbench/use-view-title'
+import { useWorkbenches } from '../workbench/store'
 import type { DraftKey, SkillCatalogResult } from '@shared/session/types'
 import { cliName, draftId, FILE_REPLY_BLOCKED, replyBlockedByFiles, useSessions } from '../session/store'
 import { useProjectShell } from '../project/store'
@@ -23,6 +23,7 @@ import './composer.css'
 export interface ComposerProps { draftKey: DraftKey; active: boolean; originViewId?: string | null }
 export function Composer({ draftKey, active, originViewId = null }: ComposerProps) {
   const id = draftId(draftKey)
+  const workbenches = useWorkbenches(s => s.catalogs[draftKey.projectId])
   const draft = useSessions(s => s.drafts[id]), loading = useSessions(s => s.draftLoading[id])
   const session = useSessions(s => draftKey.kind === 'session' ? s.summaries[draftKey.sessionId] : undefined)
   const providers = useSessions(s => s.providers), pending = useSessions(s => s.pending), errors = useSessions(s => s.errors)
@@ -167,7 +168,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
         }}><i /><i /></span>}
       {suggestions.popup}
       {!!draft?.contextItems.some(context => !draft.inlineReferences?.some(ref => sameReference(ref.item, context))) && <div className="composer__tags">{draft.contextItems.map((context, index) => draft.inlineReferences?.some(ref => sameReference(ref.item, context)) ? null : <span className="composer__tag" key={`${context.type}:${index}`} title={context.type === 'file' || context.type === 'image' ? displayName(context.path) : context.type === 'upload' ? displayName(context.name) : undefined}>
-        <Icon name={context.type === 'view' ? 'preview' : context.type === 'skill' ? 'terminal' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? `当前 View · ${VIEW_NAMES[context.viewId as ViewId] ?? context.viewId}` : context.type === 'skill' ? `Skill · ${context.name}` : context.type === 'upload' ? `${context.image ? '图片 · ' : ''}${displayName(context.name)}` : `${context.type === 'image' ? '图片 · ' : ''}${displayName(context.path.split('/').at(-1) ?? context.path)}`}</span>
+        <Icon name={context.type === 'view' ? 'preview' : context.type === 'skill' ? 'terminal' : 'file'} size={12} /><span className="composer__tag-name">{context.type === 'view' ? `当前 View · ${titleForView(draftKey.projectId, context.viewId, workbenches)}` : context.type === 'skill' ? `Skill · ${context.name}` : context.type === 'upload' ? `${context.image ? '图片 · ' : ''}${displayName(context.name)}` : `${context.type === 'image' ? '图片 · ' : ''}${displayName(context.path.split('/').at(-1) ?? context.path)}`}</span>
         <button aria-label={`移除上下文 ${context.type === 'view' ? context.viewId : context.type === 'skill' || context.type === 'upload' ? context.name : displayName(context.path)}`} onClick={() => useSessions.getState().updateDraft(draftKey, { contextItems: draft.contextItems.filter((_, itemIndex) => itemIndex !== index) })}><Icon name="close" size={10} /></button>
       </span>)}</div>}
       <ReferenceText key={id} projectId={draftKey.projectId} cli={cli} text={text} references={draft?.inlineReferences ?? []} input={input} attributes={suggestions.attributes}
@@ -210,7 +211,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
           {originViewId && !draft?.contextItems.some(item => item.type === 'view' && item.viewId === originViewId) && <><div className="composer__menu-heading">Project View</div><button className="menu-item" onClick={() => {
             const current = useSessions.getState().drafts[id]
             if (current) useSessions.getState().updateDraft(draftKey, { contextItems: [...current.contextItems, { type: 'view', viewId: originViewId }] })
-          }}><Icon name="preview" />当前 View · {VIEW_NAMES[originViewId as ViewId] ?? originViewId}</button></>}
+          }}><Icon name="preview" />当前 View · {titleForView(draftKey.projectId, originViewId, workbenches)}</button></>}
           <div className="composer__menu-heading">Skills</div>
           {cli !== 'codex' ? <p className="composer__menu-empty">当前 CLI 未提供 Skill 目录</p> : <>
             {skillsLoading && <p className="composer__menu-empty" role="status">正在读取…</p>}

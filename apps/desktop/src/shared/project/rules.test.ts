@@ -29,6 +29,14 @@ describe('shell state rules · FR-PROJ/NAV · AC-01', () => {
     expect(enterViewFromNav(ui, 'architecture')).toBeNull()
     ui = applyUiStatePatch(ui, toggleRightSidebar(ui)); expect(ui.viewRightArea).toBe('terminal')
   })
+  it('restores workbench instance and editor routes without changing builtin navigation', () => {
+    for (const viewId of ['workbench:instance-123', 'workbench-draft:draft-456'] as const) {
+      const ui = applyUiStatePatch(defaultUiState(), enterViewFromNav(defaultUiState(), viewId)!)
+      expect(normalizeUiState(JSON.parse(JSON.stringify(ui))).mainCanvas).toEqual({ mode: 'view', viewId, conversation: { kind: 'draft' } })
+      expect(parseUiStatePatch({ mainCanvas: ui.mainCanvas })).toEqual({ mainCanvas: ui.mainCanvas })
+    }
+    expect(() => parseUiStatePatch({ mainCanvas: { mode: 'view', viewId: 'workbench:../other', conversation: { kind: 'draft' } } })).toThrow()
+  })
   it('compresses effective widths without changing saved widths', () => {
     const preferred = 560
     expect(effectiveConversationWidth(1024 - 248, preferred)).toBe(376)

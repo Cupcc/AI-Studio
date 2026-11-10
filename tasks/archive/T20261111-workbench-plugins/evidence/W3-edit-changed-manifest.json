@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "workbench-2322b819-6b4d-40eb-925c-735a9c9b58b9",
+  "version": "1.0.1",
+  "sdkVersion": 1,
+  "title": "W3 编辑后的随手记",
+  "entry": "index.html",
+  "capabilities": [
+    "state.read",
+    "state.write",
+    "conversation.draft"
+  ]
+}

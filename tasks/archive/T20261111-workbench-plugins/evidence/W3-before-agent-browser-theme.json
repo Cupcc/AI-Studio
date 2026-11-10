@@ -1,0 +1,20 @@
+{
+  "native": {
+    "themeSource": "dark",
+    "shouldUseDarkColors": true
+  },
+  "media": [
+    {
+      "url": "app://studio/index.html",
+      "title": "AI Developer Studio",
+      "dark": true,
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "url": "",
+      "title": "W3 阅读进度",
+      "dark": true,
+      "background": "rgb(32, 37, 31)"
+    }
+  ]
+}

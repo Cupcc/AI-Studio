@@ -8,8 +8,8 @@
 | 文档职责 | 记录 DeepSeek Harness 的源码事实、复用价值与调查边界；AI Studio 的确认依据见 [09](<../../09. Workbench Discussion.md>)，详细行为由[工作台规格](../../../specs/workbench/spec.md)维护 |
 | 调研日期 | 2026-11-10 |
 | 源码基线 | 官方仓库 `deepseek-ai/deepseek-harness`，commit `fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159` |
-| 调查方式 | 阅读固定版本的官方文档、入口源码、包声明与出货的 Creator skill；未安装依赖、启动 Harness、生成或安装插件，也未执行上游测试 |
-| 需求来源 | 2026-11-10 用户对话：调查 Harness 左侧入口、自定义插件与 AI 创建流程，落稿至本地 references，并更新工作台讨论稿 |
+| 调查方式 | 阅读固定版本的官方文档、入口源码、包声明与出货的 Creator skill；补充核对官方产品页的 Creator Mode 演示与预设配置。未安装依赖、启动 Harness、生成或安装插件，也未执行上游测试 |
+| 需求来源 | 2026-11-10 用户对话：调查 Harness 左侧入口、自定义插件与 AI 创建流程；随后要求专项调研 Creator Mode，以 AI 创造插件的方式供工作台后续参考，并写入 09 |
 
 ## 1. 调查结论与范围
 
@@ -33,6 +33,14 @@ Harness 已提供一条明确的扩展路径：插件包声明浏览器入口，
 
 ## 3. 来源事实：用户通过 Creator 创建插件
 
+### Creator Mode 的官方定位与组成
+
+2026-11-10 核对的[官方产品页][product-page]明确介绍通过 Creator Mode 对话创建插件，以扩展工具、技能和界面。页面用悬浮番茄钟展示加载开发 skill、查询运行时 slot、写包文件、安装、修改和验证的过程。这是官方演示，不能据此推定任意插件都能一次生成成功或达到演示耗时。
+
+固定源码基线中的 `cordis` Agent preset 组合了普通文件与 Shell 工具、`tool-cordis` 查询工具、开发 skills，以及仅在存在 profile context 时启用的 Plugin Manager 工具。可将其理解为面向宿主扩展开发的一组 Agent 能力配置；这是一项配置层面的判断，不是独立模型能力的证据。[Creator 预设][creator-preset]
+
+开发知识通过 `skill-filesystem` 挂载，短流程按需引用包说明、UI 编写指南、验证指南和可复制模板。查询工具可读取当前服务、事件、工具、配置 Schema、Client Slots 与主题信息；它们只提供信息，不调用业务方法，也不承担安装。浏览器侧查询依赖已连接页面。[开发资料组织][preset-skills]；[运行时查询][inspect]
+
 ### 创建入口先准备会话草稿
 
 用户打开左侧导航下的 **More**，选择 **Create your plugin**。会话视图和右侧工具区也有同类入口，各自填入不同的简短提示语。左侧入口的中文提示语是“创建一个带左侧栏入口的 DSH 插件。”[入口说明][create-doc]；[提示语][create-copy]
@@ -51,6 +59,14 @@ Harness 已提供一条明确的扩展路径：插件包声明浏览器入口，
 4. 检查结果中的 `application` 与 `warnings`，再核对运行时注册、实际能力和用户可见页面。安装成功或 slot 注册成功都不足以证明 UI 可用。
 
 Creator 提供只读运行时查询，浏览器侧查询需要连接的页面。实际修改 profile 由 Plugin Manager 负责。其工具在非 Full access 环境下需要调用批准，依赖构建脚本还有单独的批准机制；这些是上游执行限制，本次没有触发这些操作。[运行时查询][inspect]；[管理工具权限][host-manager]；[依赖构建脚本][build-approval]
+
+### 预览、反馈与继续修改
+
+Creator skill 要求先完成可工作的最小插件，以安装后的真实插件作为首次预览，再修复观察到的问题；独立 HTML 或模拟宿主页面不算完成宿主插件交付。其安装目标是当前 profile，变更可跨重启保留并影响该 profile 的会话。因此，上游流程不能直接等同于 AI Studio 的“草稿预览后添加至 Project”。[Creator 工作流程][creator-skill]
+
+验证指南要求观察实际页面、控制台错误及主题表现；无法控制浏览器时，应说明仅完成语法、清单与运行时注册检查，不能宣称视觉验证通过。[验证指南][creator-verification]
+
+对于插件中的应用数据与配置操作，上游编写指南还要求 UI 与 Agent 工具调用同一 Host 业务方法，返回一致的结果或失败原因；纯视图操作无需全部工具化，授权确认类操作保留给用户。这让生成的插件既可点击使用，也可继续由对话操作；是否满足该约定仍需逐个插件验证。[UI 与 Agent 操作约定][creator-actions]
 
 ## 4. 来源事实：包与宿主的职责
 
@@ -86,7 +102,7 @@ Creator 提供只读运行时查询，浏览器侧查询需要连接的页面。
 
 ## 6. 我们的判断：哪些做法值得参考
 
-以下是基于上述源码的适配判断，不是上游承诺，也不新增 AI Studio 的已确认需求。AI Studio 的详细行为由[工作台规格](../../../specs/workbench/spec.md)维护，原型范围由[路线图 §4.2](<../../06. Development Roadmap.md#42-自定义工作台原型>)维护。
+以下是基于上述源码的适配判断，不是上游承诺，也不新增 AI Studio 的已确认需求。AI Studio 的详细行为由[工作台规格](../../../specs/workbench/spec.md)维护，阶段范围由[路线图 §4.2](<../../06. Development Roadmap.md#42-插件架构与工作台建设>)维护。
 
 | AI Studio 相关模块 | 可参考的做法与收益 | 适配成本或限制 |
 |---|---|---|
@@ -102,11 +118,18 @@ Creator 提供只读运行时查询，浏览器侧查询需要连接的页面。
 
 ## 7. 后续调查
 
+当前推进顺序按用户 2026-11-11 的[插件架构先行决定](<../../09. Workbench Discussion.md#1-已确认方向>)执行。以下实机比较是按需参考，不是架构设计或插件机制建设的前置条件；本轮源码调查的日期与证据边界保持原样。
+
 本轮已回答左侧入口到面板、Creator 草稿入口、包声明和生命周期职责。下一轮如需评估真实体验，应在隔离的测试 profile 中走通创建、检查草稿、生成、安装、打开、停用、再启用与卸载，并观察缺少 Workspace、加载失败、断线和版本变化。这些步骤尚未执行，不能列为通过。
 
 调查提供源码参考，不代替本产品的权限、分发或兼容性决定。已确认方向见 [09](<../../09. Workbench Discussion.md>)，后续技术核实与产品细节见[工作台规格 §1](../../../specs/workbench/spec.md#1-职责与后续事项)；其他项目的调查顺序见[参考项目索引](../README.md#建议先展开的调查)。
 
 [project]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/README.md#L5-L15
+[product-page]: https://www.deepseek.com/en/harness/
+[creator-preset]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/packages/bundle/web-app/presets/cordis.patch.yml
+[preset-skills]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/packages/preset/agent-preset/README.md#L50
+[creator-verification]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/packages/preset/agent-preset/skills/cordis-plugin-development/references/verification.md
+[creator-actions]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/packages/preset/agent-preset/skills/cordis-plugin-development/references/user-actions.md
 [sidebar-contract]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/packages/client/ui-sidebar/README.md#L40-L44
 [manager-entry]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/packages/client/ui-plugin-manager/src/client/index.ts#L106-L174
 [sidebar-code]: https://github.com/deepseek-ai/deepseek-harness/blob/fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159/packages/client/ui-sidebar/src/client/index.ts#L53-L92

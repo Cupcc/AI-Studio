@@ -9,7 +9,9 @@ import { sessionContract, SESSION_MESSAGE_MAX_LENGTH, SESSION_TITLE_MAX_LENGTH, 
 import type { ComposerDraft, ContextItem, DraftKey, SessionCli } from '@shared/session/types'
 import { FILES_LIMITS, parseProjectPath, type FileReferenceResolver } from '@shared/tools/files'
 import { SESSION_CLIS } from '@shared/session/types'
-import { catalogEntry } from '@shared/project-view/defaults'
+import { isViewId } from '@shared/project/ui-state'
+import { isWorkbenchViewId } from '@shared/workbench/types'
+import { workbenchesFor } from '../services/workbench'
 import { projectViewsFor } from '../services/project-view'
 import type { CoreServices } from '../services/core'
 import { projectShellFor } from '../services/project'
@@ -85,7 +87,7 @@ function draftKey(raw: unknown): DraftKey {
   if (value.kind === 'new_chat') {
     expectOnlyKeys(value, ['kind', 'projectId', 'viewId'])
     const viewId = value.viewId === undefined ? undefined : id(value.viewId, 'viewId')
-    if (viewId) catalogEntry(viewId)
+    if (viewId && !isViewId(viewId)) throw new IpcValidationError('Invalid viewId')
     return { kind: 'new_chat', projectId, ...(viewId ? { viewId } : {}) }
   }
   if (value.kind === 'session') {
@@ -171,7 +173,9 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     summaryChanged: change => core.broadcast(sessionContract.events.summaryChanged, change),
     transcriptChanged: change => core.broadcast(sessionContract.events.transcriptChanged, change),
     providersChanged: providers => core.broadcast(sessionContract.events.providersChanged, providers),
-    buildViewContext: (projectId, viewId) => projectViewsFor(core).buildContext(projectId, viewId, true),
+    buildViewContext: (projectId, viewId) => isWorkbenchViewId(viewId)
+      ? workbenchesFor(core).buildContext(projectId, viewId)
+      : projectViewsFor(core).buildContext(projectId, viewId, true),
     turnEnded: projectId => { void projectViewsFor(core).refresh(projectId) }
   })
   pasted.start()

@@ -1,0 +1,315 @@
+{
+  "scope": "Original direct regression set; latest applicable result by test title, not sum of all executions",
+  "runs": [
+    {
+      "file": "W0-e2e-regression-initial.log",
+      "passed": 41,
+      "failed": 14
+    },
+    {
+      "file": "W0-e2e-recheck.log",
+      "passed": 4,
+      "failed": 1
+    },
+    {
+      "file": "W0-workbench-delivery-e2e.log",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "file": "W0-e2e-unlocked.log",
+      "passed": 11,
+      "failed": 1
+    },
+    {
+      "file": "W0-e2e-caret.log",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "file": "W0-e2e-caret-regression.log",
+      "passed": 13,
+      "failed": 0
+    }
+  ],
+  "originalTestCount": 55,
+  "originalLatestPassed": 55,
+  "originalUnresolved": [],
+  "tests": [
+    {
+      "test": "e2e/alignment.spec.ts › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › glass appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440",
+      "status": "passed",
+      "source": "W0-e2e-recheck.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › solid appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440",
+      "status": "passed",
+      "source": "W0-e2e-recheck.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/alignment.spec.ts › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/app.spec.ts › new windows and foreign navigation are denied",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/app.spec.ts › opens one window with the shell spec sizes",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/app.spec.ts › renderer has no Node.js, require or raw ipcRenderer",
+      "status": "passed",
+      "source": "W0-e2e-recheck.log"
+    },
+    {
+      "test": "e2e/app.spec.ts › renders from app://studio with a draggable 40px top bar",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/app.spec.ts › smoke mode: SQLite, node-pty and login env work in the Electron main process",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/app.spec.ts › typed preload API works and main validates input",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/cli-default.spec.ts › CLI header action stays fixed with a long list in both themes and colour modes",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/cli-default.spec.ts › available CLI works in a second Project without selection; global preference survives restart",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/cli-default.spec.ts › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/cli-default.spec.ts › unavailable CLI links directly to settings; recheck restores sending without clearing draft",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/composer.spec.ts › Ultra uses a static gradient that follows the theme palette without replaying selection feedback",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/composer.spec.ts › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/composer.spec.ts › five static effort bars; max / ultra ignite only on selection, across four appearances and reduced motion",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/composer.spec.ts › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/files.spec.ts › FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through the simulated Provider, keep input on failure",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/files.spec.ts › FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, special names and failure states",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/project-view.spec.ts › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/project-view.spec.ts › removed View label sends without creating helpers, and each View has an independent draft",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/project.spec.ts › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/project.spec.ts › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/project.spec.ts › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/runtime-tools.spec.ts › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/runtime-tools.spec.ts › FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, mailto choice, menu, shared persistent data",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/runtime-tools.spec.ts › FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolation, final empty state and Project confirmation",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/session.spec.ts › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID",
+      "status": "passed",
+      "source": "W0-e2e-unlocked.log"
+    },
+    {
+      "test": "e2e/settings.spec.ts › FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one dialog; ×, Esc and outside close it",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/settings.spec.ts › FR-SET-002 · AC-08: \"Reduce transparency\" shows solid with a note, and glass returns when it is off",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/settings.spec.ts › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; \"none\" leaves the material",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/settings.spec.ts › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/settings.spec.ts › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/settings.spec.ts › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode",
+      "status": "passed",
+      "source": "W0-e2e-regression-initial.log"
+    },
+    {
+      "test": "e2e/workbench.spec.ts › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/workbench.spec.ts › AC-WB mechanism: refuses to apply files changed after the displayed preview",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    },
+    {
+      "test": "e2e/workbench.spec.ts › AC-WB mechanism: template, state, navigation, disable/reopen and restart",
+      "status": "passed",
+      "source": "W0-e2e-caret-regression.log"
+    }
+  ]
+}

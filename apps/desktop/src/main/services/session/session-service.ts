@@ -9,7 +9,8 @@ import { SESSION_MESSAGE_MAX_LENGTH, TRANSCRIPT_PAGE_SIZE } from '@shared/ipc/se
 import type { ProjectService } from '../project/project-service'
 import type { MainSessionPort } from '../project/session-port'
 import { SessionStore } from './store'
-import { VIEW_CATALOG, type ViewContext } from '@shared/project-view/types'
+import type { ViewContext } from '@shared/project-view/types'
+import { isViewId } from '@shared/project/ui-state'
 import type { FileReferenceResolver, ProjectPath, ResolvedFileReference } from '@shared/tools/files'
 import { buildUserInput, describeFileReferenceFailures, FILE_REFERENCE_STRATEGY } from './file-reference'
 import type { TurnDiffRecord } from '@shared/tools/turn-diff'
@@ -223,7 +224,7 @@ export class SessionService implements MainSessionPort {
     await this.resolveSkills(request.projectId, request.cli, request)
     await this.resolvePastedAttachments(request.projectId, request.cli, request)
     if (!this.enabledClis.has(request.cli)) throw new Error('CLI 未启用，请在 CLI 设置中启用')
-    const attach = !!request.originViewId && request.viewContextAttached === true && VIEW_CATALOG.some(view => view.id === request.originViewId)
+    const attach = !!request.originViewId && request.viewContextAttached === true && isViewId(request.originViewId)
     const viewContext = attach ? this.options.buildViewContext?.(request.projectId, request.originViewId!) : undefined
     const at = this.now()
     const summary: SessionSummary = {

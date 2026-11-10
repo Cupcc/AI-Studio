@@ -1,0 +1,11 @@
+{
+  "ready": true,
+  "starts": 2,
+  "port": 9475,
+  "fixture": "/var/folders/r2/57zjr6v53n7c_hg3nfj1sdy00000gn/T/studio-w5-workbench-cFkzaV",
+  "project": "/var/folders/r2/57zjr6v53n7c_hg3nfj1sdy00000gn/T/studio-w5-workbench-cFkzaV/W5 Workbench Project",
+  "userData": "/var/folders/r2/57zjr6v53n7c_hg3nfj1sdy00000gn/T/studio-w5-workbench-cFkzaV/user-data",
+  "providerMode": "simulated; no model messages sent",
+  "fixtureInjection": "test source files, native-directory-picker and window-size only",
+  "isPackaged": false
+}

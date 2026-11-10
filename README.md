@@ -1,6 +1,6 @@
 # AI Developer Studio
 
-以本地项目为中心的轻量桌面 AI 工作台：统一管理 Codex CLI、Claude Code 等 CLI Agent 的 Session，通过 Project View 理解项目状态，并支持面向开发与创作的自定义工作台方向。V1 首发 macOS。自定义工作台尚处于原型建设前，范围和进度见[路线图](<docs/06. Development Roadmap.md#42-自定义工作台原型>)。
+以本地项目为中心的轻量桌面 AI 工作台：统一管理 Codex CLI、Claude Code 等 CLI Agent 的 Session，通过 Project View 理解项目状态，并支持面向开发与创作的自定义工作台方向。V1 首发 macOS。最小工作台插件机制已实现，技术验收与剩余检查见[路线图](<docs/06. Development Roadmap.md#42-插件架构与工作台建设>)。
 
 产品定位、V1 目标与核心概念见 [01. 产品定义](<docs/01. Product Definition.md>)；当前阶段、进度和下一步见 [06. V1 建设计划与进度](<docs/06. Development Roadmap.md>)。
 

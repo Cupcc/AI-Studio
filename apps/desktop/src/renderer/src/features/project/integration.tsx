@@ -24,6 +24,7 @@ export interface ShellIntegration {
   openTurnDiff?(ref: TurnDiffRef): void
   toolSelected?(projectId: string, area: RightArea): void
   session: RendererSessionPort
+  Workbenches?: ComponentType<ShellSlotProps>
   SessionHistory?: ComponentType<ShellSlotProps>
   Conversation?: ComponentType<ShellSlotProps>
   ConversationHeader?: ComponentType<ShellSlotProps>

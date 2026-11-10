@@ -11,12 +11,16 @@ const available = [
   `${d}src/renderer/src/features/tools/files/files-store.test.ts`,
   `${d}src/main/services/files/references.test.ts`,
   `${d}src/main/services/session/service.test.ts`,
+  `${d}src/main/services/workbench/workbench-service.test.ts`,
+  `${d}src/renderer/src/features/workbench/workbench.test.tsx`,
+  `${d}src/main/security/hardening.test.ts`,
+  `${d}electron.vite.config.ts`,
   `${d}src/preload/bridge.test.ts`, `${d}src/shared/ipc/contract.test.ts`,
   `${d}src/renderer/src/features/session/session.test.tsx`,
   `${d}src/renderer/src/features/tools/terminal-panel.test.tsx`,
   `${d}src/renderer/src/features/settings/settings.test.tsx`,
   ...['files', 'session', 'cli-default', 'composer', 'app', 'alignment', 'runtime-tools', 'settings',
-    'project', 'project-view', 'diff', 'turn-diff', 'vscode-parity', 'claude-effort'].map(name => `${d}e2e/${name}.spec.ts`),
+    'project', 'project-view', 'workbench', 'diff', 'turn-diff', 'vscode-parity', 'claude-effort'].map(name => `${d}e2e/${name}.spec.ts`),
   `${a}src/codex/driver.ts`, `${a}test/codex/driver.test.ts`,
   `${a}test/claude/driver.test.ts`, `${a}test/codex/real.integration.test.ts`
 ]
@@ -105,4 +109,27 @@ test('automatic workflow cannot run full checks or package', () => {
     }
   }
   expect(workflow).toContain('node scripts/check-affected.mjs --base "$CHECK_BASE" --head HEAD --ci')
+})
+
+
+test('workbench IPC selects its host, UI, bridge and focused E2E', () => {
+  const result = plan([`${d}src/shared/ipc/workbench.ts`])
+  expect(result.unknown).toEqual([])
+  expect(commandText(result)).toContain('workbench-service.test.ts')
+  expect(commandText(result)).toContain('workbench.test.tsx')
+  expect(commandText(result)).toContain('bridge.test.ts')
+  expect(result.e2e).toEqual(['e2e/workbench.spec.ts'])
+})
+test('plugin assets and navigation keep the workbench regression selected', () => {
+  for (const path of ['src/shared/workbench/resources/template.ts', 'src/renderer/src/features/navigation/Navigation.tsx']) {
+    const result = plan([`${d}${path}`])
+    expect(result.unknown).toEqual([])
+    expect(result.e2e).toContain('e2e/workbench.spec.ts')
+  }
+})
+test('desktop build/CSP changes verify protocol and iframe consumers', () => {
+  const result = plan([`${d}electron.vite.config.ts`])
+  expect(result.unknown).toEqual([])
+  expect(commandText(result)).toContain('hardening.test.ts')
+  expect(result.e2e).toEqual(['e2e/app.spec.ts', 'e2e/runtime-tools.spec.ts', 'e2e/workbench.spec.ts'])
 })

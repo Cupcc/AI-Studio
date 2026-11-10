@@ -19,6 +19,15 @@ export function useSuggestions({ draftKey, text, input, active, cli, skills, loa
   const [files, setFiles] = useState<Candidate[]>([]), [loading, setLoading] = useState(false), [error, setError] = useState<string | null>(null)
   const [truncated, setTruncated] = useState(false), [room, setRoom] = useState(300), request = useRef(0), listId = useId(), id = draftId(draftKey)
   const browsing = useRef<{ start: number; before: string } | null>(null)
+  const pendingSelection = useRef<{ draftId: string; cli: string | null; text: string; caret: number } | null>(null)
+  useLayoutEffect(() => {
+    const pending = pendingSelection.current
+    if (!pending) return
+    pendingSelection.current = null
+    const editor = input.current
+    if (!active || pending.draftId !== id || pending.cli !== cli || pending.text !== text || editor?.value !== text) return
+    editor.focus(); editor.setSelectionRange(pending.caret, pending.caret)
+  }, [id, cli, text, inlineReferences, active, input])
   const prefix = text.slice(0, caret), anchor = browsing.current
   // Retain a directory chosen from the list even when its real name contains spaces.
   const inDirectory = anchor && text.slice(0, anchor.start) === anchor.before && prefix[anchor.start] === '@' && caret > anchor.start && !prefix.slice(anchor.start).includes('\n')
@@ -67,8 +76,8 @@ export function useSuggestions({ draftKey, text, input, active, cli, skills, loa
     if (item.kind === 'directory') {
       browsing.current = { start, before }
       const next = `${before}@${item.id}/${after}`, nextCaret = before.length + item.id.length + 2
+      pendingSelection.current = { draftId: id, cli, text: next, caret: nextCaret }
       useSessions.getState().updateDraft(draftKey, { text: next }); setCaret(nextCaret)
-      requestAnimationFrame(() => { input.current?.focus(); input.current?.setSelectionRange(nextCaret, nextCaret) })
       return
     }
     const ticket = ++request.current
@@ -89,9 +98,9 @@ export function useSuggestions({ draftKey, text, input, active, cli, skills, loa
     if (next.length > SESSION_MESSAGE_MAX_LENGTH) { report('引用超过消息长度限制。'); return }
     const { kept, removed } = editInlineReferences(text, next, current.inlineReferences ?? [])
     const items = current.contextItems.filter(tag => !removed.some(ref => sameReference(ref.item, tag)) || kept.some(ref => sameReference(ref.item, tag)) || sameReference(tag, context))
+    pendingSelection.current = { draftId: id, cli, text: next, caret: nextCaret }
     useSessions.getState().updateDraft(draftKey, { text: next, contextItems: duplicate ? items : [...items, context], inlineReferences: [...kept, { start: before.length, end: nextCaret, item: context }].sort((a, b) => a.start - b.start) })
     browsing.current = null; setDismissed(`${id}:${nextCaret}:${next}`); setCaret(nextCaret); report(null)
-    requestAnimationFrame(() => { input.current?.focus(); input.current?.setSelectionRange(nextCaret, nextCaret) })
   }
   function onKeyDown(event: KeyboardEvent<HTMLElement>): boolean {
     if (!open || event.nativeEvent.isComposing || event.keyCode === 229) return false

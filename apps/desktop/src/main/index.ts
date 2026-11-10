@@ -20,6 +20,7 @@ import {
   registerAppScheme
 } from './security/hardening'
 import { createCoreServices, type CoreServices } from './services/core'
+import { workbenchesFor } from './services/workbench'
 import { runNativeSmoke, writeSmokeReport } from './smoke/native-smoke'
 import { runRendererSmoke } from './smoke/renderer-smoke'
 import { createMainWindow } from './window/main-window'
@@ -91,7 +92,6 @@ async function startRuntime(): Promise<void> {
   await writeFile(join(app.getPath('userData'), 'runtime-recovery.json'), JSON.stringify(recovery), { mode: 0o600 })
   for (const item of recovery) if (item.status === 'unconfirmed') console.error('[runtime-recovery]', item)
   installPermissionPolicy(rendererOrigin)
-  handleAppProtocol(join(__dirname, '../renderer'))
   core = createCoreServices({
     userDataDir: app.getPath('userData'),
     appInfo,
@@ -99,6 +99,8 @@ async function startRuntime(): Promise<void> {
       for (const win of BrowserWindow.getAllWindows()) emit(win.webContents, channel, payload)
     }
   })
+  const workbench = workbenchesFor(core)
+  handleAppProtocol(join(__dirname, '../renderer'), request => workbench.handleRequest(request))
   const providers = !app.isPackaged && process.env.STUDIO_E2E_PROVIDERS === '1'
     ? createE2eProviders()
     : launch.smokeOutput ? [] : undefined

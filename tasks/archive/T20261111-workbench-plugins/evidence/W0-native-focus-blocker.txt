@@ -1,0 +1,7 @@
+2026-11-11 macOS native-focus preflight
+Electron test window: visible=true, minimized=false, active=false, focused=false.
+NSRunningApplication.activateWithOptions(3) returned true, but active/focused remained false.
+NSWorkspace frontmost application was loginwindow, not the test Electron process.
+ioreg reported CGSSessionScreenIsLocked=Yes.
+The 11 session.spec.ts tests failed before user scenarios, at focusWindow() line 30.
+No native-focus assertion was removed, mocked, or treated as passing. User was asked to unlock.

@@ -1,12 +1,15 @@
 // Project shell data shapes shared by main and renderer
 // (specs/project/spec.md §3; specs/navigation/spec.md §3).
 
+import type { WorkbenchViewId } from '../workbench/types'
+
 export type ProjectId = string
 export type SessionId = string
 
-/** Built-in Project Views (FR-NAV-002); custom views (FR-VIEW-002, P1) will extend this. */
+/** Default entries stay fixed; custom pages use instance or editor identities. */
 export const DEFAULT_VIEW_IDS = ['overview', 'progress', 'architecture', 'agent-team', 'business-flow'] as const
-export type ViewId = (typeof DEFAULT_VIEW_IDS)[number]
+export type BuiltinViewId = (typeof DEFAULT_VIEW_IDS)[number]
+export type ViewId = BuiltinViewId | WorkbenchViewId
 
 // Search joined as the fifth tool, after Files (FR-TOOL-005, DEC-25). A saved `lastTool` from older versions stays valid.
 export const TOOL_IDS = ['files', 'search', 'diff', 'browser', 'terminal'] as const

@@ -34,6 +34,7 @@ export function Navigation(props: ShellSlotProps) {
         aria-current={canvas.mode === 'view' && canvas.viewId === id ? 'page' : undefined}
         onKeyDown={(event) => move(event, i)} onFocus={() => setFocusIndex(i)} onClick={() => shell.enterView(project.id, id)}><Icon name={id} /><span>{VIEW_NAMES[id]}</span></button>)}
     </div>
+    {slots.Workbenches && <slots.Workbenches {...props} />}
     <div className="navigation__divider" />
     <h2 className="navigation__heading">{S.sessions}</h2>
     <div className="navigation__sessions" data-testid={`sessions-${project.id}`}>

@@ -1,0 +1,21 @@
+$ playwright test composer.spec.ts files.spec.ts cli-default.spec.ts workbench.spec.ts
+
+Running 13 tests using 1 worker
+
+(node:42805) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/cli-default.spec.ts:23:5 › available CLI works in a second Project without selection; global preference survives restart (1.9s)
+  ✓   2 e2e/cli-default.spec.ts:42:5 › unavailable CLI links directly to settings; recheck restores sending without clearing draft (734ms)
+  ✓   3 e2e/cli-default.spec.ts:63:5 › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors (1.5s)
+  ✓   4 e2e/cli-default.spec.ts:99:5 › CLI header action stays fixed with a long list in both themes and colour modes (2.2s)
+  ✓   5 e2e/composer.spec.ts:52:5 › five static effort bars; max / ultra ignite only on selection, across four appearances and reduced motion (18.1s)
+  ✓   6 e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette (1.9s)
+  ✓   7 e2e/composer.spec.ts:147:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback (3.6s)
+  ✓   8 e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (2.1s)
+  ✓   9 e2e/files.spec.ts:45:5 › FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, special names and failure states (4.9s)
+  ✓  10 e2e/files.spec.ts:130:5 › FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through the simulated Provider, keep input on failure (4.9s)
+  ✓  11 e2e/workbench.spec.ts:32:5 › AC-WB mechanism: template, state, navigation, disable/reopen and restart (2.3s)
+  ✓  12 e2e/workbench.spec.ts:62:5 › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance (1.4s)
+  ✓  13 e2e/workbench.spec.ts:99:5 › AC-WB mechanism: refuses to apply files changed after the displayed preview (983ms)
+
+  13 passed (46.8s)

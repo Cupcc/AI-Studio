@@ -1,0 +1,49 @@
+$ playwright test session.spec.ts composer.spec.ts:194
+
+Running 12 tests using 1 worker
+
+(node:31185) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   1 e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (31.5s)
+(node:31676) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   2 e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (4.1s)
+  ✓   3 e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser (2.5s)
+  ✓   4 e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (1.8s)
+  ✓   5 e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (3.6s)
+  ✓   6 e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (3.5s)
+  ✓   7 e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (3.9s)
+  ✓   8 e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (3.2s)
+  ✓   9 e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (1.2s)
+  ✓  10 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (3.3s)
+  ✓  11 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (2.8s)
+  ✓  12 e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (4.6s)
+
+
+  1) e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping 
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.project-workspace:not([hidden])').getByRole('option', { name: /source files/ })
+
+
+      216 |   await input().press('End')
+      217 |   await input().pressSequentially(' @source')
+    > 218 |   await workspace().getByRole('option', { name: /source files/ }).click()
+          |                                                                   ^
+      219 |   await expect(input()).toHaveText('@src/app.ts @source files/')
+      220 |   await workspace().getByRole('option', { name: /entry.ts/ }).click()
+      221 |   await expect(input().locator('.composer__reference--file')).toHaveCount(2)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop/e2e/composer.spec.ts:218:67
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/composer-v06-real-file-can-bea24-h-boundary-and-Add-grouping/error-context.md
+
+  1 failed
+    e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping 
+  11 passed (1.1m)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/workbench-plugins/apps/desktop
+

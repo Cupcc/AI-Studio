@@ -12,7 +12,8 @@ const unit = /\.test\.[cm]?[jt]sx?$/
 const domains = {
   files: ['files', 'composer'], input: ['composer', 'files', 'cli-default'],
   session: ['session', 'composer', 'cli-default'], chat: ['composer', 'cli-default'],
-  project: ['project', 'app'], 'project-view': ['project-view'], settings: ['settings'],
+  project: ['project', 'app', 'workbench'], 'project-view': ['project-view', 'workbench'], settings: ['settings'],
+  workbench: ['workbench'], navigation: ['project', 'workbench', 'alignment'],
   diff: ['diff', 'turn-diff'], 'turn-diff': ['turn-diff'],
   code: ['files', 'diff', 'vscode-parity'], search: ['files'], 'quick-open': ['files'],
   browser: ['runtime-tools'], terminal: ['runtime-tools'], pty: ['runtime-tools'],
@@ -70,6 +71,14 @@ export function affectedPlan(files, available) {
       types.add('node'); types.add('web')
       addDomain('session')
       if (provider === 'claude') e2e.add('e2e/claude-effort.spec.ts')
+      continue
+    }
+    if (file === `${desktop}electron.vite.config.ts`) {
+      types.add('node'); types.add('web')
+      seeds.desktop.add(file)
+      addDomain('workbench')
+      addTests('desktop', test => /src\/main\/security\/.*\.test\.ts$/.test(test))
+      e2e.add('e2e/app.spec.ts'); e2e.add('e2e/runtime-tools.spec.ts')
       continue
     }
     if (file.startsWith(`${desktop}e2e/`)) {

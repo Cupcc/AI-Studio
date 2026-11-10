@@ -1,0 +1,40 @@
+- generic "W5 Workbench ProjectNew ChatCXPROJECT VIEWSOverviewProgressArchitectureAgent TeamBusiness Flow工作台SES" [ref=e1] clickable [onclick]
+  - button "折叠导航" [ref=e3]
+  - tab "W5 Workbench Project" [selected, ref=e15]
+  - button "关闭 W5 Workbench Project" [ref=e16]
+  - button "新建标签页" [ref=e4]
+  - button "右侧边栏" [ref=e5]
+  - button "New Chat" [ref=e17]
+  - button "选择 CLI" [expanded=false, ref=e18]
+  - heading "PROJECT VIEWS" [level=2, ref=e9]
+  - button "Overview" [ref=e19]
+  - button "Progress" [ref=e20]
+  - button "Architecture" [ref=e21]
+  - button "Agent Team" [ref=e22]
+  - button "Business Flow" [ref=e23]
+  - region "工作台" [ref=e10]
+    - heading "工作台" [level=2, ref=e24]
+    - button "添加工作台" [expanded=false, ref=e25]
+  - heading "SESSIONS" [level=2, ref=e11]
+  - button "New Chat" [ref=e12]
+  - button "设置" [ref=e13]
+  - region "Conversation" [ref=e14]
+    - heading "今天要在 W5 Workbench Project 中做什么？" [level=2, ref=e97]
+    - button "了解项目" [disabled, ref=e98]
+    - button "排查问题" [disabled, ref=e99]
+    - button "规划改动" [disabled, ref=e100]
+    - textbox "消息" [ref=e101]: @
+src/app.ts
+ 
+@
+source files/entry.ts
+ W5 continuous typing 
+@
+src/app.ts
+      - button "文件引用 src/app.ts" [ref=e106]
+      - button "文件引用 source files/entry.ts" [ref=e107]
+      - button "文件引用 src/app.ts" [ref=e108]
+    - button "Context / Attachment" [expanded=false, ref=e102]
+    - button "Reasoning Effort" [expanded=false, ref=e103]
+    - button "Model Selector" [expanded=false, ref=e104]
+    - button "Send" [ref=e105]

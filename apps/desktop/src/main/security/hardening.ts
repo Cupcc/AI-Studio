@@ -13,9 +13,10 @@ export function registerAppScheme(): void {
 }
 
 /** Serves files from the built renderer directory on app://studio/. */
-export function handleAppProtocol(rendererDir: string): void {
+export function handleAppProtocol(rendererDir: string, workbenchHandler?: (request: Request) => Promise<Response>): void {
   protocol.handle(APP_SCHEME, (request) => {
     const url = new URL(request.url)
+    if (url.host === 'workbench' && workbenchHandler) return workbenchHandler(request)
     if (url.host !== APP_HOST) return new Response('Not found', { status: 404 })
     const file = resolveAppAsset(rendererDir, url.pathname)
     if (!file) return new Response('Not found', { status: 404 })

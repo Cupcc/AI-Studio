@@ -1,0 +1,9 @@
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/workbench-plugins/apps/desktop
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  06:45:36
+   Duration  664ms (environment 53%, tests 18%, transform 17%, import 12%)
+
