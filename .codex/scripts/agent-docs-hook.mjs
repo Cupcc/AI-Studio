@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { execFileSync, spawnSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { mkdirSync, readFileSync, realpathSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -13,7 +13,7 @@ const review = '按 AGENTS.md「文档同步与收尾复核」追踪本次事实
 // --no-renames exposes both sides as add/delete, including moves out of docs.
 export function changedDocuments(root) {
   const status = execFileSync('git', ['--no-optional-locks', 'status', '--porcelain=v2',
-    '--branch', '-z', '--untracked-files=all', '--no-renames'], {
+    '-z', '--untracked-files=all', '--no-renames'], {
     cwd: root, encoding: 'utf8', timeout: 1500, maxBuffer: 2 * 1024 * 1024
   })
   const documents = {}
@@ -30,78 +30,42 @@ export function changedDocuments(root) {
       documents[file] = 'deleted'
     }
   }
-  // Include HEAD and changed path membership: link targets can be non-Markdown.
-  return { documents, key: hash(status + JSON.stringify(documents)) }
-}
-
-export function runLinkCheck(root, { timeout = 8000, script = path.join(repository, 'scripts/check-docs.mjs') } = {}) {
-  const result = spawnSync(process.execPath, [script], {
-    cwd: root, encoding: 'utf8', timeout, killSignal: 'SIGKILL', maxBuffer: 128 * 1024
-  })
-  const ok = !result.error && result.status === 0
-  const detail = result.error?.code === 'ETIMEDOUT' ? '链接检查超时，未完成。'
-    : result.error ? `链接检查未完成：${result.error.code}`
-      : `${result.stderr ?? ''}\n${result.stdout ?? ''}`.trim().slice(0, 1200)
-  return { ok, detail }
+  return documents
 }
 
 function context(message, event = 'PostToolUse') {
   return { hookSpecificOutput: { hookEventName: event, additionalContext: message } }
 }
 
-export function handleHook(input, { root = repository, check = runLinkCheck } = {}) {
+export function handleHook(input, { root = repository } = {}) {
   const event = input.hook_event_name
-  if (!['SessionStart', 'PostToolUse', 'Stop'].includes(event)) return {}
+  if (!['SessionStart', 'PostToolUse'].includes(event)) return {}
   // Never merge unrelated sessions into a fallback state file.
   if (typeof input.session_id !== 'string' || !input.session_id) throw new Error('Missing session_id')
   const directory = path.join(root, '.runtime/agent-docs-hook')
   const stateFile = path.join(directory, `${hash(input.session_id)}.json`)
-  let state = { documents: {}, key: '', pending: false, notified: false, baselined: false }
-  try { state = { ...state, ...JSON.parse(readFileSync(stateFile, 'utf8')) } } catch (error) {
+  let state = { documents: {}, notified: false, baselined: false }
+  try {
+    const saved = JSON.parse(readFileSync(stateFile, 'utf8'))
+    state = { documents: saved.documents, notified: saved.notified, baselined: saved.baselined }
+  } catch (error) {
     if (error.code !== 'ENOENT') throw error
   }
+  if (event === 'SessionStart' && state.baselined) return {}
   const previous = JSON.stringify(state)
   const current = changedDocuments(root)
   if (event === 'SessionStart') {
-    // Baseline existing worktree changes so a new session does not pay for a
-    // full link check unless it changes documentation itself.
-    if (!state.baselined) {
-      state.documents = current.documents
-      state.key = current.key
-      state.pending = false
-      state.notified = false
-      state.checkedKey = undefined
-      state.result = undefined
-      state.blockedTurn = undefined
-      state.baselined = true
-    }
-  } else if (JSON.stringify(state.documents) !== JSON.stringify(current.documents)) {
-    state.pending = true
+    state.documents = current
+    state.baselined = true
   }
-  state.documents = current.documents
-  state.key = current.key
   let output = {}
-  if (state.pending && event === 'PostToolUse' && !state.notified) {
-    const paths = Object.keys(current.documents).slice(0, 6).map(file => JSON.stringify(file)).join('、')
+  if (event === 'PostToolUse' && !state.notified && JSON.stringify(state.documents) !== JSON.stringify(current)) {
+    const paths = [...new Set([...Object.keys(state.documents), ...Object.keys(current)])]
+      .filter(file => state.documents[file] !== current[file]).slice(0, 6).map(file => JSON.stringify(file)).join('、')
     output = context(`检测到本会话中的文档工作树变化：${paths || '文档被还原或移除'}。${review}`)
     state.notified = true
   }
-  if (state.pending && event === 'Stop') {
-    if (state.checkedKey !== current.key) {
-      state.result = check(root)
-      state.checkedKey = current.key
-    }
-    if ((!state.notified || !state.result.ok) && !input.stop_hook_active
-      && (!input.turn_id || state.blockedTurn !== input.turn_id)) {
-      output = { decision: 'block', reason: `${state.result.ok ? '链接检查通过。' : '链接检查失败或未完成。'} ${state.result.detail}\n${review}\n请完成复核；如检查未完成且无法修复，在最终回复明确原因和影响，不报告为全部通过。相同版本不自动重跑检查，此 hook 最多要求一次续跑。` }
-      state.notified = true
-      state.blockedTurn = input.turn_id
-    } else {
-      // A Stop continuation must always be able to finish, even if checks fail.
-      state.pending = false
-      state.notified = false
-    }
-  }
+  state.documents = current
   if (JSON.stringify(state) !== previous) {
     mkdirSync(directory, { recursive: true })
     const temporary = `${stateFile}.${process.pid}.tmp`
@@ -112,10 +76,9 @@ export function handleHook(input, { root = repository, check = runLinkCheck } = 
 }
 
 export function hookFailure(input) {
-  const message = '文档 hook 检测或状态存储失败，不能视为复核通过。请按 AGENTS.md 手动复核并运行 pnpm check:docs；无法完成时在最终回复列明原因。'
+  const message = '文档变更提醒未完成。请按 AGENTS.md 手动复核文档；链接检查使用 pnpm check:docs。'
   if (input.hook_event_name === 'PostToolUse') return context(message)
   if (input.hook_event_name === 'SessionStart') return context(message, 'SessionStart')
-  if (input.hook_event_name === 'Stop' && !input.stop_hook_active) return { decision: 'block', reason: message }
   return {}
 }
 

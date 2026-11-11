@@ -16,7 +16,7 @@ created: 2026-10-10
 
 ## 目标
 
-2026-10-10 在对话中确认：Conversation 与 ChatGPT / Claude 桌面端保持一致，首条消息位于顶部，而不是贴在输入区上方。原型 v01 的 `.feed-in` 使用 `justify-content: flex-end`，桌面端按原型对齐时照搬为 `margin: auto auto 0`，导致内容不足一屏时整段对话贴底、上方留大片空白（对照 [T20261009-prototype-alignment 截图](../archive/T20261009-prototype-alignment/evidence/W3-session-sidebar-1280.png)）。
+2026-10-10 在对话中确认：Conversation 与 ChatGPT / Claude 桌面端保持一致，首条消息位于顶部，而不是贴在输入区上方。原型 v01 的 `.feed-in` 使用 `justify-content: flex-end`，桌面端按原型对齐时照搬为 `margin: auto auto 0`，导致内容不足一屏时整段对话贴底、上方留大片空白。
 
 其他向 ChatGPT / Claude 对齐的候选调整见 [research.md](research.md)，逐项确认后另行建任务。
 
@@ -28,7 +28,7 @@ created: 2026-10-10
   - e2e：短对话首条用户消息位于滚动区顶部。
 - 不做：
   - 打开 Session 定位到底部、流式跟随、“回到最新”（FR-SESSION-001；session spec 3.2 第 1～4 条），保持不变。
-  - Project View Mode 的 Conversation 列：尚未实现（[T20261009-project-view](../archive/T20261009-project-view/task.md)），实现时沿用同一规则。
+  - Project View Mode 的 Conversation 列沿用同一排布规则。
   - [research.md](research.md) 中的其他候选调整。
 
 ## 依据

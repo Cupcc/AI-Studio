@@ -2,11 +2,11 @@
 
 ## 1. 候选调整
 
-2026-10-10 整理。对照对象：ChatGPT macOS 桌面端、Claude 桌面端（Chat 模式；Code 模式与本产品最接近，一并参考）。当前状态取自本任务与 [T20261009-prototype-alignment](../archive/T20261009-prototype-alignment/evidence/) 的截图和代码。
+对照对象为 ChatGPT macOS 桌面端与 Claude 桌面端；本文保留布局与交互分析。
 
 参考产品的描述来自公开资料和使用经验，**尚未截图留档**；标“待核实”的条目在两款产品的不同版本间有变化，采用前应补截图到 `design/references/`（[references 索引](../../design/references/README.md)目前为空）。
 
-“冲突”列指与已确认内容不一致、需要人确认后改写对应文档的条目。A1、A2、B1 在交互原型 v02 中探索（[T20261010-prototype-v02](../archive/T20261010-prototype-v02/task.md)），2026-10-10 确认全部采用，见第 2 节。
+“冲突”列指与已确认内容不一致、需要人确认后改写对应文档的条目。A1、A2、B1 的采用结果见第 2 节。
 
 ### 1.1 对阅读体验影响大
 

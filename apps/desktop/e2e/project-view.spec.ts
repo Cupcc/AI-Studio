@@ -1,10 +1,11 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
 const appDir = join(__dirname, '..')
 let dir: string, projectPath: string, app: ElectronApplication, page: Page
 const workspace = () => page.locator('.project-workspace:not([hidden])')
+const preview = () => page.frameLocator('iframe[title="工作台页面"]')
 test.beforeEach(async () => {
   dir = mkdtempSync(join(tmpdir(), 'studio-project-view-')); projectPath = join(dir, 'Payment Project'); mkdirSync(projectPath)
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
@@ -15,20 +16,20 @@ test.beforeEach(async () => {
   }, projectPath)
   await page.getByRole('button', { name: '打开本地目录', exact: true }).click()
   await workspace().getByRole('button', { name: 'Architecture', exact: true }).click()
-  await expect(workspace().getByRole('button', { name: '生成 Architecture', exact: true })).toBeVisible()
+  await expect(preview().getByRole('button', { name: '生成 Architecture', exact: true })).toBeVisible()
 })
 test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
 test('AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart', async () => {
   expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
-  await workspace().getByRole('button', { name: '生成 Architecture', exact: true }).click()
+  await preview().getByRole('button', { name: '生成 Architecture', exact: true }).click()
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 Architecture/)
   expect(await workspace().locator('[data-session-row]').count()).toBe(0)
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('重新整理支付模块架构。')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
-  await expect(workspace().getByText('支付模块架构已整理', { exact: true })).toBeVisible()
-  await expect(workspace().getByRole('region', { name: 'Project View 对话', exact: true })).toBeVisible()
+  await expect(preview().getByText('支付模块架构已整理', { exact: true })).toBeVisible()
+  await expect(workspace().getByRole('region', { name: '工作台对话', exact: true })).toBeVisible()
   await expect(workspace().locator('.transcript-user')).toContainText('重新整理支付模块架构。')
-  await expect(workspace().locator('.transcript-user summary')).toHaveText('当前 View')
+  await expect(workspace().locator('.transcript-user summary')).toHaveText('当前工作台')
   await expect(workspace().locator('[data-session-row]')).toHaveCount(1)
   expect(readFileSync(join(projectPath, '.ai-studio/.gitignore'), 'utf8')).toBe('*\n')
   await workspace().getByRole('button', { name: '放大 Preview' }).click()
@@ -40,16 +41,16 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
   writeFileSync(path, JSON.stringify(valid))
   await expect(workspace().getByRole('region', { name: 'Files', exact: true })).toBeVisible()
   await workspace().getByRole('button', { name: '关闭右侧工具' }).click()
-  await expect(workspace().getByText('后台外部更新', { exact: true })).toBeVisible()
+  await expect(preview().getByText('后台外部更新', { exact: true })).toBeVisible()
   writeFileSync(path, '{"schemaVersion":')
-  await expect(workspace().getByRole('alert')).toContainText('无法更新此 View')
-  await expect(workspace().getByText('后台外部更新', { exact: true })).toBeVisible()
+  await expect(preview().getByRole('alert')).toContainText('无法更新此工作台')
+  await expect(preview().getByText('后台外部更新', { exact: true })).toBeVisible()
   valid.data.summary = '修复后恢复'; writeFileSync(path, JSON.stringify(valid))
-  await expect(workspace().getByText('修复后恢复', { exact: true })).toBeVisible()
-  await expect(workspace().getByRole('alert')).toHaveCount(0)
+  await expect(preview().getByText('修复后恢复', { exact: true })).toBeVisible()
+  await expect(preview().getByRole('alert')).toHaveCount(0)
   await workspace().locator('.session-row__open').first().click()
-  await expect(workspace().getByRole('button', { name: '在 View 中打开' })).toBeVisible()
-  await workspace().getByRole('button', { name: '在 View 中打开' }).click()
+  await expect(workspace().getByRole('button', { name: '在工作台中打开' })).toBeVisible()
+  await workspace().getByRole('button', { name: '在工作台中打开' }).click()
   await expect(workspace().locator('.transcript-user')).toContainText('重新整理支付模块架构。')
   await workspace().getByRole('button', { name: '新对话', exact: true }).click()
   await expect(workspace().locator('.view-recent').getByRole('button', { name: '重新整理支付模块架构。', exact: true })).toBeVisible()
@@ -57,7 +58,7 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
   await app.close()
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
-  await expect(workspace().getByText('修复后恢复', { exact: true })).toBeVisible()
+  await expect(preview().getByText('修复后恢复', { exact: true })).toBeVisible()
   await expect(workspace().getByRole('button', { name: '重置 Preview 缩放' })).toHaveText('100%')
 })
 test('removed View label sends without creating helpers, and each View has an independent draft', async () => {
@@ -72,5 +73,67 @@ test('removed View label sends without creating helpers, and each View has an in
   expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
   await expect(workspace().locator('.transcript-user summary')).toHaveCount(0)
   await workspace().locator('.session-row__open').first().click()
-  await expect(workspace().getByRole('button', { name: '在 View 中打开' })).toBeVisible()
+  await expect(workspace().getByRole('button', { name: '在工作台中打开' })).toBeVisible()
+})
+
+
+test('five presets use the same webpage frame and keep all page content inside it', async () => {
+  for (const title of ['Overview', 'Progress', 'Architecture', 'Agent Team', 'Business Flow']) {
+    await workspace().getByRole('button', { name: title, exact: true }).click()
+    await expect(preview().getByRole('button', { name: `生成 ${title}`, exact: true })).toBeVisible()
+    await expect(workspace().locator('iframe[title="工作台页面"]')).toHaveCount(1)
+    await expect(workspace().locator('.view-empty, .view-node, .view-client-sessions')).toHaveCount(0)
+  }
+  await workspace().getByRole('button', { name: 'Overview', exact: true }).click()
+  await expect(preview().getByText('Recent Sessions', { exact: true })).toBeVisible()
+  await expect(preview().getByText('Needs Input', { exact: true })).toBeVisible()
+  await expect(preview().getByText('Recently Completed', { exact: true })).toBeVisible()
+  expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
+})
+
+async function copyPresetIntoOrdinaryDraft(id: string) {
+  await workspace().getByRole('button', { name: '添加工作台', exact: true }).click()
+  await workspace().getByRole('button', { name: /从简单模板开始/ }).click()
+  await expect(preview().getByRole('heading', { name: '随手记', exact: true })).toBeVisible()
+  const folder = join(projectPath, '.ai-studio/workbench/drafts')
+  const draft = readdirSync(folder)[0]!
+  // The fixture replaces files like a local author. Opening, refreshing and actions use the UI.
+  const directory = join(folder, draft)
+  rmSync(directory, { recursive: true })
+  cpSync(join(appDir, 'out/workbench-packages', id), directory, { recursive: true })
+  await workspace().getByRole('button', { name: '刷新工作台预览', exact: true }).click()
+}
+
+test('a preset copied into an ordinary custom draft uses the same knowledge subscription', async () => {
+  await copyPresetIntoOrdinaryDraft('architecture')
+  await expect(preview().getByRole('button', { name: '生成 Architecture', exact: true })).toBeVisible()
+  const directory = join(projectPath, '.ai-studio/knowledge')
+  mkdirSync(directory, { recursive: true })
+  writeFileSync(join(directory, 'architecture.json'), JSON.stringify({ schemaVersion: 1, viewId: 'architecture', data: { summary: 'PORTABLE_KNOWLEDGE_OK' } }))
+  await expect(preview().getByText('PORTABLE_KNOWLEDGE_OK', { exact: true })).toBeVisible()
+  await workspace().getByRole('button', { name: '添加至当前项目', exact: true }).click()
+  await expect(workspace().getByRole('region', { name: '工作台实例', exact: true })).toBeVisible()
+  await expect(preview().getByText('PORTABLE_KNOWLEDGE_OK', { exact: true })).toBeVisible()
+})
+
+test('a copied Overview package reads scoped Session cards and opens a conversation through the SDK', async () => {
+  await workspace().getByRole('button', { name: 'New Chat', exact: true }).first().click()
+  await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('Portable Overview Session')
+  await workspace().getByRole('button', { name: 'Send', exact: true }).click()
+  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await copyPresetIntoOrdinaryDraft('overview')
+  const sessions = preview().getByLabel('项目 Session 摘要')
+  await expect(sessions.getByText('Recent Sessions', { exact: true })).toBeVisible()
+  await sessions.getByRole('button', { name: 'Portable Overview Session', exact: true }).first().click()
+  await expect(workspace().locator('.transcript-user')).toContainText('Portable Overview Session')
+})
+
+test('the package generate action starts a new unsent workbench draft from an existing Session', async () => {
+  await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('仅回复这条消息，不整理项目知识')
+  await workspace().getByRole('button', { name: 'Send', exact: true }).click()
+  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await preview().getByRole('button', { name: '生成 Architecture', exact: true }).click()
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 Architecture/)
+  await expect(workspace().locator('.transcript-user')).toHaveCount(0)
+  await expect(workspace().locator('[data-session-row]')).toHaveCount(1)
 })

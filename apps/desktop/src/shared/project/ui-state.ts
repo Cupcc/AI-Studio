@@ -1,8 +1,8 @@
 // Per-Project UI state: defaults, tolerant normalization of stored values and
 // strict parsing of renderer patches (spec §2.3.4–2.3.5, §3.2).
-import { isWorkbenchViewId } from '../workbench/types'
+import { isWorkbenchId } from '../workbench/types'
+import { isPresetWorkbenchId } from '../workbench/presets'
 import {
-  DEFAULT_VIEW_IDS,
   TOOL_IDS,
   type BuiltinViewId,
   type MainCanvas,
@@ -29,11 +29,11 @@ export const DEFAULT_TOOL: ToolId = 'files'
 export const SESSION_ID_MAX_LENGTH = 200
 
 export function isBuiltinViewId(value: unknown): value is BuiltinViewId {
-  return typeof value === 'string' && DEFAULT_VIEW_IDS.some(id => id === value)
+  return isPresetWorkbenchId(value)
 }
 
 export function isViewId(value: unknown): value is ViewId {
-  return isBuiltinViewId(value) || isWorkbenchViewId(value)
+  return isWorkbenchId(value)
 }
 
 export function isToolId(value: unknown): value is ToolId {

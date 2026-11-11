@@ -5,12 +5,11 @@
 ## 人工审阅入口
 
 - [Shell Spec v02 确认记录与待确认项](shell-spec-v02.md#1-已确认与待确认)。
-- [组件与原型差异的记录](../../tasks/archive/T20261009-prototype-alignment/report.md#待人决定)。
 
 ## 1. 组件范围
 
 - Project Tab 与新增 / 关闭入口。
-- Project View 导航项与 Session History 列表项。
+- 工作台导航项与 Session History 列表项；来源概念见[产品定义](<../../docs/01. Product Definition.md#workbench>)。
 - Session 状态指示：Running、Needs Input、Completed Unread、Error。
 - Conversation 消息、代码块与当前轮次完成标识。
 - 输入框、Context / Attachment、Model Selector、Send / Stop。

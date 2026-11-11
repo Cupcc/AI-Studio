@@ -12,7 +12,7 @@ import { turnDiff } from '../database/migrations/2026101801_turn_diff'
 import { projectShellFor } from '../project'
 import type { CoreServices } from '../core'
 
-vi.mock('electron', () => ({ app: { getPath: () => '/tmp/studio-session-ipc-no-attachments' }, BrowserWindow: { getAllWindows: vi.fn(() => []) } }))
+vi.mock('electron', () => ({ app: { getPath: () => '/tmp/studio-session-ipc-no-attachments', getAppPath: () => process.cwd() }, BrowserWindow: { getAllWindows: vi.fn(() => []) } }))
 const cleanups: (() => Promise<void>)[] = []
 afterEach(async () => { for (const cleanup of cleanups.splice(0)) await cleanup(); vi.clearAllMocks() })
 

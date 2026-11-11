@@ -1,0 +1,156 @@
+{
+  "sourceFiles": 370,
+  "nativePaths": [],
+  "runtimeLeaks": [],
+  "sharedAssetsIdentical": true,
+  "packages": [
+    {
+      "name": "overview",
+      "manifest": {
+        "schemaVersion": 1,
+        "pluginId": "studio-overview",
+        "version": "1.0.0",
+        "sdkVersion": 1,
+        "title": "Overview",
+        "entry": "index.html",
+        "capabilities": [
+          "state.read",
+          "conversation.draft",
+          "project.knowledge.read",
+          "project.sessions.read",
+          "session.open"
+        ],
+        "knowledgeViewId": "overview"
+      },
+      "missing": [],
+      "sha256": {
+        "FONT-LICENSE.txt": "d0283623ef57e722fd0eb688a8041589670c608ab780cd3612d06ba6f153d3fd",
+        "ibm-plex-sans-latin-400-normal.woff2": "3b646991d30055a93a4ecc499713d4347953a74a947ecab435ab72070cbdab0e",
+        "ibm-plex-sans-latin-500-normal.woff2": "0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203",
+        "ibm-plex-sans-latin-600-normal.woff2": "8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f",
+        "index.html": "3d6aabb22ed2d73a8839aac349d64bc26bbd8eca6bbc0cc6ba08e47f29b609c6",
+        "manifest.json": "112f2743ac5fbe6235e1e0ddc1287fab9e8236816bbe0d5d3115ad89832b40ea",
+        "page.js": "82fb59218c0de76d0919e56d1fc0bb16658a1b8db35f8ceabce550db762b002e",
+        "renderer.js": "457d796440adcb7ce678fc410272ecb193c67bb76170054e59b196d80e5e5971",
+        "style.css": "88389e552575b700b38688ac2ba1933b0ec5529d9ce12ee4646698469c6da828"
+      }
+    },
+    {
+      "name": "progress",
+      "manifest": {
+        "schemaVersion": 1,
+        "pluginId": "studio-progress",
+        "version": "1.0.0",
+        "sdkVersion": 1,
+        "title": "Progress",
+        "entry": "index.html",
+        "capabilities": [
+          "state.read",
+          "conversation.draft",
+          "project.knowledge.read"
+        ],
+        "knowledgeViewId": "progress"
+      },
+      "missing": [],
+      "sha256": {
+        "FONT-LICENSE.txt": "d0283623ef57e722fd0eb688a8041589670c608ab780cd3612d06ba6f153d3fd",
+        "ibm-plex-sans-latin-400-normal.woff2": "3b646991d30055a93a4ecc499713d4347953a74a947ecab435ab72070cbdab0e",
+        "ibm-plex-sans-latin-500-normal.woff2": "0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203",
+        "ibm-plex-sans-latin-600-normal.woff2": "8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f",
+        "index.html": "7ca49a5bdc9bc71807901928dd2fc9f94bf0a1493f1bdbfb9e48a4180c284aef",
+        "manifest.json": "f06cec450bd1be8f2f10c022d8b6791222e73fc2404b610e349fa1dee377f475",
+        "page.js": "82fb59218c0de76d0919e56d1fc0bb16658a1b8db35f8ceabce550db762b002e",
+        "renderer.js": "457d796440adcb7ce678fc410272ecb193c67bb76170054e59b196d80e5e5971",
+        "style.css": "88389e552575b700b38688ac2ba1933b0ec5529d9ce12ee4646698469c6da828"
+      }
+    },
+    {
+      "name": "architecture",
+      "manifest": {
+        "schemaVersion": 1,
+        "pluginId": "studio-architecture",
+        "version": "1.0.0",
+        "sdkVersion": 1,
+        "title": "Architecture",
+        "entry": "index.html",
+        "capabilities": [
+          "state.read",
+          "conversation.draft",
+          "project.knowledge.read"
+        ],
+        "knowledgeViewId": "architecture"
+      },
+      "missing": [],
+      "sha256": {
+        "FONT-LICENSE.txt": "d0283623ef57e722fd0eb688a8041589670c608ab780cd3612d06ba6f153d3fd",
+        "ibm-plex-sans-latin-400-normal.woff2": "3b646991d30055a93a4ecc499713d4347953a74a947ecab435ab72070cbdab0e",
+        "ibm-plex-sans-latin-500-normal.woff2": "0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203",
+        "ibm-plex-sans-latin-600-normal.woff2": "8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f",
+        "index.html": "63bb2520635f0cd1b7615d26611dae2724211461791a7cef9f143543fe050070",
+        "manifest.json": "cd27d9a420abd94d9725a6b4b8e1a49a472920928e8775a234f468a3370dc4ad",
+        "page.js": "82fb59218c0de76d0919e56d1fc0bb16658a1b8db35f8ceabce550db762b002e",
+        "renderer.js": "457d796440adcb7ce678fc410272ecb193c67bb76170054e59b196d80e5e5971",
+        "style.css": "88389e552575b700b38688ac2ba1933b0ec5529d9ce12ee4646698469c6da828"
+      }
+    },
+    {
+      "name": "agent-team",
+      "manifest": {
+        "schemaVersion": 1,
+        "pluginId": "studio-agent-team",
+        "version": "1.0.0",
+        "sdkVersion": 1,
+        "title": "Agent Team",
+        "entry": "index.html",
+        "capabilities": [
+          "state.read",
+          "conversation.draft",
+          "project.knowledge.read"
+        ],
+        "knowledgeViewId": "agent-team"
+      },
+      "missing": [],
+      "sha256": {
+        "FONT-LICENSE.txt": "d0283623ef57e722fd0eb688a8041589670c608ab780cd3612d06ba6f153d3fd",
+        "ibm-plex-sans-latin-400-normal.woff2": "3b646991d30055a93a4ecc499713d4347953a74a947ecab435ab72070cbdab0e",
+        "ibm-plex-sans-latin-500-normal.woff2": "0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203",
+        "ibm-plex-sans-latin-600-normal.woff2": "8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f",
+        "index.html": "59ff938cec0aa8cdc40c56b43006af1371e6adaff6713021a54b430347462405",
+        "manifest.json": "3490067e609a53875c2a3d58549a0ef4b1be2ff0bf698b4441dd9994dfdc8a3e",
+        "page.js": "82fb59218c0de76d0919e56d1fc0bb16658a1b8db35f8ceabce550db762b002e",
+        "renderer.js": "457d796440adcb7ce678fc410272ecb193c67bb76170054e59b196d80e5e5971",
+        "style.css": "88389e552575b700b38688ac2ba1933b0ec5529d9ce12ee4646698469c6da828"
+      }
+    },
+    {
+      "name": "business-flow",
+      "manifest": {
+        "schemaVersion": 1,
+        "pluginId": "studio-business-flow",
+        "version": "1.0.0",
+        "sdkVersion": 1,
+        "title": "Business Flow",
+        "entry": "index.html",
+        "capabilities": [
+          "state.read",
+          "conversation.draft",
+          "project.knowledge.read"
+        ],
+        "knowledgeViewId": "business-flow"
+      },
+      "missing": [],
+      "sha256": {
+        "FONT-LICENSE.txt": "d0283623ef57e722fd0eb688a8041589670c608ab780cd3612d06ba6f153d3fd",
+        "ibm-plex-sans-latin-400-normal.woff2": "3b646991d30055a93a4ecc499713d4347953a74a947ecab435ab72070cbdab0e",
+        "ibm-plex-sans-latin-500-normal.woff2": "0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203",
+        "ibm-plex-sans-latin-600-normal.woff2": "8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f",
+        "index.html": "310129d46ee45e6132811954de35a528c1fa1f01d59d63e789ee6b5fa23a997d",
+        "manifest.json": "484f0e3cc8114734a68461d485ac5890b84d6797e9e3d8c50058287b4d361013",
+        "page.js": "82fb59218c0de76d0919e56d1fc0bb16658a1b8db35f8ceabce550db762b002e",
+        "renderer.js": "457d796440adcb7ce678fc410272ecb193c67bb76170054e59b196d80e5e5971",
+        "style.css": "88389e552575b700b38688ac2ba1933b0ec5529d9ce12ee4646698469c6da828"
+      }
+    }
+  ],
+  "passed": true
+}

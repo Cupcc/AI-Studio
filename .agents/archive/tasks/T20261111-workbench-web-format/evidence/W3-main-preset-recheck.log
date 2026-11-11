@@ -1,0 +1,9 @@
+$ playwright test e2e/project-view.spec.ts --grep AC-06:
+
+Running 1 test using 1 worker
+
+(node:4850) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/project-view.spec.ts:22:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (5.8s)
+
+  1 passed (6.1s)

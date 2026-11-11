@@ -1,0 +1,9 @@
+$ playwright test e2e/app.spec.ts --grep 'renderer has no Node'
+
+Running 1 test using 1 worker
+
+(node:48432) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer (244ms)
+
+  1 passed (2.4s)

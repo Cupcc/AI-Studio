@@ -1,4 +1,4 @@
-import { WORKBENCH_MESSAGE, type JsonValue, type WorkbenchSnapshot } from '@shared/workbench/types'
+import { WORKBENCH_MESSAGE, type JsonValue, type WorkbenchPageSnapshot } from '@shared/workbench/types'
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -14,14 +14,16 @@ function json(value: unknown, depth = 0): value is JsonValue {
 type PageRequest = { id: string } & (
   | { method: 'getInstance' }
   | { method: 'updateState'; state: JsonValue; expectedRevision: number }
-  | { method: 'setDraft'; text: string }
+  | { method: 'setDraft'; text: string; target: 'current' | 'new' }
+  | { method: 'openSession'; sessionId: string }
 )
 function request(value: Record<string, unknown>): PageRequest {
   if (typeof value.id !== 'string' || !value.id || value.id.length > 200) throw new Error('无效页面请求编号')
   const id = value.id
   if (value.method === 'getInstance') return { id, method: 'getInstance' }
   if (!record(value.params)) throw new Error('页面请求缺少参数')
-  if (value.method === 'setDraft' && typeof value.params.text === 'string' && value.params.text.length <= 100_000) return { id, method: 'setDraft', text: value.params.text }
+  if (value.method === 'setDraft' && typeof value.params.text === 'string' && value.params.text.length <= 100_000 && (value.params.target === undefined || value.params.target === 'current' || value.params.target === 'new')) return { id, method: 'setDraft', text: value.params.text, target: value.params.target ?? 'current' }
+  if (value.method === 'openSession' && typeof value.params.sessionId === 'string' && value.params.sessionId.length > 0 && value.params.sessionId.length <= 200) return { id, method: 'openSession', sessionId: value.params.sessionId }
   if (value.method === 'updateState' && json(value.params.state) && typeof value.params.expectedRevision === 'number' && Number.isSafeInteger(value.params.expectedRevision) && value.params.expectedRevision >= 0) {
     return { id, method: 'updateState', state: value.params.state, expectedRevision: value.params.expectedRevision }
   }
@@ -30,9 +32,10 @@ function request(value: Record<string, unknown>): PageRequest {
 
 export function attachWorkbenchPageBridge(options: {
   frame: Window
-  snapshot(): WorkbenchSnapshot
-  updateState(state: JsonValue, expectedRevision: number): Promise<WorkbenchSnapshot>
-  setDraft(text: string, isActive: () => boolean): Promise<void>
+  snapshot(): WorkbenchPageSnapshot
+  updateState(state: JsonValue, expectedRevision: number): Promise<WorkbenchPageSnapshot>
+  setDraft(text: string, isActive: () => boolean, target: 'current' | 'new'): Promise<void>
+  openSession(sessionId: string, isActive: () => boolean): Promise<void>
   ready(): void
   error(message: string): void
 }): () => void {
@@ -58,7 +61,10 @@ export function attachWorkbenchPageBridge(options: {
             result = await options.updateState(req.state, req.expectedRevision); break
           case 'setDraft':
             if (!snapshot.manifest.capabilities.includes('conversation.draft')) throw new Error('此工作台未声明填写对话草稿能力')
-            result = await options.setDraft(req.text, () => active); break
+            result = await options.setDraft(req.text, () => active, req.target); break
+          case 'openSession':
+            if (!snapshot.manifest.capabilities.includes('session.open')) throw new Error('此工作台未声明打开对话能力')
+            result = await options.openSession(req.sessionId, () => active); break
         }
         reply({ type: 'response', id: req.id, ok: true, result })
       } catch (error) {

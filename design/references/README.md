@@ -57,7 +57,7 @@
 | [Codex Add 展开](desktop-layout/codex-add-expand.png) | 图标、名称、描述和 Plugins 分组，供 v06 Add 菜单参考；不作为本项目 CLI 能力契约 |
 | [Codex Browser](desktop-layout/codex-with-browser.png)、[Changes](desktop-layout/codex-with-changes.png)、[Files](desktop-layout/codex-with-file.png) | 对话与右侧工具并排、顶部工具标签；仅作布局参考 |
 | [Claude Chat](desktop-layout/claude-chat.png) | 会话侧栏、底部输入区与控制分组；与 §3 官方教程图片为不同界面，不回写其历史观察 |
-| [Notion Composer](desktop-layout/notion.png) | 思考信号格与框内控制分组；关联 [v06 Composer 任务](../../tasks/archive/T20261020-v06-composer/task.md) |
+| [Notion Composer](desktop-layout/notion.png) | 思考信号格与框内控制分组 |
 
 ## 6. 2026-10-24 effort 选择反馈参考
 

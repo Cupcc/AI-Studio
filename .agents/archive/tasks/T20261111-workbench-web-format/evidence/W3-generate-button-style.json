@@ -1,0 +1,671 @@
+--attention-offset: 3px
+--attention-ring: 0 0 0 2px
+--attention-size: 7px
+--backdrop-floating: blur(28px) saturate(1.8)
+--button-height: 30px
+--button-padding-x: 14px
+--button-small-height: 26px
+--canvas-gutter: 8px
+--canvas-header-height: 48px
+--cli-menu-width: 260px
+--code-block-header-height: 32px
+--color-attention-ring: rgba(236, 236, 240, .95)
+--color-backdrop: rgba(0, 0, 0, .2)
+--color-border: rgba(0, 0, 0, .08)
+--color-border-focus: rgba(0, 0, 0, .22)
+--color-border-soft: rgba(0, 0, 0, .05)
+--color-border-strong: rgba(0, 0, 0, .13)
+--color-bubble: rgba(255, 255, 255, .78)
+--color-canvas: rgba(255, 255, 255, .26)
+--color-code-comment: #8a8a84
+--color-code-keyword: #7c3a8f
+--color-code-number: #9a5512
+--color-code-string: #2f6b45
+--color-completed: #16a34a
+--color-control: rgba(255, 255, 255, .6)
+--color-diagram-node: rgba(255, 255, 255, .88)
+--color-diagram-stroke: rgba(0, 0, 0, .18)
+--color-diff-add-bg: rgba(22, 163, 74, .13)
+--color-diff-del-bg: rgba(220, 38, 38, .1)
+--color-effort-max: #5667a1
+--color-effort-max-end: #7582b7
+--color-effort-ultra: color-mix(in oklab, #a9c1f2 76%, #262626)
+--color-effort-ultra-end: color-mix(in oklab, #f4c6b2 76%, #262626)
+--color-effort-ultra-middle: color-mix(in oklab, #d3bff0 76%, #262626)
+--color-error: #dc2626
+--color-error-bg: rgba(254, 236, 233, .72)
+--color-error-border: rgba(220, 38, 38, .22)
+--color-floating: rgba(255, 255, 255, .82)
+--color-focus-ring: #2563eb
+--color-focus-ring-soft: #2563eb2e
+--color-hover: rgba(0, 0, 0, .04)
+--color-input: rgba(255, 255, 255, .84)
+--color-launcher: rgba(255, 255, 255, .26)
+--color-link: #1d4ed8
+--color-link-underline: rgba(29, 78, 216, .35)
+--color-nav: transparent
+--color-nav-line: transparent
+--color-needs-input: #d97706
+--color-needs-input-bg: rgba(255, 244, 222, .72)
+--color-needs-input-border: rgba(217, 119, 6, .3)
+--color-on-primary: #ffffff
+--color-pane: transparent
+--color-placeholder: #7a7a7a
+--color-primary: #1d1d1b
+--color-primary-hover: #333333
+--color-running: #505050
+--color-running-track: rgba(0, 0, 0, .14)
+--color-selected: rgba(0, 0, 0, .07)
+--color-send-disabled: rgba(0, 0, 0, .16)
+--color-surface: rgba(255, 255, 255, .7)
+--color-surface-chrome: transparent
+--color-surface-preview: transparent
+--color-surface-soft: rgba(0, 0, 0, .045)
+--color-surface-sub: rgba(255, 255, 255, .42)
+--color-tab-selected: rgba(255, 255, 255, .8)
+--color-text: #0d0d0d
+--color-text-2: #262626
+--color-text-3: #505050
+--color-text-muted: #575757
+--color-tooltip: #0d0d0d
+--color-topbar: transparent
+--color-topbar-line: transparent
+--color-window: transparent
+--conversation-max-width: 720px
+--dialog-padding: 20px 22px
+--dialog-width: 420px
+--disabled-opacity: .4
+--draft-gap: 22px
+--draft-offset: 12vh
+--effort-palette-end: #f4c6b2
+--effort-palette-middle: #d3bff0
+--effort-palette-start: #a9c1f2
+--effort-ultra-gradient: linear-gradient(110deg, color-mix(in oklab, #a9c1f2 76%, #262626), color-mix(in oklab, #d3bff0 76%, #262626) 52%, color-mix(in oklab, #f4c6b2 76%, #262626))
+--font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace
+--font-sans: 'IBM Plex Sans', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', system-ui, sans-serif
+--font-size-body: 15px
+--font-size-caption: 12px
+--font-size-dialog-body: 14px
+--font-size-heading: 17px
+--font-size-lg: 17px
+--font-size-markdown-heading: 17px
+--font-size-md: 14px
+--font-size-note: 13px
+--font-size-sm: 13px
+--font-size-title: 22px
+--font-size-xs: 12px
+--glass-color-width: 52px
+--glass-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .025 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")
+--glass-swatch-size: 28px
+--glass-tint: rgba(244, 244, 242, .62)
+--glass-wall: radial-gradient(34% 44% at 9% 14%, #a9c1f2, transparent 72%), radial-gradient(32% 44% at 16% 76%, #d3bff0, transparent 72%), radial-gradient(38% 46% at 50% 38%, #c4d3f6, transparent 72%), radial-gradient(36% 46% at 88% 18%, #b9dced, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f4c6b2, transparent 72%), radial-gradient(30% 40% at 48% 100%, #efcde3, transparent 72%), #e3e5ee
+--glass-wall-aurora: radial-gradient(34% 44% at 9% 14%, #a9c1f2, transparent 72%), radial-gradient(32% 44% at 16% 76%, #d3bff0, transparent 72%), radial-gradient(38% 46% at 50% 38%, #c4d3f6, transparent 72%), radial-gradient(36% 46% at 88% 18%, #b9dced, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f4c6b2, transparent 72%), radial-gradient(30% 40% at 48% 100%, #efcde3, transparent 72%), #e3e5ee
+--glass-wall-haze: radial-gradient(34% 44% at 9% 14%, #c9d3df, transparent 72%), radial-gradient(32% 44% at 16% 76%, #d5d9e3, transparent 72%), radial-gradient(38% 46% at 50% 38%, #cfd8e2, transparent 72%), radial-gradient(36% 46% at 88% 18%, #c4d5e0, transparent 72%), radial-gradient(40% 48% at 84% 88%, #dcd8d4, transparent 72%), radial-gradient(30% 40% at 48% 100%, #d2dbe4, transparent 72%), #e2e5e9
+--glass-wall-mint: radial-gradient(34% 44% at 9% 14%, #bfe3cd, transparent 72%), radial-gradient(32% 44% at 16% 76%, #b6d5ea, transparent 72%), radial-gradient(38% 46% at 50% 38%, #f0e1b6, transparent 72%), radial-gradient(36% 46% at 88% 18%, #cbe5be, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f2cda6, transparent 72%), radial-gradient(30% 40% at 48% 100%, #c6e0e6, transparent 72%), #e6e9e4
+--glass-wall-none: #dedede
+--glass-wall-opacity: .85
+--glass-wall-sunset: radial-gradient(34% 44% at 9% 14%, #f6c9b4, transparent 72%), radial-gradient(32% 44% at 16% 76%, #f2c2d6, transparent 72%), radial-gradient(38% 46% at 50% 38%, #f7dcc0, transparent 72%), radial-gradient(36% 46% at 88% 18%, #e3c6ee, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f5d3a8, transparent 72%), radial-gradient(30% 40% at 48% 100%, #f0c4c4, transparent 72%), #efe6e3
+--heading-letter-spacing: .06em
+--icon-button-height: 28px
+--icon-button-lg-height: 30px
+--icon-button-width: 30px
+--launcher-content-width: 460px
+--launcher-gap: 18px
+--menu-item-height: 32px
+--menu-min-width: 200px
+--nav-heading-height: 28px
+--nav-heading-line-height: 16px
+--nav-row-height: 32px
+--nav-width: 248px
+--new-chat-height: 36px
+--new-chat-more-width: 30px
+--placeholder-icon-size: 28px
+--placeholder-padding: 40px
+--placeholder-text-width: 360px
+--preview-frame: rgba(0, 0, 0, .1)
+--preview-glass-canvas: rgba(255, 255, 255, .42)
+--preview-glass-ink: rgba(255, 255, 255, .85)
+--preview-glass-input: rgba(255, 255, 255, .9)
+--preview-glass-tint: rgba(244, 244, 242, .5)
+--preview-solid-bar: #efeeeb
+--preview-solid-canvas: #ffffff
+--preview-solid-ink: #e6e5e0
+--preview-solid-input: #d9d8d3
+--preview-solid-nav: #f7f7f5
+--radius-bubble: 14px
+--radius-button: 8px
+--radius-canvas: 12px
+--radius-card: 12px
+--radius-code: 10px
+--radius-dialog: 16px
+--radius-input: 16px
+--radius-lg: 9px
+--radius-md: 7px
+--radius-sm: 6px
+--radius-tab: 9px
+--radius-tip: 5px
+--radius-xs: 4px
+--resize-hit-width: 6px
+--send-size: 28px
+--session-conversation-min-width: 400px
+--settings-categories-width: 160px
+--settings-dialog-height: 520px
+--settings-dialog-width: 640px
+--shadow-bubble: 0 0 0 1px rgba(0, 0, 0, .04), 0 1px 2px rgba(0, 0, 0, .04)
+--shadow-canvas: inset 0 0 0 1px rgba(255, 255, 255, .4), 0 0 0 1px rgba(0, 0, 0, .05), 0 8px 24px rgba(0, 0, 0, .05)
+--shadow-control: 0 1px 2px rgba(0, 0, 0, .03)
+--shadow-dialog: 0 0 0 .5px rgba(0, 0, 0, .08), 0 24px 60px rgba(0, 0, 0, .2)
+--shadow-floating: 0 4px 14px rgba(0, 0, 0, .12)
+--shadow-input: 0 1px 2px rgba(0, 0, 0, .04), 0 8px 24px rgba(0, 0, 0, .07)
+--shadow-panel: 0 1px 2px rgba(0, 0, 0, .03)
+--shadow-popover: 0 0 0 .5px rgba(0, 0, 0, .05), 0 12px 36px rgba(0, 0, 0, .14)
+--shadow-tab-selected: 0 0 0 .5px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .08)
+--sidebar-min-width: 320px
+--space-0: 2px
+--space-1: 4px
+--space-1-5: 6px
+--space-2: 8px
+--space-2-5: 10px
+--space-3: 12px
+--space-4: 16px
+--space-5: 20px
+--space-6: 24px
+--space-8: 32px
+--tab-add-width: 30px
+--tab-close-size: 18px
+--tab-height: 32px
+--tab-inner-height: 28px
+--tab-max-width: 200px
+--tab-min-width: 96px
+--theme-preview-height: 96px
+--tooltip-delay: 500ms
+--tooltip-offset: 6px
+--tooltip-padding: 3px 7px
+--topbar-height: 40px
+--traffic-lights-width: 76px
+--view-conversation-min-width: 360px
+--view-right-min-width: 400px
+--vsep-height: 18px
+--window-min-height: 640px
+--window-min-width: 1024px
+--z-handle: 5
+--z-modal: 80
+--z-popover: 40
+--z-tooltip: 60
+-electron-corner-smoothing: none
+-webkit-border-horizontal-spacing: 0px
+-webkit-border-image: none
+-webkit-border-vertical-spacing: 0px
+-webkit-box-align: stretch
+-webkit-box-decoration-break: slice
+-webkit-box-direction: normal
+-webkit-box-flex: 0
+-webkit-box-ordinal-group: 1
+-webkit-box-orient: horizontal
+-webkit-box-pack: start
+-webkit-box-reflect: none
+-webkit-font-smoothing: auto
+-webkit-line-break: auto
+-webkit-line-clamp: none
+-webkit-locale: "zh-CN"
+-webkit-mask-box-image: none
+-webkit-mask-box-image-outset: 0
+-webkit-mask-box-image-repeat: stretch
+-webkit-mask-box-image-slice: 0 fill
+-webkit-mask-box-image-source: none
+-webkit-mask-box-image-width: auto
+-webkit-mask-position-x: 0%
+-webkit-mask-position-y: 0%
+-webkit-rtl-ordering: logical
+-webkit-ruby-position: before
+-webkit-tap-highlight-color: rgba(0, 0, 0, 0.18)
+-webkit-text-combine: none
+-webkit-text-decorations-in-effect: none
+-webkit-text-fill-color: rgba(0, 0, 0, 0)
+-webkit-text-orientation: vertical-right
+-webkit-text-security: none
+-webkit-text-stroke-color: rgba(0, 0, 0, 0)
+-webkit-text-stroke-width: 0px
+-webkit-user-drag: auto
+-webkit-user-modify: read-only
+-webkit-writing-mode: horizontal-tb
+accent-color: auto
+align-content: normal
+align-items: normal
+align-self: auto
+alignment-baseline: auto
+anchor-name: none
+anchor-scope: none
+animation-composition: replace
+animation-delay: 0s
+animation-direction: normal
+animation-duration: 0s
+animation-fill-mode: none
+animation-iteration-count: 1
+animation-name: none
+animation-play-state: running
+animation-range-end: normal
+animation-range-start: normal
+animation-timeline: auto
+animation-timing-function: ease
+animation-trigger: none
+app-region: none
+appearance: auto
+aspect-ratio: auto
+backdrop-filter: none
+backface-visibility: visible
+background-attachment: scroll
+background-blend-mode: normal
+background-clip: border-box
+background-color: rgb(13, 13, 13)
+background-image: none
+background-origin: padding-box
+background-position: 0% 0%
+background-repeat: repeat
+background-size: auto
+baseline-shift: 0px
+baseline-source: auto
+block-size: 37px
+border-block-end-color: rgba(0, 0, 0, 0.08)
+border-block-end-style: solid
+border-block-end-width: 1px
+border-block-start-color: rgba(0, 0, 0, 0.08)
+border-block-start-style: solid
+border-block-start-width: 1px
+border-bottom-color: rgba(0, 0, 0, 0.08)
+border-bottom-left-radius: 6px
+border-bottom-right-radius: 6px
+border-bottom-style: solid
+border-bottom-width: 1px
+border-collapse: separate
+border-end-end-radius: 6px
+border-end-start-radius: 6px
+border-image-outset: 0
+border-image-repeat: stretch
+border-image-slice: 100%
+border-image-source: none
+border-image-width: 1
+border-inline-end-color: rgba(0, 0, 0, 0.08)
+border-inline-end-style: solid
+border-inline-end-width: 1px
+border-inline-start-color: rgba(0, 0, 0, 0.08)
+border-inline-start-style: solid
+border-inline-start-width: 1px
+border-left-color: rgba(0, 0, 0, 0.08)
+border-left-style: solid
+border-left-width: 1px
+border-right-color: rgba(0, 0, 0, 0.08)
+border-right-style: solid
+border-right-width: 1px
+border-shape: none
+border-start-end-radius: 6px
+border-start-start-radius: 6px
+border-top-color: rgba(0, 0, 0, 0.08)
+border-top-left-radius: 6px
+border-top-right-radius: 6px
+border-top-style: solid
+border-top-width: 1px
+bottom: auto
+box-decoration-break: slice
+box-shadow: none
+box-sizing: border-box
+break-after: auto
+break-before: auto
+break-inside: auto
+buffered-rendering: auto
+caption-side: top
+caret-animation: auto
+caret-color: rgba(0, 0, 0, 0)
+caret-shape: auto
+clear: none
+clip: auto
+clip-path: none
+clip-rule: nonzero
+color: rgba(0, 0, 0, 0)
+color-interpolation: srgb
+color-interpolation-filters: linearrgb
+color-rendering: auto
+color-scheme: light
+column-count: auto
+column-fill: balance
+column-gap: normal
+column-height: auto
+column-rule-break: normal
+column-rule-color: rgba(0, 0, 0, 0)
+column-rule-inset-cap-end: 0px
+column-rule-inset-cap-start: 0px
+column-rule-inset-junction-end: 0px
+column-rule-inset-junction-start: 0px
+column-rule-style: none
+column-rule-visibility-items: normal
+column-rule-width: 1.5px
+column-span: none
+column-width: auto
+column-wrap: auto
+contain: none
+contain-intrinsic-block-size: none
+contain-intrinsic-height: none
+contain-intrinsic-inline-size: none
+contain-intrinsic-size: none
+contain-intrinsic-width: none
+container-name: none
+container-type: normal
+content: normal
+content-visibility: visible
+corner-bottom-left-shape: superellipse(1)
+corner-bottom-right-shape: superellipse(1)
+corner-end-end-shape: superellipse(1)
+corner-end-start-shape: superellipse(1)
+corner-start-end-shape: superellipse(1)
+corner-start-start-shape: superellipse(1)
+corner-top-left-shape: superellipse(1)
+corner-top-right-shape: superellipse(1)
+counter-increment: none
+counter-reset: none
+counter-set: none
+cursor: pointer
+cx: 0px
+cy: 0px
+d: none
+direction: ltr
+display: inline-block
+dominant-baseline: auto
+dynamic-range-limit: no-limit
+empty-cells: show
+field-sizing: fixed
+fill: rgb(0, 0, 0)
+fill-opacity: 1
+fill-rule: nonzero
+filter: none
+flex-basis: auto
+flex-direction: row
+flex-grow: 0
+flex-line-count: 1
+flex-shrink: 1
+flex-wrap: nowrap
+float: none
+flood-color: rgb(0, 0, 0)
+flood-opacity: 1
+font-family: "IBM Plex Sans", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", system-ui, sans-serif
+font-feature-settings: normal
+font-kerning: auto
+font-language-override: normal
+font-optical-sizing: auto
+font-palette: normal
+font-size: 14px
+font-size-adjust: none
+font-stretch: 100%
+font-style: normal
+font-synthesis-small-caps: auto
+font-synthesis-style: auto
+font-synthesis-weight: auto
+font-variant: normal
+font-variant-alternates: normal
+font-variant-caps: normal
+font-variant-east-asian: normal
+font-variant-emoji: normal
+font-variant-ligatures: normal
+font-variant-numeric: normal
+font-variant-position: normal
+font-variation-settings: normal
+font-weight: 400
+forced-color-adjust: auto
+grid-auto-columns: auto
+grid-auto-flow: row
+grid-auto-rows: auto
+grid-column-end: auto
+grid-column-start: auto
+grid-row-end: auto
+grid-row-start: auto
+grid-template-areas: none
+grid-template-columns: none
+grid-template-rows: none
+height: 37px
+hyphenate-character: auto
+hyphenate-limit-chars: auto
+hyphens: manual
+image-orientation: from-image
+image-rendering: auto
+initial-letter: normal
+inline-size: 151.367px
+inset-block-end: auto
+inset-block-start: auto
+inset-inline-end: auto
+inset-inline-start: auto
+interactivity: auto
+interest-delay-end: normal
+interest-delay-start: normal
+interpolate-size: numeric-only
+isolation: auto
+justify-content: normal
+justify-items: normal
+justify-self: auto
+left: auto
+letter-spacing: normal
+lighting-color: rgb(255, 255, 255)
+line-break: auto
+line-height: 21px
+list-style-image: none
+list-style-position: outside
+list-style-type: disc
+margin-block-end: 0px
+margin-block-start: 0px
+margin-bottom: 0px
+margin-inline-end: 0px
+margin-inline-start: 0px
+margin-left: 0px
+margin-right: 0px
+margin-top: 0px
+marker-end: none
+marker-mid: none
+marker-start: none
+mask-clip: border-box
+mask-composite: add
+mask-image: none
+mask-mode: match-source
+mask-origin: border-box
+mask-position: 0% 0%
+mask-repeat: repeat
+mask-size: auto
+mask-type: luminance
+math-depth: 0
+math-shift: normal
+math-style: normal
+max-block-size: none
+max-height: none
+max-inline-size: none
+max-width: none
+min-block-size: 0px
+min-height: 0px
+min-inline-size: 0px
+min-width: 0px
+mix-blend-mode: normal
+object-fit: fill
+object-position: 50% 50%
+object-view-box: none
+offset-anchor: auto
+offset-distance: 0px
+offset-path: none
+offset-position: normal
+offset-rotate: auto 0deg
+opacity: 1
+order: 0
+orphans: 2
+outline-color: rgba(0, 0, 0, 0)
+outline-offset: 0px
+outline-style: none
+outline-width: 3px
+overflow-anchor: auto
+overflow-block: visible
+overflow-clip-margin: 0px
+overflow-inline: visible
+overflow-wrap: normal
+overflow-x: visible
+overflow-y: visible
+overlay: none
+overscroll-behavior-block: auto
+overscroll-behavior-inline: auto
+overscroll-behavior-x: auto
+overscroll-behavior-y: auto
+padding-block-end: 7px
+padding-block-start: 7px
+padding-bottom: 7px
+padding-inline-end: 14px
+padding-inline-start: 14px
+padding-left: 14px
+padding-right: 14px
+padding-top: 7px
+paint-order: normal
+perspective: none
+perspective-origin: 75.6797px 18.5px
+pointer-events: auto
+position: static
+position-anchor: normal
+position-area: none
+position-try-fallbacks: none
+position-try-order: normal
+position-visibility: anchors-visible
+print-color-adjust: economy
+quotes: auto
+r: 0px
+reading-flow: normal
+reading-order: 0
+resize: none
+right: auto
+rotate: none
+row-gap: normal
+row-rule-break: normal
+row-rule-color: rgba(0, 0, 0, 0)
+row-rule-inset-cap-end: 0px
+row-rule-inset-cap-start: 0px
+row-rule-inset-junction-end: 0px
+row-rule-inset-junction-start: 0px
+row-rule-style: none
+row-rule-visibility-items: normal
+row-rule-width: 1.5px
+ruby-align: space-around
+ruby-overhang: auto
+ruby-position: over
+rule-overlap: row-over-column
+rx: auto
+ry: auto
+scale: none
+scroll-behavior: auto
+scroll-initial-target: none
+scroll-margin-block-end: 0px
+scroll-margin-block-start: 0px
+scroll-margin-bottom: 0px
+scroll-margin-inline-end: 0px
+scroll-margin-inline-start: 0px
+scroll-margin-left: 0px
+scroll-margin-right: 0px
+scroll-margin-top: 0px
+scroll-marker-group: none
+scroll-padding-block-end: auto
+scroll-padding-block-start: auto
+scroll-padding-bottom: auto
+scroll-padding-inline-end: auto
+scroll-padding-inline-start: auto
+scroll-padding-left: auto
+scroll-padding-right: auto
+scroll-padding-top: auto
+scroll-snap-align: none
+scroll-snap-stop: normal
+scroll-snap-type: none
+scroll-target-group: none
+scroll-timeline-axis: block
+scroll-timeline-name: none
+scrollbar-color: auto
+scrollbar-gutter: auto
+scrollbar-width: auto
+shape-image-threshold: 0
+shape-margin: 0px
+shape-outside: none
+shape-rendering: auto
+speak: normal
+stop-color: rgb(0, 0, 0)
+stop-opacity: 1
+stroke: none
+stroke-dasharray: none
+stroke-dashoffset: 0px
+stroke-linecap: butt
+stroke-linejoin: miter
+stroke-miterlimit: 4
+stroke-opacity: 1
+stroke-width: 1px
+tab-size: 8
+table-layout: auto
+text-align: center
+text-align-last: auto
+text-anchor: start
+text-autospace: no-autospace
+text-box-edge: auto
+text-box-trim: none
+text-combine-upright: none
+text-decoration: none
+text-decoration-color: rgba(0, 0, 0, 0)
+text-decoration-line: none
+text-decoration-skip-ink: auto
+text-decoration-style: solid
+text-decoration-thickness: auto
+text-emphasis-color: rgba(0, 0, 0, 0)
+text-emphasis-position: over
+text-emphasis-style: none
+text-fit: none
+text-indent: 0px
+text-justify: auto
+text-orientation: mixed
+text-overflow: clip
+text-rendering: auto
+text-shadow: none
+text-size-adjust: auto
+text-spacing-trim: normal
+text-transform: none
+text-underline-offset: auto
+text-underline-position: auto
+text-wrap-mode: wrap
+text-wrap-style: auto
+timeline-scope: none
+timeline-trigger-activation-range-end: normal
+timeline-trigger-activation-range-start: normal
+timeline-trigger-active-range-end: auto
+timeline-trigger-active-range-start: auto
+timeline-trigger-name: none
+timeline-trigger-source: auto
+top: auto
+touch-action: auto
+transform: none
+transform-box: view-box
+transform-origin: 75.6836px 18.5px
+transform-style: flat
+transition-behavior: normal
+transition-delay: 0s
+transition-duration: 0s
+transition-property: all
+transition-timing-function: ease
+translate: none
+trigger-scope: none
+unicode-bidi: normal
+user-select: auto
+vector-effect: none
+vertical-align: baseline
+view-timeline-axis: block
+view-timeline-inset: auto
+view-timeline-name: none
+view-transition-class: none
+view-transition-group: normal
+view-transition-name: none
+view-transition-scope: none
+visibility: visible
+white-space-collapse: collapse
+widows: 2
+width: 151.367px
+will-change: auto
+window-drag: none
+word-break: normal
+word-spacing: 0px
+writing-mode: horizontal-tb
+x: 0px
+y: 0px
+z-index: auto
+zoom: 1

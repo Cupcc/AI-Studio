@@ -11,12 +11,13 @@ export function paths(output) {
 const documentation = new Set([
   'AGENTS.md', 'CONTRIBUTING.md', 'README.md', 'scripts/README.md',
   'apps/desktop/README.md', 'packages/agent-adapter/src/codex/README.md',
-  'docs/08. System Architecture.html'
+  'docs/08. System Architecture.html', '.codex/agents/README.md',
+  '.agents/skills/vercel-react-best-practices/AGENTS.md'
 ])
 
 export function docsOnly(files) {
   return files.length > 0 && files.every(file => documentation.has(file) ||
-    /^(docs|specs|tasks|templates|design)\/.*\.md$/.test(file))
+    /^(docs|specs|tasks|design|\.agents\/archive)\/.*\.md$/.test(file))
 }
 
 export function changedPaths(base, head, cwd) {

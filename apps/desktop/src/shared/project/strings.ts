@@ -1,23 +1,16 @@
 // Shell UI copy in one place (NAV-Q13 recommendation: Chinese copy with
 // English product terms). Proposed wording from the project / navigation
 // specs; final copy is pending review.
-import type { BuiltinViewId, OpenFailureReason, ToolId } from './types'
+import type { OpenFailureReason, ToolId } from './types'
 import { isBuiltinViewId } from './ui-state'
-import { isWorkbenchViewId } from '../workbench/types'
+import { isCustomWorkbenchId } from '../workbench/types'
+import { presetWorkbench } from '../workbench/presets'
 
 export const PRODUCT_NAME = 'AI Developer Studio'
 
-export const VIEW_NAMES: Record<BuiltinViewId, string> = {
-  overview: 'Overview',
-  progress: 'Progress',
-  architecture: 'Architecture',
-  'agent-team': 'Agent Team',
-  'business-flow': 'Business Flow'
-}
-
 export function viewName(viewId: string): string {
-  if (isBuiltinViewId(viewId)) return VIEW_NAMES[viewId]
-  if (isWorkbenchViewId(viewId)) return viewId.startsWith('workbench-draft:') ? '工作台草稿' : '工作台'
+  if (isBuiltinViewId(viewId)) return presetWorkbench(viewId).title
+  if (isCustomWorkbenchId(viewId)) return viewId.startsWith('workbench-draft:') ? '工作台草稿' : '工作台'
   return viewId
 }
 
@@ -68,7 +61,7 @@ export const S = {
   navLabel: 'Project 导航',
   newChat: 'New Chat',
   chooseCli: '选择 CLI',
-  projectViews: 'PROJECT VIEWS',
+  workbenches: '工作台',
   sessions: 'SESSIONS',
   sessionsEmpty: '还没有对话',
   untitledSession: '未命名对话',
@@ -78,7 +71,7 @@ export const S = {
   draftTitle: '新对话',
   placeholderConversation: '对话内容将在这里显示。',
   placeholderDraft: '新的对话将在这里显示。',
-  placeholderViewConversation: '当前 Project View 的对话将在这里显示。',
+  placeholderViewConversation: '当前工作台的对话将在这里显示。',
   placeholderPreview: (view: string) => `${view} 的项目预览将在这里显示。`,
   placeholderTool: (tool: string) => `${tool} 的工具内容将在这里显示。`,
   preview: 'Preview',

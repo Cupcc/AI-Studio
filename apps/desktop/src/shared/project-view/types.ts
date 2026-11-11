@@ -1,11 +1,7 @@
-export const VIEW_CATALOG = [
-  { id: 'overview', title: 'Overview', kind: 'builtin', order: 0 },
-  { id: 'progress', title: 'Progress', kind: 'builtin', order: 1 },
-  { id: 'architecture', title: 'Architecture', kind: 'builtin', order: 2 },
-  { id: 'agent-team', title: 'Agent Team', kind: 'builtin', order: 3 },
-  { id: 'business-flow', title: 'Business Flow', kind: 'builtin', order: 4 }
-] as const
-export type ViewCatalogEntry = { id: string; title: string; kind: 'builtin' | 'custom'; order: number }
+import { PRESET_WORKBENCHES } from '../workbench/presets'
+
+export const VIEW_CATALOG = PRESET_WORKBENCHES.map((entry, order) => ({ id: entry.viewId, title: entry.title, kind: 'builtin', order } as const))
+export type ViewCatalogEntry = typeof VIEW_CATALOG[number]
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json }
 export interface KnowledgeDocument { schemaVersion: 1; viewId: string; data: Record<string, Json>; example?: boolean }
 export const COMPONENTS = ['stack', 'grid', 'section', 'text', 'metric', 'badge', 'list', 'table', 'timeline', 'diagram', 'callout', 'empty'] as const
@@ -27,4 +23,3 @@ export interface ViewState {
   snapshot: ViewSnapshot | null
   error: string | null
 }
-export interface ViewContext { originViewId: string; paths: string[]; text: string }

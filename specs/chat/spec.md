@@ -15,8 +15,6 @@
 
 2026-10-24 用户反馈补充：默认 CLI 改为应用级偏好；选择一次后所有 Project 的新对话均可直接使用，不要求逐个 Project 重复设置。不可用时，Composer 必须提供可见的 CLI 切换与设置入口。
 
-2026-10-09 参考应用复核见 [Session research](../../tasks/archive/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
-
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
 | C-Q1 | 未发送草稿在离开、再次点击 New Chat、切换 Project、重启应用时如何处理？ | 每个 Project 保留一份草稿（文本、CLI、模型）；离开不丢弃；再次 New Chat 回到该草稿；切换 Tab 返回恢复（D-15）；由 Session 独立持久化至 session_drafts，重启后恢复。依据：FR-CHAT-001 只规定不创建 Session；D-15、FR-PROJ-003 要求恢复离开时的状态 | 否 | |
@@ -113,7 +111,7 @@
 1. 从 Project View 左侧草稿发送第一条消息时，与 FR-CHAT-001 相同的流程创建普通 CLI Session，并把该 View 的 ID 写入 `origin_view_id`；Session 同样立即进入 Session History（FR-VIEW-006、FR-VIEW-007 第 5 项）。
 2. 进入 Project View 本身不创建 Session（FR-VIEW-007 最后一段；D-01）。
 3. 本切片提供带 `originViewId` 参数的创建接口；Project View 草稿 UI、最近对话块、View 上下文注入在 Project View task 实现。
-4. `origin_view_id` 创建后不变，用于 Conversation 顶栏显示来源 View 和“在 View 中打开”（D-02），以及在该 View 中列出相关对话（P-A）。
+4. `origin_view_id` 创建后不变，用于 Conversation 顶栏显示来源 View 和“在工作台中打开”（D-02），以及在该 View 中列出相关对话（P-A）。
 
 ### FR-NAV-003（命名部分）Session 名称
 

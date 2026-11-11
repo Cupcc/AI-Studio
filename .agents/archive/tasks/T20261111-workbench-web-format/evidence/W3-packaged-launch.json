@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-11T16:03:18.926063",
+  "application": "/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app",
+  "port": 53052,
+  "pid": 44373,
+  "listenerExecutable": "/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/MacOS/AI Developer Studio",
+  "userData": "/var/folders/r2/57zjr6v53n7c_hg3nfj1sdy00000gn/T/studio-web-format-review-MlUCnN/user-data",
+  "setup": "LaunchServices open -n; OS-assigned private CDP port; restore own QA Project; no runtime or picker injection",
+  "asarExists": true
+}

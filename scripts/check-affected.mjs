@@ -13,7 +13,7 @@ const domains = {
   files: ['files', 'composer'], input: ['composer', 'files', 'cli-default'],
   session: ['session', 'composer', 'cli-default'], chat: ['composer', 'cli-default'],
   project: ['project', 'app', 'workbench'], 'project-view': ['project-view', 'workbench'], settings: ['settings'],
-  workbench: ['workbench'], navigation: ['project', 'workbench', 'alignment'],
+  workbench: ['project-view', 'workbench'], navigation: ['project', 'workbench', 'alignment'],
   diff: ['diff', 'turn-diff'], 'turn-diff': ['turn-diff'],
   code: ['files', 'diff', 'vscode-parity'], search: ['files'], 'quick-open': ['files'],
   browser: ['runtime-tools'], terminal: ['runtime-tools'], pty: ['runtime-tools'],
@@ -75,8 +75,29 @@ function connectionDependencyPaths(files, { base = 'HEAD', head, cwd = process.c
   } catch { return new Set() }
 }
 
+export function workbenchPackageIncludeChange(before, after) {
+  const prior = JSON.parse(before), next = JSON.parse(after)
+  const include = 'build/workbenches/**/*.json'
+  if (!Array.isArray(prior.include) || !Array.isArray(next.include)) return false
+  return JSON.stringify({ ...next, include: next.include.filter(path => path !== include) }) === JSON.stringify(prior) &&
+    next.include.filter(path => path === include).length === 1
+}
+
+function workbenchConfigPaths(files, { base = 'HEAD', head, cwd = process.cwd() }) {
+  const accepted = new Set()
+  for (const file of files.filter(path => /^apps\/desktop\/tsconfig\.(?:node|web)\.json$/.test(path))) {
+    try {
+      const before = git(['show', `${base}:${file}`], cwd)
+      const after = head ? git(['show', `${head}:${file}`], cwd) : readFileSync(`${cwd}/${file}`, 'utf8')
+      if (workbenchPackageIncludeChange(before, after)) accepted.add(file)
+    } catch { /* Other compiler/configuration changes still require an impact mapping. */ }
+  }
+  return accepted
+}
+
 export function affectedPlan(files, available, comparison = {}) {
   const connectionDependencies = connectionDependencyPaths(files, comparison)
+  const workbenchConfigs = workbenchConfigPaths(files, comparison)
   const seeds = { scripts: new Set(), desktop: new Set(), adapter: new Set() }
   const types = new Set()
   const e2e = new Set()
@@ -88,6 +109,9 @@ export function affectedPlan(files, available, comparison = {}) {
   const addDomain = name => {
     for (const spec of domains[name]) e2e.add(`e2e/${spec}.spec.ts`)
     addTests('desktop', file => file.startsWith(desktop) && domainFor(file.slice(desktop.length)) === name)
+    if (name === 'workbench') {
+      addTests('desktop', file => file.startsWith(desktop) && domainFor(file.slice(desktop.length)) === 'project-view')
+    }
     if (['files', 'input', 'chat'].includes(name)) {
       addTests('desktop', file => file.startsWith(`${desktop}src/renderer/src/features/input/`))
     }
@@ -96,7 +120,11 @@ export function affectedPlan(files, available, comparison = {}) {
     }
   }
   for (const file of [...new Set(files)].sort()) {
-    if (docsOnly([file]) || /^(?:tasks\/(?:archive\/)?T[^/]+\/evidence|design)\//.test(file)) continue
+    const legacyTemplate = /^templates\/(acceptance|plan|report|spec|task)\.md$/.exec(file)
+    if (legacyTemplate && !available.includes(file) &&
+      available.includes(`${legacyTemplate[1] === 'spec' ? 'specs' : 'tasks'}/templates/${legacyTemplate[1]}.md`)) continue
+    if (docsOnly([file]) || file === '.ignore' || /^\.codex\/agents\/[\w-]+\.toml$/.test(file) ||
+      /^(?:\.agents\/archive|tasks\/archive|tasks\/T[^/]+\/evidence|design)\//.test(file)) continue
     if (connectionDependencies.has(file)) {
       types.add('node'); types.add('web')
       addDomain('session'); addDomain('settings')
@@ -126,6 +154,15 @@ export function affectedPlan(files, available, comparison = {}) {
       addDomain('workbench')
       addTests('desktop', test => /src\/main\/security\/.*\.test\.ts$/.test(test))
       e2e.add('e2e/app.spec.ts'); e2e.add('e2e/runtime-tools.spec.ts')
+      continue
+    }
+    if (file.startsWith(`${desktop}build/workbenches/`) || file.startsWith(`${desktop}build/workbench-common/`) ||
+      /^apps\/desktop\/scripts\/build-workbench-packages\.(?:mjs|d\.mts)$/.test(file) ||
+      workbenchConfigs.has(file) || file === `${desktop}vitest.config.ts`) {
+      // Static webpage packages and their build/config inputs are consumed outside Vitest's import graph.
+      types.add('node'); types.add('web')
+      addDomain('workbench')
+      e2e.add('e2e/app.spec.ts'); e2e.add('e2e/alignment.spec.ts')
       continue
     }
     if (file.startsWith(`${desktop}e2e/`)) {

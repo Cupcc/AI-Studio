@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "studio-overview",
+  "version": "1.0.0",
+  "sdkVersion": 1,
+  "title": "Overview",
+  "entry": "index.html",
+  "capabilities": [
+    "state.read",
+    "conversation.draft",
+    "project.knowledge.read",
+    "project.sessions.read",
+    "session.open"
+  ],
+  "knowledgeViewId": "overview"
+}

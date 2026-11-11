@@ -8,7 +8,6 @@
 | 来源 | 用户 2026-10-19 反馈；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001；AC-02 |
 | 行为基线 | [Shell Spec v02](components/shell-spec-v02.md) §6～8、[输入区规格](../specs/input/spec.md) §3.1 / §3.6、[New Chat 规格](../specs/chat/spec.md) §3.1 |
 | 可操作方案 | [原型 v05](prototypes/studio-prototype-v05.html)；[操作说明与限制](prototypes/README.md#studio-灰度交互原型-v05) |
-| 自检证据 | [任务记录](../tasks/archive/T20261019-ux-layout-review/task.md) |
 
 2026-10-20 后续优化见[评审 v02 / 原型 v06](layout-ux-review-v02.md)。本稿保留 v05 的问题、参考观察与验证基线；最新方案与 UX-Q1 采用审阅入口由 v02 负责。
 
@@ -95,7 +94,7 @@ New Chat 正文：              已有 Session 正文：
 
 ## 6. 验证与采用边界
 
-原型交互自检、尺寸、截图及未覆盖内容以[任务记录](../tasks/archive/T20261019-ux-layout-review/task.md#验证记录)为准。原型无真实 CLI、文件上传或配置持久化，不作为 AC-02 的应用通过证据。
+原型无真实 CLI、文件上传或配置持久化，不作为 AC-02 的应用通过证据。
 
 ### 未决问题
 

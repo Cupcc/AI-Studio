@@ -4,7 +4,6 @@ import { appContract } from './app'
 import type { StudioApiOf } from './contract'
 import { projectContract } from './project'
 import { sessionContract } from './session'
-import { projectViewContract } from './project-view'
 import { settingsContract } from './settings'
 import { browserContract } from './browser'
 import { terminalContract } from './terminal'
@@ -18,7 +17,6 @@ export const contracts = [
   appContract,
   projectContract,
   sessionContract,
-  projectViewContract,
   settingsContract,
   browserContract,
   terminalContract,

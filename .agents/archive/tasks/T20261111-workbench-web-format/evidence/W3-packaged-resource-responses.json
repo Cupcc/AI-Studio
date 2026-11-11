@@ -1,0 +1,27 @@
+[
+  {
+    "url": "app://workbench/62e36bd1-b447-4c83-bf51-19b882e72683/instance/architecture/249f9f45958d14bc6cc54c6de0c24e9d7a08513330bcf383ee04501a998f6f84/index.html",
+    "status": 200,
+    "mime": "text/html"
+  },
+  {
+    "url": "app://workbench/62e36bd1-b447-4c83-bf51-19b882e72683/instance/overview/268bc0ac12737deb0202b59924538dfa4289dfc49ea41d7a35ea064eac5d0142/index.html",
+    "status": 200,
+    "mime": "text/html"
+  },
+  {
+    "url": "app://workbench/62e36bd1-b447-4c83-bf51-19b882e72683/instance/overview/268bc0ac12737deb0202b59924538dfa4289dfc49ea41d7a35ea064eac5d0142/ibm-plex-sans-latin-600-normal.woff2",
+    "status": 200,
+    "mime": "font/woff2"
+  },
+  {
+    "url": "app://workbench/62e36bd1-b447-4c83-bf51-19b882e72683/instance/overview/268bc0ac12737deb0202b59924538dfa4289dfc49ea41d7a35ea064eac5d0142/ibm-plex-sans-latin-400-normal.woff2",
+    "status": 200,
+    "mime": "font/woff2"
+  },
+  {
+    "url": "app://workbench/62e36bd1-b447-4c83-bf51-19b882e72683/instance/92dd60a8-3a0d-4256-a80e-7a55a9a49f15/34824fb1aa8ba2d2d52db95de37947a3d61232345b8b38fed9f729af4e977322/index.html",
+    "status": 200,
+    "mime": "text/html"
+  }
+]

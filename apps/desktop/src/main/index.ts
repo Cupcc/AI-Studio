@@ -8,7 +8,6 @@ import { projectContract } from '@shared/ipc/project'
 import { S } from '@shared/project/strings'
 import { installProjectMenu } from './menu/project-menu'
 import { projectShellFor } from './services/project'
-import { projectViewsFor } from './services/project-view'
 import { createQuitFlow } from './services/project/quit-flow'
 import { registerIpc } from './ipc'
 import { emit } from './ipc/registry'
@@ -65,7 +64,7 @@ function openWindow(hidden = false): BrowserWindow {
     hidden,
     appearance: core ? settingsFor(core).appearance() : { effective: 'solid', dark: false }
   })
-  win.on('focus', () => { if (core) projectViewsFor(core).refreshAll() })
+  win.on('focus', () => { if (core) workbenchesFor(core).refreshAll() })
   const senderId = win.webContents.id
   // A gone renderer must not keep PTY attachments or Diff subscriptions (and so a Git watcher) alive. Files cleans up
   // through webContents events inside its own service.

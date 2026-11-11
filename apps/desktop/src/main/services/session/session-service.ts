@@ -9,7 +9,7 @@ import { SESSION_MESSAGE_MAX_LENGTH, TRANSCRIPT_PAGE_SIZE } from '@shared/ipc/se
 import type { ProjectService } from '../project/project-service'
 import type { MainSessionPort } from '../project/session-port'
 import { SessionStore } from './store'
-import type { ViewContext } from '@shared/project-view/types'
+import type { WorkbenchContext, WorkbenchId } from '@shared/workbench/types'
 import { isViewId } from '@shared/project/ui-state'
 import type { FileReferenceResolver, ProjectPath, ResolvedFileReference } from '@shared/tools/files'
 import { buildUserInput, describeFileReferenceFailures, FILE_REFERENCE_STRATEGY } from './file-reference'
@@ -25,7 +25,7 @@ interface ActiveTurn {
   reasoningEffort?: string | null
   adapterId?: string
   message: SessionMessage
-  viewContext?: ViewContext
+  viewContext?: WorkbenchContext
   /** Re-validated just before this turn began; the transcript keeps only the relative `message.contextItems`. */
   files?: readonly ResolvedFileReference[]
   pending: Map<string, RequestItem>
@@ -59,7 +59,7 @@ export interface SessionServiceOptions {
   summaryChanged?(change: SessionSummaryChange): void
   transcriptChanged?(change: TranscriptChange): void
   providersChanged?(providers: ProviderSummary[]): void
-  buildViewContext?(projectId: string, viewId: string): ViewContext
+  buildViewContext?(projectId: string, viewId: WorkbenchId): WorkbenchContext
   turnEnded?(projectId: string): void
   /** Queried at event time, so stale renderer focus reports cannot mark work read. */
   isForeground?(senderId: number): boolean
@@ -224,8 +224,8 @@ export class SessionService implements MainSessionPort {
     await this.resolveSkills(request.projectId, request.cli, request)
     await this.resolvePastedAttachments(request.projectId, request.cli, request)
     if (!this.enabledClis.has(request.cli)) throw new Error('CLI 未启用，请在 CLI 设置中启用')
-    const attach = !!request.originViewId && request.viewContextAttached === true && isViewId(request.originViewId)
-    const viewContext = attach ? this.options.buildViewContext?.(request.projectId, request.originViewId!) : undefined
+    const origin = request.originViewId
+    const viewContext = origin && request.viewContextAttached === true && isViewId(origin) ? this.options.buildViewContext?.(request.projectId, origin) : undefined
     const at = this.now()
     const summary: SessionSummary = {
       id: this.newId(), projectId: request.projectId, cli: request.cli, nativeSessionId: null,
@@ -342,7 +342,7 @@ export class SessionService implements MainSessionPort {
     } finally { turn.sending = false }
   }
 
-  private begin(entry: Entry, message: SessionMessage, viewContext?: ViewContext, files?: readonly ResolvedFileReference[]): void {
+  private begin(entry: Entry, message: SessionMessage, viewContext?: WorkbenchContext, files?: readonly ResolvedFileReference[]): void {
     const at = this.now()
     const turn: ActiveTurn = {
       id: this.newId(), at, model: entry.summary.model, reasoningEffort: entry.summary.reasoningEffort,

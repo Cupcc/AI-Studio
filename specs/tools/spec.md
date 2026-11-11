@@ -11,7 +11,6 @@
 | 相关验收 | AC-07；Project 状态隔离关联 AC-01 |
 | 相关设计 | [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节 |
 | 来源 | [02 第 5 节](<../../docs/02. Functional Requirements.md#5-context-panel-与工程工具>)；[03 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)；[04 第 3、5 节及事项 13](<../../docs/04. Technical Requirements.md>)；用户 2026-10-12 对话「accept above suggetions, update all related docs」 |
-| 实施记录 | [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md)、[运行时执行计划](../../tasks/archive/T20261009-context-tools/plan.md)及[验收记录](../../tasks/archive/T20261009-context-tools/acceptance.md)；VS Code 对齐见[本轮任务](../../tasks/archive/T20261026-tools-vscode-parity/task.md)；实现与验收状态以任务为准 |
 
 ## 1. 问题与决定
 
@@ -133,13 +132,13 @@ FR-TOOL-001～004、AC-07：实现前记录正常、异常和回归场景，至�
 
 原生轮次事件及非 Git 能力必须在锁定 CLI 版本验证；当前 V1 真实调用只安排 Codex，模拟不替代真实结果，Claude Code 真实能力暂缓。Codex 的额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定，应用不设置调用次数、费用上限或自动重试护栏。规格起草与本次确认不代表 AC-07 已通过；进度由 [06](<../../docs/06. Development Roadmap.md#33-工程工具>) 及工程工具任务负责。
 
-此前文档准备仅更新文档（2026-10-13 指令）；后续用户「推进运行时工具的开发。agents并发」授权 Terminal / Browser 及其生命周期接缝实施，2026-10-14「accept above, apply, continue implementing」继续阶段 1（Files / 项目 Diff / 文件引用）。Claude Code 真实验收按 DEC-16 暂缓，且不随当前 V1 发布（DEC-19）。阶段与当前验证由 [工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 维护，不将阶段通过等同四工具 AC-07 完成。
+工程工具按 DEC-14、DEC-25 与本规格的契约实施；验收按适用的真实场景执行，不能以阶段通过代替完整 AC-07。
 
 ### 5.1 运行时实现细化
 
 FR-TOOL-003 / 004、FR-PROJ-002：以下为主 Agent 在上述开发授权内的技术决定（2026-10-13），不是新增人工产品确认。
 
-- Terminal：主进程 `@xterm/headless` + SerializeAddon 持有屏幕，1000 行回滚；UI 按需加载 xterm。输出分 16 KiB chunk，256 / 64 KiB 水位控制 PTY 暂停 / 恢复；attach 返回屏幕与流序号，快照写入完的首个 ACK 启动增量，迟到的 attachment 不能退订新的显示。屏幕解析背压与 Renderer ACK 背压独立；隐藏或 Renderer 崩溃解除显示订阅，主进程屏幕继续更新。实例上限为 16 / Project、32 / 应用，超限明确反馈；不自动重跑跨重启的命令。屏幕检查点（emulator state schema 1）绑定锁定的 `@xterm/*` 版本（xterm 6.0.0 的私有结构），升级须重跑 ANSI 差分验证（含逐单元格属性 / 链接与将来 VT 状态）。xterm 在运行时注入 `<style>`，生产 CSP 因此对 `style-src-elem` 放宽（DEC-02 例外，用户 2026-10-13 确认），并因 24 位色与 `minimumContrastRatio` 经 `style` 属性写入而对 `style-src-attr` 放宽（用户 2026-10-14 确认），E2E 断言这些样式在构建后的应用里真实生效。配色（AI 技术决定；W5-F13 的视觉取舍由用户于 2026-10-18 确认，见 DEC-20）：每种外观方案（浅 / 深）使用显式 xterm 调色板，不依赖 xterm 默认值；ANSI 0–15 对该方案的名义背景及毛玻璃实测最差背景均 ≥ 4.5:1，默认文字 ≥ 7:1，选区文字 ≥ 4.5:1，光标与反色可读；毛玻璃下视口保持透明。代价：浅色方案的 ANSI 色比常见终端更深，“白 / 黑”在浅 / 深方案中分别是深灰 / 浅灰，经典的前景 / 背景配对对比度偏低；毛玻璃下选区与背景的区分度低于 3:1。xterm 的 `minimumContrastRatio` 取 5.5，使 ANSI / 24 位色背景上及程序自带颜色的文字按单元格调整到可读（xterm 按不透明名义背景计算，毛玻璃浅色的真实像素更暗，取 4.5 时实测仅 3.7–4.3:1，W5-F12）；已确认的视觉代价：反显文字实测约 5.4–6.1:1，低于调色板默认的 14–19:1，块颜色保留（W5-F13、DEC-20）；固定比值不能覆盖壁纸比实测更暗的毛玻璃（亮度 0.65 约需 6.75）；具体取值与测算见 `terminal-theme.ts` 及其测试，真实窗口的实测结果见[验收记录](../../tasks/archive/T20261009-context-tools/acceptance.md)。
+- Terminal：主进程 `@xterm/headless` + SerializeAddon 持有屏幕，1000 行回滚；UI 按需加载 xterm。输出分 16 KiB chunk，256 / 64 KiB 水位控制 PTY 暂停 / 恢复；attach 返回屏幕与流序号，快照写入完的首个 ACK 启动增量，迟到的 attachment 不能退订新的显示。屏幕解析背压与 Renderer ACK 背压独立；隐藏或 Renderer 崩溃解除显示订阅，主进程屏幕继续更新。实例上限为 16 / Project、32 / 应用，超限明确反馈；不自动重跑跨重启的命令。屏幕检查点（emulator state schema 1）绑定锁定的 `@xterm/*` 版本（xterm 6.0.0 的私有结构），升级须重跑 ANSI 差分验证（含逐单元格属性 / 链接与将来 VT 状态）。xterm 在运行时注入 `<style>`，生产 CSP 因此对 `style-src-elem` 放宽（DEC-02 例外，用户 2026-10-13 确认），并因 24 位色与 `minimumContrastRatio` 经 `style` 属性写入而对 `style-src-attr` 放宽（用户 2026-10-14 确认），E2E 断言这些样式在构建后的应用里真实生效。配色遵循 [DEC-20](<../../docs/07. Decisions.md#dec-20-terminal-视觉取舍与深色主题方案>)：每种浅 / 深方案使用显式 xterm 调色板，毛玻璃下视口透明；ANSI 0–15 对名义背景及毛玻璃最差背景的对比度至少 4.5:1，默认文字至少 7:1，选区文字至少 4.5:1，光标与反色保持可读。`minimumContrastRatio` 取 5.5，具体取值见 `terminal-theme.ts` 及其测试。
 - Browser（首轮历史实现；导航与分区已由 §5.4 取代）：每个 Project / 实例代次独立内存分区，导航只接受 HTTP / HTTPS localhost、127/8 或 `::1`；页面的普通网络子资源不受顶层回环限制。地址单独保存在 `app_meta`，无登录状态持久化；窗口恢复时未被选中的后台 Project 不创建 view、不加载已保存地址，首次选中并显示 Browser 后才创建实例并恢复上次地址。应用公共导航 guards 只用于应用窗口，预览 view 自己处理导航、新窗口、权限及下载；Shell 切换及窗口事件先校验显隐，DOM 弹层和原生退出提示均遮挡 / 移除 view。
 - 生命周期：Session Stop 与 Tools 端口分开；Project / 退出合并列出 Session 与 Terminal。确认后等待准确归属清理，失败 / 超时不批准关闭或退出；保留底层实际清理锁，拒绝新 Session / PTY / Browser 操作，直至清理 settled。退出批准前依次停止回合、清理工具，再可逆地释放全部空闲 / 已退役 Session Runtime，任一失败拒绝退出、应用保持打开并可重试；退出失败取消后可继续使用保留的 Project；不把退出通知等同受管资源已清理。
 
@@ -147,7 +146,7 @@ FR-TOOL-003 / 004、FR-PROJ-002：以下为主 Agent 在上述开发授权内的
 
 ### 5.2 Files / 项目 Diff 实现细化
 
-FR-TOOL-001 / 002、FR-INPUT-001：以下为阶段 1 授权内的 AI 技术决定（2026-10-16），依据上文行为契约与[先行验证](../../tasks/archive/T20261009-context-tools/research.md)，diff 待人工审阅；不标记为新增人工产品确认。自动化与独立验收结论由[任务验收](../../tasks/archive/T20261009-context-tools/acceptance.md)负责。
+FR-TOOL-001 / 002、FR-INPUT-001：以下为既有行为契约内的 AI 技术决定，diff 待人工审阅，不标为新增人工产品确认。
 
 - Files：Project 相对 POSIX 路径最多 1024 UTF-8 字节，单名称最多 1020 字节（兼容 APFS 的 255 字符）。惰性列出直接子项，目录优先、名称自然排序；超过 2000 项只返回排序后的前 2000 项并提示截断。`.git`（忽略大小写）不显示。超过相对路径或操作系统绝对路径上限的子项不返回未验证名称，保留其它可读项并显示省略原因，提示将更近目录单独打开为 Project。符号链接仅显示原始目标和徽标，不跟随、不展开、不查看或引用；发送与读取均重新验证路径与 Project 身份。名称中的控制字符和双向格式字符用可见标记显示，所有文件操作仍使用原名。
 - 文件查看：只读、最多 1 MiB，识别 UTF-8、带 BOM 的 UTF-16 LE / BE；二进制、超限、权限不足、编码不支持及读取期间变化均给出原因。文件事件合并刷新受影响节点；事件溢出或监听降级时补扫并提供手动刷新。展开、选择、查看器状态在本次应用内按 Project 保留，关闭 Project 时释放，不承诺跨重启恢复整棵树。
@@ -167,13 +166,13 @@ FR-TOOL-002、FR-STATE-007、FR-INPUT-001；依据 §4.1 / §4.2、04 第 1 节�
 - Session 以 `turn_diffs` 迁移（`2026101801`）按 App Turn 保存 JSON，事件 seq 作为修订，校验 Project / Session / App Turn 与原生身份。终态与补丁 final / outcome 在同一事务落盘；旧修订及已终结记录不可覆写。读取只接受该 Project / Session 的 Turn，旧历史没有记录时保持 unknown，不读当前工作区回填。Claude 未实现同等数据时返回 unavailable。
 - 聚合 patch 限 512 KiB；全部单文件 patch 合计另限 512 KiB；最多 2000 条文件记录，单路径限 8192 UTF-8 字节。裁切不拆 Unicode，分别记录聚合、文件及列表截断。先仅对 patch / 路径 / 原因脱敏，再重新施加限额；结构身份和枚举不作文本脱敏。UI 复用只读 PatchView 的 4000 行显示限额，HTML 作为文本展示。
 - Conversation 的完成 / 停止行与失败卡片提供“查看本轮变更”；只由用户点击打开，显示 Session / Turn、outcome、来源与覆盖提示，可选择聚合 / 原生文件记录。unknown、CLI 明确 empty、unavailable、failed 分别展示，不将未知文件数显示成 0；文件补丁不证明写入成功。点击工具栏 Diff 或“项目变更”返回共享工作区范围。
-- 2026-10-18 历史真实环境：macOS 15.6 arm64、Codex 0.163.0，当时协议类型锁定 0.161.0。Git / 非 Git 的原生 `apply_patch` 均收到聚合与完成文件补丁；对应 Shell 写文件均未收到这两类事件。因此该视图只保证展示收到的原生记录，不覆盖所有工作区修改，不宣称整个 0.163.0 协议已兼容。当时使用 mention 的 Adapter、应用 UI、特殊路径及同轮追加 fixture 均返回 token；CLI 版本 / 场景 / 原独立结论见[历史验收](../../tasks/archive/T20261009-context-tools/acceptance.md#2026-10-18-本轮-diff-独立评审w23)、[W24](../../tasks/archive/T20261009-context-tools/evidence/W24-review.md)及[自检记录](../../tasks/archive/T20261009-context-tools/evidence/W0-turn-diff-report.md)。这些结果未排除从项目目录发现文件，不能证明 Project 外缓存附件已提供给模型。2026-11-01 对此缺口的修正、当前转换依据和新验证由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)及[输入任务](../../tasks/archive/T20261031-inline-attachments/task.md)负责，旧记录保留其原基线。
+- 本轮 Diff 只展示收到的原生记录，不覆盖全部工作区修改，不宣称完整 CLI 协议兼容。没有收到 Shell 文件补丁时不能推断为零变更；本地附件输入与转换契约见 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)，缓存附件的接收须通过相应真实链路验证。
 
 Claude Code 真实能力仍暂缓且不随当前 V1 发布；以上应用 UI 结果是 Main Agent 技术复验，不扩大完整 AC-07、Codex 原生 Stop 或其他协议专项的通过范围。
 
 ### 5.4 VS Code 对齐（2026-10-26）
 
-FR-TOOL-001～005、TOOLS-Q8～Q12、DEC-25：以下为已授权范围内的 AI 实现选择（2026-10-27），diff 待审阅。阶段、验证、当前缺陷与人工验收由[本轮任务](../../tasks/archive/T20261026-tools-vscode-parity/task.md)负责；此前 §5.1 的首轮导航 / 分区描述保留历史基线，不作为现行约束。
+FR-TOOL-001～005、TOOLS-Q8～Q12、DEC-25：以下为已授权范围内的 AI 实现选择，diff 待审阅；现行工具行为以本节为准。
 
 - Files 管理：原生上下文菜单只接受类型化项目 / 相对路径与限定动作；每批最多 500 项，逐项返回已完成路径及首个失败原因。创建使用排他打开，删除调用系统废纸篓；复制保留符号链接本身，不读取链接目标。Project 内变更进入串行队列，关闭使旧排队请求失效并等待已开始的变更完成。
 - 不覆盖：macOS 辅助程序打开父目录时使用 `O_NOFOLLOW_ANY`，以 `renameatx_np(RENAME_EXCL)` 发布重命名 / 移动，目标被外部 CLI 或编辑器抢先创建时返回冲突，不回退到可覆盖的 `rename`。复制先写入目标目录下的私有临时目录，再以同一排他重命名发布；失败清理临时目录，避免复制过程中与外部新目录合并。系统不支持排他重命名时明确失败。原语依据：[Apple 对 RENAME_EXCL 的说明](https://developer.apple.com/documentation/foundation/urlresourcevalues/volumesupportsexclusiverenaming)；这不构成对恶意同用户进程持续替换整个目录树的隔离承诺。

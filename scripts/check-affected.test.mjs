@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { affectedPlan, connectionDependencyChange, runPlan } from './check-affected.mjs'
+import { affectedPlan, connectionDependencyChange, runPlan, workbenchPackageIncludeChange } from './check-affected.mjs'
 
 const d = 'apps/desktop/'
 const a = 'packages/agent-adapter/'
@@ -12,7 +12,9 @@ const available = [
   `${d}src/main/services/files/references.test.ts`,
   `${d}src/main/services/session/service.test.ts`,
   `${d}src/main/services/workbench/workbench-service.test.ts`,
+  `${d}src/shared/project-view/schema.test.ts`,
   `${d}src/renderer/src/features/workbench/workbench.test.tsx`,
+  `${d}src/renderer/src/features/workbench/page-bridge.test.ts`,
   `${d}src/main/security/hardening.test.ts`,
   `${d}electron.vite.config.ts`,
   `${d}src/preload/bridge.test.ts`, `${d}src/shared/ipc/contract.test.ts`,
@@ -28,7 +30,10 @@ const plan = files => affectedPlan(files, available, { base: 'missing-test-basel
 const commandText = value => value.commands.flat().join(' ')
 
 test('docs, evidence and empty diff do not run application checks', () => {
-  for (const files of [[], ['README.md'], ['docs/08. System Architecture.html'], ['tasks/T-example/evidence/check.mjs']]) {
+  for (const files of [[], ['README.md'], ['docs/08. System Architecture.html'], ['tasks/T-example/evidence/check.mjs'],
+    ['.ignore'], ['.agents/archive/tasks/T-example/task.md'],
+    ['.agents/archive/tasks/T-example/evidence/check.mjs'],
+    ['tasks/archive/.gitkeep', '.agents/archive/tasks/.gitkeep']]) {
     expect(plan(files)).toMatchObject({ commands: [], e2e: [], unknown: [] })
   }
 })
@@ -39,6 +44,14 @@ test('input selects related module, not terminal/settings/adapter suites', () =>
   expect(commandText(result)).toContain('tsconfig.web.json')
   expect(commandText(result)).not.toMatch(/terminal-panel|settings.test|tsconfig.node|check:code| run test /)
   expect(result.e2e).toEqual(['e2e/cli-default.spec.ts', 'e2e/composer.spec.ts', 'e2e/files.spec.ts'])
+})
+test('project agent definitions do not run app checks or exempt other Codex files', () => {
+  expect(plan(['.codex/agents/reviewer.toml', '.codex/agents/README.md']))
+    .toMatchObject({ commands: [], e2e: [], unknown: [] })
+  for (const file of ['.codex/config.toml', '.codex/agents/run.mjs', '.codex/agents/nested/role.toml']) {
+    expect(plan([file]).unknown).toEqual([file])
+  }
+  expect(commandText(plan(['.codex/hooks.json']))).toContain('vitest')
 })
 test('IPC files seam includes main, renderer, input and preload tests', () => {
   const result = plan([`${d}src/shared/ipc/files.ts`])
@@ -134,8 +147,9 @@ test('workbench IPC selects its host, UI, bridge and focused E2E', () => {
   expect(result.unknown).toEqual([])
   expect(commandText(result)).toContain('workbench-service.test.ts')
   expect(commandText(result)).toContain('workbench.test.tsx')
+  expect(commandText(result)).toContain('src/shared/project-view/schema.test.ts')
   expect(commandText(result)).toContain('bridge.test.ts')
-  expect(result.e2e).toEqual(['e2e/workbench.spec.ts'])
+  expect(result.e2e).toEqual(['e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
 })
 test('plugin assets and navigation keep the workbench regression selected', () => {
   for (const path of ['src/shared/workbench/resources/template.ts', 'src/renderer/src/features/navigation/Navigation.tsx']) {
@@ -148,5 +162,33 @@ test('desktop build/CSP changes verify protocol and iframe consumers', () => {
   const result = plan([`${d}electron.vite.config.ts`])
   expect(result.unknown).toEqual([])
   expect(commandText(result)).toContain('hardening.test.ts')
-  expect(result.e2e).toEqual(['e2e/app.spec.ts', 'e2e/runtime-tools.spec.ts', 'e2e/workbench.spec.ts'])
+  expect(result.e2e).toEqual(['e2e/app.spec.ts', 'e2e/project-view.spec.ts', 'e2e/runtime-tools.spec.ts', 'e2e/workbench.spec.ts'])
+})
+
+test('standard webpage package assets select their host, SDK and iframe regression consumers', () => {
+  for (const file of ['build/workbenches/overview/manifest.json', 'build/workbench-common/page.js', 'scripts/build-workbench-packages.mjs']) {
+    const result = plan([`${d}${file}`])
+    expect(result.unknown).toEqual([])
+    expect(result.e2e).toEqual(['e2e/alignment.spec.ts', 'e2e/app.spec.ts', 'e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
+    expect(commandText(result)).toContain('workbench-service.test.ts')
+    expect(commandText(result)).toContain('page-bridge')
+  }
+})
+
+test('only the known package JSON include change is mapped, unrelated compiler edits stay unknown', () => {
+  const prior = { compilerOptions: { composite: true }, include: ['src/shared/**/*'] }
+  const next = { ...prior, include: [...prior.include, 'build/workbenches/**/*.json'] }
+  expect(workbenchPackageIncludeChange(JSON.stringify(prior), JSON.stringify(next))).toBe(true)
+  expect(workbenchPackageIncludeChange(JSON.stringify(prior), JSON.stringify({ ...next, compilerOptions: { composite: false } }))).toBe(false)
+  expect(workbenchPackageIncludeChange(JSON.stringify(prior), JSON.stringify({ ...next, include: [...next.include, 'other/**/*'] }))).toBe(false)
+})
+
+test('classifies removed templates only when their owning replacement exists', () => {
+  for (const name of ['acceptance', 'plan', 'report', 'spec', 'task']) {
+    const old = `templates/${name}.md`
+    const next = `${name === 'spec' ? 'specs' : 'tasks'}/templates/${name}.md`
+    expect(affectedPlan([old, next], [...available, next]).unknown).toEqual([])
+    expect(affectedPlan([old], available).unknown).toEqual([old])
+    expect(affectedPlan([old], [...available, old, next]).unknown).toEqual([old])
+  }
 })

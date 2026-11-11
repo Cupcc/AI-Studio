@@ -1,0 +1,104 @@
+- generic [ref=e1] clickable [onclick]
+  - banner
+    - button "折叠导航" [ref=e3]
+    - tablist "Projects"
+      - tab "Web Format Review Project" [selected, ref=e16]
+        - StaticText "Web Format Review Project"
+      - button "关闭 Web Format Review Project" [ref=e17]
+    - button "新建标签页" [ref=e4]
+    - button "右侧边栏" [ref=e5]
+  - complementary "Project 导航"
+    - button "New Chat" [ref=e18]
+    - button "选择 CLI" [expanded=false, ref=e19]
+    - region "工作台" [ref=e12]
+      - heading "工作台" [level=2, ref=e20]
+      - button "添加工作台" [expanded=false, ref=e21]
+      - generic "工作台列表"
+        - button "Overview" [ref=e25]
+          - StaticText "Overview"
+        - button "Progress" [ref=e26]
+          - StaticText "Progress"
+        - button "Architecture" [ref=e27]
+          - StaticText "Architecture"
+        - button "Agent Team" [ref=e28]
+          - StaticText "Agent Team"
+        - button "Business Flow" [ref=e29]
+          - StaticText "Business Flow"
+    - heading "SESSIONS" [level=2, ref=e13]
+    - generic
+      - heading "今天" [level=3, ref=e71]
+      - generic
+        - StaticText "CX"
+        - button "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [ref=e80]
+        - button "更多操作 不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [expanded=false, ref=e81]
+        - image "Completed Unread"
+    - button "设置" [ref=e14]
+      - StaticText "设置"
+  - main
+    - region "工作台对话" [ref=e15]
+      - sectionheader
+        - StaticText "CX"
+        - StaticText "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…"
+        - button "新对话" [ref=e72]
+      - generic "对话记录" [ref=e70] focusable [tabindex]
+        - article
+          - group
+            - DisclosureTriangle "当前工作台" [expanded=false]
+              - StaticText "当前工作台"
+          - paragraph
+            - StaticText "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WEB_PACKAGE_PRESET_OK | <Current Workbench 的名称>。若没有附加上下文则回复 NO_CONTEXT。"
+        - group
+          - DisclosureTriangle "推理摘要" [expanded=false]
+            - StaticText "推理摘要"
+        - article
+          - paragraph
+            - StaticText "WEB_PACKAGE_PRESET_OK | Business Flow"
+        - StaticText "Worked for "
+        - StaticText "11s"
+        - StaticText " · "
+        - StaticText "Done"
+        - button "查看本轮变更" [ref=e73]
+      - generic
+        - textbox "消息" [ref=e74]
+          - StaticText "向 Codex CLI 发送消息…"
+        - button "Context / Attachment" [expanded=false, ref=e75]
+        - button "Reasoning Effort" [expanded=false, ref=e76]
+        - button "Model Selector" [expanded=false, ref=e77]
+          - StaticText "GPT-6.1-Sol（默认）"
+        - button "Send" [disabled, ref=e78]
+          - StaticText "Enter 发送 · Shift + Enter 换行"
+      - separator "调整对话列宽度" [ref=e23] focusable [tabindex]: 440
+    - region "Preview" [ref=e24]
+      - sectionheader
+        - StaticText "Business Flow"
+        - generic "右侧工具"
+          - button "Preview" [ref=e45]
+          - button "Files" [ref=e46]
+          - button "Search" [ref=e47]
+          - button "Diff" [ref=e48]
+          - button "Browser" [ref=e49]
+          - button "Terminal" [ref=e50]
+      - region "工作台实例" [ref=e79]
+        - StaticText "App 预设工作台"
+        - button "缩小 Preview" [ref=e82]
+          - StaticText "−"
+        - button "重置 Preview 缩放" [ref=e83]
+          - StaticText "100%"
+        - button "放大 Preview" [ref=e84]
+          - StaticText "+"
+        - button "刷新工作台预览" [ref=e85]
+        - group
+          - DisclosureTriangle "插件信息与备份" [expanded=false]
+            - StaticText "插件信息与备份"
+        - status
+          - StaticText "包检查通过"
+          - StaticText "页面已连接"
+          - StaticText "已读取保存状态"
+        - Iframe "工作台页面" [ref=e86]
+          - main "项目知识" [ref=e87]
+            - status
+              - StaticText "更新于 3:30:10 PM"
+            - heading "Business Flow" [level=2, ref=e88]
+            - paragraph
+              - StaticText "尚无项目知识。生成指令会填入左侧草稿，由你确认发送。"
+            - button "生成 Business Flow" [ref=e89]

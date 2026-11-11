@@ -1,0 +1,99 @@
+- generic [ref=e198] clickable [onclick]
+  - banner
+    - button "折叠导航" [ref=e199]
+    - tablist "Projects"
+      - tab "Unified Review Project" [selected, ref=e206]
+        - StaticText "Unified Review Project"
+      - button "关闭 Unified Review Project" [ref=e207]
+    - button "新建标签页" [ref=e200]
+    - button "右侧边栏" [ref=e201]
+  - complementary "Project 导航"
+    - button "New Chat" [ref=e208]
+    - button "选择 CLI" [expanded=false, ref=e209]
+    - region "工作台" [ref=e202]
+      - heading "工作台" [level=2, ref=e210]
+      - button "添加工作台" [expanded=false, ref=e211]
+      - generic "工作台列表"
+        - button "Overview" [ref=e217]
+          - StaticText "Overview"
+        - button "Progress" [ref=e218]
+          - StaticText "Progress"
+        - button "Architecture" [ref=e219]
+          - StaticText "Architecture"
+        - button "Agent Team" [ref=e220]
+          - StaticText "Agent Team"
+        - button "Business Flow" [ref=e221]
+          - StaticText "Business Flow"
+        - button "随手记" [ref=e222]
+          - StaticText "随手记"
+        - button "草稿：随手记" [ref=e223]
+          - StaticText "随手记"
+          - StaticText "设计草稿"
+        - button "草稿：随手记" [ref=e224]
+          - StaticText "随手记"
+          - StaticText "设计草稿"
+    - heading "SESSIONS" [level=2, ref=e203]
+    - generic
+      - heading "今天" [level=3, ref=e225]
+      - generic
+        - StaticText "CX"
+        - button "不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [ref=e234]
+        - button "更多操作 不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [expanded=false, ref=e235]
+        - image "Completed Unread"
+      - generic
+        - StaticText "CX"
+        - button "不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [ref=e236]
+        - button "更多操作 不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [expanded=false, ref=e237]
+        - image "Completed Unread"
+    - button "设置" [ref=e204]
+      - StaticText "设置"
+  - main
+    - region "工作台对话" [ref=e205]
+      - sectionheader
+        - StaticText "新对话"
+        - generic
+          - StaticText "· 随手记"
+        - combobox "工作台 CLI" [expanded=false, ref=e226]: Codex
+          - MenuListPopup
+            - option "选择 CLI" [disabled, ref=e242]
+            - option "Codex" [selected, ref=e243]
+            - option "Claude Code · 不可用" [disabled, ref=e244]
+      - heading "在 随手记 中继续工作" [level=2, ref=e212]
+      - paragraph
+        - StaticText "结合右侧页面继续对话。修改布局和交互，请使用“编辑工作台”。"
+      - heading "继续最近的对话" [level=3, ref=e213]
+      - button "不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [ref=e214]
+      - generic
+        - StaticText "当前工作台 · 随手记"
+        - button "移除上下文 workbench:4fee585e-bd14-4b95-9ef5-32f9568d58c6" [ref=e227]
+        - textbox "消息" [ref=e228]: jie
+          - StaticText "jie"
+        - button "Context / Attachment" [expanded=false, ref=e229]
+        - button "Reasoning Effort" [expanded=false, ref=e230]
+        - button "Model Selector" [expanded=false, ref=e231]
+          - StaticText "GPT-6.1-Sol（默认）"
+        - button "Send" [ref=e232]
+      - separator "调整对话列宽度" [ref=e215] focusable [tabindex]: 440
+    - region "Preview" [ref=e216]
+      - sectionheader
+        - StaticText "随手记"
+        - generic "右侧工具"
+          - button "Preview" [ref=e245]
+          - button "Files" [ref=e246]
+          - button "Search" [ref=e247]
+          - button "Diff" [ref=e248]
+          - button "Browser" [ref=e249]
+          - button "Terminal" [ref=e250]
+      - region "工作台实例" [ref=e233]
+        - StaticText "已添加至项目"
+        - button "刷新工作台预览" [ref=e238]
+        - button "编辑工作台" [ref=e239]
+        - button "停用工作台" [ref=e240]
+        - group
+          - DisclosureTriangle "插件信息与备份" [expanded=false]
+            - StaticText "插件信息与备份"
+        - status
+          - StaticText "包检查通过"
+          - StaticText "页面已连接"
+          - StaticText "已读取保存状态"
+        - Iframe "工作台页面" [ref=e241]

@@ -1,20 +1,20 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { WORKBENCH_MESSAGE, type WorkbenchSnapshot } from '@shared/workbench/types'
+import { WORKBENCH_MESSAGE, type WorkbenchPageSnapshot } from '@shared/workbench/types'
 import { attachWorkbenchPageBridge } from './page-bridge'
 
-const snapshot = (): WorkbenchSnapshot => ({
+const snapshot = (): WorkbenchPageSnapshot => ({
   target: { projectId: 'p', kind: 'instance', id: 'one' }, manifest: { schemaVersion: 1, sdkVersion: 1, pluginId: 'local.notes', title: 'Notes', version: '1.0.0', entry: 'index.html', capabilities: ['state.read', 'state.write', 'conversation.draft'] },
   state: { count: 1 }, stateRevision: 1, packageRevision: 'r1', pageUrl: 'app://workbench/one/index.html', enabled: true
 })
 let iframe: HTMLIFrameElement, frame: Window, dispose: () => void
-const updateState = vi.fn(), setDraft = vi.fn(), ready = vi.fn(), error = vi.fn()
-let current: WorkbenchSnapshot
+const updateState = vi.fn(), setDraft = vi.fn(), openSession = vi.fn(), ready = vi.fn(), error = vi.fn()
+let current: WorkbenchPageSnapshot
 function emit(data: object, source = frame) { window.dispatchEvent(new MessageEvent('message', { source, data: { channel: WORKBENCH_MESSAGE, ...data } })) }
 beforeEach(() => {
   vi.clearAllMocks(); current = snapshot()
   iframe = document.createElement('iframe'); document.body.append(iframe); frame = iframe.contentWindow!
   updateState.mockResolvedValue({ ...current, state: { count: 2 }, stateRevision: 2 }); setDraft.mockResolvedValue(undefined)
-  dispose = attachWorkbenchPageBridge({ frame, snapshot: () => current, updateState, setDraft, ready, error })
+  dispose = attachWorkbenchPageBridge({ frame, snapshot: () => current, updateState, setDraft, openSession, ready, error })
 })
 afterEach(() => { dispose(); iframe.remove(); vi.restoreAllMocks() })
 it('routes only the current page and stops requests after detach', async () => {
@@ -46,16 +46,30 @@ it('refuses unknown operations, malformed state and undeclared capabilities', as
 })
 it('does not answer a pending request after the page unmounts', async () => {
   const post = vi.spyOn(frame, 'postMessage')
-  let finish!: (snapshot: WorkbenchSnapshot) => void
-  updateState.mockImplementation(() => new Promise<WorkbenchSnapshot>(resolve => { finish = resolve }))
+  let finish!: (snapshot: WorkbenchPageSnapshot) => void
+  updateState.mockImplementation(() => new Promise<WorkbenchPageSnapshot>(resolve => { finish = resolve }))
   emit({ type: 'request', id: 'pending', method: 'updateState', params: { state: 2, expectedRevision: 1 } })
   dispose(); finish(current); await Promise.resolve(); await Promise.resolve()
   expect(post).not.toHaveBeenCalled()
 })
 it('re-mounting does not keep duplicate listeners and reports page failures', () => {
   dispose()
-  dispose = attachWorkbenchPageBridge({ frame, snapshot: () => current, updateState, setDraft, ready, error })
+  dispose = attachWorkbenchPageBridge({ frame, snapshot: () => current, updateState, setDraft, openSession, ready, error })
   emit({ type: 'ready' }); emit({ type: 'error', message: 'ReferenceError: missing function' })
   expect(ready).toHaveBeenCalledTimes(1)
   expect(error).toHaveBeenCalledExactlyOnceWith('ReferenceError: missing function')
+})
+
+it('requires the same session.open capability for every page and validates action parameters', async () => {
+  const post = vi.spyOn(frame, 'postMessage')
+  emit({ type: 'request', id: 'denied-open', method: 'openSession', params: { sessionId: 's' } })
+  await vi.waitFor(() => expect(post).toHaveBeenCalledWith(expect.objectContaining({ id: 'denied-open', ok: false, error: '此工作台未声明打开对话能力' }), '*'))
+  expect(openSession).not.toHaveBeenCalled()
+  current.manifest.capabilities.push('session.open')
+  emit({ type: 'request', id: 'open', method: 'openSession', params: { sessionId: 's' } })
+  await vi.waitFor(() => expect(openSession).toHaveBeenCalledWith('s', expect.any(Function)))
+  emit({ type: 'request', id: 'invalid-draft', method: 'setDraft', params: { text: 'Draft', target: 'send' } })
+  emit({ type: 'request', id: 'new-draft', method: 'setDraft', params: { text: 'Draft', target: 'new' } })
+  await vi.waitFor(() => expect(setDraft).toHaveBeenCalledExactlyOnceWith('Draft', expect.any(Function), 'new'))
+  expect(post).toHaveBeenCalledWith(expect.objectContaining({ id: 'invalid-draft', ok: false }), '*')
 })

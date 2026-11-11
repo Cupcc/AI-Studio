@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
@@ -30,10 +30,22 @@ async function template() {
 }
 
 test('AC-WB mechanism: template, state, navigation, disable/reopen and restart', async () => {
+  const navigation = workspace().getByRole('region', { name: '工作台', exact: true })
+  await expect(navigation).toHaveCount(1)
+  for (const title of ['Overview', 'Progress', 'Architecture', 'Agent Team', 'Business Flow']) {
+    await expect(navigation.getByRole('button', { name: title, exact: true })).toBeVisible()
+  }
+  await expect(workspace().getByRole('heading', { name: 'PROJECT VIEWS', exact: true })).toHaveCount(0)
+  expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
+  await navigation.getByRole('button', { name: 'Business Flow', exact: true }).click()
+  await expect(plugin().getByRole('button', { name: '生成 Business Flow', exact: true })).toBeVisible()
+  await expect(workspace().getByRole('region', { name: '工作台对话', exact: true })).toBeVisible()
+  expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
   await template()
   await expect(workspace().locator('[data-session-row]')).toHaveCount(0)
   await workspace().getByRole('button', { name: '添加至当前项目', exact: true }).click()
   await expect(workspace().getByRole('region', { name: '工作台实例', exact: true })).toBeVisible()
+  await expect(navigation.getByRole('button', { name: '随手记', exact: true })).toBeVisible()
   await plugin().getByRole('button', { name: '增加一次', exact: true }).click()
   await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')
   await plugin().getByRole('textbox', { name: '笔记', exact: true }).fill('已保存的项目笔记')
@@ -44,7 +56,7 @@ test('AC-WB mechanism: template, state, navigation, disable/reopen and restart',
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toContainText('已有草稿')
   await expect(workspace().locator('[data-session-row]')).toHaveCount(0)
   await workspace().getByRole('button', { name: 'Overview', exact: true }).click()
-  await expect(page.locator('iframe[title="工作台页面"]')).toHaveCount(0)
+  await expect(plugin().getByRole('button', { name: '生成 Overview', exact: true })).toBeVisible()
   await workspace().getByRole('button', { name: '随手记', exact: true }).click()
   await expect(plugin().getByRole('textbox', { name: '笔记', exact: true })).toHaveValue('已保存的项目笔记')
   await workspace().getByRole('button', { name: '停用工作台', exact: true }).click()
@@ -89,8 +101,7 @@ test('AC-WB mechanism: isolated edit preview, actionable errors and applying one
   await expect(plugin().getByRole('heading', { name: '随手记', exact: true })).toBeVisible()
   await expect(plugin().getByRole('heading', { name: '我的项目笔记', exact: true })).toHaveCount(0)
   await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')
-  await workspace().locator('.workbench-drafts summary').click()
-  await workspace().locator('.workbench-drafts button').last().click()
+  await workspace().getByRole('region', { name: '工作台', exact: true }).getByRole('button', { name: '草稿：随手记', exact: true }).last().click()
   await workspace().getByRole('button', { name: '应用更改', exact: true }).click()
   await expect(plugin().getByRole('heading', { name: '我的项目笔记', exact: true })).toBeVisible()
   await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')

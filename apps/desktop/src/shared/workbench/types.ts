@@ -1,6 +1,10 @@
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue }
 
-export const WORKBENCH_CAPABILITIES = ['state.read', 'state.write', 'conversation.draft'] as const
+import type { ViewState } from '../project-view/types'
+import type { SessionSummary } from '../session/types'
+import { isPresetWorkbenchId, type PresetWorkbenchEntry, type PresetWorkbenchId } from './presets'
+
+export const WORKBENCH_CAPABILITIES = ['state.read', 'state.write', 'conversation.draft', 'project.knowledge.read', 'project.sessions.read', 'session.open'] as const
 export type WorkbenchCapability = typeof WORKBENCH_CAPABILITIES[number]
 
 export interface PluginManifest {
@@ -11,20 +15,29 @@ export interface PluginManifest {
   title: string
   entry: string
   capabilities: WorkbenchCapability[]
+  knowledgeViewId?: PresetWorkbenchId
 }
 
 export type WorkbenchTarget = { projectId: string; kind: 'draft'; id: string } | { projectId: string; kind: 'instance'; id: string }
-export type WorkbenchViewId = `workbench:${string}` | `workbench-draft:${string}`
+export type InstanceWorkbenchId = `workbench:${string}`
+export type DraftWorkbenchId = `workbench-draft:${string}`
+export type CustomWorkbenchId = InstanceWorkbenchId | DraftWorkbenchId
+export type WorkbenchId = PresetWorkbenchId | CustomWorkbenchId
 
-export function isWorkbenchViewId(value: unknown): value is WorkbenchViewId {
+export function isCustomWorkbenchId(value: unknown): value is CustomWorkbenchId {
   return typeof value === 'string' && /^workbench(?:-draft)?:[a-zA-Z0-9-]{1,100}$/.test(value)
 }
 
-export function workbenchViewId(target: Pick<WorkbenchTarget, 'kind' | 'id'>): WorkbenchViewId {
+export function isWorkbenchId(value: unknown): value is WorkbenchId {
+  return isPresetWorkbenchId(value) || isCustomWorkbenchId(value)
+}
+
+export function workbenchViewId(target: Pick<WorkbenchTarget, 'kind' | 'id'>): CustomWorkbenchId {
   return target.kind === 'draft' ? `workbench-draft:${target.id}` : `workbench:${target.id}`
 }
 
-export function workbenchTarget(projectId: string, viewId: WorkbenchViewId): WorkbenchTarget {
+export function workbenchTarget(projectId: string, viewId: WorkbenchId): WorkbenchTarget {
+  if (isPresetWorkbenchId(viewId)) return { projectId, kind: 'instance', id: viewId }
   return { projectId, kind: viewId.startsWith('workbench-draft:') ? 'draft' : 'instance', id: viewId.slice(viewId.indexOf(':') + 1) }
 }
 
@@ -46,12 +59,8 @@ export interface WorkbenchInstance {
   enabled: boolean
 }
 
-export interface WorkbenchCatalog {
-  instances: WorkbenchInstance[]
-  drafts: WorkbenchDraft[]
-}
-
-export interface WorkbenchSnapshot {
+/** SDK 1 page payload. The host envelope is separate from this stable page contract. */
+export interface WorkbenchPageSnapshot {
   target: WorkbenchTarget
   manifest: PluginManifest
   packageRevision: string
@@ -59,14 +68,64 @@ export interface WorkbenchSnapshot {
   stateRevision: number
   pageUrl: string
   enabled: boolean
+  resources?: WorkbenchPageResources
+  appearance?: { dark: boolean; variables: Record<string, string> }
+}
+
+export type WorkbenchSessionLink = Pick<SessionSummary, 'id' | 'title' | 'activity' | 'status' | 'lastOutcome' | 'updatedAt' | 'lastUserMessageAt' | 'createdAt'>
+export interface WorkbenchPageResources {
+  knowledge?: ViewState
+  sessions?: WorkbenchSessionLink[]
 }
 
 /** These methods are bound to one mounted page; pages never choose an instance ID. */
 export interface WorkbenchPageApi {
-  getInstance(): Promise<WorkbenchSnapshot>
-  updateState(state: JsonValue, expectedRevision: number): Promise<WorkbenchSnapshot>
-  subscribe(listener: (snapshot: WorkbenchSnapshot) => void): () => void
-  setDraft(text: string): Promise<void>
+  getInstance(): Promise<WorkbenchPageSnapshot>
+  updateState(state: JsonValue, expectedRevision: number): Promise<WorkbenchPageSnapshot>
+  subscribe(listener: (snapshot: WorkbenchPageSnapshot) => void): () => void
+  setDraft(text: string, options?: { target: 'current' | 'new' }): Promise<void>
+  openSession(sessionId: string): Promise<void>
 }
 
 export const WORKBENCH_MESSAGE = 'ai-studio-workbench-v1'
+
+
+export interface WorkbenchRef { projectId: string; viewId: WorkbenchId }
+export interface CustomWorkbenchRef extends WorkbenchRef { viewId: CustomWorkbenchId }
+export interface PresetWorkbenchRef extends WorkbenchRef { viewId: PresetWorkbenchId }
+export interface InstanceWorkbenchRef extends CustomWorkbenchRef { viewId: InstanceWorkbenchId }
+export interface DraftWorkbenchRef extends CustomWorkbenchRef { viewId: DraftWorkbenchId }
+
+export interface CustomInstanceEntry extends WorkbenchInstance {
+  viewId: InstanceWorkbenchId
+  origin: 'custom'
+  kind: 'instance'
+  icon: 'preview'
+  editable: true
+  canDisable: true
+}
+export interface CustomDraftEntry extends WorkbenchDraft {
+  viewId: DraftWorkbenchId
+  origin: 'custom'
+  kind: 'draft'
+  icon: 'pencil'
+  editable: true
+  canDisable: false
+}
+export type CustomWorkbenchEntry = CustomInstanceEntry | CustomDraftEntry
+export type WorkbenchEntry = PresetWorkbenchEntry | CustomWorkbenchEntry
+export type WorkbenchCatalog = readonly WorkbenchEntry[]
+
+export interface WorkbenchSnapshot {
+  ref: WorkbenchRef
+  entry: WorkbenchEntry
+  /** Host read/event ordering, independent of the page's stateRevision CAS token. */
+  revision: number
+  status: 'ready' | 'error' | 'disabled'
+  error: string | null
+  page: WorkbenchPageSnapshot | null
+}
+export interface WorkbenchContext { originViewId: WorkbenchId; paths: string[]; text: string }
+export type WorkbenchChange =
+  | { kind: 'catalog'; projectId: string }
+  | { kind: 'snapshot'; snapshot: WorkbenchSnapshot }

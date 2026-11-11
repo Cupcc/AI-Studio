@@ -1,13 +1,13 @@
-import { workbenchViewId, type WorkbenchDraft } from '@shared/workbench/types'
+import type { CustomDraftEntry } from '@shared/workbench/types'
 import { useProjectShell } from '../project/store'
 import { draftId, useSessions } from '../session/store'
 import { workbenchApi } from './api'
 import { useWorkbenches } from './store'
 
-export async function openWorkbenchDraft(projectId: string, source: 'template' | 'ai', instanceId?: string): Promise<WorkbenchDraft> {
+export async function openWorkbenchDraft(projectId: string, source: 'template' | 'ai', instanceId?: string): Promise<CustomDraftEntry> {
   const draft = await workbenchApi().createDraft({ projectId, source, ...(instanceId ? { instanceId } : {}) })
-  await useWorkbenches.getState().load(projectId)
-  const viewId = workbenchViewId({ kind: 'draft', id: draft.id })
+  await useWorkbenches.getState().loadCatalog(projectId)
+  const viewId = draft.viewId
   useProjectShell.getState().enterView(projectId, viewId)
   const key = { projectId, kind: 'new_chat' as const, viewId }
   await useSessions.getState().loadDraft(key)

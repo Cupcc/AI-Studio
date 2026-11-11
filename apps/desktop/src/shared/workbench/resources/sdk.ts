@@ -46,7 +46,8 @@ export const PAGE_SDK = String.raw`(() => {
     getInstance: () => send('getInstance', {}),
     updateState: (state, expectedRevision) => send('updateState', { state, expectedRevision }),
     subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); },
-    setDraft: text => send('setDraft', { text })
+    setDraft: (text, options) => send('setDraft', { text, target: options?.target ?? 'current' }),
+    openSession: sessionId => send('openSession', { sessionId })
   }), writable: false });
   const ready = () => parent.postMessage({ channel, type: 'ready' }, '*');
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready, { once: true });
@@ -54,20 +55,56 @@ export const PAGE_SDK = String.raw`(() => {
 })();`
 
 export const SDK_TYPES = `type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue }
+type WorkbenchCapability = 'state.read' | 'state.write' | 'conversation.draft' | 'project.knowledge.read' | 'project.sessions.read' | 'session.open'
+interface ViewNode {
+  type: 'stack' | 'grid' | 'section' | 'text' | 'metric' | 'badge' | 'list' | 'table' | 'timeline' | 'diagram' | 'callout' | 'empty'
+  bind?: string
+  props?: { title?: string; variant?: 'default' | 'muted' | 'accent'; direction?: 'horizontal' | 'vertical'; columns?: string[] }
+  children?: ViewNode[]
+}
+interface WorkbenchKnowledgeResource {
+  projectId: string
+  viewId: string
+  revision: number
+  status: 'empty' | 'loading' | 'ready' | 'stale' | 'error'
+  error: string | null
+  snapshot: null | {
+    projectId: string
+    viewId: string
+    catalog: { id: string; title: string; kind: 'builtin'; order: number }
+    knowledge: null | { schemaVersion: 1; viewId: string; data: Record<string, JsonValue>; example?: boolean }
+    definition: { schemaVersion: 1; viewId: string; root: ViewNode; bindings: Record<string, string> }
+    revision: number
+    updatedAt: number
+  }
+}
+interface WorkbenchSessionLink {
+  id: string
+  title: string
+  activity: 'none' | 'running' | 'needs_input'
+  status: 'running' | 'needs_input' | 'error' | 'completed_unread' | null
+  lastOutcome?: 'completed' | 'interrupted' | 'failed'
+  updatedAt: number
+  lastUserMessageAt: number
+  createdAt: number
+}
 interface WorkbenchSnapshot {
   target: { projectId: string; kind: 'draft' | 'instance'; id: string }
-  manifest: { schemaVersion: 1; pluginId: string; version: string; sdkVersion: 1; title: string; entry: string; capabilities: ('state.read' | 'state.write' | 'conversation.draft')[] }
+  manifest: { schemaVersion: 1; pluginId: string; version: string; sdkVersion: 1; title: string; entry: string; capabilities: WorkbenchCapability[]; knowledgeViewId?: 'overview' | 'progress' | 'architecture' | 'agent-team' | 'business-flow' }
   packageRevision: string
   state: JsonValue
   stateRevision: number
   pageUrl: string
   enabled: boolean
+  resources?: { knowledge?: WorkbenchKnowledgeResource; sessions?: WorkbenchSessionLink[] }
+  appearance?: { dark: boolean; variables: Record<string, string> }
 }
 interface WorkbenchPageApi {
   getInstance(): Promise<WorkbenchSnapshot>
   updateState(state: JsonValue, expectedRevision: number): Promise<WorkbenchSnapshot>
   subscribe(listener: (snapshot: WorkbenchSnapshot) => void): () => void
-  setDraft(text: string): Promise<void>
+  setDraft(text: string, options?: { target: 'current' | 'new' }): Promise<void>
+  openSession(sessionId: string): Promise<void>
 }
 interface Window { readonly workbench: WorkbenchPageApi }
 `

@@ -1,0 +1,117 @@
+- generic [ref=e1] clickable [onclick]
+  - banner
+    - button "折叠导航" [ref=e3]
+    - tablist "Projects"
+      - tab "Unified Review Project" [selected, ref=e14]
+        - StaticText "Unified Review Project"
+      - button "关闭 Unified Review Project" [ref=e15]
+    - button "新建标签页" [ref=e4]
+    - button "右侧边栏" [ref=e5]
+  - complementary "Project 导航"
+    - button "New Chat" [ref=e16]
+    - button "选择 CLI" [expanded=false, ref=e17]
+    - region "工作台" [ref=e9]
+      - heading "工作台" [level=2, ref=e18]
+      - button "添加工作台" [expanded=false, ref=e19]
+      - generic "工作台列表"
+        - button "Overview" [ref=e23]
+          - StaticText "Overview"
+        - button "Progress" [ref=e24]
+          - StaticText "Progress"
+        - button "Architecture" [ref=e25]
+          - StaticText "Architecture"
+        - button "Agent Team" [ref=e26]
+          - StaticText "Agent Team"
+        - button "Business Flow" [ref=e27]
+          - StaticText "Business Flow"
+        - button "随手记" [ref=e99]
+          - StaticText "随手记"
+        - button "草稿：随手记" [ref=e79]
+          - StaticText "随手记"
+          - StaticText "设计草稿"
+    - heading "SESSIONS" [level=2, ref=e10]
+    - generic
+      - heading "今天" [level=3, ref=e63]
+      - generic
+        - StaticText "CX"
+        - button "不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [ref=e123]
+        - button "更多操作 不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [expanded=false, ref=e124]
+        - image "Completed Unread"
+      - generic
+        - StaticText "CX"
+        - button "不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [ref=e71]
+        - button "更多操作 不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…" [expanded=false, ref=e72]
+        - image "Completed Unread"
+    - button "设置" [ref=e12]
+      - StaticText "设置"
+  - main
+    - region "工作台对话" [ref=e13]
+      - sectionheader
+        - StaticText "CX"
+        - StaticText "不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行…"
+        - button "新对话" [ref=e116]
+      - generic "对话记录" [ref=e115] focusable [tabindex]
+        - article
+          - group
+            - DisclosureTriangle "当前工作台" [expanded=false]
+              - StaticText "当前工作台"
+          - paragraph
+            - StaticText "不要读取或修改任何文件，不要运行命令。只根据本轮随消息附加的工作台上下文回复一行：UNIFIED_CUSTOM_CONTEXT_OK | <当前工作台名称> | <当前已保存状态中的 note>。若没有附加上下文则回复 NO_CONTEXT。"
+        - group
+          - DisclosureTriangle "推理摘要" [expanded=false]
+            - StaticText "推理摘要"
+        - article
+          - paragraph
+            - StaticText "UNIFIED_CUSTOM_CONTEXT_OK | 随手记 | UNIFIED_NOTE_20261111"
+        - StaticText "Worked for "
+        - StaticText "15s"
+        - StaticText " · "
+        - StaticText "Done"
+        - button "查看本轮变更" [ref=e117]
+      - generic
+        - textbox "消息" [ref=e118]
+          - StaticText "向 Codex CLI 发送消息…"
+        - button "Context / Attachment" [expanded=false, ref=e119]
+        - button "Reasoning Effort" [expanded=false, ref=e120]
+        - button "Model Selector" [expanded=false, ref=e121]
+          - StaticText "GPT-6.1-Sol（默认）"
+        - button "Send" [disabled, ref=e122]
+          - StaticText "Enter 发送 · Shift + Enter 换行"
+      - separator "调整对话列宽度" [ref=e21] focusable [tabindex]: 440
+    - region "Preview" [ref=e22]
+      - sectionheader
+        - StaticText "随手记"
+        - generic "右侧工具"
+          - button "Preview" [ref=e41]
+          - button "Files" [ref=e42]
+          - button "Search" [ref=e43]
+          - button "Diff" [ref=e44]
+          - button "Browser" [ref=e45]
+          - button "Terminal" [ref=e46]
+      - region "工作台实例" [ref=e105]
+        - StaticText "已添加至项目"
+        - button "刷新工作台预览" [ref=e106]
+        - button "编辑工作台" [ref=e107]
+        - button "停用工作台" [ref=e108]
+        - group
+          - DisclosureTriangle "插件信息与备份" [expanded=false]
+            - StaticText "插件信息与备份"
+        - status
+          - StaticText "包检查通过"
+          - StaticText "页面已连接"
+          - StaticText "已读取保存状态"
+        - Iframe "工作台页面" [ref=e109]
+          - heading "随手记" [level=1, ref=e110]
+          - paragraph
+            - StaticText "记录一个想法，或用计数器跟进进度。内容保存在当前工作台。"
+          - status "计数"
+            - StaticText "1"
+          - button "增加一次" [ref=e111]
+          - LabelText
+            - StaticText "笔记"
+          - textbox "笔记" [ref=e112]: UNIFIED_NOTE_20261111
+            - StaticText "UNIFIED_NOTE_20261111"
+          - button "保存笔记" [ref=e113]
+          - button "填入对话" [ref=e114]
+          - status
+            - StaticText "内容已保存"

@@ -3,14 +3,90 @@
   "title": "AI Studio Workbench manifest v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "pluginId", "version", "sdkVersion", "title", "entry", "capabilities"],
+  "required": [
+    "schemaVersion",
+    "pluginId",
+    "version",
+    "sdkVersion",
+    "title",
+    "entry",
+    "capabilities"
+  ],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "pluginId": { "type": "string", "maxLength": 80, "pattern": "^[a-z][a-z0-9-]*$" },
-    "version": { "type": "string", "maxLength": 64, "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][\\w.-]+)?$" },
-    "sdkVersion": { "const": 1 },
-    "title": { "type": "string", "minLength": 1, "maxLength": 80 },
-    "entry": { "type": "string", "minLength": 1, "maxLength": 512, "description": "HTML path relative to this package; no absolute path, backslash, empty component, . or .." },
-    "capabilities": { "type": "array", "uniqueItems": true, "items": { "enum": ["state.read", "state.write", "conversation.draft"] } }
-  }
+    "schemaVersion": {
+      "const": 1
+    },
+    "pluginId": {
+      "type": "string",
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "version": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:[-+][\\w.-]+)?$"
+    },
+    "sdkVersion": {
+      "const": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "entry": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "HTML path relative to this package; no absolute path, backslash, empty component, . or .."
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "state.read",
+          "state.write",
+          "conversation.draft",
+          "project.knowledge.read",
+          "project.sessions.read",
+          "session.open"
+        ]
+      }
+    },
+    "knowledgeViewId": {
+      "enum": [
+        "overview",
+        "progress",
+        "architecture",
+        "agent-team",
+        "business-flow"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "capabilities": {
+            "contains": {
+              "const": "project.knowledge.read"
+            }
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "knowledgeViewId"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "knowledgeViewId"
+          ]
+        }
+      }
+    }
+  ]
 }

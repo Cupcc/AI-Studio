@@ -1,4 +1,4 @@
-# 用户自定义工作台
+# 工作台
 
 ## 文档信息
 
@@ -16,7 +16,7 @@
 
 ## 1. 职责与后续事项
 
-本模块复用 Project、Navigation 和普通 CLI Session，负责自定义页面及其内容状态。五个默认 View 继续由 [Project View spec](../project-view/spec.md)负责。
+本模块复用 Project、Navigation 和普通 CLI Session，负责所有工作台的宿主架构。预设与自定义的产品概念由 [01 Workbench](<../../docs/01. Product Definition.md#workbench>)负责（2026-11-11，DEC-29）。预设网页包使用的 Knowledge 与 Definition 数据由 [Project View spec](../project-view/spec.md)负责；宿主统一契约见 §9.7。
 
 按 2026-11-11 对话决定，当前实施插件机制。下面列出分层要求，最小机制契约见 §9；阶段状态见[路线图](<../../docs/06. Development Roadmap.md#42-插件架构与工作台建设>)。
 
@@ -314,7 +314,7 @@ brand-illustration/
 
 ## 9. FR-WB-001、006～008 最小插件机制实现契约
 
-依据：用户 2026-11-11 确认 09 方案并授权 agent team 开发至 Harness 对照验收。以下是 Main Agent 在授权范围内确定的技术设计；实现与验收状态由[本次任务](../../tasks/archive/T20261111-workbench-plugins/task.md)维护。§2～8 中的位置、产物、生成执行和分享方案仍属于后续业务。
+依据：用户 2026-11-11 确认 09 方案并授权 agent team 开发至 Harness 对照验收。以下是 Main Agent 在授权范围内确定的技术设计；实现与验收状态由[本次任务](../../.agents/archive/tasks/T20261111-workbench-plugins/task.md)维护。§2～8 中的位置、产物、生成执行和分享方案仍属于后续业务。
 
 ### 9.1 模块与依赖
 
@@ -335,13 +335,13 @@ flowchart LR
     CLI --> Files
 ```
 
-宿主管理包校验、版本快照、实例状态和文件响应。Renderer 管理导航、预览、保存反馈和当前页面通信。页面只处理自身呈现和交互。Session 仍独立负责模型请求、历史和 Stop。关闭页面不调用 Stop。默认 Project View 的声明式渲染、Knowledge 和文件监视保持原职责。
+宿主管理包校验、版本快照、实例状态和文件响应。Renderer 管理导航、预览、保存反馈和当前页面通信。页面只处理自身呈现和交互。Session 仍独立负责模型请求、历史和 Stop。关闭页面不调用 Stop。所有页面使用同一种 Web 包运行方式。Knowledge 的校验、文件监视和 last-good 作为通用数据资源提供，详见 §9.7。
 
 ### 9.2 清单、包修订与实例
 
 最小包由 `manifest.json` 与本地 HTML 入口组成，可包含 JS、CSS 和静态资源。清单字段以 [PluginManifest](../../apps/desktop/src/shared/workbench/types.ts)为准：`schemaVersion: 1`、`pluginId`、`version`、`sdkVersion: 1`、`title`、`entry`、`capabilities`。首期能力仅为 `state.read`、`state.write` 和 `conversation.draft`，没有图片位置或出图能力要求。能力清单不授予 Node、文件系统、CLI、密钥或付费工具访问权。
 
-草稿位于 `.ai-studio/workbench/drafts/<draftId>/`，应用时携带已预览的 `expectedPackageRevision`，校验当前文件仍对应同一修订后复制到 `.ai-studio/workbench/packages/<revision>/`。文件在预览后变化时须重新预览。修订按内容固定。实例引用该修订，修改草稿不会改变已经打开的实例。包身份和版本描述可复用页面，实例 ID 标识当前 Project 的状态；导航使用 `workbench:<instanceId>`，编辑使用 `workbench-draft:<draftId>`。不向五个默认 View ID 列表添加具体插件。
+草稿位于 `.ai-studio/workbench/drafts/<draftId>/`，应用时携带已预览的 `expectedPackageRevision`，校验当前文件仍对应同一修订后复制到 `.ai-studio/workbench/packages/<revision>/`。文件在预览后变化时须重新预览。修订按内容固定。实例引用该修订，修改草稿不会改变已经打开的实例。包身份和版本描述可复用页面，实例 ID 标识当前 Project 的状态；导航使用 `workbench:<instanceId>`，编辑使用 `workbench-draft:<draftId>`。统一目录由 App 预设、Project 内实例及设计草稿合成，预设声明是其稳定 ID、标题及顺序的唯一来源。
 
 SQLite 保存草稿来源、编辑目标、实例与包修订的绑定、启用状态及 JSON 状态版本。编辑应用只改变目标实例的包修订，保留其当前已保存状态；预览操作使用草稿自身状态，首次添加保留该草稿已保存状态。其他实例不随编辑更新。所有页面状态写入都经过宿主，带 `expectedRevision`，冲突返回错误供页面重读。该 JSON 状态接口不等于后续业务的文件产物协议。
 
@@ -354,7 +354,7 @@ SQLite 保存草稿来源、编辑目标、实例与包修订的绑定、启用�
 | `getInstance()` | 读取当前挂载对象的清单、状态和修订 |
 | `updateState(state, expectedRevision)` | 校验并保存 JSON 状态，返回实际保存快照 |
 | `subscribe(listener)` | 接收当前对象的状态快照；返回取消订阅函数 |
-| `setDraft(text)` | 填入可编辑的普通对话草稿，由用户发送 |
+| `setDraft(text, options?)` | 填入可编辑的普通对话草稿，由用户发送 |
 
 宿主桥只处理当前 iframe 的消息，卸载时注销监听和订阅。页面加载、包校验和状态保存分别反馈；加载错误或脚本异常提供重试。停用卸载页面，保留实例与状态；启用后读取已保存状态，不重新发起模型调用。首期不增加完整包卸载、实例删除和管理中心。
 
@@ -371,3 +371,56 @@ SQLite 保存草稿来源、编辑目标、实例与包修订的绑定、启用�
 ### 9.6 Harness 对照边界
 
 对照 [Harness 固定源码](../../docs/references/deepseek-harness/README.md)中的 Creator 开发资料、普通会话创建、导航注册、页面加载、宿主操作和清理原则。AI Studio 保留独立草稿预览和 Project 实例；本期不引入 Cordis、profile patch、依赖注入容器、通用模块图、任意后端代码或 DSH 包兼容。真实 CLI 与 UI 结果由任务证据证明，文件存在或模型回复均不能代替可用性验收。
+
+### 9.7 预设与自定义工作台统一宿主
+
+所有工作台使用相同的标准网页插件包、校验、资源服务、iframe、SDK、快照和生命周期。预设包由 App 分发，自定义包来自项目草稿；来源只决定资源位置和已有管理操作，不选择另一种页面格式或 Renderer。产品决定见 [DEC-29](<../../docs/07. Decisions.md#dec-29-预设与自定义工作台统一架构>)，本轮实施与验证见[网页格式统一任务](../../.agents/archive/tasks/T20261111-workbench-web-format/task.md)。
+
+```mermaid
+flowchart LR
+    App[App 分发的标准网页包] --> Packages[同一包校验与资源服务]
+    Custom[项目自定义网页包] --> Packages
+    Packages --> Frame[同一 iframe 与页面 SDK]
+    Frame --> Content[包内 HTML CSS JavaScript]
+    Host[WorkbenchService] --> Packages
+    Knowledge[Knowledge 校验监视与 last-good] --> Host
+    Host --> Snapshot[统一页面快照与资源]
+    Sessions[当前 Project 的 Session 摘要] --> Snapshot
+    Snapshot --> Frame
+    Frame --> Actions[公共草稿与打开会话操作]
+```
+
+#### 标准包与交付
+
+五个预设均包含 `manifest.json`、HTML 入口和包内 JavaScript、CSS 资源。清单使用同一 `PluginManifest` Schema；生成后的完整包经同一 `readPackage` 校验、引用检查和内容修订计算。构建生成的预设包位于应用 `out/workbench-packages/`，实际桌面包包含同一目录。运行时不依赖源码目录、开发服务器、CDN 或预设专用协议。
+
+预设的页面内容全部位于 iframe，包括知识展示、错误与空态、生成按钮及 Overview 的三个 Session 分组。Knowledge Definition 可以由包内脚本解释；它是页面的业务数据，不是宿主的另一种页面运行方式。宿主不保留原生 KnowledgePreview、Overview 内容组件或按 `runtime` 选择 Renderer 的分支。
+
+预设包复制为普通自定义草稿后，使用相同的资源声明、SDK 与页面操作即可运行，不依赖预设 ID 的隐藏通道。
+
+#### 目录、身份与快照
+
+`WorkbenchService` 统一提供目录、`{ projectId, viewId }` 定位、上下文、快照与 `workbench` typed IPC。预设清单是标题与包信息的来源；App 注册信息维护稳定路由和默认顺序。预设仍是 Project 内的虚拟实例，打开不插入实例记录或创建事实文件。
+
+保留 `overview`、`progress`、`architecture`、`agent-team`、`business-flow`、`workbench:<id>` 和 `workbench-draft:<id>`。已有 MainCanvas、Session 的 `originViewId`、输入草稿键及 Knowledge 路径不迁移。
+
+`WorkbenchSnapshot` 统一包含定位、目录条目、读取状态、错误、宿主排序版本及页面快照，不再按声明式或 Web 划分类型。页面保留 SDK 1 的 target、清单、包修订、JSON state、stateRevision、资源地址和启用状态。宿主排序版本用于异步读取和事件去重，stateRevision 仅用于 JSON 状态 CAS。
+
+#### 公共数据能力与页面操作
+
+| 声明或操作 | 数据与边界 |
+|---|---|
+| `project.knowledge.read` 与 `knowledgeViewId` | 指定已有 Knowledge/Definition 源，宿主读取、校验、监视并在 `resources.knowledge` 中提供状态、错误及 last-good 文档；任何来源的包均可声明 |
+| `project.sessions.read` | 在 `resources.sessions` 中提供当前 Project 的最小 Session 摘要，页面自行完成排序和分组，不提供 transcript、凭据或其他 Project 的数据 |
+| `session.open` 与 `openSession()` | 通过当前挂载工作台打开同 Project 的已有会话；校验所属关系和页面仍有效，不创建、发送或停止 Session |
+| `conversation.draft` 与 `setDraft()` | 默认填写当前对话草稿；`target: new` 进入当前工作台的新对话草稿。两者均由用户确认发送 |
+
+资源随既有 `getInstance()` 与 `subscribe()` 通道更新。Knowledge 错误保留 last-good 资源和当前页面，不能把正常网页包判成加载失败或改变 iframe 地址。自定义包请求同一能力时获得相同协议；不能只为预设提供未声明特权。
+
+页面只通过绑定到当前挂载实例的 SDK 访问宿主。Session 仍拥有会话状态，Knowledge 文件仍是知识事实的唯一来源，JSON state 继续由宿主 CAS 管理；不把 Knowledge 另存成可写的 SQLite 事实副本。
+
+#### 生命周期与通用呈现
+
+一个 Renderer store 保存全部工作台目录、页面快照与临时缩放状态。所有网页包共享 iframe、运行反馈、资源订阅及缩放控件。主题通过公共页面环境提供，不直接读取父窗口 DOM 或宿主 store。Project 关闭后清理缓存与监听，拒绝迟到的读取和页面动作。
+
+首次附带上下文发送才初始化 Knowledge 辅助文件；进入页面、读取资源和刷新不创建 Session 或生成内容。普通实例的知识上下文根据清单的数据绑定构造，设计草稿仍进入包编辑上下文。后续图片业务的逐轮上下文另按 §4.2 接入。

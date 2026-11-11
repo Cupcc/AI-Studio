@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSyn
 import { execFileSync, spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { changedDocuments, handleHook, hookFailure, runLinkCheck } from './agent-docs-hook.mjs'
+import { changedDocuments, handleHook, hookFailure } from './agent-docs-hook.mjs'
 
 const temporary = []
 beforeEach(() => {
@@ -30,110 +30,71 @@ function fixture({ start = true } = {}) {
   write('docs/中文 空格.md', '# 标题\n')
   git(['add', '.'])
   git(['commit', '-qm', 'fixture'])
-  const check = vi.fn(() => ({ ok: true, detail: 'pass' }))
   const call = (event, extra = {}) => handleHook({
-    session_id: 'session-a', turn_id: 'turn-a', hook_event_name: event,
+    session_id: 'session-a', hook_event_name: event,
     tool_name: 'Bash', tool_input: { command: 'arbitrary script' }, ...extra
-  }, { root, check })
-  if (start) call('SessionStart', { source: 'startup' })
-  return { root, git, write, check, call }
+  }, { root })
+  if (start) call('SessionStart')
+  return { root, git, write, call }
 }
 
-test('SessionStart baselines pre-existing documentation changes', () => {
-  const { write, call, check } = fixture({ start: false })
+test('SessionStart baselines pre-existing changes, including on resume', () => {
+  const { write, call } = fixture({ start: false })
   write('README.md', '# Changed before session')
-  expect(call('SessionStart', { source: 'startup' })).toEqual({})
-  expect(call('Stop')).toEqual({})
-  expect(check).not.toHaveBeenCalled()
+  expect(call('SessionStart')).toEqual({})
+  expect(call('PostToolUse')).toEqual({})
   write('README.md', '# Changed during session')
+  expect(call('SessionStart')).toEqual({})
   expect(call('PostToolUse').hookSpecificOutput).toBeDefined()
-  // Already reminded and links passed: Stop must not request a redundant turn.
-  expect(call('Stop')).toEqual({})
-  expect(check).toHaveBeenCalledTimes(1)
 })
 
-test('clean and code-only tools do not remind or invoke the link checker', () => {
-  const { write, call, check } = fixture()
+test('clean and code-only tools do not remind', () => {
+  const { write, call } = fixture()
   expect(call('PostToolUse')).toEqual({})
   write('source.ts', 'export const a = 1')
   expect(call('PostToolUse')).toEqual({})
-  expect(call('Stop')).toEqual({})
-  expect(check).not.toHaveBeenCalled()
 })
 
-test('Shell edits are detected from disk; repeated edits remind once and check once at Stop', () => {
-  const { write, call, check } = fixture()
+test('Shell edits remind once per session and name only changed documents', () => {
+  const { write, call } = fixture({ start: false })
+  write('README.md', '# Pre-existing change')
+  call('SessionStart')
   write('docs/中文 空格.md', '# Changed')
-  expect(call('PostToolUse').hookSpecificOutput.additionalContext).toContain('中文 空格.md')
+  const message = call('PostToolUse').hookSpecificOutput.additionalContext
+  expect(message).toContain('中文 空格.md')
+  expect(message).not.toContain('README.md')
   expect(call('PostToolUse')).toEqual({})
   write('docs/中文 空格.md', '# Changed again')
   expect(call('PostToolUse')).toEqual({})
-  expect(check).not.toHaveBeenCalled()
   expect(call('Stop')).toEqual({})
-  expect(call('Stop')).toEqual({})
-  expect(check).toHaveBeenCalledTimes(1)
-  write('docs/中文 空格.md', '# Another turn')
-  expect(call('PostToolUse', { turn_id: 'turn-b' }).hookSpecificOutput).toBeDefined()
-  call('Stop', { turn_id: 'turn-b' })
-  expect(check).toHaveBeenCalledTimes(2)
+  write('README.md', '# Another edit')
+  expect(call('PostToolUse')).toEqual({})
 })
 
-test('add, delete, staged rename and HTML docs all trigger, including both rename paths', () => {
+test('adds, deletes, renames and HTML documents trigger with both rename paths', () => {
   const { root, git, write, call } = fixture()
   git(['mv', 'docs/中文 空格.md', 'docs/moved.md'])
   rmSync(path.join(root, 'README.md'))
   write('docs/new.md', '# New')
   write('docs/08. Architecture.html', '<h1>Architecture</h1>')
-  expect(Object.keys(changedDocuments(root).documents).sort()).toEqual([
+  expect(Object.keys(changedDocuments(root)).sort()).toEqual([
     'README.md', 'docs/08. Architecture.html', 'docs/moved.md', 'docs/new.md', 'docs/中文 空格.md'
   ])
   expect(call('PostToolUse', { tool_name: 'apply_patch' }).hookSpecificOutput).toBeDefined()
 })
 
-test('Stop catches missed PostToolUse events and requests only one review continuation', () => {
-  const { write, call, check } = fixture()
-  write('README.md', '# Missed event')
-  expect(call('Stop').decision).toBe('block')
-  expect(call('Stop', { stop_hook_active: true, turn_id: 'continuation' })).toEqual({})
-  expect(call('Stop', { turn_id: 'later' })).toEqual({})
-  expect(check).toHaveBeenCalledTimes(1)
-})
-
-test('failure is surfaced once, cached, and cannot trap the agent in a Stop loop', () => {
-  const { write, call, check } = fixture()
-  check.mockReturnValue({ ok: false, detail: 'missing local target' })
-  write('README.md', '# Changed')
-  call('PostToolUse')
-  expect(call('Stop').reason).toContain('missing local target')
-  expect(call('Stop', { stop_hook_active: true })).toEqual({})
+test('Stop does no work, even without valid input or a repository', () => {
+  expect(handleHook({ hook_event_name: 'Stop' }, { root: '/missing/repository' })).toEqual({})
+  const { root, write, call } = fixture()
+  write('README.md', '[broken](missing.md)')
+  const directory = path.join(root, '.runtime/agent-docs-hook')
+  const stateFile = path.join(directory, readdirSync(directory)[0])
+  const before = readFileSync(stateFile, 'utf8')
   expect(call('Stop')).toEqual({})
-  expect(check).toHaveBeenCalledTimes(1)
+  expect(readFileSync(stateFile, 'utf8')).toBe(before)
 })
 
-test('a repair during continuation invalidates the cached check without another continuation', () => {
-  const { write, call, check } = fixture()
-  check.mockReturnValueOnce({ ok: false, detail: 'broken' })
-  write('README.md', '# Broken')
-  call('PostToolUse')
-  expect(call('Stop').decision).toBe('block')
-  write('README.md', '# Repaired')
-  call('PostToolUse', { turn_id: 'continuation' })
-  expect(call('Stop', { stop_hook_active: true, turn_id: 'continuation' })).toEqual({})
-  expect(check).toHaveBeenCalledTimes(2)
-})
-
-test('a non-Markdown link target repair also invalidates the cached result', () => {
-  const { write, call, check } = fixture()
-  check.mockReturnValueOnce({ ok: false, detail: 'missing image.png' })
-  write('README.md', '![image](image.png)')
-  call('PostToolUse')
-  call('Stop')
-  write('image.png', 'fixture')
-  expect(call('Stop', { stop_hook_active: true })).toEqual({})
-  expect(check).toHaveBeenCalledTimes(2)
-})
-
-test('session states are isolated, names are hashed, and command text is not persisted', () => {
+test('session state stores only document metadata and reminder flags', () => {
   const { root, write, call } = fixture()
   write('README.md', '# Shared dirty file')
   call('PostToolUse')
@@ -142,49 +103,39 @@ test('session states are isolated, names are hashed, and command text is not per
   expect(files).toHaveLength(2)
   for (const file of files) {
     expect(file).toMatch(/^[a-f0-9]{64}\.json$/)
-    expect(readFileSync(path.join(root, '.runtime/agent-docs-hook', file), 'utf8')).not.toContain('arbitrary script')
+    const state = readFileSync(path.join(root, '.runtime/agent-docs-hook', file), 'utf8')
+    expect(state).not.toContain('arbitrary script')
+    expect(Object.keys(JSON.parse(state)).sort()).toEqual(['baselined', 'documents', 'notified'])
   }
 })
 
-test('real link checker detects broken links, passes repairs, and times out a stalled process', () => {
+test('entry point emits JSON and supports a nested cwd with spaces', () => {
   const { root, write } = fixture()
-  write('README.md', '[broken](missing.md)')
-  expect(runLinkCheck(root).ok).toBe(false)
-  write('missing.md', '# Target')
-  expect(runLinkCheck(root).ok).toBe(true)
-  write('stall.mjs', 'setInterval(() => {}, 1000)')
-  const result = runLinkCheck(root, { timeout: 100, script: path.join(root, 'stall.mjs') })
-  expect(result).toEqual({ ok: false, detail: '链接检查超时，未完成。' })
-})
-
-test('entry point emits JSON with real hook input and tolerates a nested cwd with spaces', () => {
-  const { root, write } = fixture()
-  write('scripts/agent-docs-hook.mjs', readFileSync(new URL('./agent-docs-hook.mjs', import.meta.url), 'utf8'))
+  write('.codex/scripts/agent-docs-hook.mjs', readFileSync(new URL('./agent-docs-hook.mjs', import.meta.url), 'utf8'))
   write('docs/中文 空格.md', '# Edited')
-  const result = spawnSync(process.execPath, [path.join(root, 'scripts/agent-docs-hook.mjs')], {
+  const result = spawnSync(process.execPath, [path.join(root, '.codex/scripts/agent-docs-hook.mjs')], {
     cwd: path.join(root, 'docs'), encoding: 'utf8', input: JSON.stringify({
-      hook_event_name: 'PostToolUse', session_id: 'fixture', tool_name: 'apply_patch',
-      tool_input: { command: '*** Begin Patch\n*** Update File: docs/中文 空格.md\n*** End Patch' }
+      hook_event_name: 'PostToolUse', session_id: 'fixture', tool_name: 'apply_patch'
     })
   })
   expect(result.status).toBe(0)
   expect(JSON.parse(result.stdout).hookSpecificOutput.hookEventName).toBe('PostToolUse')
 })
 
-test('detection/storage failures request manual review but never block a continuation', () => {
-  expect(hookFailure({ hook_event_name: 'PostToolUse' }).hookSpecificOutput).toBeDefined()
-  expect(hookFailure({ hook_event_name: 'Stop' }).decision).toBe('block')
-  expect(hookFailure({ hook_event_name: 'Stop', stop_hook_active: true })).toEqual({})
+test('detection or storage failures only remind and never block', () => {
+  for (const event of ['SessionStart', 'PostToolUse']) {
+    const result = hookFailure({ hook_event_name: event })
+    expect(result.hookSpecificOutput.hookEventName).toBe(event)
+    expect(result.decision).toBeUndefined()
+  }
+  expect(hookFailure({ hook_event_name: 'Stop' })).toEqual({})
 })
 
-test('project configuration matches native tools and sets short finite timeouts', () => {
+test('project configuration contains only bounded baseline and reminder hooks', () => {
   const config = JSON.parse(readFileSync(new URL('../hooks.json', import.meta.url), 'utf8'))
-  const start = config.hooks.SessionStart[0]
-  expect('startup').toMatch(new RegExp(start.matcher))
-  expect(start.hooks[0].timeout).toBe(3)
-  const post = config.hooks.PostToolUse[0]
-  expect('Bash').toMatch(new RegExp(post.matcher))
-  expect('apply_patch').toMatch(new RegExp(post.matcher))
-  expect(post.hooks[0].timeout).toBe(3)
-  expect(config.hooks.Stop[0].hooks[0].timeout).toBe(12)
+  expect(Object.keys(config.hooks).sort()).toEqual(['PostToolUse', 'SessionStart'])
+  expect('startup').toMatch(new RegExp(config.hooks.SessionStart[0].matcher))
+  expect('Bash').toMatch(new RegExp(config.hooks.PostToolUse[0].matcher))
+  expect('apply_patch').toMatch(new RegExp(config.hooks.PostToolUse[0].matcher))
+  for (const event of Object.values(config.hooks)) expect(event[0].hooks[0].timeout).toBe(3)
 })

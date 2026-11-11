@@ -1,0 +1,450 @@
+{
+  "files": [
+    "apps/desktop/README.md",
+    "apps/desktop/build/workbench-common/page.js",
+    "apps/desktop/build/workbench-common/renderer.js",
+    "apps/desktop/build/workbench-common/style.css",
+    "apps/desktop/build/workbenches/agent-team/index.html",
+    "apps/desktop/build/workbenches/agent-team/manifest.json",
+    "apps/desktop/build/workbenches/architecture/index.html",
+    "apps/desktop/build/workbenches/architecture/manifest.json",
+    "apps/desktop/build/workbenches/business-flow/index.html",
+    "apps/desktop/build/workbenches/business-flow/manifest.json",
+    "apps/desktop/build/workbenches/overview/index.html",
+    "apps/desktop/build/workbenches/overview/manifest.json",
+    "apps/desktop/build/workbenches/progress/index.html",
+    "apps/desktop/build/workbenches/progress/manifest.json",
+    "apps/desktop/e2e/project-view.spec.ts",
+    "apps/desktop/e2e/workbench.spec.ts",
+    "apps/desktop/electron.vite.config.ts",
+    "apps/desktop/scripts/build-workbench-packages.d.mts",
+    "apps/desktop/scripts/build-workbench-packages.mjs",
+    "apps/desktop/src/main/ipc/registry.test.ts",
+    "apps/desktop/src/main/ipc/workbench.ts",
+    "apps/desktop/src/main/services/session/session-ipc.test.ts",
+    "apps/desktop/src/main/services/workbench/index.ts",
+    "apps/desktop/src/main/services/workbench/ipc.test.ts",
+    "apps/desktop/src/main/services/workbench/knowledge-resources.test.ts",
+    "apps/desktop/src/main/services/workbench/knowledge-resources.ts",
+    "apps/desktop/src/main/services/workbench/package-runtime.test.ts",
+    "apps/desktop/src/main/services/workbench/package-runtime.ts",
+    "apps/desktop/src/main/services/workbench/sdk.test.ts",
+    "apps/desktop/src/main/services/workbench/workbench-service.test.ts",
+    "apps/desktop/src/main/services/workbench/workbench-service.ts",
+    "apps/desktop/src/renderer/src/features/project-view/OverviewSessions.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/Preview.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/preview-boundary.test.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/project-view.css",
+    "apps/desktop/src/renderer/src/features/project-view/project-view.test.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/renderer.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/WebWorkbenchPreview.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/WorkbenchPage.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/WorkbenchPreview.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/actions.ts",
+    "apps/desktop/src/renderer/src/features/workbench/conversation.test.ts",
+    "apps/desktop/src/renderer/src/features/workbench/conversation.ts",
+    "apps/desktop/src/renderer/src/features/workbench/page-bridge.test.ts",
+    "apps/desktop/src/renderer/src/features/workbench/page-bridge.ts",
+    "apps/desktop/src/renderer/src/features/workbench/portable-pages.test.ts",
+    "apps/desktop/src/renderer/src/features/workbench/store.test.ts",
+    "apps/desktop/src/renderer/src/features/workbench/unified-workbench.test.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/workbench.css",
+    "apps/desktop/src/renderer/src/features/workbench/workbench.test.tsx",
+    "apps/desktop/src/shared/ipc/workbench.ts",
+    "apps/desktop/src/shared/project/strings.ts",
+    "apps/desktop/src/shared/workbench/presets.ts",
+    "apps/desktop/src/shared/workbench/resources/guide.ts",
+    "apps/desktop/src/shared/workbench/resources/manifest.schema.json",
+    "apps/desktop/src/shared/workbench/resources/sdk.ts",
+    "apps/desktop/src/shared/workbench/schema.test.ts",
+    "apps/desktop/src/shared/workbench/schema.ts",
+    "apps/desktop/src/shared/workbench/types.ts",
+    "apps/desktop/tsconfig.node.json",
+    "apps/desktop/tsconfig.web.json",
+    "apps/desktop/vitest.config.ts",
+    "docs/01. Product Definition.md",
+    "docs/04. Technical Requirements.md",
+    "docs/05. Acceptance Criteria.md",
+    "docs/06. Development Roadmap.md",
+    "docs/07. Decisions.md",
+    "docs/08. System Architecture.html",
+    "docs/09. Workbench Discussion.md",
+    "scripts/README.md",
+    "scripts/check-affected.mjs",
+    "scripts/check-affected.test.mjs",
+    "specs/README.md",
+    "specs/project-view/spec.md",
+    "specs/workbench/spec.md",
+    "tasks/T20261111-workbench-web-format/plan.md",
+    "tasks/T20261111-workbench-web-format/task.md"
+  ],
+  "commands": [
+    [
+      "exec",
+      "vitest",
+      "related",
+      ".codex/scripts/agent-docs-hook.test.mjs",
+      "scripts/check-affected.mjs",
+      "scripts/check-affected.test.mjs",
+      "scripts/check-docs.test.mjs",
+      "scripts/check-workflow.test.mjs",
+      "--run",
+      "--config",
+      "scripts/vitest.config.mjs"
+    ],
+    [
+      "--filter",
+      "@ai-studio/agent-adapter",
+      "run",
+      "build"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.node.json"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.web.json"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.e2e.json"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "vitest",
+      "related",
+      "electron.vite.config.ts",
+      "src/main/ipc/registry.test.ts",
+      "src/main/ipc/workbench.ts",
+      "src/main/security/hardening.test.ts",
+      "src/main/security/policy.test.ts",
+      "src/main/services/project/close-flow.test.ts",
+      "src/main/services/project/project-service.test.ts",
+      "src/main/services/project/tool-close.test.ts",
+      "src/main/services/session/session-ipc.test.ts",
+      "src/main/services/workbench/index.ts",
+      "src/main/services/workbench/ipc.test.ts",
+      "src/main/services/workbench/knowledge-resources.test.ts",
+      "src/main/services/workbench/knowledge-resources.ts",
+      "src/main/services/workbench/package-runtime.test.ts",
+      "src/main/services/workbench/package-runtime.ts",
+      "src/main/services/workbench/sdk.test.ts",
+      "src/main/services/workbench/workbench-service.test.ts",
+      "src/main/services/workbench/workbench-service.ts",
+      "src/preload/bridge.test.ts",
+      "src/renderer/src/features/project/shell.test.tsx",
+      "src/renderer/src/features/workbench/WorkbenchPage.tsx",
+      "src/renderer/src/features/workbench/WorkbenchPreview.tsx",
+      "src/renderer/src/features/workbench/actions.ts",
+      "src/renderer/src/features/workbench/conversation.test.ts",
+      "src/renderer/src/features/workbench/conversation.ts",
+      "src/renderer/src/features/workbench/page-bridge.test.ts",
+      "src/renderer/src/features/workbench/page-bridge.ts",
+      "src/renderer/src/features/workbench/portable-pages.test.ts",
+      "src/renderer/src/features/workbench/store.test.ts",
+      "src/renderer/src/features/workbench/unified-workbench.test.tsx",
+      "src/renderer/src/features/workbench/workbench.test.tsx",
+      "src/shared/ipc/contract.test.ts",
+      "src/shared/ipc/workbench.ts",
+      "src/shared/project-view/schema.test.ts",
+      "src/shared/project/rules.test.ts",
+      "src/shared/project/strings.test.ts",
+      "src/shared/project/strings.ts",
+      "src/shared/workbench/presets.ts",
+      "src/shared/workbench/resources/guide.ts",
+      "src/shared/workbench/resources/sdk.ts",
+      "src/shared/workbench/schema.test.ts",
+      "src/shared/workbench/schema.ts",
+      "src/shared/workbench/types.ts",
+      "--run"
+    ]
+  ],
+  "e2e": [
+    "e2e/alignment.spec.ts",
+    "e2e/app.spec.ts",
+    "e2e/project-view.spec.ts",
+    "e2e/project.spec.ts",
+    "e2e/runtime-tools.spec.ts",
+    "e2e/workbench.spec.ts"
+  ],
+  "unknown": [],
+  "missingTests": []
+}
+> pnpm exec vitest related .codex/scripts/agent-docs-hook.test.mjs scripts/check-affected.mjs scripts/check-affected.test.mjs scripts/check-docs.test.mjs scripts/check-workflow.test.mjs --run --config scripts/vitest.config.mjs
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format
+
+
+ Test Files  4 passed (4)
+      Tests  74 passed (74)
+   Start at  15:22:49
+   Duration  5.05s (tests 94%, import 5%)
+
+> pnpm --filter @ai-studio/agent-adapter run build
+$ tsc -p tsconfig.build.json
+> pnpm --filter @ai-studio/desktop exec tsc --noEmit -p tsconfig.node.json
+> pnpm --filter @ai-studio/desktop exec tsc --noEmit -p tsconfig.web.json
+> pnpm --filter @ai-studio/desktop exec tsc --noEmit -p tsconfig.e2e.json
+> pnpm --filter @ai-studio/desktop exec vitest related electron.vite.config.ts src/main/ipc/registry.test.ts src/main/ipc/workbench.ts src/main/security/hardening.test.ts src/main/security/policy.test.ts src/main/services/project/close-flow.test.ts src/main/services/project/project-service.test.ts src/main/services/project/tool-close.test.ts src/main/services/session/session-ipc.test.ts src/main/services/workbench/index.ts src/main/services/workbench/ipc.test.ts src/main/services/workbench/knowledge-resources.test.ts src/main/services/workbench/knowledge-resources.ts src/main/services/workbench/package-runtime.test.ts src/main/services/workbench/package-runtime.ts src/main/services/workbench/sdk.test.ts src/main/services/workbench/workbench-service.test.ts src/main/services/workbench/workbench-service.ts src/preload/bridge.test.ts src/renderer/src/features/project/shell.test.tsx src/renderer/src/features/workbench/WorkbenchPage.tsx src/renderer/src/features/workbench/WorkbenchPreview.tsx src/renderer/src/features/workbench/actions.ts src/renderer/src/features/workbench/conversation.test.ts src/renderer/src/features/workbench/conversation.ts src/renderer/src/features/workbench/page-bridge.test.ts src/renderer/src/features/workbench/page-bridge.ts src/renderer/src/features/workbench/portable-pages.test.ts src/renderer/src/features/workbench/store.test.ts src/renderer/src/features/workbench/unified-workbench.test.tsx src/renderer/src/features/workbench/workbench.test.tsx src/shared/ipc/contract.test.ts src/shared/ipc/workbench.ts src/shared/project-view/schema.test.ts src/shared/project/rules.test.ts src/shared/project/strings.test.ts src/shared/project/strings.ts src/shared/workbench/presets.ts src/shared/workbench/resources/guide.ts src/shared/workbench/resources/sdk.ts src/shared/workbench/schema.test.ts src/shared/workbench/schema.ts src/shared/workbench/types.ts --run
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop
+
+
+ Test Files  47 passed (47)
+      Tests  555 passed (555)
+   Start at  15:22:57
+   Duration  6.55s (tests 53%, environment 32%, import 9%, transform 6%)
+
+Environment  |renderer| jsdom was created 20 times · 15.06s total, 40% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+> pnpm --filter @ai-studio/desktop run build
+$ electron-vite build
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 145 modules transformed.
+rendering chunks...
+out/main/directory-reader-worker.js    4.50 kB
+out/main/index.js                    514.50 kB
+✓ built in 304ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 15 modules transformed.
+rendering chunks...
+out/preload/index.js  10.99 kB
+✓ built in 12ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 1490 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                                                0.95 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff      13.14 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-CB9ihrfo.woff      13.16 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2     14.71 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2     14.89 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff      22.10 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2     22.59 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff      23.88 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff      23.92 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2     24.18 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2     24.25 kB
+../../out/renderer/assets/codicon-DF1abBS2.ttf                             153.23 kB
+../../out/renderer/assets/code-C0VoY9X6.css                                  1.12 kB
+../../out/renderer/assets/TerminalScreen-GVL3fBIr.css                        7.11 kB
+../../out/renderer/assets/index-B7QjJRdK.css                               135.32 kB
+../../out/renderer/assets/monaco-runtime-CPVWXZLM.css                      167.09 kB
+../../out/renderer/assets/register-BCrbe0dR.js                               0.41 kB
+../../out/renderer/assets/register-Deh1H_Z0.js                               0.42 kB
+../../out/renderer/assets/register-vnretqJk.js                               0.42 kB
+../../out/renderer/assets/register-CfU75afa.js                               0.43 kB
+../../out/renderer/assets/register-DOTnlWRi.js                               0.43 kB
+../../out/renderer/assets/register-5tARyiY7.js                               0.43 kB
+../../out/renderer/assets/register-BcZb-PQx.js                               0.43 kB
+../../out/renderer/assets/register-D_pyVKh7.js                               0.44 kB
+../../out/renderer/assets/register-BzD0hfdl.js                               0.44 kB
+../../out/renderer/assets/register-CgFhEBhk.js                               0.44 kB
+../../out/renderer/assets/register-CerskmB0.js                               0.44 kB
+../../out/renderer/assets/register-BoDJRAUI.js                               0.45 kB
+../../out/renderer/assets/register-DdUxadxt.js                               0.45 kB
+../../out/renderer/assets/register-Blq7JCHX.js                               0.45 kB
+../../out/renderer/assets/register-CBzeY1hz.js                               0.45 kB
+../../out/renderer/assets/register-BmXfkdWy.js                               0.45 kB
+../../out/renderer/assets/register-D3Y_y3GY.js                               0.45 kB
+../../out/renderer/assets/register-CDmhyi-O.js                               0.46 kB
+../../out/renderer/assets/register-K_BUe4KR.js                               0.46 kB
+../../out/renderer/assets/register-C7yh0vSS.js                               0.46 kB
+../../out/renderer/assets/register-D3sfRawT.js                               0.46 kB
+../../out/renderer/assets/register-DJPRWyhX.js                               0.47 kB
+../../out/renderer/assets/register-EO9t-i1C.js                               0.47 kB
+../../out/renderer/assets/register-DXpzzxkH.js                               0.47 kB
+../../out/renderer/assets/register-KtL3Xo0V.js                               0.48 kB
+../../out/renderer/assets/register-BzhCvTST.js                               0.48 kB
+../../out/renderer/assets/register-BaVZ2AGh.js                               0.48 kB
+../../out/renderer/assets/register-Dh41p9WF.js                               0.48 kB
+../../out/renderer/assets/register-Ca5rZDS_.js                               0.49 kB
+../../out/renderer/assets/register-D_jDAeag.js                               0.50 kB
+../../out/renderer/assets/register-BmUrv4NV.js                               0.50 kB
+../../out/renderer/assets/register-Dg73NaL-.js                               0.50 kB
+../../out/renderer/assets/register-BdzbCWKJ.js                               0.50 kB
+../../out/renderer/assets/register-OVCJQklK.js                               0.51 kB
+../../out/renderer/assets/register-CQ1GuKSc.js                               0.53 kB
+../../out/renderer/assets/register-De2Qt6I5.js                               0.53 kB
+../../out/renderer/assets/register-B1BA9Yzz.js                               0.57 kB
+../../out/renderer/assets/register-BmQIdRjz.js                               0.66 kB
+../../out/renderer/assets/register-Dk-OuB94.js                               0.73 kB
+../../out/renderer/assets/register-Cc11O0PI.js                               0.81 kB
+../../out/renderer/assets/register-weGQ1cyk.js                               0.83 kB
+../../out/renderer/assets/register-CvS8QPUv.js                               0.84 kB
+../../out/renderer/assets/register-BeuyDUOf.js                               0.85 kB
+../../out/renderer/assets/register-GMdVUEAY.js                               0.91 kB
+../../out/renderer/assets/register-B6hGQwvI.js                               0.93 kB
+../../out/renderer/assets/register-DEcCAk35.js                               1.11 kB
+../../out/renderer/assets/terminal-font-BrrJ_5zI.js                          1.40 kB
+../../out/renderer/assets/javascript-QFD9wh25.js                             1.41 kB
+../../out/renderer/assets/_.contribution-CbRCQ1Yy.js                         1.52 kB
+../../out/renderer/assets/ini-BcQysCTb.js                                    1.67 kB
+../../out/renderer/assets/bat-Bqkp9Cfu.js                                    2.66 kB
+../../out/renderer/assets/xml-BtclsQ5s.js                                    2.86 kB
+../../out/renderer/assets/dockerfile--oxj0cAH.js                             3.02 kB
+../../out/renderer/assets/lua-hNsuGJkO.js                                    3.43 kB
+../../out/renderer/assets/objective-c-B1L1C5EC.js                            3.48 kB
+../../out/renderer/assets/graphql-BeiGgjIU.js                                3.77 kB
+../../out/renderer/assets/shell-vZEubQ82.js                                  4.48 kB
+../../out/renderer/assets/go-brnMpFrj.js                                     4.49 kB
+../../out/renderer/assets/r-CtqYUQ6l.js                                      4.80 kB
+../../out/renderer/assets/less-B7Qaxw-O.js                                   5.00 kB
+../../out/renderer/assets/tcl-Bb4GCwBr.js                                    5.05 kB
+../../out/renderer/assets/java-Dt3iMn2o.js                                   5.16 kB
+../../out/renderer/assets/kotlin-Ddo1SjA5.js                                 5.20 kB
+../../out/renderer/assets/hcl-CrX1Es2W.js                                    5.21 kB
+../../out/renderer/assets/restructuredtext-B-KQCVu_.js                       5.33 kB
+../../out/renderer/assets/powershell-BXiKvz7Z.js                             5.39 kB
+../../out/renderer/assets/coffee-CzJ5oEdj.js                                 5.51 kB
+../../out/renderer/assets/mdx-DOvbmGdo.js                                    5.87 kB
+../../out/renderer/assets/yaml-COVQUTZS.js                                   5.92 kB
+../../out/renderer/assets/css-i3rI3_64.js                                    6.10 kB
+../../out/renderer/assets/CodeViewer-Dob7fCUp.js                             6.18 kB
+../../out/renderer/assets/rust-B1c0VCeq.js                                   6.27 kB
+../../out/renderer/assets/dart-vLMHv35g.js                                   6.48 kB
+../../out/renderer/assets/python-DPt38imV.js                                 6.54 kB
+../../out/renderer/assets/markdown-B0YTnTxW.js                               6.65 kB
+../../out/renderer/assets/swift-CbF6f74o.js                                  6.92 kB
+../../out/renderer/assets/csharp-BJeIuvde.js                                 6.98 kB
+../../out/renderer/assets/CodeDiffViewer-CzfNDRDw.js                         7.01 kB
+../../out/renderer/assets/html-Da1-og6F.js                                   7.66 kB
+../../out/renderer/assets/typescript-D5IgVBte.js                             7.95 kB
+../../out/renderer/assets/cpp-CcN6f0ik.js                                    8.22 kB
+../../out/renderer/assets/pug-BxCXwerb.js                                    8.26 kB
+../../out/renderer/assets/vb-Bm6ESA0Q.js                                     8.33 kB
+../../out/renderer/assets/scss-B42qMyAu.js                                   9.07 kB
+../../out/renderer/assets/twig-DvgEGWAV.js                                  10.26 kB
+../../out/renderer/assets/handlebars-DUxd749U.js                            10.44 kB
+../../out/renderer/assets/julia-Cm3ItYL_.js                                 10.54 kB
+../../out/renderer/assets/scala-DbVzH-3O.js                                 10.70 kB
+../../out/renderer/assets/php-Bkx1qpkQ.js                                   12.48 kB
+../../out/renderer/assets/protobuf-CndvAUGu.js                              12.68 kB
+../../out/renderer/assets/perl-DC0Z0tlO.js                                  12.82 kB
+../../out/renderer/assets/clojure-fcgFaMHx.js                               13.94 kB
+../../out/renderer/assets/ruby-DCd4DmAr.js                                  15.31 kB
+../../out/renderer/assets/sql-BAGepFCR.js                                   15.56 kB
+../../out/renderer/assets/code-C13CgMqr.js                                  16.18 kB
+../../out/renderer/assets/elixir-eLfY1jWH.js                                18.74 kB
+../../out/renderer/assets/solidity-yHOxYChb.js                              26.03 kB
+../../out/renderer/assets/TerminalScreen-CaHb2P6r.js                       488.41 kB
+../../out/renderer/assets/index-CybhSXLo.js                              1,875.06 kB
+../../out/renderer/assets/monaco-runtime-C1Mb3kcS.js                     5,791.05 kB
+✓ built in 3.91s
+> pnpm --filter @ai-studio/desktop run test:e2e:built e2e/alignment.spec.ts e2e/app.spec.ts e2e/project-view.spec.ts e2e/project.spec.ts e2e/runtime-tools.spec.ts e2e/workbench.spec.ts
+$ playwright test e2e/alignment.spec.ts e2e/app.spec.ts e2e/project-view.spec.ts e2e/project.spec.ts e2e/runtime-tools.spec.ts e2e/workbench.spec.ts
+
+Running 32 tests using 1 worker
+
+(node:94185) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/alignment.spec.ts:139:5 › glass appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (8.9s)
+  ✓   2 e2e/alignment.spec.ts:171:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (5.5s)
+  ✓   3 e2e/alignment.spec.ts:186:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (3.8s)
+  ✓   4 e2e/alignment.spec.ts:199:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (5.2s)
+  ✓   5 e2e/alignment.spec.ts:139:5 › solid appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (2.3s)
+  ✓   6 e2e/alignment.spec.ts:171:5 › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (3.8s)
+  ✓   7 e2e/alignment.spec.ts:186:5 › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (2.0s)
+  ✓   8 e2e/alignment.spec.ts:199:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.8s)
+  ✓   9 e2e/alignment.spec.ts:210:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (4.7s)
+  ✓  10 e2e/alignment.spec.ts:228:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (4.8s)
+  ✓  11 e2e/alignment.spec.ts:239:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (6.1s)
+  ✓  12 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (158ms)
+  ✓  13 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (47ms)
+  ✓  14 e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer (12ms)
+  ✓  15 e2e/app.spec.ts:124:5 › typed preload API works and main validates input (8ms)
+  ✓  16 e2e/app.spec.ts:145:5 › new windows and foreign navigation are denied (657ms)
+  ✓  17 e2e/app.spec.ts:157:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (4.8s)
+  ✘  18 e2e/project-view.spec.ts:22:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (6.4s)
+(node:96922) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 e2e/project-view.spec.ts:64:5 › removed View label sends without creating helpers, and each View has an independent draft (2.1s)
+  ✓  20 e2e/project-view.spec.ts:80:5 › five presets use the same webpage frame and keep all page content inside it (1.7s)
+  ✓  21 e2e/project-view.spec.ts:107:5 › a preset copied into an ordinary custom draft uses the same knowledge subscription (1.9s)
+  ✓  22 e2e/project-view.spec.ts:119:5 › a copied Overview package reads scoped Session cards and opens a conversation through the SDK (2.2s)
+  ✓  23 e2e/project-view.spec.ts:131:5 › the package generate action starts a new unsent workbench draft from an existing Session (1.8s)
+  ✓  24 e2e/project.spec.ts:54:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (8.8s)
+  ✓  25 e2e/project.spec.ts:122:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (1.4s)
+  ✓  26 e2e/project.spec.ts:141:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (1.2s)
+  ✓  27 e2e/runtime-tools.spec.ts:97:5 › FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolation, final empty state and Project confirmation (11.1s)
+  ✓  28 e2e/runtime-tools.spec.ts:192:5 › FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, mailto choice, menu, shared persistent data (8.9s)
+  ✘  29 e2e/runtime-tools.spec.ts:271:5 › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit (5.9s)
+(node:99363) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  30 e2e/workbench.spec.ts:32:5 › AC-WB mechanism: template, state, navigation, disable/reopen and restart (2.7s)
+  ✓  31 e2e/workbench.spec.ts:74:5 › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance (1.5s)
+  ✓  32 e2e/workbench.spec.ts:110:5 › AC-WB mechanism: refuses to apply files changed after the displayed preview (1.4s)
+
+
+  1) e2e/project-view.spec.ts:22:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.project-workspace:not([hidden])').getByText('支付模块架构已整理', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('.project-workspace:not([hidden])').getByText('支付模块架构已整理', { exact: true }) with timeout 5000ms
+      - waiting for locator('.project-workspace:not([hidden])').getByText('支付模块架构已整理', { exact: true })
+
+
+      27 |   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('重新整理支付模块架构。')
+      28 |   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
+    > 29 |   await expect(workspace().getByText('支付模块架构已整理', { exact: true })).toBeVisible()
+         |                                                                     ^
+      30 |   await expect(workspace().getByRole('region', { name: '工作台对话', exact: true })).toBeVisible()
+      31 |   await expect(workspace().locator('.transcript-user')).toContainText('重新整理支付模块架构。')
+      32 |   await expect(workspace().locator('.transcript-user summary')).toHaveText('当前工作台')
+        at /Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/e2e/project-view.spec.ts:29:69
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/project-view-AC-06-ordinar-9ce7f-ity-history-context-restart/error-context.md
+
+  2) e2e/runtime-tools.spec.ts:271:5 › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit
+
+    Error: locator.textContent: Target page, context or browser has been closed
+
+      275 |   await plainShell()
+      276 |   await terminalCommand('node -e \'const s=require("node:http").createServer((q,r)=>r.end("<h1>PTY Server Preview</h1>"));s.listen(0,"127.0.0.1",()=>console.log("CHAIN_URL:http://127.0.0.1:"+s.address().port+"/"))\'')
+    > 277 |   const chainUrl = async () => (await workspace().locator('.xterm-rows').textContent())?.match(/CHAIN_URL:(http:\/\/127\.0\.0\.1:\d+\/)/)?.[1] ?? ''
+          |                                                                          ^
+      278 |   await expect.poll(chainUrl).not.toBe('')
+      279 |   const url = await chainUrl()
+      280 |   await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
+        at chainUrl (/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/e2e/runtime-tools.spec.ts:277:74)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/e2e/runtime-tools.spec.ts:278:3
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/runtime-tools-FR-PROJ-002--f71eb-nd-Terminal-only-mixed-quit/error-context.md
+
+  2 failed
+    e2e/project-view.spec.ts:22:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart
+    e2e/runtime-tools.spec.ts:271:5 › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit
+  30 passed (1.9m)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/web-workbench-format/apps/desktop

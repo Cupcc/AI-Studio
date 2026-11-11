@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -15,17 +16,35 @@ function walk(node, visit) {
 }
 
 export function snapshot(ref, cwd = process.cwd()) {
-  const files = ref
-    ? paths(git(['ls-tree', '-r', '--name-only', '-z', ref], cwd))
-    : paths(git(['ls-files', '--cached', '--others', '--exclude-standard', '-z'], cwd))
   const result = new Map()
-  for (const file of new Set(files)) {
-    if (!ref) {
-      try { if (!statSync(path.join(cwd, file)).isFile()) continue } catch { continue }
+  if (ref) {
+    const documents = []
+    for (const entry of paths(git(['ls-tree', '-r', '-z', ref], cwd))) {
+      const tab = entry.indexOf('\t')
+      const file = entry.slice(tab + 1)
+      result.set(file, null)
+      if (file.endsWith('.md')) documents.push({ file, oid: entry.slice(0, tab).split(' ')[2] })
     }
-    result.set(file, file.endsWith('.md')
-      ? (ref ? git(['show', `${ref}:${file}`], cwd) : readFileSync(path.join(cwd, file), 'utf8'))
-      : null)
+    if (!documents.length) return result
+    const blobs = execFileSync('git', ['cat-file', '--batch'], {
+      cwd, input: documents.map(doc => doc.oid).join('\n') + '\n', maxBuffer: 32 * 1024 * 1024
+    })
+    let offset = 0
+    for (const { file } of documents) {
+      const end = blobs.indexOf(10, offset)
+      const [, type, size] = blobs.toString('utf8', offset, end).split(' ')
+      if (type !== 'blob') throw new Error(`Cannot read Markdown blob: ${file}`)
+      offset = end + 1
+      const length = Number(size)
+      result.set(file, blobs.toString('utf8', offset, offset + length))
+      offset += length + 1
+    }
+    return result
+  }
+  const files = paths(git(['ls-files', '--cached', '--others', '--exclude-standard', '-z'], cwd))
+  for (const file of new Set(files)) {
+    try { if (!statSync(path.join(cwd, file)).isFile()) continue } catch { continue }
+    result.set(file, file.endsWith('.md') ? readFileSync(path.join(cwd, file), 'utf8') : null)
   }
   return result
 }
@@ -50,7 +69,10 @@ export function documentIssues(files) {
     documents.set(file, { anchors, links, definitions })
   }
   const issues = []
-  const exists = target => target === '.' || files.has(target) || [...files.keys()].some(file => file.startsWith(`${target}/`))
+  const targets = new Set(['.', ...files.keys()])
+  for (const file of files.keys()) {
+    for (let directory = path.posix.dirname(file); directory !== '.'; directory = path.posix.dirname(directory)) targets.add(directory)
+  }
   for (const [file, doc] of documents) {
     for (const link of doc.links) {
       const url = link.url ?? doc.definitions.get(link.identifier)
@@ -67,7 +89,7 @@ export function documentIssues(files) {
         // Repository-root absolute paths are treated as repository links.
         target = target.replace(/^\//, '').replace(/\/$/, '') || '.'
       } catch { report('invalid URL encoding'); continue }
-      if (target === '..' || target.startsWith('../') || !exists(target)) {
+      if (target === '..' || target.startsWith('../') || !targets.has(target)) {
         report('missing local target')
       } else if (fragment && documents.has(target) && !documents.get(target).anchors.has(fragment)) {
         report('missing Markdown anchor')
@@ -85,9 +107,11 @@ export function newIssues(before, after) {
 export function checkDocs({ base = 'HEAD', head, cwd = process.cwd() } = {}) {
   const before = base ? snapshot(base, cwd) : new Map()
   const after = snapshot(head, cwd)
-  const issues = newIssues(before, after)
+  const baseline = documentIssues(before)
+  const old = new Set(baseline.map(issue => issue.key))
+  const issues = documentIssues(after).filter(issue => !old.has(issue.key))
   for (const issue of issues) console.error(`${issue.file}:${issue.line}: ${issue.reason}: ${issue.url}`)
-  console.log(`Documentation: ${issues.length} new issue(s); ${documentIssues(before).length} baseline issue(s) unchanged or removed.`)
+  console.log(`Documentation: ${issues.length} new issue(s); ${baseline.length} baseline issue(s) unchanged or removed.`)
   return issues.length === 0
 }
 

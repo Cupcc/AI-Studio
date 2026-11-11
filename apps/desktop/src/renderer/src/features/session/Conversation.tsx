@@ -22,7 +22,7 @@ export function ConversationHeader({ project, canvas }: ShellSlotProps) {
         if (!isViewId(origin)) return
         useProjectShell.getState().enterView(project.id, origin)
         useProjectShell.getState().setViewConversation(project.id, { kind: 'session', sessionId: sessionId! })
-      }} title={origin}>在 View 中打开</button></>}
+      }} title={origin}>在工作台中打开</button></>}
   </>
 }
 

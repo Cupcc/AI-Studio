@@ -24,7 +24,8 @@
 .workbench-status__saved { margin-left: auto; }
 .workbench-error { margin: 10px 14px; padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--font-size-sm); line-height: 1.6; overflow-wrap: anywhere; }
 .workbench-error p { margin: 5px 0 10px; }
-.workbench-page { display: block; flex: 1; width: 100%; min-height: 180px; border: 0; background: var(--color-pane); }
+.workbench-page-viewport { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.workbench-page { display: block; border: 0; transform-origin: top left; background: var(--color-surface-preview); }
 .workbench-idle { margin: auto; padding: 32px 24px; max-width: 380px; text-align: center; line-height: 1.7; }
 .workbench-idle h2 { font-size: var(--font-size-heading); font-weight: 600; }
 .workbench-idle p { font-size: var(--font-size-sm); color: var(--color-text-3); }

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "studio-agent-team",
+  "version": "1.0.0",
+  "sdkVersion": 1,
+  "title": "Agent Team",
+  "entry": "index.html",
+  "capabilities": [
+    "state.read",
+    "conversation.draft",
+    "project.knowledge.read"
+  ],
+  "knowledgeViewId": "agent-team"
+}

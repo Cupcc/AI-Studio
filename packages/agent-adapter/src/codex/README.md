@@ -26,7 +26,7 @@ await provider.dispose();
 - `setModel` 只影响下一轮。原生 `model:null` 表示保持已有设置，因此 Adapter 的 `setModel(null)` 会读取该 cwd 的 CLI 有效默认模型，下一轮显式提交它；无配置值时使用原生目录的默认项。
 - 可用性分别检查 executable、`--version`、`login status` 和可选模型目录。认证输出只转换为粗粒度状态，不保留原始输出。模型目录只进行握手与 `model/list`，不创建 Thread。
 - 登录兼容旧版 `Logged in` 与新版 `API key configured`；后者只代表本地已配置 API key，不保证远端认证成功。判定边界见 [Adapter spec §3.11](../../../../specs/agent-adapter/spec.md#311-codex-provider)。
-- 当前类型锁定为 Codex CLI `0.163.0`；已执行方法的证据见[本轮收尾](../../../../tasks/archive/T20261009-v1-foundation-slice/evidence/W26-closure.md)，不宣称全部生成协议通过。其他版本报告 `untested`，不会因版本号不同自动禁止；实验接口缺失时 Stop 走独立 Runtime 兜底。
+- 当前类型锁定为 Codex CLI `0.163.0`；不宣称全部生成协议通过。其他版本报告 `untested`，不会因版本号不同自动禁止；实验接口缺失时 Stop 走独立 Runtime 兜底。
 
 ## 事件与请求
 
@@ -60,4 +60,4 @@ pnpm --filter @ai-studio/agent-adapter test
 
 生成器检查 CLI 版本，无模型调用。默认测试不启动真实 CLI；测试用模拟协议与系统 Node 进程验证 OS 退出。真实套件只有 `AI_STUDIO_REAL_CLI=1` 才启用，六回合综合场景和另一个双回合 Stop 场景互斥；后者还需 `AI_STUDIO_CODEX_STOP_ONLY=1`。
 
-官方协议文档：[Codex App Server](https://learn.chatgpt.com/docs/app-server)。本次真实结果与未覆盖项：[W2 evidence](../../../../tasks/archive/T20261009-agent-adapter/evidence/W2-codex-provider.md)。
+官方协议文档：[Codex App Server](https://learn.chatgpt.com/docs/app-server)。

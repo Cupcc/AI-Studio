@@ -7,7 +7,7 @@
 | 产品 | AI Developer Studio |
 | 版本 | v02 |
 | 状态 | 已确认（2026-10-11）：继承 v01；工程工具行为已于 2026-10-10 确认，本版 v01 对齐修订与交互原型 v02 的 Conversation 修订随各自任务签收 |
-| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[工程工具任务](../../tasks/archive/T20261009-context-tools/task.md) 的 2026-10-10 确认；用户 2026-10-11 对话确认的 v01 对齐界面决定，证据见[归档复验记录](../../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)；[交互原型 v02](../prototypes/README.md#studio-灰度交互原型-v02) 与[其采用确认](../../tasks/archive/T20261010-prototype-v02/task.md#已确认事项)（2026-10-10） |
+| 依据 | [UX Specification](<../../docs/03. UX Specification.md>) 第 3–8、10 节；[Wireframes](../wireframes/README.md) v02；FR-TOOL-002、FR-TOOL-004；[交互原型](../prototypes/README.md)及其采用记录 |
 | 范围 | 窗口布局、区域尺寸、组件结构与交互状态 |
 | 不含 | 色值、字体、图标库等视觉参数：见 [Visual Direction](../visual-direction.md) 第 1 节 |
 
@@ -16,8 +16,8 @@
 | 项目 | 说明 |
 |---|---|
 | 本轮对齐修订 | 第 3、4、8、11 节依据用户 2026-10-11 对话确认补充，并于 2026-10-11 随任务签收 |
-| Conversation 修订 | 第 2.2、6、7 节依据交互原型 v02 的 2026-10-10 确认补充，并于 2026-10-11 随 [v02 对齐任务](../../tasks/archive/T20261010-prototype-v02-alignment/task.md)签收 |
-| v06 UI 采用 | 用户 2026-10-23 要求对齐 v06；2026-10-24 纠正为五格静态思考指示、实际选中 max / ultra 时输入框一次切换反馈；第 6、7 节采用底部 Composer，范围见 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)。本次 diff 待审阅，实施 / 验证与人工复验分别见[本轮任务](../../tasks/archive/T20261023-v06-ui-effort/task.md) |
+| Conversation 修订 | 第 2.2、6、7 节对应[交互原型 v02](../prototypes/README.md#studio-灰度交互原型-v02) |
+| v06 UI 采用 | 底部 Composer、五格静态思考指示、选中 max / ultra 时输入框的一次切换反馈，见 [DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)；规格 diff 待审阅，待人工复验 |
 | 视觉参数 | 当前基线与待定项见 [Visual Direction](../visual-direction.md) 第 1 节 |
 | CLI 设置分组 | 2026-10-25 用户明确上方已添加、下方未添加、上方点击选默认；第 12 节按 [CLI 管理规格](../../specs/settings/spec.md#cli-管理与默认-cli2026-10-25-确认)更新，diff 待审阅 |
 | 窗口控制区 | macOS 左侧布局已确定；原生标题栏与拖拽区域需在 Electron 骨架中复核 |
@@ -77,8 +77,8 @@
 |---|---|---|---|---|
 | New Chat 分裂按钮 | 高 36 | 主区：图标 + New Chat，使用 Default CLI；右区：▾ 打开 CLI 菜单 | Default / Hover / Focus | FR-CHAT-001、FR-CHAT-002 |
 | CLI 菜单 | 宽 260 | 每项：CLI 名称、默认标记、“设为此 Project 默认”；不可用项禁用并说明原因 | Default / Hover / Disabled | FR-CHAT-002；UX D-11 |
-| 区域标题 | 高 28 | PROJECT VIEWS / SESSIONS，小号大写 | — | FR-NAV-001 |
-| Project View 项 | 高 32 | 图标 + 名称 | Default / Hover / Selected / Focus | FR-NAV-002 |
+| 区域标题 | 高 28 | 工作台 / SESSIONS，小号标题（2026-11-11，DEC-29） | — | FR-NAV-001 |
+| 工作台项 | 高 32 | 图标 + 名称 | Default / Hover / Selected / Focus | FR-NAV-002 |
 | 日期分组标题 | 高 24 | 今天 / 昨天 / 过去 7 天 / 更早 | — | FR-NAV-003 |
 | Session 项 | 高 32 | CLI 标识 + 标题（单行截断）+ 右侧状态；悬停时在状态左侧显示 ⋯ | Default / Hover / Selected / Focus / Renaming | FR-NAV-003；UX P-D |
 | CLI 标识 | 约 18×14 | 等宽小字 CX / CC，1px 描边，单色 | — | UX P-D |

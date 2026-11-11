@@ -22,7 +22,7 @@ created: 2026-10-11
 
 - [x] 通用规则、任务协议和模板使用一致的职责边界，保留独立验证、必要文档审阅与范围授权要求。（来源：本次对话；任务协议 Acceptance）
 - [x] 路线图和阶段 1 人工清单按功能 / 阶段组织验收，不再要求逐个子 task 签收。（来源：本次对话）
-- [x] Project View 的状态与人工确认一致，规格任务与后续实现分开记录。（来源：[Project View 规格](../../specs/project-view/spec.md)第 1 节、[原任务](../archive/T20261009-project-view/task.md)范围及用户 2026-10-11 后续明确全部确认）
+- [x] Project View 的状态与人工确认一致，规格任务与后续实现分开记录。（来源：[Project View 规格](../../specs/project-view/spec.md)第 1 节及用户 2026-10-11 后续明确全部确认）
 - [x] 检查 diff、Markdown 表格 / 标题、相对链接与旧锚点引用；保留既有未提交改动和历史验收证据。（来源：AGENTS Validation Guidelines）
 
 ## 收尾

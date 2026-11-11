@@ -1,18 +1,17 @@
 # Task Protocol
 
-复杂或跨会话工作的进行中记录位于 `tasks/T<YYYYMMDD>-<slug>/`，已完成记录位于 `tasks/archive/T<YYYYMMDD>-<slug>/`，归档规则见 Archiving。日期型 ID 避免并行 agent 冲突；模板位于 `templates/`。
+复杂或跨会话工作的进行中记录位于 `tasks/T<YYYYMMDD>-<slug>/`，已完成记录位于 `.agents/archive/tasks/T<YYYYMMDD>-<slug>/`，归档规则见 Archiving。日期型 ID 避免并行 agent 冲突；任务模板位于 `tasks/templates/`。
 
 ## 待审阅事项
 
-- [Acceptance](#acceptance) 新增分层验收、界面操作、真实 CLI 验证与独立验收要求，依据用户 2026-10-11 对话指令「apply 增加验收规范」；本次 diff 待审阅。
-- 人类与 AI 的职责、任务收尾及功能验收分离，依据用户在分析建议后回复「apply, update related docs」（2026-10-11 确认）；本次治理规则 diff 待审阅，见[本次任务](T20261011-review-boundaries/task.md)。
+- [Acceptance](#acceptance) 中的分层验收、界面操作、真实 CLI 验证与独立验收要求。
+- 人类与 AI 的职责、任务收尾及功能验收边界，见[职责边界任务](T20261011-review-boundaries/task.md)。
 
 ## When to Create a Task
 
 - Small, self-contained changes such as wording edits or localized fixes need no task directory when the diff and commit message adequately explain the work and validation.
 - Create or continue a task for work that spans sessions, introduces or revises product requirements or architectural decisions, needs several implementation or verification stages, or coordinates multiple workers. File count alone does not determine complexity.
 - Exemption from a task record does not waive the owning document's review rules or required checks. If a small change grows beyond these limits, add a task before continuing.
-- This scope follows the user's 2026-10-10 request to simplify the workflow for solo development; see [contributing task](T20261010-contributing/task.md).
 
 ## Files
 
@@ -49,22 +48,20 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 
 ## Archiving
 
-依据：用户 2026-10-10 对话请求「tasks 里面应该有归档文件夹，完成的任务进入归档文件夹」；本次规则修订待 diff 审阅。
-
-- `tasks/archive/` 存放 `status: done` 的任务；其余状态的任务保留在 `tasks/` 下。归档依据 Lifecycle 的 AI 收尾，不代表人工产品验收；待人工验收的功能仍须在路线图保留入口。
+- 将 `status: done` 的任务归档到 `.agents/archive/tasks/`；其余状态的任务保留在 `tasks/`。待人工验收的功能仍须在路线图保留入口。
 - 归档时整体移动任务目录，保留原 ID、目录名、状态、任务记录与 `evidence/`；不另建归档索引。
 - 移动时同步修正仓库内指向旧路径的引用，以及任务内部因目录深度变化而失效的相对链接和路径；检查链接目标，并搜索旧路径，确保没有遗漏。
 - 已归档任务需要恢复工作时，由主 agent 将完整目录移回 `tasks/`，更新状态并记录重开原因，同时修正相关引用。
 
 ## Writing task.md
 
-- Cite FR, AC, spec, or decision locations for every goal and criterion. Do not introduce requirements.
-- Derive acceptance criteria from `docs/05. Acceptance Criteria.md`; they may be stricter, never looser.
+- For product goals and criteria, cite FR, AC, spec, or decision locations. Repository tooling and workflow tasks describe the authorized scope and may link existing records when useful. Do not introduce requirements.
+- Derive product acceptance criteria from `docs/05. Acceptance Criteria.md`; they may be stricter, never looser.
 - When one requirement becomes several tasks, a single planning agent does the split to avoid gaps, duplicates, and ID collisions.
 
 ## Acceptance
 
-本节负责验收方法与执行流程；产品预期仍由 [V1 核心验收场景](<../docs/05. Acceptance Criteria.md>)、对应 FR 与模块 spec 定义。适用于后续验收及进行中任务的下一轮验收，不追改既有验收结论。依据见本文件顶部待审阅事项。
+本节负责验收方法与执行流程；产品预期仍由 [V1 核心验收场景](<../docs/05. Acceptance Criteria.md>)、对应 FR 与模块 spec 定义。适用于后续验收及进行中任务的下一轮验收，不追改既有验收结论。
 
 ### 验收准备与分层
 
@@ -97,7 +94,7 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 
 ### 结论与证据
 
-- 验收记录开头先列未覆盖与边界、待决事项及适用的人工功能验收入口，再给出 AI 总体结论（通过／部分通过／不通过）和逐项结果。使用 [验收模板](../templates/acceptance.md)；无内容的可选区块删除。
+- 验收记录开头先列未覆盖与边界、待决事项及适用的人工功能验收入口，再给出 AI 总体结论（通过／部分通过／不通过）和逐项结果。使用 [验收模板](templates/acceptance.md)；无内容的可选区块删除。
 - 记录验收者及是否参与实现、代码基线（commit；有未提交改动时标明 diff 范围）、平台、应用形态（开发／构建／打包）、Provider 类型与相关 CLI 版本。逐项关联来源、操作、预期与实际结果、结论及证据。
 - 关键交互保留截图，自动化保留结果或日志；失败项记录复现步骤、修复与复验结果。证据文件遵循 Evidence，使用隔离测试数据，原生窗口检查的并行限制遵循贡献指南。
 - Review Agent 给出独立结论，Main Agent 核对 Lifecycle 完成条件、更新任务状态并归档；不另加一次形式化签收。功能或阶段准备就绪后，提供可运行版本、核心操作、关键证据与已知限制供人验收。AI 评审通过、任务完成、提交和合并均不等同于人工产品验收。
@@ -119,12 +116,12 @@ A new main agent resumes from `task.md` and, if present, the `plan.md` progress 
 
 - Name files `W<n>-<description>.<ext>` after the producing worker, lowercase and descriptive. Records created before this protocol keep their original names.
 - Never store credentials, authentication responses, email addresses, or full user configuration.
-- `.ignore` 将 `tasks/*/evidence/` 和 `tasks/archive/*/evidence/` 排除出默认搜索。证据由 `acceptance.md`、`report.md` 或 docs 链接；需要搜索时使用 `rg --no-ignore-dot`。
+- `.ignore` 将 `tasks/*/evidence/` 和 `.agents/archive/tasks/*/evidence/` 排除出默认搜索。证据由 `acceptance.md`、`report.md` 或 docs 链接；需要搜索时使用 `rg --no-ignore-dot`。
 - Scratch output goes to `.runtime/`; copy into `evidence/` only what supports a conclusion. CLI test projects stay outside the repository (for example under `/tmp`) so they do not inherit this repository's `AGENTS.md`.
 
 ## Queries
 
 - `rg -l '^status: in_progress' tasks/*/task.md`: active tasks.
 - `rg -l '^status: verifying' tasks/*/task.md`: tasks undergoing verification or closure review; not necessarily waiting for a human.
-- `rg -l '^status: done' tasks/archive --glob task.md`: archived tasks.
-- `rg -l 'FR-STATE-002' tasks --glob task.md`: tasks covering a requirement, including archived tasks.
+- `rg -l '^status: done' .agents/archive/tasks --glob task.md`: archived tasks.
+- `rg -l 'FR-STATE-002' tasks .agents/archive/tasks --glob task.md`: tasks covering a requirement, including archived tasks.

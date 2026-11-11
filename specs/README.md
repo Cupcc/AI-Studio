@@ -6,7 +6,7 @@
 |---|---|
 | 文档状态 | 草稿（模块划分待确认） |
 | 文档职责 | 说明 `specs/` 的用途和规则，维护模块与 FR 编号的对应关系。 |
-| 模板 | [templates/spec.md](../templates/spec.md) |
+| 模板 | [templates/spec.md](templates/spec.md) |
 
 ## 1. 未决问题
 
@@ -25,7 +25,7 @@
 - spec 与 `docs/` 冲突时按[文档索引](<../docs/00. Documentation Index.md>)的冲突优先级处理，并把冲突记入 spec 的未决问题。
 - 来源简称：01～07 指 `docs/` 下同编号文档；Shell 指 [Shell Spec v01](../design/components/shell-spec-v01.md)。
 - 标注：无标注的规则直接来自所引来源。“建议”或 **（提案）** 表示来源未规定、为让实现不必猜测而提出的行为，须经人确认，真正存在分歧的列入未决问题；**（技术方案，待实现确认）** 表示不影响产品行为的实现选择，实现时可调整，不需要产品确认。
-- 决策边界按 [AGENTS.md](../AGENTS.md) 的 Authorship & Review 判断。AI 可决定授权范围内的接口形态、代码组织等实现细节并记录依据；影响用户行为、验收标准或重大成本、兼容性、数据安全的取舍须提交人类。整理审阅材料时突出这些差异，不要求人逐项批准技术细节（2026-10-11 确认，治理规则 diff 待审阅）。
+- 决策边界按 [AGENTS.md](../AGENTS.md) 的 Authorship & Review 判断。AI 可决定授权范围内的接口形态、代码组织等实现细节并记录依据；影响用户行为、验收标准或重大成本、兼容性、数据安全的取舍须提交人类。整理审阅材料时突出这些差异，不要求人逐项批准技术细节。
 
 ## 4. 修改规则
 
@@ -45,8 +45,8 @@
 | `chat/` | FR-CHAT-001～FR-CHAT-003 | [spec.md](chat/spec.md) |
 | `session/` | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007 | [spec.md](session/spec.md) |
 | `input/` | FR-INPUT-001～FR-INPUT-002 | [spec.md](input/spec.md) |
-| `project-view/` | FR-VIEW-001～FR-VIEW-008；默认 View 与扩展接缝 | [spec.md](project-view/spec.md) |
-| `workbench/` | FR-VIEW-002、FR-WB-001～FR-WB-008；自定义工作台 | [spec.md](workbench/spec.md) |
+| `project-view/` | FR-VIEW-001～FR-VIEW-008；预设网页包使用的 Knowledge 与 Definition 数据 | [spec.md](project-view/spec.md) |
+| `workbench/` | FR-VIEW-002、FR-WB-001～FR-WB-008；统一工作台宿主、统一网页插件格式 | [spec.md](workbench/spec.md) |
 | `tools/` | FR-TOOL-001～FR-TOOL-005 | [spec.md](tools/spec.md) |
 | `settings/` | FR-SET-001～FR-SET-002 | [spec.md](settings/spec.md) |
 | `agent-todos/` | FR-TODO-001～FR-TODO-009；增量范围 / 阶段见 [02 §8](<../docs/02. Functional Requirements.md#8-后续阶段agent-to-dos>)与[路线图 §4.1](<../docs/06. Development Roadmap.md#41-agent-to-dos-分阶段建设规划>) | [spec.md](agent-todos/spec.md) |

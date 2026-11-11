@@ -1,0 +1,9 @@
+$ playwright test e2e/runtime-tools.spec.ts --grep 'Terminal server'
+
+Running 1 test using 1 worker
+
+(node:5128) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/runtime-tools.spec.ts:271:5 › FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit (4.2s)
+
+  1 passed (4.4s)

@@ -15,8 +15,6 @@
 
 ### 1.1 未决问题
 
-2026-10-09 参考应用复核见 [Session research](../../tasks/archive/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
-
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
 | S-Q3 | 原生会话无法恢复时，可提供哪些原生恢复／分支入口？ | 报告原生错误；按原则 24 核对并接入 CLI 支持的恢复／分支操作，不再因旧文档未列入口而一律排除。显式新建或分支须显示为新会话，不得暗中替换原 Session ID（04 第 5 节第 7 条） | 否；技术能力核对，具体未接入项如实记录 | |
@@ -52,10 +50,10 @@
   - New Chat 草稿、Default CLI、CLI 菜单、Session 命名方法：见 [specs/chat/spec.md](../chat/spec.md)。
   - 输入区结构、Send / Stop 控件、Model Selector：见 [specs/input/spec.md](../input/spec.md)。本文只规定发送、答复、Stop、切换模型对 Session 状态的影响。
   - Session History 的分组、排序呈现、滚动、Rename 交互：见 [Navigation spec](../navigation/spec.md)。本文提供排序字段与状态。
-  - Tab 注意力点的渲染、关闭确认对话框的 UI、折叠按钮注意力点的渲染：Project 壳层（[T20261009-project-shell](../../tasks/archive/T20261009-project-shell/task.md)）。
+  - Tab 注意力点的渲染、关闭确认对话框的 UI、折叠按钮注意力点的渲染：Project 壳层（[Project 规格](../project/spec.md)）。
   - CLI 协议、进程管理、Stop 的资源清理细节：CLI Adapter（[Adapter spec](../agent-adapter/spec.md)）。本文只以抽象接口描述所需能力（第 5.1 节）。
-  - 默认 View 的 Conversation 列与首条上下文由 [Project View spec](../project-view/spec.md)负责；自定义工作台的逐次上下文、执行范围和产物发布由 [workbench spec](../workbench/spec.md)负责。两者使用普通 Session，本模块维护会话、查看状态和 Stop（FR-WB-003、005，2026-11-10 接受方向，2026-11-11 调整为插件架构先行，此处业务接缝留到后续业务阶段设计与评审）。
-  - 轮次原生文件记录与 Diff 联动（依赖 FR-TOOL-002、04 第 1 节第 13 项与 [context-tools task](../../tasks/archive/T20261009-context-tools/task.md)；组件修订见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节）。
+  - 预设与自定义工作台的 Conversation、首条可移除上下文和生命周期接入统一由[工作台宿主](../workbench/spec.md#97-预设与自定义工作台统一宿主)负责（用户 2026-11-11，DEC-29）。预设知识上下文内容由 [Project View spec](../project-view/spec.md)负责，后续业务逐轮上下文、执行范围与产物发布仍按工作台规格另行接入。本模块维护普通 Session、查看状态与 Stop。
+  - 轮次原生文件记录与 Diff 联动（依赖 FR-TOOL-002、04 第 1 节第 13 项；组件修订见 [Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6、9 节）。
 
 ## 3. 行为细则
 
@@ -88,7 +86,7 @@
 3. 流式输出逐段追加；用户位于底部时自动跟随；向上滚动后停止跟随并显示“回到最新”；点击后返回底部并聚焦输入框（Shell Spec v02 第 6 节；DEC-23）。
 4. 切换 Project Tab 后返回、或在同一 Project 内从其他 View 返回同一 Session 时：离开时处于底部（跟随中）的，返回后定位到最新位置；离开时已向上滚动的，恢复离开时的位置并显示“回到最新”（建议；依据 UX D-15“恢复离开时的完整状态”，与 FR-STATE-005“点击进入最新位置”在点击路径上一致）。
 5. 对话记录条目（Shell Spec 第 6 节）：用户消息、Agent 消息、工具活动行、Needs Input 卡片、Error 卡片、轮次完成行。条目定义见第 4.4 节。是否显示 CLI 的推理 / 思考内容见 S-Q12。Agent 消息按 Markdown 渲染，用户消息保持纯文本；渲染范围、代码块和链接规则见 Shell Spec v02 第 6 节（交互原型 v02，2026-10-10 确认）。流式输出期间按已到达的文本渲染，未闭合的代码块显示到当前末尾。
-6. 主画布顶栏显示 CLI 标识与 Session 标题；完整 CLI 名称保留在标识的提示与无障碍名称，长标题省略但保留完整提示（[DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)，2026-10-23 确认）。Session 的 `origin_view_id` 不为空时，显示来源 View 和“在 View 中打开”入口（UX 第 6 节 Session 打开；D-02）。该入口通过壳层导航到真实 Project View，并在左列打开原 Session；当前实现与验证见 [Project View 任务](../../tasks/archive/T20261011-project-view-implementation/task.md)。
+6. 主画布顶栏显示 CLI 标识与 Session 标题；完整 CLI 名称保留在标识的提示与无障碍名称，长标题省略但保留完整提示（[DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)，2026-10-23 确认）。Session 的 `origin_view_id` 不为空时，显示来源 View 和“在工作台中打开”入口（UX 第 6 节 Session 打开；D-02）。该入口通过壳层导航到真实 Project View，并在左列打开原 Session。
 7. 输入区固定在对话区域下方（FR-SESSION-001），可立即输入（UX 第 6 节 Session 打开第 4 项），细节见 input spec。
 8. 性能：打开 Session 和切换 Session 不等待 CLI；大量历史 Session 时只加载列表所需元数据（04 第 7 节性能）。
 
@@ -319,13 +317,13 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 - 本轮采用“只在发送时恢复 Runtime”：打开、分页、Rename 不启动原生会话；继续对话使用原 `nativeSessionId`、Project cwd 和下一轮模型。秘密问题的答案与草稿不写入明文持久化记录，界面记录以隐藏文本代替。
 - 只记录在本应用中发生的轮；在应用外用 CLI 继续同一原生会话产生的内容不会出现在对话记录中（S-Q13）。
 
-实现与验证记录见 [Session task](../../tasks/archive/T20261009-session-slice/task.md)、[后端证据](../../tasks/archive/T20261009-session-slice/evidence/W4-backend-validation.md) 与[独立验收](../../tasks/archive/T20261009-session-slice/acceptance.md)。模拟 Provider 验证不代表真实 CLI 的 AC-02～AC-05 已完整通过。
+模拟 Provider 验证不代表真实 CLI 的 AC-02～AC-05 已完整通过。
 
 ## 5. 接口与事件
 
 ### 5.1 需要 CLI Adapter 提供（抽象）
 
-以下为本模块所需能力，命名为示意。实现使用 [Adapter spec §5](../agent-adapter/spec.md) 与 `packages/agent-adapter/src/provider.ts` 的正式契约；两者的名称映射见 Adapter §5.5。本轮对齐记录见 [research](../../tasks/archive/T20261009-session-slice/research.md) §3。
+以下为本模块所需能力，命名为示意。实现使用 [Adapter spec §5](../agent-adapter/spec.md) 与 `packages/agent-adapter/src/provider.ts` 的正式契约；两者的名称映射见 Adapter §5.5。
 
 | 能力 / 事件 | 用途 | 对应 [CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 / 04 第 5 节 | 需对齐的点 |
 |---|---|---|---|
@@ -368,7 +366,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | 接口 | 说明 |
 |---|---|
 | 查看上下文推送 | 当前窗口的当前 Project；该 Project Main Canvas 的模式与显示对象：`conversation(sessionId)` / `draft` / `view(viewId, leftSessionId?)`。另需窗口前台状态（应用活动、窗口获得焦点、未最小化），以及“打开 S”的用户操作信号（点击列表项、切换 Tab 返回、启动恢复、在 View 左列继续 S），二者区分开：前者决定是否产生提醒，后者触发清除（第 3.11 节，S-Q1 2026-10-09 确认）。状态恢复（FR-PROJ-003）后同样推送 |
-| 打开 Session / 打开 View 的导航接口 | 点击列表项、“在 View 中打开”、创建 Session 后切换到该 Session |
+| 打开 Session / 打开 View 的导航接口 | 点击列表项、“在工作台中打开”、创建 Session 后切换到该 Session |
 | 关闭 Tab 前查询与确认后回调 | 调用 `getBlockingSessionCounts`、`stopProjectTurns`，通过后调用 `projectClosed` |
 | 应用退出前钩子 | 依次调用 `stopAllTurns`、`releaseAllRuntimes` 并重新计数（见 [quit-flow.ts](../../apps/desktop/src/main/services/project/quit-flow.ts)）；失败 / 取消调用 `cancelQuit`（由 app-skeleton / 壳层提供） |
 | Project 目录路径 | 作为 CLI cwd |
@@ -393,4 +391,4 @@ Renderer 在 `createRoot` 前一次安装 `installSessionIntegration()`，注册
 
 ### 2026-10-18 异常退出后的条目恢复
 
-依据 FR-STATE-001 / 003、FR-SESSION-002 与第 3.14 节的恢复责任：启动发现未结束回合时，将该回合保存的未完成 Agent 消息标为完整、运行中工具条目标为失败，并沿原错误流程结束回合、取消未答请求；保留已有正文，不重放命令。活动恢复只读取该 Session / turn 的未完成记录；启动同时按已保存的 failed / interrupted 终态修复旧版遗留的不完整条目，不改写成功回合、正文和摘要，也不重放命令。W26 强杀截图暴露并修复此接缝，技术证据见[收尾自检](../../tasks/archive/T20261009-v1-foundation-slice/evidence/W26-closure.md)；当前基线与独立结果由总体验收负责。
+依据 FR-STATE-001 / 003、FR-SESSION-002 与第 3.14 节的恢复责任：启动发现未结束回合时，将该回合保存的未完成 Agent 消息标为完整、运行中工具条目标为失败，并沿原错误流程结束回合、取消未答请求；保留已有正文，不重放命令。活动恢复只读取该 Session / turn 的未完成记录；启动同时按已保存的 failed / interrupted 终态修复旧版遗留的不完整条目，不改写成功回合、正文和摘要，也不重放命令。

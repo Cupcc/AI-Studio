@@ -1,0 +1,123 @@
+- generic [ref=e1] clickable [onclick]
+  - banner
+    - button "折叠导航" [ref=e2]
+    - tablist "Projects"
+      - tab "Web Format Review Project" [selected, ref=e9]
+        - StaticText "Web Format Review Project"
+      - button "关闭 Web Format Review Project" [ref=e10]
+    - button "新建标签页" [ref=e3]
+    - button "右侧边栏" [ref=e4]
+  - complementary "Project 导航"
+    - button "New Chat" [ref=e11]
+    - button "选择 CLI" [expanded=false, ref=e12]
+    - region "工作台" [ref=e5]
+      - heading "工作台" [level=2, ref=e13]
+      - button "添加工作台" [expanded=false, ref=e14]
+      - generic "工作台列表"
+        - button "Overview" [ref=e18]
+          - StaticText "Overview"
+        - button "Progress" [ref=e19]
+          - StaticText "Progress"
+        - button "Architecture" [ref=e20]
+          - StaticText "Architecture"
+        - button "Agent Team" [ref=e21]
+          - StaticText "Agent Team"
+        - button "Business Flow" [ref=e22]
+          - StaticText "Business Flow"
+        - button "随手记" [ref=e23]
+          - StaticText "随手记"
+        - button "草稿：随手记" [ref=e24]
+          - StaticText "随手记"
+          - StaticText "设计草稿"
+        - button "草稿：随手记" [ref=e96]
+          - StaticText "随手记"
+          - StaticText "设计草稿"
+    - heading "SESSIONS" [level=2, ref=e6]
+    - generic
+      - heading "今天" [level=3, ref=e25]
+      - generic
+        - StaticText "CX"
+        - button "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [ref=e34]
+        - button "更多操作 不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [expanded=false, ref=e35]
+      - generic
+        - StaticText "CX"
+        - button "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [ref=e36]
+        - button "更多操作 不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [expanded=false, ref=e37]
+        - image "Completed Unread"
+    - button "设置" [ref=e7]
+      - StaticText "设置"
+  - main
+    - region "工作台对话" [ref=e8]
+      - sectionheader
+        - StaticText "新对话"
+        - generic
+          - StaticText "· 随手记"
+        - combobox "工作台 CLI" [expanded=false, ref=e54]: Codex
+          - MenuListPopup
+            - option "选择 CLI" [disabled, ref=e66]
+            - option "Codex" [selected, ref=e67]
+            - option "Claude Code · 不可用" [disabled, ref=e68]
+      - heading "想创建怎样的工作台？" [level=2, ref=e51]
+      - paragraph
+        - StaticText "描述页面的用途与交互。AI 修改草稿文件，你可以在右侧预览后应用。"
+      - generic
+        - StaticText "当前工作台 · 随手记"
+        - button "移除上下文 workbench-draft:3d93c491-f7b0-44d0-95a1-e815959a37c9" [ref=e114]
+        - textbox "消息" [ref=e97]
+          - StaticText "向 Codex CLI 发送消息…"
+        - button "Context / Attachment" [expanded=false, ref=e115]
+        - button "Reasoning Effort" [expanded=false, ref=e116]
+        - button "Model Selector" [expanded=false, ref=e117]
+          - StaticText "GPT-6.1-Sol（默认）"
+        - button "Send" [disabled, ref=e60]
+      - separator "调整对话列宽度" [ref=e16] focusable [tabindex]: 440
+    - region "Preview" [ref=e17]
+      - sectionheader
+        - StaticText "随手记"
+        - generic "右侧工具"
+          - button "Preview" [ref=e44]
+          - button "Files" [ref=e45]
+          - button "Search" [ref=e46]
+          - button "Diff" [ref=e47]
+          - button "Browser" [ref=e48]
+          - button "Terminal" [ref=e49]
+      - region "工作台草稿预览" [ref=e100]
+        - StaticText "新工作台草稿"
+        - button "缩小 Preview" [ref=e103]
+          - StaticText "−"
+        - button "重置 Preview 缩放" [ref=e104]
+          - StaticText "100%"
+        - button "放大 Preview" [ref=e105]
+          - StaticText "+"
+        - button "刷新工作台预览" [ref=e106]
+        - button "添加至当前项目" [ref=e107]
+        - paragraph
+          - StaticText "在左侧描述或修改页面，完成后刷新预览。预览使用独立草稿状态，确认后再添加到项目。"
+        - group
+          - DisclosureTriangle "来源、能力与开发文件" [expanded=false]
+            - StaticText "来源、能力与开发文件"
+        - status
+          - StaticText "包检查通过"
+          - StaticText "页面已连接"
+          - StaticText "已读取保存状态"
+        - Iframe "工作台页面" [ref=e129]
+          - main "项目知识" [ref=e130]
+            - status
+              - StaticText "更新于 3:45:45 PM"
+            - heading "Overview" [level=2, ref=e131]
+            - paragraph
+              - StaticText "尚无项目知识。生成指令会填入左侧草稿，由你确认发送。" [ref=e133] focusable [tabindex]
+            - button "生成 Overview" [ref=e132]
+            - generic "项目 Session 摘要"
+              - generic
+                - heading "Recent Sessions" [level=3, ref=e134]
+                - button "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [ref=e135]
+                - button "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [ref=e136]
+              - generic
+                - heading "Needs Input" [level=3, ref=e137]
+                - paragraph
+                  - StaticText "暂无"
+              - generic
+                - heading "Recently Completed" [level=3, ref=e138]
+                - button "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [ref=e139]
+                - button "不要读取或修改任何文件，不要运行命令。只根据本轮附加的工作台上下文回复一行：WE…" [ref=e140]

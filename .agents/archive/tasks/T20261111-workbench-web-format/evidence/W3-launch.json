@@ -1,0 +1,19 @@
+{
+  "ready": true,
+  "starts": 1,
+  "port": 49905,
+  "pid": 28686,
+  "listenerPids": [
+    28686
+  ],
+  "fixture": "/var/folders/r2/57zjr6v53n7c_hg3nfj1sdy00000gn/T/studio-web-format-review-MlUCnN",
+  "projects": [
+    "/var/folders/r2/57zjr6v53n7c_hg3nfj1sdy00000gn/T/studio-web-format-review-MlUCnN/Web Format Review Project",
+    "/var/folders/r2/57zjr6v53n7c_hg3nfj1sdy00000gn/T/studio-web-format-review-MlUCnN/Second Web Review Project"
+  ],
+  "userData": "/var/folders/r2/57zjr6v53n7c_hg3nfj1sdy00000gn/T/studio-web-format-review-MlUCnN/user-data",
+  "providerMode": "real",
+  "messagesSentByLauncher": 0,
+  "fixtureInjection": "native directory picker result and window size/focus only",
+  "isPackaged": false
+}

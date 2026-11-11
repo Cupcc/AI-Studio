@@ -1,0 +1,9 @@
+$ playwright test e2e/session.spec.ts --grep 'draft first, then streamed'
+
+Running 1 test using 1 worker
+
+(node:54325) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (5.7s)
+
+  1 passed (6.3s)

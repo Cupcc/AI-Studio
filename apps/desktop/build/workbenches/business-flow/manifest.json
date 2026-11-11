@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "studio-business-flow",
+  "version": "1.0.0",
+  "sdkVersion": 1,
+  "title": "Business Flow",
+  "entry": "index.html",
+  "capabilities": [
+    "state.read",
+    "conversation.draft",
+    "project.knowledge.read"
+  ],
+  "knowledgeViewId": "business-flow"
+}

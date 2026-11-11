@@ -9,9 +9,9 @@
 | 覆盖需求 | FR-VIEW-001～FR-VIEW-008 |
 | 相关验收 | AC-06；05 第 4 节的 Project Knowledge / View 数据分离与本地持久化专项 |
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、6、8、10 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
-| 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 3、6、1、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；T20261009-project-view；2026-10-10 起草；用户明确“我都已经全部确定了”（2026-10-11 确认） |
+| 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 3、6、1、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；2026-10-10 起草；用户明确“我都已经全部确定了”（2026-10-11 确认） |
 
-> 本规格负责默认五个 View 的 DEC-04～07 行为。自定义扩展按用户 2026-11-10 确认的 DEC-28 由[工作台规格](../workbench/spec.md)负责，本次同步 diff 待审阅。
+> 本规格负责预设网页包的 Knowledge、Definition 数据与 DEC-04～07 内容行为。统一宿主、目录、定位、快照、事件、生命周期与上下文入口由[工作台规格 §9.7](../workbench/spec.md#97-预设与自定义工作台统一宿主)负责，依据用户 2026-11-11“统一为同一种架构”（DEC-29）。网页包迁移见[网页格式统一任务](../../.agents/archive/tasks/T20261111-workbench-web-format/task.md)。
 
 来源简称：Project 指 [Project spec](../project/spec.md)；Session 指 [Session spec](../session/spec.md)。其余简称与标注约定见 [specs/README.md](../README.md) 第 3 节。
 
@@ -26,12 +26,12 @@
 | 编号 | 问题 | 回答（确认日期） |
 |---|---|---|
 | PV-Q1 | Knowledge 是否放在 Project 内 `.ai-studio/`，并默认 Git 忽略？ | 是；每个 View 一份带 `schemaVersion` 的 JSON，`.gitignore` 内容为 `*`（2026-10-09，DEC-04）。 |
-| PV-Q2 | 默认 View 与自定义扩展分别如何渲染？ | 默认五个 View 使用受信组件；自定义工作台使用 Web 页面配结构化定义，按功能优先选择容器（默认基线 2026-10-09；自定义扩展 2026-11-10 对话调整，DEC-05、DEC-28；diff 待审阅）。 |
+| PV-Q2 | 默认 View 与自定义扩展分别如何渲染？ | 预设与自定义使用同一标准 Web 插件包、iframe 和 SDK；Knowledge/Definition 是网页包的内容数据，当前决定见 DEC-29。 |
 | PV-Q3 | View Context 是否首条消息前附加可移除的英文文本块？ | 是；不内联 Knowledge，移除后仍保留 `originViewId`（2026-10-09，DEC-06）。 |
 | PV-Q4 | 客户端是否只监视、校验和刷新，不自动生成或修复 Knowledge？ | 是；打开、回合结束和重新聚焦时补扫，渲染失败保留上一版（2026-10-09，DEC-07）。 |
-| PV-Q5 | 默认 View Definition 是否内置，Project 文件仅可覆盖？ | 是（2026-10-09，T20261009-project-view Q4）。 |
-| PV-Q6 | Overview 的 Session 摘要区块是否由客户端固定渲染？ | 是（2026-10-09，T20261009-project-view Q5）。 |
-| PV-Q7 | V1 文件上限是否暂定 256 KB、500 节点？ | 是，作为实现防护上限，渲染原型校准后如需调整需更新规格（2026-10-09，T20261009-project-view Q11）。 |
+| PV-Q5 | 默认 View Definition 是否内置，Project 文件仅可覆盖？ | 是（2026-10-09）。 |
+| PV-Q6 | Overview 的 Session 摘要区块是否由客户端固定渲染？ | 是（2026-10-09）。 |
+| PV-Q7 | V1 文件上限是否暂定 256 KB、500 节点？ | 是，作为实现防护上限，渲染原型校准后如需调整需更新规格（2026-10-09）。 |
 | PV-Q8 | `ViewSnapshot` 是否同时推送完整 Knowledge 与 Definition，还是只推送渲染后的模型？ | 采用已校验的声明式快照，包含完整 Knowledge 与 Definition，便于 Renderer 保持可测试和 last-good；不推送 Session 敏感区块（2026-10-11，依据 DEC-05、04 第 3 节）。 |
 | PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 缩放比例只保存在当前 View 的运行期状态，不扩展 Project `ui_state`；具体手势交给高保真设计确认（2026-10-11，依据 FR-VIEW-005、Project spec 状态边界）。控件与手势已按[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q1 确认（2026-10-11），见 FR-VIEW-005 第 4 条。 |
 | PV-Q10 | `schemaVersion` 升级是否只支持同版本读取，还是提供迁移器？ | V1 只接受当前支持版本；未知版本进入 `error` 并保留 last-good，迁移器作为后续 task（2026-10-11，依据 DEC-04 与本地文件可回退原则）。 |
@@ -42,18 +42,18 @@
 ## 2. 职责与边界
 
 - 负责：
-  - 五个默认 View 的目录、标题、顺序和语义入口（FR-VIEW-001）。
+  - 五个预设工作台的项目知识语义与内容要求（FR-VIEW-001）；目录、标题、顺序与实例定位由工作台宿主负责。
   - Project Knowledge 与 View Definition 的文件发现、读取、Schema 校验、版本检查和快照发布（FR-VIEW-003～004；DEC-04、DEC-07）。
-  - 受信声明式 View Renderer 与 Preview 的空状态、加载、刷新、缩放、错误回退和只读行为（FR-VIEW-003～005；DEC-05、DEC-07）。
-  - Project View Mode 的 Conversation 列、最近对话入口、View Context 标签和普通 Session 创建契约（FR-VIEW-005～008；DEC-06）。
+  - 预设网页包中的受信内容脚本与 Preview 的空状态、加载、刷新、缩放、错误回退和只读行为（FR-VIEW-003～005；DEC-05、DEC-07）。
+  - 预设的首条上下文内容规则（FR-VIEW-005～008；DEC-06）；Conversation、最近对话、标签与 Session 接入由统一工作台负责。
   - 监听 Project 内 `.ai-studio/` 的变化，并在 Project 打开、CLI 回合结束、窗口重新获得焦点时补扫。
-  - 向 Renderer、Session 和 Project Shell 提供类型化的 View 数据与事件。
+  - 向工作台宿主提供已验证的声明式内容；公共快照与事件由宿主提供。
 - 不负责：
   - Project 的打开、Tab、`ui_state` 持久化、左右区域尺寸及 Project 间隔离 → [Project spec](../project/spec.md)。
   - Session 生命周期、Conversation 内容、状态提醒、CLI Runtime、首条消息创建 → [Session spec](../session/spec.md)、[Chat spec](../chat/spec.md)、[Agent Adapter spec](../agent-adapter/spec.md)。
-  - 输入区的通用布局、Model Selector、Send / Stop → [Input spec](../input/spec.md)。本模块只提供 View Context 标签和创建参数。
-  - Files、Search、Diff、Browser、Terminal 的内容 → [tools spec](../tools/spec.md)；Project View Mode 下它们复用右侧区域切换契约，切换内容不释放工具的 Project 级资源（DEC-10，2026-10-12 确认）。既有内容见[工程工具任务](../../tasks/archive/T20261009-context-tools/task.md)，Search 与新增工具能力见[对齐任务](../../tasks/archive/T20261026-tools-vscode-parity/task.md)。
-  - 自定义工作台的包、实例、创建入口、HTML / JavaScript 页面、逐次上下文和产物提交 → [workbench spec](../workbench/spec.md)（FR-WB-001～008）。
+  - 输入区的通用布局、Model Selector、Send / Stop → [Input spec](../input/spec.md)。本模块只规定预设上下文内容。
+  - Files、Search、Diff、Browser、Terminal 的内容 → [tools spec](../tools/spec.md)；Project View Mode 下它们复用右侧区域切换契约，切换内容不释放工具的 Project 级资源（DEC-10，2026-10-12 确认）。
+  - 所有工作台的目录、公共宿主、会话入口，以及自定义包、实例和后续业务 → [workbench spec](../workbench/spec.md)（FR-WB-001～008）。
 
 ## 3. 行为细则
 
@@ -84,8 +84,8 @@
 ### FR-VIEW-002 Project View 可扩展
 
 1. 默认 View 保留扩展边界：View 目录、Schema、Renderer Registry 和导航数据结构不得把五个 ID 写死为不可扩展的数据库枚举。
-2. 自定义扩展采用包与 Project 内实例，使用[工作台规格](../workbench/spec.md)的创建、导航、权限与存储规则。默认 View 在插件机制阶段不迁移，未知 View 文件不能破坏默认 View。
-3. 自定义工作台使用 Web 页面配结构化定义，通过独立页面入口运行；声明式组件可作为模板，不限制工作台只能复用本 Renderer（2026-11-10 确认，DEC-28）。
+2. 自定义扩展采用包与 Project 内实例，使用[工作台规格](../workbench/spec.md)的创建、导航、权限与存储规则。预设与自定义工作台共用 §5 所引宿主契约，未知文件不能破坏已有预设内容。
+3. 预设与自定义均使用标准网页入口和公共 SDK，Definition 组件是包内可复用的内容实现，不构成宿主的第二种 Renderer。
 
 ### FR-VIEW-003 View 内容动态生成
 
@@ -185,16 +185,15 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 
 | 类型 | 字段 | 说明 |
 |---|---|---|
-| `ViewCatalogEntry` | `id`, `title`, `kind`, `order` | `kind` 为 `builtin` 或 `custom`；V1 只产生 builtin |
 | `KnowledgeDocument` | `schemaVersion`, `viewId`, `data` | `data` 是事实对象；应用按内置 Schema 校验 |
 | `ViewDefinition` | `schemaVersion`, `viewId`, `root`, `bindings` | `root` 为声明式组件树；`bindings` 只引用 Knowledge / 明确允许的客户端数据 |
-| `ViewSnapshot` | `projectId`, `viewId`, `catalog`, `knowledge`, `definition`, `revision`, `updatedAt` | 主进程发布给 Renderer 的完整、已校验的声明式不可变快照；缺失 definition 时已合并内置定义，不包含 Session 敏感区块（PV-Q8，2026-10-11 确认） |
+| `ViewSnapshot` | `projectId`, `viewId`, `catalog`, `knowledge`, `definition`, `revision`, `updatedAt` | 宿主提供给网页包的完整、已校验的内容资源；缺失 definition 时已合并内置定义，不包含 Session 敏感区块（PV-Q8，2026-10-11 确认） |
 
 单文件限制（PV-Q7 已确认，作为 V1 防护上限）：Knowledge 或 View Definition 文件默认不超过 256 KB，单个组件树不超过 500 个节点。超过上限时该 View 进入校验错误并保留上一版，不截断、不执行部分 JSON；具体数值在渲染原型校准后若需调整，必须修改本规格与任务证据。
 
-### 4.2 声明式 Renderer 组件
+### 4.2 网页包的 Definition 组件
 
-V1 仅开放内置 Registry 中的受信组件（实现名称可调整）：
+预设网页包解释 Definition 时支持以下组件：
 
 `stack`、`grid`、`section`、`text`、`metric`、`badge`、`list`、`table`、`timeline`、`diagram`、`callout`、`empty`。
 
@@ -228,7 +227,7 @@ V1 仅开放内置 Registry 中的受信组件（实现名称可调整）：
 模板只包含：
 
 ```text
-Current Project View: <view title>
+Current Workbench: <view title>
 Relevant files: <relative paths>
 Rules: update the relevant Knowledge and View Definition files when the user asks to change this view; keep facts separate from presentation; do not add executable HTML or scripts.
 ```
@@ -239,66 +238,34 @@ Rules: update the relevant Knowledge and View Definition files when the user ask
 
 ### 5.1 Main Service
 
-建议新增 `ProjectViewService`（技术方案，待实现确认），放在 `apps/desktop/src/main/services/project-view/`：
-
-| 方法 | 作用 | 备注 |
-|---|---|---|
-| `list(projectId)` | 返回默认目录和当前可用快照摘要 | 不创建文件，不启动 AI |
-| `getSnapshot(projectId, viewId)` | 读取、校验并返回一个 ViewSnapshot | 受 Project canonical path 限制 |
-| `getRecentSessions(projectId, viewId)` | 由 Session 摘要按 `originViewId` 取最近 3 条 | 可由 Renderer 组合，边界由 Session 提供 |
-| `buildContext(projectId, viewId)` | 返回相对路径、英文模板和默认附加标记 | 不返回 Knowledge 内容 |
-| `watch(projectId)` / `dispose(projectId)` | 管理文件监视和补扫 | Project 关闭时释放 |
-
-主进程服务负责真实路径、文件读取、Schema 校验、稳定读取、快照版本和安全错误；Renderer 不直接访问 `fs`、Shell 或 Project 目录。
+公共服务由[工作台规格 §9.7](../workbench/spec.md#97-预设与自定义工作台统一宿主)负责。预设的 Knowledge 资源服务 负责真实路径、文件读取、Schema 与绑定校验、稳定读取、快照版本、last-good 和文件监视。Renderer 不直接访问 `fs`、Shell 或 Project 目录。
 
 ### 5.2 IPC 契约
 
-建议新增 `shared/ipc/project-view.ts`，按 DEC-02 登记到 `contracts.ts`、`main/ipc/index.ts`，参数均带 `projectId`：
-
-| 调用 / 事件 | DTO | 作用 |
-|---|---|---|
-| `projectView:list` | `projectId → ViewCatalogEntry[]` | 导航与 View 最近对话入口 |
-| `projectView:get-snapshot` | `{projectId, viewId} → ViewSnapshot` | 首次进入 / 恢复时读取 |
-| `projectView:get-context` | `{projectId, viewId} → {originViewId, paths, text}` | 创建首条 Session 前渲染标签 |
-| `projectView:snapshot-changed` | `{projectId, viewId, snapshot}` | 文件变化、回合结束、窗口聚焦后的增量刷新 |
-| `projectView:error` | `{projectId, viewId, revision, kind, message}` | 诊断与 Preview 错误状态；不替换 last-good |
+预设内容通过统一 `workbench` typed IPC 的目录、快照、上下文和事件使用，不再公开独立 `projectView` IPC。具体模型及事件由工作台规格 §9.7 维护。
 
 不提供“生成 View”或“写入 Knowledge”的 IPC；生成与修改仍通过普通 Session。若后续需要手动刷新，应先补充 FR 和 UX 决定，不能在本规格隐式加入按钮。
 
 ### 5.3 Renderer Store 与组件
 
-建议新增 `apps/desktop/src/renderer/src/features/project-view/`：
-
-| 文件 / 责任 | 内容 |
-|---|---|
-| `store.ts` | 按 `projectId:viewId` 缓存 catalog、snapshot、Preview 状态和 last-good；处理版本去重 |
-| `api.ts` | 仅通过 `studio.projectView` 调用 IPC，便于测试替换 |
-| `ProjectView.tsx` | 左右布局、View 最近对话、右侧区域入口与 Preview 容器 |
-| `Preview.tsx` | 状态机、滚动、缩放、更新时间和错误回退 |
-| `renderer.tsx` | 受信组件 Registry 和递归渲染；无动态 HTML / 脚本 |
-| `project-view.css` | 布局与状态样式；不写入 View Definition |
-
-Project Shell 只负责把当前 `UiState.mainCanvas.view` 和 `viewRightArea` 传入；View feature 通过现有 `ShellIntegration` 调用 Session 的 `Conversation`、`ConversationHeader` 和输入区。所有 store 均以 `projectId` 为键，避免跨 Project 混淆（AC-01）。
+统一工作台 store 与 integration 负责缓存、版本去重、订阅、会话及项目关闭清理，契约见工作台规格 §9.7。预设标准网页包包含内容渲染、错误回退、空态生成按钮及样式。Overview 通过公共 SDK 获取最小 Session 摘要，并在 iframe 内渲染分组和打开入口。父 Renderer 不再提供预设内容组件。
 
 ### 5.4 Session 接缝
 
 1. 从 View 草稿发送时，Renderer 把 `originViewId`、`viewContextAttached` 和已有 `contextItems` 传给 Session store；Session 创建 DTO 由 `CreateSessionRequest` 扩展相应可选字段（技术方案，待实现确认）。
-2. Session 主进程在创建前向 `ProjectViewService.buildContext` 取模板；若标记为 false 或 View 已失效，则不附加文本，但仍保存 `originViewId`。
+2. Session 主进程在创建前向 `WorkbenchService.buildContext` 取模板；若标记为 false 或 View 已失效，则不附加文本，但仍保存 `originViewId`。
 3. Adapter 接收统一的“View Context 文本块 + 用户文本”输入；Codex / Claude 的差异不暴露给 Renderer。首条消息完成后，服务将附加状态记录到 transcript 元数据，后续轮次不重复注入。
-4. Session 回合结束事件通知 `ProjectViewService` 补扫；Project 窗口聚焦事件也触发补扫。补扫失败不改变 Session 的成功 / Error 终态。
+4. Session 回合结束事件通知统一 `WorkbenchService` 补扫；Project 窗口聚焦事件也触发补扫。补扫失败不改变 Session 的成功 / Error 终态。
 
 ### 5.5 Project / Navigation 接缝
 
-| 调用方 | Project View 提供 | 调用方负责 |
-|---|---|---|
-| Navigation | `list()`、当前 View ID、高亮所需的目录信息 | 左侧列表、选中状态和折叠行为 |
-| Project Shell | `getSnapshot()`、右侧 Preview slot、当前显示 Session ID | `ui_state` 保存 / 恢复、左右宽度和工具切换 |
-| Session | `buildContext()`、按 View 查询最近对话的过滤条件、回合结束通知 | Session 状态、Conversation、原生 CLI 和 transcript |
-| Input | View Context 标签的可移除状态 | 通用输入区、Model Selector、Send / Stop |
+Project、Navigation、Session 和 Input 统一通过[工作台宿主](../workbench/spec.md#97-预设与自定义工作台统一宿主)访问目录、快照、上下文与生命周期。Knowledge runtime 只提供内部内容贡献，不向这些模块公开另一套接口。Shell 的布局持久化、Session 状态和通用输入仍由各自模块负责。
 
 ## 6. 实现计划与落地记录
 
-以下阶段由 [T20261011-project-view-implementation](../../tasks/archive/T20261011-project-view-implementation/task.md) 按用户 2026-10-11 实现请求推进；验证与未覆盖项见该任务的 [acceptance.md](../../tasks/archive/T20261011-project-view-implementation/acceptance.md)，模拟通过不等于真实 AC-06 或人工验收通过。
+本节保留 2026-10-11 实现及验证基线，其中独立服务和 IPC 已由[统一任务](../../.agents/archive/tasks/T20261111-unified-workbench/task.md)迁入工作台宿主；当前契约以 §5 及工作台规格为准。
+
+本节列出实现阶段；模拟验证不等于真实 AC-06 或人工验收通过。
 
 ### 2026-10-11 技术落地
 
@@ -331,13 +298,13 @@ Project Shell 只负责把当前 `UiState.mainCanvas.view` 和 `viewRightArea` �
 
 1. `fs.watch` / 原生 watcher 只能触发调度；读取、校验和快照替换必须串行化并可取消旧刷新。
 2. Project 关闭时释放 watcher；重新打开时重新扫描，不依赖 Renderer 旧缓存。
-3. 多步写入的中间错误保留 last-good；只有稳定读取后仍失败才发出 `projectView:error`。
+3. 多步写入的中间错误保留 last-good；只有稳定读取后仍失败才通过统一工作台事件发布错误快照。
 
 ### 阶段 3 的安全约束
 
-1. Renderer 使用固定组件映射，不使用动态 `import()`、`eval`、`new Function`、`dangerouslySetInnerHTML`。
+1. 网页包解释 Knowledge 与 Definition 时使用受信组件映射和文本节点，不把数据作为可执行 HTML、表达式或脚本。
 2. Preview 不拥有 Node.js、文件系统、Shell、凭据或任意 IPC 能力；Renderer 只接收已经校验的 DTO。
-3. 自定义工作台按[独立规格](../workbench/spec.md)先设计插件架构，再建设机制和接入业务；本阶段声明式入口仍不执行 HTML 或脚本。
+3. 预设和自定义页面使用[统一网页包协议](../workbench/spec.md#97-预设与自定义工作台统一宿主)，宿主不保留另一套原生页面渲染入口。
 
 ## 7. 验证清单
 

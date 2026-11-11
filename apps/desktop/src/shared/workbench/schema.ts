@@ -1,4 +1,5 @@
-import { WORKBENCH_CAPABILITIES, type JsonValue, type PluginManifest, type WorkbenchCapability, type WorkbenchTarget } from './types'
+import { isWorkbenchId, isCustomWorkbenchId, WORKBENCH_CAPABILITIES, type DraftWorkbenchRef, type InstanceWorkbenchRef, type JsonValue, type PluginManifest, type CustomWorkbenchRef, type WorkbenchCapability, type WorkbenchRef, type WorkbenchTarget } from './types'
+import { isPresetWorkbenchId } from './presets'
 
 export const MAX_STATE_BYTES = 1024 * 1024
 
@@ -20,7 +21,7 @@ export function packagePath(value: unknown): string {
 
 export function parseManifest(value: unknown): PluginManifest {
   const input = record(value, 'manifest.json')
-  const keys = ['schemaVersion', 'pluginId', 'version', 'sdkVersion', 'title', 'entry', 'capabilities']
+  const keys = ['schemaVersion', 'pluginId', 'version', 'sdkVersion', 'title', 'entry', 'capabilities', 'knowledgeViewId']
   for (const key of Object.keys(input)) if (!keys.includes(key)) throw new Error(`manifest.json 不支持字段 ${key}`)
   if (input.schemaVersion !== 1) throw new Error('manifest.json 的 schemaVersion 必须为 1')
   if (input.sdkVersion !== 1) throw new Error('不支持此 SDK 版本，请使用 sdkVersion: 1')
@@ -39,7 +40,10 @@ export function parseManifest(value: unknown): PluginManifest {
     if (capabilities.includes(known)) throw new Error(`重复能力 ${known}`)
     capabilities.push(known)
   }
-  return { schemaVersion: 1, pluginId, version, sdkVersion: 1, title, entry, capabilities }
+  const knowledgeViewId = input.knowledgeViewId
+  if (knowledgeViewId !== undefined && !isPresetWorkbenchId(knowledgeViewId)) throw new Error('knowledgeViewId 必须指向受支持的项目知识')
+  if (capabilities.includes('project.knowledge.read') !== (knowledgeViewId !== undefined)) throw new Error('project.knowledge.read 能力必须与 knowledgeViewId 一起声明')
+  return { schemaVersion: 1, pluginId, version, sdkVersion: 1, title, entry, capabilities, ...(knowledgeViewId !== undefined ? { knowledgeViewId } : {}) }
 }
 
 export function parseJsonState(value: unknown): JsonValue {
@@ -70,4 +74,30 @@ export function parseTarget(value: unknown): WorkbenchTarget {
   if (!/^[a-zA-Z0-9-]+$/.test(projectId) || !/^[a-zA-Z0-9-]+$/.test(id)) throw new Error('工作台标识无效')
   if (input.kind !== 'draft' && input.kind !== 'instance') throw new Error('工作台目标必须是 draft 或 instance')
   return { projectId, kind: input.kind, id }
+}
+
+export function parseWorkbenchRef(value: unknown): WorkbenchRef {
+  const input = record(value, '工作台引用')
+  for (const key of Object.keys(input)) if (!['projectId', 'viewId'].includes(key)) throw new Error(`不支持字段 ${key}`)
+  const projectId = text(input.projectId, 'projectId', 100)
+  if (!/^[a-zA-Z0-9-]+$/.test(projectId) || !isWorkbenchId(input.viewId)) throw new Error('工作台引用无效')
+  return { projectId, viewId: input.viewId }
+}
+
+export function parseCustomWorkbenchRef(value: unknown): CustomWorkbenchRef {
+  const ref = parseWorkbenchRef(value)
+  if (!isCustomWorkbenchId(ref.viewId)) throw new Error('此操作只适用于自定义工作台')
+  return { projectId: ref.projectId, viewId: ref.viewId }
+}
+
+export function parseDraftWorkbenchRef(value: unknown): DraftWorkbenchRef {
+  const ref = parseCustomWorkbenchRef(value)
+  if (!ref.viewId.startsWith('workbench-draft:')) throw new Error('此操作需要工作台设计草稿')
+  return { projectId: ref.projectId, viewId: `workbench-draft:${ref.viewId.slice('workbench-draft:'.length)}` }
+}
+
+export function parseInstanceWorkbenchRef(value: unknown): InstanceWorkbenchRef {
+  const ref = parseCustomWorkbenchRef(value)
+  if (!ref.viewId.startsWith('workbench:')) throw new Error('此操作需要已添加的工作台实例')
+  return { projectId: ref.projectId, viewId: `workbench:${ref.viewId.slice('workbench:'.length)}` }
 }

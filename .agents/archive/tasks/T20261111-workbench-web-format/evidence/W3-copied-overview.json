@@ -1,0 +1,17 @@
+{
+  "draftId": "3d93c491-f7b0-44d0-95a1-e815959a37c9",
+  "directory": ".ai-studio/workbench/drafts/3d93c491-f7b0-44d0-95a1-e815959a37c9",
+  "source": "apps/desktop/out/workbench-packages/overview",
+  "sameFilesAndBytes": true,
+  "sha256": {
+    "renderer.js": "457d796440adcb7ce678fc410272ecb193c67bb76170054e59b196d80e5e5971",
+    "FONT-LICENSE.txt": "d0283623ef57e722fd0eb688a8041589670c608ab780cd3612d06ba6f153d3fd",
+    "index.html": "3d6aabb22ed2d73a8839aac349d64bc26bbd8eca6bbc0cc6ba08e47f29b609c6",
+    "page.js": "82fb59218c0de76d0919e56d1fc0bb16658a1b8db35f8ceabce550db762b002e",
+    "ibm-plex-sans-latin-600-normal.woff2": "8960851d691c054ed38e259bdcf1a6190d157b4203ed5bb32c632a863fb8ec2f",
+    "style.css": "88389e552575b700b38688ac2ba1933b0ec5529d9ce12ee4646698469c6da828",
+    "manifest.json": "112f2743ac5fbe6235e1e0ddc1287fab9e8236816bbe0d5d3115ad89832b40ea",
+    "ibm-plex-sans-latin-500-normal.woff2": "0717336fb31fcdcde4b8deb3675bb4a0f7f6d484864afcd6751ac29975962203",
+    "ibm-plex-sans-latin-400-normal.woff2": "3b646991d30055a93a4ecc499713d4347953a74a947ecab435ab72070cbdab0e"
+  }
+}

@@ -23,7 +23,7 @@ export interface ProjectShellMain {
   closeProject(projectId: string, confirmed: boolean): Promise<CloseProjectResult>
   quitFlow: QuitFlow | null
   onStateFlushed: (() => void) | null
-  views?: { open(projectId: string): unknown; close(projectId: string): void }
+  workbenches?: { open(projectId: string): void; close(projectId: string): void }
   toolsChanged?: () => void
 }
 
@@ -57,7 +57,7 @@ export function projectShellFor(core: Pick<CoreServices, 'database'>): ProjectSh
           void cleanup.then(finish, finish)
         })
           .then(result => {
-            if (result.status === 'closed') shell!.views?.close(id)
+            if (result.status === 'closed') shell!.workbenches?.close(id)
             return result
           }).finally(() => closing.delete(id))
         closing.set(id, operation)

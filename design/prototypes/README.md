@@ -26,8 +26,8 @@
 | Studio 灰度交互原型 | v02 | 已确认（2026-10-10） | [在线原型](https://claude.ai/artifact/7i4ULjj3vEo16mqqXYm5E1)；源文件 [studio-prototype-v02.html](studio-prototype-v02.html) + [studio-prototype-v02/](studio-prototype-v02/) | v01；[对照 ChatGPT / Claude 的候选调整](../../tasks/T20261010-conversation-layout/research.md) A1、A2、B1；FR-SESSION-001 |
 | Studio 灰度交互原型 | v03 | 探索中：Q1～Q6 已确认（2026-10-11），其余变更待评审；外观保留为“纯色”主题的浅色外观（2026-10-12 确认） | [在线原型](https://claude.ai/artifact/DnWzpmbXGAJF6gP7KBL7Hz)；源文件 [studio-prototype-v03.html](studio-prototype-v03.html) + [studio-prototype-v03/](studio-prototype-v03/) | v02；[Project View spec](../../specs/project-view/spec.md) §4.2～4.4；FR-TOOL-002、FR-TOOL-004；[T20261011-prototype-v03](../../tasks/T20261011-prototype-v03/task.md) |
 | Studio 灰度交互原型 | v04 | 外观已采用为默认的“毛玻璃”主题，浓淡固定为适中（2026-10-12 确认）；布局与交互同 v03 | 在线原型待发布；源文件 [studio-prototype-v04.html](studio-prototype-v04.html) + [studio-prototype-v04/](studio-prototype-v04/) | v03；用户 2026-10-11～12 对话要求；[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md) |
-| Studio 灰度交互原型 | v05 | 探索中：New Chat Composer 固定到底部，Thinking Effort 收进 Composer 控制行；不代表规格已确认 | [页面布局与输入体验评审](../layout-ux-review-v01.md)；源文件 [studio-prototype-v05.html](studio-prototype-v05.html) + [studio-prototype-v05/](studio-prototype-v05/) | v04；[T20261019-ux-layout-review](../../tasks/archive/T20261019-ux-layout-review/task.md)；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
-| Studio 灰度交互原型 | v06 | UI 采用已授权（2026-10-23）；采用范围及规格 diff 审阅入口见评审 v02。源原型仍为示例数据，不代表应用已验收 | [页面体验评审 v02](../layout-ux-review-v02.md#6-采用记录)；源文件 [studio-prototype-v06.html](studio-prototype-v06.html) + [studio-prototype-v06/](studio-prototype-v06/) | v05；[原型交付](../../tasks/archive/T20261020-prototype-v06/task.md)、[Composer 修订](../../tasks/archive/T20261020-v06-composer/task.md)、[Add 菜单](../../tasks/archive/T20261020-v06-add-menu/task.md)；[桌面实施](../../tasks/archive/T20261023-v06-ui-effort/task.md)；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
+| Studio 灰度交互原型 | v05 | 探索中：New Chat Composer 固定到底部，Thinking Effort 收进 Composer 控制行；不代表规格已确认 | [页面布局与输入体验评审](../layout-ux-review-v01.md)；源文件 [studio-prototype-v05.html](studio-prototype-v05.html) + [studio-prototype-v05/](studio-prototype-v05/) | v04；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
+| Studio 灰度交互原型 | v06 | UI 采用已授权（2026-10-23）；采用范围及规格 diff 审阅入口见评审 v02。源原型仍为示例数据，不代表应用已验收 | [页面体验评审 v02](../layout-ux-review-v02.md#6-采用记录)；源文件 [studio-prototype-v06.html](studio-prototype-v06.html) + [studio-prototype-v06/](studio-prototype-v06/) | v05；FR-CHAT-001、FR-INPUT-001～002、FR-SESSION-001 |
 
 ### Studio 灰度交互原型 v01
 
@@ -39,11 +39,11 @@
 - **未实现**：真实目录选择与文件读取、Session Resume、图片附件、Terminal 多实例、窗口尺寸以外的平台差异、最终视觉参数（当前基线见 [Visual Direction](../visual-direction.md) 第 1 节）。
 - **工程工具差异**：项目 / 本轮 Diff 与 Terminal Tabs 的行为依据见 FR-TOOL-002、FR-TOOL-004，组件修订见 [Shell Spec v02](../components/shell-spec-v02.md) 第 6、9 节；原型 v01 / v02 均未覆盖；v03 已做出这些行为供评审（探索中），评审前不作为验收证据。
 - **与 spec 的关系**：原型确定布局、组件外观与交互示意；行为与 spec 不一致时以 spec 为准，例如窗口失焦时不视为正在查看（[session spec](../../specs/session/spec.md) S-Q1）；原型中不足一屏的对话贴底显示，已改为从顶部开始（[Shell Spec v01](../components/shell-spec-v01.md) 第 6 节，2026-10-10 确认）。
-- **对齐后的组件修订**：2026-10-11 确认并签收的组件尺寸与选中字重见 [Shell Spec v02](../components/shell-spec-v02.md) 第 3、4、11 节；View Mode 工具关闭入口见其第 8 节。原型源文件保留，复验截图见[归档验收](../../tasks/archive/T20261009-prototype-alignment/acceptance.md#6-2026-10-11-复验)。
+- **对齐后的组件修订**：2026-10-11 确认并签收的组件尺寸与选中字重见 [Shell Spec v02](../components/shell-spec-v02.md) 第 3、4、11 节；View Mode 工具关闭入口见其第 8 节。
 
 ### Studio 灰度交互原型 v02
 
-在 v01 基础上让 Conversation 向 ChatGPT / Claude 桌面端对齐（[T20261010-prototype-v02](../../tasks/archive/T20261010-prototype-v02/task.md)），2026-10-10 评审通过、全部采用，规则写入 [Shell Spec v02](../components/shell-spec-v02.md) 第 2.2、6、7 节；桌面端实现见 [T20261010-prototype-v02-alignment](../../tasks/archive/T20261010-prototype-v02-alignment/task.md)（2026-10-11 签收）。未改动的部分与 v01 相同，上节说明继续适用。
+在 v01 基础上让 Conversation 向 ChatGPT / Claude 桌面端对齐，2026-10-10 评审通过、全部采用，规则写入 [Shell Spec v02](../components/shell-spec-v02.md) 第 2.2、6、7 节。未改动的部分与 v01 相同，上节说明继续适用。
 
 - **变更**：
   - 对话从顶部开始排列（已确认，见 [Shell Spec v01](../components/shell-spec-v01.md) 第 6 节）；
@@ -79,7 +79,7 @@
 
 v03 的副本，只换外观，用于和 v03 的白色原样式并排对比（[T20261012-prototype-v04-glass](../../tasks/T20261012-prototype-v04-glass/task.md)）。布局、交互、数据与演示场景同 v03，上节说明继续适用；两份 HTML 的差异只在样式表末尾的 `.skin-glass` 一节及版本标识。
 
-- **结论**：2026-10-12 用户确认 v03 与 v04 都保留，作为纯色（原“白色”）与毛玻璃两种主题，默认毛玻璃，内容层浓淡固定为适中，在新增的设置中切换；颜色模式另可选浅色 / 深色，深色无原型（[DEC-12](<../../docs/07. Decisions.md#dec-12-外观主题与设置>)；桌面端实现见 [T20261012-settings-theme](../../tasks/archive/T20261012-settings-theme/task.md)）。原型中的浓淡切换仅用于演示；示例壁纸 A / B 在桌面端成为可选的毛玻璃背景颜色（2026-10-12 用户要求并确认色板）。
+- **结论**：2026-10-12 用户确认 v03 与 v04 都保留，作为纯色（原“白色”）与毛玻璃两种主题，默认毛玻璃，内容层浓淡固定为适中，在新增的设置中切换；颜色模式另可选浅色 / 深色，深色无原型（[DEC-12](<../../docs/07. Decisions.md#dec-12-外观主题与设置>)）。原型中的浓淡切换仅用于演示；示例壁纸 A / B 在桌面端成为可选的毛玻璃背景颜色（2026-10-12 用户要求并确认色板）。
 - **变更**：外观“统一毛玻璃”，参考 ChatGPT Desktop 的侧边栏。
   - 整个窗口是同一种毛玻璃，透出窗口后方的桌面并模糊，颜色随壁纸变化。顶栏、左侧导航和内容区四周的 8px 边距直接在玻璃上。
   - Conversation、右侧区域 / 边栏和启动页是叠在玻璃上的一层更浅的磨砂（圆角），浓淡分通透 / 适中 / 柔和三档，默认适中。
@@ -110,13 +110,12 @@ v04 的布局评审探索稿，详见[页面布局与输入体验评审 v01](../
 - **与规格的关系**：本版是探索稿。行为与已确认 spec 不一致时以 spec 为准；用户确认布局后，再回写 [Shell Spec v02](../components/shell-spec-v02.md)、[输入区规格](../../specs/input/spec.md) 与 [New Chat 规格](../../specs/chat/spec.md)。
 - **模拟范围与限制**：只改设计原型，实际 Electron Composer 尚未改动。模型 / effort 是示例目录，无真实 CLI、图片上传、Skill 目录、持久化或目录错误恢复；运行中发送只追加演示消息。其余继承 v04，包含尚未按当前规格更新的历史行为；不作为完整应用或 Claude 发布能力证明。
 - **继承的模拟差异**：附件按 Project 演示，New Chat 会重建演示草稿；不用于验证生产环境的草稿隔离与恢复。
-- **验证**：[任务自检与截图](../../tasks/archive/T20261019-ux-layout-review/task.md#验证记录)。
 
 ### Studio 灰度交互原型 v06
 
 v05 的连续操作与反馈细化稿，完整发现、取舍与状态定义见[评审 v02](../layout-ux-review-v02.md)。v05 保留作上一轮对照；外观继续沿用 v04。
 
-用户 2026-10-23 已授权桌面 UI 对齐 v06 并加入 max / ultra effort 动效，采用、真实目录差异与规格入口见[采用记录](../layout-ux-review-v02.md#6-采用记录)。以下操作和未实现项描述的是原型文件；桌面实现与验证由[本轮任务](../../tasks/archive/T20261023-v06-ui-effort/task.md)负责，不能用原型截图替代。
+用户 2026-10-23 已授权桌面 UI 对齐 v06 并加入 max / ultra effort 动效，采用、真实目录差异与规格入口见[采用记录](../layout-ux-review-v02.md#6-采用记录)。以下操作和未实现项描述原型文件，不能用原型截图替代桌面应用验收。
 
 2026-10-24 用户纠正为五格静态指示和实际选中后的输入框一次切换反馈，当前桌面行为由 [input spec](../../specs/input/spec.md#思考强度信号与动效)负责；本节及源原型继续保留原型交付时的示例行为，不作为该修正的验证证据。
 
@@ -131,4 +130,3 @@ v05 的连续操作与反馈细化稿，完整发现、取舍与状态定义见[
   6. 在 Architecture 打开思考菜单，用方向键 / Home / End 移动、Enter 选择、Esc 关闭；在 1024×560、1024×640、1280×800、1440×900 比较边界与布局。
 - **演示数据**：Project / Session / View 与 v05 一致；新增目录失败、一次发送失败、草稿 CLI 可用性开关，以及从项目文件树派生的 `code-review` Skill。所有异常、catalog 与恢复均为脚本模拟，草稿和标签仅在当前页面内存保留。
 - **原型未实现边界**：见[评审 v02 §5](../layout-ux-review-v02.md#5-验证与未实现范围)。Add 菜单只演示 CLI catalog 的呈现形状：Files 复用工具入口，Skill 可加入上下文；Plugins 没有真实接口时显示空状态，Images 保留禁用项。本原型不接真实 catalog、上传或持久化，也不包含 max / ultra 动效；桌面采用后的当前状态另见实施任务。
-- **验证**：[任务自检与截图](../../tasks/archive/T20261020-prototype-v06/task.md#验证记录)。

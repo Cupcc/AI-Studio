@@ -1,0 +1,86 @@
+{
+  "providerMode": "real",
+  "modelChoiceChanged": false,
+  "actualTurns": 2,
+  "sessions": [
+    {
+      "id": "ad208953-bf22-4f67-8ba9-f77ae434314b",
+      "cli": "codex",
+      "model": null,
+      "originViewId": "architecture",
+      "viewContextAttached": true,
+      "viewContextPaths": [
+        ".ai-studio/knowledge/architecture.json",
+        ".ai-studio/views/architecture.view.json",
+        ".ai-studio/GUIDE.md",
+        ".ai-studio/schema/knowledge.schema.json",
+        ".ai-studio/schema/view.schema.json"
+      ],
+      "lastOutcome": "completed",
+      "transcriptKinds": {
+        "user_message": 1,
+        "tool_activity": 1,
+        "agent_message": 1,
+        "turn_end": 1
+      },
+      "agentReplies": [
+        "UNIFIED_PRESET_CONTEXT_OK | Architecture"
+      ],
+      "turns": [
+        {
+          "outcome": "completed",
+          "model": null
+        }
+      ],
+      "toolActivityKinds": [
+        "reasoning"
+      ],
+      "nonReasoningToolCount": 0
+    },
+    {
+      "id": "790c10a4-667b-4220-8d32-81b74ecb9f1e",
+      "cli": "codex",
+      "model": null,
+      "originViewId": "workbench:4fee585e-bd14-4b95-9ef5-32f9568d58c6",
+      "viewContextAttached": true,
+      "viewContextPaths": [],
+      "lastOutcome": "completed",
+      "transcriptKinds": {
+        "user_message": 1,
+        "tool_activity": 1,
+        "agent_message": 1,
+        "turn_end": 1
+      },
+      "agentReplies": [
+        "UNIFIED_CUSTOM_CONTEXT_OK | 随手记 | UNIFIED_NOTE_20261111"
+      ],
+      "turns": [
+        {
+          "outcome": "completed",
+          "model": null
+        }
+      ],
+      "toolActivityKinds": [
+        "reasoning"
+      ],
+      "nonReasoningToolCount": 0
+    }
+  ],
+  "instances": [
+    {
+      "id": "4fee585e-bd14-4b95-9ef5-32f9568d58c6",
+      "project_id": "5a518717-acc8-4781-9dea-b8f6eae5646f",
+      "plugin_id": "workbench-f5633dc6-b1e0-457c-b6b6-0c9c71d67904",
+      "title": "随手记",
+      "package_revision": "0e65f90abee4fb1650ae4622c6fc993259f6925503581660dda389ad2cfec851",
+      "state": {
+        "count": 1,
+        "note": "UNIFIED_NOTE_20261111"
+      },
+      "state_revision": 0,
+      "enabled": 1
+    }
+  ],
+  "factsFixture": "Only external architecture.json good/malformed/recovery writes; not model-generated",
+  "pageErrorLogExists": false
+}

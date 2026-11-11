@@ -9,7 +9,7 @@ import { createRendererSessionPort } from './integration'
 import { SessionHistory, historyRows, visibleHistoryRows } from './SessionHistory'
 import { Composer } from '../input/Composer'
 import { CliMenu } from '../chat/CliMenu'
-import { ViewConversationHeader } from '../project-view/ProjectView'
+import { WorkbenchConversationHeader } from '../workbench/WorkbenchConversation'
 import { InputRequestCard } from './Transcript'
 import { Conversation, ConversationHeader } from './Conversation'
 import { useProjectShell } from '../project/store'
@@ -62,7 +62,7 @@ describe('Session IPC store · FR-SESSION/STATE · AC-02–05', () => {
     expect(screen.queryByRole('button', { name: 'Codex' })).toBeNull()
     expect(screen.getByRole('button', { name: 'Claude Code' })).toBeTruthy()
     menu.unmount()
-    render(<ViewConversationHeader project={project} active viewId="overview" canvas={{ mode: 'view', viewId: 'overview', conversation: { kind: 'draft' } }} />)
+    render(<WorkbenchConversationHeader project={project} active viewId="overview" canvas={{ mode: 'view', viewId: 'overview', conversation: { kind: 'draft' } }} />)
     expect(screen.queryByRole('option', { name: 'codex' })).toBeNull()
     expect(screen.getByRole('option', { name: 'claude-code' })).toBeTruthy()
   })

@@ -1,0 +1,10 @@
+{
+  "reminder": {
+    "hookSpecificOutput": {
+      "hookEventName": "PostToolUse",
+      "additionalContext": "检测到本会话中的文档工作树变化：\"tasks/T20261111-doc-links-hook/task.md\"。按 AGENTS.md「文档同步与收尾复核」追踪本次事实变化：核对负责文档、决定记录、路线图各节、验收要求与相关任务的负责人、阻塞条件和状态；按主题/编号/同义表述搜索。修正遗漏，在已有任务或最终回复简述核对范围及保留理由。链接通过不代表语义一致；不要为无影响的文档制造修改。"
+    }
+  },
+  "deduplicated": {},
+  "stop_ignored": {}
+}

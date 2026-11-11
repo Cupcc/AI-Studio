@@ -7,6 +7,9 @@ import { App } from '../../app/App'
 import { registerShellIntegration, type RendererSessionPort } from './integration'
 import { useProjectShell } from './store'
 import { useSettings } from '../settings/store'
+import { PRESET_WORKBENCHES } from '@shared/workbench/presets'
+import { WorkbenchNavigation } from '../workbench/WorkbenchNavigation'
+import { useWorkbenches } from '../workbench/store'
 
 const initial = useProjectShell.getState()
 const projects = ['a', 'b', 'c'].map((id) => ({ id, name: id, canonicalPath: `/projects/${id}`, localPath: `/projects/${id}`, displayPath: `/projects/${id}`, createdAt: '', lastOpenedAt: '' }))
@@ -22,6 +25,7 @@ let api: StudioApi['project']
 let closeResult: CloseProjectResult
 beforeEach(() => {
   useProjectShell.setState(initial, true)
+  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {} })
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
   attention = {}; attentionListeners = new Set()
   port = {
@@ -30,7 +34,7 @@ beforeEach(() => {
     onProjectOpened: vi.fn(), onProjectClosed: vi.fn(), sessionExists: () => true,
     setViewing: vi.fn(), setWindowForeground: vi.fn(), userOpenedSession: vi.fn(), startNewChat: vi.fn()
   }
-  restoreIntegration = registerShellIntegration({ session: port })
+  restoreIntegration = registerShellIntegration({ session: port, Workbenches: WorkbenchNavigation })
   closeResult = { status: 'closed' }
   api = {
     bootstrap: async () => bootstrap(),
@@ -42,7 +46,7 @@ beforeEach(() => {
     confirmQuit: async () => {}, cancelQuit: async () => {}, onMenuCommand: () => () => {}, onQuitRequested: () => () => {}, stateFlushed: async () => {}, onFlushRequested: () => () => {}
   }
   Object.defineProperty(window, 'studio', { configurable: true, value: {
-    project: api, app: { getWindowFocus: async () => ({ focused: useProjectShell.getState().foreground }), onWindowFocusChanged: () => () => {} }
+    project: api, workbench: { list: async () => PRESET_WORKBENCHES }, app: { getWindowFocus: async () => ({ focused: useProjectShell.getState().foreground }), onWindowFocusChanged: () => () => {} }
   } as unknown as StudioApi })
 })
 afterEach(async () => { cleanup(); await useProjectShell.getState().flush(); restoreIntegration(); vi.unstubAllGlobals() })

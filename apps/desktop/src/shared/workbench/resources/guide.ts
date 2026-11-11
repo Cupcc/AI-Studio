@@ -15,11 +15,16 @@ export const AUTHORING_GUIDE = `# AI Studio 工作台开发说明 · SDK 1
 
 宿主在页面入口之前注入 window.workbench；不需要自行加载 SDK。完整签名见 sdk.d.ts。
 
-- getInstance()：返回当前绑定目标、manifest、state、stateRevision、pageUrl、enabled。
+- getInstance()：返回当前绑定目标、manifest、state、stateRevision、pageUrl、enabled，以及已声明能力提供的 resources。
 - updateState(state, expectedRevision)：写当前目标的 JSON 状态并返回新快照。期望版本必须与最近快照一致；冲突时重新读取、让用户确认后重试，不能悄悄覆盖。状态上限 1 MiB。
 - subscribe(listener)：接收当前目标状态更新，返回取消订阅函数；页面卸载时清理监听。用新的快照更新显示。
-- setDraft(text)：填入可编辑的对话草稿。它不发送请求、不调用模型。用户仍需点击 Send。
-- 能力分别为 state.read、state.write、conversation.draft，按实际使用在 manifest 声明。仅声明不会增加其他宿主能力。
+- setDraft(text, options?)：填入可编辑的对话草稿。options.target 可选 current（默认，当前对话）或 new（当前工作台的新对话草稿）。它不发送请求、不调用模型。用户仍需点击 Send。
+- openSession(sessionId)：将当前 Project 的已有 Session 打开到工作台对话列，不发送消息或调用 Stop。需要 session.open 能力。
+- project.knowledge.read：与 manifest.knowledgeViewId 一起声明，在 resources.knowledge 接收相应项目知识和 Definition 的校验快照。支持 overview、progress、architecture、agent-team、business-flow。快照带 loading、stale、empty、ready、error 状态；错误时保留上一版有效 snapshot。页面应显示错误并继续呈现有效内容，不自行读取项目文件。
+- project.sessions.read：在 resources.sessions 接收当前 Project 的最小 Session 摘要，包含 id、title、activity、status、lastOutcome、updatedAt、lastUserMessageAt、createdAt；无完整对话或凭据。
+- resources 的变化通过现有 subscribe 推送，不改变 stateRevision；stateRevision 只用于 JSON 状态写入冲突检查。
+- appearance 提供当前外观的 dark 和 CSS variables；页面可用于匹配宿主主题。App 预设与自定义包使用相同清单、页面 SDK、资源能力和加载方式。
+- 能力按实际使用在 manifest 声明。未声明的资源不会提供；只声明读取资源不会授予写入、打开 Session 或发送消息的能力。
 
 每个页面只绑定一个目标。草稿预览的状态与实例状态隔离；首次添加保留草稿中已保存的状态，编辑应用保留实例当前已保存状态。页面应兼容空对象并提供默认显示。包版本变化不会自动迁移状态，请保持已有字段可读。
 

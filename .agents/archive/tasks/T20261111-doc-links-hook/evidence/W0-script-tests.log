@@ -1,0 +1,10 @@
+$ vitest run --config scripts/vitest.config.mjs
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI-Studio
+
+
+ Test Files  4 passed (4)
+      Tests  70 passed (70)
+   Start at  14:20:09
+   Duration  10.28s (tests 95%, import 3%, transform 2%)
+

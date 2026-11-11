@@ -1,0 +1,20 @@
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/Squirrel.framework/Versions/Current/.
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/Mantle.framework/Versions/Current/.
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/AI Developer Studio Helper.app
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/Mantle.framework/Versions/Current/.
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/Squirrel.framework/Versions/Current/.
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/AI Developer Studio Helper.app
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/ReactiveObjC.framework/Versions/Current/.
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/ReactiveObjC.framework/Versions/Current/.
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/AI Developer Studio Helper (Plugin).app
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/AI Developer Studio Helper (Renderer).app
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/AI Developer Studio Helper (Plugin).app
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/AI Developer Studio Helper (Renderer).app
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/AI Developer Studio Helper (GPU).app
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/AI Developer Studio Helper (GPU).app
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/Electron Framework.framework/Versions/Current/.
+--prepared:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/Electron Framework.framework/Versions/Current/Helpers/chrome_crashpad_handler
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/Electron Framework.framework/Versions/Current/Helpers/chrome_crashpad_handler
+--validated:/Users/zhixing/Projects/AI Stduio.worktrees/web-workbench-format/apps/desktop/dist/mac-arm64/AI Developer Studio.app/Contents/Frameworks/Electron Framework.framework/Versions/Current/.
+apps/desktop/dist/mac-arm64/AI Developer Studio.app: valid on disk
+apps/desktop/dist/mac-arm64/AI Developer Studio.app: satisfies its Designated Requirement

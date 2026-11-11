@@ -3,7 +3,6 @@
 import { contracts } from '@shared/ipc/contracts'
 import type { CoreServices } from '../services/core'
 import { createAppFeature } from './app'
-import { createProjectViewFeature } from './project-view'
 import { createProjectFeature } from './project'
 import { isSessionWindowForeground, createSessionFeature, type SessionFeatureOptions } from './session'
 import { createSettingsFeature } from './settings'
@@ -51,7 +50,6 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
   return [
     createAppFeature(core, sessionOptions.isForeground ?? isSessionWindowForeground),
     createProjectFeature(core),
-    createProjectViewFeature(core),
     createWorkbenchFeature(core),
     createSessionFeature(core, { ...sessionOptions, fileReferences: sessionOptions.fileReferences ?? files }),
     createSettingsFeature(core),

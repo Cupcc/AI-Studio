@@ -1,0 +1,45 @@
+$ playwright test e2e/session.spec.ts --grep 'draft first, then streamed'
+
+Running 1 test using 1 worker
+
+(node:53283) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+AFTER_SEND_FOCUS { app: true, focus: true, visible: true } { document: true, native: { focused: true } }
+AFTER_DONE_FOCUS { app: false, focus: false, visible: true } { document: true, native: { focused: false } }
+  ✘  1 e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (10.0s)
+
+
+  1) e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.project-workspace:not([hidden])').locator('[data-session-row="b1d483e4-a94d-46ee-9dc4-bba672b92749"]').getByRole('img', { name: 'Completed Unread' })
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('.project-workspace:not([hidden])').locator('[data-session-row="b1d483e4-a94d-46ee-9dc4-bba672b92749"]').getByRole('img', { name: 'Completed Unread' }) with timeout 5000ms
+      - waiting for locator('.project-workspace:not([hidden])').locator('[data-session-row="b1d483e4-a94d-46ee-9dc4-bba672b92749"]').getByRole('img', { name: 'Completed Unread' })
+        14 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      90 |   expect(offset).toBeLessThanOrEqual(32)
+      91 |   console.log('AFTER_DONE_FOCUS', await app.evaluate(({ app, BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; return { app:app.isActive(),focus:win.isFocused(),visible:win.isVisible() } }), await page.evaluate(async () => ({document:document.hasFocus(),native:await window.studio.app.getWindowFocus()})))
+    > 92 |   await expect(row(session.id).getByRole('img', { name: 'Completed Unread' })).toHaveCount(0)
+         |                                                                                ^
+      93 |   await screenshot('conversation-stream-completed')
+      94 | })
+      95 |
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:92:80
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-02-FR-CHAT-001--fa569-ive-tool-row-and-completion/error-context.md
+
+  1 failed
+    e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/unified-workbench/apps/desktop

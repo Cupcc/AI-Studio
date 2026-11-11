@@ -10,9 +10,7 @@ import type { ComposerDraft, ContextItem, DraftKey, SessionCli } from '@shared/s
 import { FILES_LIMITS, parseProjectPath, type FileReferenceResolver } from '@shared/tools/files'
 import { SESSION_CLIS } from '@shared/session/types'
 import { isViewId } from '@shared/project/ui-state'
-import { isWorkbenchViewId } from '@shared/workbench/types'
 import { workbenchesFor } from '../services/workbench'
-import { projectViewsFor } from '../services/project-view'
 import type { CoreServices } from '../services/core'
 import { projectShellFor } from '../services/project'
 import { SessionService } from '../services/session/session-service'
@@ -173,10 +171,8 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     summaryChanged: change => core.broadcast(sessionContract.events.summaryChanged, change),
     transcriptChanged: change => core.broadcast(sessionContract.events.transcriptChanged, change),
     providersChanged: providers => core.broadcast(sessionContract.events.providersChanged, providers),
-    buildViewContext: (projectId, viewId) => isWorkbenchViewId(viewId)
-      ? workbenchesFor(core).buildContext(projectId, viewId)
-      : projectViewsFor(core).buildContext(projectId, viewId, true),
-    turnEnded: projectId => { void projectViewsFor(core).refresh(projectId) }
+    buildViewContext: (projectId, viewId) => workbenchesFor(core).buildContext({ projectId, viewId }, true),
+    turnEnded: projectId => { void workbenchesFor(core).refresh(projectId) }
   })
   pasted.start()
   const installer = new CliInstaller({

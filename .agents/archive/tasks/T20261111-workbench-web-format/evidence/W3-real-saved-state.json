@@ -1,0 +1,72 @@
+{
+  "actualTurns": 2,
+  "sessions": [
+    {
+      "id": "cc688d82-5657-402a-b74b-93e0003e1034",
+      "cli": "codex",
+      "model": null,
+      "originViewId": "business-flow",
+      "viewContextAttached": true,
+      "viewContextPaths": [
+        ".ai-studio/knowledge/business-flow.json",
+        ".ai-studio/views/business-flow.view.json",
+        ".ai-studio/GUIDE.md",
+        ".ai-studio/schema/knowledge.schema.json",
+        ".ai-studio/schema/view.schema.json"
+      ],
+      "lastOutcome": "completed",
+      "agentReplies": [
+        "WEB_PACKAGE_PRESET_OK | Business Flow"
+      ],
+      "toolKinds": [
+        "reasoning"
+      ],
+      "turns": [
+        {
+          "outcome": "completed",
+          "model": null
+        }
+      ]
+    },
+    {
+      "id": "60bb9965-6707-439e-9bab-56a39c0978d6",
+      "cli": "codex",
+      "model": null,
+      "originViewId": "workbench:92dd60a8-3a0d-4256-a80e-7a55a9a49f15",
+      "viewContextAttached": true,
+      "viewContextPaths": [],
+      "lastOutcome": "completed",
+      "agentReplies": [
+        "WEB_PACKAGE_CUSTOM_OK | 随手记 | WEB_PACKAGE_NOTE"
+      ],
+      "toolKinds": [
+        "reasoning"
+      ],
+      "turns": [
+        {
+          "outcome": "completed",
+          "model": null
+        }
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "92dd60a8-3a0d-4256-a80e-7a55a9a49f15",
+      "title": "随手记",
+      "plugin_id": "workbench-b342bb1c-489e-41ef-ba4e-60158189be5e",
+      "package_revision": "34824fb1aa8ba2d2d52db95de37947a3d61232345b8b38fed9f729af4e977322",
+      "state": "{\"count\":1,\"note\":\"WEB_PACKAGE_NOTE\"}",
+      "state_revision": 0
+    },
+    {
+      "id": "3d73beb5-a26c-4cb8-bf39-5cddcc711687",
+      "title": "Overview",
+      "plugin_id": "studio-overview",
+      "package_revision": "268bc0ac12737deb0202b59924538dfa4289dfc49ea41d7a35ea064eac5d0142",
+      "state": "{}",
+      "state_revision": 0
+    }
+  ],
+  "notes": "Two actual Codex turns; default model; no CLI or file tool use. Reading this report is supplemental to UI response evidence."
+}

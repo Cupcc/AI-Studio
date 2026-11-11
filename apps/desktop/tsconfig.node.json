@@ -2,10 +2,16 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
-    "lib": ["ES2023"],
-    "types": ["node"],
+    "lib": [
+      "ES2023"
+    ],
+    "types": [
+      "node"
+    ],
     "paths": {
-      "@shared/*": ["./src/shared/*"]
+      "@shared/*": [
+        "./src/shared/*"
+      ]
     }
   },
   "include": [
@@ -13,6 +19,7 @@
     "src/preload/**/*",
     "src/shared/**/*",
     "electron.vite.config.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "build/workbenches/**/*.json"
   ]
 }

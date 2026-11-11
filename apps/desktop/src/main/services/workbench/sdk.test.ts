@@ -21,6 +21,18 @@ function fixture() {
   return { window, parent, context, respond, events, domEvents, Element }
 }
 afterEach(() => vi.useRealTimers())
+it('uses the ordinary SDK channel for project Session actions and current or new conversation drafts', async () => {
+  const f = fixture()
+  const open: Promise<unknown> = runInContext('window.workbench.openSession("session-one")', f.context)
+  expect(f.parent.postMessage).toHaveBeenLastCalledWith({ channel: 'ai-studio-workbench-v1', type: 'request', id: '1', method: 'openSession', params: { sessionId: 'session-one' } }, '*')
+  f.respond({ type: 'response', id: '1', ok: true }); await open
+  const current: Promise<unknown> = runInContext('window.workbench.setDraft("Current draft")', f.context)
+  expect(f.parent.postMessage).toHaveBeenLastCalledWith({ channel: 'ai-studio-workbench-v1', type: 'request', id: '2', method: 'setDraft', params: { text: 'Current draft', target: 'current' } }, '*')
+  f.respond({ type: 'response', id: '2', ok: true }); await current
+  const fresh: Promise<unknown> = runInContext('window.workbench.setDraft("New draft", { target: "new" })', f.context)
+  expect(f.parent.postMessage).toHaveBeenLastCalledWith({ channel: 'ai-studio-workbench-v1', type: 'request', id: '3', method: 'setDraft', params: { text: 'New draft', target: 'new' } }, '*')
+  f.respond({ type: 'response', id: '3', ok: true }); await fresh
+})
 it('binds request replies to the parent, resolves snapshots and subscribes without leaking after unsubscribe', async () => {
   const f = fixture()
   expect(f.parent.postMessage).not.toHaveBeenCalled()

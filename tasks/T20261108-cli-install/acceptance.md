@@ -16,7 +16,7 @@
 
 - 当前结论：本轮实现的独立技术评审与新版 UI 交互验收通过。双 CLI 远端服务验证仍为部分覆盖（仅 Codex 完成真实直接 API 请求）；原任务的一键安装、打包与人工产品验收不因此关闭。
 - 验收者：`/root/review_connection_inherit`，未参与代码实现；独立读取 diff、运行测试并搭建隔离的原生 CLI 回环实验。发现问题交回 Main Agent 修改后复验。
-- 日期与代码基线：2026-11-10，`3deffa4` 上 `fix/cli-connection-inherit` 未提交 diff；后端复验 11:31，新 UI 交互及最终 diff 复核 11:42～11:46（本机时区）。当日交付保留在独立 worktree，未提交、未合入 main；后续 Git 集成状态见[集成记录](../archive/T20261111-main-integration/task.md)。
+- 日期与代码基线：2026-11-10，`3deffa4` 上 `fix/cli-connection-inherit` 未提交 diff；后端复验 11:31，新 UI 交互及最终 diff 复核 11:42～11:46（本机时区）。当日交付保留在独立 worktree，未提交、未合入 main；后续 Git 集成状态见[集成记录](../../.agents/archive/tasks/T20261111-main-integration/task.md)。
 - 平台：macOS arm64；源码 / workspace 构建产物；Codex CLI 0.167.0，Claude Code 2.1.319，Claude Agent SDK 0.3.293。
 - 测试环境：单元测试的模拟 Provider / 本地 HTTP fixture；原生 CLI 实验使用独立 `CODEX_HOME` / `CLAUDE_CONFIG_DIR`、回环 endpoint 和合成凭据，无外部模型调用、未改用户配置。
 

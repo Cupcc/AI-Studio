@@ -15,8 +15,6 @@
 
 ### 1.1 未决问题
 
-2026-10-09 参考应用复核见 [Session research](../../tasks/archive/T20261009-session-slice/research.md)；推荐仍为草稿，已确认回答保持原样。
-
 “阻塞”指：未回答前，对应部分不应开始实现；“否”表示可按建议答案先实现，回答不同再调整。以下均无阻塞项，但 NAV-Q4、NAV-Q5 建议在实现 Rename 与 View 导航前确认。
 
 | 编号 | 问题 | 建议答案与依据 | 阻塞实现 | 回答（确认日期） |
@@ -26,25 +24,25 @@
 | NAV-Q3 | Rename 的标题长度上限是多少？ | 最多 100 个字符，输入时限制，粘贴时截断，列表中单行省略显示。依据：文档无规定；100 足以描述一次对话，同时避免数据与布局问题。具体数值由人确认 | 否 | |
 | NAV-Q5 | 已处于某个 View 的 Project View Mode 时，再次点击导航中同一个 View 的行为：忽略，还是回到新草稿 / 回到 Preview？ | 忽略（不改变左列当前对话与右侧区域）。依据：P-A 的“新草稿”限定为“进入 View”；左列顶栏已提供“新建对话”按钮（Shell 第 8 节），无需用导航承担该功能；避免意外丢弃草稿 | 否 | |
 | NAV-Q6 | Session Mode 下停留在 New Chat 草稿时，导航是否有条目高亮（例如 New Chat 按钮呈 Selected）？ | 无任何条目高亮，New Chat 按钮也不呈 Selected。依据：03 第 8 节与 Shell 第 4 节只规定 Session 项与 View 项的 Selected；New Chat 按钮的状态仅列 Default / Hover / Focus | 否 | |
-| NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），Project Views 区域过高时如何处理：独立滚动、限制高度、折叠？ | 工作台实例进入当前 Project 导航，插件机制交互中设计区域高度和滚动；完整多实例管理后续评估。依据：DEC-28、FR-WB-006；03 第 8 节要求 Session History 可持续增长 | 否 | |
+| NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），工作台 区域过高时如何处理：独立滚动、限制高度、折叠？ | 工作台实例进入当前 Project 导航，插件机制交互中设计区域高度和滚动；完整多实例管理后续评估。依据：DEC-28、FR-WB-006；03 第 8 节要求 Session History 可持续增长 | 否 | |
 | NAV-Q8 | 折叠后顶栏的 New Chat 按钮、以及空状态中的 New Chat 按钮，是否也带 CLI 下拉？ | 都只是单个按钮，使用 Default CLI，不带下拉；需要选其他 CLI 时展开导航，用顶部分裂按钮。依据：Shell 第 3 节顶栏写“New Chat 按钮”，第 4 节导航写“分裂按钮”，第 10 节空状态写“New Chat”，措辞不同；FR-CHAT-002 只要求提供扩展入口。该决定由 `specs/chat/` 最终确认 | 否 | |
 | NAV-Q9 | V1 没有删除或归档 Session 的入口，列表只增不减，是否符合预期？ | 符合，V1 不提供。依据：02 与 03 均未定义删除 / 归档；“不添加文档之外的需求”；04 第 7 节要求大量历史 Session 不卡顿，说明按只增长设计 | 否 | |
 | NAV-Q10 | 左侧导航的折叠状态是否随应用重启保留？ | 保留（与窗口级状态一起保存）。依据：03 第 8 节称之为“窗口级偏好”，偏好通常持久；与 `specs/project/spec.md` PROJ-Q1 一并确认 | 否 | |
 | NAV-Q11 | 导航是否需要键盘快捷键（折叠 / 展开、New Chat、在 Session 间移动、触发 Rename）？ | V1 只保证 3.5 的键盘可达（Tab、方向键、Enter、Esc），不规定全局快捷键；若需要，建议 `⌘B` 折叠、`⌘N` 新建对话（New Chat）。依据：文档仅规定焦点环（Shell 第 11 节）；快捷键属新增需求，需人确认 | 否 | |
 | NAV-Q12 | “大量历史 Session”的验收规模是多少？ | 以单个 Project 2,000 条 Session 为性能测试规模：滚动不掉帧、Tab 切换即时、单个状态变化不重排。依据：04 第 7 节与 05 第 4 节只说“大量”，没有数值，测试需要一个目标 | 否 | |
-| NAV-Q13 | 界面文案语言：Shell 示例使用中文文案（“今天”“还没有对话”）并保留英文产品名（New Chat、PROJECT VIEWS），V1 是否仅提供中文文案？ | 是，沿用 Shell 的混合写法，字符串集中定义以便日后本地化。依据：Shell 第 4、10 节、03 第 8 节；文档没有语言策略 | 否 | |
+| NAV-Q13 | 界面文案语言：Shell 示例使用中文文案（“今天”“还没有对话”）并保留英文产品名（New Chat、SESSIONS；工作台标题按 DEC-29），V1 是否仅提供中文文案？ | 是，沿用 Shell 的混合写法，字符串集中定义以便日后本地化。依据：Shell 第 4、10 节、03 第 8 节；文档没有语言策略 | 否 | |
 
 ### 1.2 已确认
 
 | 编号 | 问题 | 建议答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
-| NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入。依据：`tasks/archive/T20261009-session-slice/task.md` 已把 Rename 列入范围（FR-NAV-003；D-12）；实现量小，且 05 第 4 节把 Rename 列入专项测试。若判定为 P1，则首个交付可延后 3.3.6，其余不受影响。需要在 02 中统一优先级 | 否 | Rename 为 P0，纳入 session-slice；02 第 6 节 MVP 表同步改为 P0（2026-10-09 确认） |
+| NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入，依据 FR-NAV-003 与 05 第 4 节的 Rename 专项要求。 | 否 | Rename 为 P0，纳入 session-slice；02 第 6 节 MVP 表同步改为 P0（2026-10-09 确认） |
 
 ## 2. 职责与边界
 
 - 负责：
   - 左侧导航的区域划分、New Chat 的位置、分隔线（FR-NAV-001）。
-  - Project Views 列表的呈现、点击后切换 Main Canvas 到 Project View Mode 的导航契约、高亮规则（FR-NAV-002）。
+  - 工作台 列表的呈现、点击后切换 Main Canvas 到 Project View Mode 的导航契约、高亮规则（FR-NAV-002）。
   - Session History 的呈现：日期分组、排序、列表项结构、Rename 的原位编辑、滚动与性能、空状态、选中规则（FR-NAV-003）。
   - 左侧导航的折叠与展开、折叠时顶栏保留的按钮、展开按钮上的注意力点（03 第 8 节；D-14）。
   - 导航内的键盘焦点与 Hover / Selected / Focus / Disabled 状态（Shell 第 11 节）。
@@ -67,17 +65,17 @@
 | 序 | 区域 | 尺寸 | 说明 | 来源 |
 |---|---|---|---|---|
 | 1 | New Chat 分裂按钮 | 高 36 | 位于导航顶部。主区：图标 + “New Chat”，使用 Default CLI；右区：▾ 打开 CLI 菜单。按钮行为、菜单内容归 `specs/chat/` | 03 第 6、8 节；D-11；Shell 第 4 节 |
-| 2 | 区域标题“PROJECT VIEWS” | 高 28 | 小号大写 | Shell 第 4 节 |
-| 3 | Project Views 列表 | 每项高 32 | 默认五项，见 FR-NAV-002 | FR-NAV-001 |
+| 2 | 区域标题“工作台” | 高 28 | 小号标题 | 03；DEC-29 |
+| 3 | 工作台列表 | 每项高 32 | 统一显示预设、自定义实例及设计草稿，见 FR-NAV-002 | FR-NAV-001 |
 | 4 | 分隔线 | — | 清晰但低视觉噪音（FR-NAV-001）；具体线宽与色值在高保真阶段确定 | FR-NAV-001 |
-| 5 | 区域标题“SESSIONS” | 高 28 | 小号大写 | Shell 第 4 节 |
+| 5 | 区域标题“SESSIONS” | 高 28 | 小号标题 | 03；DEC-29 |
 | 6 | Session History | 占满剩余高度 | 见 FR-NAV-003 | FR-NAV-001 |
 
 规则：
 
-1. 两个区域用分隔线明确划分，上部为 Project Views，下部为 Session History（FR-NAV-001）；New Chat 位于导航顶部，其下依次是 Project Views 与 Session History（03 第 8 节）。
-2. 只有 Session History 区域滚动；New Chat 与 Project Views 区域固定在上方，不随列表滚动（提案，与 03 第 8 节“Session History 可持续增长”一致）。Project Views 增加自定义 View（FR-VIEW-002，P1）后的区域高度策略见 NAV-Q7。
-3. 导航内容属于**当前 Project**：切换 Tab 时 Project Views 与 Session History 同时切换为该 Project 的内容，列表与高亮互不混淆（FR-PROJ-002；AC-01）。导航所需的数据按 `project_id` 取用，不使用全局“当前列表”（技术方案，待实现确认）。
+1. 两个区域用分隔线明确划分，上部为工作台，下部为 Session History（FR-NAV-001）；New Chat 位于导航顶部，其下依次是工作台与 Session History（03 第 8 节）。
+2. 只有 Session History 区域滚动；New Chat 与 工作台 区域固定在上方，不随列表滚动（提案，与 03 第 8 节“Session History 可持续增长”一致）。工作台 增加自定义 View（FR-VIEW-002，P1）后的区域高度策略见 NAV-Q7。
+3. 导航内容属于**当前 Project**：切换 Tab 时 工作台 与 Session History 同时切换为该 Project 的内容，列表与高亮互不混淆（FR-PROJ-002；AC-01）。导航所需的数据按 `project_id` 取用，不使用全局“当前列表”（技术方案，待实现确认）。
 4. 宽度稳定：展开状态下始终为 248，不随内容、窗口宽度变化（03 第 8 节“宽度稳定”；Shell 第 2.2 节）。
 5. 启动页 Tab 激活时没有当前 Project，导航不显示内容；相关按钮的呈现见 `specs/project/spec.md` 3.2.5 与 PROJ-Q2。
 
@@ -97,7 +95,7 @@
 
 #### 工作台实例导航
 
-来源：FR-VIEW-002、FR-WB-006、DEC-28（2026-11-10 接受方向，2026-11-11 确认方案并实施最小插件机制，具体接缝见 workbench §9）。宿主从当前 Project 的实例目录生成入口，按 `instanceId` 定位并核实 Project 与固定包版本；首期名称取清单 title，使用宿主固定的工作台图标。默认五项保持现状，不把工作台实例塞入默认 View ID 枚举。
+来源：FR-VIEW-002、FR-WB-006、DEC-28（2026-11-10 接受方向，2026-11-11 确认方案并实施最小插件机制，具体接缝见 workbench §9）。宿主从当前 Project 的实例目录生成入口，按 `instanceId` 定位并核实 Project 与固定包版本；首期名称取清单 title，使用宿主固定的工作台图标。预设五项的内容、ID 和顺序保持，所有条目来自统一工作台目录，不把工作台实例塞入默认 View ID 枚举。
 
 点击实例打开对应工作台，不因打开或安装自动创建 Session / 出图。导航选中状态仍由 Main Canvas 决定；首期提供添加、草稿与实例入口、停用和启用。实例重命名、取消固定及删除仍后置，候选行为由[工作台生命周期](../workbench/spec.md#62-导航与生命周期)负责。
 
@@ -115,7 +113,7 @@
 
 #### 3.2.3 高亮规则
 
-任一时刻，整个导航（Project Views 与 Session History 合计）最多一个条目处于 Selected：
+任一时刻，整个导航（工作台 与 Session History 合计）最多一个条目处于 Selected：
 
 | Main Canvas 当前内容 | 高亮的条目 | 来源 |
 |---|---|---|
@@ -291,7 +289,7 @@
 
 键盘操作（文档只规定焦点环，下列为让键盘可达的提案与技术方案，快捷键见 NAV-Q11）：
 
-1. Tab 键顺序：顶栏按钮 → New Chat 主区 → ▾ → Project Views 列表（单一 Tab 停靠点）→ Session History（单一 Tab 停靠点）；列表内用上 / 下方向键在条目间移动，Home / End 跳到首 / 末，Enter 或 Space 打开（技术方案，待实现确认：roving tabindex）。
+1. Tab 键顺序：顶栏按钮 → New Chat 主区 → ▾ → 工作台 列表（单一 Tab 停靠点）→ Session History（单一 Tab 停靠点）；列表内用上 / 下方向键在条目间移动，Home / End 跳到首 / 末，Enter 或 Space 打开（技术方案，待实现确认：roving tabindex）。
 2. 聚焦某个 Session 项时，可通过键盘到达 ⋯ 并打开菜单（提案：右方向键移动到 ⋯，Enter 打开菜单）。
 3. 菜单打开后焦点在 Rename，Esc 关闭并回到该项；Rename 编辑中遵循 3.3.6 的 Enter / Esc。
 4. 当前选中项以 `aria-current` 标识；分组标题以标题语义标识，不进入方向键序列（技术方案，待实现确认）。
@@ -304,7 +302,7 @@
 
 | 数据 | 来源 | 说明 |
 |---|---|---|
-| Project Views 列表 | project-view 模块（`specs/project-view/`）；V1 默认五项为内置，顺序固定 | 对应 04 第 6 节 ProjectView 的 `type`、`title`、`order`；自定义 View（P1）加入时由同一接口返回 |
+| 工作台 列表 | workbench 模块（`specs/workbench/`）；统一返回预设、自定义实例及草稿 | 目录及身份契约见[工作台规格 §9.7](../workbench/spec.md#97-预设与自定义工作台统一宿主) |
 | Session 摘要 | session 模块 | 见 5.1 |
 | 当前选中项 | project 模块的 `ui_state.main_canvas` | 见 `specs/project/spec.md` 4.2 |
 | 当前 Project | project 模块 | `current_project_id` |

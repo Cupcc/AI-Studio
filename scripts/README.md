@@ -26,7 +26,7 @@
 
 ## 测试分层
 
-依据：用户 2026-11-06 要求「应该是哪里改动测试哪里」「优化规则，不要全量跑」；[本次任务](../tasks/archive/T20261106-scoped-checks/task.md)。取代 2026-10-11 的自动全量提交／CI 策略；[历史验证](../tasks/archive/T20261011-test-workflow/task.md)保留原基线。规则 diff 待审阅，未改变产品验收标准。
+范围检查的实现与验证见[任务记录](../.agents/archive/tasks/T20261106-scoped-checks/task.md)。
 
 | 场景 | 执行范围 |
 |---|---|
@@ -43,9 +43,11 @@
 
 选择器为 [check-affected.mjs](check-affected.mjs)：源码与测试文件作为 [Vitest `related`](https://vitest.dev/guide/cli.html#vitest-related) 的种子，另显式加入模块测试来覆盖 IPC、Adapter 构建产物和动态加载边界。删除／重命名按旧、新路径选中模块；仅修改测试时只选该测试，不触发 E2E。类型检查以受影响的 TS 项目为最小边界，不声称可按单个文件完整检查类型。
 
+工作台宿主通过同一 iframe 承载预设与自定义 Web 包，`workbench` 范围须覆盖两类内容测试及 `project-view` / `workbench` E2E，见 [DEC-29](<../docs/07. Decisions.md#dec-29-预设与自定义工作台统一架构>)。
+
 影响映射不是全知依赖分析。新增模块、跨模块调用或全局依赖／构建配置变更时，先在选择器中补充有依据的映射和对应回归测试；未知路径失败时不得改为无条件豁免或全量兜底。选中的 E2E 文件缺失／改名时阻断并要求同步映射，单测选择为空也不记作通过。共享边界可能选中多个模块；选择结果须结合 diff 审阅，必要的功能／里程碑验收仍遵循 Task Protocol。
 
-CLI 连接模型读取使用的 `smol-toml` 是已登记的叶子依赖。桌面 manifest 与 lockfile 的变更只有在两个比较快照除该依赖外完全一致时，才选中 Session / Settings 单测、桌面类型检查及应用启动和相关 E2E。暂存检查使用 Git index，CI 使用 before → HEAD；其他依赖、脚本或 lockfile 变化仍阻断。依据：用户 2026-11-11 授权全部线性集成，见[集成记录](../tasks/archive/T20261111-main-integration/task.md)。
+CLI 连接模型读取使用的 `smol-toml` 是已登记的叶子依赖。桌面 manifest 与 lockfile 的变更只有在两个比较快照除该依赖外完全一致时，才选中 Session / Settings 单测、桌面类型检查及应用启动和相关 E2E。暂存检查使用 Git index，CI 使用 before → HEAD；其他依赖、脚本或 lockfile 变化仍阻断。验证结果见[集成记录](../.agents/archive/tasks/T20261111-main-integration/task.md)。
 
 ```sh
 # 默认比较 HEAD 与工作树（含未跟踪文件）；只打印计划，不执行测试。
@@ -71,7 +73,8 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 
 ### 文档检查边界
 
-- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README、已登记的架构 HTML 文档，以及 docs / specs / tasks / templates / design 下的 `.md`。设计目录及任务 evidence 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定，空变更不启动应用测试。
+- [Codex 项目角色](../.codex/agents/README.md)的 `.codex/agents/*.toml` 只影响开发 Agent，按角色说明核对解析与加载，不触发应用测试；该目录的 README 纳入文档快路径。其他 Codex 配置与脚本不因此豁免。
+- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README、已登记的架构 HTML 文档，以及 docs / specs / tasks / design / .agents/archive 下的 `.md`（任务与规格模板分别位于 `tasks/templates/`、`specs/templates/`）。设计目录、任务 evidence、归档目录和搜索忽略配置 `.ignore` 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定，空变更不启动应用测试。归档规则见 [Task Protocol](../tasks/README.md#archiving)。
 - [check-docs.mjs](check-docs.mjs) 解析 Markdown 与 GFM 表格，检查内联／引用式链接、图片目标、Markdown 标题锚点及显式 HTML id/name。跨文档扫描可发现删除文件、改标题造成的未修改文件入链损坏；代码示例中的伪链接不检查。
 - 本地 `check:docs` 默认比较 HEAD 与当前工作树（包含未忽略的未跟踪文件）；提交门禁比较 HEAD 与 Git 暂存快照，未暂存修复和未跟踪目标不能掩盖提交中的断链。
 - 只阻断相对基线新增的问题，历史问题按来源路径、链接和问题类型识别，不借本任务批量清理。`pnpm check:docs --base <commit> --head <commit>` 检查两个快照；`pnpm check:docs --base ''` 对当前工作树做完整审计，可能暴露历史问题。
@@ -80,32 +83,21 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 
 ## Agent 文档 Hook
 
-依据：用户 2026-10-17 明确要求 Agent 修改文档时触发 hook，并回复「approve and apply，注意轻量级，不要拖缓运行」。配置为 [.codex/hooks.json](../.codex/hooks.json)，处理脚本为 [agent-docs-hook.mjs](../.codex/scripts/agent-docs-hook.mjs)。文档复核规则仍由 [贡献指南](../CONTRIBUTING.md#文档同步与收尾复核) 负责。
+文档 Hook 只提醒 Agent 复核关联文档。配置位于 [.codex/hooks.json](../.codex/hooks.json)，脚本为 [agent-docs-hook.mjs](../.codex/scripts/agent-docs-hook.mjs)。语义复核按[贡献指南](../CONTRIBUTING.md#文档同步与收尾复核)执行。
 
-| 时点 | 行为与开销 |
-|---|---|
-| `SessionStart` | 记录本会话的文档元数据基线；只做一次有超时的 Git 状态查询，不运行链接检查 |
-| `PostToolUse`：`apply_patch` / `Bash`（含 `exec_command`） | 一次有超时的 Git 状态查询，仅读取变更文档的文件元数据；有文档变化时给 Agent 一次复核提醒，同一待收尾批次去重。不读取正文、不调用模型、不运行链接检查 |
-| `Stop` | 只在本会话基线之后检测到文档变化时运行现有链接回归检查，同一会话、同一文件元数据与 Git 状态复用结果。无本会话文档变化时直接放行；已提醒且链接通过直接放行；漏发提醒或检查失败时最多请求一次续跑，修复改变快照后可再检查，`stop_hook_active` 时不再阻止结束 |
+- `SessionStart` 记录已有文档改动的元数据基线，避免新会话因历史脏文档收到提醒。
+- `PostToolUse` 在文档发生变化后提醒，同一会话最多一次，只列出发生变化的文件。通过 Git 状态检测 Shell 写入，不读取命令内容或文档正文。
+- 不运行链接检查、应用测试或模型调用，不配置 `Stop`，不阻断会话结束。链接检查使用 `pnpm check:docs` 或提交门禁。
 
-轻量约束：Git 查询上限 1.5 秒，链接检查上限 8 秒；外层 SessionStart / Post / Stop 超时分别为 3 / 3 / 12 秒。通常只花进程启动、Git 查询与少量文件元数据读取时间；链接检查只在收尾运行。没有后台 watcher、模型评审调用或应用测试；失败续跑会使用当前 Agent 的正常对话预算，不无限重试。超时和失败会要求 Agent 修复或明确报告未完成，不能记作通过。
+检测范围为未被 Git 忽略的 `.md` 及 `docs/` 下的 `.html`，覆盖新增、修改、删除和重命名。仓库外文件、被忽略文件及两次检测之间已提交且不再留有工作树变化的文件不在检测范围内；同一工作树的其他会话修改文档也可能触发提醒。
 
-检测范围与边界：
+每次只查询一次 Git 状态并读取变更文档的文件元数据；Git 查询限时 1.5 秒，外层 Hook 限时 3 秒。检测或状态存储失败时提示手动复核。状态按工作树与会话隔离，保存在忽略目录 `.runtime/agent-docs-hook/`，只含元数据和提醒标记，不保存文件正文或工具输入。
 
-- 检测未被 Git 忽略的 `.md`（含根规则、索引、spec、task）及 `docs/` 下 `.html` 的新增、修改、删除和重命名。通过 Git 实际状态检测 Shell 写入，不依赖命令字符串猜测；Stop 补查未匹配的工具写入。HTML 只触发语义复核提醒，现有链接检查不解析 HTML 内容。
-- `SessionStart` 会把启动前已有的文档改动记录为基线，不让每个新会话为历史脏文档重复支付链接检查；启动后由其他会话或人工修改文档仍可能触发。已提交且在两次检测之间没有留下工作树变化、被忽略的文件、仓库外文件，不在此轻量检测的保证范围内；原有提交门禁和人工／AI 复核仍适用。
-- 文件元数据用于失效检测，非内容语义判断；触碰时间戳可能导致重新检查。状态按工作树与会话隔离，保存于忽略目录 `.runtime/agent-docs-hook/`，仅保存路径、元数据摘要、检查结果及去重标记，不保存对话或工具输入。可随 `.runtime/` 清理，清理后重新检测。
-- 此 hook 提醒 Agent 追踪关联文档；不证明已经完成语义复核，不自动改写文档，不代替人工确认。仅配置 Codex 主会话的 `SessionStart` / `PostToolUse` / `Stop`；未配置 Claude Code 或 `SubagentStop`。
-
-启用与验证：
-
-1. 在仓库目录启动支持 hooks 的 Codex，运行 `/hooks` 查看并信任本项目的具体 hook 定义；项目 `.codex/` 配置层也须受信任。这是 [Codex 官方的加载与信任要求](https://learn.chatgpt.com/docs/hooks)，配置文件存在不代表已经启用；定义变更后按 Codex 提示重新审阅。
-2. `pnpm test:scripts` 覆盖去重、Shell 修改、增删改名、漏发补查、会话隔离、失败续跑、修复重检、真实本地链接检查与超时；不发送真实模型请求。
-3. 本次交付为配置与本地脚本验证；尚未在用户信任后的真实 Codex 会话中验证事件加载与触发。可在信任后修改一份文档，确认收到一次复核提醒并在结束前运行检查。需在 `/hooks` 中停用时，不必改动 Git hooks。
+配置加载与信任遵循 [Codex 官方 Hooks 要求](https://learn.chatgpt.com/docs/hooks)；定义变更后按 Codex 提示重新加载。`pnpm test:scripts` 验证基线、提醒去重、增删改名、会话隔离及配置边界。Hook 提醒不代表已完成文档复核或链接检查。
 
 ## 本地 Commit 门禁
 
-依据：[开发命令](#开发命令)与 [贡献指南](../CONTRIBUTING.md) 第 3 节的提交约定；任务记录：[T20261010-commit-gates](../tasks/T20261010-commit-gates/task.md)。
+提交约定见 [贡献指南](../CONTRIBUTING.md#3-提交规范)，门禁实现与验证见[任务记录](../tasks/T20261010-commit-gates/task.md)。
 
 根目录执行 `pnpm install` 时，`prepare` 自动通过 Husky 安装 hooks；已有依赖时可用 `pnpm prepare` 重新安装。Git 客户端的 PATH 必须能找到根 `package.json` 要求的 Node 与 pnpm。若 GUI 客户端找不到版本管理器安装的 Node / pnpm，按 [Husky 官方说明](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis) 配置用户级初始化文件，不在仓库硬编码个人路径。
 
@@ -151,13 +143,11 @@ Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-i
 - Release Notes 与最终发布方式待后续安排；
 - 是否必须签名、公证及附带校验和。
 
-路线图所列现有功能的人工体验已全部通过（2026-10-18 确认），接受范围与基线见[人工功能验收记录](../tasks/archive/T20261009-v1-foundation-slice/acceptance.md#人工功能验收)。当前 Codex 技术复核、完整 Electron 回归及最终打包验证已通过，新增体验人工验收和发布前保留事项见[路线图](<../docs/06. Development Roadmap.md>)。
-
 Claude Code 已确定不随当前 V1 发布（DEC-19）；后续真实验收和发布另行安排。真实 Codex 调用的额度、限流及限流后的停止 / 错误行为由 Codex CLI / 上游服务提供方决定，应用不设置调用次数、费用上限或自动重试护栏；验收记录以 CLI 实际结果为准。
 
 产物生成和检查结果不表示已经发布，也不表示产物已签名或公证。
 
-生成产物时的验证命令（当前结果与产物入口见[总报告](../tasks/archive/T20261009-v1-foundation-slice/report.md)）：
+生成产物时的验证命令：
 
 ```sh
 pnpm check:code
@@ -223,3 +213,5 @@ node tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs \
 - 原生 Stop 补充复核使用两条带唯一标记、睡眠 120 秒的 Python 命令；同时检查原生后台列表和系统 Python 进程退出。进程探测限定实际 Python 可执行文件，排除包含命令文本的 Shell。`clean` / `terminate` 是实验接口，需锁定所支持 CLI 版本；具体语义与覆盖边界见校验报告第 4、5 节。
 - 本脚本不验证 Electron、PTY、Browser、SQLite、文件变更归因或 GUI 提醒行为，也不代表完整 AC 已验收。
 - 本次实测结果见 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md)。
+
+预设网页包的 manifest、HTML、JS、CSS 和静态包生成脚本归入工作台影响范围，同时检查预设及自定义 iframe 场景、应用启动和布局。TypeScript 配置仅新增网页包 JSON include 时按此范围处理，其他编译配置变化仍须单独映射。

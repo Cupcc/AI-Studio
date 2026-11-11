@@ -78,7 +78,7 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
   return <div className="project-workspace" hidden={!active} data-project-id={projectId}>
     {!shell.windowState.navCollapsed && <Navigation {...props} />}
     <main className={`canvas-mode ${view ? 'canvas-mode--view' : 'canvas-mode--session'}`} ref={ref} style={{ '--pane-width': `${width}px` } as CSSProperties}>
-      <section className="conversation-pane" aria-label={view ? 'Project View 对话' : 'Conversation'}>
+      <section className="conversation-pane" aria-label={view ? '工作台对话' : 'Conversation'}>
         <header className="canvas-header">{ui.mainCanvas.mode === 'view' && slots.ViewConversationHeader
           ? <slots.ViewConversationHeader {...props} viewId={ui.mainCanvas.viewId} />
           : !view && slots.ConversationHeader ? <slots.ConversationHeader {...props} />

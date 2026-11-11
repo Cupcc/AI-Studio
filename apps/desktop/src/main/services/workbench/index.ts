@@ -1,3 +1,5 @@
+import { app } from 'electron'
+import { join } from 'node:path'
 import { workbenchContract } from '@shared/ipc/workbench'
 import type { CoreServices } from '../core'
 import { projectShellFor } from '../project'
@@ -9,12 +11,13 @@ export function workbenchesFor(core: CoreServices): WorkbenchService {
   if (!service) {
     service = new WorkbenchService({
       database: () => core.database().db,
+      presetRoot: join(app.getAppPath(), 'out/workbench-packages'),
       projectPath: id => {
         const project = projectShellFor(core).projects.getProject(id)
         if (!project) throw new Error('找不到 Project')
         return project.canonicalPath
       },
-      changed: target => core.broadcast(workbenchContract.events.changed, { projectId: target.projectId, target })
+      changed: change => core.broadcast(workbenchContract.events.changed, change)
     })
     services.set(core, service)
   }

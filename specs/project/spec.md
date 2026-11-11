@@ -274,7 +274,7 @@ Project 记录是新创建的（3.1.4 第 4 步），或没有任何已保存 UI
 
 ### 3.4 窗口布局规则（Shell 第 2 节）
 
-本节为窗口骨架的唯一出处，navigation、project-view、tools 各 spec 引用本节，不重复尺寸。数值随 Shell 于 2026-10-09 确认；Shell 第 1 节要求按 1024 / 1280 / 1440 宽度复核，在[已归档的 T20261009-prototype-alignment](../../tasks/archive/T20261009-prototype-alignment/task.md)中完成。
+本节为窗口骨架的唯一出处，navigation、project-view、tools 各 spec 引用本节，不重复尺寸。数值随 Shell 于 2026-10-09 确认；Shell 第 1 节要求按 1024 / 1280 / 1440 宽度复核。
 
 Files 查看文件时新增内容列；这一状态下的布局及窄窗口压缩见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)，下表与压缩顺序适用于未打开该内容列的状态（用户 2026-10-30 请求）。
 
@@ -387,7 +387,7 @@ Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级�
 - project-view 读取 `ui_state.main_canvas` 中 `view` 分支，写入左列 `conversation`、`view_right_area`；使用 `view_conversation_width`。
 - tools 读取 `sidebar_open`、`view_right_area`、`last_tool`、`sidebar_width`，写入 `last_tool`；右侧边栏容器（开关、图标切换、宽度拖拽）由本 task 提供；四工具内容已由工程工具任务接入，运行时与 Files / 项目 Diff 的细化分别见 [Tools §5.1](../tools/spec.md#51-运行时实现细化)、[§5.2](../tools/spec.md#52-files--项目-diff-实现细化)。
 - 工具实例与缓存按 [tools spec](../tools/spec.md#4-状态与接口) 管理；壳层隐藏 / 卸载内容时不能销毁用户 PTY 或丢失输出状态，Project 的可信关闭流程负责调用工具清理。壳层不持有历史补丁或网页权限（DEC-10，2026-10-12 确认）。
-- 关闭编排新增工具端口：查询所属未退出 Terminal、阻止新实例创建、释放所属资源并返回逐项成功 / 失败；与 Session 计数合并生成 §3.2.4 的确认信息。已实现为 [`MainToolPort`](../../apps/desktop/src/main/services/project/tool-port.ts)（`activeTerminals`、`closeProject`、`closeAll`），由 close-flow 与 quit-flow 与 Session 计数合并；失败或超时保留 Project，并保留底层实际清理锁直到清理 settled（AI 技术决定，2026-10-13）；验证状态见[运行时工具验收](../../tasks/archive/T20261009-context-tools/acceptance.md)。
+- 关闭编排新增工具端口：查询所属未退出 Terminal、阻止新实例创建、释放所属资源并返回逐项成功 / 失败；与 Session 计数合并生成 §3.2.4 的确认信息。已实现为 [`MainToolPort`](../../apps/desktop/src/main/services/project/tool-port.ts)（`activeTerminals`、`closeProject`、`closeAll`），由 close-flow 与 quit-flow 与 Session 计数合并；失败或超时保留 Project，并保留底层实际清理锁直到清理 settled（AI 技术决定，2026-10-13）。
 - 两者都通过本模块的 `updateUiState(project_id, patch)` 写入，由本模块统一落盘（3.3.4）；不得各自存储同一事实。
 
 ### 5.6 事件小结

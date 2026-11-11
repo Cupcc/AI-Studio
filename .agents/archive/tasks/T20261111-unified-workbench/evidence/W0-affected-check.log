@@ -1,0 +1,832 @@
+{
+  "files": [
+    "README.md",
+    "apps/desktop/README.md",
+    "apps/desktop/e2e/project-view.spec.ts",
+    "apps/desktop/e2e/workbench.spec.ts",
+    "apps/desktop/src/main/index.ts",
+    "apps/desktop/src/main/ipc/index.ts",
+    "apps/desktop/src/main/ipc/project-view.ts",
+    "apps/desktop/src/main/ipc/project.ts",
+    "apps/desktop/src/main/ipc/session.ts",
+    "apps/desktop/src/main/ipc/workbench.ts",
+    "apps/desktop/src/main/services/project-view/index.ts",
+    "apps/desktop/src/main/services/project/index.ts",
+    "apps/desktop/src/main/services/session/e2e-providers.ts",
+    "apps/desktop/src/main/services/session/session-service.ts",
+    "apps/desktop/src/main/services/workbench/index.ts",
+    "apps/desktop/src/main/services/workbench/ipc.test.ts",
+    "apps/desktop/src/main/services/workbench/knowledge-runtime.test.ts",
+    "apps/desktop/src/main/services/workbench/knowledge-runtime.ts",
+    "apps/desktop/src/main/services/workbench/web-runtime.test.ts",
+    "apps/desktop/src/main/services/workbench/web-runtime.ts",
+    "apps/desktop/src/main/services/workbench/workbench-service.test.ts",
+    "apps/desktop/src/main/services/workbench/workbench-service.ts",
+    "apps/desktop/src/renderer/src/features/input/Composer.tsx",
+    "apps/desktop/src/renderer/src/features/navigation/Navigation.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/OverviewSessions.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/Preview.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/api.ts",
+    "apps/desktop/src/renderer/src/features/project-view/integration.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/project-view.test.tsx",
+    "apps/desktop/src/renderer/src/features/project-view/store.ts",
+    "apps/desktop/src/renderer/src/features/project/Workspace.tsx",
+    "apps/desktop/src/renderer/src/features/project/shell.test.tsx",
+    "apps/desktop/src/renderer/src/features/session/session.test.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/WebWorkbenchPreview.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/WorkbenchConversation.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/WorkbenchNavigation.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/WorkbenchPreview.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/actions.ts",
+    "apps/desktop/src/renderer/src/features/workbench/conversation.test.ts",
+    "apps/desktop/src/renderer/src/features/workbench/conversation.ts",
+    "apps/desktop/src/renderer/src/features/workbench/integration.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/page-bridge.test.ts",
+    "apps/desktop/src/renderer/src/features/workbench/page-bridge.ts",
+    "apps/desktop/src/renderer/src/features/workbench/store.test.ts",
+    "apps/desktop/src/renderer/src/features/workbench/store.ts",
+    "apps/desktop/src/renderer/src/features/workbench/unified-workbench.test.tsx",
+    "apps/desktop/src/renderer/src/features/workbench/use-view-title.ts",
+    "apps/desktop/src/renderer/src/features/workbench/workbench.test.tsx",
+    "apps/desktop/src/renderer/src/main.tsx",
+    "apps/desktop/src/shared/ipc/contracts.ts",
+    "apps/desktop/src/shared/ipc/project-view.ts",
+    "apps/desktop/src/shared/ipc/workbench.ts",
+    "apps/desktop/src/shared/project-view/types.ts",
+    "apps/desktop/src/shared/project/strings.ts",
+    "apps/desktop/src/shared/project/types.ts",
+    "apps/desktop/src/shared/project/ui-state.ts",
+    "apps/desktop/src/shared/workbench/presets.ts",
+    "apps/desktop/src/shared/workbench/schema.test.ts",
+    "apps/desktop/src/shared/workbench/schema.ts",
+    "apps/desktop/src/shared/workbench/types.ts",
+    "design/components/README.md",
+    "design/components/shell-spec-v02.md",
+    "docs/00. Documentation Index.md",
+    "docs/01. Product Definition.md",
+    "docs/02. Functional Requirements.md",
+    "docs/03. UX Specification.md",
+    "docs/04. Technical Requirements.md",
+    "docs/05. Acceptance Criteria.md",
+    "docs/06. Development Roadmap.md",
+    "docs/07. Decisions.md",
+    "docs/08. System Architecture.html",
+    "docs/09. Workbench Discussion.md",
+    "scripts/README.md",
+    "scripts/check-affected.mjs",
+    "scripts/check-affected.test.mjs",
+    "specs/README.md",
+    "specs/navigation/spec.md",
+    "specs/project-view/spec.md",
+    "specs/session/spec.md",
+    "specs/workbench/spec.md",
+    "tasks/T20261111-unified-workbench/plan.md",
+    "tasks/T20261111-unified-workbench/task.md"
+  ],
+  "commands": [
+    [
+      "exec",
+      "vitest",
+      "related",
+      ".codex/scripts/agent-docs-hook.test.mjs",
+      "scripts/check-affected.mjs",
+      "scripts/check-affected.test.mjs",
+      "scripts/check-workflow.test.mjs",
+      "--run",
+      "--config",
+      "scripts/vitest.config.mjs"
+    ],
+    [
+      "--filter",
+      "@ai-studio/agent-adapter",
+      "run",
+      "build"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.node.json"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.web.json"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.e2e.json"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "vitest",
+      "related",
+      "src/main/index.ts",
+      "src/main/ipc/app.test.ts",
+      "src/main/ipc/index.ts",
+      "src/main/ipc/menu.test.ts",
+      "src/main/ipc/project.ts",
+      "src/main/ipc/registry.test.ts",
+      "src/main/ipc/session.ts",
+      "src/main/ipc/settings.test.ts",
+      "src/main/ipc/workbench.ts",
+      "src/main/security/hardening.test.ts",
+      "src/main/security/policy.test.ts",
+      "src/main/services/project/close-flow.test.ts",
+      "src/main/services/project/index.ts",
+      "src/main/services/project/project-service.test.ts",
+      "src/main/services/project/tool-close.test.ts",
+      "src/main/services/session/cli-connection.test.ts",
+      "src/main/services/session/connection-test.test.ts",
+      "src/main/services/session/e2e-providers.ts",
+      "src/main/services/session/file-reference.test.ts",
+      "src/main/services/session/pasted-attachments.test.ts",
+      "src/main/services/session/session-ipc.test.ts",
+      "src/main/services/session/session-service.test.ts",
+      "src/main/services/session/session-service.ts",
+      "src/main/services/workbench/index.ts",
+      "src/main/services/workbench/ipc.test.ts",
+      "src/main/services/workbench/knowledge-runtime.test.ts",
+      "src/main/services/workbench/knowledge-runtime.ts",
+      "src/main/services/workbench/sdk.test.ts",
+      "src/main/services/workbench/web-runtime.test.ts",
+      "src/main/services/workbench/web-runtime.ts",
+      "src/main/services/workbench/workbench-service.test.ts",
+      "src/main/services/workbench/workbench-service.ts",
+      "src/main/window/foreground.test.ts",
+      "src/preload/bridge.test.ts",
+      "src/renderer/src/features/input/Composer.tsx",
+      "src/renderer/src/features/input/file-references.test.tsx",
+      "src/renderer/src/features/input/reference-text.test.tsx",
+      "src/renderer/src/features/input/useSuggestions.test.tsx",
+      "src/renderer/src/features/navigation/Navigation.tsx",
+      "src/renderer/src/features/project-view/OverviewSessions.tsx",
+      "src/renderer/src/features/project-view/Preview.tsx",
+      "src/renderer/src/features/project-view/preview-boundary.test.tsx",
+      "src/renderer/src/features/project-view/project-view.test.tsx",
+      "src/renderer/src/features/project/Workspace.tsx",
+      "src/renderer/src/features/project/shell.test.tsx",
+      "src/renderer/src/features/session/markdown.test.tsx",
+      "src/renderer/src/features/session/session.test.tsx",
+      "src/renderer/src/features/workbench/WebWorkbenchPreview.tsx",
+      "src/renderer/src/features/workbench/WorkbenchConversation.tsx",
+      "src/renderer/src/features/workbench/WorkbenchNavigation.tsx",
+      "src/renderer/src/features/workbench/WorkbenchPreview.tsx",
+      "src/renderer/src/features/workbench/actions.ts",
+      "src/renderer/src/features/workbench/conversation.test.ts",
+      "src/renderer/src/features/workbench/conversation.ts",
+      "src/renderer/src/features/workbench/integration.tsx",
+      "src/renderer/src/features/workbench/page-bridge.test.ts",
+      "src/renderer/src/features/workbench/page-bridge.ts",
+      "src/renderer/src/features/workbench/store.test.ts",
+      "src/renderer/src/features/workbench/store.ts",
+      "src/renderer/src/features/workbench/unified-workbench.test.tsx",
+      "src/renderer/src/features/workbench/use-view-title.ts",
+      "src/renderer/src/features/workbench/workbench.test.tsx",
+      "src/renderer/src/main.tsx",
+      "src/shared/ipc/contract.test.ts",
+      "src/shared/ipc/contracts.ts",
+      "src/shared/ipc/workbench.ts",
+      "src/shared/project-view/schema.test.ts",
+      "src/shared/project-view/types.ts",
+      "src/shared/project/rules.test.ts",
+      "src/shared/project/strings.test.ts",
+      "src/shared/project/strings.ts",
+      "src/shared/project/types.ts",
+      "src/shared/project/ui-state.ts",
+      "src/shared/session/presentation.test.ts",
+      "src/shared/workbench/presets.ts",
+      "src/shared/workbench/schema.test.ts",
+      "src/shared/workbench/schema.ts",
+      "src/shared/workbench/types.ts",
+      "--run"
+    ]
+  ],
+  "e2e": [
+    "e2e/alignment.spec.ts",
+    "e2e/app.spec.ts",
+    "e2e/cli-default.spec.ts",
+    "e2e/composer.spec.ts",
+    "e2e/files.spec.ts",
+    "e2e/project-view.spec.ts",
+    "e2e/project.spec.ts",
+    "e2e/session.spec.ts",
+    "e2e/workbench.spec.ts"
+  ],
+  "unknown": [],
+  "missingTests": []
+}
+> pnpm exec vitest related .codex/scripts/agent-docs-hook.test.mjs scripts/check-affected.mjs scripts/check-affected.test.mjs scripts/check-workflow.test.mjs --run --config scripts/vitest.config.mjs
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench
+
+
+ Test Files  3 passed (3)
+      Tests  72 passed (72)
+   Start at  12:46:50
+   Duration  5.49s (tests 97%, import 2%)
+
+> pnpm --filter @ai-studio/agent-adapter run build
+$ tsc -p tsconfig.build.json
+> pnpm --filter @ai-studio/desktop exec tsc --noEmit -p tsconfig.node.json
+> pnpm --filter @ai-studio/desktop exec tsc --noEmit -p tsconfig.web.json
+> pnpm --filter @ai-studio/desktop exec tsc --noEmit -p tsconfig.e2e.json
+> pnpm --filter @ai-studio/desktop exec vitest related src/main/index.ts src/main/ipc/app.test.ts src/main/ipc/index.ts src/main/ipc/menu.test.ts src/main/ipc/project.ts src/main/ipc/registry.test.ts src/main/ipc/session.ts src/main/ipc/settings.test.ts src/main/ipc/workbench.ts src/main/security/hardening.test.ts src/main/security/policy.test.ts src/main/services/project/close-flow.test.ts src/main/services/project/index.ts src/main/services/project/project-service.test.ts src/main/services/project/tool-close.test.ts src/main/services/session/cli-connection.test.ts src/main/services/session/connection-test.test.ts src/main/services/session/e2e-providers.ts src/main/services/session/file-reference.test.ts src/main/services/session/pasted-attachments.test.ts src/main/services/session/session-ipc.test.ts src/main/services/session/session-service.test.ts src/main/services/session/session-service.ts src/main/services/workbench/index.ts src/main/services/workbench/ipc.test.ts src/main/services/workbench/knowledge-runtime.test.ts src/main/services/workbench/knowledge-runtime.ts src/main/services/workbench/sdk.test.ts src/main/services/workbench/web-runtime.test.ts src/main/services/workbench/web-runtime.ts src/main/services/workbench/workbench-service.test.ts src/main/services/workbench/workbench-service.ts src/main/window/foreground.test.ts src/preload/bridge.test.ts src/renderer/src/features/input/Composer.tsx src/renderer/src/features/input/file-references.test.tsx src/renderer/src/features/input/reference-text.test.tsx src/renderer/src/features/input/useSuggestions.test.tsx src/renderer/src/features/navigation/Navigation.tsx src/renderer/src/features/project-view/OverviewSessions.tsx src/renderer/src/features/project-view/Preview.tsx src/renderer/src/features/project-view/preview-boundary.test.tsx src/renderer/src/features/project-view/project-view.test.tsx src/renderer/src/features/project/Workspace.tsx src/renderer/src/features/project/shell.test.tsx src/renderer/src/features/session/markdown.test.tsx src/renderer/src/features/session/session.test.tsx src/renderer/src/features/workbench/WebWorkbenchPreview.tsx src/renderer/src/features/workbench/WorkbenchConversation.tsx src/renderer/src/features/workbench/WorkbenchNavigation.tsx src/renderer/src/features/workbench/WorkbenchPreview.tsx src/renderer/src/features/workbench/actions.ts src/renderer/src/features/workbench/conversation.test.ts src/renderer/src/features/workbench/conversation.ts src/renderer/src/features/workbench/integration.tsx src/renderer/src/features/workbench/page-bridge.test.ts src/renderer/src/features/workbench/page-bridge.ts src/renderer/src/features/workbench/store.test.ts src/renderer/src/features/workbench/store.ts src/renderer/src/features/workbench/unified-workbench.test.tsx src/renderer/src/features/workbench/use-view-title.ts src/renderer/src/features/workbench/workbench.test.tsx src/renderer/src/main.tsx src/shared/ipc/contract.test.ts src/shared/ipc/contracts.ts src/shared/ipc/workbench.ts src/shared/project-view/schema.test.ts src/shared/project-view/types.ts src/shared/project/rules.test.ts src/shared/project/strings.test.ts src/shared/project/strings.ts src/shared/project/types.ts src/shared/project/ui-state.ts src/shared/session/presentation.test.ts src/shared/workbench/presets.ts src/shared/workbench/schema.test.ts src/shared/workbench/schema.ts src/shared/workbench/types.ts --run
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop
+
+
+ Test Files  58 passed (58)
+      Tests  615 passed (615)
+   Start at  12:47:00
+   Duration  8.94s (tests 48%, environment 32%, import 12%, transform 6%, worker 1%)
+
+Environment  |renderer| jsdom was created 22 times · 19.98s total, 42% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+> pnpm --filter @ai-studio/desktop run build
+$ electron-vite build
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 140 modules transformed.
+rendering chunks...
+out/main/directory-reader-worker.js    4.50 kB
+out/main/index.js                    505.68 kB
+✓ built in 421ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 15 modules transformed.
+rendering chunks...
+out/preload/index.js  10.99 kB
+✓ built in 16ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 1490 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                                                0.95 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-CvHOgSBP.woff      13.14 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-CB9ihrfo.woff      13.16 kB
+../../out/renderer/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2     14.71 kB
+../../out/renderer/assets/ibm-plex-mono-latin-500-normal-DSY6xOcd.woff2     14.89 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CYLoc0-x.woff      22.10 kB
+../../out/renderer/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2     22.59 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-Cu4Hd6ag.woff      23.88 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-BgVn5rGT.woff      23.92 kB
+../../out/renderer/assets/ibm-plex-sans-latin-500-normal-6ng42L7E.woff2     24.18 kB
+../../out/renderer/assets/ibm-plex-sans-latin-600-normal-CuJfVYMP.woff2     24.25 kB
+../../out/renderer/assets/codicon-DF1abBS2.ttf                             153.23 kB
+../../out/renderer/assets/code-C0VoY9X6.css                                  1.12 kB
+../../out/renderer/assets/TerminalScreen-GVL3fBIr.css                        7.11 kB
+../../out/renderer/assets/index-CS1OYajC.css                               138.88 kB
+../../out/renderer/assets/monaco-runtime-CPVWXZLM.css                      167.09 kB
+../../out/renderer/assets/register-EiBpYB2P.js                               0.41 kB
+../../out/renderer/assets/register-C-BPmx6g.js                               0.42 kB
+../../out/renderer/assets/register-DrnJLC8h.js                               0.42 kB
+../../out/renderer/assets/register-A2lb3pbC.js                               0.43 kB
+../../out/renderer/assets/register-DqYChnQn.js                               0.43 kB
+../../out/renderer/assets/register-DcFKb_tf.js                               0.43 kB
+../../out/renderer/assets/register-CJOEuA3l.js                               0.43 kB
+../../out/renderer/assets/register-Dzbu-2ED.js                               0.44 kB
+../../out/renderer/assets/register-DwboZNjv.js                               0.44 kB
+../../out/renderer/assets/register-BRwaBQjl.js                               0.44 kB
+../../out/renderer/assets/register-XOJHek0V.js                               0.44 kB
+../../out/renderer/assets/register-CiYGqT3m.js                               0.45 kB
+../../out/renderer/assets/register-PJ18OEqf.js                               0.45 kB
+../../out/renderer/assets/register-DSIi0oOL.js                               0.45 kB
+../../out/renderer/assets/register-CJaJp5eM.js                               0.45 kB
+../../out/renderer/assets/register-yGCl8O55.js                               0.45 kB
+../../out/renderer/assets/register-C1bWr2RX.js                               0.45 kB
+../../out/renderer/assets/register-DooNqLJG.js                               0.46 kB
+../../out/renderer/assets/register-c3BqyGSd.js                               0.46 kB
+../../out/renderer/assets/register-C7dcl_lP.js                               0.46 kB
+../../out/renderer/assets/register-CRMpjl5r.js                               0.46 kB
+../../out/renderer/assets/register-u_2yNM-C.js                               0.47 kB
+../../out/renderer/assets/register-DD_Ssbbj.js                               0.47 kB
+../../out/renderer/assets/register-DlmAYlyV.js                               0.47 kB
+../../out/renderer/assets/register-BSUeZdPa.js                               0.48 kB
+../../out/renderer/assets/register-CVsSbXkt.js                               0.48 kB
+../../out/renderer/assets/register-CtLGNJOt.js                               0.48 kB
+../../out/renderer/assets/register-BVM6Kq8C.js                               0.48 kB
+../../out/renderer/assets/register-BbA8H9R8.js                               0.49 kB
+../../out/renderer/assets/register-B7U3--90.js                               0.50 kB
+../../out/renderer/assets/register-CINbc_Ee.js                               0.50 kB
+../../out/renderer/assets/register-WrXGH5Ym.js                               0.50 kB
+../../out/renderer/assets/register-BDxh2WDk.js                               0.50 kB
+../../out/renderer/assets/register-CGK9yA68.js                               0.51 kB
+../../out/renderer/assets/register-CcwmFFiZ.js                               0.53 kB
+../../out/renderer/assets/register-Ct_U7V9k.js                               0.53 kB
+../../out/renderer/assets/register-BQg-P-l1.js                               0.57 kB
+../../out/renderer/assets/register-UUcw8ufj.js                               0.66 kB
+../../out/renderer/assets/register-BWm2Rp4r.js                               0.73 kB
+../../out/renderer/assets/register-Br26R8-1.js                               0.81 kB
+../../out/renderer/assets/register-BTE7khNE.js                               0.83 kB
+../../out/renderer/assets/register-BrXIf_GR.js                               0.84 kB
+../../out/renderer/assets/register-DWTdLDVi.js                               0.85 kB
+../../out/renderer/assets/register-D5W34RAv.js                               0.91 kB
+../../out/renderer/assets/register-CciPVdTo.js                               0.93 kB
+../../out/renderer/assets/register-Dd-Hylju.js                               1.11 kB
+../../out/renderer/assets/terminal-font-BrrJ_5zI.js                          1.40 kB
+../../out/renderer/assets/javascript-DflN7cFB.js                             1.41 kB
+../../out/renderer/assets/_.contribution-B3pFY9D8.js                         1.52 kB
+../../out/renderer/assets/ini-BcQysCTb.js                                    1.67 kB
+../../out/renderer/assets/bat-Bqkp9Cfu.js                                    2.66 kB
+../../out/renderer/assets/xml-DuuSbBS_.js                                    2.86 kB
+../../out/renderer/assets/dockerfile--oxj0cAH.js                             3.02 kB
+../../out/renderer/assets/lua-hNsuGJkO.js                                    3.43 kB
+../../out/renderer/assets/objective-c-B1L1C5EC.js                            3.48 kB
+../../out/renderer/assets/graphql-BeiGgjIU.js                                3.77 kB
+../../out/renderer/assets/shell-vZEubQ82.js                                  4.48 kB
+../../out/renderer/assets/go-brnMpFrj.js                                     4.49 kB
+../../out/renderer/assets/r-CtqYUQ6l.js                                      4.80 kB
+../../out/renderer/assets/less-B7Qaxw-O.js                                   5.00 kB
+../../out/renderer/assets/tcl-Bb4GCwBr.js                                    5.05 kB
+../../out/renderer/assets/java-Dt3iMn2o.js                                   5.16 kB
+../../out/renderer/assets/kotlin-Ddo1SjA5.js                                 5.20 kB
+../../out/renderer/assets/hcl-CrX1Es2W.js                                    5.21 kB
+../../out/renderer/assets/restructuredtext-B-KQCVu_.js                       5.33 kB
+../../out/renderer/assets/powershell-BXiKvz7Z.js                             5.39 kB
+../../out/renderer/assets/coffee-CzJ5oEdj.js                                 5.51 kB
+../../out/renderer/assets/mdx-0o0vngCK.js                                    5.87 kB
+../../out/renderer/assets/yaml-Darze0pk.js                                   5.92 kB
+../../out/renderer/assets/css-i3rI3_64.js                                    6.10 kB
+../../out/renderer/assets/CodeViewer-s_NBwvJw.js                             6.18 kB
+../../out/renderer/assets/rust-B1c0VCeq.js                                   6.27 kB
+../../out/renderer/assets/dart-vLMHv35g.js                                   6.48 kB
+../../out/renderer/assets/python-BSzzgkwJ.js                                 6.54 kB
+../../out/renderer/assets/markdown-B0YTnTxW.js                               6.65 kB
+../../out/renderer/assets/swift-CbF6f74o.js                                  6.92 kB
+../../out/renderer/assets/csharp-BJeIuvde.js                                 6.98 kB
+../../out/renderer/assets/CodeDiffViewer-ZOCiplfx.js                         7.01 kB
+../../out/renderer/assets/html-oYFuZME-.js                                   7.66 kB
+../../out/renderer/assets/typescript-D7m2waGf.js                             7.95 kB
+../../out/renderer/assets/cpp-CcN6f0ik.js                                    8.22 kB
+../../out/renderer/assets/pug-BxCXwerb.js                                    8.26 kB
+../../out/renderer/assets/vb-Bm6ESA0Q.js                                     8.33 kB
+../../out/renderer/assets/scss-B42qMyAu.js                                   9.07 kB
+../../out/renderer/assets/twig-DvgEGWAV.js                                  10.26 kB
+../../out/renderer/assets/handlebars-DLzhTpvM.js                            10.44 kB
+../../out/renderer/assets/julia-Cm3ItYL_.js                                 10.54 kB
+../../out/renderer/assets/scala-DbVzH-3O.js                                 10.70 kB
+../../out/renderer/assets/php-Bkx1qpkQ.js                                   12.48 kB
+../../out/renderer/assets/protobuf-CndvAUGu.js                              12.68 kB
+../../out/renderer/assets/perl-DC0Z0tlO.js                                  12.82 kB
+../../out/renderer/assets/clojure-fcgFaMHx.js                               13.94 kB
+../../out/renderer/assets/ruby-DCd4DmAr.js                                  15.31 kB
+../../out/renderer/assets/sql-BAGepFCR.js                                   15.56 kB
+../../out/renderer/assets/code-e8IUPx1h.js                                  16.18 kB
+../../out/renderer/assets/elixir-eLfY1jWH.js                                18.74 kB
+../../out/renderer/assets/solidity-yHOxYChb.js                              26.03 kB
+../../out/renderer/assets/TerminalScreen-B-8nbnhf.js                       488.41 kB
+../../out/renderer/assets/index-Bp1aW2hF.js                              1,880.80 kB
+../../out/renderer/assets/monaco-runtime-DU9I4tVz.js                     5,791.05 kB
+✓ built in 7.18s
+> pnpm --filter @ai-studio/desktop run test:e2e:built e2e/alignment.spec.ts e2e/app.spec.ts e2e/cli-default.spec.ts e2e/composer.spec.ts e2e/files.spec.ts e2e/project-view.spec.ts e2e/project.spec.ts e2e/session.spec.ts e2e/workbench.spec.ts
+$ playwright test e2e/alignment.spec.ts e2e/app.spec.ts e2e/cli-default.spec.ts e2e/composer.spec.ts e2e/files.spec.ts e2e/project-view.spec.ts e2e/project.spec.ts e2e/session.spec.ts e2e/workbench.spec.ts
+
+Running 46 tests using 1 worker
+
+(node:39237) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/alignment.spec.ts:139:5 › glass appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (7.8s)
+  ✓   2 e2e/alignment.spec.ts:171:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (6.3s)
+  ✓   3 e2e/alignment.spec.ts:186:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (4.4s)
+  ✓   4 e2e/alignment.spec.ts:199:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (6.5s)
+  ✓   5 e2e/alignment.spec.ts:139:5 › solid appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (2.4s)
+  ✓   6 e2e/alignment.spec.ts:171:5 › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (3.7s)
+  ✓   7 e2e/alignment.spec.ts:186:5 › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (2.2s)
+  ✓   8 e2e/alignment.spec.ts:199:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.8s)
+  ✓   9 e2e/alignment.spec.ts:210:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (5.7s)
+  ✓  10 e2e/alignment.spec.ts:228:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (4.8s)
+  ✓  11 e2e/alignment.spec.ts:239:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (6.9s)
+  ✓  12 e2e/app.spec.ts:34:5 › opens one window with the shell spec sizes (110ms)
+  ✓  13 e2e/app.spec.ts:63:5 › renders from app://studio with a draggable 40px top bar (36ms)
+  ✘  14 e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer (3ms)
+(node:40983) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  15 e2e/app.spec.ts:124:5 › typed preload API works and main validates input (56ms)
+  ✓  16 e2e/app.spec.ts:145:5 › new windows and foreign navigation are denied (515ms)
+  ✓  17 e2e/app.spec.ts:157:5 › smoke mode: SQLite, node-pty and login env work in the Electron main process (3.3s)
+  ✓  18 e2e/cli-default.spec.ts:23:5 › available CLI works in a second Project without selection; global preference survives restart (1.9s)
+  ✓  19 e2e/cli-default.spec.ts:42:5 › unavailable CLI links directly to settings; recheck restores sending without clearing draft (1.0s)
+  ✓  20 e2e/cli-default.spec.ts:63:5 › enabled CLI are shared across Projects and restart; disabled entries disappear only from new-chat selectors (1.9s)
+  ✓  21 e2e/cli-default.spec.ts:99:5 › CLI header action stays fixed with a long list in both themes and colour modes (2.7s)
+  ✓  22 e2e/composer.spec.ts:52:5 › five static effort bars; max / ultra ignite only on selection, across four appearances and reduced motion (18.7s)
+  ✓  23 e2e/composer.spec.ts:110:5 › effort precedes model, keeps menu columns aligned, and uses a quiet Max palette (2.3s)
+  ✓  24 e2e/composer.spec.ts:147:5 › Ultra uses a static gradient that follows the theme palette without replaying selection feedback (4.0s)
+  ✓  25 e2e/composer.spec.ts:194:5 › v06 real file candidates, deleted-file recovery, slash boundary and Add grouping (2.5s)
+  ✓  26 e2e/files.spec.ts:45:5 › FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, special names and failure states (5.1s)
+  ✓  27 e2e/files.spec.ts:130:5 › FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through the simulated Provider, keep input on failure (5.4s)
+  ✘  28 e2e/project-view.spec.ts:21:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (6.7s)
+(node:43257) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  29 e2e/project-view.spec.ts:63:5 › removed View label sends without creating helpers, and each View has an independent draft (2.0s)
+  ✓  30 e2e/project.spec.ts:54:5 › FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, tools, layouts and relaunch (8.8s)
+  ✓  31 e2e/project.spec.ts:122:5 › FR-PROJ-001: symlink/equivalent path identity, errors and recent removal (929ms)
+  ✓  32 e2e/project.spec.ts:141:5 › PROJ-Q7/Q17: native menu commands and macOS window close retain Workspace (746ms)
+  ✘  33 e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion (5.5s)
+(node:44091) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  34 e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser (5.5s)
+(node:44271) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  35 e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session (5.5s)
+(node:44439) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  36 e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest (5.6s)
+(node:44587) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  37 e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text (5.6s)
+(node:44788) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  38 e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch (5.6s)
+(node:44913) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  39 e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID (5.5s)
+(node:45080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  40 e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message (5.6s)
+(node:45256) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  41 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen (5.5s)
+(node:45368) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  42 e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen (5.8s)
+(node:45508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  43 e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest (5.5s)
+(node:45680) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  44 e2e/workbench.spec.ts:32:5 › AC-WB mechanism: template, state, navigation, disable/reopen and restart (3.3s)
+  ✘  45 e2e/workbench.spec.ts:74:5 › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance (31.5s)
+(node:46648) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  46 e2e/workbench.spec.ts:111:5 › AC-WB mechanism: refuses to apply files changed after the displayed preview (1.8s)
+
+
+  1) e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer ────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 0
+
+    @@ -16,11 +16,10 @@
+        "require": "undefined",
+        "studioKeys": Array [
+          "app",
+          "project",
+          "session",
+    -     "projectView",
+          "settings",
+          "browser",
+          "terminal",
+          "files",
+          "diff",
+
+      107 |     }
+      108 |   })
+    > 109 |   expect(probe).toEqual({
+          |                 ^
+      110 |     inlineScriptRan: false,
+      111 |     blockedDirective: 'script-src-elem',
+      112 |     require: 'undefined',
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/app.spec.ts:109:17
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/app-renderer-has-no-Node-js-require-or-raw-ipcRenderer/error-context.md
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/app-renderer-has-no-Node-js-require-or-raw-ipcRenderer/error-context.md
+
+  2) e2e/project-view.spec.ts:21:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  locator('.project-workspace:not([hidden])').locator('.transcript-user summary')
+    Expected: "当前工作台"
+    Received: "当前 View"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" locator('.project-workspace:not([hidden])').locator('.transcript-user summary') with timeout 5000ms
+      - waiting for locator('.project-workspace:not([hidden])').locator('.transcript-user summary')
+        14 × locator resolved to <summary>当前 View</summary>
+           - unexpected value "当前 View"
+
+
+      29 |   await expect(workspace().getByRole('region', { name: '工作台对话', exact: true })).toBeVisible()
+      30 |   await expect(workspace().locator('.transcript-user')).toContainText('重新整理支付模块架构。')
+    > 31 |   await expect(workspace().locator('.transcript-user summary')).toHaveText('当前工作台')
+         |                                                                 ^
+      32 |   await expect(workspace().locator('[data-session-row]')).toHaveCount(1)
+      33 |   expect(readFileSync(join(projectPath, '.ai-studio/.gitignore'), 'utf8')).toBe('*\n')
+      34 |   await workspace().getByRole('button', { name: '放大 Preview' }).click()
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/project-view.spec.ts:31:65
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/project-view-AC-06-ordinar-9ce7f-ity-history-context-restart/error-context.md
+
+  3) e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-02-FR-CHAT-001--fa569-ive-tool-row-and-completion/error-context.md
+
+  4) e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-02-FR-SESSION-0-ee1ce-pened-in-the-system-browser/error-context.md
+
+  5) e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-03-FR-SESSION-0-70b62--only-the-displayed-Session/error-context.md
+
+  6) e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-04-FR-STATE-004-e0208-s-it-and-reveals-the-latest/error-context.md
+
+  7) e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-AC-05-FR-STATE-002-01951-e-approval-or-composer-text/error-context.md
+
+  8) e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-SESSION-002-FR--9b7dc-sent-input-survive-relaunch/error-context.md
+
+  9) e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-STATE-003-005-S-ac86c--resumes-the-same-native-ID/error-context.md
+
+  10) e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-STATE-002-I-Q2--90847--and-remains-a-user-message/error-context.md
+
+  11) e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-PROJ-002-FR-SES-68f88-tive-conversation-on-reopen/error-context.md
+
+  12) e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-PROJ-002-FR-SES-2447f-tive-conversation-on-reopen/error-context.md
+
+  13) e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      28 |     const win = BrowserWindow.getAllWindows()[0]!
+      29 |     return (process.platform !== 'darwin' || app.isActive()) && win.isFocused() && win.isVisible() && !win.isMinimized()
+    > 30 |   })).toBe(true)
+         |       ^
+      31 |   if (process.platform === 'darwin') {
+      32 |     const pid = await app.evaluate(() => process.pid)
+      33 |     await expect.poll(() => Number(execFileSync('osascript', ['-l', 'JavaScript', '-e', "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)"], { encoding: 'utf8' }).trim())).toBe(pid)
+        at focusWindow (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:30:7)
+        at launch (/Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:40:3)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/session.spec.ts:61:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/session-FR-SESSION-001-ope-fa8a3-g-until-returning-to-latest/error-context.md
+
+  14) e2e/workbench.spec.ts:74:5 › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.project-workspace:not([hidden])').locator('.workbench-drafts summary')
+
+
+      102 |   await expect(plugin().getByRole('heading', { name: '我的项目笔记', exact: true })).toHaveCount(0)
+      103 |   await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')
+    > 104 |   await workspace().locator('.workbench-drafts summary').click()
+          |                                                          ^
+      105 |   await workspace().locator('.workbench-drafts button').last().click()
+      106 |   await workspace().getByRole('button', { name: '应用更改', exact: true }).click()
+      107 |   await expect(plugin().getByRole('heading', { name: '我的项目笔记', exact: true })).toBeVisible()
+        at /Users/zhixing/Projects/AI Stduio.worktrees/unified-workbench/apps/desktop/e2e/workbench.spec.ts:104:58
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/workbench-AC-WB-mechanism--0f97a-s-and-applying-one-instance/error-context.md
+
+  14 failed
+    e2e/app.spec.ts:83:5 › renderer has no Node.js, require or raw ipcRenderer ─────────────────────
+    e2e/project-view.spec.ts:21:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart
+    e2e/session.spec.ts:70:5 › AC-02 / FR-CHAT-001 / FR-SESSION-001: draft first, then streamed Session from the top, native tool row and completion
+    e2e/session.spec.ts:90:5 › AC-02 / FR-SESSION-001 · Shell Spec v02 §6: Markdown reply, code copy and links opened in the system browser
+    e2e/session.spec.ts:125:5 › AC-03 / FR-SESSION-003 / FR-INPUT-001: Codex and Claude run independently; Stop affects only the displayed Session
+    e2e/session.spec.ts:139:5 › AC-04 / FR-STATE-004/005: background completion shows a green dot; opening clears it and reveals the latest
+    e2e/session.spec.ts:153:5 › AC-05 / FR-STATE-002 / I-Q2: Needs Input survives viewing and resolves through native approval or composer text
+    e2e/session.spec.ts:175:5 › FR-SESSION-002 / FR-INPUT-002 / FR-NAV-003: Rename, next-turn model and unsent input survive relaunch
+    e2e/session.spec.ts:201:5 › FR-STATE-003/005 / S-Q1/S-Q2: completion during blur stays unread on focus; opening clears it and retry resumes the same native ID
+    e2e/session.spec.ts:219:5 › FR-STATE-002 / I-Q2: composer text declines every outstanding approval and remains a user message
+    e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing an idle Project preserves the native conversation on reopen
+    e2e/session.spec.ts:231:7 › FR-PROJ-002 / FR-SESSION-002: closing a Running Project preserves the native conversation on reopen
+    e2e/session.spec.ts:265:5 › FR-SESSION-001: opening starts at the bottom; scrolling up pauses following until returning to latest
+    e2e/workbench.spec.ts:74:5 › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance
+  32 passed (3.7m)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/unified-workbench/apps/desktop
