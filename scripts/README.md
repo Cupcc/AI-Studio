@@ -13,7 +13,7 @@
 | `pnpm build` | 构建所有 workspace 包 |
 | `pnpm typecheck` | 检查所有 workspace 包的类型 |
 | `pnpm test` | 运行脚本测试与各包单元测试，不调用真实 CLI 或模型 |
-| `pnpm test:scripts` | 仅测试文档检查、Agent 文档 Hook 与工作流范围选择 |
+| `pnpm test:scripts` | 测试文档检查、Agent 文档 Hook、范围选择与任务分支集成 |
 | `pnpm check:docs` | 相对 HEAD 检查本地 Markdown 链接回归，见[检查边界](#文档检查边界) |
 | `pnpm check:code` | 构建 Adapter，并执行所有包类型检查和全部脚本、单元测试 |
 | `pnpm check:commit` | 检查暂存文档及受影响模块；未知范围阻断，pre-commit 使用同一入口 |
@@ -23,6 +23,19 @@
 | `pnpm smoke:packaged` | 启动打包应用并检查原生依赖 |
 
 桌面命令选项、输出和运行约定见[桌面开发说明](../apps/desktop/README.md#1-命令)。真实 CLI 预检会发送模型请求，见[开发前 CLI 校验](#开发前-cli-校验)，不属于应用测试。当前未配置源码 formatter、linter 或覆盖率阈值。
+
+## 任务分支集成
+
+分支流程由[贡献指南 §5](../CONTRIBUTING.md#5-合并与收尾)负责。源 worktree 提交完成后，在主目录 dev 执行：
+
+```sh
+node scripts/integrate-branch.mjs feat/example
+git push origin dev
+```
+
+命令检查主目录在 dev、源分支有独立 worktree、两边均无暂存或未暂存改动及未跟踪文件、源提交包含当前 dev 且有新增提交，再以 `--ff-only` 合入核对的源 SHA。失败返回非零状态，不修改源 worktree。命令不自动提交、暂存、复制、rebase 或推送；分支落后时先回源 worktree 同步并解决冲突。忽略的构建产物和依赖不计入工作区脏状态。
+
+脚本回归使用临时 Git 仓库，覆盖未提交文件拒绝、无新增提交拒绝、分叉拒绝和正常快进。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
 
 ## 测试分层
 

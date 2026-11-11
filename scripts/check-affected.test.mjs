@@ -192,3 +192,13 @@ test('classifies removed templates only when their owning replacement exists', (
     expect(affectedPlan([old], [...available, old, next]).unknown).toEqual([old])
   }
 })
+
+test('integration command and its tests run script checks without application suites', () => {
+  for (const file of ['scripts/integrate-branch.mjs', 'scripts/integrate-branch.test.mjs']) {
+    const result = plan([file])
+    expect(result.unknown).toEqual([])
+    expect(commandText(result)).toContain('scripts/check-workflow.test.mjs')
+    expect(commandText(result)).not.toContain('@ai-studio/desktop')
+    expect(result.e2e).toEqual([])
+  }
+})

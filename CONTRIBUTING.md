@@ -26,7 +26,7 @@
 | 任务分支 | 功能开发、修复或需要隔离的工作 | 从最新 dev 创建独立 worktree；使用英文小写与连字符，例如 `feat/project-view`、`fix/workbench-order` |
 | `<任务分支>-<worker>` | 已安排的并行 worker | 独立 worktree，写入范围与集成方式遵循 Task Protocol |
 
-用户在主目录运行 `pnpm dev` 体验集成版本。AI 在任务 worktree 实现和自检，处理冲突并提交到 dev；人工体验发现的问题通过任务或修复分支继续集成。小改动可直接提交 dev，仍须检查 diff 并通过适用门禁。main 不接收待验收的日常改动。流程来源与本轮迁移状态见 [dev 集成任务](.agents/archive/tasks/T20261111-dev-integration/task.md)。
+用户在主目录运行 `pnpm dev` 体验集成版本。AI 在任务 worktree 实现、自检并提交到任务分支，再按第 5 节处理冲突并合入 dev；人工体验发现的问题通过任务或修复分支继续集成。小改动可直接提交 dev，仍须检查 diff 并通过适用门禁。main 不接收待验收的日常改动。流程来源与本轮迁移状态见 [dev 集成任务](.agents/archive/tasks/T20261111-dev-integration/task.md)。
 
 主 checkout（仓库主目录）常驻 dev，不切换到任务分支或 main。多个 AI 会话共用 checkout 时共享 HEAD、文件和暂存区，不能同时暂存或提交；集成由单一写者串行执行。
 
@@ -84,16 +84,27 @@ PR 可选：需要集中查看较大 diff、邀请他人审阅或协作时使用
 
 ### 集成到 dev
 
-1. 在主 checkout 同步 dev，再在任务 worktree 执行 `git rebase dev`。
-2. 将同一目标的过程提交整理成有意义的提交，不同目标拆分。检查最终 diff，完成必要验证；冲突处理改变内容时重新验证受影响部分。
-3. 回到主 checkout，用 `--ff-only` 合入并普通推送。快进失败时重新同步任务分支，不改用普通 merge。
+集成来源必须是任务分支上的提交。不得把未提交 worktree 的文件、补丁或目录复制到 dev 后代为提交。源 worktree 有改动时先回到该目录提交，不能只检查分支 HEAD 就认定源码已交付。
+
+1. 在任务 worktree 检查全部改动，将本轮交付提交到自己的任务分支。提交须通过现有门禁；记录提交 SHA，并确认暂存区、工作区及未跟踪文件均已处理。
+2. 在干净的主 checkout 同步 dev，再回到干净的任务 worktree 执行 `git rebase dev`。冲突只在任务 worktree 解决，完成 `git rebase --continue`，不把冲突处理留成未提交文件。整理同一目标的过程提交，按变化复验受影响部分。
+3. 核对源 worktree 干净并记录最终 SHA。回到干净的主 checkout，通过[集成命令](scripts/README.md#任务分支集成)快进合入该提交，再普通推送 dev。命令失败时修复提示的问题，不改用文件复制、自动 stash 或普通 merge。
+4. 记录源分支、最终源提交、dev 提交及两边工作区状态，提供主目录的测试入口。只在用户接受对应版本后推进 main，不能把提交完成写成人工验收通过。
 
 ```sh
-git merge --ff-only feat/example   # 在主 checkout（dev）执行
+# 在任务 worktree 完成提交后执行。
+git rebase dev
+git status --short
+git log -1 --oneline
+
+# 在主 checkout（dev）执行。
+node scripts/integrate-branch.mjs feat/example
 git push origin dev
 ```
 
-若选择 PR，功能 PR 使用 **Squash and merge** 到 dev，禁止 **Create a merge commit**。主 checkout 随后用 `git pull --ff-only origin dev` 同步。已经 squash 集成的任务分支不再复用，反馈修复从最新 dev 开始。
+集成命令要求 dev 与源 worktree 均干净、源分支有新提交且包含当前 dev。它合入固定的源提交，不会替源目录提交、复制文件、stash、rebase、推送或删除 worktree。
+
+若选择 PR，源分支同样先在自己的 worktree 完成提交并推送；功能 PR 使用 **Squash and merge** 到 dev，禁止 **Create a merge commit**。主 checkout 随后用 `git pull --ff-only origin dev` 同步。已经 squash 集成的任务分支不再复用，反馈修复从最新 dev 开始。
 
 ### 将验收版本推进到 main
 
@@ -111,7 +122,7 @@ git push origin main
 
 ### 清理
 
-对应交付进入 main 后，核对任务 worktree 没有未提交改动且无人使用，再删除 worktree 与已合入分支；不使用 `--force`。dev 长期保留，继续承接下一轮功能。任务文档与历史证据按 Task Protocol 保留。
+对应交付进入 main 后，核对任务 worktree 没有未提交改动且无人使用，再删除 worktree 与已合入分支。默认不使用 `--force`；用户明确要求删除旧脏 worktree 时，只按授权的目录和范围处理，不把该授权沿用到后续任务。dev 长期保留，继续承接下一轮功能。任务文档与历史证据按 Task Protocol 保留。
 
 既有 main 的 merge commit 保留。整理旧历史须另建任务，列出保留内容、备份与协作影响，并取得人工明确授权。
 

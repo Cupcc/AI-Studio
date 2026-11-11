@@ -106,6 +106,7 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 - Workers that change code concurrently each work in their own worktree, as defined in [CONTRIBUTING.md](../CONTRIBUTING.md) section 2.
 - Workers write only inside their scope and never edit `task.md` or `plan.md`.
 - A worker ends with a report to the main agent in this order: done; outputs (file paths); findings and pitfalls; not done; decisions needed from a human.
+- Code handoff follows [the committed-branch integration workflow](../CONTRIBUTING.md#集成到-dev). Include the final commit SHA and source worktree status in the report; a file path alone is not a code handoff.
 - The main agent appends to the `plan.md` progress log at each milestone. Anything of lasting value also goes into `acceptance.md`, `report.md`, a spec, a decision, or a numbered doc.
 
 ## Recovery
