@@ -72,6 +72,11 @@ test('actual desktop dependency graph keeps leaf changes focused and IPC consume
         ctx.config.related = seeds.map(file => resolve(root, file))
         selected[name] = (await ctx.getRelevantTestSpecifications()).map(spec => spec.moduleId.slice(root.length + 1)).sort()
       }
+      const scripts = await createVitest({ root: process.cwd(), config: resolve('scripts/vitest.config.mjs'),
+        watch: false, run: true, related: ['scripts/integrate-branch.mjs'] })
+      try {
+        selected.integration = (await scripts.getRelevantTestSpecifications()).map(spec => spec.moduleId.slice(process.cwd().length + 1)).sort()
+      } finally { await scripts.close() }
       console.log('SELECTED:' + JSON.stringify(selected))
     } finally { await ctx.close() }
   `], { cwd: root, encoding: 'utf8', timeout: 20000 })
@@ -85,6 +90,7 @@ test('actual desktop dependency graph keeps leaf changes focused and IPC consume
   ])
   expect(selected.input).toContain('src/renderer/src/features/input/file-references.test.tsx')
   expect(selected.testOnly).toEqual([paths.testOnly])
+  expect(selected.integration).toEqual(['scripts/integrate-branch.test.mjs'])
   expect(selected.ipc).toEqual(expect.arrayContaining([
     'src/main/services/workbench/ipc.test.ts',
     'src/renderer/src/features/workbench/workbench.test.tsx',
