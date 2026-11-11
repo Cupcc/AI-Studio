@@ -7,8 +7,8 @@ const desktop = 'apps/desktop/'
 const adapter = 'packages/agent-adapter/'
 const unit = /\.test\.[cm]?[jt]sx?$/
 
-// IPC and lazy imports are not captured by Vitest's import graph. Keep module
-// tests and E2E consumers explicit; static imports add other dependents.
+// Ordinary source uses Vitest's import graph. These domains select E2E and
+// supply unit tests only where IPC, generated assets or deletion break that graph.
 const domains = {
   files: ['files', 'composer'], input: ['composer', 'files', 'cli-default'],
   session: ['session', 'composer', 'cli-default'], chat: ['composer', 'cli-default'],
@@ -95,29 +95,77 @@ function workbenchConfigPaths(files, { base = 'HEAD', head, cwd = process.cwd() 
   return accepted
 }
 
+export function buildConfigChange(before, after) {
+  const stripPackage = text => text
+    .replace(/^import \{ buildWorkbenchPackages \} from '\.\/scripts\/build-workbench-packages\.mjs'\r?\n/m, '')
+    .replace(/^buildWorkbenchPackages\(\)\r?\n/m, '')
+  if (before !== after && stripPackage(before) === stripPackage(after)) return 'workbench-package'
+  // Only the two existing CSP arrays may change. Build entries, plugins and
+  // other configuration require a new reviewed mapping rather than broad tests.
+  const stripCsp = text => text.replace(/^export const CSP_(PRODUCTION|DEVELOPMENT) = \[\n[\s\S]*?^\]\.join\('; '\)/gm, 'CSP_$1')
+  if (before !== after && stripCsp(before) === stripCsp(after)) return 'csp'
+  return null
+}
+
+function configChange(file, comparison) {
+  const { base = 'HEAD', head, cwd = process.cwd() } = comparison
+  try {
+    return buildConfigChange(git(['show', `${base}:${file}`], cwd),
+      head ? git(['show', `${head}:${file}`], cwd) : readFileSync(`${cwd}/${file}`, 'utf8'))
+  } catch { return null }
+}
+
 export function affectedPlan(files, available, comparison = {}) {
   const connectionDependencies = connectionDependencyPaths(files, comparison)
   const workbenchConfigs = workbenchConfigPaths(files, comparison)
   const seeds = { scripts: new Set(), desktop: new Set(), adapter: new Set() }
   const types = new Set()
   const e2e = new Set()
+  const fullE2e = new Set()
+  const e2eFilters = {}
   const unknown = []
+  const missingTests = []
   const tests = available.filter(file => unit.test(file) && !file.includes('.integration.test.'))
   const addTests = (group, predicate) => {
-    for (const file of tests.filter(predicate)) seeds[group].add(file)
+    const selected = tests.filter(predicate)
+    for (const file of selected) seeds[group].add(file)
+    return selected.length
   }
-  const addDomain = name => {
-    for (const spec of domains[name]) e2e.add(`e2e/${spec}.spec.ts`)
-    addTests('desktop', file => file.startsWith(desktop) && domainFor(file.slice(desktop.length)) === name)
+  const addDomainE2e = name => {
+    for (const spec of domains[name]) {
+      e2e.add(`e2e/${spec}.spec.ts`)
+      fullE2e.add(`e2e/${spec}.spec.ts`)
+    }
+  }
+  const addDomainTests = name => {
+    let count = addTests('desktop', file => file.startsWith(desktop) && domainFor(file.slice(desktop.length)) === name)
     if (name === 'workbench') {
-      addTests('desktop', file => file.startsWith(desktop) && domainFor(file.slice(desktop.length)) === 'project-view')
+      count += addTests('desktop', file => file.startsWith(desktop) && domainFor(file.slice(desktop.length)) === 'project-view')
     }
     if (['files', 'input', 'chat'].includes(name)) {
-      addTests('desktop', file => file.startsWith(`${desktop}src/renderer/src/features/input/`))
+      count += addTests('desktop', file => file.startsWith(`${desktop}src/renderer/src/features/input/`))
     }
     if (['database', 'shell-env'].includes(name)) {
-      addTests('desktop', file => file.startsWith(`${desktop}src/main/services/session/`))
+      count += addTests('desktop', file => file.startsWith(`${desktop}src/main/services/session/`))
     }
+    return count
+  }
+  const addDomain = name => { addDomainE2e(name); addDomainTests(name) }
+  const requireTests = files => {
+    for (const relative of files) {
+      const file = `${desktop}${relative}`
+      if (available.includes(file)) seeds.desktop.add(file)
+      else missingTests.push(file)
+    }
+  }
+  const addPackageTests = () => {
+    // These tests read out/workbench-packages, not its build inputs.
+    requireTests([
+      'src/main/services/workbench/package-runtime.test.ts',
+      'src/main/services/workbench/workbench-service.test.ts',
+      'src/renderer/src/features/workbench/portable-pages.test.ts'
+    ])
+    addDomainE2e('workbench')
   }
   for (const file of [...new Set(files)].sort()) {
     const legacyTemplate = /^templates\/(acceptance|plan|report|spec|task)\.md$/.exec(file)
@@ -133,7 +181,15 @@ export function affectedPlan(files, available, comparison = {}) {
     }
     if (/^(?:scripts\/(?:check-[\w-]+(?:\.test)?|integrate-branch(?:\.test)?|vitest\.config)\.mjs|\.codex\/(?:hooks\.json|scripts\/agent-docs-hook(?:\.test)?\.mjs)|\.husky\/(?:pre-commit|commit-msg)|commitlint\.config\.cjs|\.github\/workflows\/ci\.yml)$/.test(file)) {
       seeds.scripts.add(file)
-      addTests('scripts', test => test.startsWith('scripts/') || test.startsWith('.codex/scripts/'))
+      if (file === '.codex/hooks.json') seeds.scripts.add('.codex/scripts/agent-docs-hook.test.mjs')
+      else if (/^(?:\.husky\/|commitlint\.|\.github\/)/.test(file)) {
+        seeds.scripts.add('scripts/check-workflow.test.mjs')
+        seeds.scripts.add('scripts/check-affected.test.mjs')
+      } else if (!available.includes(file) || file === 'scripts/vitest.config.mjs') {
+        addTests('scripts', test => test.startsWith('scripts/') || test.startsWith('.codex/scripts/'))
+      }
+      // The workflow tests execute these entry points in child processes.
+      if (/^scripts\/check-(?:commit|scope|affected|paths)\.mjs$/.test(file)) seeds.scripts.add('scripts/check-workflow.test.mjs')
       continue
     }
     if (file.startsWith(adapter) && /^(?:(?:src|test)\/.*\.(?:[cm]?ts|json)|tsconfig[^/]*\.json)$/.test(file.slice(adapter.length))) {
@@ -141,7 +197,9 @@ export function affectedPlan(files, available, comparison = {}) {
       if (available.includes(file) && !file.includes('.integration.test.')) seeds.adapter.add(file)
       if (unit.test(file) && available.includes(file)) continue
       const provider = /\/(codex|claude)\//.exec(file)?.[1]
-      addTests('adapter', test => test.startsWith(`${adapter}test/${provider ?? 'core'}/`))
+      if (!available.includes(file) || /tsconfig[^/]*\.json$/.test(file)) {
+        if (!addTests('adapter', test => test.startsWith(`${adapter}test/${provider ?? 'core'}/`))) unknown.push(file)
+      }
       // Desktop imports dist, so its graph cannot trace back into adapter/src.
       types.add('node'); types.add('web')
       addDomain('session')
@@ -149,47 +207,80 @@ export function affectedPlan(files, available, comparison = {}) {
       continue
     }
     if (file === `${desktop}electron.vite.config.ts`) {
+      const change = configChange(file, comparison)
+      if (!change) { unknown.push(file); continue }
       types.add('node'); types.add('web')
-      seeds.desktop.add(file)
-      addDomain('workbench')
-      addTests('desktop', test => /src\/main\/security\/.*\.test\.ts$/.test(test))
-      e2e.add('e2e/app.spec.ts'); e2e.add('e2e/runtime-tools.spec.ts')
+      if (change === 'workbench-package') addPackageTests()
+      else {
+        requireTests(['src/main/security/policy.test.ts', 'src/main/security/hardening.test.ts'])
+        addDomainE2e('workbench')
+        e2e.add('e2e/runtime-tools.spec.ts')
+        // CSP affects renderer Shell styles and web preview isolation, not quit cleanup.
+        e2eFilters['e2e/runtime-tools.spec.ts'] = 'FR-TOOL-003|FR-TOOL-004'
+      }
+      e2e.add('e2e/app.spec.ts')
       continue
     }
     if (file.startsWith(`${desktop}build/workbenches/`) || file.startsWith(`${desktop}build/workbench-common/`) ||
       /^apps\/desktop\/scripts\/build-workbench-packages\.(?:mjs|d\.mts)$/.test(file) ||
-      workbenchConfigs.has(file) || file === `${desktop}vitest.config.ts`) {
+      workbenchConfigs.has(file) || (file === `${desktop}vitest.config.ts` && configChange(file, comparison) === 'workbench-package')) {
       // Static webpage packages and their build/config inputs are consumed outside Vitest's import graph.
-      types.add('node'); types.add('web')
-      addDomain('workbench')
-      e2e.add('e2e/app.spec.ts'); e2e.add('e2e/alignment.spec.ts')
+      if (file.endsWith('.css')) addDomainE2e('workbench')
+      else {
+        types.add('node'); types.add('web')
+        addPackageTests()
+      }
       continue
     }
     if (file.startsWith(`${desktop}e2e/`)) {
       types.add('e2e')
-      if (file.endsWith('.spec.ts') && available.includes(file)) e2e.add(file.slice(desktop.length))
+      if (file.endsWith('.spec.ts') && available.includes(file)) {
+        e2e.add(file.slice(desktop.length))
+        fullE2e.add(file.slice(desktop.length))
+      }
       else if (!file.endsWith('.spec.ts')) unknown.push(file)
       continue
     }
     if (file.startsWith(`${desktop}src/`) && /\.(?:[cm]?[jt]sx?|css|html|json)$/.test(file)) {
       const relative = file.slice(desktop.length)
+      const domain = domainFor(relative)
+      if (relative.endsWith('.css') || relative.endsWith('.html')) {
+        if (domain) addDomainE2e(domain)
+        else if (/^src\/renderer\/(index\.html|src\/(app|styles|features\/tools)\/)/.test(relative)) {
+          e2e.add('e2e/app.spec.ts'); e2e.add('e2e/alignment.spec.ts')
+          if (relative.startsWith('src/renderer/src/features/tools/')) {
+            e2e.add('e2e/runtime-tools.spec.ts')
+            e2eFilters['e2e/runtime-tools.spec.ts'] = 'FR-TOOL-003|FR-TOOL-004'
+          }
+        } else unknown.push(file)
+        continue
+      }
       if (relative.startsWith('src/renderer/')) types.add('web')
       else if (relative.startsWith('src/shared/')) { types.add('node'); types.add('web') }
       else types.add('node')
-      if (available.includes(file) && /\.[cm]?[jt]sx?$/.test(file)) seeds.desktop.add(file)
+      if (available.includes(file) && /\.(?:[cm]?[jt]sx?|json)$/.test(file)) seeds.desktop.add(file)
       if (unit.test(file) && available.includes(file)) continue
-      const domain = domainFor(relative)
       if (domain) {
-        addDomain(domain)
-        if (relative.startsWith('src/shared/') || relative.startsWith('src/main/ipc/')) {
+        addDomainE2e(domain)
+        // Deleted paths cannot appear in the current import graph. IPC bridges
+        // use generated APIs and mocks, so explicitly cover both sides.
+        if (!available.includes(file) || /^src\/(shared\/ipc|main\/ipc)\//.test(relative) ||
+          /^src\/shared\/.*\/types\.ts$/.test(relative)) {
+          if (!addDomainTests(domain) && !available.includes(file)) unknown.push(file)
+        }
+        if (/^src\/(shared\/ipc|main\/ipc)\//.test(relative)) {
           addTests('desktop', test => /src\/(preload|shared\/ipc)\/.*\.test\.ts$/.test(test))
         }
       } else if (/^src\/(preload\/|shared\/ipc\/|main\/(ipc\/|index\.ts|security\/|window\/|launch-options|shutdown|menu\/)|renderer\/(index\.html|src\/(app\/|lib\/|styles\/|main\.tsx|env\.d\.ts|features\/tools\/[^/]+\.(?:ts|tsx|css)$)))/.test(relative)) {
         // Shared shell/bridge: smoke + layout, not every feature's E2E.
         e2e.add('e2e/app.spec.ts'); e2e.add('e2e/alignment.spec.ts')
-        addTests('desktop', test => /src\/(preload|shared\/ipc|main\/(ipc|security|window))\/.*\.test\.ts$/.test(test) || test.endsWith('/features/project/shell.test.tsx'))
+        if (!available.includes(file) || /^src\/(preload\/|shared\/ipc\/|main\/(ipc\/|index\.ts))/.test(relative)) {
+          const count = addTests('desktop', test => /src\/(preload|shared\/ipc|main\/(ipc|security|window))\/.*\.test\.ts$/.test(test) || test.endsWith('/features/project/shell.test.tsx'))
+          if (!count && !available.includes(file)) unknown.push(file)
+        }
         if (relative.startsWith('src/renderer/src/features/tools/')) {
           e2e.add('e2e/runtime-tools.spec.ts')
+          fullE2e.add('e2e/runtime-tools.spec.ts')
           addTests('desktop', test => test === `${desktop}src/renderer/src/features/tools/integration.test.ts`)
         }
       } else unknown.push(file)
@@ -201,9 +292,12 @@ export function affectedPlan(files, available, comparison = {}) {
   const add = (...args) => commands.push(args)
   const related = (group, prefix, pkg) => {
     const selected = [...seeds[group]].filter(file => available.includes(file)).sort()
-    if (!selected.length) return
+    if (!selected.length) {
+      unknown.push(...seeds[group])
+      return
+    }
     add(...(pkg ? ['--filter', pkg, 'exec'] : ['exec']), 'vitest', 'related',
-      ...selected.map(file => file.slice(prefix.length)), '--run',
+      ...selected.map(file => file.slice(prefix.length)), '--run', '--no-passWithNoTests',
       ...(group === 'scripts' ? ['--config', 'scripts/vitest.config.mjs'] : []))
   }
   related('scripts', '', null)
@@ -215,8 +309,11 @@ export function affectedPlan(files, available, comparison = {}) {
   related('adapter', adapter, '@ai-studio/agent-adapter')
   related('desktop', desktop, '@ai-studio/desktop')
   const selectedE2e = [...e2e].sort()
-  const missingTests = selectedE2e.filter(file => !available.includes(`${desktop}${file}`))
-  return { files, commands, e2e: selectedE2e, unknown, missingTests }
+  // Merge requirements, not path prefixes: test-only and unrelated module edits
+  // must not turn another change's focused scenarios into an entire E2E suite.
+  for (const file of fullE2e) delete e2eFilters[file]
+  missingTests.push(...selectedE2e.filter(file => !available.includes(`${desktop}${file}`)))
+  return { files, commands, e2e: selectedE2e, e2eFilters, unknown, missingTests: [...new Set(missingTests)] }
 }
 
 export function runPlan(plan, { ci = false, cwd = process.cwd(), run = spawnSync } = {}) {
@@ -226,13 +323,17 @@ export function runPlan(plan, { ci = false, cwd = process.cwd(), run = spawnSync
     return 1
   }
   if (plan.missingTests.length) {
-    console.error(`Selected E2E tests are missing: ${plan.missingTests.join(', ')}. Update the module mapping; do not silently drop coverage.`)
+    console.error(`Selected tests are missing: ${plan.missingTests.join(', ')}. Update the module mapping; do not silently drop coverage.`)
     return 1
   }
   const commands = [...plan.commands]
   if (ci && plan.e2e.length) {
     commands.push(['--filter', '@ai-studio/desktop', 'run', 'build'])
-    commands.push(['--filter', '@ai-studio/desktop', 'run', 'test:e2e:built', ...plan.e2e])
+    const full = plan.e2e.filter(file => !plan.e2eFilters[file])
+    if (full.length) commands.push(['--filter', '@ai-studio/desktop', 'run', 'test:e2e:built', ...full])
+    for (const file of plan.e2e.filter(file => plan.e2eFilters[file])) {
+      commands.push(['--filter', '@ai-studio/desktop', 'run', 'test:e2e:built', file, '--grep', plan.e2eFilters[file]])
+    }
   }
   for (const args of commands) {
     console.log(`> pnpm ${args.join(' ')}`)

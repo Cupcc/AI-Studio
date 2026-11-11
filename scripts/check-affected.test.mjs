@@ -1,21 +1,30 @@
-import { expect, test, vi } from 'vitest'
-import { readFileSync } from 'node:fs'
-import { affectedPlan, connectionDependencyChange, runPlan, workbenchPackageIncludeChange } from './check-affected.mjs'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { execFileSync } from 'node:child_process'
+import { affectedPlan, buildConfigChange, connectionDependencyChange, runPlan, workbenchPackageIncludeChange } from './check-affected.mjs'
 
 const d = 'apps/desktop/'
 const a = 'packages/agent-adapter/'
 const available = [
   'scripts/check-affected.mjs', 'scripts/check-affected.test.mjs', 'scripts/check-workflow.test.mjs',
+  '.codex/scripts/agent-docs-hook.test.mjs',
   `${d}src/renderer/src/features/input/Composer.tsx`,
+  `${d}src/renderer/src/features/navigation/Navigation.tsx`,
+  `${d}src/shared/workbench/resources/template.ts`,
   `${d}src/renderer/src/features/input/file-references.test.tsx`,
   `${d}src/renderer/src/features/tools/files/files-store.test.ts`,
   `${d}src/main/services/files/references.test.ts`,
   `${d}src/main/services/session/service.test.ts`,
   `${d}src/main/services/workbench/workbench-service.test.ts`,
+  `${d}src/main/services/workbench/package-runtime.test.ts`,
+  `${d}src/renderer/src/features/workbench/portable-pages.test.ts`,
   `${d}src/shared/project-view/schema.test.ts`,
   `${d}src/renderer/src/features/workbench/workbench.test.tsx`,
   `${d}src/renderer/src/features/workbench/page-bridge.test.ts`,
   `${d}src/main/security/hardening.test.ts`,
+  `${d}src/main/security/policy.test.ts`,
   `${d}electron.vite.config.ts`,
   `${d}src/preload/bridge.test.ts`, `${d}src/shared/ipc/contract.test.ts`,
   `${d}src/renderer/src/features/session/session.test.tsx`,
@@ -29,6 +38,11 @@ const available = [
 const plan = files => affectedPlan(files, available, { base: 'missing-test-baseline' })
 const commandText = value => value.commands.flat().join(' ')
 
+beforeEach(() => {
+  for (const name of Object.keys(process.env)) if (name.startsWith('GIT_')) vi.stubEnv(name, undefined)
+})
+afterEach(() => vi.unstubAllEnvs())
+
 test('docs, evidence and empty diff do not run application checks', () => {
   for (const files of [[], ['README.md'], ['docs/08. System Architecture.html'], ['tasks/T-example/evidence/check.mjs'],
     ['.ignore'], ['.agents/archive/tasks/T-example/task.md'],
@@ -40,7 +54,7 @@ test('docs, evidence and empty diff do not run application checks', () => {
 test('input selects related module, not terminal/settings/adapter suites', () => {
   const result = plan([`${d}src/renderer/src/features/input/Composer.tsx`])
   expect(result.unknown).toEqual([])
-  expect(commandText(result)).toContain('file-references.test.tsx')
+  expect(commandText(result)).toContain('related src/renderer/src/features/input/Composer.tsx --run')
   expect(commandText(result)).toContain('tsconfig.web.json')
   expect(commandText(result)).not.toMatch(/terminal-panel|settings.test|tsconfig.node|check:code| run test /)
   expect(result.e2e).toEqual(['e2e/cli-default.spec.ts', 'e2e/composer.spec.ts', 'e2e/files.spec.ts'])
@@ -69,9 +83,23 @@ test('deleted and renamed source retain both module seams', () => {
   expect(commandText(result)).not.toContain('removed.ts')
   expect(result.e2e).toContain('e2e/session.spec.ts')
 })
+test('deleted source with no remaining module tests blocks even alongside another change', () => {
+  const deleted = `${d}src/renderer/src/features/navigation/removed.ts`
+  const result = plan([deleted, `${d}src/renderer/src/features/input/Composer.tsx`])
+  expect(result.unknown).toContain(deleted)
+  const run = vi.fn()
+  expect(runPlan(result, { run })).toBe(1)
+  expect(run).not.toHaveBeenCalled()
+  const script = 'scripts/check-deleted.mjs'
+  expect(affectedPlan([script], []).unknown).toContain(script)
+  const adapterFile = `${a}src/core/deleted.ts`
+  expect(affectedPlan([adapterFile], []).unknown).toContain(adapterFile)
+  const shared = `${d}src/renderer/src/lib/deleted.ts`
+  expect(affectedPlan([shared], []).unknown).toContain(shared)
+})
 test('adapter provider updates cover dist consumers, not unrelated provider suite', () => {
   const result = plan([`${a}src/codex/driver.ts`])
-  expect(commandText(result)).toContain('test/codex/driver.test.ts')
+  expect(commandText(result)).toContain('related src/codex/driver.ts --run')
   expect(commandText(result)).toContain('features/session/session.test.tsx')
   expect(commandText(result)).not.toMatch(/test\/claude|real.integration.test/)
 })
@@ -129,7 +157,7 @@ test('deleted or renamed selected E2E blocks instead of silently losing coverage
   expect(run).not.toHaveBeenCalled()
 })
 test('unit selection must find tests; no green pass for an empty selection', () => {
-  expect(commandText(plan(['scripts/check-affected.mjs']))).not.toContain('--passWithNoTests')
+  expect(commandText(plan(['scripts/check-affected.mjs']))).toContain('--no-passWithNoTests')
 })
 test('automatic workflow cannot run full checks or package', () => {
   const workflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8')
@@ -158,21 +186,109 @@ test('plugin assets and navigation keep the workbench regression selected', () =
     expect(result.e2e).toContain('e2e/workbench.spec.ts')
   }
 })
-test('desktop build/CSP changes verify protocol and iframe consumers', () => {
-  const result = plan([`${d}electron.vite.config.ts`])
-  expect(result.unknown).toEqual([])
-  expect(commandText(result)).toContain('hardening.test.ts')
-  expect(result.e2e).toEqual(['e2e/app.spec.ts', 'e2e/project-view.spec.ts', 'e2e/runtime-tools.spec.ts', 'e2e/workbench.spec.ts'])
+test('unknown desktop config changes and missing baselines block', () => {
+  for (const file of [`${d}electron.vite.config.ts`, `${d}vitest.config.ts`]) {
+    expect(plan([file]).unknown).toEqual([file])
+  }
 })
 
 test('standard webpage package assets select their host, SDK and iframe regression consumers', () => {
   for (const file of ['build/workbenches/overview/manifest.json', 'build/workbench-common/page.js', 'scripts/build-workbench-packages.mjs']) {
     const result = plan([`${d}${file}`])
     expect(result.unknown).toEqual([])
-    expect(result.e2e).toEqual(['e2e/alignment.spec.ts', 'e2e/app.spec.ts', 'e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
+    expect(result.e2e).toEqual(['e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
     expect(commandText(result)).toContain('workbench-service.test.ts')
-    expect(commandText(result)).toContain('page-bridge')
+    expect(commandText(result)).toContain('portable-pages.test.ts')
+    expect(commandText(result)).not.toMatch(/terminal|session|navigation.test/)
   }
+})
+
+test('styles select UI regression without backend tests, builds or typechecks', () => {
+  for (const file of ['src/renderer/src/features/workbench/workbench.css', 'build/workbench-common/style.css']) {
+    expect(plan([`${d}${file}`])).toMatchObject({
+      commands: [], e2e: ['e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'], unknown: [], missingTests: []
+    })
+  }
+  expect(plan([`${d}src/renderer/src/features/tools/tools.css`])).toMatchObject({
+    commands: [], e2e: ['e2e/alignment.spec.ts', 'e2e/app.spec.ts', 'e2e/runtime-tools.spec.ts'],
+    e2eFilters: { 'e2e/runtime-tools.spec.ts': 'FR-TOOL-003|FR-TOOL-004' }, unknown: []
+  })
+})
+
+test('renderer library leaves do not seed unrelated IPC and backend tests', () => {
+  const file = `${d}src/renderer/src/lib/example.ts`
+  const result = affectedPlan([file], [...available, file])
+  expect(result.unknown).toEqual([])
+  expect(commandText(result)).toContain('related src/renderer/src/lib/example.ts --run')
+  expect(commandText(result)).not.toMatch(/\.test\.|tsconfig.node/)
+})
+
+test('mapped package consumers cannot silently disappear', () => {
+  const missing = `${d}src/renderer/src/features/workbench/portable-pages.test.ts`
+  const result = affectedPlan([`${d}build/workbench-common/page.js`], available.filter(file => file !== missing))
+  expect(result.missingTests).toEqual([missing])
+  const run = vi.fn()
+  expect(runPlan(result, { run })).toBe(1)
+  expect(run).not.toHaveBeenCalled()
+})
+
+const config = readFileSync(new URL('../apps/desktop/electron.vite.config.ts', import.meta.url), 'utf8')
+const withoutPackage = config.replace("import { buildWorkbenchPackages } from './scripts/build-workbench-packages.mjs'\n", '')
+  .replace('buildWorkbenchPackages()\n', '')
+const cspChange = config.replace("frame-src app://workbench", "frame-src 'none'")
+
+test('classifies exact package wiring and CSP changes, rejects unrelated or mixed edits', () => {
+  expect(buildConfigChange(withoutPackage, config)).toBe('workbench-package')
+  expect(buildConfigChange(config, withoutPackage)).toBe('workbench-package')
+  expect(buildConfigChange(config, cspChange)).toBe('csp')
+  expect(buildConfigChange(config, config)).toBeNull()
+  expect(buildConfigChange(withoutPackage, config.replace('plugins: [react()', 'plugins: [unknown()'))).toBeNull()
+  expect(buildConfigChange(withoutPackage, cspChange)).toBeNull()
+})
+
+test('config scope reads Git index, committed snapshots and working tree independently', () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'scope-config-'))
+  const file = `${d}electron.vite.config.ts`
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')))
+  const git = args => execFileSync('git', args, { cwd, env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
+  try {
+    git(['init', '-q'])
+    mkdirSync(join(cwd, d), { recursive: true })
+    writeFileSync(join(cwd, file), withoutPackage)
+    git(['add', '.'])
+    const base = git(['write-tree'])
+    writeFileSync(join(cwd, file), config)
+    git(['add', '.'])
+    const head = git(['write-tree'])
+    writeFileSync(join(cwd, file), config.replace('plugins: [react()', 'plugins: [unknown()'))
+    const result = affectedPlan([file], available, { cwd, base, head })
+    expect(result.unknown).toEqual([])
+    expect(result.e2e).toEqual(['e2e/app.spec.ts', 'e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
+    expect(commandText(result)).not.toContain('terminal')
+    expect(affectedPlan([file], available, { cwd, base }).unknown).toEqual([file])
+
+    writeFileSync(join(cwd, file), cspChange)
+    const csp = affectedPlan([file], available, { cwd, base: head })
+    expect(csp.unknown).toEqual([])
+    expect(csp.e2eFilters).toEqual({ 'e2e/runtime-tools.spec.ts': 'FR-TOOL-003|FR-TOOL-004' })
+    const run = vi.fn(() => ({ status: 0 }))
+    expect(runPlan(csp, { ci: true, run })).toBe(0)
+    expect(run.mock.calls.at(-1)[1]).toEqual(['--filter', '@ai-studio/desktop', 'run', 'test:e2e:built',
+      'e2e/runtime-tools.spec.ts', '--grep', 'FR-TOOL-003|FR-TOOL-004'])
+    expect(run.mock.calls.filter(([, args]) => args.includes('@ai-studio/desktop') && args.includes('build'))).toHaveLength(1)
+    const combined = affectedPlan([file, `${d}e2e/runtime-tools.spec.ts`], available, { cwd, base: head })
+    expect(combined.e2eFilters).toEqual({})
+    const styles = `${d}src/renderer/src/features/tools/tools.css`
+    expect(affectedPlan([file, styles], available, { cwd, base: head }).e2eFilters).toEqual(csp.e2eFilters)
+    for (const runtime of ['src/main/services/terminal/service.ts', 'src/renderer/src/features/tools/TerminalPanel.tsx']) {
+      expect(affectedPlan([file, styles, `${d}${runtime}`], available, { cwd, base: head }).e2eFilters).toEqual({})
+    }
+    for (const unrelated of ['src/renderer/src/features/tools/terminal-font.test.ts',
+      'src/renderer/src/features/tools/diff/diff-format.test.ts', 'src/renderer/src/features/tools/diff/diff-format.ts']) {
+      const changed = `${d}${unrelated}`
+      expect(affectedPlan([file, styles, changed], [...available, changed], { cwd, base: head }).e2eFilters).toEqual(csp.e2eFilters)
+    }
+  } finally { rmSync(cwd, { recursive: true, force: true }) }
 })
 
 test('only the known package JSON include change is mapped, unrelated compiler edits stay unknown', () => {

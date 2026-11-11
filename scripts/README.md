@@ -39,7 +39,7 @@ git push origin dev
 
 ## 测试分层
 
-范围检查的实现与验证见[任务记录](../.agents/archive/tasks/T20261106-scoped-checks/task.md)。
+范围检查的初始实现见[任务记录](../.agents/archive/tasks/T20261106-scoped-checks/task.md)，最小回归与实际选择验证见[收紧范围任务](../tasks/T20261111-minimal-regression/task.md)。
 
 | 场景 | 执行范围 |
 |---|---|
@@ -54,9 +54,13 @@ git push origin dev
 
 开发、提交、CI 均按影响范围验证。执行前说明改动、测试范围和理由，不把「准备提交／合并」当作全量测试理由。相同代码／依赖／配置／环境基线已有有效结果时引用其来源、时间和覆盖范围，不手工重复门禁将要执行的检查；发生相关变化或冲突修复后重跑受影响部分。当前门禁不缓存测试成功结果，重试提交仍会执行选中的局部检查。
 
-选择器为 [check-affected.mjs](check-affected.mjs)：源码与测试文件作为 [Vitest `related`](https://vitest.dev/guide/cli.html#vitest-related) 的种子，另显式加入模块测试来覆盖 IPC、Adapter 构建产物和动态加载边界。删除／重命名按旧、新路径选中模块；仅修改测试时只选该测试，不触发 E2E。类型检查以受影响的 TS 项目为最小边界，不声称可按单个文件完整检查类型。
+选择器为 [check-affected.mjs](check-affected.mjs)。普通源码与测试文件作为 [Vitest `related`](https://vitest.dev/guide/cli.html#vitest-related) 的种子，按实际静态依赖选择单测，不按所在模块追加整套单测。IPC、共享领域类型、Adapter 构建产物的桌面消费者及删除路径仍显式补充模块覆盖。重命名按旧、新路径共同判定；仅修改测试时只选该测试，不触发 E2E。类型检查以受影响的 TS 项目为最小边界，不声称可按单个文件完整检查类型。
 
-工作台宿主通过同一 iframe 承载预设与自定义 Web 包，`workbench` 范围须覆盖两类内容测试及 `project-view` / `workbench` E2E，见 [DEC-29](<../docs/07. Decisions.md#dec-29-预设与自定义工作台统一架构>)。
+CSS 与 Renderer HTML 只选择对应界面 E2E，不触发后端单测或 TypeScript 检查。本地提交不自动执行 E2E，界面改动仍须完成 Task Protocol 要求的交互验收。工作台通过同一 iframe 承载预设与自定义包，两类界面由 `project-view` / `workbench` E2E 覆盖，见 [DEC-29](<../docs/07. Decisions.md#dec-29-预设与自定义工作台统一架构>)。
+
+网页包 JS、HTML、manifest 与生成脚本绕过源码导入图，明确选择读取构建产物的 `package-runtime`、`workbench-service`、`portable-pages` 三份单测。TypeScript 配置仅新增网页包 JSON include 时也使用该范围，其他编译配置须另行映射。`electron.vite.config.ts` 或桌面 Vitest 配置仅增删既定网页包构建 import 与调用时使用该范围，Electron 构建配置另选应用启动。CSP 数组变化选择安全策略单测、工作台界面、应用启动及 `runtime-tools` 中的 Shell 和 Browser 场景；共享工具样式也覆盖这两个界面场景，不带入终端关闭流程。同批修改运行时模块或该 E2E 文件时保留完整 runtime-tools。其他构建和测试配置变化须补充映射，不能套用工作台范围。
+
+所有 `related` 命令显式使用 `--no-passWithNoTests`，找不到测试时失败。删除源码后没有剩余模块测试时也阻断，须补充消费者映射。选择器回归除了断言计划，还通过 Vitest 实际依赖图核对必须包含和不得包含的测试，通过真实子进程检查空选择退出码。清单检查不执行应用测试；它先构建 Adapter 以解析桌面依赖，并由测试配置生成本地辅助产物。
 
 影响映射不是全知依赖分析。新增模块、跨模块调用或全局依赖／构建配置变更时，先在选择器中补充有依据的映射和对应回归测试；未知路径失败时不得改为无条件豁免或全量兜底。选中的 E2E 文件缺失／改名时阻断并要求同步映射，单测选择为空也不记作通过。共享边界可能选中多个模块；选择结果须结合 diff 审阅，必要的功能／里程碑验收仍遵循 Task Protocol。
 
@@ -75,7 +79,7 @@ node scripts/check-affected.mjs --base <base-commit> --head HEAD --ci
 ```sh
 # 每次 Adapter 源码或依赖变化后，先更新桌面测试依赖的构建产物。
 pnpm --filter @ai-studio/agent-adapter run build
-pnpm --filter @ai-studio/desktop exec vitest run --project renderer
+pnpm --filter @ai-studio/desktop exec vitest run src/renderer/src/features/workbench/navigation.test.tsx
 pnpm --filter @ai-studio/desktop exec vitest run src/main/services/project
 pnpm --filter @ai-studio/desktop run test:watch
 pnpm --filter @ai-studio/agent-adapter exec vitest run test/codex
@@ -226,5 +230,3 @@ node tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs \
 - 原生 Stop 补充复核使用两条带唯一标记、睡眠 120 秒的 Python 命令；同时检查原生后台列表和系统 Python 进程退出。进程探测限定实际 Python 可执行文件，排除包含命令文本的 Shell。`clean` / `terminate` 是实验接口，需锁定所支持 CLI 版本；具体语义与覆盖边界见校验报告第 4、5 节。
 - 本脚本不验证 Electron、PTY、Browser、SQLite、文件变更归因或 GUI 提醒行为，也不代表完整 AC 已验收。
 - 本次实测结果见 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md)。
-
-预设网页包的 manifest、HTML、JS、CSS 和静态包生成脚本归入工作台影响范围，同时检查预设及自定义 iframe 场景、应用启动和布局。TypeScript 配置仅新增网页包 JSON include 时按此范围处理，其他编译配置变化仍须单独映射。

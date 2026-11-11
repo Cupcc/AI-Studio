@@ -1,0 +1,9 @@
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/minimal-regression
+
+
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+   Start at  17:21:31
+   Duration  293ms (tests 88%, transform 9%, import 3%, worker 1%)
+

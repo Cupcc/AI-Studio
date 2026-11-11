@@ -14,7 +14,7 @@ AI Developer Studio 的 Electron 桌面客户端（macOS 首发）。技术栈�
 
 桌面包通过 workspace 依赖 `@ai-studio/agent-adapter`。根命令会先构建该包；直接使用 `pnpm --filter @ai-studio/desktop …` 时，需先运行 `pnpm --filter @ai-studio/agent-adapter build`。
 
-开发迭代的局部测试与提交／CI 检查范围见[测试分层](../../scripts/README.md#测试分层)。包内 `test:e2e:built` 与 `package:built` 不构建任何源码，仅供同一流程先构建后复用产物；源码、依赖或构建配置变化后必须重新构建。日常独立执行仍用根命令 `test:e2e` / `package`，不要把旧产物当作当前代码验证结果。
+开发迭代的局部测试与提交／CI 检查范围见[测试分层](../../scripts/README.md#测试分层)。包内 `test:e2e:built` 与 `package:built` 不构建任何源码，仅供同一流程先构建后复用产物；源码、依赖或构建配置变化后必须重新构建。日常 E2E 使用测试分层中的局部命令，显式选择 spec 或场景；根命令 `test:e2e` 用于全量 E2E，`package` 用于独立打包。
 
 | 命令 | 桌面包细节 |
 |---|---|

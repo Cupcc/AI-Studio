@@ -1,0 +1,110 @@
+{
+  "files": [
+    "apps/desktop/build/workbench-common/page.js"
+  ],
+  "commands": [
+    [
+      "--filter",
+      "@ai-studio/agent-adapter",
+      "run",
+      "build"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.node.json"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.web.json"
+    ],
+    [
+      "--filter",
+      "@ai-studio/desktop",
+      "exec",
+      "vitest",
+      "related",
+      "src/main/services/workbench/package-runtime.test.ts",
+      "src/main/services/workbench/workbench-service.test.ts",
+      "--run",
+      "--no-passWithNoTests"
+    ]
+  ],
+  "e2e": [
+    "e2e/project-view.spec.ts",
+    "e2e/workbench.spec.ts"
+  ],
+  "e2eFilters": {},
+  "unknown": [],
+  "missingTests": [
+    "apps/desktop/src/renderer/src/features/workbench/portable-pages.test.ts"
+  ]
+}
+Selected tests are missing: apps/desktop/src/renderer/src/features/workbench/portable-pages.test.ts. Update the module mapping; do not silently drop coverage.
+{
+  "reviewedSourceSha256": "dfb04d8a7976ef728f9e4e727dc2c40ea1fe70d306bb29da17b68ce9d7d3220c",
+  "checks": [
+    {
+      "extra": null,
+      "filtered": true,
+      "result": "passed"
+    },
+    {
+      "extra": "src/renderer/src/features/tools/tools.css",
+      "filtered": true,
+      "result": "passed"
+    },
+    {
+      "extra": "src/renderer/src/features/tools/terminal-font.test.ts",
+      "filtered": true,
+      "result": "passed"
+    },
+    {
+      "extra": "src/renderer/src/features/tools/diff/diff-format.test.ts",
+      "filtered": true,
+      "result": "passed"
+    },
+    {
+      "extra": "src/renderer/src/features/tools/diff/diff-format.ts",
+      "filtered": true,
+      "result": "passed"
+    },
+    {
+      "extra": "src/renderer/src/features/tools/TerminalPanel.tsx",
+      "filtered": false,
+      "result": "passed"
+    },
+    {
+      "extra": "e2e/runtime-tools.spec.ts",
+      "filtered": false,
+      "result": "passed"
+    },
+    {
+      "deleted": "apps/desktop/src/main/services/navigation/removed.ts",
+      "result": "blocked without candidates"
+    },
+    {
+      "deleted": "packages/agent-adapter/src/codex/removed.ts",
+      "result": "blocked without candidates"
+    },
+    {
+      "deleted": "scripts/check-removed.mjs",
+      "result": "blocked without candidates"
+    },
+    {
+      "deleted": "apps/desktop/src/renderer/src/lib/removed.ts",
+      "result": "blocked without candidates"
+    }
+  ],
+  "css": "both scopes passed",
+  "missingPackageConsumer": "blocked before commands"
+}
