@@ -107,3 +107,5 @@ scripts/                       postinstall、afterPack、打包冒烟脚本
 当前预设统一的实施与验证见[统一任务](../../.agents/archive/tasks/T20261111-unified-workbench/task.md)，上述插件机制任务保留原实现与验收基线。
 
 预设网页包的生成、公共资源能力与本轮交付验证见[网页格式统一任务](../../.agents/archive/tasks/T20261111-workbench-web-format/task.md)。
+
+基础列表管理的行为与导航偏好存储由 [workbench §9.8](../../specs/workbench/spec.md#98-fr-wb-001006008-工作台列表管理)负责，实施与验证见[管理任务](../../tasks/T20261111-workbench-management/task.md)。

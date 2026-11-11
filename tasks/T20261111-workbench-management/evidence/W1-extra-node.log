@@ -1,0 +1,47 @@
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/workbench-management/apps/desktop
+
+ ❯ |node| ../../tasks/T20261111-workbench-management/evidence/W1-extra.node.test.ts (2 tests | 1 failed) 177ms
+   × appends an installed instance after preexisting unmodified drafts 92ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |node| ../../tasks/T20261111-workbench-management/evidence/W1-extra.node.test.ts > appends an installed instance after preexisting unmodified drafts
+AssertionError: existing order ["overview","progress","architecture","agent-team","business-flow","workbench-draft:acb3e40c-8a21-4971-95ed-999de58c2d27","workbench-draft:fb202fb1-195a-4729-929a-30f2ada4d802"], actual ["overview","progress","architecture","agent-team","business-flow","workbench:0dd90573-0bae-460b-8af3-414b929aeb59","workbench-draft:acb3e40c-8a21-4971-95ed-999de58c2d27","workbench-draft:fb202fb1-195a-4729-929a-30f2ada4d802"]: expected [ 'overview', 'progress', …(6) ] to deeply equal [ 'overview', 'progress', …(6) ]
+
+- Expected
++ Received
+
+@@ -2,9 +2,9 @@
+    "overview",
+    "progress",
+    "architecture",
+    "agent-team",
+    "business-flow",
++   "workbench:0dd90573-0bae-460b-8af3-414b929aeb59",
+    "workbench-draft:acb3e40c-8a21-4971-95ed-999de58c2d27",
+    "workbench-draft:fb202fb1-195a-4729-929a-30f2ada4d802",
+-   "workbench:0dd90573-0bae-460b-8af3-414b929aeb59",
+  ]
+
+ ❯ ../../tasks/T20261111-workbench-management/evidence/W1-extra.node.test.ts:27:96
+     25|   const installed = service.applyDraft({ ref, expectedPackageRevision:…
+     26|   const actual = service.list(projectId).map(entry => entry.viewId)
+     27|   expect(actual, `existing order ${JSON.stringify(before)}, actual ${J…
+       |                                                                                                ^
+     28|   expect(actual.indexOf(b.viewId)).toBe(before.indexOf(b.viewId))
+     29| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  13:44:48
+   Duration  1.29s (transform 64%, tests 22%, import 13%, worker 2%)
+
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/workbench-management/apps/desktop
+

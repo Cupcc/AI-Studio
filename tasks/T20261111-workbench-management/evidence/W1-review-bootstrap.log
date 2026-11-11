@@ -1,0 +1,17 @@
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/workbench-management/apps/desktop
+
+No test files found, exiting with code 1
+
+projects: node
+
+|node| 
+
+include: /Users/zhixing/Projects/AI%20Stduio.worktrees/workbench-management/tasks/T20261111-workbench-management/evidence/W1-extra.node.test.ts
+exclude:  **/node_modules/**, **/.git/**
+
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/workbench-management/apps/desktop
+

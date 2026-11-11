@@ -1,4 +1,5 @@
 import { workbenchContract } from '@shared/ipc/workbench'
+import { isWorkbenchId } from '@shared/workbench/types'
 import { parseDraftWorkbenchRef, parseInstanceWorkbenchRef, parseJsonState, parseCustomWorkbenchRef, parseWorkbenchRef } from '@shared/workbench/schema'
 import type { CoreServices } from '../services/core'
 import { workbenchesFor } from '../services/workbench'
@@ -15,6 +16,34 @@ export function createWorkbenchFeature(core: CoreServices) {
       parse(raw) { const value = expectRecord(raw); expectOnlyKeys(value, ['projectId']); return { projectId: id(value.projectId, 'projectId') } },
       handle: ({ projectId }) => service.list(projectId)
     },
+    listRemoved: {
+      parse(raw) { const value = expectRecord(raw); expectOnlyKeys(value, ['projectId']); return { projectId: id(value.projectId, 'projectId') } },
+      handle: ({ projectId }) => service.listRemoved(projectId)
+    },
+    rename: {
+      parse(raw) {
+        const value = expectRecord(raw); expectOnlyKeys(value, ['ref', 'title'])
+        return { ref: parseWorkbenchRef(value.ref), title: expectString(value.title, 'title', { minLength: 1, maxLength: 100 }) }
+      },
+      handle: request => service.rename(request)
+    },
+    move: {
+      parse(raw) {
+        const value = expectRecord(raw); expectOnlyKeys(value, ['ref', 'before'])
+        if (value.before !== null && !isWorkbenchId(value.before)) throw new Error('before 必须是工作台标识或 null')
+        return { ref: parseWorkbenchRef(value.ref), before: value.before }
+      },
+      handle: request => service.move(request)
+    },
+    setVisible: {
+      parse(raw) {
+        const value = expectRecord(raw); expectOnlyKeys(value, ['ref', 'visible'])
+        if (typeof value.visible !== 'boolean') throw new Error('visible 必须为布尔值')
+        return { ref: parseWorkbenchRef(value.ref), visible: value.visible }
+      },
+      handle: request => service.setVisible(request)
+    },
+    deleteDraft: { parse: parseDraftWorkbenchRef, handle: ref => service.deleteDraft(ref) },
     createDraft: {
       parse(raw): { projectId: string; source: 'template' | 'ai'; instanceId?: string } {
         const value = expectRecord(raw); expectOnlyKeys(value, ['projectId', 'source', 'instanceId'])

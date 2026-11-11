@@ -36,7 +36,7 @@ beforeEach(() => {
   useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {} })
   api = {
     list: vi.fn(async () => catalog), getSnapshot: vi.fn(async () => presetSnapshot()), getContext: vi.fn(),
-    createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(), setEnabled: vi.fn(),
+    listRemoved: vi.fn(async () => []), rename: vi.fn(), move: vi.fn(), setVisible: vi.fn(), deleteDraft: vi.fn(), createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(), setEnabled: vi.fn(),
     onChanged: vi.fn(listener => { change = listener; return () => {} })
   }
   Object.defineProperty(window, 'studio', { configurable: true, value: { workbench: api, project: { updateUiState: vi.fn(async () => defaultUiState()) } } })

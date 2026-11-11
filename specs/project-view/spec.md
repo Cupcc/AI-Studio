@@ -59,7 +59,7 @@
 
 ### FR-VIEW-001 默认 Project Views
 
-五个 View 始终出现在当前 Project 的导航中，不因 Knowledge 不存在而隐藏或禁用。顺序和稳定 ID 如下：
+五个 View 是当前 Project 的默认工作台目录，不因 Knowledge 不存在而自动隐藏或禁用。初始顺序和稳定 ID 如下；用户对名称、顺序或可见性的管理由[工作台规格 §9.8](../workbench/spec.md#98-fr-wb-001006008-工作台列表管理)负责：
 
 | ID | 标题 | 目标 | V1 数据来源 |
 |---|---|---|---|
@@ -70,7 +70,7 @@
 | `business-flow` | Business Flow | 表达业务流程及其与代码的映射 | Knowledge；声明式流程图 |
 
 1. 默认目录由应用内置，不依赖 Project 内存在的 View 文件。内置 Definition 以版本化应用资源 JSON 打包，启动时解析并使用与 Project 文件相同的内置 Schema 校验；不写入 Project。Project 内的 `views/<view-id>.view.json` 可以覆盖内置呈现定义；缺失时使用内置定义（2026-10-09 已确认，DEC-05 相关 Q4；PV-Q12 于 2026-10-11 确认）。
-2. View 的标题、图标和顺序由内置目录提供；读取到未知 `view-id` 时不加入导航，保留诊断供开发日志使用（技术方案，待实现确认）。
+2. View 的默认标题、图标和顺序由内置目录提供；用户的导航偏好由统一工作台宿主保存。读取到未知 `view-id` 时不加入导航，保留诊断供开发日志使用（技术方案，待实现确认）。
 3. 进入 View 只改变 Main Canvas，不触发 Knowledge 生成、不创建 Session、不写入 Project 目录（FR-VIEW-007；D-01；DEC-07）。
 
 #### 默认 View 的内容边界

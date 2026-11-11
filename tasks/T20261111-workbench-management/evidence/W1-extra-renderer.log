@@ -1,0 +1,485 @@
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/workbench-management/apps/desktop
+
+ ❯ |renderer| ../../tasks/T20261111-workbench-management/evidence/W1-extra.renderer.test.tsx (2 tests | 2 failed) 433ms
+   × keeps a newer user selection when remove finishes asynchronously 329ms
+   × restores a usable keyboard focus after canceling rename 103ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |renderer| ../../tasks/T20261111-workbench-management/evidence/W1-extra.renderer.test.tsx > keeps a newer user selection when remove finishes asynchronously
+AssertionError: expected { mode: 'view', …(2) } to match object { mode: 'view', …(1) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "mode": "view",
+-   "viewId": "business-flow",
++   "viewId": "progress",
+  }
+
+ ❯ ../../tasks/T20261111-workbench-management/evidence/W1-extra.renderer.test.tsx:34:61
+     32|   await act(async () => { finish() })
+     33|   await waitFor(() => expect(screen.queryByRole('button', { name: 'Ove…
+     34|   expect(useProjectShell.getState().uiStates.p?.mainCanvas).toMatchObj…
+       |                                                             ^
+     35| })
+     36| it('restores a usable keyboard focus after canceling rename', async ()…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |renderer| ../../tasks/T20261111-workbench-management/evidence/W1-extra.renderer.test.tsx > restores a usable keyboard focus after canceling rename
+AssertionError: expected <body><div>…(1)</div></body> to be <button …(6)>…(1)</button> // Object.is equality
+
+- Expected
++ Received
+
+@@ -1,9 +1,334 @@
++ <body>
++   <div>
++     <section
++       aria-label="工作台"
++       class="workbench-navigation"
++     >
++       <div
++         class="workbench-navigation__heading"
++       >
++         <h2
++           class="navigation__heading"
++         >
++           工作台
++         </h2>
++         <button
++           aria-expanded="false"
++           aria-label="添加工作台"
++           class="icon-button"
++           data-tip="添加工作台"
++           data-tip-align="end"
++         >
++           <svg
++             aria-hidden="true"
++             fill="none"
++             height="14"
++             stroke="currentColor"
++             stroke-linecap="round"
++             stroke-linejoin="round"
++             stroke-width="1.4"
++             viewBox="0 0 16 16"
++             width="14"
++           >
++             <path
++               d="M8 3v10M3 8h10"
++             />
++           </svg>
++         </button>
++       </div>
++       <div
++         aria-label="工作台列表"
++         class="workbench-navigation__items"
++       >
++         <div
++           class="workbench-navigation__row  "
++           data-workbench-id="overview"
++           draggable="true"
++         >
++           <button
++             aria-current="page"
++             aria-label="Overview"
++             class="navigation__view is-selected"
++             tabindex="0"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="16"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="16"
++             >
++               <rect
++                 height="4.5"
++                 rx="1"
++                 width="4.5"
++                 x="2.5"
++                 y="2.5"
++               />
++               <rect
++                 height="4.5"
++                 rx="1"
++                 width="4.5"
++                 x="9"
++                 y="2.5"
++               />
++               <rect
++                 height="4.5"
++                 rx="1"
++                 width="4.5"
++                 x="2.5"
++                 y="9"
++               />
++               <rect
++                 height="4.5"
++                 rx="1"
++                 width="4.5"
++                 x="9"
++                 y="9"
++               />
++             </svg>
++             <span>
++               Overview
++             </span>
++           </button>
++           <button
++             aria-expanded="false"
++             aria-haspopup="menu"
++             aria-label="管理 Overview"
++             class="icon-button workbench-navigation__manage"
++             data-tip="管理工作台"
++             data-tip-align="end"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="14"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="14"
++             >
++               <circle
++                 cx="3.5"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++               <circle
++                 cx="8"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++               <circle
++                 cx="12.5"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++             </svg>
++           </button>
++         </div>
++         <div
++           class="workbench-navigation__row  "
++           data-workbench-id="progress"
++           draggable="true"
++         >
+            <button
++             aria-label="Progress"
++             class="navigation__view "
++             tabindex="-1"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="16"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="16"
++             >
++               <path
++                 d="M3 13V9M8 13V5M13 13V3"
++               />
++             </svg>
++             <span>
++               Progress
++             </span>
++           </button>
++           <button
+              aria-expanded="false"
+              aria-haspopup="menu"
++             aria-label="管理 Progress"
++             class="icon-button workbench-navigation__manage"
++             data-tip="管理工作台"
++             data-tip-align="end"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="14"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="14"
++             >
++               <circle
++                 cx="3.5"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++               <circle
++                 cx="8"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++               <circle
++                 cx="12.5"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++             </svg>
++           </button>
++         </div>
++         <div
++           class="workbench-navigation__row  "
++           data-workbench-id="architecture"
++           draggable="true"
++         >
++           <button
++             aria-label="Architecture"
++             class="navigation__view "
++             tabindex="-1"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="16"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="16"
++             >
++               <rect
++                 height="3.5"
++                 rx="1"
++                 width="6"
++                 x="5"
++                 y="2"
++               />
++               <rect
++                 height="3.5"
++                 rx="1"
++                 width="5"
++                 x="2"
++                 y="10.5"
++               />
++               <rect
++                 height="3.5"
++                 rx="1"
++                 width="5"
++                 x="9"
++                 y="10.5"
++               />
++               <path
++                 d="M8 5.5V8M4.5 10.5V8h7v2.5"
++               />
++             </svg>
++             <span>
++               Architecture
++             </span>
++           </button>
++           <button
++             aria-expanded="false"
++             aria-haspopup="menu"
+              aria-label="管理 Architecture"
++             class="icon-button workbench-navigation__manage"
++             data-tip="管理工作台"
++             data-tip-align="end"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="14"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="14"
++             >
++               <circle
++                 cx="3.5"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++               <circle
++                 cx="8"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++               <circle
++                 cx="12.5"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++             </svg>
++           </button>
++         </div>
++         <div
++           class="workbench-navigation__row  "
++           data-workbench-id="agent-team"
++           draggable="true"
++         >
++           <button
++             aria-label="Agent Team"
++             class="navigation__view "
++             tabindex="-1"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="16"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="16"
++             >
++               <path
++                 d="M6 7.7a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4zM2 13c.5-2.3 2-3.5 4-3.5s3.5 1.2 4 3.5M10.5 3.6a2.2 2.2 0 0 1 0 4M12 9.8c1 .5 1.7 1.6 2 3.2"
++               />
++             </svg>
++             <span>
++               Agent Team
++             </span>
++           </button>
++           <button
++             aria-expanded="false"
++             aria-haspopup="menu"
++             aria-label="管理 Agent Team"
+              class="icon-button workbench-navigation__manage"
+              data-tip="管理工作台"
+              data-tip-align="end"
+            >
+              <svg
+@@ -35,5 +360,89 @@
+                  fill="currentColor"
+                  r=".9"
+                />
+              </svg>
+            </button>
++         </div>
++         <div
++           class="workbench-navigation__row  "
++           data-workbench-id="business-flow"
++           draggable="true"
++         >
++           <button
++             aria-label="Business Flow"
++             class="navigation__view "
++             tabindex="-1"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="16"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="16"
++             >
++               <circle
++                 cx="3.5"
++                 cy="8"
++                 r="1.5"
++               />
++               <circle
++                 cx="12.5"
++                 cy="8"
++                 r="1.5"
++               />
++               <path
++                 d="M5 8h5.5M8.5 6l2 2-2 2"
++               />
++             </svg>
++             <span>
++               Business Flow
++             </span>
++           </button>
++           <button
++             aria-expanded="false"
++             aria-haspopup="menu"
++             aria-label="管理 Business Flow"
++             class="icon-button workbench-navigation__manage"
++             data-tip="管理工作台"
++             data-tip-align="end"
++           >
++             <svg
++               aria-hidden="true"
++               fill="none"
++               height="14"
++               stroke="currentColor"
++               stroke-linecap="round"
++               stroke-linejoin="round"
++               stroke-width="1.4"
++               viewBox="0 0 16 16"
++               width="14"
++             >
++               <circle
++                 cx="3.5"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++               <circle
++                 cx="8"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++               <circle
++                 cx="12.5"
++                 cy="8"
++                 fill="currentColor"
++                 r=".9"
++               />
++             </svg>
++           </button>
++         </div>
++       </div>
++     </section>
++   </div>
++ </body>
+
+ ❯ ../../tasks/T20261111-workbench-management/evidence/W1-extra.renderer.test.tsx:44:34
+     42|   fireEvent.click(screen.getByRole('button', { name: '取消' }))
+     43|   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+     44|   expect(document.activeElement).toBe(trigger)
+       |                                  ^
+     45| })
+     46|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  13:46:17
+   Duration  2.35s (environment 46%, tests 20%, transform 18%, import 16%)
+
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/workbench-management/apps/desktop
+

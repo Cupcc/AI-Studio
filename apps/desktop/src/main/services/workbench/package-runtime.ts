@@ -172,6 +172,10 @@ export class PackageRuntime {
     this.options.changed({ projectId, kind: 'instance', id: instanceId }, true)
     return instance(this.instanceRow(projectId, instanceId))
   }
+  deleteDraft(projectId: string, draftId: string): void {
+    this.draftRow(projectId, draftId)
+    this.db().prepare('DELETE FROM workbench_drafts WHERE project_id=? AND id=?').run(projectId, draftId)
+  }
   buildContext(projectId: string, viewId: string): WorkbenchContext {
     if (!isWorkbenchId(viewId)) throw new Error('工作台 View 标识无效')
     const target = workbenchTarget(projectId, viewId)

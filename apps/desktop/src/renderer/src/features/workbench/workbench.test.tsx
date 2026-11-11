@@ -20,7 +20,7 @@ let change: (event: WorkbenchChange) => void, detach: () => void
 beforeEach(() => {
   snapshot = makeSnapshot()
   api = {
-    list: vi.fn(async () => [entry]), createDraft: vi.fn(), getContext: vi.fn(),
+    list: vi.fn(async () => [entry]), listRemoved: vi.fn(async () => []), rename: vi.fn(), move: vi.fn(), setVisible: vi.fn(), deleteDraft: vi.fn(), createDraft: vi.fn(), getContext: vi.fn(),
     getSnapshot: vi.fn(async () => snapshot), applyDraft: vi.fn(),
     updateState: vi.fn(async () => ({ ...snapshot, revision: 2, page: { ...snapshot.page, stateRevision: 1, state: { count: 1 } } })),
     setEnabled: vi.fn(), onChanged: vi.fn(listener => { change = listener; return () => {} })

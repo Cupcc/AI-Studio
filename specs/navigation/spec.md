@@ -83,7 +83,7 @@
 
 #### 3.2.1 列表
 
-默认显示五项，顺序固定，名称使用 FR-NAV-002 的英文名：
+默认目录包含五项，初始顺序和默认名称使用 FR-NAV-002 的英文名。用户可以按[工作台列表管理](../workbench/spec.md#98-fr-wb-001006008-工作台列表管理)重命名、排序、移除和恢复：
 
 1. Overview
 2. Progress
@@ -91,13 +91,13 @@
 4. Agent Team
 5. Business Flow
 
-每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 4 节）。图标采用交互原型 v01。五项在任何 Project 中始终显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。
+每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 4 节）。图标采用交互原型 v01。默认项首次打开时显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。移除项从当前导航隐藏，但可以从底部的“添加工作台”入口恢复。添加入口使用浮层，不改变工作台列表或 Session History 的布局。
 
 #### 工作台实例导航
 
 来源：FR-VIEW-002、FR-WB-006、DEC-28（2026-11-10 接受方向，2026-11-11 确认方案并实施最小插件机制，具体接缝见 workbench §9）。宿主从当前 Project 的实例目录生成入口，按 `instanceId` 定位并核实 Project 与固定包版本；首期名称取清单 title，使用宿主固定的工作台图标。预设五项的内容、ID 和顺序保持，所有条目来自统一工作台目录，不把工作台实例塞入默认 View ID 枚举。
 
-点击实例打开对应工作台，不因打开或安装自动创建 Session / 出图。导航选中状态仍由 Main Canvas 决定；首期提供添加、草稿与实例入口、停用和启用。实例重命名、取消固定及删除仍后置，候选行为由[工作台生命周期](../workbench/spec.md#62-导航与生命周期)负责。
+点击实例打开对应工作台，不因打开或安装自动创建 Session / 出图。导航选中状态仍由 Main Canvas 决定；首期提供底部添加入口、草稿与实例入口、重命名、排序、移除恢复、停用和启用。草稿删除仍由工作台管理菜单负责，候选行为由[工作台生命周期](../workbench/spec.md#62-导航与生命周期)和[工作台列表管理](../workbench/spec.md#98-fr-wb-001006008-工作台列表管理)负责。
 
 #### 3.2.2 点击 View 的导航契约
 

@@ -24,7 +24,7 @@ test.beforeEach(async () => {
 test.afterEach(async () => { await closeTestApp(app, page); rmSync(dir, { recursive: true, force: true }) })
 async function template() {
   await workspace().getByRole('button', { name: '添加工作台', exact: true }).click()
-  await workspace().getByRole('button', { name: /从简单模板开始/ }).click()
+  await page.getByRole('button', { name: /从简单模板开始/ }).click()
   await expect(plugin().getByRole('heading', { name: '随手记', exact: true })).toBeVisible()
   await expect(workspace().getByRole('button', { name: '添加至当前项目', exact: true })).toBeEnabled()
 }
@@ -121,4 +121,72 @@ test('AC-WB mechanism: refuses to apply files changed after the displayed previe
   await workspace().getByRole('button', { name: '添加至当前项目', exact: true }).click()
   await expect(workspace().getByRole('region', { name: '工作台实例', exact: true })).toBeVisible()
   await expect(plugin().getByRole('heading', { name: '未预览的修改', exact: true })).toBeVisible()
+})
+
+test('workbench management: rename, drag, remove/restore, delete draft and restart', async () => {
+  let navigation = workspace().getByRole('region', { name: '工作台', exact: true })
+  const rows = () => navigation.locator('[data-workbench-id]')
+  const layoutBeforeAdd = await page.evaluate(() => {
+    const nav = document.querySelector('.navigation')!, sessions = document.querySelector('.navigation__sessions')!
+    return { navHeight: nav.getBoundingClientRect().height, sessionsTop: sessions.getBoundingClientRect().top, sessionsHeight: sessions.getBoundingClientRect().height }
+  })
+  await navigation.getByRole('button', { name: '添加工作台', exact: true }).click()
+  await expect(page.getByRole('button', { name: /从简单模板开始/ })).toBeVisible()
+  const layoutAfterAdd = await page.evaluate(() => {
+    const nav = document.querySelector('.navigation')!, sessions = document.querySelector('.navigation__sessions')!
+    return { navHeight: nav.getBoundingClientRect().height, sessionsTop: sessions.getBoundingClientRect().top, sessionsHeight: sessions.getBoundingClientRect().height }
+  })
+  expect(layoutAfterAdd).toEqual(layoutBeforeAdd)
+  await page.keyboard.press('Escape')
+  async function manage(title: string, action: string) {
+    await navigation.getByRole('button', { name: `管理 ${title}`, exact: true }).click()
+    await page.getByRole('menuitem', { name: action, exact: true }).click()
+  }
+  await manage('Architecture', '重命名')
+  await page.getByRole('textbox', { name: '工作台名称', exact: true }).fill('项目架构')
+  await page.getByRole('button', { name: '保存名称', exact: true }).click()
+  await expect(navigation.getByRole('button', { name: '项目架构', exact: true })).toBeVisible()
+  await rows().filter({ has: page.getByRole('button', { name: 'Business Flow', exact: true }) }).dragTo(rows().first(), { targetPosition: { x: 30, y: 3 } })
+  await expect(rows().first()).toHaveAttribute('data-workbench-id', 'business-flow')
+  await manage('Business Flow', '下移')
+  await expect(rows().nth(1)).toHaveAttribute('data-workbench-id', 'business-flow')
+  await template()
+  const draftsDir = join(projectPath, '.ai-studio/workbench/drafts'), draftId = readdirSync(draftsDir)[0]!
+  await workspace().getByRole('button', { name: '添加至当前项目', exact: true }).click()
+  await plugin().getByRole('button', { name: '增加一次', exact: true }).click()
+  await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')
+  await manage('随手记', '重命名')
+  await page.getByRole('textbox', { name: '工作台名称', exact: true }).fill('项目笔记')
+  await page.getByRole('button', { name: '保存名称', exact: true }).click()
+  await expect(navigation.getByRole('button', { name: '项目笔记', exact: true })).toBeVisible()
+  await manage('项目笔记', '移除工作台')
+  await expect(navigation.getByRole('button', { name: '项目笔记', exact: true })).toHaveCount(0)
+  await expect(page.locator('iframe[title="工作台页面"]')).toHaveCount(1) // selected neighbor is the design draft
+  await navigation.getByRole('button', { name: '添加工作台', exact: true }).click()
+  await page.getByRole('button', { name: '恢复 项目笔记', exact: true }).click()
+  await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')
+  await manage('草稿：随手记', '删除草稿…')
+  await page.getByRole('dialog').getByRole('button', { name: '取消', exact: true }).click()
+  await expect(navigation.getByRole('button', { name: '草稿：随手记', exact: true })).toBeVisible()
+  await manage('草稿：随手记', '删除草稿…')
+  await page.getByRole('dialog').getByRole('button', { name: '删除草稿', exact: true }).click()
+  await expect(navigation.getByRole('button', { name: '草稿：随手记', exact: true })).toHaveCount(0)
+  expect(existsSync(join(draftsDir, draftId, 'index.html'))).toBe(true)
+  await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')
+  await manage('Progress', '移除工作台')
+  await page.screenshot({ path: test.info().outputPath('workbench-management.png') })
+  const order = await rows().evaluateAll(elements => elements.map(element => element.getAttribute('data-workbench-id')))
+  await closeTestApp(app, page); await launch()
+  navigation = workspace().getByRole('region', { name: '工作台', exact: true })
+  await expect(rows()).toHaveCount(order.length)
+  expect(await rows().evaluateAll(elements => elements.map(element => element.getAttribute('data-workbench-id')))).toEqual(order)
+  await expect(navigation.getByRole('button', { name: '项目架构', exact: true })).toBeVisible()
+  await expect(navigation.getByRole('button', { name: 'Progress', exact: true })).toHaveCount(0)
+  await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')
+  for (const title of ['Overview', 'Business Flow', '项目架构', 'Agent Team', '项目笔记']) await manage(title, '移除工作台')
+  await expect(navigation.getByText('还没有工作台，点击 + 添加。')).toBeVisible()
+  await expect(page.locator('iframe[title="工作台页面"]')).toHaveCount(0)
+  await navigation.getByRole('button', { name: '添加工作台', exact: true }).click()
+  await page.getByRole('button', { name: '添加 Overview', exact: true }).click()
+  await expect(navigation.getByRole('button', { name: 'Overview', exact: true })).toHaveAttribute('aria-current', 'page')
 })

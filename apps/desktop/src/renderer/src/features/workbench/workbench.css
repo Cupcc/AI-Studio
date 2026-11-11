@@ -2,11 +2,37 @@
 .workbench-navigation__items { max-height: min(26vh, 220px); overflow-y: auto; overscroll-behavior: contain; }
 .workbench-navigation__heading { display: flex; align-items: center; gap: 8px; padding: 0 2px; }
 .workbench-navigation__heading .navigation__heading { flex: 1; margin: 0; padding: 8px 6px; }
-.workbench-navigation__heading .icon-button { width: 24px; height: 24px; }
-.workbench-navigation .navigation__view { width: 100%; }
+.workbench-add-button { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; min-height: 30px; margin: 6px 0 0; padding: 5px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: transparent; color: var(--color-text-2); font: inherit; font-size: var(--font-size-sm); cursor: pointer; }
+.workbench-add-button:hover { background: var(--color-hover); color: var(--color-text); }
+.workbench-add-button:disabled { opacity: .5; cursor: default; }
+.workbench-navigation .navigation__view { flex: 1; min-width: 0; padding-right: 4px; }
+.workbench-navigation__row { display: flex; align-items: center; position: relative; border-radius: var(--radius-md); }
+.workbench-navigation__row:hover { background: var(--color-hover); }
+.workbench-navigation__row .navigation__view > span { flex: 1; text-align: left; }
+.workbench-navigation__row .navigation__view > svg { flex-shrink: 0; }
+.workbench-navigation__manage { flex-shrink: 0; width: 24px; height: 24px; margin-right: 2px; opacity: 0; }
+.workbench-navigation__row:hover .workbench-navigation__manage, .workbench-navigation__row:focus-within .workbench-navigation__manage, .workbench-navigation__manage[aria-expanded="true"] { opacity: 1; }
+.workbench-navigation__row.is-dragging { opacity: .5; }
+.workbench-navigation__row.is-drop-before::before, .workbench-navigation__row.is-drop-after::after { content: ''; position: absolute; left: 4px; right: 4px; height: 2px; background: var(--color-text); pointer-events: none; }
+.workbench-navigation__row.is-drop-before::before { top: 0; }
+.workbench-navigation__row.is-drop-after::after { bottom: 0; }
+.workbench-navigation__empty { padding: 8px; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.workbench-menu { position: fixed; min-width: 184px; }
+.workbench-add-menu { min-width: 250px; max-width: min(360px, calc(100vw - 16px)); }
+.workbench-add-menu .workbench-choices { max-height: min(48vh, 360px); overflow-y: auto; overscroll-behavior: contain; }
+.workbench-menu > button { display: block; width: 100%; padding: 7px 10px; text-align: left; font: inherit; border-radius: var(--radius-sm); }
+.workbench-menu > button:hover:not(:disabled), .workbench-menu > button:focus-visible { background: var(--color-hover); }
+.workbench-menu > button:disabled { opacity: .45; cursor: default; }
+.workbench-menu__danger { color: var(--color-error); }
+.workbench-dialog label { font-size: var(--font-size-sm); }
+.workbench-dialog input { width: 100%; padding: 8px 10px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); background: var(--color-pane); color: var(--color-text); font: inherit; }
 .workbench-navigation__badge { color: var(--color-text-muted); font-size: var(--font-size-xs); white-space: nowrap; }
 .workbench-navigation__error { font-size: var(--font-size-sm); overflow-wrap: anywhere; }
-.workbench-choices { margin: 4px 0 8px; padding: 4px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-pane); }
+.workbench-choices { max-height: min(36vh, 300px); overflow-y: auto; overscroll-behavior: contain; margin: 4px 0 8px; padding: 4px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-pane); }
+.workbench-choices h3 { margin: 8px 7px 2px; font-size: var(--font-size-xs); font-weight: 500; color: var(--color-text-muted); }
+.workbench-choices > p { margin: 7px; font-size: var(--font-size-sm); }
+.workbench-choices > button > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.workbench-choices > button:disabled { opacity: .5; cursor: default; }
 .workbench-choices > button { display: flex; gap: 8px; width: 100%; padding: 10px 7px; text-align: left; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text); font: inherit; cursor: pointer; }
 .workbench-choices > button:hover { background: var(--color-hover); }
 .workbench-choices small { display: block; margin-top: 4px; font-size: var(--font-size-xs); line-height: 1.5; color: var(--color-text-muted); }
