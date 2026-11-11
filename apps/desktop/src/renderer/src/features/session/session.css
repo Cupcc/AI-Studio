@@ -52,10 +52,10 @@
 .session-draft { grid-area: 1 / 1 / -1 / -1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
 .session-draft__greeting { grid-area: 1 / 1; align-self: center; max-height: 100%; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-6) var(--space-8); text-align: center; }
 .session-draft__greeting h2 { margin: 0; font-size: var(--font-size-title); font-weight: 500; letter-spacing: -.01em; text-wrap: balance; }
-.session-draft__greeting p { margin: 0; font-size: var(--font-size-note); color: var(--color-text-muted); overflow-wrap: anywhere; }
+.session-draft__greeting p { margin: 0; font-size: var(--font-size-note); color: var(--color-text-3); overflow-wrap: anywhere; }
 .session-draft > .composer { grid-area: 2 / 1; }
 .session-draft__starters { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); margin-top: var(--space-4); }
-.session-draft__starters button { min-height: 34px; padding: 0 13px; font-size: var(--font-size-sm); color: var(--color-text-2); background: var(--color-surface-sub); border: 1px solid var(--color-border-strong); border-radius: 18px; }
+.session-draft__starters button { min-height: 34px; padding: 0 13px; font-size: var(--font-size-md); color: var(--color-text-2); background: var(--color-surface-sub); border: 1px solid var(--color-border-strong); border-radius: 18px; }
 .session-draft__starters button:hover:not(:disabled) { background: var(--color-hover); }
 .session-draft__starters button:disabled { opacity: .45; cursor: default; }
 @media (max-height: 650px) { .session-draft__greeting h2 { font-size: 20px; } .session-draft__starters { margin-top: var(--space-2-5); } }
@@ -127,7 +127,7 @@
 .request-card p, .transcript-error p { margin: 0; }
 .request-card ul { margin: 0; padding-left: var(--space-4); }
 .request-card code { font: var(--font-size-sm) var(--font-mono); }
-.request-card__title { font-size: 13.5px; font-weight: 400; }
+.request-card__title { font-size: var(--font-size-md); font-weight: 400; }
 .request-card pre, .transcript-error pre, .transcript-tool pre { max-height: 320px; overflow: auto; font: var(--font-size-sm)/1.6 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 .request-card pre, .transcript-error pre { margin: 0; padding: 7px var(--space-2-5); color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-button); }
 .request-card summary, .transcript-error summary { cursor: pointer; font-size: var(--font-size-sm); color: var(--color-text-muted); }

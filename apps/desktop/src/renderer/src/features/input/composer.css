@@ -6,7 +6,7 @@
 .composer .composer__tag button { width: 24px; height: 24px; }
 .composer__settings { min-width: 0; display: flex; align-items: center; gap: 2px; margin-left: auto; }
 .composer__control { min-width: 0; display: flex; }
-.composer__control-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; height: 32px; padding: 0 8px; border-radius: var(--radius-md); color: var(--color-text-3); font-size: var(--font-size-sm); }
+.composer__control-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; height: 32px; padding: 0 8px; border-radius: var(--radius-md); color: var(--color-text-2); font-size: var(--font-size-md); }
 .composer__control-trigger:hover:not(:disabled), .composer__control-trigger[aria-expanded="true"] { background: var(--color-hover); color: var(--color-text); }
 .composer__control-trigger:disabled { opacity: var(--disabled-opacity); }
 .composer__add-control, .composer__effort-control { flex: none; }
@@ -18,7 +18,7 @@
 .composer__control-panel .menu-item { width: 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 .composer__control-panel .menu-item > span { flex: 1; min-width: 0; }
 .composer__control-panel .menu-item > svg { flex: none; }
-.composer__menu-heading { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px 5px; font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.composer__menu-heading { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px 5px; font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-3); }
 .composer__menu-heading:not(:first-child) { border-top: 1px solid var(--color-border-soft); margin-top: 5px; }
 .composer__menu-divider { height: 1px; margin: 6px 10px; background: var(--color-border-soft); }
 .composer__menu-empty { margin: 0; padding: 5px 10px 8px; font-size: var(--font-size-sm); color: var(--color-text-muted); overflow-wrap: anywhere; }

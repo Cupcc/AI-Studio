@@ -5,7 +5,8 @@
  * (design/prototypes/studio-prototype-v01.html, confirmed 2026-10-09); the
  * Markdown, code block and new-chat draft values follow prototype v02
  * (studio-prototype-v02.html, confirmed 2026-10-10). Values may
- * be revised at the high-fidelity stage (design/visual-direction.md §5). Keep
+ * be revised at the high-fidelity stage. Typography and glass grain follow the
+ * 2026-11-11 readability revision (design/visual-direction.md §1.1). Keep
  * every visual value here so that a revision touches one file. Layout sizes
  * follow Shell Spec v01 §1–2. Appearances (Product Definition principle 23;
  * FR-SET-002, 2026-10-12): theme solid or glass × colour mode light or dark.
@@ -49,7 +50,7 @@
   --menu-min-width: 200px;
   --menu-item-height: 32px;
   --nav-heading-height: 28px;
-  --nav-heading-line-height: 14px;
+  --nav-heading-line-height: 16px;
   --nav-row-height: 32px;
   --attention-size: 7px;
   --attention-offset: 3px;
@@ -114,17 +115,17 @@
   /* Typography */
   --font-sans: 'IBM Plex Sans', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --font-size-xs: 11px;
-  --font-size-sm: 12px;
-  --font-size-md: 13px;
-  --font-size-body: 14px;
-  --font-size-caption: 11.5px;
-  --font-size-note: 12.5px;
-  --font-size-dialog-body: 13.5px;
-  --font-size-heading: 16px;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-body: 15px;
+  --font-size-caption: 12px;
+  --font-size-note: 13px;
+  --font-size-dialog-body: 14px;
+  --font-size-heading: 17px;
   --font-size-lg: 17px;
   --font-size-title: 22px;
-  --font-size-markdown-heading: 15.5px;
+  --font-size-markdown-heading: 17px;
   --heading-letter-spacing: .06em;
 
   /* Colour */
@@ -412,7 +413,7 @@
   --glass-wall: var(--glass-wall-aurora);
   /* Over the wall, as in v04: the glass tint, then a faint grain so blurred gradients do not band */
   --glass-tint: rgba(244, 244, 242, .62);
-  --glass-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --glass-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .025 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   /* < 1 lets a little of the desktop through the colour, so the window still reads as glass */
   --glass-wall-opacity: .85;
 }

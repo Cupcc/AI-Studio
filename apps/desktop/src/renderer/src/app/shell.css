@@ -35,7 +35,7 @@
 .split-button__more { display: grid; place-items: center; flex: 0 0 var(--new-chat-more-width); width: var(--new-chat-more-width); height: 100%; border-left: 1px solid var(--color-border-soft); border-radius: 0 calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0; color: var(--color-text-3); }
 .cli-menu { top: calc(var(--new-chat-height) + var(--space-1)); left: 0; width: var(--cli-menu-width); }
 .cli-menu > p { margin: 0; padding: var(--space-1-5) var(--space-2-5); font-size: var(--font-size-sm); color: var(--color-text-muted); }
-.navigation__heading { flex: 0 0 var(--nav-heading-height); height: var(--nav-heading-height); margin: 0; padding: var(--space-2) var(--space-2-5) var(--space-1-5); font-size: var(--font-size-xs); font-weight: 400; line-height: var(--nav-heading-line-height); letter-spacing: var(--heading-letter-spacing); color: var(--color-text-muted); }
+.navigation__heading { flex: 0 0 var(--nav-heading-height); height: var(--nav-heading-height); margin: 0; padding: var(--space-2) var(--space-2-5) var(--space-1-5); font-size: var(--font-size-xs); font-weight: 600; line-height: var(--nav-heading-line-height); letter-spacing: var(--heading-letter-spacing); color: var(--color-text-3); }
 .navigation__view { display: flex; align-items: center; gap: var(--space-2-5); width: 100%; height: var(--nav-row-height); padding: 0 var(--space-2-5); border-radius: var(--radius-md); font-size: var(--font-size-md); color: var(--color-text-2); }
 .navigation__view > svg { color: var(--color-text-muted); }
 .navigation__view.is-selected { background: var(--color-selected); color: var(--color-text); font-weight: 500; }
@@ -92,7 +92,7 @@
 .launcher h1 { margin: 0; font-size: var(--font-size-title); font-weight: 600; }
 .launcher__intro p { margin: var(--space-1) 0 0; }
 .launcher__open { align-self: flex-start; }
-.launcher__recent h2 { margin: 0; padding: var(--space-2) var(--space-3) var(--space-1-5); font-size: var(--font-size-xs); font-weight: 400; letter-spacing: var(--heading-letter-spacing); color: var(--color-text-muted); }
+.launcher__recent h2 { margin: 0; padding: var(--space-2) var(--space-3) var(--space-1-5); font-size: var(--font-size-xs); font-weight: 600; letter-spacing: var(--heading-letter-spacing); color: var(--color-text-3); }
 .error-message { margin: 0; color: var(--color-error); font-size: var(--font-size-sm); line-height: 1.6; }
 .recent-project { display: flex; align-items: center; border-radius: var(--radius-lg); }
 .recent-project:hover { background: var(--color-hover); }
