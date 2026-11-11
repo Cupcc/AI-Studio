@@ -126,6 +126,7 @@ it('goes back, forward and stops, and restores the address with Escape', async (
   vi.mocked(api.getState).mockResolvedValue(state({ address: 'https://example.com/b', status: 'ready', canGoBack: true }))
   render(<BrowserPanel projectId="p" active />)
   const back = await screen.findByRole('button', { name: '后退' })
+  await waitFor(() => expect(back.hasAttribute('disabled')).toBe(false))
   expect((screen.getByRole('button', { name: '前进' }) as HTMLButtonElement).disabled).toBe(true)
   fireEvent.click(back)
   await waitFor(() => expect(api.goBack).toHaveBeenCalledWith({ projectId: 'p', generation: 'g1' }))
