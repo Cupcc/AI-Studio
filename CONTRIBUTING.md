@@ -19,39 +19,37 @@
 
 ## 2. 分支规范
 
-| 分支                  | 用途                           | 约束                                                                                                                                                           |
-| --------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `main`                | 日常开发与交付基线             | 文档、小修复可直接提交；禁止新增 merge commit、强推和重写已发布历史                                                                                            |
-| 任务分支              | 较大改动、试验或需要隔离的工作 | 从同步后的 main 创建，在独立 worktree 工作；名称由执行的 Agent 按工作内容决定，使用英文小写与连字符，例如 `task/contributing`、`feat/project-view`，不强制前缀 |
-| `<任务分支>-<worker>` | 已安排的并行 worker            | 在独立 worktree 工作；写入范围与集成方式遵循 Task Protocol                                                                                                     |
+| 分支 | 用途 | 约束 |
+|---|---|---|
+| `main` | 已通过约定检查和人工验收的稳定交付基线 | 从 dev 的已验收提交快进；禁止新增 merge commit、强推和重写已发布历史 |
+| `dev` | 长期功能集成与人工体验入口 | 主 checkout 常驻；只集成已提交并完成开发自检的成果；不强推或改写已集成提交 |
+| 任务分支 | 功能开发、修复或需要隔离的工作 | 从最新 dev 创建独立 worktree；使用英文小写与连字符，例如 `feat/project-view`、`fix/workbench-order` |
+| `<任务分支>-<worker>` | 已安排的并行 worker | 独立 worktree，写入范围与集成方式遵循 Task Protocol |
 
-小改动的日常流程为：修改 → 检查 diff → 提交 → 推送。较大工作使用短期任务分支，默认不设长期集成分支；已有其他命名的分支保留。
+用户在主目录运行 `pnpm dev` 体验集成版本。AI 在任务 worktree 实现和自检，处理冲突并提交到 dev；人工体验发现的问题通过任务或修复分支继续集成。小改动可直接提交 dev，仍须检查 diff 并通过适用门禁。main 不接收待验收的日常改动。流程来源与本轮迁移状态见 [dev 集成任务](tasks/T20261111-dev-integration/task.md)。
 
-主 checkout（仓库主目录）始终停在 main，只做小改动和第 5 节的合入，不切换到任务分支。多个 AI 会话共用 checkout 时会共享 HEAD、工作区和暂存区。切换分支会改变其他会话正在编辑的文件，暂存的改动可能被其他提交带走，提交门禁也会检查到他人未完成的修改。
+主 checkout（仓库主目录）常驻 dev，不切换到任务分支或 main。多个 AI 会话共用 checkout 时共享 HEAD、文件和暂存区，不能同时暂存或提交；集成由单一写者串行执行。
 
-开始工作前同步 main；工作区须干净，无法快进时先检查本地与远端差异，不强推或丢弃本地改动：
+开始工作前核对状态并同步 dev；工作区须干净，无法快进时检查差异，不强推或丢弃本地改动：
 
 ```sh
 git status --short
-git switch main
-git pull --ff-only origin main
+git pull --ff-only origin dev
 ```
 
-较大工作在仓库同级目录 `../AI Stduio.worktrees/` 下创建 worktree，不放在仓库内，避免被搜索、编辑器和测试扫描到：
+较大工作在仓库同级目录 `../AI Stduio.worktrees/` 下创建 worktree，不放在仓库内：
 
 ```sh
-git worktree add "../AI Stduio.worktrees/example" -b task/example main
+git worktree add "../AI Stduio.worktrees/example" -b feat/example dev
 cd "../AI Stduio.worktrees/example"
 pnpm install
 ```
 
-- 新 worktree 须先执行 `pnpm install` 再提交：`core.hooksPath` 指向 Husky 生成的 `.husky/_/`，该目录未纳入版本控制；缺少时 Git 不报错，直接跳过提交检查。
-- 并行工作开始前核对写入范围；会修改同一文件的工作排成先后，否则冲突只会推迟到 rebase 时出现。
+- 新 worktree 须先执行 `pnpm install` 再提交：`core.hooksPath` 指向 Husky 生成的 `.husky/_/`，缺少时 Git 会跳过提交检查。
+- 并行工作开始前核对写入范围；会修改同一文件的工作排成先后。
 - 本机资源同一时间只给一个 worktree 使用：开发模式各 worktree 共用同一 userData 与数据库（见 [桌面端说明](apps/desktop/README.md)），`pnpm dev` 不同时运行；需要窗口焦点的 Electron E2E 同一时间只运行一份。
 
-任务分支同步 main 使用 rebase，禁止把 main merge 进任务分支。共享分支改写前先协调所有使用者。
-
-任务分支按需推送备份。已发布的个人任务分支因 rebase 改写历史时，核对远端没有他人新提交后才可使用 `--force-with-lease`；禁止使用 `--force`，禁止对 main 强推。
+任务分支首次集成 dev 前使用 rebase 同步 dev，不把 dev merge 进任务分支。已经进入 dev 的提交不再重写；后续修复从当前 dev 新建分支。任务分支按需推送备份，个人分支 rebase 后须核对远端没有他人新提交，才可使用 `--force-with-lease`；禁止对 dev 或 main 强推。
 
 ## 3. 提交规范
 
@@ -66,7 +64,7 @@ pnpm install
 - 破坏性变更使用 `!` 或 `BREAKING CHANGE:` footer。
 - 标题已能说明的小改动无需重复写长正文；复杂改动在正文说明原因，引用已有任务和适用的 FR / AC。涉及人工确认的内容，引用确认记录；没有记录时在提交说明中保留对话结论与确认日期。
 - 每个提交围绕同一目的，提交前检查暂存 diff；不夹带无关修改、凭据、个人配置或临时产物。
-- 任务分支可保留过程提交，进入 main 前按第 5 节整理；提交须通过现有门禁。
+- 任务分支可保留过程提交，进入 dev 前按第 5 节整理；提交须通过现有门禁。
 
 本地 hooks、commitlint 的具体配置、检查命令和边界见 [scripts/README.md](scripts/README.md)。不得用 `--no-verify` 或 `HUSKY=0` 跳过本地提交检查；CI 中显式运行检查的配置以脚本说明为准。
 
@@ -78,30 +76,44 @@ PR 可选：需要集中查看较大 diff、邀请他人审阅或协作时使用
 
 已有 task 由 Main Agent 按 [Task Protocol](tasks/README.md#lifecycle) 核对完成条件并收尾。任务关闭、PR approval、合并均不代表人工接受功能交付；所需独立 AI 评审与人工功能验收见该协议，不额外要求每个 task 人工签收。
 
-使用 PR 时，目标为 main，标题遵循第 3 节格式；描述简要说明目的、验证结果、已有任务及适用 FR / AC。界面变化附截图，有未决问题则明确列出。
+功能或修复 PR 的目标为 dev，标题遵循第 3 节格式；描述简要说明目的、验证结果、已有任务及适用 FR / AC。界面变化附截图，有未决问题则明确列出。
 
-提交与日常 CI 按[脚本说明](scripts/README.md#测试分层)检查受影响范围，不默认全量运行。提交或合并本身不是全量回归理由；同一基线的有效检查结果无需手工重复，根据改动补充必要验证。推送 main 或更新 PR 后检查 CI 结果，失败时修复；使用 PR 时须等最新版本 CI 通过再合并。无 PR 的任务分支推送仅作备份，手动 CI 明确表示选择完整自动化；本地合入仍须完成第 5 节必要验证。
+提交与日常 CI 按[脚本说明](scripts/README.md#测试分层)检查受影响范围，不默认全量运行。提交或合并本身不是全量回归理由；同一基线的有效检查结果无需手工重复，根据改动补充必要验证。推送 dev、main 或更新 PR 后检查 CI 结果，失败时修复；使用 PR 时须等最新版本 CI 通过再合并。无 PR 的任务分支推送仅作备份，手动 CI 明确表示选择完整自动化；本地合入仍须完成第 5 节必要验证。
 
 ## 5. 合并与收尾
 
-任务分支默认在本地合并：
+### 集成到 dev
 
-1. 在主 checkout 同步 main，再在任务 worktree 中执行 `git rebase main`，确保包含本地 main 上尚未推送的提交。
-2. 将同一目标的过程提交压成一个有意义的提交；不同目标先拆分。保留改动原因、已有任务、适用 FR / AC 和必要的人工确认记录。
-3. 检查最终 diff 并完成必要验证；若冲突处理改变内容，重新验证受影响部分。
-4. 回到主 checkout，只用 `--ff-only` 合入并普通推送。快进失败时回到分支同步步骤，不改用普通 merge。
+1. 在主 checkout 同步 dev，再在任务 worktree 执行 `git rebase dev`。
+2. 将同一目标的过程提交整理成有意义的提交，不同目标拆分。检查最终 diff，完成必要验证；冲突处理改变内容时重新验证受影响部分。
+3. 回到主 checkout，用 `--ff-only` 合入并普通推送。快进失败时重新同步任务分支，不改用普通 merge。
 
 ```sh
-git merge --ff-only task/example   # 在主 checkout（main）执行
-git push origin main
-git worktree remove "../AI Stduio.worktrees/example"
+git merge --ff-only feat/example   # 在主 checkout（dev）执行
+git push origin dev
 ```
 
-若选择 PR，则使用 **Squash and merge**，一个 PR 对应一个提交，核对最终提交信息；禁止 **Create a merge commit**。合并后本地 main 用 `git pull --ff-only origin main` 同步。
+若选择 PR，功能 PR 使用 **Squash and merge** 到 dev，禁止 **Create a merge commit**。主 checkout 随后用 `git pull --ff-only origin dev` 同步。已经 squash 集成的任务分支不再复用，反馈修复从最新 dev 开始。
 
-合入后删除对应 worktree；有未提交改动时 `git worktree remove` 会拒绝，先检查，不加 `--force`。确认交付后可删除已合并且无人使用的分支，保留任务文档与证据。已经 squash 合并的分支不再复用，后续工作从最新 main 开始。
+### 将验收版本推进到 main
 
-此规范约束后续合入的提交。既有 main 的 merge commit 仍保留；若需要整理旧历史，另建任务，列出保留内容、备份与协作影响，经人工明确授权后执行。
+人工在 dev 验收完整功能或一批版本，记录接受范围与具体提交。dev 同时包含尚未接受的功能时，先修复或撤回相关改动并验证剩余组合，再选择晋级提交；不能把未验收内容随 dev 分支头一起带入 main。
+
+在独立的 main worktree 中同步 main，然后快进到记录的已验收提交并普通推送。主目录始终保留在 dev；dev 到 main 不 squash，避免丢失已验收提交身份与祖先关系。
+
+```sh
+git pull --ff-only origin main
+git merge --ff-only <已验收的-dev-commit>
+git push origin main
+```
+
+快进失败时检查分叉来源，不强推或重写 dev、main；整合后的内容发生变化则重新验证。提交、AI 检查与合并不代替人工产品验收，记录要求见 [Task Protocol](tasks/README.md#人工功能验收)。
+
+### 清理
+
+对应交付进入 main 后，核对任务 worktree 没有未提交改动且无人使用，再删除 worktree 与已合入分支；不使用 `--force`。dev 长期保留，继续承接下一轮功能。任务文档与历史证据按 Task Protocol 保留。
+
+既有 main 的 merge commit 保留。整理旧历史须另建任务，列出保留内容、备份与协作影响，并取得人工明确授权。
 
 ## 6. 远端设置
 

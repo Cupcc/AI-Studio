@@ -33,7 +33,7 @@
 | 开发迭代 | 先跑受影响文件／模块的测试；共享 IPC、数据库、Adapter 等跨模块变化扩大回归范围 |
 | 纯文档提交 | 暂存快照的 Markdown 本地链接回归检查；人工或 AI 补充表格／标题预览及负责索引要求的一致性检查 |
 | 代码提交 | 文档回归＋受影响 TypeScript 项目类型检查＋相关单测；本地不自动运行 E2E |
-| main push / 面向 main 的 PR | 文档回归＋同一选择器的受影响检查＋明确选中的 E2E spec；不自动打包 |
+| dev / main push 及面向它们的 PR | 文档回归＋同一选择器的受影响检查＋明确选中的 E2E spec；不自动打包 |
 | 空变更、设计素材、任务证据 | 不触发应用测试；文档链接检查仍适用 |
 | 未映射路径／全局配置／缺失比较基线 | 阻断并提示补充影响映射或恢复比较基线；不自动退回全量 |
 | 显式完整命令／手动 CI | 完整基础检查；手动 CI 另运行全量 E2E、打包与冒烟 |
@@ -74,7 +74,7 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 ### 文档检查边界
 
 - [Codex 项目角色](../.codex/agents/README.md)的 `.codex/agents/*.toml` 只影响开发 Agent，按角色说明核对解析与加载，不触发应用测试；该目录的 README 纳入文档快路径。其他 Codex 配置与脚本不因此豁免。
-- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README、已登记的架构 HTML 文档，以及 docs / specs / tasks / design / .agents/archive 下的 `.md`（任务与规格模板分别位于 `tasks/templates/`、`specs/templates/`）。设计目录、任务 evidence、归档目录和搜索忽略配置 `.ignore` 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定，空变更不启动应用测试。归档规则见 [Task Protocol](../tasks/README.md#archiving)。
+- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README、React 技能 AGENTS 的文档链接、已登记的架构 HTML 文档，以及 docs / specs / tasks / design / .agents/archive 下的 `.md`（任务与规格模板分别位于 `tasks/templates/`、`specs/templates/`）。设计目录、任务 evidence、归档目录和搜索忽略配置 `.ignore` 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定；旧 templates 下五份 Markdown 仅在原路径已移除且所属 tasks/specs 模板存在时按迁移识别。空变更不启动应用测试。归档规则见 [Task Protocol](../tasks/README.md#archiving)。
 - [check-docs.mjs](check-docs.mjs) 解析 Markdown 与 GFM 表格，检查内联／引用式链接、图片目标、Markdown 标题锚点及显式 HTML id/name。跨文档扫描可发现删除文件、改标题造成的未修改文件入链损坏；代码示例中的伪链接不检查。
 - 本地 `check:docs` 默认比较 HEAD 与当前工作树（包含未忽略的未跟踪文件）；提交门禁比较 HEAD 与 Git 暂存快照，未暂存修复和未跟踪目标不能掩盖提交中的断链。
 - 只阻断相对基线新增的问题，历史问题按来源路径、链接和问题类型识别，不借本任务批量清理。`pnpm check:docs --base <commit> --head <commit>` 检查两个快照；`pnpm check:docs --base ''` 对当前工作树做完整审计，可能暴露历史问题。
@@ -119,8 +119,8 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 
 配置：[ci.yml](../.github/workflows/ci.yml)，触发条件、runner、Node 版本、CLI 版本、超时、权限与产物保留期均以该文件为准；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。
 
-- 仅 main push、面向 main 的 PR 与手动触发运行；任务分支备份 push 不再与 PR 重复。main 合入后的验证针对新基线，仍保留。
-- Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。无效／缺失基线阻断，空 diff 跳过应用；手动 CI 的文档以 HEAD 为基线，不声称历史审计通过。
+- 仅 dev / main push、面向 dev / main 的 PR 与手动触发运行；任务分支备份 push 不再与 PR 重复。main 合入后的验证针对新基线，仍保留。
+- Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。首次创建 dev 的 push 以 origin/main 与当前提交的共同祖先为基线；其他无效／缺失基线阻断，空 diff 跳过应用；手动 CI 的文档以 HEAD 为基线，不声称历史审计通过。
 - macOS arm64 job 冻结 lockfile 安装，普通事件执行 `check-affected.mjs --ci`：受影响类型检查、相关单测，以及选中的 E2E spec。仅有工作流脚本改动时只执行脚本测试；无 E2E 时不构建桌面或配置显示器。需要 E2E 时构建桌面一次，无自动打包。
 - 仅手动 `workflow_dispatch` 执行 `check:code`、完整 E2E、`package:built` 和 `smoke:packaged`。构建产物只在本 job 的同一基线复用，不跨运行缓存输出。显式根命令保留原语义。
 - CI 设置 `HUSKY=0` 显式运行检查；应用 job 保留依赖安装脚本以安装 Electron 与修复 PTY helper。

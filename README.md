@@ -15,6 +15,8 @@ pnpm dev       # 以开发模式启动桌面应用
 
 常用根命令见[开发命令](scripts/README.md#开发命令)；桌面包的命令细节与代码结构见 [apps/desktop/README.md](apps/desktop/README.md)。
 
+日常体验在主目录 `dev` 分支运行 `pnpm dev`。功能先集成 dev，经人工验收后再进入 main；具体流程见[分支规范](CONTRIBUTING.md#2-分支规范)。
+
 ## 仓库结构
 
 | 路径 | 内容 |
