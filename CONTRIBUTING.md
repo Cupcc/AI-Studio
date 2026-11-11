@@ -26,7 +26,7 @@
 | 任务分支 | 功能开发、修复或需要隔离的工作 | 从最新 dev 创建独立 worktree；使用英文小写与连字符，例如 `feat/project-view`、`fix/workbench-order` |
 | `<任务分支>-<worker>` | 已安排的并行 worker | 独立 worktree，写入范围与集成方式遵循 Task Protocol |
 
-用户在主目录运行 `pnpm dev` 体验集成版本。AI 在任务 worktree 实现和自检，处理冲突并提交到 dev；人工体验发现的问题通过任务或修复分支继续集成。小改动可直接提交 dev，仍须检查 diff 并通过适用门禁。main 不接收待验收的日常改动。流程来源与本轮迁移状态见 [dev 集成任务](tasks/T20261111-dev-integration/task.md)。
+用户在主目录运行 `pnpm dev` 体验集成版本。AI 在任务 worktree 实现和自检，处理冲突并提交到 dev；人工体验发现的问题通过任务或修复分支继续集成。小改动可直接提交 dev，仍须检查 diff 并通过适用门禁。main 不接收待验收的日常改动。流程来源与本轮迁移状态见 [dev 集成任务](.agents/archive/tasks/T20261111-dev-integration/task.md)。
 
 主 checkout（仓库主目录）常驻 dev，不切换到任务分支或 main。多个 AI 会话共用 checkout 时共享 HEAD、文件和暂存区，不能同时暂存或提交；集成由单一写者串行执行。
 
