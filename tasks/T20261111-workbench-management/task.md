@@ -43,3 +43,7 @@ owner: main-agent
 ## dev 集成与本轮边界
 
 用户于 2026-11-11 要求统一集成到 dev，并明确由其自行验证，AI 本轮只处理提交、集成和冲突。管理操作已移植到标准网页包宿主，保留新版 PackageRuntime、统一快照、iframe 和公共资源。原工作目录与历史验收基线保留；本轮提交门禁不等于组合后的功能验收。当前操作入口为主目录 dev 的 `pnpm dev`，人工产品验收待进行；不再把旧的“等待 Main 释放窗口”作为本轮前置条件。集成记录见[dev 任务](../../.agents/archive/tasks/T20261111-dev-integration/task.md)。
+
+## 来源目录清理
+
+2026-11-11 用户明确要求删除已经整合的旧 worktree 且本次无需快照，原 workbench-management 目录和旧分支已删除。当前管理代码已在 dev；后续反馈从最新 dev 创建修复分支，不再回旧目录修改。清理与工作流纠正见[后续任务](../../.agents/archive/tasks/T20261111-worktree-workflow/task.md)。人工产品验收仍待进行。
