@@ -1,7 +1,8 @@
+import { CliConnectionPanel } from './CliConnectionPanel'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { COLOR_MODES, DEFAULT_THEME, GLASS_COLORS, THEME_PREFERENCES, type ColorMode, type GlassColor, type ThemePreference } from '@shared/ipc/settings'
 import type { SessionCli } from '@shared/session/types'
-import type { CliConnection, SaveCliConnection } from '@shared/session/cli-connection'
+import type { CliConnection } from '@shared/session/cli-connection'
 import type { CliInstallation } from '@shared/session/cli-installation'
 import { SETTINGS_STRINGS as T } from '@shared/settings/strings'
 import { Icon } from '../../app/Icon'
@@ -38,8 +39,6 @@ function CliSettings() {
   const [installations, setInstallations] = useState<CliInstallation[]>([])
   const [connections, setConnections] = useState<CliConnection[]>([])
   const [connectionOpen, setConnectionOpen] = useState<SessionCli | null>(null)
-  const [connectionDraft, setConnectionDraft] = useState<Partial<SaveCliConnection>>({})
-  const [connectionMessage, setConnectionMessage] = useState<string | null>(null)
   useEffect(() => {
     let active = true
     const api = sessionApi()
@@ -84,34 +83,15 @@ function CliSettings() {
     catch (reason) { setError(String(reason)) }
   }
   const connectionFor = (cli: SessionCli) => connections.find(item => item.cli === cli) ?? { cli, mode: 'local' as const, profile: null, revision: 'local' }
-  const openConnection = (cli: SessionCli) => {
-    const current = connectionFor(cli)
-    setConnectionOpen(cli)
-    setConnectionMessage(null)
-    setConnectionDraft(current.mode === 'app' && current.profile ? { cli, mode: 'app', baseUrl: current.profile.baseUrl, model: current.profile.model, auth: current.profile.auth } : { cli, mode: 'local' })
-  }
-  const testConnection = async () => {
-    if (!connectionOpen) return
-    setConnectionMessage('正在测试连接…')
-    try { const result = await sessionApi().testCliConnection({ cli: connectionOpen }); setConnectionMessage(result.message) }
-    catch (reason) { setConnectionMessage(String(reason)) }
-  }
-  const saveConnection = async () => {
-    if (!connectionOpen || !connectionDraft.mode) return
-    setPending(connectionOpen); setError(null)
-    try {
-      const saved = await sessionApi().saveCliConnection({ ...connectionDraft, cli: connectionOpen } as SaveCliConnection)
-      setConnections(items => items.map(item => item.cli === saved.cli ? saved : item))
-      setConnectionOpen(null)
-      await useSessions.getState().loadProviders(true)
-    } catch (reason) { setError(String(reason)) }
-    finally { setPending(null) }
-  }
+  const openConnection = (cli: SessionCli) => { setError(null); setConnectionOpen(cli) }
   const enabled = providers.filter(provider => provider.status !== 'disabled')
   const notAdded = providers.filter(provider => provider.status === 'disabled')
   const available = providers.filter(provider => provider.status === 'available')
   const effectiveDefault = available.find(provider => provider.cli === selected)?.cli ?? available[0]?.cli ?? null
   const statusLabels = { disabled: '未添加', checking: '待检测', available: '可用', not_installed: '未安装', not_logged_in: '未登录', unsupported_version: '版本不兼容', error: '检测失败' }
+  if (connectionOpen) return <CliConnectionPanel key={connectionOpen} connection={connectionFor(connectionOpen)} name={cliName(connectionOpen)}
+    onClose={() => { const cli = connectionOpen; setConnectionOpen(null); requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(`[data-cli-config="${cli}"]`)?.focus()) }}
+    onSaved={saved => { setConnections(items => [...items.filter(item => item.cli !== saved.cli), saved]); void useSessions.getState().loadProviders(true) }} />
   return <section className="settings-dialog__content cli-settings" aria-label={T.cli} ref={panel}>
     <div className="cli-settings__header">
       <h3>{T.cli}</h3>
@@ -141,17 +121,12 @@ function CliSettings() {
                   <span>{name}</span>
                 </button>
                 <span className="cli-settings__status">{checking ? '检测中…' : statusLabels[provider.status]}</span>
-                <button className="text-button cli-settings__action" onClick={() => openConnection(provider.cli)}>配置</button><button className="text-button cli-settings__action" aria-label={`移除 ${name}`} data-cli-action={provider.cli}
+                <button className="text-button cli-settings__action" data-cli-config={provider.cli} disabled={loading} onClick={() => openConnection(provider.cli)}>配置</button><button className="text-button cli-settings__action" aria-label={`移除 ${name}`} data-cli-action={provider.cli}
                   disabled={loading || pending !== null} onClick={() => void toggle(provider.cli, false)}>移除</button>
               </div>
               {failed && <div className="cli-settings__failure">
                 {provider.status === 'not_installed' ? <button className="text-button cli-settings__help" disabled={installations.some(item => item.cli === provider.cli && item.status === 'installing')} onClick={() => void install(provider.cli)}>{installations.find(item => item.cli === provider.cli)?.status === 'installing' ? '正在安装…' : '一键安装'}</button> : <button className="text-button cli-settings__help" aria-expanded={details === provider.cli} onClick={() => setDetails(details === provider.cli ? null : provider.cli)}>处理方法</button>}
                 {details === provider.cli && <p className="cli-settings__recovery">{provider.reason}<br />{provider.status === 'not_installed' ? `安装 ${name} 后点击右上角“重新检测”。` : provider.status === 'not_logged_in' ? `在终端完成 ${name} 登录后，点击右上角“重新检测”。` : '确认 CLI 在终端中可正常运行后，点击右上角“重新检测”。'}</p>}
-              </div>}
-              {connectionOpen === provider.cli && <div className="cli-settings__connection">
-                <label>配置来源<select value={connectionDraft.mode ?? 'local'} onChange={event => setConnectionDraft({ cli: provider.cli, mode: event.target.value as 'local', ...(event.target.value === 'app' ? { auth: provider.cli === 'codex' ? 'api_key' : 'api_key' as const } : {}) })}><option value="local">使用本机配置</option><option value="app">使用应用配置</option></select></label>
-                {connectionDraft.mode === 'app' && <>{provider.cli === 'claude-code' && <label>认证方式<select value={connectionDraft.auth ?? 'api_key'} onChange={event => setConnectionDraft(draft => ({ ...draft, cli: provider.cli, mode: 'app', auth: event.target.value as 'api_key' | 'bearer' }))}><option value="api_key">API Key</option><option value="bearer">Bearer Token</option></select></label>}<label>Base URL<input value={connectionDraft.baseUrl ?? ''} onChange={event => setConnectionDraft(draft => ({ ...draft, cli: provider.cli, mode: 'app', baseUrl: event.target.value }))} placeholder="https://api.example.com/v1" /></label><label>模型<input value={connectionDraft.model ?? ''} onChange={event => setConnectionDraft(draft => ({ ...draft, cli: provider.cli, mode: 'app', model: event.target.value || null }))} /></label><label>API Key<input type="password" autoComplete="new-password" value={connectionDraft.apiKey ?? ''} onChange={event => setConnectionDraft(draft => ({ ...draft, cli: provider.cli, mode: 'app', apiKey: event.target.value }))} placeholder="留空表示保留已保存的密钥" /></label></>}
-                <div>{connectionMessage && <span role="status">{connectionMessage}</span>}<button className="secondary-button button--small" onClick={() => void testConnection()}>测试连接</button><button className="secondary-button button--small" onClick={() => setConnectionOpen(null)}>取消</button><button className="primary-button button--small" disabled={pending !== null} onClick={() => void saveConnection()}>保存并重新检测</button></div>
               </div>}
             </div>
           })}
@@ -197,7 +172,7 @@ export function SettingsDialog() {
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') { event.preventDefault(); closeDialog() }
     if (event.key !== 'Tab') return
-    const focusable = [...dialog.current!.querySelectorAll<HTMLElement>('button:not(:disabled):not([tabindex="-1"])')]
+    const focusable = [...dialog.current!.querySelectorAll<HTMLElement>('button:not(:disabled):not([tabindex="-1"]), input:not(:disabled), select:not(:disabled)')]
     const first = focusable[0], last = focusable.at(-1)
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
     if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }

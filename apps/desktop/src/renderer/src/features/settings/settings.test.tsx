@@ -41,6 +41,50 @@ async function openDialog() {
 }
 
 describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
+  it('saves URL and key without a model and shows the direct API hi test result', async () => {
+    const previous = useSessions.getState()
+    const connection = { cli: 'codex', mode: 'local', profile: null, revision: 'local' }
+    const saveCliConnection = vi.fn(async (request) => ({ ...connection, ...request, revision: 'saved', profile: { baseUrl: request.baseUrl, auth: request.auth, hasApiKey: true } }))
+    const testCliConnection = vi.fn(async () => ({ ok: true, message: '连接测试通过。回复：Hi!', model: 'native-model', reply: 'Hi!', durationMs: 1200 }))
+    Object.assign(window.studio, { session: {
+      getProviders: async () => [{ cli: 'codex', displayName: 'Codex CLI', status: 'available', reason: null }],
+      getGlobalDefaultCli: async () => 'codex', getCliConnections: async () => [connection], saveCliConnection, testCliConnection,
+    } })
+    useSessions.setState({ providers: [], providersError: null, projects: {}, drafts: {} })
+    try {
+      await openDialog()
+      fireEvent.click(screen.getByRole('button', { name: 'CLI' }))
+      const configure = await screen.findByRole('button', { name: '配置' })
+      await waitFor(() => expect(configure.hasAttribute('disabled')).toBe(false))
+      fireEvent.click(configure)
+      fireEvent.click(screen.getByRole('radio', { name: '自定义连接' }))
+      expect(screen.queryByLabelText('模型')).toBeNull()
+      expect(screen.queryByLabelText('认证方式')).toBeNull()
+      fireEvent.change(screen.getByLabelText('Base URL'), { target: { value: 'https://gateway.example/v1' } })
+      fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'secret' } })
+      expect(screen.getByRole('button', { name: '测试连接' }).hasAttribute('disabled')).toBe(true)
+      expect(screen.getByText('保存后即可测试')).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: '保存' }))
+      expect(screen.getByRole('button', { name: '返回 CLI 列表' }).hasAttribute('disabled')).toBe(true)
+      expect(screen.getByRole('button', { name: '取消' }).hasAttribute('disabled')).toBe(true)
+      await waitFor(() => expect(saveCliConnection).toHaveBeenCalledWith({ cli: 'codex', mode: 'app', auth: 'api_key', baseUrl: 'https://gateway.example/v1', apiKey: 'secret' }))
+      expect(testCliConnection).not.toHaveBeenCalled()
+      await waitFor(() => expect(screen.getByText('已安全保存')).toBeTruthy())
+      expect(screen.getByLabelText('Base URL')).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: '测试连接' }))
+      await waitFor(() => expect(screen.getByRole('status').textContent).toContain('Hi!'))
+      expect(screen.getByRole('status').textContent).toContain('native-model')
+      expect(screen.getByRole('status').textContent).toContain('1.2 s')
+      fireEvent.change(screen.getByLabelText('Base URL'), { target: { value: 'https://other.example/v1' } })
+      expect(screen.queryByRole('status')).toBeNull()
+      expect(screen.getByRole('button', { name: '保存' }).hasAttribute('disabled')).toBe(true)
+      expect(screen.getByRole('button', { name: '测试连接' }).hasAttribute('disabled')).toBe(true)
+      fireEvent.click(screen.getByRole('button', { name: '返回 CLI 列表' }))
+      fireEvent.click(screen.getByRole('button', { name: '配置' }))
+      expect(screen.getByLabelText<HTMLInputElement>('Base URL').value).toBe('https://gateway.example/v1')
+    } finally { useSessions.setState(previous, true) }
+  })
+
   it('loads the CLI category, saves one default for all Projects and retries detection', async () => {
     const previous = useSessions.getState()
     const provider = { cli: 'codex' as const, displayName: 'Codex CLI', status: 'available' as const, reason: null }

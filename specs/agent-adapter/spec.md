@@ -212,9 +212,9 @@ FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026
 
 CLI 连接配置由桌面主进程保存与注入，Adapter 不读写用户配置文件。`ProviderEnvironment.connection` 是可选的宿主连接快照，包含 Base URL、认证方式和仅在主进程解密后的 API Key；未设置时 Adapter 保持本机 CLI 配置行为。
 
-- Codex 在每个 app-server / model catalog Runtime 启动时传递 `-c` provider 覆盖，API Key 只放入子进程环境；availability 的登录检查在应用配置模式下以宿主管理凭据为准。
-- Claude 在每个 SDK Runtime 与 availability 检查中设置 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST=1`、`ANTHROPIC_BASE_URL` 和对应认证变量，清理继承的冲突变量。
-- 覆盖必须同时用于 Session、恢复、模型目录和可用性检查；Session 绑定创建时的连接修订，不在运行中静默切换。
+- Codex 在创建 / 恢复前通过原生 `config/read` 取得有效 provider，保留非认证传输选项，剔除空可选值与旧认证信息，再用 app-server `-c` 注入连接覆盖。API Key 只放入子进程环境。模型、effort 和其他原生配置不覆盖；目录读取仍使用原生目录，不缩减为应用指定的单个模型。availability 的凭据存在检查不代表远端请求成功。
+- Claude 原生初始化后，通过 SDK `applyFlagSettings` 的 stdin 控制请求只叠加 endpoint / credential 环境项；恢复 Runtime 时重新应用。不设置宿主管理模型标记，不把密钥放进 argv 或配置文件；本机模型环境、默认别名、输出限额与 effort 继续由原生设置合并。
+- 连接覆盖用于 Session、恢复和可用性检查；Session 绑定创建时的 URL / 凭据修订，不在运行中静默切换。设置中的直接 API 测试由[settings spec](../settings/spec.md#cli-连接配置2026-11-08-确认)负责，不经过 Adapter。
 - 连接配置机制验证基线与未覆盖项见[CLI 配置研究](../../tasks/T20261108-cli-install/research.md)。真实网关协议、鉴权和旧版本兼容性仍需按 CLI 单独验收。
 
 ## 4. 状态与数据

@@ -19,5 +19,5 @@ if (!files.length || docsOnly(files)) {
     console.error(`Stage or isolate unstaged non-document changes before checking the index: ${unstaged.join(', ')}`)
     process.exit(1)
   }
-  process.exitCode = runPlan(affectedPlan(files, inventory()))
+  process.exitCode = runPlan(affectedPlan(files, inventory(), { base, head }))
 }

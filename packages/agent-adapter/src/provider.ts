@@ -24,7 +24,6 @@ export interface ProviderConnection {
   baseUrl: string;
   apiKey: string;
   auth: 'api_key' | 'bearer';
-  model?: string;
 }
 
 export interface ProviderEnvironment {

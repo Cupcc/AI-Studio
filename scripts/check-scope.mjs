@@ -28,7 +28,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   }
   if (process.env.GITHUB_EVENT_NAME !== 'workflow_dispatch') {
     const { affectedPlan, inventory } = await import('./check-affected.mjs')
-    const plan = affectedPlan(changedPaths(result.base, 'HEAD'), inventory())
+    const plan = affectedPlan(changedPaths(result.base, 'HEAD'), inventory(), { base: result.base, head: 'HEAD' })
     console.log(JSON.stringify(plan, null, 2))
     if (plan.unknown.length || plan.missingTests.length) {
       console.error(`Unmapped paths: ${plan.unknown.join(', ')}; missing selected tests: ${plan.missingTests.join(', ')}. Fix focused scope mappings; refusing automatic full checks.`)

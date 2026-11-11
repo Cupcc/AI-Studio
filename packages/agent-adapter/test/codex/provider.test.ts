@@ -10,6 +10,23 @@ const setup = () => { const harness = new Harness(); harnesses.push(harness); re
 afterEach(async () => { await Promise.all(harnesses.splice(0).map((h) => h.provider.dispose())); });
 
 describe('Codex Provider lifecycle / FR-CHAT-002, FR-CHAT-003, AC-02', () => {
+  it('overrides only connection fields while inheriting the native model and provider tuning', async () => {
+    const h = setup();
+    h.configure = server => server.handle('config/read', () => ({ config: {
+      model: 'local-model', model_provider: 'gateway', model_reasoning_effort: 'high',
+      model_providers: { gateway: { name: 'Gateway', base_url: 'https://old.example', env_key: 'OLD_KEY', wire_api: 'responses', request_max_retries: 7, gateway_oauth: null, credential_file: null, http_headers: { 'x-custom': 'keep', Authorization: 'old-token' } } },
+    } }));
+    await h.session({ environment: { env: { PATH: '/bin', OLD_KEY: 'old', SENTINEL: 'kept' }, connection: { baseUrl: 'https://new.example', apiKey: 'new', auth: 'api_key' } } });
+    const start = h.servers[1]!.received.find(message => message.method === 'thread/start')!.params;
+    expect(start).toEqual({ cwd: options.cwd });
+    const args = h.spawns[1]!.args.join(' ');
+    expect(args).toContain('request_max_retries');
+    expect(args).toContain('https://new.example');
+    expect(args).not.toContain('old-token');
+    expect(args).not.toContain('model=');
+    expect(h.spawns[1]!.env).toMatchObject({ SENTINEL: 'kept', AI_STUDIO_CODEX_API_KEY: 'new' });
+  });
+
   it('rejects unconfirmed runtime disposal and retries the exact runtime', async () => {
     const h = setup();
     const session = await h.session();

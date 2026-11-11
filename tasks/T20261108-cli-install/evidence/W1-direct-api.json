@@ -1,0 +1,7 @@
+{
+  "cli": "codex",
+  "transport": "direct HTTP API",
+  "input": "hi",
+  "ok": true,
+  "message": "连接测试通过（gpt-6.1-sol）。回复：Hi! How can I help you today?"
+}

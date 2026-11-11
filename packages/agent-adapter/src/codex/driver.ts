@@ -63,6 +63,7 @@ export class CodexDriver implements SessionDriver {
     private readonly extras: CodexProviderOptions,
     executable: string,
     private readonly dependencies: DriverDependencies,
+    connectionOptions = codexConnectionOptions(options.environment),
   ) {
     this.timeouts = resolveTimeouts(options.timeouts);
     this.desiredModel = options.overrides?.model;
@@ -71,7 +72,6 @@ export class CodexDriver implements SessionDriver {
     this.slot = new RuntimeSlot(async (generation) => {
       this.operationSignal?.throwIfAborted();
       if (this.disposed) throw adapterError('disposed', 'Codex Session is disposed');
-      const connectionOptions = codexConnectionOptions(options.environment);
       const runtime = await dependencies.runtimeFactory({ command: executable, args: ['app-server', '--listen', 'stdio://', ...connectionOptions.args],
         sessionId: sink.sessionId, cwd: options.cwd, env: connectionOptions.env, label: 'codex app-server', generation, lister: dependencies.processLister, terminate });
       if (this.operationSignal?.aborted || this.disposed) {
@@ -128,6 +128,7 @@ export class CodexDriver implements SessionDriver {
     }));
     this.sink.runtimeStarted({ generation: runtime.generation, ...(runtime.pid !== undefined ? { pid: runtime.pid } : {}) });
     await connection.initialize(signal);
+
   }
 
   private threadParams(): ThreadStartParams {

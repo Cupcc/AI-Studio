@@ -40,12 +40,12 @@ function connectionRequest(raw: unknown): SaveCliConnection {
     expectOnlyKeys(value, ['cli', 'mode'])
     return { cli: provider, mode: 'local' }
   }
-  expectOnlyKeys(value, ['cli', 'mode', 'baseUrl', 'model', 'auth', 'apiKey'])
+  expectOnlyKeys(value, ['cli', 'mode', 'baseUrl', 'auth', 'apiKey'])
   if (value.mode !== 'app' || (value.auth !== 'api_key' && value.auth !== 'bearer')) throw new IpcValidationError('Invalid connection mode or authentication')
   const baseUrl = validateBaseUrl(expectString(value.baseUrl, 'baseUrl', { minLength: 1, maxLength: 2048 }))
   const apiKey = value.apiKey === undefined ? undefined : expectString(value.apiKey, 'apiKey', { minLength: 1, maxLength: 8192 })
   if (apiKey && /[\r\n\0]/.test(apiKey)) throw new IpcValidationError('Invalid API Key')
-  return { cli: provider, mode: 'app', baseUrl, model: model(value.model), auth: value.auth, ...(apiKey ? { apiKey } : {}) }
+  return { cli: provider, mode: 'app', baseUrl, auth: value.auth, ...(apiKey ? { apiKey } : {}) }
 }
 function projectRef(raw: unknown) { const value = record(raw, ['projectId']); return { projectId: id(value.projectId, 'projectId') } }
 function sessionRef(raw: unknown) { const value = record(raw, ['sessionId']); return { sessionId: id(value.sessionId, 'sessionId') } }
@@ -208,7 +208,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     } },
     testCliConnection: {
       parse: raw => { const value = record(raw, ['cli']); return { cli: cli(value.cli) } },
-      handle: ({ cli }) => connections.test(cli)
+      handle: async ({ cli }) => connections.test(cli, cliEnvironment((await core.shellEnv.get()).env))
     },
     getCliInstallations: { parse: noInput, handle: () => installer.snapshot() },
     installCli: {

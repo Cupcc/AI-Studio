@@ -119,6 +119,19 @@ const question = { questions: [{ question: 'Choose a color', header: 'Color', mu
   options: [{ label: 'Blue', description: 'cool' }, { label: 'Green', description: 'natural' }] }] };
 
 describe('Claude Provider — FR-CHAT-003 / FR-STATE-001..003 / AC-02, AC-03, AC-05', () => {
+  it('keeps native model, effort and limits while replacing endpoint credentials', async () => {
+    const h = harness();
+    await h.provider.createSession({ ...options, environment: {
+      env: { PATH: '/bin', ANTHROPIC_MODEL: 'local-model', ANTHROPIC_DEFAULT_SONNET_MODEL: 'local-sonnet', ANTHROPIC_MAX_OUTPUT_TOKENS: '12345', CLAUDE_CODE_EFFORT_LEVEL: 'high', ANTHROPIC_AUTH_TOKEN: 'old-token' },
+      connection: { baseUrl: 'https://gateway.example', apiKey: 'new-key', auth: 'api_key' },
+    } });
+    expect(h.queries[0]!.options.model).toBeUndefined();
+    expect(h.queries[0]!.options.env).toMatchObject({ ANTHROPIC_MODEL: 'local-model', ANTHROPIC_DEFAULT_SONNET_MODEL: 'local-sonnet', ANTHROPIC_MAX_OUTPUT_TOKENS: '12345', CLAUDE_CODE_EFFORT_LEVEL: 'high' });
+    expect(h.queries[0]!.options.env).not.toHaveProperty('CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST');
+    expect(h.queries[0]!.flagSettings).toEqual([expect.objectContaining({ env: expect.objectContaining({ ANTHROPIC_BASE_URL: 'https://gateway.example', ANTHROPIC_API_KEY: 'new-key', ANTHROPIC_AUTH_TOKEN: '' }) })]);
+    expect(JSON.stringify(h.spawns[0]!.args)).not.toContain('new-key');
+  });
+
   it('rejects unconfirmed runtime disposal and retries without replacing the handle', async () => {
     const h = harness();
     const { session, runtime } = await h.session();

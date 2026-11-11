@@ -123,10 +123,17 @@ export class CodexProvider implements AgentProvider {
       const executable = await this.executable(options.environment);
       this.assertLive();
       this.resources.assertOpen(options.cwd);
+      const nativeConfig = options.environment.connection ? await this.probe(
+        { ...options.environment, connection: undefined }, options.cwd, this.lifetime.signal, options.timeouts?.startupMs ?? 30_000,
+        async (connection, signal) => (await connection.request('config/read', { cwd: options.cwd, includeLayers: false }, signal)).config,
+      ) : undefined;
+      this.assertLive();
+      this.resources.assertOpen(options.cwd);
+      const connectionOptions = codexConnectionOptions(options.environment, nativeConfig);
       let driver!: CodexDriver;
       const session = new SessionController({ providerId: this.id, capabilities: this.capabilities, timeouts: options.timeouts,
         expectedNativeSessionId: resumeId, initialModel: options.overrides?.model }, (sink) => {
-        driver = new CodexDriver(sink, options, extras, executable.path, this.dependencies); return driver;
+        driver = new CodexDriver(sink, options, extras, executable.path, this.dependencies, connectionOptions); return driver;
       });
       this.live.add(session, options.cwd);
       try {

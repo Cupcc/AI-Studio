@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { changedPaths, docsOnly, git, paths } from './check-paths.mjs'
 
@@ -35,7 +35,48 @@ export function inventory(cwd = process.cwd()) {
     .filter(file => existsSync(`${cwd}/${file}`))
 }
 
-export function affectedPlan(files, available) {
+// smol-toml is a leaf runtime dependency used only by the CLI connection reader.
+// Compare both snapshots so unrelated manifest/lock changes still fail closed.
+export function connectionDependencyChange(beforeManifest, afterManifest, beforeLock, afterLock) {
+  const normalize = (manifest, lock) => {
+    const value = JSON.parse(manifest)
+    const version = value.dependencies?.['smol-toml']
+    if (version !== undefined) {
+      if (!/^\d+\.\d+\.\d+$/.test(version)) return null
+      const importer = `      smol-toml:\n        specifier: ${version}\n        version: ${version}\n`
+      let removed = false
+      lock = lock.replace(/^  apps\/desktop:\n[\s\S]*?(?=^  [^ ]|^packages:)/m, block => {
+        removed = block.includes(importer)
+        return block.replace(importer, '')
+      })
+      if (!removed) return null
+      const escaped = version.replaceAll('.', '\\.')
+      lock = lock.replace(new RegExp(`^  smol-toml@${escaped}:\\n    resolution: \\{integrity: [^\\n]+\\}\\n    engines: \\{node: [^\\n]+\\}\\n\\n`, 'm'), '')
+      lock = lock.replace(`  smol-toml@${version}: {}\n\n`, '')
+      delete value.dependencies['smol-toml']
+    }
+    if (lock.includes('smol-toml')) return null
+    return JSON.stringify([value, lock])
+  }
+  try {
+    const before = normalize(beforeManifest, beforeLock)
+    return before !== null && before === normalize(afterManifest, afterLock)
+  } catch { return false }
+}
+
+function connectionDependencyPaths(files, { base = 'HEAD', head, cwd = process.cwd() }) {
+  const manifest = `${desktop}package.json`
+  const lock = 'pnpm-lock.yaml'
+  if (!files.includes(manifest) && !files.includes(lock)) return new Set()
+  try {
+    const read = (ref, file) => ref ? git(['show', `${ref}:${file}`], cwd) : readFileSync(`${cwd}/${file}`, 'utf8')
+    return connectionDependencyChange(read(base, manifest), read(head, manifest), read(base, lock), read(head, lock))
+      ? new Set([manifest, lock]) : new Set()
+  } catch { return new Set() }
+}
+
+export function affectedPlan(files, available, comparison = {}) {
+  const connectionDependencies = connectionDependencyPaths(files, comparison)
   const seeds = { scripts: new Set(), desktop: new Set(), adapter: new Set() }
   const types = new Set()
   const e2e = new Set()
@@ -56,6 +97,12 @@ export function affectedPlan(files, available) {
   }
   for (const file of [...new Set(files)].sort()) {
     if (docsOnly([file]) || /^(?:tasks\/(?:archive\/)?T[^/]+\/evidence|design)\//.test(file)) continue
+    if (connectionDependencies.has(file)) {
+      types.add('node'); types.add('web')
+      addDomain('session'); addDomain('settings')
+      e2e.add('e2e/app.spec.ts')
+      continue
+    }
     if (/^(?:scripts\/(?:check-[\w-]+(?:\.test)?|vitest\.config)\.mjs|\.codex\/(?:hooks\.json|scripts\/agent-docs-hook(?:\.test)?\.mjs)|\.husky\/(?:pre-commit|commit-msg)|commitlint\.config\.cjs|\.github\/workflows\/ci\.yml)$/.test(file)) {
       seeds.scripts.add(file)
       addTests('scripts', test => test.startsWith('scripts/') || test.startsWith('.codex/scripts/'))
@@ -168,7 +215,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     ...paths(git(['diff', '--name-only', '--no-renames', '-z', base, '--'])),
     ...paths(git(['ls-files', '--others', '--exclude-standard', '-z']))
   ])]
-  const plan = affectedPlan(files, available)
+  const plan = affectedPlan(files, available, { base, head })
   if (args.includes('--dry-run')) {
     console.log(JSON.stringify(plan, null, 2))
     process.exitCode = plan.unknown.length || plan.missingTests.length ? 1 : 0

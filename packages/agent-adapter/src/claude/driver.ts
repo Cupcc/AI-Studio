@@ -1,4 +1,4 @@
-import { claudeConnectionEnvironment } from './connection-options.js';
+import { claudeConnectionSettings } from './connection-options.js';
 import { randomUUID } from 'node:crypto';
 import type { EffortLevel, ModelInfo as SDKModelInfo, Options, SDKMessage, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import { deferred, withTimeout } from '../core/async.js';
@@ -80,6 +80,7 @@ export class ClaudeDriver implements SessionDriver {
           await this.slot.start();
           if (startupSignal.aborted) throw adapterError('timeout', 'Claude initialization was cancelled');
           this.catalog = await this.state!.query!.supportedModels(); // initialize handshake; sends no user prompt
+          if (this.options.environment.connection) await this.state!.query!.applyFlagSettings(claudeConnectionSettings(this.options.environment.connection));
         } finally { startupSignal.removeEventListener('abort', abort); }
       }, this.timeouts.startupMs, 'Claude initialization', signal);
     } catch (error) {
@@ -98,7 +99,7 @@ export class ClaudeDriver implements SessionDriver {
     const ready = deferred<RuntimeHandle>();
     const sdkOptions: Options = {
       ...this.extras,
-      cwd: this.options.cwd, env: { ...claudeConnectionEnvironment(this.options.environment) }, pathToClaudeCodeExecutable: this.executable,
+      cwd: this.options.cwd, env: { ...this.options.environment.env }, pathToClaudeCodeExecutable: this.executable,
       includePartialMessages: true,
       systemPrompt: this.extras.systemPrompt ?? { type: 'preset', preset: 'claude_code' },
       ...(this.nativeId ? { resume: this.nativeId } : {}),
@@ -292,6 +293,7 @@ export class ClaudeDriver implements SessionDriver {
     previous.query!.close();
     if (stop.signal.aborted) throw adapterError('timeout', 'Claude recovery was cancelled');
     await this.current().query!.supportedModels();
+    if (this.options.environment.connection) await this.current().query!.applyFlagSettings(claudeConnectionSettings(this.options.environment.connection));
     // Flag settings belong to the replaced process; the replacement starts from CLI defaults.
     if (typeof this.effort === 'string') this.effortDirty = true;
     this.sink.nativeSessionId(this.nativeId);

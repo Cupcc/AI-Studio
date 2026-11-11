@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { affectedPlan, runPlan } from './check-affected.mjs'
+import { affectedPlan, connectionDependencyChange, runPlan } from './check-affected.mjs'
 
 const d = 'apps/desktop/'
 const a = 'packages/agent-adapter/'
@@ -24,7 +24,7 @@ const available = [
   `${a}src/codex/driver.ts`, `${a}test/codex/driver.test.ts`,
   `${a}test/claude/driver.test.ts`, `${a}test/codex/real.integration.test.ts`
 ]
-const plan = files => affectedPlan(files, available)
+const plan = files => affectedPlan(files, available, { base: 'missing-test-baseline' })
 const commandText = value => value.commands.flat().join(' ')
 
 test('docs, evidence and empty diff do not run application checks', () => {
@@ -74,6 +74,23 @@ test('unknown/global config blocks before any commands, never falls back to full
     expect(runPlan(plan([file]), { run })).toBe(1)
   }
   expect(run).not.toHaveBeenCalled()
+})
+test('only the reviewed leaf dependency change receives the connection scope', () => {
+  const beforeManifest = JSON.stringify({ dependencies: { 'node-pty': '1.1.0' } })
+  const afterManifest = JSON.stringify({ dependencies: { 'node-pty': '1.1.0', 'smol-toml': '1.9.1' } })
+  const beforeLock = 'importers:\n\n  apps/desktop:\n    dependencies:\n      node-pty:\n        specifier: 1.1.0\n        version: 1.1.0\n\npackages:\n\nsnapshots:\n\n'
+  const afterLock = beforeLock.replace('    dependencies:\n', '    dependencies:\n      smol-toml:\n        specifier: 1.9.1\n        version: 1.9.1\n')
+    .replace('packages:\n\n', 'packages:\n\n  smol-toml@1.9.1:\n    resolution: {integrity: sha512-fixture}\n    engines: {node: \">= 18\"}\n\n') + '  smol-toml@1.9.1: {}\n\n'
+  const accepts = (manifest = afterManifest, lock = afterLock) => connectionDependencyChange(beforeManifest, manifest, beforeLock, lock)
+  expect(accepts()).toBe(true)
+  expect(connectionDependencyChange(afterManifest, beforeManifest, afterLock, beforeLock)).toBe(true)
+  expect(accepts(afterManifest.replace('1.1.0', '2.0.0'))).toBe(false)
+  expect(accepts(afterManifest.replace('1.9.1', '^1.9.1'))).toBe(false)
+  expect(accepts(afterManifest, afterLock.replace('version: 1.1.0', 'version: 2.0.0'))).toBe(false)
+  expect(accepts(afterManifest, afterLock.replace('  smol-toml@1.9.1: {}', '  smol-toml@1.9.1:\n    dependencies:\n      unreviewed: 1.0.0'))).toBe(false)
+  expect(accepts(afterManifest, afterLock.replace('  apps/desktop:', '  other/workspace:'))).toBe(false)
+  expect(accepts(afterManifest, beforeLock)).toBe(false)
+  expect(accepts('invalid JSON')).toBe(false)
 })
 test('local checks never run Electron; CI builds once then passes explicit specs', () => {
   const run = vi.fn(() => ({ status: 0 }))

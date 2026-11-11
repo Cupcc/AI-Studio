@@ -45,6 +45,8 @@
 
 影响映射不是全知依赖分析。新增模块、跨模块调用或全局依赖／构建配置变更时，先在选择器中补充有依据的映射和对应回归测试；未知路径失败时不得改为无条件豁免或全量兜底。选中的 E2E 文件缺失／改名时阻断并要求同步映射，单测选择为空也不记作通过。共享边界可能选中多个模块；选择结果须结合 diff 审阅，必要的功能／里程碑验收仍遵循 Task Protocol。
 
+CLI 连接模型读取使用的 `smol-toml` 是已登记的叶子依赖。桌面 manifest 与 lockfile 的变更只有在两个比较快照除该依赖外完全一致时，才选中 Session / Settings 单测、桌面类型检查及应用启动和相关 E2E。暂存检查使用 Git index，CI 使用 before → HEAD；其他依赖、脚本或 lockfile 变化仍阻断。依据：用户 2026-11-11 授权全部线性集成，见[集成记录](../tasks/T20261111-main-integration/task.md)。
+
 ```sh
 # 默认比较 HEAD 与工作树（含未跟踪文件）；只打印计划，不执行测试。
 node scripts/check-affected.mjs --dry-run

@@ -1,0 +1,100 @@
+import { useEffect, useRef, useState } from 'react'
+import type { CliConnection, ConnectionTestResult, SaveCliConnection } from '@shared/session/cli-connection'
+import { Icon } from '../../app/Icon'
+import { sessionApi } from '../session/api'
+
+interface Props {
+  connection: CliConnection
+  name: string
+  onClose(): void
+  onSaved(connection: CliConnection): void
+}
+type TestState = { status: 'idle' } | { status: 'running' } | { status: 'complete'; result: ConnectionTestResult }
+
+export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props) {
+  const [saved, setSaved] = useState(connection)
+  const [mode, setMode] = useState(connection.mode)
+  const [baseUrl, setBaseUrl] = useState(connection.profile?.baseUrl ?? '')
+  const [apiKey, setApiKey] = useState('')
+  const [showKey, setShowKey] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [test, setTest] = useState<TestState>({ status: 'idle' })
+  const back = useRef<HTMLButtonElement>(null)
+  const body = useRef<HTMLDivElement>(null)
+  const active = useRef(true)
+  useEffect(() => { active.current = true; back.current?.focus(); return () => { active.current = false } }, [])
+  useEffect(() => {
+    if (test.status === 'complete' && body.current) body.current.scrollTop = body.current.scrollHeight
+  }, [test])
+  const dirty = mode !== saved.mode || (mode === 'app' && (baseUrl.trim().replace(/\/+$/, '') !== saved.profile?.baseUrl || Boolean(apiKey)))
+  const busy = saving || test.status === 'running'
+  const hasKey = saved.profile?.hasApiKey && baseUrl.trim().replace(/\/+$/, '') === saved.profile.baseUrl
+  const canSave = dirty && (mode === 'local' || Boolean(baseUrl.trim() && (apiKey || hasKey)))
+  const changeMode = (next: 'local' | 'app') => { setMode(next); setTest({ status: 'idle' }); setError(null) }
+  const save = async () => {
+    if (!canSave || busy) return
+    setSaving(true); setError(null); setTest({ status: 'idle' })
+    const request: SaveCliConnection = mode === 'local' ? { cli: connection.cli, mode }
+      : { cli: connection.cli, mode, baseUrl: baseUrl.trim(), auth: saved.profile?.auth ?? 'api_key', ...(apiKey ? { apiKey } : {}) }
+    try {
+      const next = await sessionApi().saveCliConnection(request)
+      onSaved(next)
+      if (!active.current) return
+      setSaved(next); setBaseUrl(next.profile?.baseUrl ?? ''); setApiKey(''); setShowKey(false)
+    } catch (reason) { if (active.current) setError(String(reason)) }
+    finally { if (active.current) setSaving(false) }
+  }
+  const runTest = async () => {
+    if (busy || dirty || saved.mode !== 'app') return
+    setTest({ status: 'running' })
+    try {
+      const result = await sessionApi().testCliConnection({ cli: connection.cli })
+      if (active.current) setTest({ status: 'complete', result })
+    } catch (reason) { if (active.current) setTest({ status: 'complete', result: { ok: false, message: String(reason) } }) }
+  }
+  return <section className="settings-dialog__content cli-connection" aria-label={`${name} 连接`}>
+    <header className="cli-connection__header">
+      <button className="icon-button" ref={back} aria-label="返回 CLI 列表" disabled={saving} onClick={onClose}><Icon name="arrow-left" /></button>
+      <h3>{name} <span>连接</span></h3>
+      <span className="cli-connection__save-state">{dirty ? '未保存' : '已保存'}</span>
+    </header>
+    <div className="cli-connection__body" ref={body}>
+      <div className="cli-connection__modes" role="radiogroup" aria-label="配置来源">
+        {(['local', 'app'] as const).map(value => <button key={value} role="radio" aria-checked={mode === value} tabIndex={mode === value ? 0 : -1}
+          disabled={busy} className={mode === value ? 'is-selected' : ''} onClick={() => changeMode(value)}
+          onKeyDown={event => { if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) { event.preventDefault(); const next = event.key === 'Home' ? 'local' : event.key === 'End' ? 'app' : mode === 'local' ? 'app' : 'local'; changeMode(next); event.currentTarget.parentElement?.querySelector<HTMLButtonElement>(`[data-mode="${next}"]`)?.focus() } }} data-mode={value}>
+          <Icon name={value === 'local' ? 'terminal' : 'browser'} size={15} />{value === 'local' ? '本机配置' : '自定义连接'}
+        </button>)}
+      </div>
+      {mode === 'local' ? <div className="cli-connection__native">
+        <span className="cli-connection__native-icon"><Icon name="terminal" size={24} /></span>
+        <h4>与本机 CLI 保持一致</h4>
+        <p>使用本机的连接地址、凭据与模型。<br />在终端中修改配置，这里也会沿用。</p>
+      </div> : <>
+        <p className="cli-connection__hint">仅替换地址与密钥，模型和其他设置沿用本机。</p>
+        <div className="cli-connection__fields">
+          <label htmlFor="connection-url">Base URL</label>
+          <input id="connection-url" value={baseUrl} spellCheck={false} autoComplete="off" disabled={busy} placeholder={connection.cli === 'codex' ? 'https://api.example.com/v1' : 'https://api.example.com'} onChange={event => { setBaseUrl(event.target.value); setTest({ status: 'idle' }) }} />
+          <div className="cli-connection__key-label"><label htmlFor="connection-key">API Key</label>{hasKey && <span><Icon name="check" size={12} />已安全保存</span>}</div>
+          <div className="cli-connection__key">
+            <input id="connection-key" type={showKey ? 'text' : 'password'} value={apiKey} autoComplete="new-password" spellCheck={false} disabled={busy} placeholder={hasKey ? '留空保留已保存的密钥' : '输入 API Key'} onChange={event => { setApiKey(event.target.value); setTest({ status: 'idle' }) }} />
+            <button aria-label={showKey ? '隐藏 API Key' : '显示 API Key'} disabled={!apiKey} onClick={() => setShowKey(value => !value)}>{showKey ? '隐藏' : '显示'}</button>
+          </div>
+        </div>
+        <section className="cli-connection__test" aria-label="连接测试">
+          <div className="cli-connection__test-heading"><div><h4>连接测试</h4><p>{dirty ? '保存后即可测试' : '沿用本机配置的模型，发送 hi'}</p></div>
+            <button className="secondary-button" disabled={busy || dirty || saved.mode !== 'app'} onClick={() => void runTest()}><Icon name="refresh" size={14} />{test.status === 'running' ? '测试中…' : '测试连接'}</button>
+          </div>
+          {test.status === 'complete' && <div className={`cli-connection__result ${test.result.ok ? 'is-success' : 'is-error'}`} role="status">
+            <div className="cli-connection__result-heading"><Icon name={test.result.ok ? 'check' : 'close'} size={15} /><strong>{test.result.ok ? '连接正常' : '连接失败'}</strong>{test.result.ok && <span>{(test.result.durationMs / 1000).toFixed(1)} s</span>}</div>
+            {test.result.ok ? <><span className="cli-connection__model">{test.result.model}</span><p>{test.result.reply}</p></> : <p>{test.result.message}</p>}
+          </div>}
+          {test.status === 'running' && <p className="cli-connection__testing" role="status">正在等待 API 回复…</p>}
+        </section>
+      </>}
+      {error && <p className="error-message" role="alert">{error}</p>}
+    </div>
+    <footer className="cli-connection__footer"><button className="secondary-button" disabled={saving} onClick={onClose}>取消</button><button className="primary-button" disabled={!canSave || busy} onClick={() => void save()}>{saving ? '保存中…' : '保存'}</button></footer>
+  </section>
+}

@@ -1064,7 +1064,7 @@ export class SessionService implements MainSessionPort {
       try {
         const environment = await this.options.environment(cli)
         if (this.quitting || this.disposed || this.closing.has(projectId) || this.closed.has(projectId) || this.options.canOperate?.(projectId) === false) return { models: [], error: 'Project 正在关闭或应用正在退出' }
-        const models = environment.connection?.model ? [{ id: environment.connection.model, displayName: environment.connection.model, isDefault: true }] : await this.provider(cli).listModels({ environment, cwd: project.canonicalPath, signal: this.discoveryAbort.signal })
+        const models = await this.provider(cli).listModels({ environment, cwd: project.canonicalPath, signal: this.discoveryAbort.signal })
         const result = { models: models.filter(model => !model.hidden), error: null }
         this.catalogs.set(`${projectId}:${cli}`, result)
         return result

@@ -1,3 +1,4 @@
+import { nativeTestModel, testApiConnection } from './connection-test'
 import { randomUUID } from 'node:crypto'
 import type { ProviderEnvironment } from '@ai-studio/agent-adapter'
 import { SESSION_CLIS, type SessionCli } from '@shared/session/types'
@@ -36,8 +37,8 @@ export class CliConnections {
       let profile: StoredProfile | null = null
       if (data.profile !== null) {
         const p = data.profile
-        if (!p || typeof p !== 'object' || !('baseUrl' in p) || typeof p.baseUrl !== 'string' || !('model' in p) || !(p.model === null || typeof p.model === 'string') || !('auth' in p) || !(p.auth === 'api_key' || p.auth === 'bearer') || !('encryptedKey' in p) || typeof p.encryptedKey !== 'string' || !p.encryptedKey) throw new Error()
-        profile = { baseUrl: validateBaseUrl(p.baseUrl), model: p.model, auth: p.auth, encryptedKey: p.encryptedKey }
+        if (!p || typeof p !== 'object' || !('baseUrl' in p) || typeof p.baseUrl !== 'string' || !('auth' in p) || !(p.auth === 'api_key' || p.auth === 'bearer') || !('encryptedKey' in p) || typeof p.encryptedKey !== 'string' || !p.encryptedKey) throw new Error()
+        profile = { baseUrl: validateBaseUrl(p.baseUrl), auth: p.auth, encryptedKey: p.encryptedKey }
       }
       if (data.mode === 'app' && !profile) throw new Error()
       return { mode: data.mode === 'app' ? 'app' : 'local', revision: data.revision, profile }
@@ -46,7 +47,7 @@ export class CliConnections {
 
   get(cli: SessionCli): CliConnection {
     const saved = this.read(`connection:${cli}`)
-    return { cli, mode: saved.mode, revision: saved.revision, profile: saved.profile ? { baseUrl: saved.profile.baseUrl, model: saved.profile.model, auth: saved.profile.auth, hasApiKey: true } : null }
+    return { cli, mode: saved.mode, revision: saved.revision, profile: saved.profile ? { baseUrl: saved.profile.baseUrl, auth: saved.profile.auth, hasApiKey: true } : null }
   }
   list(): CliConnection[] { return SESSION_CLIS.map(cli => this.get(cli)) }
 
@@ -65,7 +66,7 @@ export class CliConnections {
         let encryptedKey: string
         try { encryptedKey = key ? (await this.secrets.encrypt(key)).toString('base64') : profile!.encryptedKey }
         catch { throw new Error('无法安全保存 API Key，请检查系统钥匙串后重试。') }
-        profile = { baseUrl, model: request.model, auth: request.auth, encryptedKey }
+        profile = { baseUrl, auth: request.auth, encryptedKey }
       }
       this.store.setPreference(`connection:${request.cli}`, JSON.stringify({ mode: request.mode, revision: randomUUID(), profile } satisfies StoredConnection))
       return this.get(request.cli)
@@ -85,24 +86,16 @@ export class CliConnections {
     let apiKey: string
     try { apiKey = await this.secrets.decrypt(Buffer.from(profile.encryptedKey, 'base64')) }
     catch { throw new Error('无法读取此会话的 API Key，请解锁系统钥匙串后重试。') }
-    return { env, connection: { baseUrl: profile.baseUrl, apiKey, auth: profile.auth, ...(profile.model ? { model: profile.model } : {}) } }
+    return { env, connection: { baseUrl: profile.baseUrl, apiKey, auth: profile.auth } }
   }
 
-  async test(cli: SessionCli): Promise<ConnectionTestResult> {
-    const { connection } = await this.environment(cli, {})
+  async test(cli: SessionCli, env: Env): Promise<ConnectionTestResult> {
+    const { connection } = await this.environment(cli, env)
     if (!connection) return { ok: false, message: '请先保存应用连接配置。' }
-    if (!connection.model) return { ok: false, message: '请填写并保存要测试的模型。' }
-    const claude = cli === 'claude-code'
-    const endpoint = claude ? `${connection.baseUrl.replace(/\/v1$/, '')}/v1/messages` : `${connection.baseUrl}/responses`
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST', redirect: 'error', signal: AbortSignal.timeout(15_000),
-        headers: { 'Content-Type': 'application/json', ...(claude ? { 'anthropic-version': '2023-06-01' } : {}),
-          ...(claude && connection.auth === 'api_key' ? { 'x-api-key': connection.apiKey } : { Authorization: `Bearer ${connection.apiKey}` }) },
-        body: JSON.stringify(claude ? { model: connection.model, max_tokens: 1, messages: [{ role: 'user', content: 'Reply OK.' }] } : { model: connection.model, max_output_tokens: 16, input: 'Reply OK.', store: false })
-      })
-      await response.body?.cancel()
-      return response.ok ? { ok: true, message: '连接测试通过。' } : { ok: false, message: `服务返回 HTTP ${response.status}，请检查地址、凭据、模型和额度。` }
-    } catch { return { ok: false, message: '连接失败或超时，请检查地址、网络和代理。' } }
+    let model: string
+    try { model = await nativeTestModel(cli, env) }
+    catch { return { ok: false, message: '无法读取本机模型配置，请检查 CLI 配置文件。' } }
+    return testApiConnection(cli, connection, model)
   }
+
 }

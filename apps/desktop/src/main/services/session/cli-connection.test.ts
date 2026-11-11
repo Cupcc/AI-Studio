@@ -11,7 +11,7 @@ describe('CliConnections', () => {
     expect(validateBaseUrl('https://example.com/v1/')).toBe('https://example.com/v1')
     const db = store(); const connections = new CliConnections(db, secrets())
     expect(connections.get('codex')).toMatchObject({ mode: 'local', profile: null })
-    const saved = await connections.save({ cli: 'codex', mode: 'app', baseUrl: 'https://gateway.example/v1', model: 'm1', auth: 'api_key', apiKey: 'secret' })
+    const saved = await connections.save({ cli: 'codex', mode: 'app', baseUrl: 'https://gateway.example/v1', auth: 'api_key', apiKey: 'secret' })
     expect(saved.profile).toMatchObject({ baseUrl: 'https://gateway.example/v1', hasApiKey: true })
     expect(JSON.stringify([...db.values])).not.toContain('secret')
     await expect(connections.environment('codex', { PATH: '/bin' })).resolves.toMatchObject({ env: { PATH: '/bin' }, connection: { baseUrl: 'https://gateway.example/v1', apiKey: 'secret' } })
@@ -21,6 +21,17 @@ describe('CliConnections', () => {
 
   it('requires a new key when the endpoint changes and refuses plaintext fallback', async () => {
     const db = store(); const connections = new CliConnections(db, { ...secrets(), available: async () => false })
-    await expect(connections.save({ cli: 'claude-code', mode: 'app', baseUrl: 'https://gateway.example', model: null, auth: 'api_key', apiKey: 'secret' })).rejects.toThrow('密钥保护')
+    await expect(connections.save({ cli: 'claude-code', mode: 'app', baseUrl: 'https://gateway.example', auth: 'api_key', apiKey: 'secret' })).rejects.toThrow('密钥保护')
   })
+  it('ignores a legacy model in saved profiles and session snapshots', async () => {
+    const db = store(); const connections = new CliConnections(db, secrets())
+    const legacy = JSON.stringify({ mode: 'app', revision: 'old', profile: { baseUrl: 'https://gateway.example/v1', model: 'old-model', auth: 'api_key', encryptedKey: Buffer.from('sealed:secret').toString('base64') } })
+    db.setPreference('connection:codex', legacy)
+    db.setPreference('connection:session:old', legacy)
+    expect(connections.get('codex').profile).not.toHaveProperty('model')
+    expect((await connections.environment('codex', {}, 'old')).connection).toEqual({ baseUrl: 'https://gateway.example/v1', apiKey: 'secret', auth: 'api_key' })
+    await connections.save({ cli: 'codex', mode: 'app', baseUrl: 'https://gateway.example/v1', auth: 'api_key' })
+    expect(db.getPreference('connection:codex')).not.toContain('model')
+  })
+
 })

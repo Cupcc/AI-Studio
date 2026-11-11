@@ -80,7 +80,44 @@
 .glass-color.is-checked .glass-color__swatch { box-shadow: inset 0 0 0 1px var(--preview-frame), 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-text); }
 .glass-color__name { font-size: var(--font-size-sm); color: var(--color-text-3); }
 .glass-color.is-checked .glass-color__name { color: var(--color-text); font-weight: 500; }
-.cli-settings__connection { display: grid; gap: var(--space-2); padding: var(--space-3) 26px var(--space-4); background: var(--color-pane); border-top: 1px solid var(--color-border-soft); }
-.cli-settings__connection label { display: grid; gap: 4px; font-size: var(--font-size-sm); color: var(--color-text-2); }
-.cli-settings__connection input, .cli-settings__connection select { min-height: 30px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 0 8px; color: var(--color-text); background: var(--color-window); }
-.cli-settings__connection > div { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: 4px; }
+
+.settings-dialog__content.cli-connection { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
+.cli-connection__header { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-border-soft); }
+.cli-connection__header h3 { flex: 1; margin: 0; font-size: var(--font-size-body); }
+.cli-connection__header h3 span { margin-left: var(--space-1); color: var(--color-text-muted); font-weight: 400; }
+.cli-connection__save-state { color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.cli-connection__body { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-5) var(--space-6); }
+.cli-connection__modes { display: flex; gap: var(--space-1); padding: var(--space-1); border-radius: var(--radius-lg); background: var(--color-hover); }
+.cli-connection__modes button { display: flex; flex: 1; align-items: center; justify-content: center; gap: var(--space-2); min-height: 32px; border-radius: var(--radius-sm); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.cli-connection__modes button.is-selected { background: var(--color-control); color: var(--color-text); box-shadow: var(--shadow-input); font-weight: 500; }
+.cli-connection__hint { margin: var(--space-3) 0 var(--space-5); color: var(--color-text-muted); font-size: var(--font-size-sm); line-height: 1.6; }
+.cli-connection__fields { display: grid; gap: var(--space-2); }
+.cli-connection__fields label { font-size: var(--font-size-sm); font-weight: 500; }
+.cli-connection__fields input { width: 100%; min-width: 0; height: 36px; padding: 0 var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-control); color: var(--color-text); font-size: var(--font-size-sm); }
+.cli-connection__fields input::placeholder { color: var(--color-text-muted); }
+.cli-connection__fields input:focus { outline: 2px solid var(--color-focus-ring-soft); border-color: var(--color-focus-ring); }
+.cli-connection__key-label { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-2); }
+.cli-connection__key-label span { display: flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.cli-connection__key { position: relative; }
+.cli-connection__key input { padding-right: 52px; }
+.cli-connection__key button { position: absolute; right: var(--space-2); top: 4px; height: 28px; padding: 0 var(--space-1); color: var(--color-text-muted); font-size: var(--font-size-xs); border-radius: var(--radius-xs); }
+.cli-connection__test { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-border-soft); }
+.cli-connection__test-heading { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+.cli-connection h4 { margin: 0; font-weight: 500; font-size: var(--font-size-sm); }
+.cli-connection__test-heading p { margin: var(--space-1) 0 0; color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.cli-connection__test-heading button { flex-shrink: 0; display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); }
+.cli-connection__result { margin-top: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-border-soft); border-radius: var(--radius-md); background: var(--color-control); }
+.cli-connection__result-heading { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); }
+.cli-connection__result-heading strong { font-weight: 500; }
+.cli-connection__result-heading span { margin-left: auto; font-size: var(--font-size-xs); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.cli-connection__result.is-success .cli-connection__result-heading > svg { color: var(--color-completed); }
+.cli-connection__result.is-error .cli-connection__result-heading > svg { color: var(--color-error); }
+.cli-connection__model { display: block; margin: var(--space-2) 0 0 23px; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--font-size-xs); overflow-wrap: anywhere; }
+.cli-connection__result p { margin: var(--space-2) 0 0 23px; font-size: var(--font-size-sm); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cli-connection__testing { margin: var(--space-3) 0 0; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.cli-connection__footer { display: flex; flex-shrink: 0; justify-content: flex-end; gap: var(--space-2); padding: var(--space-3) var(--space-6); border-top: 1px solid var(--color-border-soft); }
+.cli-connection__footer button { min-width: 64px; font-size: var(--font-size-sm); }
+.cli-connection__native { padding: var(--space-8) var(--space-2); text-align: center; }
+.cli-connection__native-icon { display: inline-flex; padding: var(--space-3); margin-bottom: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-card); color: var(--color-text-2); }
+.cli-connection__native h4 { font-size: var(--font-size-body); }
+.cli-connection__native p { color: var(--color-text-muted); font-size: var(--font-size-sm); line-height: 1.8; }

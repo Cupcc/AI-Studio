@@ -39,14 +39,22 @@ describe('execBounded', () => {
     expect(result.timedOut).toBe(false);
   });
 
-  it('kills the process group on timeout and truncates large output', async () => {
-    const { path } = await fakeCli('slow', 'head -c 5000 /dev/zero | tr "\\0" a; sleep 30');
+  it('kills the process group on timeout', async () => {
+    const { path } = await fakeCli('slow', 'sleep 30');
     const started = Date.now();
-    const result = await execBounded(path, [], { env: { PATH: '/usr/bin:/bin' }, timeoutMs: 300, maxOutputBytes: 100 });
+    const result = await execBounded(path, [], { env: { PATH: '/usr/bin:/bin' }, timeoutMs: 300 });
     expect(result.timedOut).toBe(true);
-    expect(result.truncated).toBe(true);
-    expect(result.stdout.length).toBe(100);
+    expect(result.signal).toBe('SIGKILL');
     expect(Date.now() - started).toBeLessThan(5_000);
+  });
+
+  it('truncates large output without depending on the timeout', async () => {
+    const { path } = await fakeCli('large-output', 'head -c 5000 /dev/zero | tr "\\0" a');
+    const result = await execBounded(path, [], { env: { PATH: '/usr/bin:/bin' }, maxOutputBytes: 100 });
+    expect(result.code).toBe(0);
+    expect(result.timedOut).toBe(false);
+    expect(result.truncated).toBe(true);
+    expect(result.stdout).toBe('a'.repeat(100));
   });
 
   it('maps a missing file to not_installed', async () => {

@@ -1,4 +1,3 @@
-import { claudeConnectionEnvironment } from './connection-options.js';
 import { isAbsolute } from 'node:path';
 import { tmpdir } from 'node:os';
 import { query } from '@anthropic-ai/claude-agent-sdk';
@@ -39,7 +38,7 @@ export class ClaudeProvider implements AgentProvider {
   }
 
   async checkAvailability(options: AvailabilityOptions): Promise<AvailabilityReport> {
-    const env = claudeConnectionEnvironment(options.environment);
+    const env = options.environment.env;
     const resolve = this.dependencies.resolveExecutable ?? resolveExecutable;
     const exec = this.dependencies.exec ?? execBounded;
     let executable;
@@ -58,6 +57,7 @@ export class ClaudeProvider implements AgentProvider {
         } catch (error) { return failed(toAdapterError(error).info); }
       })(),
       (async (): Promise<CheckResult<LoginInfo>> => {
+        if (options.environment.connection) return ok({ state: 'logged_in', method: 'host_api_key' });
         try {
           const result = await exec(executable.path, ['auth', 'status', '--json'], runOptions);
           if (result.timedOut) throw adapterError('timeout', 'Claude login check timed out');
