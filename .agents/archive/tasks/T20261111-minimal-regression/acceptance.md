@@ -12,7 +12,7 @@
 - 评审者：`regression_review`，未参与实现，只编写本记录与 `W1-*` 探针及证据。
 - 日期与基线：2026-11-11，`bc75bae50e85f3cb5b1060a8126a0964d29ca41b` 加本工作树的选择器及测试 diff。首轮选择器 SHA-256 由 [探针日志](evidence/W1-scope-probe.log) 固定；rebase 后基线与验证见下节。
 - 环境：macOS arm64，Node 26.13.0、Vitest 5.0.1；Provider 与 CLI 不适用。
-- 依据：[本任务范围](task.md)、[测试分层](../../scripts/README.md#测试分层)及用户批准的最小回归目标。
+- 依据：[本任务范围](task.md)、[测试分层](../../../../scripts/README.md#测试分层)及用户批准的最小回归目标。
 
 ## 验证结果
 
@@ -40,3 +40,5 @@
 读取 `integrate-branch.test.mjs` 的静态 `integrateBranch` 导入和 CLI 子进程断言，确认源码修改会选中同一文件内的两类检查。独立执行新增影响断言和实际依赖图断言，2 项通过，28 项按名称过滤跳过，见 [增量日志](evidence/W1-rebase-selection.log)。实际清单精确为 `scripts/integrate-branch.test.mjs`，未选中整组工作流或应用测试。
 
 该增量无新增发现，首轮其他通过结论继续适用于未变更的逻辑。未重复运行整组脚本、应用测试或界面验证。
+
+2026-11-11 输出复核：在 `fb2dbf0` 加测试日志静默改动的基线上，独立检查 `console.log/error` 的测试内 spy 与 `afterEach` 恢复，生产选择器未变。以 `CI=true` 仅运行 `local checks never|config scope` 两项，2 项通过、25 项过滤跳过；输出没有模拟的 `> pnpm` 或 `test:e2e:built` 命令，见 [CI 输出复验](evidence/W1-ci-output-recheck.log)。

@@ -39,7 +39,7 @@ git push origin dev
 
 ## 测试分层
 
-范围检查的初始实现见[任务记录](../.agents/archive/tasks/T20261106-scoped-checks/task.md)，最小回归与实际选择验证见[收紧范围任务](../tasks/T20261111-minimal-regression/task.md)。
+范围检查的初始实现见[任务记录](../.agents/archive/tasks/T20261106-scoped-checks/task.md)，最小回归与实际选择验证见[收紧范围任务](../.agents/archive/tasks/T20261111-minimal-regression/task.md)。
 
 | 场景 | 执行范围 |
 |---|---|

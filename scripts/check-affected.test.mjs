@@ -40,8 +40,11 @@ const commandText = value => value.commands.flat().join(' ')
 
 beforeEach(() => {
   for (const name of Object.keys(process.env)) if (name.startsWith('GIT_')) vi.stubEnv(name, undefined)
+  // runPlan's injected runners simulate commands; do not report them as real CI executions.
+  vi.spyOn(console, 'log').mockImplementation(() => {})
+  vi.spyOn(console, 'error').mockImplementation(() => {})
 })
-afterEach(() => vi.unstubAllEnvs())
+afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks() })
 
 test('docs, evidence and empty diff do not run application checks', () => {
   for (const files of [[], ['README.md'], ['docs/08. System Architecture.html'], ['tasks/T-example/evidence/check.mjs'],
