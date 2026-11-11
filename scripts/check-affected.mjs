@@ -13,7 +13,7 @@ const domains = {
   files: ['files', 'composer'], input: ['composer', 'files', 'cli-default'],
   session: ['session', 'composer', 'cli-default'], chat: ['composer', 'cli-default'],
   project: ['project', 'app', 'workbench'], 'project-view': ['project-view', 'workbench'], settings: ['settings'],
-  workbench: ['project-view', 'workbench'], navigation: ['project', 'workbench', 'alignment'],
+  workbench: ['project-view', 'workbench', 'product-selection'], navigation: ['project', 'workbench', 'alignment'],
   diff: ['diff', 'turn-diff'], 'turn-diff': ['turn-diff'],
   code: ['files', 'diff', 'vscode-parity'], search: ['files'], 'quick-open': ['files'],
   browser: ['runtime-tools'], terminal: ['runtime-tools'], pty: ['runtime-tools'],
@@ -229,6 +229,7 @@ export function affectedPlan(files, available, comparison = {}) {
       else {
         types.add('node'); types.add('web')
         addPackageTests()
+        if (file.startsWith(`${desktop}build/workbenches/product-selection/`)) requireTests(['src/main/services/workbench/selection-model.test.ts', 'src/main/services/workbench/agents.test.ts'])
       }
       continue
     }

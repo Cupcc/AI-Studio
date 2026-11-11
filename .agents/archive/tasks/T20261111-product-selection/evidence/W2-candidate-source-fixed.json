@@ -1,0 +1,11 @@
+{
+  "linked": {
+    "usesLinkedSource": true,
+    "usesUnlinkedSource": false
+  },
+  "relinkedUsesSecond": true,
+  "invalidDependencyRender": {
+    "threw": true,
+    "message": "设计节点需要连接且仅连接一个候选方案节点。"
+  }
+}

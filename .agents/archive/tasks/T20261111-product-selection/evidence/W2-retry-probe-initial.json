@@ -1,0 +1,13 @@
+{
+  "before": {
+    "phase": "failed",
+    "reads": 1,
+    "savedResult": ""
+  },
+  "after": {
+    "phase": "completed",
+    "reads": 1,
+    "savedResult": ""
+  },
+  "nodeLabel": "独立 Agent\n结果待修正\n市场与趋势\n\n整理市场趋势、消费人群与需求。区分可核实的事实、来源与假设；无法访问的资料明确列出。\n\n输入：任务目标与用户资料"
+}

@@ -50,7 +50,8 @@
           "conversation.draft",
           "project.knowledge.read",
           "project.sessions.read",
-          "session.open"
+          "session.open",
+          "agent.execute"
         ]
       }
     },

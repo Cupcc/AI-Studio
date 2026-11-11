@@ -44,8 +44,8 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
     catch (error) { setActionError(describeWorkbenchError(error)) }
     finally { setPending(false) }
   }
-  async function create(source: 'template' | 'ai') {
-    await run(async () => { await openWorkbenchDraft(project.id, source); setChoosing(false) })
+  async function create(source: 'template' | 'ai', templateId?: 'product-selection') {
+    await run(async () => { await openWorkbenchDraft(project.id, source, undefined, templateId); setChoosing(false) })
   }
   function reorder(viewId: WorkbenchId, before: WorkbenchId | null) {
     return run(() => workbenchApi().move({ ref: { projectId: project.id, viewId }, before }))
@@ -109,6 +109,7 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
       <div className="workbench-choices" aria-label="创建工作台" onKeyDown={event => { if (event.key === 'Escape') { setChoosing(false); addButton.current?.focus() } }}>
         <button disabled={pending} onClick={() => void create('ai')}><Icon name="chat" /><span>AI 对话创建<small>描述工作方式，由 AI 编写页面</small></span></button>
         <button disabled={pending} onClick={() => void create('template')}><Icon name="preview" /><span>从简单模板开始<small>先体验预览、保存与对话</small></span></button>
+        <button disabled={pending} onClick={() => void create('template', 'product-selection')}><Icon name="preview" /><span>选品工作台<small>四阶段流程，使用 Codex 执行节点</small></span></button>
         <h3>预设工作台</h3>
         {PRESET_WORKBENCHES.map(preset => {
           const existing = catalog?.find(entry => entry.viewId === preset.viewId), entry = existing ?? removed.find(entry => entry.viewId === preset.viewId) ?? preset

@@ -1,4 +1,4 @@
-import { isWorkbenchId, isCustomWorkbenchId, WORKBENCH_CAPABILITIES, type DraftWorkbenchRef, type InstanceWorkbenchRef, type JsonValue, type PluginManifest, type CustomWorkbenchRef, type WorkbenchCapability, type WorkbenchRef, type WorkbenchTarget } from './types'
+import { isWorkbenchId, isCustomWorkbenchId, WORKBENCH_CAPABILITIES, type DraftWorkbenchRef, type InstanceWorkbenchRef, type JsonValue, type PluginManifest, type CustomWorkbenchRef, type WorkbenchCapability, type WorkbenchRef, type WorkbenchTarget, type WorkbenchAgentRequest } from './types'
 import { isPresetWorkbenchId } from './presets'
 
 export const MAX_STATE_BYTES = 1024 * 1024
@@ -100,4 +100,12 @@ export function parseInstanceWorkbenchRef(value: unknown): InstanceWorkbenchRef 
   const ref = parseCustomWorkbenchRef(value)
   if (!ref.viewId.startsWith('workbench:')) throw new Error('此操作需要已添加的工作台实例')
   return { projectId: ref.projectId, viewId: `workbench:${ref.viewId.slice('workbench:'.length)}` }
+}
+
+export function parseAgentRequest(value: unknown): WorkbenchAgentRequest {
+  const input = record(value, 'Agent 请求')
+  for (const key of Object.keys(input)) if (!['requestId', 'key', 'title', 'text', 'model'].includes(key)) throw new Error(`不支持字段 ${key}`)
+  const requestId = text(input.requestId, 'requestId', 100)
+  if (!/^[a-zA-Z0-9-]+$/.test(requestId)) throw new Error('无效执行编号')
+  return { requestId, key: text(input.key, 'key', 100), title: text(input.title, 'title', 100), text: text(input.text, 'text', 180_000), model: input.model == null ? null : text(input.model, 'model', 300) }
 }

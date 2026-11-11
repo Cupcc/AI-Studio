@@ -73,3 +73,25 @@ it('requires the same session.open capability for every page and validates actio
   await vi.waitFor(() => expect(setDraft).toHaveBeenCalledExactlyOnceWith('Draft', expect.any(Function), 'new'))
   expect(post).toHaveBeenCalledWith(expect.objectContaining({ id: 'invalid-draft', ok: false }), '*')
 })
+
+it('requires explicit Agent capability and an added instance before routing execution, read or Stop', async () => {
+  dispose()
+  const agents = { start: vi.fn(), list: vi.fn(), get: vi.fn(), stop: vi.fn() }
+  dispose = attachWorkbenchPageBridge({ frame, snapshot: () => current, updateState, setDraft, openSession, ready, error, agents })
+  const post = vi.spyOn(frame, 'postMessage')
+  const params = { requestId: 'run-one', key: 'node', title: 'Node', text: 'Execute node', model: null }
+  emit({ type: 'request', id: 'denied', method: 'startAgent', params })
+  expect(agents.start).not.toHaveBeenCalled()
+  expect(post).toHaveBeenCalledWith(expect.objectContaining({ id: 'denied', ok: false }), '*')
+  current.manifest.capabilities.push('agent.execute')
+  current.target.kind = 'draft'
+  emit({ type: 'request', id: 'draft', method: 'startAgent', params })
+  expect(agents.start).not.toHaveBeenCalled()
+  current.target.kind = 'instance'
+  emit({ type: 'request', id: 'start', method: 'startAgent', params })
+  emit({ type: 'request', id: 'read', method: 'getAgent', params: { runId: 'run-one' } })
+  emit({ type: 'request', id: 'stop', method: 'stopAgent', params: { runId: 'run-one' } })
+  await vi.waitFor(() => expect(agents.start).toHaveBeenCalledExactlyOnceWith(params))
+  expect(agents.get).toHaveBeenCalledExactlyOnceWith('run-one')
+  expect(agents.stop).toHaveBeenCalledExactlyOnceWith('run-one')
+})

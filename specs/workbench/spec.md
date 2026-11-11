@@ -294,7 +294,7 @@ brand-illustration/
 
 按 [09 §2.3](<../../docs/09. Workbench Discussion.md#23-架构设计与后续业务技术事项>)的功能优先决定，先设计并建设插件机制。本期采用 iframe 承载页面，页面加载、布局适配、宿主通信、状态更新和卸载契约见 §9.3，不以图片展示或安全专项作为前置条件。
 
-本期页面 SDK 的当前对象读取、状态保存和订阅及对话草稿操作见 §9.3。产物展示、位置选择和绑定更新由后续业务接入。页面卸载时注销订阅，切换和重新打开时恢复对应实例状态；页面加载失败时提供重试入口，并保留对话和已保存成果。
+本期页面 SDK 的当前对象读取、状态保存和订阅及对话草稿操作见 §9.3。选品节点的文本结果由 §9.9 接入；图片产物展示、位置选择和绑定更新由后续业务接入。页面卸载时注销订阅，切换和重新打开时恢复对应实例状态；页面加载失败时提供重试入口，并保留对话和已保存成果。
 
 页面安全专项设计与验证在功能完善后另行安排，不作为首期容器选型、功能接入或验收的前置条件。对应后续场景保留在 [AC-WB-07](<../../docs/05. Acceptance Criteria.md#6-插件机制与业务分阶段验收>)。
 
@@ -339,7 +339,7 @@ flowchart LR
 
 ### 9.2 清单、包修订与实例
 
-最小包由 `manifest.json` 与本地 HTML 入口组成，可包含 JS、CSS 和静态资源。清单字段以 [PluginManifest](../../apps/desktop/src/shared/workbench/types.ts)为准：`schemaVersion: 1`、`pluginId`、`version`、`sdkVersion: 1`、`title`、`entry`、`capabilities`。首期能力仅为 `state.read`、`state.write` 和 `conversation.draft`，没有图片位置或出图能力要求。能力清单不授予 Node、文件系统、CLI、密钥或付费工具访问权。
+最小包由 `manifest.json` 与本地 HTML 入口组成，可包含 JS、CSS 和静态资源。清单字段以 [PluginManifest](../../apps/desktop/src/shared/workbench/types.ts)为准：`schemaVersion: 1`、`pluginId`、`version`、`sdkVersion: 1`、`title`、`entry`、`capabilities`。基础能力为 `state.read`、`state.write` 和 `conversation.draft`；资源能力见 §9.7，真实节点执行能力 `agent.execute` 见 §9.9。能力清单不提供任意 Node、文件系统或密钥访问；节点请求由宿主已有 Session Provider 执行。
 
 草稿位于 `.ai-studio/workbench/drafts/<draftId>/`，应用时携带已预览的 `expectedPackageRevision`，校验当前文件仍对应同一修订后复制到 `.ai-studio/workbench/packages/<revision>/`。文件在预览后变化时须重新预览。修订按内容固定。实例引用该修订，修改草稿不会改变已经打开的实例。包身份和版本描述可复用页面，实例 ID 标识当前 Project 的状态；导航使用 `workbench:<instanceId>`，编辑使用 `workbench-draft:<draftId>`。统一目录由 App 预设、Project 内实例及设计草稿合成，预设声明是其稳定 ID、标题及顺序的唯一来源。
 
@@ -444,3 +444,28 @@ flowchart LR
 技术决定（AI，2026-11-11）：SQLite `workbench_navigation` 以 `(project_id, view_id)` 保存名称覆盖、隐藏状态与顺序；只在用户管理操作时写入，保留默认预设的虚拟实例。typed IPC 提供 `listRemoved`、`rename`、`move`、`setVisible` 和 `deleteDraft`。移动以目标条目与插入锚点执行，宿主校验当前目录并在事务内保存顺序。名称覆盖与包内容分开，编辑应用不会覆盖用户指定的列表名称。
 
 本节的“移除”对应 §6.2 的取消固定，不等于候选实例永久删除。跨 Project 移动、包卸载、成果保留期限和永久文件清理仍后置。
+
+
+### 9.9 选品工作台与真实 Agent 执行
+
+来源：用户 2026-11-11 要求参考 EnterpriseAI/apps/web 构建选品工作台，并明确复用已有 Provider、使用真实 Codex CLI 执行。实现与验证见[选品任务](../../.agents/archive/tasks/T20261111-product-selection/task.md)。本节为该授权内的实现契约，不标记为人工产品验收。
+
+#### 通用执行接口
+
+网页包声明 `agent.execute` 后，可在已添加实例使用 `startAgent(request)`、`listAgents()`、`getAgent(requestId)` 和 `stopAgent(requestId)`。设计草稿不能运行。主进程再次检查实例启用状态、能力及会话归属；页面不能操作其他实例的执行。
+
+请求携带稳定 requestId、业务 key、标题、文本和可空 model。首期由已有 Codex Provider 执行，模型为空时采用其默认配置。SessionService 保存执行及流式 transcript、审批、错误和 Stop；工作台不另建 CLI Runtime。执行映射与 Session 创建在同一 SQLite 事务写入，重复 requestId 返回同一执行，保存失败不遗留 Session。后台创建不消耗 Composer 中未发送的草稿。
+
+`workbench_agent_runs` 保存实例到请求及 Session 的关联，普通 Session 保存原始输入和输出。读取返回已有会话，停止调用原 Session Stop。原生审批、问题和重试通过“打开会话”处理。页面重开重新读取执行与最后提交的业务状态，普通会话重试完成后可采纳结果；不自动发起新的请求。
+
+关闭页面不停止已授权 Session，也不继续发起页面中尚未执行的队列。实例移除仍沿用 §9.8；用户可以在普通会话停止。图片文件绑定及任意后端插件不随该接口交付。
+
+#### 选品模板
+
+“添加工作台”提供选品模板，经标准草稿预览、添加及固定修订加载。默认包含三个来源节点、四维分析、五条候选和 A–E 五个设计节点。页面以四阶段列组织节点，通过详情中的“输入与来源”编辑依赖，拒绝环与缺失节点。任务要求、来源文本/项目文件相对路径与节点 Prompt 形成每次执行的输入快照。
+
+单节点运行要求上游结果已完成且未过期。“运行四个流程”按依赖顺序执行缺失或过期节点；失败、停止、结果格式错误终止后续安排。需输入时展示状态并可打开会话处理。执行中锁定任务与结果编辑，阅读和讨论草稿可用。刷新清空尚未发起的编排安排，已有执行继续。
+
+候选返回经校验的 A–E 五条结构化记录，包含名称、人群、材质、价格、依据和风险；结果不合格时显示错误并保留旧成果，不填充演示数据。可入选、比较、修改单候选材质及打开对应设计。候选集合归属于生成它的节点，设计必须连接且仅连接一个候选节点；比较与导出使用最近打开的候选节点集合。单候选修改只使对应设计过期，上游要求变化沿依赖传播。原始执行保留在 Session 历史，人工材质修订保存到当前业务状态。
+
+设计节点显示实际 Agent 的文本设计说明。真实图片能力由 CLI 当前工具决定；本期没有图片文件到页面的绑定/预览，不用合成图片代替实际生成。入选方案可导出 HTML 交接简报，缺失或过期设计明确标注。

@@ -1,0 +1,8 @@
+{
+  "designDependencies": [
+    "candidates"
+  ],
+  "linkedSourceTitle": "原候选-A",
+  "usesLinkedSource": false,
+  "usesUnlinkedSource": true
+}

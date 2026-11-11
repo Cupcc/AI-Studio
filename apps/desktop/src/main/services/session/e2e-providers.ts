@@ -147,6 +147,7 @@ export function createE2eProviders(): AgentProvider[] {
             }, null), 200)
             return
           }
+          if (input.text.includes('[e2e:selection]') && input.text.includes('严格仅返回 JSON')) { schedule(turn, () => complete(run, JSON.stringify({ candidates: 'ABCDE'.split('').map(id => ({ id, title: '测试方案 '+id, audience: '桌面用户', material: '竹材', price: '100–200 元（待验证）', rationale: '合成测试依据', risk: '成本待验证' })) })), 300); return }
           if (input.text.includes('[e2e:markdown]')) { schedule(turn, () => complete(run, E2E_MARKDOWN_REPLY), 300); return }
           schedule(turn, () => complete(run), input.text.includes('[e2e:delay]') ? 1800 : 500)
         },

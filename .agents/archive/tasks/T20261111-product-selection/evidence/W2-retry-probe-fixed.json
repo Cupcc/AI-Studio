@@ -1,0 +1,13 @@
+{
+  "before": {
+    "phase": "failed",
+    "reads": 1,
+    "savedResult": ""
+  },
+  "after": {
+    "phase": "completed",
+    "reads": 3,
+    "savedResult": "重试成功结果"
+  },
+  "nodeLabel": "独立 Agent\n已完成\n市场与趋势\n\n重试成功结果\n\n输入：任务目标与用户资料"
+}

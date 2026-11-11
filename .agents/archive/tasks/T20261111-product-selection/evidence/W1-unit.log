@@ -1,0 +1,12 @@
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/product-selection/apps/desktop
+
+
+ Test Files  22 passed (22)
+      Tests  230 passed (230)
+   Start at  17:40:05
+   Duration  4.36s (tests 52%, environment 25%, transform 16%, import 6%)
+
+    Isolate  22 workers spawned · ~346ms startup each (spawn + environment, per file)
+             at least ~500ms faster with isolate: false — reuses workers across files instead of one per file
+

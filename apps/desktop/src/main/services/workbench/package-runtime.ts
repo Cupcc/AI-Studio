@@ -90,17 +90,17 @@ export class PackageRuntime {
       const path = join(folder, name); assertInside(root, path); writeFileSync(path, text)
     }
   }
-  createDraft(projectId: string, source: 'template' | 'ai', instanceId?: string): WorkbenchDraft {
+  createDraft(projectId: string, source: 'template' | 'ai', instanceId?: string, templateId?: 'product-selection'): WorkbenchDraft {
     const root = this.root(projectId), id = randomUUID(), directory = `${ROOT}/drafts/${id}`
     const original = instanceId ? this.instanceRow(projectId, instanceId) : null
-    const files = original ? readPackage(root, join(root, ROOT, 'packages', original.package_revision)).files : new Map([
+    const files = original ? readPackage(root, join(root, ROOT, 'packages', original.package_revision)).files : templateId ? readPackage(this.options.presetRoot, join(this.options.presetRoot, templateId)).files : new Map([
       ['manifest.json', Buffer.from(JSON.stringify({ schemaVersion: 1, pluginId: `workbench-${id}`, version: '1.0.0', sdkVersion: 1, title: source === 'ai' ? '新的工作台' : '随手记', entry: 'index.html', capabilities: ['state.read', 'state.write', 'conversation.draft'] }, null, 2))],
       ['index.html', Buffer.from(TEMPLATE_HTML)]
     ])
     this.writeDocs(projectId)
     writePackage(root, join(root, directory), files)
     try {
-      this.db().prepare('INSERT INTO workbench_drafts(id,project_id,source,target_instance_id,base_package_revision,directory,title,state,created_at) VALUES (?,?,?,?,?,?,?,?,?)').run(id, projectId, source, instanceId ?? null, original?.package_revision ?? null, directory, original?.title ?? (source === 'ai' ? '新的工作台' : '随手记'), original?.state ?? '{}', Date.now())
+      this.db().prepare('INSERT INTO workbench_drafts(id,project_id,source,target_instance_id,base_package_revision,directory,title,state,created_at) VALUES (?,?,?,?,?,?,?,?,?)').run(id, projectId, source, instanceId ?? null, original?.package_revision ?? null, directory, original?.title ?? (templateId ? '选品工作台' : source === 'ai' ? '新的工作台' : '随手记'), original?.state ?? '{}', Date.now())
     } catch (error) { rmSync(join(root, directory), { recursive: true, force: true }); throw error }
     const target: WorkbenchTarget = { projectId, kind: 'draft', id }
     this.options.changed(target, true)

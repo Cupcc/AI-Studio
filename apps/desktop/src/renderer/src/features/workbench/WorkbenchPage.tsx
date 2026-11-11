@@ -1,3 +1,4 @@
+import { parseInstanceWorkbenchRef } from '@shared/workbench/schema'
 import { useEffect, useMemo, useRef } from 'react'
 import { WORKBENCH_MESSAGE, isCustomWorkbenchId, type WorkbenchPageSnapshot, type WorkbenchRef, type WorkbenchSessionLink } from '@shared/workbench/types'
 import { useSessions } from '../session/store'
@@ -42,6 +43,12 @@ export function WorkbenchPage({ workbenchRef, page, zoom, onPageStatus, onSaveSt
     let disposed = false
     const timer = window.setTimeout(() => onPageStatus({ kind: 'error', message: '页面未能连接宿主，请检查入口脚本后重试。' }), 10_000)
     const detach = attachWorkbenchPageBridge({
+      agents: {
+        start: request => workbenchApi().startAgent({ ref: parseInstanceWorkbenchRef(current.current.workbenchRef), request }),
+        list: () => workbenchApi().listAgents(parseInstanceWorkbenchRef(current.current.workbenchRef)),
+        get: runId => workbenchApi().getAgent({ ref: parseInstanceWorkbenchRef(current.current.workbenchRef), runId }),
+        stop: runId => workbenchApi().stopAgent({ ref: parseInstanceWorkbenchRef(current.current.workbenchRef), runId })
+      },
       frame, snapshot: () => current.current.page,
       ready: () => { window.clearTimeout(timer); onPageStatus({ kind: 'ready' }) },
       error: error => { window.clearTimeout(timer); onPageStatus({ kind: 'error', message: error }) },
@@ -68,5 +75,5 @@ export function WorkbenchPage({ workbenchRef, page, zoom, onPageStatus, onSaveSt
   }, [decorated])
   return <div className="workbench-page-viewport"><iframe ref={iframe} className="workbench-page" title="工作台页面" src={page.pageUrl}
     style={{ width: `${100 / zoom}%`, height: `${100 / zoom}%`, transform: `scale(${zoom})` }}
-    sandbox="allow-scripts allow-same-origin" onError={() => onPageStatus({ kind: 'error', message: '页面加载失败，请检查文件后重试。' })} /></div>
+    sandbox="allow-scripts allow-same-origin allow-downloads" onError={() => onPageStatus({ kind: 'error', message: '页面加载失败，请检查文件后重试。' })} /></div>
 }

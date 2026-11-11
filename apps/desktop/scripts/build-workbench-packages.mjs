@@ -19,6 +19,7 @@ export function buildWorkbenchPackages(options = {}) {
     const files = new Map([
       ['manifest.json', readFileSync(join(sourceRoot, name, 'manifest.json'))],
       ['index.html', readFileSync(join(sourceRoot, name, 'index.html'))],
+      ...readdirSync(join(sourceRoot, name)).filter(file => !['manifest.json', 'index.html'].includes(file)).map(file => [file, readFileSync(join(sourceRoot, name, file))]),
       ...common.map(file => [file, readFileSync(join(commonRoot, file))]),
       ...fonts,
       ['FONT-LICENSE.txt', readFileSync(fileURLToPath(new URL('../node_modules/@fontsource/ibm-plex-sans/LICENSE', import.meta.url)))]

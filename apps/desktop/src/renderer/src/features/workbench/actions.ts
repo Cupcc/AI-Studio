@@ -4,8 +4,8 @@ import { draftId, useSessions } from '../session/store'
 import { workbenchApi } from './api'
 import { useWorkbenches } from './store'
 
-export async function openWorkbenchDraft(projectId: string, source: 'template' | 'ai', instanceId?: string): Promise<CustomDraftEntry> {
-  const draft = await workbenchApi().createDraft({ projectId, source, ...(instanceId ? { instanceId } : {}) })
+export async function openWorkbenchDraft(projectId: string, source: 'template' | 'ai', instanceId?: string, templateId?: 'product-selection'): Promise<CustomDraftEntry> {
+  const draft = await workbenchApi().createDraft({ projectId, source, ...(templateId ? { templateId } : {}), ...(instanceId ? { instanceId } : {}) })
   await useWorkbenches.getState().loadCatalog(projectId)
   const viewId = draft.viewId
   useProjectShell.getState().enterView(projectId, viewId)

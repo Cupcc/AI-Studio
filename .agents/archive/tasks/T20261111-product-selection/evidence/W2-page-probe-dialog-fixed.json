@@ -1,0 +1,14 @@
+{
+  "focusBefore": true,
+  "focusAfter": true,
+  "nodesAfterCreate": 11,
+  "beforeSelectBDisabled": false,
+  "afterSelectADisabledB": false,
+  "selectedAChecked": true,
+  "detailHiddenAfterClose": true,
+  "logs": [
+    "An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can escape its sandboxing.",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+}

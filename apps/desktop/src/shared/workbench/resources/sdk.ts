@@ -47,7 +47,11 @@ export const PAGE_SDK = String.raw`(() => {
     updateState: (state, expectedRevision) => send('updateState', { state, expectedRevision }),
     subscribe: listener => { listeners.add(listener); return () => listeners.delete(listener); },
     setDraft: (text, options) => send('setDraft', { text, target: options?.target ?? 'current' }),
-    openSession: sessionId => send('openSession', { sessionId })
+    openSession: sessionId => send('openSession', { sessionId }),
+    startAgent: request => send('startAgent', request),
+    listAgents: () => send('listAgents', {}),
+    getAgent: runId => send('getAgent', { runId }),
+    stopAgent: runId => send('stopAgent', { runId })
   }), writable: false });
   const ready = () => parent.postMessage({ channel, type: 'ready' }, '*');
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready, { once: true });
@@ -55,7 +59,7 @@ export const PAGE_SDK = String.raw`(() => {
 })();`
 
 export const SDK_TYPES = `type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue }
-type WorkbenchCapability = 'state.read' | 'state.write' | 'conversation.draft' | 'project.knowledge.read' | 'project.sessions.read' | 'session.open'
+type WorkbenchCapability = 'state.read' | 'state.write' | 'conversation.draft' | 'project.knowledge.read' | 'project.sessions.read' | 'session.open' | 'agent.execute'
 interface ViewNode {
   type: 'stack' | 'grid' | 'section' | 'text' | 'metric' | 'badge' | 'list' | 'table' | 'timeline' | 'diagram' | 'callout' | 'empty'
   bind?: string
@@ -99,12 +103,23 @@ interface WorkbenchSnapshot {
   resources?: { knowledge?: WorkbenchKnowledgeResource; sessions?: WorkbenchSessionLink[] }
   appearance?: { dark: boolean; variables: Record<string, string> }
 }
+interface WorkbenchAgentRequest { requestId: string; key: string; title: string; text: string; model: string | null }
+interface WorkbenchAgentRun { request: WorkbenchAgentRequest; session: WorkbenchSessionLink & { stopping: boolean } }
+interface WorkbenchAgentConversation {
+  session: WorkbenchSessionLink & { stopping: boolean }
+  items: ({ turnId: string | null; sequence: number; at: number } & ({ kind: 'agent_message'; text: string; complete: boolean } | { kind: 'error'; summary: string; details: string } | { kind: 'user_message' | 'tool_activity' | 'input_request' | 'turn_end' }))[]
+  hasMore: boolean
+}
 interface WorkbenchPageApi {
   getInstance(): Promise<WorkbenchSnapshot>
   updateState(state: JsonValue, expectedRevision: number): Promise<WorkbenchSnapshot>
   subscribe(listener: (snapshot: WorkbenchSnapshot) => void): () => void
   setDraft(text: string, options?: { target: 'current' | 'new' }): Promise<void>
   openSession(sessionId: string): Promise<void>
+  startAgent(request: WorkbenchAgentRequest): Promise<WorkbenchAgentRun>
+  listAgents(): Promise<WorkbenchAgentRun[]>
+  getAgent(runId: string): Promise<WorkbenchAgentConversation>
+  stopAgent(runId: string): Promise<void>
 }
 interface Window { readonly workbench: WorkbenchPageApi }
 `

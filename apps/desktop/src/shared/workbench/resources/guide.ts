@@ -20,6 +20,8 @@ export const AUTHORING_GUIDE = `# AI Studio 工作台开发说明 · SDK 1
 - subscribe(listener)：接收当前目标状态更新，返回取消订阅函数；页面卸载时清理监听。用新的快照更新显示。
 - setDraft(text, options?)：填入可编辑的对话草稿。options.target 可选 current（默认，当前对话）或 new（当前工作台的新对话草稿）。它不发送请求、不调用模型。用户仍需点击 Send。
 - openSession(sessionId)：将当前 Project 的已有 Session 打开到工作台对话列，不发送消息或调用 Stop。需要 session.open 能力。
+- startAgent(request)：需要 agent.execute，且仅已添加实例可调用。请求字段 requestId（稳定唯一编号）、key（业务节点）、title、text、model（可空）；复用宿主 Codex Provider 创建真实会话。由用户点击执行触发，重复编号复用同一执行。
+- listAgents() 返回当前实例的请求与 Session 摘要；getAgent(requestId) 返回该执行的最近 transcript（最多 500 项）；stopAgent(requestId) 停止对应 Session。结果、审批和错误来自实际 Provider；通过 openSession 处理需输入与重试。后台执行不消耗未发送的 Composer 草稿。
 - project.knowledge.read：与 manifest.knowledgeViewId 一起声明，在 resources.knowledge 接收相应项目知识和 Definition 的校验快照。支持 overview、progress、architecture、agent-team、business-flow。快照带 loading、stale、empty、ready、error 状态；错误时保留上一版有效 snapshot。页面应显示错误并继续呈现有效内容，不自行读取项目文件。
 - project.sessions.read：在 resources.sessions 接收当前 Project 的最小 Session 摘要，包含 id、title、activity、status、lastOutcome、updatedAt、lastUserMessageAt、createdAt；无完整对话或凭据。
 - resources 的变化通过现有 subscribe 推送，不改变 stateRevision；stateRevision 只用于 JSON 状态写入冲突检查。

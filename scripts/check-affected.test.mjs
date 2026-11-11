@@ -19,6 +19,8 @@ const available = [
   `${d}src/main/services/session/service.test.ts`,
   `${d}src/main/services/workbench/workbench-service.test.ts`,
   `${d}src/main/services/workbench/package-runtime.test.ts`,
+  `${d}src/main/services/workbench/selection-model.test.ts`,
+  `${d}src/main/services/workbench/agents.test.ts`,
   `${d}src/renderer/src/features/workbench/portable-pages.test.ts`,
   `${d}src/shared/project-view/schema.test.ts`,
   `${d}src/renderer/src/features/workbench/workbench.test.tsx`,
@@ -31,7 +33,7 @@ const available = [
   `${d}src/renderer/src/features/tools/terminal-panel.test.tsx`,
   `${d}src/renderer/src/features/settings/settings.test.tsx`,
   ...['files', 'session', 'cli-default', 'composer', 'app', 'alignment', 'runtime-tools', 'settings',
-    'project', 'project-view', 'workbench', 'diff', 'turn-diff', 'vscode-parity', 'claude-effort'].map(name => `${d}e2e/${name}.spec.ts`),
+    'project', 'project-view', 'workbench', 'product-selection', 'diff', 'turn-diff', 'vscode-parity', 'claude-effort'].map(name => `${d}e2e/${name}.spec.ts`),
   `${a}src/codex/driver.ts`, `${a}test/codex/driver.test.ts`,
   `${a}test/claude/driver.test.ts`, `${a}test/codex/real.integration.test.ts`
 ]
@@ -180,7 +182,7 @@ test('workbench IPC selects its host, UI, bridge and focused E2E', () => {
   expect(commandText(result)).toContain('workbench.test.tsx')
   expect(commandText(result)).toContain('src/shared/project-view/schema.test.ts')
   expect(commandText(result)).toContain('bridge.test.ts')
-  expect(result.e2e).toEqual(['e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
+  expect(result.e2e).toEqual(['e2e/product-selection.spec.ts', 'e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
 })
 test('plugin assets and navigation keep the workbench regression selected', () => {
   for (const path of ['src/shared/workbench/resources/template.ts', 'src/renderer/src/features/navigation/Navigation.tsx']) {
@@ -199,7 +201,7 @@ test('standard webpage package assets select their host, SDK and iframe regressi
   for (const file of ['build/workbenches/overview/manifest.json', 'build/workbench-common/page.js', 'scripts/build-workbench-packages.mjs']) {
     const result = plan([`${d}${file}`])
     expect(result.unknown).toEqual([])
-    expect(result.e2e).toEqual(['e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
+    expect(result.e2e).toEqual(['e2e/product-selection.spec.ts', 'e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
     expect(commandText(result)).toContain('workbench-service.test.ts')
     expect(commandText(result)).toContain('portable-pages.test.ts')
     expect(commandText(result)).not.toMatch(/terminal|session|navigation.test/)
@@ -209,7 +211,7 @@ test('standard webpage package assets select their host, SDK and iframe regressi
 test('styles select UI regression without backend tests, builds or typechecks', () => {
   for (const file of ['src/renderer/src/features/workbench/workbench.css', 'build/workbench-common/style.css']) {
     expect(plan([`${d}${file}`])).toMatchObject({
-      commands: [], e2e: ['e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'], unknown: [], missingTests: []
+      commands: [], e2e: ['e2e/product-selection.spec.ts', 'e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'], unknown: [], missingTests: []
     })
   }
   expect(plan([`${d}src/renderer/src/features/tools/tools.css`])).toMatchObject({
@@ -266,7 +268,7 @@ test('config scope reads Git index, committed snapshots and working tree indepen
     writeFileSync(join(cwd, file), config.replace('plugins: [react()', 'plugins: [unknown()'))
     const result = affectedPlan([file], available, { cwd, base, head })
     expect(result.unknown).toEqual([])
-    expect(result.e2e).toEqual(['e2e/app.spec.ts', 'e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
+    expect(result.e2e).toEqual(['e2e/app.spec.ts', 'e2e/product-selection.spec.ts', 'e2e/project-view.spec.ts', 'e2e/workbench.spec.ts'])
     expect(commandText(result)).not.toContain('terminal')
     expect(affectedPlan([file], available, { cwd, base }).unknown).toEqual([file])
 
@@ -322,4 +324,14 @@ test('integration command and its tests run script checks without application su
     expect(commandText(result)).not.toContain('@ai-studio/desktop')
     expect(result.e2e).toEqual([])
   }
+})
+
+
+test('selection business assets include their directly read model and actual Session seam', () => {
+  const result = plan([`${d}build/workbenches/product-selection/model.js`])
+  expect(result.missingTests).toEqual([])
+  expect(commandText(result)).toContain('selection-model.test.ts')
+  expect(commandText(result)).toContain('agents.test.ts')
+  expect(result.e2e).toContain('e2e/product-selection.spec.ts')
+  expect(commandText(plan([`${d}build/workbenches/product-selection/selection.css`]))).toBe('')
 })

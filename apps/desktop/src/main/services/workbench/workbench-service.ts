@@ -1,3 +1,6 @@
+import type { SessionService } from '../session/session-service'
+import { parseAgentRequest } from '@shared/workbench/schema'
+import type { WorkbenchAgentRequest, WorkbenchAgentRun } from '@shared/workbench/types'
 import type { DatabaseSync } from 'node:sqlite'
 import { PRESET_WORKBENCHES, isPresetWorkbenchId, presetWorkbench } from '@shared/workbench/presets'
 import { workbenchTarget, type DraftWorkbenchRef, type InstanceWorkbenchRef, type JsonValue, type CustomDraftEntry, type CustomInstanceEntry, type CustomWorkbenchEntry, type CustomWorkbenchRef, type WorkbenchCatalog, type WorkbenchChange, type WorkbenchContext, type WorkbenchDraft, type WorkbenchEntry, type WorkbenchInstance, type WorkbenchId, type WorkbenchPageSnapshot, type WorkbenchRef, type WorkbenchSnapshot, type WorkbenchTarget } from '@shared/workbench/types'
@@ -27,6 +30,55 @@ export class WorkbenchService {
   private readonly snapshots = new Map<string, WorkbenchSnapshot>()
   private readonly knowledgeStates = new Map<string, ViewState>()
   private revision = 0
+  private sessions?: Pick<SessionService, 'create' | 'list' | 'getConversation' | 'stop' | 'rename'>
+  private readonly starting = new Map<string, { request: WorkbenchAgentRequest; promise: Promise<WorkbenchAgentRun> }>()
+
+  setAgentPort(port: NonNullable<WorkbenchService['sessions']>): void { this.sessions = port }
+  private agentPort(ref: InstanceWorkbenchRef) {
+    const page = this.packages.getSnapshot(workbenchTarget(ref.projectId, ref.viewId))
+    if (!page.enabled || !page.manifest.capabilities.includes('agent.execute')) throw new Error('工作台未启用 Agent 执行能力')
+    if (!this.sessions) throw new Error('Agent Provider 尚未就绪')
+    return this.sessions
+  }
+  listAgents(ref: InstanceWorkbenchRef): WorkbenchAgentRun[] {
+    const port = this.agentPort(ref), sessions = new Map(port.list(ref.projectId).map(session => [session.id, session]))
+    return this.options.database().prepare('SELECT request_json,session_id FROM workbench_agent_runs WHERE project_id=? AND view_id=? ORDER BY rowid').all(ref.projectId, ref.viewId).map(row => {
+      if (typeof row.request_json !== 'string' || typeof row.session_id !== 'string') throw new Error('执行记录损坏')
+      const session = sessions.get(row.session_id)
+      if (!session || session.originViewId !== ref.viewId) throw new Error('执行会话归属不匹配')
+      return { request: parseAgentRequest(JSON.parse(row.request_json)), session }
+    })
+  }
+  startAgent(ref: InstanceWorkbenchRef, request: WorkbenchAgentRequest): Promise<WorkbenchAgentRun> {
+    const port = this.agentPort(ref)
+    const existing = this.listAgents(ref).find(run => run.request.requestId === request.requestId)
+    if (existing) {
+      if (JSON.stringify(existing.request) !== JSON.stringify(request)) throw new Error('执行编号已被不同请求使用')
+      return Promise.resolve(existing)
+    }
+    const key = `${this.key(ref)}\0${request.requestId}`
+    const pending = this.starting.get(key)
+    if (pending) {
+      if (JSON.stringify(pending.request) !== JSON.stringify(request)) throw new Error('执行编号已被不同请求使用')
+      return pending.promise
+    }
+    const promise = port.create({ projectId: ref.projectId, originViewId: ref.viewId, cli: 'codex', model: request.model, text: request.text, viewContextAttached: false }, { preserveDraft: true, onCreated: summary => {
+      this.agentPort(ref)
+      this.options.database().prepare('INSERT INTO workbench_agent_runs(project_id,view_id,request_id,request_json,session_id) VALUES (?,?,?,?,?)').run(ref.projectId, ref.viewId, request.requestId, JSON.stringify(request), summary.id)
+    } }).then(session => ({ request, session: port.rename(session.id, request.title) })).finally(() => this.starting.delete(key))
+    this.starting.set(key, { request, promise })
+    return promise
+  }
+  getAgent(ref: InstanceWorkbenchRef, runId: string) {
+    const run = this.listAgents(ref).find(run => run.request.requestId === runId)
+    if (!run) throw new Error('执行不属于当前工作台')
+    return this.agentPort(ref).getConversation(run.session.id, undefined, 500)
+  }
+  stopAgent(ref: InstanceWorkbenchRef, runId: string): Promise<void> {
+    const run = this.listAgents(ref).find(run => run.request.requestId === runId)
+    if (!run) throw new Error('执行不属于当前工作台')
+    return this.agentPort(ref).stop(run.session.id)
+  }
 
   constructor(private readonly options: WorkbenchOptions) {
     this.knowledge = new KnowledgeResources({ projectPath: options.projectPath, settleMs: options.settleMs, changed: state => this.knowledgeChanged(state) })
@@ -190,10 +242,10 @@ export class WorkbenchService {
     }
     return this.packages.buildContext(ref.projectId, ref.viewId)
   }
-  createDraft(request: { projectId: string; source: 'template' | 'ai'; instanceId?: string }): CustomDraftEntry {
+  createDraft(request: { projectId: string; source: 'template' | 'ai'; instanceId?: string; templateId?: 'product-selection' }): CustomDraftEntry {
     this.open(request.projectId)
     this.seedNavigation(request.projectId)
-    return draftEntry(this.packages.createDraft(request.projectId, request.source, request.instanceId))
+    return draftEntry(this.packages.createDraft(request.projectId, request.source, request.instanceId, request.templateId))
   }
   applyDraft(request: { ref: DraftWorkbenchRef; expectedPackageRevision: string }): CustomInstanceEntry {
     this.open(request.ref.projectId)

@@ -1,0 +1,121 @@
+$ playwright test product-selection.spec.ts workbench.spec.ts project-view.spec.ts alignment.spec.ts settings.spec.ts
+
+Running 29 tests using 1 worker
+
+(node:40983) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/alignment.spec.ts:139:5 › glass appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (4.7s)
+  ✓   2 e2e/alignment.spec.ts:171:5 › glass appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (5.2s)
+  ✓   3 e2e/alignment.spec.ts:186:5 › glass appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (3.5s)
+  ✓   4 e2e/alignment.spec.ts:199:5 › glass appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (4.8s)
+  ✓   5 e2e/alignment.spec.ts:139:5 › solid appearance › FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom before and after sending (2.3s)
+  ✓   6 e2e/alignment.spec.ts:171:5 › solid appearance › FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440 (3.7s)
+  ✓   7 e2e/alignment.spec.ts:186:5 › solid appearance › FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440 (2.1s)
+  ✓   8 e2e/alignment.spec.ts:199:5 › solid appearance › FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440 (1.6s)
+  ✓   9 e2e/alignment.spec.ts:210:5 › FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280 (4.4s)
+  ✓  10 e2e/alignment.spec.ts:228:5 › FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440 (4.3s)
+  ✓  11 e2e/alignment.spec.ts:239:5 › FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280 (5.4s)
+  ✘  12 e2e/product-selection.spec.ts:29:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works (44.9s)
+(node:42513) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  13 e2e/product-selection.spec.ts:54:5 › stopping the Session path cancels the queue and preserves unsent discussion; page reopen recovers runs (2.5s)
+  ✓  14 e2e/project-view.spec.ts:22:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (4.9s)
+  ✓  15 e2e/project-view.spec.ts:64:5 › removed View label sends without creating helpers, and each View has an independent draft (1.8s)
+  ✓  16 e2e/project-view.spec.ts:80:5 › five presets use the same webpage frame and keep all page content inside it (1.2s)
+  ✘  17 e2e/project-view.spec.ts:107:5 › a preset copied into an ordinary custom draft uses the same knowledge subscription (30.8s)
+(node:43284) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  18 e2e/project-view.spec.ts:119:5 › a copied Overview package reads scoped Session cards and opens a conversation through the SDK (31.8s)
+(node:43566) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  19 e2e/project-view.spec.ts:131:5 › the package generate action starts a new unsent workbench draft from an existing Session (1.8s)
+  ✓  20 e2e/settings.spec.ts:73:5 › FR-SET-002 · AC-08: the first launch is glass on the native material with the aurora colour, following the system mode (1.3s)
+  ✓  21 e2e/settings.spec.ts:91:5 › FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one dialog; ×, Esc and outside close it (1.2s)
+  ✓  22 e2e/settings.spec.ts:118:5 › FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart (1.7s)
+[settings] muted text contrast on light glass {
+  aurora: 5.488132546985891,
+  mint: 5.606748938463886,
+  sunset: 5.545431575966049,
+  haze: 5.707885992543998
+}
+  ✓  23 e2e/settings.spec.ts:175:5 › FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material (7.7s)
+  ✓  24 e2e/settings.spec.ts:204:5 › FR-SET-002 · AC-08: "Reduce transparency" shows solid with a note, and glass returns when it is off (936ms)
+[settings] muted text contrast in dark {
+  'glass-极光': 7.024034850134204,
+  'glass-无': 4.780845517969554,
+  solid: 6.05631572140189
+}
+  ✓  25 e2e/settings.spec.ts:219:5 › FR-SET-002 · AC-08: the colour mode follows the system by default; light and dark are forced, apply at once and persist (3.3s)
+  ✓  26 e2e/workbench.spec.ts:32:5 › AC-WB mechanism: template, state, navigation, disable/reopen and restart (2.2s)
+  ✓  27 e2e/workbench.spec.ts:74:5 › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance (1.2s)
+  ✓  28 e2e/workbench.spec.ts:110:5 › AC-WB mechanism: refuses to apply files changed after the displayed preview (907ms)
+  ✓  29 e2e/workbench.spec.ts:126:5 › workbench management: rename, drag, remove/restore, delete draft and restart (3.1s)
+
+
+  1) e2e/product-selection.spec.ts:29:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works 
+
+    TimeoutError: page.waitForEvent: Timeout 30000ms exceeded while waiting for event "download"
+    =========================== logs ===========================
+    waiting for event "download"
+    ============================================================
+
+      46 |   await expect(plugin().locator('#comparison')).toContainText('白色哑光陶瓷')
+      47 |   await plugin().getByRole('button',{name:'关闭',exact:true}).click()
+    > 48 |   const download=page.waitForEvent('download');await plugin().getByRole('button',{name:'导出交接简报',exact:true}).click()
+         |                       ^
+      49 |   expect((await download).suggestedFilename()).toBe('选品交接简报.html')
+      50 |   await closeTestApp(app,page);await launch()
+      51 |   await expect(plugin().locator('#progress')).toHaveText('9 / 10 节点已有最新结果')
+        at /Users/zhixing/Projects/AI Stduio.worktrees/product-selection/apps/desktop/e2e/product-selection.spec.ts:48:23
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/product-selection-four-sta-f96fb-ing-design-and-export-works/error-context.md
+
+  2) e2e/project-view.spec.ts:107:5 › a preset copied into an ordinary custom draft uses the same knowledge subscription 
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.project-workspace:not([hidden])').getByRole('button', { name: /从简单模板开始/ })
+
+
+      94 | async function copyPresetIntoOrdinaryDraft(id: string) {
+      95 |   await workspace().getByRole('button', { name: '添加工作台', exact: true }).click()
+    > 96 |   await workspace().getByRole('button', { name: /从简单模板开始/ }).click()
+         |                                                              ^
+      97 |   await expect(preview().getByRole('heading', { name: '随手记', exact: true })).toBeVisible()
+      98 |   const folder = join(projectPath, '.ai-studio/workbench/drafts')
+      99 |   const draft = readdirSync(folder)[0]!
+        at copyPresetIntoOrdinaryDraft (/Users/zhixing/Projects/AI Stduio.worktrees/product-selection/apps/desktop/e2e/project-view.spec.ts:96:62)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/product-selection/apps/desktop/e2e/project-view.spec.ts:108:3
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/project-view-a-preset-copi-ece35-same-knowledge-subscription/error-context.md
+
+  3) e2e/project-view.spec.ts:119:5 › a copied Overview package reads scoped Session cards and opens a conversation through the SDK 
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.project-workspace:not([hidden])').getByRole('button', { name: /从简单模板开始/ })
+
+
+      94 | async function copyPresetIntoOrdinaryDraft(id: string) {
+      95 |   await workspace().getByRole('button', { name: '添加工作台', exact: true }).click()
+    > 96 |   await workspace().getByRole('button', { name: /从简单模板开始/ }).click()
+         |                                                              ^
+      97 |   await expect(preview().getByRole('heading', { name: '随手记', exact: true })).toBeVisible()
+      98 |   const folder = join(projectPath, '.ai-studio/workbench/drafts')
+      99 |   const draft = readdirSync(folder)[0]!
+        at copyPresetIntoOrdinaryDraft (/Users/zhixing/Projects/AI Stduio.worktrees/product-selection/apps/desktop/e2e/project-view.spec.ts:96:62)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/product-selection/apps/desktop/e2e/project-view.spec.ts:124:3
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/project-view-a-copied-Over-65516-onversation-through-the-SDK/error-context.md
+
+  3 failed
+    e2e/product-selection.spec.ts:29:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works 
+    e2e/project-view.spec.ts:107:5 › a preset copied into an ordinary custom draft uses the same knowledge subscription 
+    e2e/project-view.spec.ts:119:5 › a copied Overview package reads scoped Session cards and opens a conversation through the SDK 
+  26 passed (3.1m)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/product-selection/apps/desktop
+

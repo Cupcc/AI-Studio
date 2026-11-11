@@ -211,7 +211,7 @@ export class SessionService implements MainSessionPort {
     }
   }
 
-  async create(request: CreateSessionRequest): Promise<SessionSummary> {
+  async create(request: CreateSessionRequest, options?: { onCreated(summary: SessionSummary): void; preserveDraft: boolean }): Promise<SessionSummary> {
     this.validateMessage(request)
     this.project(request.projectId)
     if (!this.enabledClis.has(request.cli)) throw new Error('CLI 未启用，请在 CLI 设置中启用')
@@ -240,9 +240,10 @@ export class SessionService implements MainSessionPort {
     try {
       this.options.store.transaction(() => {
         this.options.store.saveSummary(summary)
+        options?.onCreated(summary)
         this.options.bindConnection?.(summary.id, summary.cli)
         this.begin(entry, request, viewContext, files)
-        this.options.store.deleteDraft({ projectId: request.projectId, kind: 'new_chat', ...(request.originViewId ? { viewId: request.originViewId } : {}) })
+        if (!options?.preserveDraft) this.options.store.deleteDraft({ projectId: request.projectId, kind: 'new_chat', ...(request.originViewId ? { viewId: request.originViewId } : {}) })
       })
     } catch (error) {
       this.entries.delete(summary.id)

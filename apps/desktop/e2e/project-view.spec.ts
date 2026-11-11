@@ -93,7 +93,7 @@ test('five presets use the same webpage frame and keep all page content inside i
 
 async function copyPresetIntoOrdinaryDraft(id: string) {
   await workspace().getByRole('button', { name: '添加工作台', exact: true }).click()
-  await workspace().getByRole('button', { name: /从简单模板开始/ }).click()
+  await page.getByRole('button', { name: /从简单模板开始/ }).click()
   await expect(preview().getByRole('heading', { name: '随手记', exact: true })).toBeVisible()
   const folder = join(projectPath, '.ai-studio/workbench/drafts')
   const draft = readdirSync(folder)[0]!

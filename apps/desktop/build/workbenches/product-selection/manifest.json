@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "pluginId": "product-selection",
+  "version": "1.0.0",
+  "sdkVersion": 1,
+  "title": "选品工作台",
+  "entry": "index.html",
+  "capabilities": ["state.read", "state.write", "conversation.draft", "session.open", "agent.execute"]
+}

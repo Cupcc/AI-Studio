@@ -230,3 +230,5 @@ node tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs \
 - 原生 Stop 补充复核使用两条带唯一标记、睡眠 120 秒的 Python 命令；同时检查原生后台列表和系统 Python 进程退出。进程探测限定实际 Python 可执行文件，排除包含命令文本的 Shell。`clean` / `terminate` 是实验接口，需锁定所支持 CLI 版本；具体语义与覆盖边界见校验报告第 4、5 节。
 - 本脚本不验证 Electron、PTY、Browser、SQLite、文件变更归因或 GUI 提醒行为，也不代表完整 AC 已验收。
 - 本次实测结果见 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md)。
+
+选品模板及 `agent.execute` 变更归入工作台范围，包含 `product-selection.spec.ts`。选品 HTML/JS/manifest 额外选择直接读取业务模型的 `selection-model` 和验证真实 SessionService 接缝的 `agents` 单测；CSS 沿用仅界面回归规则。该 E2E 使用模拟 Provider，真实 Codex 验证见[选品任务](../.agents/archive/tasks/T20261111-product-selection/task.md)。

@@ -21,6 +21,7 @@ beforeEach(() => {
   useProjectShell.setState({ projects: { p: project }, uiStates: { p: defaultUiState() } })
   useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {} })
   api = {
+    startAgent: vi.fn(), listAgents: vi.fn(), getAgent: vi.fn(), stopAgent: vi.fn(),
     list: vi.fn(async () => catalog), listRemoved: vi.fn(async () => removed), getSnapshot: vi.fn(), getContext: vi.fn(), createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(), setEnabled: vi.fn(), onChanged: vi.fn(),
     rename: vi.fn(async ({ ref, title }) => { catalog = catalog.map(entry => entry.viewId === ref.viewId ? { ...entry, title } : entry); return catalog }),
     move: vi.fn(async () => catalog), deleteDraft: vi.fn(async ref => { catalog = catalog.filter(entry => entry.viewId !== ref.viewId); return catalog }),

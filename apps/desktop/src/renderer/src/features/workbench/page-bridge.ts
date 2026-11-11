@@ -1,3 +1,6 @@
+import { parseAgentRequest } from '@shared/workbench/schema'
+import type { WorkbenchAgentRequest, WorkbenchAgentRun } from '@shared/workbench/types'
+import type { ConversationPage } from '@shared/session/types'
 import { WORKBENCH_MESSAGE, type JsonValue, type WorkbenchPageSnapshot } from '@shared/workbench/types'
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -13,6 +16,9 @@ function json(value: unknown, depth = 0): value is JsonValue {
 
 type PageRequest = { id: string } & (
   | { method: 'getInstance' }
+  | { method: 'listAgents' }
+  | { method: 'startAgent'; request: WorkbenchAgentRequest }
+  | { method: 'getAgent' | 'stopAgent'; runId: string }
   | { method: 'updateState'; state: JsonValue; expectedRevision: number }
   | { method: 'setDraft'; text: string; target: 'current' | 'new' }
   | { method: 'openSession'; sessionId: string }
@@ -21,7 +27,10 @@ function request(value: Record<string, unknown>): PageRequest {
   if (typeof value.id !== 'string' || !value.id || value.id.length > 200) throw new Error('无效页面请求编号')
   const id = value.id
   if (value.method === 'getInstance') return { id, method: 'getInstance' }
+  if (value.method === 'listAgents') return { id, method: 'listAgents' }
   if (!record(value.params)) throw new Error('页面请求缺少参数')
+  if (value.method === 'startAgent') return { id, method: 'startAgent', request: parseAgentRequest(value.params) }
+  if ((value.method === 'getAgent' || value.method === 'stopAgent') && typeof value.params.runId === 'string' && /^[a-zA-Z0-9-]{1,100}$/.test(value.params.runId)) return { id, method: value.method, runId: value.params.runId }
   if (value.method === 'setDraft' && typeof value.params.text === 'string' && value.params.text.length <= 100_000 && (value.params.target === undefined || value.params.target === 'current' || value.params.target === 'new')) return { id, method: 'setDraft', text: value.params.text, target: value.params.target ?? 'current' }
   if (value.method === 'openSession' && typeof value.params.sessionId === 'string' && value.params.sessionId.length > 0 && value.params.sessionId.length <= 200) return { id, method: 'openSession', sessionId: value.params.sessionId }
   if (value.method === 'updateState' && json(value.params.state) && typeof value.params.expectedRevision === 'number' && Number.isSafeInteger(value.params.expectedRevision) && value.params.expectedRevision >= 0) {
@@ -36,6 +45,12 @@ export function attachWorkbenchPageBridge(options: {
   updateState(state: JsonValue, expectedRevision: number): Promise<WorkbenchPageSnapshot>
   setDraft(text: string, isActive: () => boolean, target: 'current' | 'new'): Promise<void>
   openSession(sessionId: string, isActive: () => boolean): Promise<void>
+  agents?: {
+    start(request: WorkbenchAgentRequest): Promise<WorkbenchAgentRun>
+    list(): Promise<WorkbenchAgentRun[]>
+    get(runId: string): Promise<ConversationPage>
+    stop(runId: string): Promise<void>
+  }
   ready(): void
   error(message: string): void
 }): () => void {
@@ -53,6 +68,17 @@ export function attachWorkbenchPageBridge(options: {
         if (!snapshot.enabled) throw new Error('工作台已停用')
         let result: unknown
         switch (req.method) {
+          case 'startAgent':
+          case 'listAgents':
+          case 'getAgent':
+          case 'stopAgent': {
+            if (!snapshot.manifest.capabilities.includes('agent.execute') || !options.agents) throw new Error('此工作台未声明 Agent 执行能力')
+            if (snapshot.target.kind !== 'instance') throw new Error('请先添加工作台，再执行 Agent')
+            result = req.method === 'startAgent' ? await options.agents.start(req.request)
+              : req.method === 'listAgents' ? await options.agents.list()
+              : req.method === 'getAgent' ? await options.agents.get(req.runId) : await options.agents.stop(req.runId)
+            break
+          }
           case 'getInstance':
             if (!snapshot.manifest.capabilities.includes('state.read')) throw new Error('此工作台未声明读取状态能力')
             result = snapshot; break

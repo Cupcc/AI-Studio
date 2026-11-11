@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>选品工作台</title><link rel="stylesheet" href="selection.css"></head>
+<body>
+<header><div><h1>选品工作台</h1><p>从市场线索，到值得开发的产品</p></div><span class="provider">Codex CLI</span><button id="run-all" class="primary">运行四个流程</button><button id="stop-all" hidden>停止编排</button></header>
+<div id="notice" role="status" aria-live="polite">正在读取工作台…</div>
+<details id="task-settings" open><summary>选品任务与资料</summary><div class="task-form"><label>任务目标<textarea id="brief" rows="2" placeholder="例如：为家居品牌寻找适合秋冬上新的桌面摆件，零售价 100–300 元。"></textarea></label><label>资料与来源<textarea id="sources" rows="2" placeholder="粘贴调研资料、网址或项目内文件相对路径。Agent 会依据实际可读取的内容分析。"></textarea></label><button id="save-task">保存要求</button></div></details>
+<nav id="stages" aria-label="选品流程"></nav>
+<div class="canvas-toolbar"><span id="progress">尚未执行</span><div><button id="add-node">新增节点</button><button id="compare">比较入选</button><button id="export">导出交接简报</button></div></div>
+<main><div id="canvas" class="canvas" aria-label="四阶段节点画布"></div><aside id="detail" aria-label="节点详情" hidden></aside></main>
+<dialog id="compare-dialog"><div class="dialog-head"><h2>候选方案比较</h2><button id="close-compare">关闭</button></div><div id="comparison"></div></dialog>
+<dialog id="edit-dialog"><div id="edit-form"><div class="dialog-head"><h2 id="edit-heading">新增节点</h2><button type="button" id="cancel-edit">取消</button></div><label id="edit-label"><span id="edit-label-text">名称</span><input id="edit-value" maxlength="2000" required></label><label id="edit-stage-label">所属流程<select id="edit-stage"><option value="0">数据收集与整理</option><option value="1">数据汇总分析</option><option value="2">方案生成</option><option value="3">方案对应的设计</option></select></label><div class="detail-actions"><button id="confirm-edit" type="button" class="primary">保存</button></div></div></dialog>
+<script type="module" src="selection.js"></script>
+</body></html>

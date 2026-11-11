@@ -1,6 +1,6 @@
 import { workbenchContract } from '@shared/ipc/workbench'
 import { isWorkbenchId } from '@shared/workbench/types'
-import { parseDraftWorkbenchRef, parseInstanceWorkbenchRef, parseJsonState, parseCustomWorkbenchRef, parseWorkbenchRef } from '@shared/workbench/schema'
+import { parseAgentRequest, parseDraftWorkbenchRef, parseInstanceWorkbenchRef, parseJsonState, parseCustomWorkbenchRef, parseWorkbenchRef } from '@shared/workbench/schema'
 import type { CoreServices } from '../services/core'
 import { workbenchesFor } from '../services/workbench'
 import { projectShellFor } from '../services/project'
@@ -12,6 +12,19 @@ export function createWorkbenchFeature(core: CoreServices) {
   const service = workbenchesFor(core), shell = projectShellFor(core)
   shell.workbenches = service
   return defineHandlers(workbenchContract, {
+    startAgent: {
+      parse(raw) { const value = expectRecord(raw); expectOnlyKeys(value, ['ref', 'request']); return { ref: parseInstanceWorkbenchRef(value.ref), request: parseAgentRequest(value.request) } },
+      handle: ({ ref, request }) => service.startAgent(ref, request)
+    },
+    listAgents: { parse: parseInstanceWorkbenchRef, handle: ref => service.listAgents(ref) },
+    getAgent: {
+      parse(raw) { const value = expectRecord(raw); expectOnlyKeys(value, ['ref', 'runId']); return { ref: parseInstanceWorkbenchRef(value.ref), runId: id(value.runId, 'runId') } },
+      handle: ({ ref, runId }) => service.getAgent(ref, runId)
+    },
+    stopAgent: {
+      parse(raw) { const value = expectRecord(raw); expectOnlyKeys(value, ['ref', 'runId']); return { ref: parseInstanceWorkbenchRef(value.ref), runId: id(value.runId, 'runId') } },
+      handle: ({ ref, runId }) => service.stopAgent(ref, runId)
+    },
     list: {
       parse(raw) { const value = expectRecord(raw); expectOnlyKeys(value, ['projectId']); return { projectId: id(value.projectId, 'projectId') } },
       handle: ({ projectId }) => service.list(projectId)
@@ -45,10 +58,11 @@ export function createWorkbenchFeature(core: CoreServices) {
     },
     deleteDraft: { parse: parseDraftWorkbenchRef, handle: ref => service.deleteDraft(ref) },
     createDraft: {
-      parse(raw): { projectId: string; source: 'template' | 'ai'; instanceId?: string } {
-        const value = expectRecord(raw); expectOnlyKeys(value, ['projectId', 'source', 'instanceId'])
+      parse(raw): { projectId: string; source: 'template' | 'ai'; instanceId?: string; templateId?: 'product-selection' } {
+        const value = expectRecord(raw); expectOnlyKeys(value, ['projectId', 'source', 'instanceId', 'templateId'])
         if (value.source !== 'template' && value.source !== 'ai') throw new Error('source 必须为 template 或 ai')
-        return { projectId: id(value.projectId, 'projectId'), source: value.source, ...(value.instanceId !== undefined ? { instanceId: id(value.instanceId, 'instanceId') } : {}) }
+        if (value.templateId !== undefined && (value.templateId !== 'product-selection' || value.source !== 'template' || value.instanceId !== undefined)) throw new Error('无效模板')
+        return { ...(value.templateId === 'product-selection' ? { templateId: value.templateId } : {}), projectId: id(value.projectId, 'projectId'), source: value.source, ...(value.instanceId !== undefined ? { instanceId: id(value.instanceId, 'instanceId') } : {}) }
       },
       handle: request => service.createDraft(request)
     },

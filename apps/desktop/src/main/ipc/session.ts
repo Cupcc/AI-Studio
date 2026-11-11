@@ -181,6 +181,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     installed: async () => { await service.getProviders(); await service.getProviders(true) }
   })
   shell.setSessionPort(service)
+  workbenchesFor(core).setAgentPort(service)
   void service.getProviders().catch(() => {})
   return defineHandlers(sessionContract, {
     pasteAttachment: {

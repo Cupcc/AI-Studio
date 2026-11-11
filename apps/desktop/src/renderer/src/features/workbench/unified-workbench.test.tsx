@@ -35,6 +35,7 @@ beforeEach(() => {
   useProjectShell.setState({ projects: { p: project }, uiStates: { p: defaultUiState() } })
   useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {} })
   api = {
+    startAgent: vi.fn(), listAgents: vi.fn(), getAgent: vi.fn(), stopAgent: vi.fn(),
     list: vi.fn(async () => catalog), getSnapshot: vi.fn(async () => presetSnapshot()), getContext: vi.fn(),
     listRemoved: vi.fn(async () => []), rename: vi.fn(), move: vi.fn(), setVisible: vi.fn(), deleteDraft: vi.fn(), createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(), setEnabled: vi.fn(),
     onChanged: vi.fn(listener => { change = listener; return () => {} })

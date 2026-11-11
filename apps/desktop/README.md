@@ -109,3 +109,5 @@ scripts/                       postinstall、afterPack、打包冒烟脚本
 预设网页包的生成、公共资源能力与本轮交付验证见[网页格式统一任务](../../.agents/archive/tasks/T20261111-workbench-web-format/task.md)。
 
 基础列表管理的行为与导航偏好存储由 [workbench §9.8](../../specs/workbench/spec.md#98-fr-wb-001006008-工作台列表管理)负责，实施与验证见[管理任务](../../tasks/T20261111-workbench-management/task.md)。
+
+选品模板位于 `build/workbenches/product-selection/`，从“添加工作台 → 选品工作台”创建。四流程业务与通用真实 Agent 接口由 [workbench §9.9](../../specs/workbench/spec.md#99-选品工作台与真实-agent-执行)维护，验证与人工体验入口见[选品任务](../../.agents/archive/tasks/T20261111-product-selection/task.md)。

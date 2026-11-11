@@ -1,10 +1,10 @@
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue }
 
 import type { ViewState } from '../project-view/types'
-import type { SessionSummary } from '../session/types'
+import type { SessionSummary, ConversationPage } from '../session/types'
 import { isPresetWorkbenchId, type PresetWorkbenchEntry, type PresetWorkbenchId } from './presets'
 
-export const WORKBENCH_CAPABILITIES = ['state.read', 'state.write', 'conversation.draft', 'project.knowledge.read', 'project.sessions.read', 'session.open'] as const
+export const WORKBENCH_CAPABILITIES = ['state.read', 'state.write', 'conversation.draft', 'project.knowledge.read', 'project.sessions.read', 'session.open', 'agent.execute'] as const
 export type WorkbenchCapability = typeof WORKBENCH_CAPABILITIES[number]
 
 export interface PluginManifest {
@@ -85,6 +85,22 @@ export interface WorkbenchPageApi {
   subscribe(listener: (snapshot: WorkbenchPageSnapshot) => void): () => void
   setDraft(text: string, options?: { target: 'current' | 'new' }): Promise<void>
   openSession(sessionId: string): Promise<void>
+  startAgent(request: WorkbenchAgentRequest): Promise<WorkbenchAgentRun>
+  listAgents(): Promise<WorkbenchAgentRun[]>
+  getAgent(runId: string): Promise<ConversationPage>
+  stopAgent(runId: string): Promise<void>
+}
+
+export interface WorkbenchAgentRequest {
+  requestId: string
+  key: string
+  title: string
+  text: string
+  model: string | null
+}
+export interface WorkbenchAgentRun {
+  request: WorkbenchAgentRequest
+  session: SessionSummary
 }
 
 export const WORKBENCH_MESSAGE = 'ai-studio-workbench-v1'
