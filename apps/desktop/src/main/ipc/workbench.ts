@@ -61,7 +61,7 @@ export function createWorkbenchFeature(core: CoreServices) {
       parse(raw): { projectId: string; source: 'template' | 'ai'; instanceId?: string; templateId?: 'product-selection' } {
         const value = expectRecord(raw); expectOnlyKeys(value, ['projectId', 'source', 'instanceId', 'templateId'])
         if (value.source !== 'template' && value.source !== 'ai') throw new Error('source 必须为 template 或 ai')
-        if (value.templateId !== undefined && (value.templateId !== 'product-selection' || value.source !== 'template' || value.instanceId !== undefined)) throw new Error('无效模板')
+        if (value.templateId !== undefined && (value.templateId !== 'product-selection' || value.source !== 'template')) throw new Error('无效模板')
         return { ...(value.templateId === 'product-selection' ? { templateId: value.templateId } : {}), projectId: id(value.projectId, 'projectId'), source: value.source, ...(value.instanceId !== undefined ? { instanceId: id(value.instanceId, 'instanceId') } : {}) }
       },
       handle: request => service.createDraft(request)

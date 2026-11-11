@@ -1,0 +1,13 @@
+{
+  "doubleClickOpens": "市场与趋势",
+  "expandButtonOpens": true,
+  "stoppedLabel": "已停止",
+  "hostDarkFixture": true,
+  "colors": {
+    "canvas": "rgb(242, 245, 241)",
+    "card": "rgb(255, 255, 255)",
+    "scheme": "light"
+  },
+  "errors": [],
+  "passed": true
+}

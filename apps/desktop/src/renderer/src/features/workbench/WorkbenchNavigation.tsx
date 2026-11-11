@@ -109,12 +109,12 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
       <div className="workbench-choices" aria-label="创建工作台" onKeyDown={event => { if (event.key === 'Escape') { setChoosing(false); addButton.current?.focus() } }}>
         <button disabled={pending} onClick={() => void create('ai')}><Icon name="chat" /><span>AI 对话创建<small>描述工作方式，由 AI 编写页面</small></span></button>
         <button disabled={pending} onClick={() => void create('template')}><Icon name="preview" /><span>从简单模板开始<small>先体验预览、保存与对话</small></span></button>
-        <button disabled={pending} onClick={() => void create('template', 'product-selection')}><Icon name="preview" /><span>选品工作台<small>四阶段流程，使用 Codex 执行节点</small></span></button>
         <h3>预设工作台</h3>
         {PRESET_WORKBENCHES.map(preset => {
           const existing = catalog?.find(entry => entry.viewId === preset.viewId), entry = existing ?? removed.find(entry => entry.viewId === preset.viewId) ?? preset
           return <button key={preset.viewId} disabled={pending || choiceLoading || !!choiceError || !!existing} aria-label={`添加 ${entry.title}`} onClick={() => visibility(entry, true)}><Icon name={entry.icon} /><span>{existing?.title ?? entry.title}</span><small>{existing ? '已添加' : '添加'}</small></button>
         })}
+        <button disabled={pending} aria-label="添加 选品工作台" onClick={() => void create('template', 'product-selection')}><Icon name="preview" /><span>选品工作台<small>四阶段画布，预览后添加到项目</small></span><small>添加</small></button>
         {removed.some(entry => entry.origin === 'custom') && <><h3>已移除的工作台</h3>{removed.filter(entry => entry.origin === 'custom').map(entry => <button key={entry.viewId} disabled={pending || choiceLoading || !!choiceError} aria-label={`恢复 ${entry.title}`} onClick={() => visibility(entry, true)}><Icon name={entry.icon} /><span>{entry.title}</span><small>恢复</small></button>)}</>}
         {choiceLoading && <p role="status">正在读取可用工作台…</p>}
         {choiceError && <p role="alert">{choiceError}<button className="text-button" onClick={() => { setChoosing(false); setActionError(choiceError) }}>关闭后重试</button></p>}

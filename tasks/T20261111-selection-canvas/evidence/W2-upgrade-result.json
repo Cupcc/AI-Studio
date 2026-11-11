@@ -1,0 +1,18 @@
+{
+  "oldVersion": "1.0.0",
+  "previewVersion": "1.1.0",
+  "previewUsesNewFiles": true,
+  "instanceUnchangedBeforeApply": true,
+  "preservedIdentity": true,
+  "stateAfterApply": {
+    "brief": "预览期间的新目标",
+    "nodes": [
+      {
+        "id": "market",
+        "result": "预览期间的新结果"
+      }
+    ]
+  },
+  "stateRevision": 2,
+  "passed": true
+}

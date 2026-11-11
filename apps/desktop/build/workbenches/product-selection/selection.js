@@ -1,6 +1,8 @@
 import { stages, readState, executionOrder, fingerprint, stale, parseCandidates, nodePrompt, candidateSource, candidatesFor, selectedFor } from './model.js';
+import {createCanvas} from './canvas.js';
+import {connectionState} from './canvas-model.js';
 const $ = id => document.getElementById(id), api = window.workbench;
-let snapshot, state, runs = [], selectedNode = null, busy = false, queue = null, pollTimer, disposed = false, canvasMarkup = '', activeCandidates = 'candidates', polling = null;
+let snapshot, state, runs = [], selectedNode = null, busy = false, queue = null, pollTimer, disposed = false, canvas = null, saving = Promise.resolve(), layoutQueued = false, layoutVersion = 0, activeCandidates = 'candidates', polling = null;
 const outputs = new Map(), runErrors = new Map(), accepted = new Map();
 const escape = text => String(text ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const running = run => run.session.activity !== 'none';
@@ -22,9 +24,24 @@ function status(node) {
   if (node.result) return stale(state,node) ? ['stale','需要更新'] : ['done','已完成'];
   return ['idle','待执行'];
 }
-async function save(next = state) {
-  const saved = await api.updateState(next, snapshot.stateRevision);
-  snapshot = saved; state = readState(saved.state);
+function save(next = () => state) {
+  const commit = async () => {
+    const value = typeof next === 'function' ? next() : next;
+    const saved = await api.updateState({...value,...(canvas ? {canvas:canvas.layout()} : {})}, snapshot.stateRevision);
+    snapshot = saved; state = readState(saved.state);
+  };
+  saving = saving.then(commit,commit);
+  return saving;
+}
+function saveLayout() {
+  layoutVersion++;canvas.saving();
+  if(layoutQueued)return;
+  layoutQueued=true;
+  void (async()=>{
+    try {let version;do{version=layoutVersion;await save();}while(version!==layoutVersion&&!disposed);canvas.saved();}
+    catch(error){canvas.failed(error.message);}
+    finally{layoutQueued=false;}
+  })();
 }
 async function action(fn) {
   if (polling) await polling;
@@ -38,6 +55,7 @@ function renderControls() {
   $('brief').disabled = lock; $('sources').disabled = lock; $('save-task').disabled = lock;
   $('run-all').disabled = lock || preview(); $('add-node').disabled = lock;
   $('stop-all').hidden = !runs.some(running) && queue === null;
+  if(runs.some(running)||queue!==null)$('task-settings').open=true;
   $('stop-all').disabled = busy;
   $('compare').disabled = allCandidates().length === 0;
   $('export').disabled = chosen().length === 0;
@@ -46,14 +64,8 @@ function render() {
   if (!state) return;
   renderControls();
   $('progress').textContent = state.nodes.filter(n => n.result && !stale(state,n)).length+' / '+state.nodes.length+' 节点已有最新结果';
-  const markup = stages.map((stage,index) => `<section class="lane" id="stage-${index}" aria-label="${stage.title}"><div class="lane-heading"><span>${index+1}</span><div><h3>${stage.title}</h3><small>${stage.subtitle}</small></div></div>${state.nodes.filter(n => n.stage === index).map(n => { const [cls,label] = status(n); return `<button class="node ${n.id===selectedNode?'selected':''}" data-node="${escape(n.id)}"><div class="node-head"><span class="kind">${n.candidate ? '设计 '+escape(n.candidate) : '独立 Agent'}</span><span class="status ${cls}">${label}</span></div><h3>${escape(n.title)}</h3><p>${escape(n.result ? n.result.slice(0,110) : n.prompt)}</p><div class="dependency">${n.deps.length ? '输入：'+n.deps.map(id => escape(state.nodes.find(n => n.id===id)?.title || id)).join('、') : '输入：任务目标与用户资料'}</div></button>`; }).join('')}</section>`).join('');
-  if (markup !== canvasMarkup) {
-    const focused = document.activeElement?.dataset.node;
-    $('canvas').innerHTML = markup; canvasMarkup = markup;
-    if (focused) [...document.querySelectorAll('#canvas [data-node]')].find(el => el.dataset.node === focused)?.focus();
-  }
-  document.querySelectorAll('#canvas [data-node]').forEach(button => button.onclick = () => openNode(button.dataset.node));
-  if (selectedNode) renderDetail(false);
+  canvas?.update(state,status,selectedNode);
+  if (selectedNode && !$('detail').hidden) renderDetail(false);
 }
 function openNode(id) { selectedNode=id; if(state.nodes.find(n=>n.id===id)?.stage===2)activeCandidates=id; $('detail').hidden=false; renderDetail(true); render(); }
 function renderDetail(force) {
@@ -91,7 +103,7 @@ function renderDetail(force) {
   $('run-node').onclick=()=>action(()=>startNode(node.id));
   $('stop-node').onclick=()=>action(async()=>{queue=null;await api.stopAgent(currentRun(node).request.requestId);await refreshRuns();});
   $('open-session').onclick=()=>action(()=>api.openSession(currentRun(node).session.id));
-  $('discuss').onclick=()=>action(async()=>{await api.setDraft('请讨论选品节点“'+node.title+'”。\n任务：'+state.brief+'\n节点要求：'+node.prompt+'\n当前结果：'+node.result, {target:'new'});notice('已填入对话草稿，请检查后发送。');});
+  $('discuss').onclick=()=>action(()=>discussNode(node));
   $('save-node').onclick=()=>action(async()=>{
     if (runs.some(running)) throw new Error('请先停止执行再修改。');
     const title=$('node-title').value.trim(),prompt=$('node-prompt').value.trim();
@@ -111,6 +123,7 @@ function renderDetail(force) {
     });
   });
 }
+async function discussNode(node){await api.setDraft('请讨论选品节点“'+node.title+'”。\n任务：'+state.brief+'\n节点要求：'+node.prompt+'\n当前结果：'+node.result,{target:'new'});notice('已填入对话草稿，请检查后发送。');}
 async function startNode(id) {
   if(preview())throw new Error('请先添加工作台。');
   if(runs.some(running))throw new Error('已有节点执行中，请等待或停止。');
@@ -174,6 +187,7 @@ async function tick() {
   if(!busy) { polling=poll();await polling;polling=null; }
   pollTimer=setTimeout(tick,1200);
 }
+$('task-toggle').onclick=()=>{$('task-settings').open=!$('task-settings').open;};
 $('save-task').onclick=()=>action(async()=>{await save({...state,brief:$('brief').value,sources:$('sources').value});notice('任务要求已保存。');});
 $('run-all').onclick=()=>action(async()=>{if(!state.brief.trim())throw new Error('请先填写并保存选品任务目标。');queue=executionOrder(state,state.nodes.map(n=>n.id));notice('已按依赖安排执行；停止、失败会终止后续安排。');});
 $('stop-all').onclick=()=>action(async()=>{queue=null;for(const run of runs.filter(running))await api.stopAgent(run.request.requestId);await refreshRuns();notice('已停止编排；历史成果保留。');});
@@ -192,8 +206,9 @@ $('add-node').onclick=()=>editDialog('新增节点','',true,async title=>{
   const stage=Number($('edit-stage').value),id=crypto.randomUUID();
   await save({...state,nodes:[...state.nodes,{id,title:title.slice(0,80),stage,deps:stage===3&&collection()?[collection().id]:[],prompt:'请依据任务目标完成此节点，注明来源与待核实信息。',candidate:stage===3?'A':null,revision:0,result:'',fingerprint:'',runId:null}]});openNode(id);
 });
-$('stages').innerHTML=stages.map((s,i)=>`<button data-stage="${i}"><b>${i+1}</b>${s.short}</button>`).join('');
-document.querySelectorAll('[data-stage]').forEach(button=>button.onclick=()=>$('stage-'+button.dataset.stage).scrollIntoView({block:'nearest',inline:'center',behavior:'instant'}));
+$('stages').innerHTML=stages.map((s,i)=>`<button data-stage="${i}"><b>${i+1}</b>${s.title}</button>`).join('');
+$('auto-layout').onclick=()=>canvas.autoLayout();
+document.querySelectorAll('[data-stage]').forEach(button=>button.onclick=()=>canvas.fit(Number(button.dataset.stage)));
 $('compare').onclick=()=>{
   const list=allCandidates().filter(c=>chosen().includes(c.id));const candidates=list.length?list:allCandidates();
   $('comparison').innerHTML=`<h3>${escape(collection().title)}</h3><p>${list.length?'比较已入选的 '+list.length+' 个候选':'尚未入选方案，展示全部候选。可在方案节点勾选入选。'}</p><table><thead><tr><th>比较维度</th>${candidates.map(c=>`<th>${escape(c.id+' · '+c.title)}</th>`).join('')}</tr></thead><tbody>${[['audience','目标人群'],['material','材质工艺'],['price','建议价格'],['rationale','入选依据'],['risk','风险']].map(([key,label])=>`<tr><th>${label}</th>${candidates.map(c=>`<td>${escape(c[key])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;$('compare-dialog').showModal();
@@ -204,12 +219,19 @@ $('export').onclick=()=>{
   const content='<!doctype html><meta charset="utf-8"><title>选品交接简报</title><style>body{font:15px/1.8 system-ui;max-width:900px;margin:40px auto;padding:20px}pre{white-space:pre-wrap}section{page-break-inside:avoid;border-top:1px solid #ccc;margin-top:30px}</style><h1>选品交接简报</h1><p>'+escape(state.brief)+'</p>'+selected.map(c=>{const n=state.nodes.find(n=>n.candidate===c.id&&n.deps.includes(collection().id));return '<section><h2>'+escape(c.id+' · '+c.title)+'</h2><p>'+escape(c.audience+' / '+c.price)+'</p><p>'+escape(c.material)+'</p><p>'+escape(c.rationale)+'</p><p>风险：'+escape(c.risk)+'</p><h3>设计说明'+(n&&stale(state,n)?'（需要更新）':'')+'</h3><pre>'+escape(n?.result||'尚未生成')+'</pre></section>';}).join('');
   const url=URL.createObjectURL(new Blob([content],{type:'text/html'})),link=document.createElement('a');link.href=url;link.download='选品交接简报.html';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('已导出入选方案交接简报。');
 };
-window.addEventListener('pagehide',()=>{disposed=true;clearTimeout(pollTimer);});
+window.addEventListener('pagehide',()=>{disposed=true;clearTimeout(pollTimer);canvas?.dispose();});
 try {
   snapshot=await api.getInstance();state=readState(snapshot.state);
+  canvas=createCanvas($('canvas'),{
+    state,open:openNode,select:id=>{selectedNode=id;$('detail').hidden=true;render();},preview,run:id=>action(async()=>{const node=state.nodes.find(n=>n.id===id),run=currentRun(node);if(run&&running(run)){queue=null;await api.stopAgent(run.request.requestId);await refreshRuns();}else await startNode(id);}),chat:id=>action(()=>discussNode(state.nodes.find(n=>n.id===id))),design:(source,id)=>{const target=state.nodes.find(n=>n.stage===3&&n.candidate===id&&n.deps.includes(source));openNode(target?.id??source);},locked:()=>(busy&&!polling)||runs.some(running)||queue!==null,notice,layoutChanged:saveLayout,
+    connect:(source,target,remove)=>action(async()=>{
+      if(runs.some(running)||queue)throw new Error('执行中不能修改依赖，请先停止。');
+      await save(connectionState(state,source,target,remove));
+      if(selectedNode===target)renderDetail(true);
+      notice(remove?'依赖连线已删除，受影响的结果需要更新。':'依赖连线已保存，执行时将使用此上游结果。');
+    })
+  });
   $('brief').value=state.brief;$('sources').value=state.sources;
-  const appearance=value=>document.documentElement.classList.toggle('dark',!!value.appearance?.dark);
-  appearance(snapshot);api.subscribe(value=>{appearance(value);});
   notice(preview()?'模板预览：编辑任务后，点击上方“添加至当前项目”开始真实执行。':'填写选品目标与资料，按节点生成或运行四个流程。');
   render();void tick();
 }catch(error){notice(error.message,true);}

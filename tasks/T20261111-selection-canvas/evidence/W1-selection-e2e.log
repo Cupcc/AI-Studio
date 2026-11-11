@@ -1,0 +1,12 @@
+$ playwright test product-selection.spec.ts
+
+Running 4 tests using 1 worker
+
+(node:7817) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/product-selection.spec.ts:35:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works (15.8s)
+  ✓  2 e2e/product-selection.spec.ts:63:5 › stopping the Session path cancels the queue and preserves unsent discussion; page reopen recovers runs (2.5s)
+  ✓  3 e2e/product-selection.spec.ts:81:5 › failed node resumes result collection after retry in the ordinary Session (3.4s)
+  ✓  4 e2e/product-selection.spec.ts:92:5 › infinite canvas drags groups and nodes, pans, zooms, edits connections and restores layout (1.9s)
+
+  4 passed (23.9s)

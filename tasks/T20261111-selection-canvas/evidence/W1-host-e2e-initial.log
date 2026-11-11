@@ -1,0 +1,169 @@
+$ playwright test product-selection.spec.ts workbench.spec.ts project-view.spec.ts
+
+Running 14 tests using 1 worker
+
+(node:99850) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   1 e2e/product-selection.spec.ts:35:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works (6.7s)
+(node:99935) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   2 e2e/product-selection.spec.ts:63:5 › stopping the Session path cancels the queue and preserves unsent discussion; page reopen recovers runs (6.6s)
+(node:269) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   3 e2e/product-selection.spec.ts:81:5 › failed node resumes result collection after retry in the ordinary Session (5.8s)
+(node:406) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   4 e2e/product-selection.spec.ts:92:5 › infinite canvas drags groups and nodes, pans, zooms, edits connections and restores layout (5.7s)
+(node:528) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 e2e/project-view.spec.ts:22:5 › AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart (4.6s)
+  ✓   6 e2e/project-view.spec.ts:64:5 › removed View label sends without creating helpers, and each View has an independent draft (1.7s)
+  ✓   7 e2e/project-view.spec.ts:80:5 › five presets use the same webpage frame and keep all page content inside it (1.1s)
+  ✓   8 e2e/project-view.spec.ts:107:5 › a preset copied into an ordinary custom draft uses the same knowledge subscription (1.4s)
+  ✓   9 e2e/project-view.spec.ts:119:5 › a copied Overview package reads scoped Session cards and opens a conversation through the SDK (1.8s)
+  ✓  10 e2e/project-view.spec.ts:131:5 › the package generate action starts a new unsent workbench draft from an existing Session (1.7s)
+  ✓  11 e2e/workbench.spec.ts:32:5 › AC-WB mechanism: template, state, navigation, disable/reopen and restart (2.1s)
+  ✓  12 e2e/workbench.spec.ts:74:5 › AC-WB mechanism: isolated edit preview, actionable errors and applying one instance (1.3s)
+  ✓  13 e2e/workbench.spec.ts:110:5 › AC-WB mechanism: refuses to apply files changed after the displayed preview (961ms)
+  ✘  14 e2e/workbench.spec.ts:126:5 › workbench management: rename, drag, remove/restore, delete draft and restart (6.2s)
+
+
+  1) e2e/product-selection.spec.ts:35:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator: locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true })
+    Expected: disabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeDisabled" locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true }) with timeout 5000ms
+      - waiting for locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true })
+
+
+      17 |   await page.getByRole('button',{name:'添加工作台',exact:true}).click()
+      18 |   await page.getByRole('button',{name:'添加 选品工作台',exact:true}).click()
+    > 19 |   await expect(plugin().getByRole('button',{name:'运行四个流程',exact:true})).toBeDisabled()
+         |                                                                         ^
+      20 |   await page.getByRole('button',{name:'添加至当前项目',exact:true}).click()
+      21 |   await expect(plugin().getByRole('button',{name:'运行四个流程',exact:true})).toBeEnabled()
+      22 | })
+        at /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/product-selection.spec.ts:19:73
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/product-selection-four-sta-f96fb-ing-design-and-export-works/error-context.md
+
+  2) e2e/product-selection.spec.ts:63:5 › stopping the Session path cancels the queue and preserves unsent discussion; page reopen recovers runs
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator: locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true })
+    Expected: disabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeDisabled" locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true }) with timeout 5000ms
+      - waiting for locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true })
+
+
+      17 |   await page.getByRole('button',{name:'添加工作台',exact:true}).click()
+      18 |   await page.getByRole('button',{name:'添加 选品工作台',exact:true}).click()
+    > 19 |   await expect(plugin().getByRole('button',{name:'运行四个流程',exact:true})).toBeDisabled()
+         |                                                                         ^
+      20 |   await page.getByRole('button',{name:'添加至当前项目',exact:true}).click()
+      21 |   await expect(plugin().getByRole('button',{name:'运行四个流程',exact:true})).toBeEnabled()
+      22 | })
+        at /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/product-selection.spec.ts:19:73
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/product-selection-stopping-a969c-n-page-reopen-recovers-runs/error-context.md
+
+  3) e2e/product-selection.spec.ts:81:5 › failed node resumes result collection after retry in the ordinary Session
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator: locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true })
+    Expected: disabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeDisabled" locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true }) with timeout 5000ms
+      - waiting for locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true })
+
+
+      17 |   await page.getByRole('button',{name:'添加工作台',exact:true}).click()
+      18 |   await page.getByRole('button',{name:'添加 选品工作台',exact:true}).click()
+    > 19 |   await expect(plugin().getByRole('button',{name:'运行四个流程',exact:true})).toBeDisabled()
+         |                                                                         ^
+      20 |   await page.getByRole('button',{name:'添加至当前项目',exact:true}).click()
+      21 |   await expect(plugin().getByRole('button',{name:'运行四个流程',exact:true})).toBeEnabled()
+      22 | })
+        at /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/product-selection.spec.ts:19:73
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/product-selection-failed-n-4dc3f-try-in-the-ordinary-Session/error-context.md
+
+  4) e2e/product-selection.spec.ts:92:5 › infinite canvas drags groups and nodes, pans, zooms, edits connections and restores layout
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator: locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true })
+    Expected: disabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeDisabled" locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true }) with timeout 5000ms
+      - waiting for locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行四个流程', exact: true })
+
+
+      17 |   await page.getByRole('button',{name:'添加工作台',exact:true}).click()
+      18 |   await page.getByRole('button',{name:'添加 选品工作台',exact:true}).click()
+    > 19 |   await expect(plugin().getByRole('button',{name:'运行四个流程',exact:true})).toBeDisabled()
+         |                                                                         ^
+      20 |   await page.getByRole('button',{name:'添加至当前项目',exact:true}).click()
+      21 |   await expect(plugin().getByRole('button',{name:'运行四个流程',exact:true})).toBeEnabled()
+      22 | })
+        at /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/product-selection.spec.ts:19:73
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/product-selection-infinite-09b62-ections-and-restores-layout/error-context.md
+
+  5) e2e/workbench.spec.ts:126:5 › workbench management: rename, drag, remove/restore, delete draft and restart
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  locator('iframe[title="工作台页面"]').contentFrame().getByLabel('计数', { exact: true })
+    Expected: "1"
+    Received: "0"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" locator('iframe[title="工作台页面"]').contentFrame().getByLabel('计数', { exact: true }) with timeout 5000ms
+      - waiting for locator('iframe[title="工作台页面"]').contentFrame().getByLabel('计数', { exact: true })
+        14 × locator resolved to <output id="count" aria-label="计数">0</output>
+           - unexpected value "0"
+
+
+      155 |   await workspace().getByRole('button', { name: '添加至当前项目', exact: true }).click()
+      156 |   await plugin().getByRole('button', { name: '增加一次', exact: true }).click()
+    > 157 |   await expect(plugin().getByLabel('计数', { exact: true })).toHaveText('1')
+          |                                                            ^
+      158 |   await manage('随手记', '重命名')
+      159 |   await page.getByRole('textbox', { name: '工作台名称', exact: true }).fill('项目笔记')
+      160 |   await page.getByRole('button', { name: '保存名称', exact: true }).click()
+        at /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/workbench.spec.ts:157:60
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/workbench-workbench-manage-b49fc-re-delete-draft-and-restart/error-context.md
+
+  5 failed
+    e2e/product-selection.spec.ts:35:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works
+    e2e/product-selection.spec.ts:63:5 › stopping the Session path cancels the queue and preserves unsent discussion; page reopen recovers runs
+    e2e/product-selection.spec.ts:81:5 › failed node resumes result collection after retry in the ordinary Session
+    e2e/product-selection.spec.ts:92:5 › infinite canvas drags groups and nodes, pans, zooms, edits connections and restores layout
+    e2e/workbench.spec.ts:126:5 › workbench management: rename, drag, remove/restore, delete draft and restart
+  9 passed (48.8s)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/selection-canvas/apps/desktop

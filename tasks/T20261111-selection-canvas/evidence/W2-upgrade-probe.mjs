@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { DatabaseSync } from 'node:sqlite';
+const { createServer } = await import(pathToFileURL(resolve('apps/desktop/node_modules/vite/dist/node/index.js')));
+const server = await createServer({ configFile:false, root:resolve('apps/desktop'), resolve:{ alias:{'@shared':resolve('apps/desktop/src/shared')} }, optimizeDeps:{noDiscovery:true,entries:[]}, server:{middlewareMode:true} });
+const root = mkdtempSync(join(tmpdir(),'canvas-review-upgrade-')), projectId='fixture-project', db=new DatabaseSync(':memory:');
+try {
+ const { PackageRuntime }=await server.ssrLoadModule('/src/main/services/workbench/package-runtime.ts');
+ const { workbenchCore }=await server.ssrLoadModule('/src/main/services/database/migrations/2026111101_workbench.ts');
+ db.exec('CREATE TABLE projects(id TEXT PRIMARY KEY); INSERT INTO projects(id) VALUES (\'fixture-project\'); PRAGMA foreign_keys=ON');
+ workbenchCore.up(db);
+ const runtime=new PackageRuntime({database:()=>db,presetRoot:resolve('apps/desktop/out/workbench-packages'),projectPath:id=>{assert.equal(id,projectId);return root;},changed:()=>{}});
+ const draft=runtime.createDraft(projectId,'template',undefined,'product-selection'),draftTarget={projectId,kind:'draft',id:draft.id};
+ const manifestFile=join(root,draft.directory,'manifest.json'),manifest=JSON.parse(readFileSync(manifestFile,'utf8'));
+ writeFileSync(manifestFile,JSON.stringify({...manifest,version:'1.0.0'}));
+ const htmlFile=join(root,draft.directory,'index.html');writeFileSync(htmlFile,readFileSync(htmlFile,'utf8')+'\n<!-- REVIEW-OLD-PAGE -->');
+ const preview=runtime.getSnapshot(draftTarget),original=runtime.applyDraft(projectId,draft.id,preview.packageRevision),target={projectId,kind:'instance',id:original.id};
+ runtime.updateState(target,{brief:'旧目标',nodes:[{id:'market',result:'已保存的合成结果'}]},0);
+ const upgrade=runtime.createDraft(projectId,'template',original.id,'product-selection'),upgradeTarget={projectId,kind:'draft',id:upgrade.id},newPreview=runtime.getSnapshot(upgradeTarget);
+ assert.equal(newPreview.manifest.version,'1.1.0');
+ assert.equal(runtime.getSnapshot(target).manifest.version,'1.0.0');
+ assert.equal(newPreview.state.nodes[0].result,'已保存的合成结果');
+ assert(!readFileSync(join(root,upgrade.directory,'index.html'),'utf8').includes('REVIEW-OLD-PAGE'));
+ runtime.updateState(target,{brief:'预览期间的新目标',nodes:[{id:'market',result:'预览期间的新结果'}]},1);
+ const applied=runtime.applyDraft(projectId,upgrade.id,newPreview.packageRevision),after=runtime.getSnapshot(target);
+ assert.equal(applied.id,original.id);assert.equal(after.manifest.version,'1.1.0');assert.equal(after.state.brief,'预览期间的新目标');assert.equal(after.state.nodes[0].result,'预览期间的新结果');assert.equal(after.stateRevision,2);
+ const result={oldVersion:preview.manifest.version,previewVersion:newPreview.manifest.version,previewUsesNewFiles:true,instanceUnchangedBeforeApply:true,preservedIdentity:applied.id===original.id,stateAfterApply:after.state,stateRevision:after.stateRevision,passed:true};
+ writeFileSync(resolve('tasks/T20261111-selection-canvas/evidence/W2-upgrade-result.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));
+} finally { db.close();await server.close();rmSync(root,{recursive:true,force:true}); }

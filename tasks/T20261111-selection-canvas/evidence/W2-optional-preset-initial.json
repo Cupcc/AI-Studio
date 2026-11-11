@@ -1,0 +1,22 @@
+{
+  "ref": {
+    "projectId": "test-project",
+    "viewId": "product-selection"
+  },
+  "navigable": {
+    "projectId": "test-project",
+    "viewId": "product-selection"
+  },
+  "rendererAllowsStateWrite": false,
+  "pageTarget": {
+    "projectId": "test-project",
+    "kind": "instance",
+    "id": "product-selection"
+  },
+  "parseCustomWorkbenchRef": {
+    "error": "此操作只适用于自定义工作台"
+  },
+  "parseInstanceWorkbenchRef": {
+    "error": "此操作只适用于自定义工作台"
+  }
+}

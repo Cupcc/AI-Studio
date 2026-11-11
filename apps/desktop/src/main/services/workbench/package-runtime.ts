@@ -93,7 +93,8 @@ export class PackageRuntime {
   createDraft(projectId: string, source: 'template' | 'ai', instanceId?: string, templateId?: 'product-selection'): WorkbenchDraft {
     const root = this.root(projectId), id = randomUUID(), directory = `${ROOT}/drafts/${id}`
     const original = instanceId ? this.instanceRow(projectId, instanceId) : null
-    const files = original ? readPackage(root, join(root, ROOT, 'packages', original.package_revision)).files : templateId ? readPackage(this.options.presetRoot, join(this.options.presetRoot, templateId)).files : new Map([
+    if (templateId && (source !== 'template' || (original && original.plugin_id !== templateId))) throw new Error('只能使用匹配的模板升级此工作台')
+    const files = templateId ? readPackage(this.options.presetRoot, join(this.options.presetRoot, templateId)).files : original ? readPackage(root, join(root, ROOT, 'packages', original.package_revision)).files : new Map([
       ['manifest.json', Buffer.from(JSON.stringify({ schemaVersion: 1, pluginId: `workbench-${id}`, version: '1.0.0', sdkVersion: 1, title: source === 'ai' ? '新的工作台' : '随手记', entry: 'index.html', capabilities: ['state.read', 'state.write', 'conversation.draft'] }, null, 2))],
       ['index.html', Buffer.from(TEMPLATE_HTML)]
     ])

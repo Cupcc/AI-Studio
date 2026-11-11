@@ -1,0 +1,118 @@
+$ playwright test product-selection.spec.ts workbench.spec.ts --grep 'four stages|stopping the Session|failed node|workbench management'
+
+Running 4 tests using 1 worker
+
+(node:3236) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 e2e/product-selection.spec.ts:35:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works (44.8s)
+(node:3654) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 e2e/product-selection.spec.ts:63:5 › stopping the Session path cancels the queue and preserves unsent discussion; page reopen recovers runs (7.7s)
+(node:3736) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 e2e/product-selection.spec.ts:81:5 › failed node resumes result collection after retry in the ordinary Session (31.1s)
+(node:4026) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 e2e/workbench.spec.ts:126:5 › workbench management: rename, drag, remove/restore, delete draft and restart (2.9s)
+
+
+  1) e2e/product-selection.spec.ts:35:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works
+
+    TimeoutError: locator.dblclick: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('iframe[title="工作台页面"]').contentFrame().locator('[data-node="candidates"].node')
+        - locator resolved to <button class="node" data-node="candidates" aria-label="五个候选方案 · 已完成">…</button>
+      - attempting dblclick action
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - performing dblclick action
+          - <button data-candidate="B" data-action="design" class="candidate-route node-action">…</button> from <div class="candidate-preview-list" data-signature="[{"id":"A","title":"测试方案 A","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"B","title":"测试方案 B","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"C","title":"测试方案 C","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"D","title":"测试方案 D","audience":"桌面用户","material":"竹材","price":"100–200 元（待…>…</div> subtree intercepts pointer events
+        - retrying dblclick action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - performing dblclick action
+          - <button data-candidate="B" data-action="design" class="candidate-route node-action">…</button> from <div class="candidate-preview-list" data-signature="[{"id":"A","title":"测试方案 A","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"B","title":"测试方案 B","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"C","title":"测试方案 C","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"D","title":"测试方案 D","audience":"桌面用户","material":"竹材","price":"100–200 元（待…>…</div> subtree intercepts pointer events
+        - retrying dblclick action
+          - waiting 100ms
+        55 × waiting for element to be visible, enabled and stable
+           - element is visible, enabled and stable
+           - scrolling into view if needed
+           - done scrolling
+           - performing dblclick action
+           - <button data-candidate="B" data-action="design" class="candidate-route node-action">…</button> from <div class="candidate-preview-list" data-signature="[{"id":"A","title":"测试方案 A","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"B","title":"测试方案 B","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"C","title":"测试方案 C","audience":"桌面用户","material":"竹材","price":"100–200 元（待验证）","rationale":"合成测试依据","risk":"成本待验证"},{"id":"D","title":"测试方案 D","audience":"桌面用户","material":"竹材","price":"100–200 元（待…>…</div> subtree intercepts pointer events
+         - retrying dblclick action
+           - waiting 500ms
+
+
+      31 |   const stage=id.startsWith('design-')?3:id==='candidates'?2:id==='analysis'?1:0
+      32 |   await plugin().locator(`[data-stage="${stage}"]`).click()
+    > 33 |   await plugin().locator(`[data-node="${id}"].node`).dblclick()
+         |                                                      ^
+      34 | }
+      35 | test('four stages execute, candidates persist, local changes invalidate only matching design, and export works',async()=>{
+      36 |   await brief('[e2e:selection] 合成选品验证')
+        at node (/Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/product-selection.spec.ts:33:54)
+        at /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/product-selection.spec.ts:39:3
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/product-selection-four-sta-f96fb-ing-design-and-export-works/error-context.md
+
+  2) e2e/product-selection.spec.ts:63:5 › stopping the Session path cancels the queue and preserves unsent discussion; page reopen recovers runs
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('iframe[title="工作台页面"]').contentFrame().locator('.node[data-node="market"]')
+    Expected substring: "已停止"
+    Received string:    "市场与趋势需复核更新独立 Agent整理市场趋势、消费人群与需求。区分可核实的事实、来源与假设；无法访问的资料明确列出。来源：任务目标与用户资料"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('iframe[title="工作台页面"]').contentFrame().locator('.node[data-node="market"]') with timeout 5000ms
+      - waiting for locator('iframe[title="工作台页面"]').contentFrame().locator('.node[data-node="market"]')
+        14 × locator resolved to <button class="node" data-node="market" aria-label="市场与趋势 · 已停止">…</button>
+           - unexpected value "市场与趋势需复核更新独立 Agent整理市场趋势、消费人群与需求。区分可核实的事实、来源与假设；无法访问的资料明确列出。来源：任务目标与用户资料"
+
+
+      71 |   await expect(plugin().locator('.node[data-node="market"]')).toContainText('执行中')
+      72 |   await plugin().getByRole('button',{name:'停止编排',exact:true}).click()
+    > 73 |   await expect(plugin().locator('.node[data-node="market"]')).toContainText('已停止')
+         |                                                               ^
+      74 |   await expect(plugin().locator('.node[data-node="competition"]')).toContainText('待执行')
+      75 |   await expect(page.getByRole('textbox',{name:'消息',exact:true})).toContainText('尚未发送的讨论')
+      76 |   await plugin().getByRole('button',{name:'新增节点',exact:true}).click()
+        at /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/product-selection.spec.ts:73:63
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/product-selection-stopping-a969c-n-page-reopen-recovers-runs/error-context.md
+
+  3) e2e/product-selection.spec.ts:81:5 › failed node resumes result collection after retry in the ordinary Session
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('iframe[title="工作台页面"]').contentFrame().getByRole('button', { name: '运行此节点', exact: true })
+
+
+      81 | test('failed node resumes result collection after retry in the ordinary Session',async()=>{
+      82 |   await brief('[e2e:error] 测试失败后重试')
+    > 83 |   await node('market');await plugin().getByRole('button',{name:'运行此节点',exact:true}).click()
+         |                                                                                     ^
+      84 |   await expect(plugin().locator('#node-status')).toHaveText('结果待修正')
+      85 |   await plugin().getByRole('button',{name:'打开会话',exact:true}).click()
+      86 |   await page.getByRole('button',{name:'重试',exact:true}).click()
+        at /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop/e2e/product-selection.spec.ts:83:85
+
+    Error Context: ../../.runtime/desktop-e2e/test-results/product-selection-failed-n-4dc3f-try-in-the-ordinary-Session/error-context.md
+
+  3 failed
+    e2e/product-selection.spec.ts:35:5 › four stages execute, candidates persist, local changes invalidate only matching design, and export works
+    e2e/product-selection.spec.ts:63:5 › stopping the Session path cancels the queue and preserves unsent discussion; page reopen recovers runs
+    e2e/product-selection.spec.ts:81:5 › failed node resumes result collection after retry in the ordinary Session
+  1 passed (1.5m)
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+
+  × "pnpm recursive run" failed in /Users/zhixing/Projects/AI
+  │ Stduio.worktrees/selection-canvas/apps/desktop

@@ -50,6 +50,19 @@ it('keeps the add control below the list and opens its choices in a floating men
   await waitFor(() => expect(screen.queryByRole('menu', { name: '工作台操作' })).toBeNull())
 })
 
+it('adds the optional selection preset through a writable template draft', async () => {
+  vi.mocked(api.createDraft).mockResolvedValue({ ...draft, title: '选品工作台' })
+  render(<Navigation />)
+  expect(screen.queryByRole('button', { name: /^选品工作台$/ })).toBeNull()
+  fireEvent.click(screen.getByRole('button', { name: '添加工作台' }))
+  const add = await screen.findByRole('button', { name: '添加 选品工作台' })
+  expect(screen.getByRole('heading', { name: '预设工作台' }).compareDocumentPosition(add) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  fireEvent.click(add)
+  await waitFor(() => expect(api.createDraft).toHaveBeenCalledExactlyOnceWith({ projectId: 'p', source: 'template', templateId: 'product-selection' }))
+  expect(api.setVisible).not.toHaveBeenCalled()
+  await waitFor(() => expect(useProjectShell.getState().uiStates.p?.mainCanvas).toMatchObject({ mode: 'view', viewId: draft.viewId }))
+})
+
 it('renames through the menu, keeps the dialog open on failure and retries without losing the name', async () => {
   render(<Navigation />)
   await manage('Architecture')

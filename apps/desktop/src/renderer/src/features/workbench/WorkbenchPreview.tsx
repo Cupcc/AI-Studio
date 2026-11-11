@@ -1,3 +1,4 @@
+import selectionTemplate from '../../../../../build/workbenches/product-selection/manifest.json'
 import { useEffect, useRef, useState } from 'react'
 import { type WorkbenchSnapshot } from '@shared/workbench/types'
 import { WorkbenchPage, type PageStatus } from './WorkbenchPage'
@@ -39,6 +40,13 @@ function WorkbenchContent({ project, active, snapshot, loading }: ViewSlotProps 
     } catch (error) { if (alive.current) setActionError(describeWorkbenchError(error)) }
     finally { if (alive.current) setPending(false) }
   }
+  async function upgrade() {
+    if (entry.origin !== 'custom' || entry.kind !== 'instance') return
+    setPending(true); setActionError(null)
+    try { await openWorkbenchDraft(project.id, 'template', entry.id, 'product-selection') }
+    catch (error) { if (alive.current) setActionError(describeWorkbenchError(error)) }
+    finally { if (alive.current) setPending(false) }
+  }
   async function edit() {
     setPending(true); setActionError(null)
     try { if (entry.origin === 'custom') await openWorkbenchDraft(project.id, 'ai', entry.id) }
@@ -59,6 +67,7 @@ function WorkbenchContent({ project, active, snapshot, loading }: ViewSlotProps 
     catch (failure) { setActionError(describeWorkbenchError(failure)) }
   }
   const editing = entry.kind === 'draft'
+  const upgradeAvailable = !editing && entry.origin === 'custom' && page?.manifest.pluginId === selectionTemplate.pluginId && page.manifest.version !== selectionTemplate.version
   return <section className="workbench-preview" aria-label={editing ? '工作台草稿预览' : '工作台实例'}>
     <div className="workbench-toolbar">
       <span className="workbench-toolbar__stage">{editing ? entry.targetInstanceId ? '编辑草稿' : '新工作台草稿' : entry.origin === 'preset' ? 'App 预设工作台' : '已添加至项目'}</span><span className="grow" />
@@ -69,6 +78,7 @@ function WorkbenchContent({ project, active, snapshot, loading }: ViewSlotProps 
       {editing ? <button className="primary-button" disabled={pending || loading || !!error || !page || !pageReady} onClick={() => void apply()}>{pending ? '正在应用…' : entry.targetInstanceId ? '应用更改' : '添加至当前项目'}</button>
         : <>{entry.editable && <button className="secondary-button" disabled={pending || !page} onClick={() => void edit()}>编辑工作台</button>}{entry.canDisable && <button className="text-button" disabled={pending || !page} onClick={() => void toggleEnabled()}>{page?.enabled === false ? '启用工作台' : '停用工作台'}</button>}</>}
     </div>
+    {upgradeAvailable && <div className="workbench-notice">新版选品模板提供无限画布。升级保留任务、候选和执行记录，会替换当前页面定制；先预览，再应用。 <button className="secondary-button" disabled={pending} onClick={() => void upgrade()}>预览新版选品画布</button></div>}
     {editing && <p className="workbench-notice">在左侧描述或修改页面，完成后刷新预览。{entry.targetInstanceId ? '应用前，原实例保持不变；应用只更新此实例并保留已保存状态。' : '预览使用独立草稿状态，确认后再添加到项目。'}</p>}
     <details className="workbench-details">
       <summary>{editing ? '来源、能力与开发文件' : '插件信息与备份'}</summary>

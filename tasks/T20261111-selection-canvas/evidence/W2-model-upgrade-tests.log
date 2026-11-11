@@ -1,0 +1,8 @@
+
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/selection-canvas/apps/desktop
+
+
+ Test Files  2 passed (2)
+      Tests  4 passed | 20 skipped (24)
+   Start at  21:48:02
+   Duration  220ms (transform 55%, tests 32%, import 11%, worker 2%)

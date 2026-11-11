@@ -1,0 +1,22 @@
+{
+  "before": {
+    "x": 56,
+    "y": 126
+  },
+  "savedDuringDrag": {
+    "x": 24,
+    "y": 94
+  },
+  "visualAfterCancel": {
+    "x": 56,
+    "y": 126
+  },
+  "savedAfterCancel": {
+    "x": 24,
+    "y": 94
+  },
+  "storedWorldAfterCancel": {
+    "x": 56,
+    "y": 126
+  }
+}

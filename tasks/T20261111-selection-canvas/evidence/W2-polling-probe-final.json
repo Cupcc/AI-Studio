@@ -1,0 +1,9 @@
+{
+  "portEnabled": true,
+  "deps": [
+    "market"
+  ],
+  "notice": "依赖连线已保存，执行时将使用此上游结果。",
+  "runningCount": 0,
+  "errors": []
+}
