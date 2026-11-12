@@ -80,7 +80,15 @@ export function integrateBranch({ branch, title, body = '', cwd = process.cwd() 
   const tree = git(['rev-parse', `${sourceCommit}^{tree}`], cwd).trim()
   const commit = execFileSync('git', ['commit-tree', tree, '-p', head, '-F', '-'], { cwd, input: message, encoding: 'utf8' }).trim()
   git(['merge', '--ff-only', commit], cwd)
-  return { branch, sourceCommit, commit }
+  // dev now holds the delivery, so the worktree list keeps only unfinished work. A failed removal leaves dev integrated.
+  try {
+    git(['worktree', 'remove', source], cwd)
+    // Unlike branch -D, this refuses when the branch gained a commit after the checks above.
+    git(['update-ref', '-d', ref, sourceCommit], cwd)
+    return { branch, sourceCommit, commit, worktree: source }
+  } catch (error) {
+    return { branch, sourceCommit, commit, worktree: source, cleanupError: error.stderr?.trim() || error.message }
+  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -98,6 +106,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       const body = values['body-file'] ? readFileSync(values['body-file'], 'utf8') : ''
       const result = integrateBranch({ branch: positionals[0], title: values.title, body })
       console.log(`Squashed ${result.branch} at ${result.sourceCommit} into dev as ${result.commit}.`)
+      if (result.cleanupError) console.error(`dev is integrated, but the worktree ${result.worktree} or the branch ${result.branch} was not removed. ` +
+        `Clean up by hand as CONTRIBUTING.md §5 清理 describes, without --force:\n${result.cleanupError}`)
+      else console.log(`Removed the worktree ${result.worktree} and the branch ${result.branch}.`)
     }
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error))

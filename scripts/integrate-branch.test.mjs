@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync, realpathSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -16,7 +16,8 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 function fixture() {
-  const dir = mkdtempSync(path.join(tmpdir(), 'studio-integration-'))
+  // Git reports worktree paths with symlinks resolved, such as macOS /var -> /private/var.
+  const dir = realpathSync(mkdtempSync(path.join(tmpdir(), 'studio-integration-')))
   temporary.push(dir)
   const dev = path.join(dir, 'dev'), source = path.join(dir, '功能 worktree')
   mkdirSync(dev)
@@ -26,6 +27,7 @@ function fixture() {
   git(['config', 'core.hooksPath', path.join(dir, 'no-hooks')], dev)
   const commit = cwd => { git(['add', '.'], cwd); git(['commit', '-qm', 'fixture'], cwd); return git(['rev-parse', 'HEAD'], cwd).trim() }
   writeFileSync(path.join(dev, 'base.txt'), 'stable')
+  writeFileSync(path.join(dev, '.gitignore'), 'ignored/\n')
   const base = commit(dev)
   git(['worktree', 'add', '-q', '-b', 'feat/example', source], dev)
   return { dev, source, base, commit }
@@ -47,7 +49,8 @@ test('squashes the task branch into one dev commit with the checked tree', () =>
   writeFileSync(path.join(f.source, 'second.txt'), 'second commit')
   const head = f.commit(f.source)
   const result = integrateBranch({ branch: 'feat/example', title, body: 'Verified by the fixture.', cwd: f.dev })
-  expect(result).toMatchObject({ branch: 'feat/example', sourceCommit: head })
+  expect(result).toMatchObject({ branch: 'feat/example', sourceCommit: head, worktree: f.source })
+  expect(result.cleanupError).toBeUndefined()
   expect(git(['rev-parse', 'HEAD'], f.dev).trim()).toBe(result.commit)
   expect(git(['rev-list', '--parents', '-n1', 'HEAD'], f.dev).trim().split(' ')).toEqual([result.commit, f.base])
   expect(git(['rev-parse', 'HEAD^{tree}'], f.dev)).toBe(git(['rev-parse', `${head}^{tree}`], f.dev))
@@ -56,9 +59,18 @@ test('squashes the task branch into one dev commit with the checked tree', () =>
   expect(message).toContain(`Source-Branch: feat/example\nSource-Commit: ${head}`)
   expect(readFileSync(path.join(f.dev, 'second.txt'), 'utf8')).toBe('second commit')
   expect(git(['branch', '--show-current'], f.dev).trim()).toBe('dev')
-  expect(git(['rev-parse', 'HEAD'], f.source).trim()).toBe(head)
-  expect(git(['status', '--porcelain'], f.source)).toBe('')
 })
+
+test('removes the integrated worktree and branch, ignoring ignored build output', () => {
+  const f = fixture(); feature(f)
+  mkdirSync(path.join(f.source, 'ignored'))
+  writeFileSync(path.join(f.source, 'ignored', 'build.txt'), 'generated')
+  integrate(f)
+  expect(existsSync(f.source)).toBe(false)
+  expect(git(['worktree', 'list', '--porcelain'], f.dev)).not.toContain('feat/example')
+  expect(() => git(['rev-parse', '--verify', 'refs/heads/feat/example'], f.dev)).toThrow()
+})
+
 
 test('keeps body trailers in the final trailer block', () => {
   const f = fixture(), head = feature(f)
@@ -153,6 +165,19 @@ test('CLI rejects a dirty source with a nonzero status and unchanged dev', () =>
   unchanged(f)
 })
 
+test('CLI keeps dev integrated and exits 0 when the worktree cannot be removed', () => {
+  const f = fixture(), head = feature(f)
+  git(['worktree', 'lock', f.source], f.dev)
+  const result = cli(['feat/example', '--title', title], f.dev)
+  expect(result.status).toBe(0)
+  expect(result.stdout).toContain(`at ${head} into dev as`)
+  expect(result.stderr).toContain(`the worktree ${f.source} or the branch feat/example was not removed`)
+  expect(result.stderr).toContain('locked')
+  expect(git(['log', '-1', '--format=%(trailers:key=Source-Commit,valueonly)', 'HEAD'], f.dev).trim()).toBe(head)
+  expect(git(['rev-parse', 'HEAD'], f.source).trim()).toBe(head)
+  expect(git(['rev-parse', 'refs/heads/feat/example'], f.dev).trim()).toBe(head)
+})
+
 test('CLI squashes with a body file and toggles the acceptance freeze', () => {
   const f = fixture(), head = feature(f)
   const bodyFile = path.join(path.dirname(f.dev), 'body.md')
@@ -163,6 +188,7 @@ test('CLI squashes with a body file and toggles the acceptance freeze', () => {
   const result = cli(['feat/example', '--title', title, '--body-file', bodyFile], f.dev)
   expect(result.status).toBe(0)
   expect(result.stdout).toContain(`at ${head} into dev as`)
+  expect(result.stdout).toContain(`Removed the worktree ${f.source} and the branch feat/example.`)
   expect(git(['log', '-1', '--format=%B', 'HEAD'], f.dev)).toContain('Checked with the fixture.')
   expect(cli(['feat/example'], f.dev).status).toBe(1)
 })
