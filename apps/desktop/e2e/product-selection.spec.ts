@@ -89,8 +89,11 @@ test('failed node resumes result collection after retry in the ordinary Session'
   await expect(plugin().locator('#node-error')).toBeEmpty()
 })
 
-test('infinite canvas drags groups and nodes, pans, zooms, edits connections and restores layout',async()=>{
+test('infinite canvas drags groups and nodes, pans, zooms, edits connections and restores layout but not the view',async()=>{
   const frame=plugin(),canvas=frame.locator('#canvas')
+  const revision=()=>frame.locator('body').evaluate(async()=>(await (window as unknown as {workbench:{getInstance():Promise<{stateRevision:number}>}}).workbench.getInstance()).stateRevision)
+  const view=async()=>({zoom:await canvas.getAttribute('data-zoom'),x:await canvas.getAttribute('data-pan-x'),y:await canvas.getAttribute('data-pan-y')})
+  const reenter=async()=>{await page.getByRole('button',{name:'概览',exact:true}).click();await page.getByRole('button',{name:'选品工作台',exact:true}).click();await expect(canvas).toHaveAttribute('data-zoom',/./)}
   await frame.locator('[data-stage="0"]').click()
   const group=frame.locator('#stage-0'),handle=group.getByRole('button',{name:'移动分组 数据收集与整理',exact:true})
   const position=()=>group.evaluate(el=>({x:parseFloat(el.style.left),y:parseFloat(el.style.top)}))
@@ -114,6 +117,10 @@ test('infinite canvas drags groups and nodes, pans, zooms, edits connections and
   await edge.focus();await page.keyboard.press('Enter')
   await frame.getByRole('button',{name:'删除连线',exact:true}).click()
   await expect(edge).toHaveCount(0)
+  await expect(frame.locator('.layout-status')).toHaveText('布局已保存')
+  // Pan and zoom only change the view; they never write the instance state.
+  const saved=await revision()
+  await frame.getByRole('button',{name:'适应全图',exact:true}).click()
   const z1=Number(await canvas.getAttribute('data-zoom'))
   await frame.getByRole('button',{name:'放大画布',exact:true}).click()
   await expect.poll(async()=>Number(await canvas.getAttribute('data-zoom'))).toBeGreaterThan(z1)
@@ -123,13 +130,16 @@ test('infinite canvas drags groups and nodes, pans, zooms, edits connections and
   await expect.poll(async()=>Number(await canvas.getAttribute('data-zoom'))).toBeGreaterThan(z2)
   await canvas.focus();const x1=Number(await canvas.getAttribute('data-pan-x'));await page.keyboard.press('ArrowRight')
   await expect.poll(async()=>Number(await canvas.getAttribute('data-pan-x'))).toBe(x1-60)
-  await expect(frame.locator('.layout-status')).toHaveText('布局已保存')
-  const finalGroup=await position(),finalNode=await market.evaluate(el=>el.style.left),finalZoom=await canvas.getAttribute('data-zoom'),finalPan=await canvas.getAttribute('data-pan-x')
-  await page.getByRole('button',{name:'概览',exact:true}).click();await page.getByRole('button',{name:'选品工作台',exact:true}).click()
+  expect(await revision()).toBe(saved)
+  const finalGroup=await position(),finalNode=await market.evaluate(el=>el.style.left),zoomed=await view()
+  await reenter()
   await expect.poll(position).toEqual(finalGroup)
   await expect(market).toHaveCSS('left',finalNode)
-  await expect(canvas).toHaveAttribute('data-zoom',finalZoom!)
-  await expect(canvas).toHaveAttribute('data-pan-x',finalPan!)
+  // Every entry opens the same start view instead of the last pan and zoom.
+  const entry=await view();expect(entry).not.toEqual(zoomed)
+  await canvas.focus();await page.keyboard.press('ArrowDown');await expect(canvas).not.toHaveAttribute('data-pan-y',entry.y!)
+  await reenter()
+  expect(await view()).toEqual(entry)
   await frame.getByRole('button',{name:'适应全图',exact:true}).click()
   await page.screenshot({path:test.info().outputPath('infinite-canvas.png')})
 })

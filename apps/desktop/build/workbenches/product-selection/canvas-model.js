@@ -11,8 +11,7 @@ export function layoutFor(state) {
       nodes[n.id] = point(saved.nodes?.[n.id]) ? {x:Math.max(24,saved.nodes[n.id].x),y:Math.max(94,saved.nodes[n.id].y)} : {x:24,y:94+index*(stage===3?210:275)};
     });
   }
-  const view = saved.viewport;
-  return {groups,nodes,viewport:point(view)&&Number.isFinite(view.zoom)?{x:view.x,y:view.y,zoom:clampZoom(view.zoom)}:null};
+  return {groups,nodes};
 }
 export function groupBounds(state,layout,stage) {
   const positions=state.nodes.filter(n=>n.stage===stage).map(n=>({...layout.nodes[n.id],...nodeSize(n)}));

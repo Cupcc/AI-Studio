@@ -32,6 +32,9 @@ function canvasRun(script: string): unknown { const context=createContext({struc
 it('restores layout separately from business results and moves a whole group in world coordinates',()=>{
   expect(canvasRun(`const s=initialState(),l=layoutFor(s),before=fingerprint(s,s.nodes[0]),p=worldNode(s,l,'market');l.groups[0].x+=250;l.groups[0].y-=180;s.canvas=l;const restored=layoutFor(s),q=worldNode(s,restored,'market');[q.x-p.x,q.y-p.y,before===fingerprint(s,s.nodes[0]),s.nodes.length]`)).toEqual([250,-180,true,10])
 })
+it('ignores a saved viewport so every entry starts from the same view',()=>{
+  expect(canvasRun(`const s=initialState();s.canvas={...layoutFor(s),viewport:{x:-400,y:90,zoom:2}};Object.keys(layoutFor(s))`)).toEqual(['groups','nodes'])
+})
 it('cursor zoom preserves the world point and fitting contains every group',()=>{
   expect(canvasRun(`const v={x:-120,y:80,zoom:.7},p={x:320,y:190},z=zoomAt(v,2,p);Math.abs((p.x-v.x)/v.zoom-(p.x-z.x)/z.zoom)<1e-8 && Math.abs((p.y-v.y)/v.zoom-(p.y-z.y)/z.zoom)<1e-8`)).toBe(true)
   expect(canvasRun(`const s=initialState(),l=layoutFor(s),b=[0,1,2,3].map(i=>groupBounds(s,l,i)),v=fitBounds(b,{width:1200,height:800});b.every(r=>r.x*v.zoom+v.x>=0&&r.y*v.zoom+v.y>=0&&(r.x+r.width)*v.zoom+v.x<=1200&&(r.y+r.height)*v.zoom+v.y<=800)`)).toBe(true)

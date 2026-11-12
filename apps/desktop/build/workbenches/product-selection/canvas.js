@@ -3,7 +3,7 @@ import {NODE,nodeSize,layoutFor,groupBounds,worldNode,zoomAt,fitBounds,startView
 const svgNS='http://www.w3.org/2000/svg';
 const svgElement=(name,attributes)=>{const el=document.createElementNS(svgNS,name);for(const [key,value] of Object.entries(attributes))el.setAttribute(key,String(value));return el;};
 export function createCanvas(root,options) {
-  let state=options.state,layout=layoutFor(state),view=layout.viewport,gesture=null,space=false,connecting=null,edgeSelection=null,ignoreClick=false,lastNodeClick=null,current=null;
+  let state=options.state,layout=layoutFor(state),view=null,gesture=null,space=false,connecting=null,edgeSelection=null,ignoreClick=false,lastNodeClick=null,current=null;
   const groups=new Map(),cards=new Map(),edges=new Map();
   root.innerHTML='<div class="canvas-world"><div class="canvas-groups"></div><svg class="canvas-edges" aria-label="节点依赖连线"></svg><div class="canvas-nodes"></div></div><div class="canvas-tools" role="toolbar" aria-label="画布控制"><button data-tool="out" aria-label="缩小画布">−</button><button data-tool="reset" aria-label="画布恢复100%">100%</button><button data-tool="in" aria-label="放大画布">+</button><button data-tool="fit">适应全图</button><button data-tool="delete" hidden>删除连线</button><span class="layout-status" role="status"></span><button data-tool="retry" hidden>重试保存布局</button><button data-tool="help" aria-label="画布操作说明" title="画布操作说明">?</button></div><p class="canvas-help" id="canvas-help">拖动空白平移 · Ctrl/⌘ + 滚轮缩放 · 拖动节点圆点连线 · 空格拖动平移 · 画布聚焦时方向键平移、加减键缩放</p>';
   root.setAttribute('aria-describedby','canvas-help');
@@ -36,9 +36,9 @@ export function createCanvas(root,options) {
     if(stage!==current){current=stage;options.stageChanged?.(stage);}
     if(connecting){preview.setAttribute('d',curve(point(connecting.source,true),connecting.end));preview.style.display='';}else preview.style.display='none';
   }
-  function changed(){layout.viewport={...view};options.layoutChanged();}
-  function fit(stage){if(!root.clientWidth||!root.clientHeight)return;view=fitBounds(stage===undefined?[0,1,2,3].map(i=>groupBounds(state,layout,i)):[groupBounds(state,layout,stage)],size());paint();changed();}
-  function zoom(factor,anchor={x:root.clientWidth/2,y:root.clientHeight/2}){view=zoomAt(view,factor,anchor);paint();changed();}
+  function changed(){options.layoutChanged();}
+  function fit(stage){if(!root.clientWidth||!root.clientHeight)return;view=fitBounds(stage===undefined?[0,1,2,3].map(i=>groupBounds(state,layout,i)):[groupBounds(state,layout,stage)],size());paint();}
+  function zoom(factor,anchor={x:root.clientWidth/2,y:root.clientHeight/2}){view=zoomAt(view,factor,anchor);paint();}
   function selectEdge(edge){edgeSelection=edge;for(const item of edges.values())item.line.classList.toggle('selected',item===edge);tool('delete').hidden=!edge;tool('delete').disabled=options.locked();}
   function connect(source,target){connecting=null;paint();void options.connect(source,target,false);}
   function portAction(id,output){
@@ -121,7 +121,7 @@ export function createCanvas(root,options) {
       lastNodeClick=double?null:{id:done.id,time:event.timeStamp,point:done.start};
       if(double)options.open(done.id);else options.select(done.id);
     }else lastNodeClick=null;
-    if(done.moved&&done.kind!=='connect')changed();
+    if(done.moved&&(done.kind==='node'||done.kind==='group'))changed();
     if(done.kind!=='connect'||done.moved){ignoreClick=true;setTimeout(()=>ignoreClick=false,0);}
   }
   function cancel(){
@@ -138,7 +138,7 @@ export function createCanvas(root,options) {
     if(event.target.closest('.canvas-tools,.node-action'))return;event.preventDefault();
     const scale=event.deltaMode===1?16:event.deltaMode===2?root.clientHeight:1;
     if(event.ctrlKey||event.metaKey)zoom(Math.exp(-event.deltaY*scale*.008),local(event));
-    else{view={...view,x:view.x-event.deltaX*scale,y:view.y-event.deltaY*scale};paint();changed();}
+    else{view={...view,x:view.x-event.deltaX*scale,y:view.y-event.deltaY*scale};paint();}
   },{passive:false});
   root.onkeydown=event=>{
     if(event.key==='Escape'){cancel();selectEdge(null);return;}
@@ -154,17 +154,17 @@ export function createCanvas(root,options) {
     if(event.key==='-'){event.preventDefault();zoom(1/1.2);}
     if(event.key==='0'){event.preventDefault();fit();}
     if(event.key==='Delete'||event.key==='Backspace'){if(edgeSelection){event.preventDefault();void options.connect(edgeSelection.source,edgeSelection.target,true);}}
-    if(event.key.startsWith('Arrow')){event.preventDefault();view={...view,x:view.x+(event.key==='ArrowLeft'?60:event.key==='ArrowRight'?-60:0),y:view.y+(event.key==='ArrowUp'?60:event.key==='ArrowDown'?-60:0)};paint();changed();}
+    if(event.key.startsWith('Arrow')){event.preventDefault();view={...view,x:view.x+(event.key==='ArrowLeft'?60:event.key==='ArrowRight'?-60:0),y:view.y+(event.key==='ArrowUp'?60:event.key==='ArrowDown'?-60:0)};paint();}
   };
   const spaceDown=event=>{if(event.code==='Space'&&root.contains(event.target)&&!event.target.closest('button')){space=true;root.classList.add('pan-ready');event.preventDefault();}};
   const spaceUp=event=>{if(event.code==='Space'){space=false;root.classList.remove('pan-ready');}};
   document.addEventListener('keydown',spaceDown);document.addEventListener('keyup',spaceUp);window.addEventListener('blur',cancel);
   tool('in').onclick=()=>zoom(1.2);tool('out').onclick=()=>zoom(1/1.2);tool('reset').onclick=()=>zoom(1/view.zoom);tool('fit').onclick=()=>fit();tool('help').onclick=()=>options.notice(root.querySelector('.canvas-help').textContent);
   tool('delete').onclick=()=>{if(edgeSelection)void options.connect(edgeSelection.source,edgeSelection.target,true);};tool('retry').onclick=()=>options.layoutChanged();
-  const observer=new ResizeObserver(()=>{if(!view&&root.clientWidth&&root.clientHeight){view=startView([0,1,2,3].map(i=>groupBounds(state,layout,i)),size());paint();changed();}else paint();});observer.observe(root);
+  const observer=new ResizeObserver(()=>{if(!view&&root.clientWidth&&root.clientHeight){view=startView([0,1,2,3].map(i=>groupBounds(state,layout,i)),size());paint();}else paint();});observer.observe(root);
   return {
-    update,fit,autoLayout:()=>{layout=layoutFor({...state,canvas:undefined});view=null;fit();},
-    layout:()=>{const committed=structuredClone({...layout,viewport:view});if(gesture?.kind==='node')committed.nodes[gesture.id]={...gesture.origin};if(gesture?.kind==='group')committed.groups[gesture.stage]={...gesture.origin};if(gesture?.kind==='pan')committed.viewport={...gesture.origin};return committed;},
+    update,fit,autoLayout:()=>{layout=layoutFor({...state,canvas:undefined});view=null;fit();changed();},
+    layout:()=>{const committed=structuredClone(layout);if(gesture?.kind==='node')committed.nodes[gesture.id]={...gesture.origin};if(gesture?.kind==='group')committed.groups[gesture.stage]={...gesture.origin};return committed;},
     saving:()=>{layoutStatus.textContent='保存布局中…';tool('retry').hidden=true;},
     saved:()=>{layoutStatus.textContent='布局已保存';tool('retry').hidden=true;},
     failed:message=>{layoutStatus.textContent='布局未保存';tool('retry').hidden=false;options.notice(message,true);},
