@@ -121,7 +121,10 @@ test('FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolati
   const applied = (await appliedStyle())!
   expect(applied.blockedStyles).toBe(0)
   expect(applied.color).not.toBe(applied.rowColor)
-  expect(applied.font).toContain('IBM Plex Mono')
+  // System monospace first, bundled IBM Plex Mono as the last named fallback that still loads on demand.
+  const named = applied.font.split(',').map(item => item.trim().replace(/["']/g, '')).filter(item => item !== 'monospace')
+  expect([named[0], named.at(-1)]).toEqual(['ui-monospace', 'IBM Plex Mono'])
+  expect(await page.evaluate(async () => (await document.fonts.load("13px 'IBM Plex Mono'")).some(face => face.status === 'loaded'))).toBe(true)
   // 24-bit colours and minimumContrastRatio adjustments are written as style attributes (W5-F6, W5-F9).
   await terminalCommand("printf '\\033[48;2;0;128;0m\\033[38;2;255;255;255m TRUECOLOR_BG \\033[0m \\033[41mDEFAULT_ON_RED\\033[0m \\033[43;30mBLACK_ON_YELLOW\\033[0m\\n'")
   const colourProbe = () => page.evaluate(() => {

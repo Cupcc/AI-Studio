@@ -1,6 +1,6 @@
-// Shell UI copy in one place (NAV-Q13 recommendation: Chinese copy with
-// English product terms). Proposed wording from the project / navigation
-// specs; final copy is pending review.
+// Shell UI copy in one place. NAV-Q13 (confirmed 2026-11-12): the interface is
+// Chinese; the English product terms kept on screen are listed in the name
+// table of specs/navigation/spec.md.
 import type { OpenFailureReason, ToolId } from './types'
 import { isBuiltinViewId } from './ui-state'
 import { isCustomWorkbenchId } from '../workbench/types'

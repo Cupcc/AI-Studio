@@ -109,7 +109,7 @@ export function createE2eProviders(): AgentProvider[] {
           }), 160)
           schedule(turn, () => sink.itemDelta(turn.turnId, `${turn.turnId}:message`, 'text', '正在处理模拟请求…'), 80)
           if (input.text.includes('[e2e:slow]')) return
-          if (input.text.includes('Current Workbench: Architecture') && input.text.includes('重新整理支付模块架构')) {
+          if (input.text.includes('Current Workbench: 架构') && input.text.includes('重新整理支付模块架构')) {
             const cwd = provider.sessions.find(session => session.controller.activeTurn?.turnId === turn.turnId)?.options.cwd
             schedule(turn, () => {
               if (!cwd) return
@@ -123,7 +123,7 @@ export function createE2eProviders(): AgentProvider[] {
                   modules: [{ name: 'Payment API', responsibility: '校验与入口', path: 'src/payment/api.ts' }, { name: 'Payment Service', responsibility: '支付编排', path: 'src/payment/service.ts' }, { name: 'Payment Store', responsibility: '本地持久化', path: 'src/payment/store.ts' }]
                 }
               }))
-              complete(run, '已通过普通模拟 CLI Session 更新 Architecture Knowledge。')
+              complete(run, '已通过普通模拟 CLI Session 更新架构 Knowledge。')
             }, 600)
             return
           }

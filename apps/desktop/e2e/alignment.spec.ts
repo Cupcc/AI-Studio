@@ -177,10 +177,20 @@ test('FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right
   await workspace().getByRole('button', { name: 'Files', exact: true }).click()
   await expect(workspace().getByRole('button', { name: 'Files', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await atEachWidth('session-sidebar', 'session-sidebar')
-  // DEC-02 / task criterion 4: IBM Plex is bundled and actually loaded from app://studio.
-  const loaded = await page.evaluate(() => [...document.fonts].filter((face) => face.status === 'loaded').map((face) => face.family.replace(/"/g, '')))
-  expect(loaded).toEqual(expect.arrayContaining(['IBM Plex Sans', 'IBM Plex Mono']))
-  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain('IBM Plex Sans')
+  // DEC-02: IBM Plex is bundled and loads from app://studio on demand; the UI and code stacks prefer system faces
+  // and name Plex as the last fallback (T20261112-workbench-ui-polish), so it is no longer loaded eagerly.
+  const fonts = await page.evaluate(async () => {
+    await Promise.all([document.fonts.load("400 13px 'IBM Plex Sans'"), document.fonts.load("400 13px 'IBM Plex Mono'")])
+    const named = (stack: string) => stack.split(',').map((item) => item.trim().replace(/["']/g, '')).filter((item) => !['sans-serif', 'monospace'].includes(item))
+    return {
+      loaded: [...document.fonts].filter((face) => face.status === 'loaded').map((face) => face.family.replace(/["']/g, '')),
+      sans: named(getComputedStyle(document.body).fontFamily),
+      mono: named(getComputedStyle(document.documentElement).getPropertyValue('--font-mono'))
+    }
+  })
+  expect(fonts.loaded).toEqual(expect.arrayContaining(['IBM Plex Sans', 'IBM Plex Mono']))
+  expect([fonts.sans[0], fonts.sans.at(-1)]).toEqual(['system-ui', 'IBM Plex Sans'])
+  expect([fonts.mono[0], fonts.mono.at(-1)]).toEqual(['ui-monospace', 'IBM Plex Mono'])
 })
 
 test('FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440', async () => {
