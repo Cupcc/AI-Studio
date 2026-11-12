@@ -26,11 +26,18 @@ export function zoomAt(viewport,factor,anchor) {
   const zoom=clampZoom(viewport.zoom*factor),ratio=zoom/viewport.zoom;
   return {x:anchor.x-(anchor.x-viewport.x)*ratio,y:anchor.y-(anchor.y-viewport.y)*ratio,zoom};
 }
-export function fitBounds(bounds,size) {
-  const left=Math.min(...bounds.map(b=>b.x)),top=Math.min(...bounds.map(b=>b.y));
-  const width=Math.max(...bounds.map(b=>b.x+b.width))-left,height=Math.max(...bounds.map(b=>b.y+b.height))-top;
-  const zoom=clampZoom(Math.min((size.width-80)/Math.max(1,width),(size.height-80)/Math.max(1,height),1));
-  return {x:(size.width-width*zoom)/2-left*zoom,y:(size.height-height*zoom)/2-top*zoom,zoom};
+export const INSET = {top:60,right:24,bottom:56,left:24};
+const extent = bounds => {const left=Math.min(...bounds.map(b=>b.x)),top=Math.min(...bounds.map(b=>b.y));return {left,top,width:Math.max(...bounds.map(b=>b.x+b.width))-left,height:Math.max(...bounds.map(b=>b.y+b.height))-top};};
+export function fitBounds(bounds,size,inset=INSET) {
+  const {left,top,width,height}=extent(bounds),room={width:size.width-inset.left-inset.right,height:size.height-inset.top-inset.bottom};
+  const zoom=clampZoom(Math.min(room.width/Math.max(1,width),room.height/Math.max(1,height),1));
+  return {x:inset.left+Math.max(0,(room.width-width*zoom)/2)-left*zoom,y:inset.top-top*zoom,zoom};
+}
+export function startView(bounds,size,inset=INSET,readable=.75) {
+  const fit=fitBounds(bounds,size,inset);
+  if(fit.zoom>=readable)return fit;
+  const {left,top}=extent(bounds),zoom=clampZoom(Math.min(1,readable));
+  return {x:inset.left-left*zoom,y:inset.top-top*zoom,zoom};
 }
 export function connectionState(state,sourceId,targetId,remove=false) {
   const source=state.nodes.find(n=>n.id===sourceId),target=state.nodes.find(n=>n.id===targetId);

@@ -73,7 +73,7 @@ test('stopping the Session path cancels the queue and preserves unsent discussio
   await expect(plugin().locator('.node[data-node="market"]')).toContainText('已停止')
   await expect(plugin().locator('.node[data-node="competition"]')).toContainText('待执行')
   await expect(page.getByRole('textbox',{name:'消息',exact:true})).toContainText('尚未发送的讨论')
-  await plugin().getByRole('button',{name:'新增节点',exact:true}).click()
+  await plugin().getByRole('button',{name:'新建节点',exact:true}).click()
   await plugin().locator('#edit-value').fill('补充调研')
   await plugin().locator('#edit-form').getByRole('button',{name:'保存',exact:true}).click()
   await expect(plugin().getByRole('heading',{name:'补充调研',exact:true,level:2})).toBeVisible()

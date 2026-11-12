@@ -1,11 +1,12 @@
 import {stages,candidatesFor} from './model.js';
-import {NODE,nodeSize,layoutFor,groupBounds,worldNode,zoomAt,fitBounds} from './canvas-model.js';
+import {NODE,nodeSize,layoutFor,groupBounds,worldNode,zoomAt,fitBounds,startView,INSET} from './canvas-model.js';
 const svgNS='http://www.w3.org/2000/svg';
 const svgElement=(name,attributes)=>{const el=document.createElementNS(svgNS,name);for(const [key,value] of Object.entries(attributes))el.setAttribute(key,String(value));return el;};
 export function createCanvas(root,options) {
-  let state=options.state,layout=layoutFor(state),view=layout.viewport,gesture=null,space=false,connecting=null,edgeSelection=null,ignoreClick=false,lastNodeClick=null;
+  let state=options.state,layout=layoutFor(state),view=layout.viewport,gesture=null,space=false,connecting=null,edgeSelection=null,ignoreClick=false,lastNodeClick=null,current=null;
   const groups=new Map(),cards=new Map(),edges=new Map();
-  root.innerHTML='<div class="canvas-world"><div class="canvas-groups"></div><svg class="canvas-edges" aria-label="节点依赖连线"></svg><div class="canvas-nodes"></div></div><div class="canvas-tools" role="toolbar" aria-label="画布控制"><button data-tool="out" aria-label="缩小画布">−</button><button data-tool="reset" aria-label="画布恢复100%">100%</button><button data-tool="in" aria-label="放大画布">+</button><button data-tool="fit">适应全图</button><button data-tool="delete" hidden>删除连线</button><span class="layout-status" role="status"></span><button data-tool="retry" hidden>重试保存布局</button></div><p class="canvas-help">拖动空白平移 · Ctrl/⌘ + 滚轮缩放 · 拖动节点圆点连线 · 空格拖动平移</p>';
+  root.innerHTML='<div class="canvas-world"><div class="canvas-groups"></div><svg class="canvas-edges" aria-label="节点依赖连线"></svg><div class="canvas-nodes"></div></div><div class="canvas-tools" role="toolbar" aria-label="画布控制"><button data-tool="out" aria-label="缩小画布">−</button><button data-tool="reset" aria-label="画布恢复100%">100%</button><button data-tool="in" aria-label="放大画布">+</button><button data-tool="fit">适应全图</button><button data-tool="delete" hidden>删除连线</button><span class="layout-status" role="status"></span><button data-tool="retry" hidden>重试保存布局</button><button data-tool="help" aria-label="画布操作说明" title="画布操作说明">?</button></div><p class="canvas-help" id="canvas-help">拖动空白平移 · Ctrl/⌘ + 滚轮缩放 · 拖动节点圆点连线 · 空格拖动平移 · 画布聚焦时方向键平移、加减键缩放</p>';
+  root.setAttribute('aria-describedby','canvas-help');
   const world=root.querySelector('.canvas-world'),groupLayer=root.querySelector('.canvas-groups'),nodeLayer=root.querySelector('.canvas-nodes'),svg=root.querySelector('svg');
   const tool=name=>root.querySelector(`[data-tool="${name}"]`),layoutStatus=root.querySelector('.layout-status');
   const defs=svgElement('defs',{}),marker=svgElement('marker',{id:'dependency-arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto'});
@@ -31,6 +32,8 @@ export function createCanvas(root,options) {
     for(const [stage,element] of groups){const b=groupBounds(state,layout,stage);Object.assign(element.style,{left:b.x+'px',top:b.y+'px',width:b.width+'px',height:b.height+'px'});}
     for(const [id,element] of cards){element.querySelector('.output-port').classList.toggle('connecting',connecting?.source===id);const p=worldNode(state,layout,id);element.style.left=p.x+'px';element.style.top=p.y+'px';element.style.height=p.height+'px';}
     for(const edge of edges.values()){const d=curve(point(edge.source,true),point(edge.target,false));edge.line.setAttribute('d',d);edge.hit.setAttribute('d',d);edge.hit.setAttribute('stroke-width',String(18/view.zoom));}
+    let best=0,stage=current;for(const i of groups.keys()){const b=groupBounds(state,layout,i),w=Math.min(root.clientWidth-INSET.right,view.x+(b.x+b.width)*view.zoom)-Math.max(INSET.left,view.x+b.x*view.zoom),h=Math.min(root.clientHeight-INSET.bottom,view.y+(b.y+b.height)*view.zoom)-Math.max(INSET.top,view.y+b.y*view.zoom);if(w>0&&h>0&&w*h>best){best=w*h;stage=i;}}
+    if(stage!==current){current=stage;options.stageChanged?.(stage);}
     if(connecting){preview.setAttribute('d',curve(point(connecting.source,true),connecting.end));preview.style.display='';}else preview.style.display='none';
   }
   function changed(){layout.viewport={...view};options.layoutChanged();}
@@ -80,7 +83,7 @@ export function createCanvas(root,options) {
     }
     for(const [key,edge] of edges)if(!wanted.has(key)){edge.line.remove();edge.hit.remove();edges.delete(key);if(edge===edgeSelection)selectEdge(null);}
     tool('delete').disabled=options.locked();
-    if(!view&&root.clientWidth&&root.clientHeight)view=fitBounds([0,1,2,3].map(i=>groupBounds(state,layout,i)),size());
+    if(!view&&root.clientWidth&&root.clientHeight)view=startView([0,1,2,3].map(i=>groupBounds(state,layout,i)),size());
     paint();
   }
   function pointerDown(event){
@@ -156,9 +159,9 @@ export function createCanvas(root,options) {
   const spaceDown=event=>{if(event.code==='Space'&&root.contains(event.target)&&!event.target.closest('button')){space=true;root.classList.add('pan-ready');event.preventDefault();}};
   const spaceUp=event=>{if(event.code==='Space'){space=false;root.classList.remove('pan-ready');}};
   document.addEventListener('keydown',spaceDown);document.addEventListener('keyup',spaceUp);window.addEventListener('blur',cancel);
-  tool('in').onclick=()=>zoom(1.2);tool('out').onclick=()=>zoom(1/1.2);tool('reset').onclick=()=>zoom(1/view.zoom);tool('fit').onclick=()=>fit();
+  tool('in').onclick=()=>zoom(1.2);tool('out').onclick=()=>zoom(1/1.2);tool('reset').onclick=()=>zoom(1/view.zoom);tool('fit').onclick=()=>fit();tool('help').onclick=()=>options.notice(root.querySelector('.canvas-help').textContent);
   tool('delete').onclick=()=>{if(edgeSelection)void options.connect(edgeSelection.source,edgeSelection.target,true);};tool('retry').onclick=()=>options.layoutChanged();
-  const observer=new ResizeObserver(()=>{if(!view){fit();}else paint();});observer.observe(root);
+  const observer=new ResizeObserver(()=>{if(!view&&root.clientWidth&&root.clientHeight){view=startView([0,1,2,3].map(i=>groupBounds(state,layout,i)),size());paint();changed();}else paint();});observer.observe(root);
   return {
     update,fit,autoLayout:()=>{layout=layoutFor({...state,canvas:undefined});view=null;fit();},
     layout:()=>{const committed=structuredClone({...layout,viewport:view});if(gesture?.kind==='node')committed.nodes[gesture.id]={...gesture.origin};if(gesture?.kind==='group')committed.groups[gesture.stage]={...gesture.origin};if(gesture?.kind==='pan')committed.viewport={...gesture.origin};return committed;},

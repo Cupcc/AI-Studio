@@ -36,6 +36,9 @@ it('cursor zoom preserves the world point and fitting contains every group',()=>
   expect(canvasRun(`const v={x:-120,y:80,zoom:.7},p={x:320,y:190},z=zoomAt(v,2,p);Math.abs((p.x-v.x)/v.zoom-(p.x-z.x)/z.zoom)<1e-8 && Math.abs((p.y-v.y)/v.zoom-(p.y-z.y)/z.zoom)<1e-8`)).toBe(true)
   expect(canvasRun(`const s=initialState(),l=layoutFor(s),b=[0,1,2,3].map(i=>groupBounds(s,l,i)),v=fitBounds(b,{width:1200,height:800});b.every(r=>r.x*v.zoom+v.x>=0&&r.y*v.zoom+v.y>=0&&(r.x+r.width)*v.zoom+v.x<=1200&&(r.y+r.height)*v.zoom+v.y<=800)`)).toBe(true)
 })
+it('fitting and the start view keep groups clear of the floating bars and begin at the first stage',()=>{
+  expect(canvasRun(`const s=initialState(),l=layoutFor(s),b=[0,1,2,3].map(i=>groupBounds(s,l,i)),near=(a,c)=>Math.abs(a-c)<1e-9,v=fitBounds(b,{width:1200,height:800}),one=fitBounds([b[3]],{width:1200,height:800}),start=startView(b,{width:400,height:700});[b.every(r=>r.x*v.zoom+v.x>=INSET.left&&r.y*v.zoom+v.y>=INSET.top-1e-9&&(r.x+r.width)*v.zoom+v.x<=1200-INSET.right&&(r.y+r.height)*v.zoom+v.y<=800-INSET.bottom),near(b[3].y*one.zoom+one.y,INSET.top),start.zoom,near(b[0].x*start.zoom+start.x,INSET.left),near(b[0].y*start.zoom+start.y,INSET.top)]`)).toEqual([true,true,.75,true,true])
+})
 it('canvas dependencies use the same graph and design-source rules as node detail edits',()=>{
   expect(canvasRun(`const s=initialState();connectionState(s,'market','competition').nodes.find(n=>n.id==='competition').deps`)).toEqual(['market'])
   expect(()=>canvasRun(`const s=connectionState(initialState(),'market','competition');connectionState(s,'competition','market')`)).toThrow('循环')

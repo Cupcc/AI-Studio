@@ -2,7 +2,7 @@ import { stages, readState, executionOrder, fingerprint, stale, parseCandidates,
 import {createCanvas} from './canvas.js';
 import {connectionState} from './canvas-model.js';
 const $ = id => document.getElementById(id), api = window.workbench;
-let snapshot, state, runs = [], selectedNode = null, busy = false, queue = null, pollTimer, disposed = false, canvas = null, saving = Promise.resolve(), layoutQueued = false, layoutVersion = 0, activeCandidates = 'candidates', polling = null;
+let snapshot, state, runs = [], selectedNode = null, busy = false, queue = null, pollTimer, disposed = false, canvas = null, saving = Promise.resolve(), layoutQueued = false, layoutVersion = 0, activeCandidates = 'candidates', polling = null, active = false;
 const outputs = new Map(), runErrors = new Map(), accepted = new Map();
 const escape = text => String(text ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const running = run => run.session.activity !== 'none';
@@ -12,7 +12,7 @@ const collection = () => state.nodes.find(n=>n.id===activeCandidates && n.stage=
 const allCandidates = () => collection() ? candidatesFor(state,collection()) : [];
 const chosen = () => collection() ? selectedFor(state,collection()) : [];
 const preview = () => snapshot.target.kind === 'draft';
-function notice(text, error = false) { $('notice').textContent = text; $('notice').classList.toggle('error', error); }
+function notice(text, error = false) { $('notice').textContent = text; $('notice').title = text; $('notice').classList.toggle('error', error); }
 function status(node) {
   const run = currentRun(node);
   if (run?.session.stopping) return ['running','正在停止'];
@@ -55,7 +55,7 @@ function renderControls() {
   $('brief').disabled = lock; $('sources').disabled = lock; $('save-task').disabled = lock;
   $('run-all').disabled = lock || preview(); $('add-node').disabled = lock;
   $('stop-all').hidden = !runs.some(running) && queue === null;
-  if(runs.some(running)||queue!==null)$('task-settings').open=true;
+  const now=runs.some(running)||queue!==null;if(now&&!active)$('task-settings').open=true;active=now;
   $('stop-all').disabled = busy;
   $('compare').disabled = allCandidates().length === 0;
   $('export').disabled = chosen().length === 0;
@@ -188,6 +188,11 @@ async function tick() {
   pollTimer=setTimeout(tick,1200);
 }
 $('task-toggle').onclick=()=>{$('task-settings').open=!$('task-settings').open;};
+$('task-settings').ontoggle=()=>$('task-toggle').setAttribute('aria-expanded',String($('task-settings').open));
+document.addEventListener('pointerdown',event=>{if($('task-settings').open&&!event.target.closest('#task-settings,#task-toggle,dialog'))$('task-settings').open=false;});
+document.addEventListener('keydown',event=>{if(event.key!=='Escape'||!$('task-settings').open||document.querySelector('dialog[open]'))return;const inside=$('task-settings').contains(document.activeElement);$('task-settings').open=false;if(inside)$('task-toggle').focus();});
+$('notice-close').onclick=()=>{$('notice').textContent='';$('notice').title='';};
+for(const el of document.querySelectorAll('.canvas-top,.notice-bar'))el.addEventListener('wheel',event=>{const nav=event.target.closest('#stages');if(nav&&nav.scrollWidth>nav.clientWidth&&!event.ctrlKey&&!event.metaKey)return;event.preventDefault();$('canvas').dispatchEvent(new WheelEvent('wheel',event));},{passive:false});
 $('save-task').onclick=()=>action(async()=>{await save({...state,brief:$('brief').value,sources:$('sources').value});notice('任务要求已保存。');});
 $('run-all').onclick=()=>action(async()=>{if(!state.brief.trim())throw new Error('请先填写并保存选品任务目标。');queue=executionOrder(state,state.nodes.map(n=>n.id));notice('已按依赖安排执行；停止、失败会终止后续安排。');});
 $('stop-all').onclick=()=>action(async()=>{queue=null;for(const run of runs.filter(running))await api.stopAgent(run.request.requestId);await refreshRuns();notice('已停止编排；历史成果保留。');});
@@ -202,11 +207,12 @@ function editDialog(title,value,showStage,onSave) {
   $('edit-value').onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();confirm();}};
 }
 $('cancel-edit').onclick=()=>$('edit-dialog').close();
-$('add-node').onclick=()=>editDialog('新增节点','',true,async title=>{
+$('add-node').onclick=()=>editDialog('新建节点','',true,async title=>{
   const stage=Number($('edit-stage').value),id=crypto.randomUUID();
   await save({...state,nodes:[...state.nodes,{id,title:title.slice(0,80),stage,deps:stage===3&&collection()?[collection().id]:[],prompt:'请依据任务目标完成此节点，注明来源与待核实信息。',candidate:stage===3?'A':null,revision:0,result:'',fingerprint:'',runId:null}]});openNode(id);
 });
-$('stages').innerHTML=stages.map((s,i)=>`<button data-stage="${i}"><b>${i+1}</b>${s.title}</button>`).join('');
+$('stages').innerHTML=stages.map((s,i)=>`<button data-stage="${i}" title="${s.title}"><b>${i+1}</b><span>${s.title}</span></button>`).join('');
+function currentStage(stage){for(const button of document.querySelectorAll('[data-stage]'))if(Number(button.dataset.stage)===stage)button.setAttribute('aria-current','location');else button.removeAttribute('aria-current');}
 $('auto-layout').onclick=()=>canvas.autoLayout();
 document.querySelectorAll('[data-stage]').forEach(button=>button.onclick=()=>canvas.fit(Number(button.dataset.stage)));
 $('compare').onclick=()=>{
@@ -223,7 +229,7 @@ window.addEventListener('pagehide',()=>{disposed=true;clearTimeout(pollTimer);ca
 try {
   snapshot=await api.getInstance();state=readState(snapshot.state);
   canvas=createCanvas($('canvas'),{
-    state,open:openNode,select:id=>{selectedNode=id;$('detail').hidden=true;render();},preview,run:id=>action(async()=>{const node=state.nodes.find(n=>n.id===id),run=currentRun(node);if(run&&running(run)){queue=null;await api.stopAgent(run.request.requestId);await refreshRuns();}else await startNode(id);}),chat:id=>action(()=>discussNode(state.nodes.find(n=>n.id===id))),design:(source,id)=>{const target=state.nodes.find(n=>n.stage===3&&n.candidate===id&&n.deps.includes(source));openNode(target?.id??source);},locked:()=>(busy&&!polling)||runs.some(running)||queue!==null,notice,layoutChanged:saveLayout,
+    state,open:openNode,select:id=>{selectedNode=id;$('detail').hidden=true;render();},preview,run:id=>action(async()=>{const node=state.nodes.find(n=>n.id===id),run=currentRun(node);if(run&&running(run)){queue=null;await api.stopAgent(run.request.requestId);await refreshRuns();}else await startNode(id);}),chat:id=>action(()=>discussNode(state.nodes.find(n=>n.id===id))),design:(source,id)=>{const target=state.nodes.find(n=>n.stage===3&&n.candidate===id&&n.deps.includes(source));openNode(target?.id??source);},locked:()=>(busy&&!polling)||runs.some(running)||queue!==null,notice,layoutChanged:saveLayout,stageChanged:currentStage,
     connect:(source,target,remove)=>action(async()=>{
       if(runs.some(running)||queue)throw new Error('执行中不能修改依赖，请先停止。');
       await save(connectionState(state,source,target,remove));
@@ -232,6 +238,8 @@ try {
     })
   });
   $('brief').value=state.brief;$('sources').value=state.sources;
+  const tools=$('canvas').querySelector('.canvas-tools'),placeNotice=()=>{const room=$('canvas').clientWidth-28-tools.offsetWidth-12;document.body.style.setProperty('--notice-room',room+'px');document.body.classList.toggle('notice-stacked',room<200);};
+  new ResizeObserver(placeNotice).observe(tools);new ResizeObserver(placeNotice).observe($('canvas'));
   notice(preview()?'模板预览：编辑任务后，点击上方“添加至当前项目”开始真实执行。':'填写选品目标与资料，按节点生成或运行四个流程。');
   render();void tick();
 }catch(error){notice(error.message,true);}
