@@ -71,6 +71,14 @@
 .transcript-user { align-self: flex-end; max-width: 80%; padding: var(--space-2-5) 14px; background: var(--color-bubble); box-shadow: var(--shadow-bubble); border-radius: var(--radius-bubble); font-size: var(--font-size-body); line-height: 1.55; }
 .transcript-user p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .transcript-user__context { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); margin-bottom: var(--space-1); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.conversation-queue { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2); }
+.conversation-queue__item { max-width: 80%; padding: var(--space-2) 14px var(--space-2-5); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-bubble); font-size: var(--font-size-body); line-height: 1.55; color: var(--color-text-2); }
+.conversation-queue__item.is-undelivered { border-style: solid; border-color: var(--color-error-border); background: var(--color-error-bg); }
+.conversation-queue__status { display: flex; align-items: baseline; gap: var(--space-1-5); margin: 0 0 var(--space-1); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.conversation-queue__badge { flex-shrink: 0; font-weight: 600; white-space: nowrap; color: var(--color-text-2); }
+.conversation-queue__item.is-undelivered .conversation-queue__badge { color: var(--color-error); }
+.conversation-queue__text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.conversation-queue__actions { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
 .transcript-tool { padding: 7px var(--space-2-5); font: var(--font-size-sm)/1.65 var(--font-mono); color: var(--color-text-3); background: var(--color-surface-sub); border: 1px solid var(--color-border-soft); border-radius: var(--radius-button); }
 .transcript-tool > summary { display: flex; align-items: center; gap: var(--space-2); cursor: pointer; overflow-wrap: anywhere; }
 .transcript-tool > :not(summary) { margin: var(--space-1-5) 0 0; }

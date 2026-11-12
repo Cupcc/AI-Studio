@@ -3,6 +3,7 @@ import { displayName } from '../../../lib/display-path'
 import type { DiffFileEntry, DiffSide, DiffSnapshot } from '@shared/tools/diff'
 import { projectPathName, projectPathParent } from '@shared/tools/files'
 import { D, KIND_LABEL, OMITTED } from './strings'
+import { ipcErrorText } from '../../../lib/ipc-error'
 
 export const SHORT_COMMIT_LENGTH = 7
 
@@ -107,6 +108,5 @@ export function classifyPatch(lines: string[]): PatchLineKind[] {
 
 /** Error text without Electron's "Error invoking remote method '…': Error:" wrapper. */
 export function describeError(error: unknown): string {
-  const text = error instanceof Error ? error.message : String(error)
-  return text.replace(/^Error invoking remote method '[^']*': (?:Error: )?/, '').slice(0, 300)
+  return ipcErrorText(error).slice(0, 300)
 }

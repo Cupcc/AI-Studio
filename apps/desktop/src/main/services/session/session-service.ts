@@ -1,9 +1,9 @@
 import { open } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import { createHash, randomUUID } from 'node:crypto'
-import { toErrorInfo, type InputAttachment, type NativeSkillInfo, type AdapterEvent, type AdapterErrorInfo, type AgentProvider, type AgentSession, type InputRequest, type InputResolution, type InputResponse, type ItemSnapshot, type ProviderEnvironment } from '@ai-studio/agent-adapter'
+import { toErrorInfo, type InputAttachment, type NativeSkillInfo, type AdapterEvent, type AdapterErrorInfo, type AgentProvider, type AgentSession, type InputRequest, type InputResolution, type InputResponse, type ItemSnapshot, type ProviderEnvironment, type UserInput } from '@ai-studio/agent-adapter'
 import { initialSessionTitle, projectSessionState, sessionStatus, sortSessions } from '@shared/session/presentation'
-import type { ComposerDraft, ContextItem, ConversationPage, CreateSessionRequest, DraftKey, ModelCatalogResult, SkillCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem } from '@shared/session/types'
+import type { ComposerDraft, ContextItem, ConversationPage, QueuedMessage, CreateSessionRequest, DraftKey, ModelCatalogResult, SkillCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem } from '@shared/session/types'
 import { SESSION_CLIS } from '@shared/session/types'
 import { SESSION_MESSAGE_MAX_LENGTH, TRANSCRIPT_PAGE_SIZE } from '@shared/ipc/session'
 import type { ProjectService } from '../project/project-service'
@@ -12,7 +12,7 @@ import { SessionStore } from './store'
 import type { WorkbenchContext, WorkbenchId } from '@shared/workbench/types'
 import { isViewId } from '@shared/project/ui-state'
 import type { FileReferenceResolver, ProjectPath, ResolvedFileReference } from '@shared/tools/files'
-import { buildUserInput, describeFileReferenceFailures, FILE_REFERENCE_STRATEGY } from './file-reference'
+import { buildUserInput, describeFileReferenceFailures, FILE_REFERENCE_STRATEGY, type BuildUserInputOptions } from './file-reference'
 import type { TurnDiffRecord } from '@shared/tools/turn-diff'
 import { boundNativeDiff } from '@ai-studio/agent-adapter'
 
@@ -47,6 +47,10 @@ interface Entry {
   turn?: ActiveTurn
   secrets: Set<string>
   secretComposer?: boolean
+  /** A queue submission is in flight (one at a time, like steering). */
+  queueing?: boolean
+  /** Registered before `queueUserInput` resolves, so an early `input.started` / `input.cancelled` still finds it. */
+  awaitingQueue?: Map<string, QueuedMessage>
   replyEvents?: { generation: number; events: AdapterEvent[] }
 }
 
@@ -126,7 +130,9 @@ export class SessionService implements MainSessionPort {
     if (!Array.isArray(enabled)) options.store.setPreference('enabled_clis', JSON.stringify([...this.enabledClis]))
     options.store.finalizeInterruptedHistory()
     for (const summary of options.store.summaries()) {
-      const entry: Entry = { summary: { ...summary, stopping: false }, sequence: options.store.nextSequence(summary.id), generation: 0, secrets: new Set() }
+      // The runtime that held a queue did not survive the restart.
+      const queuedMessages = summary.queuedMessages?.map(message => ({ ...message, status: 'undelivered' as const }))
+      const entry: Entry = { summary: { ...summary, stopping: false, ...(queuedMessages ? { queuedMessages } : {}) }, sequence: options.store.nextSequence(summary.id), generation: 0, secrets: new Set() }
       this.entries.set(summary.id, entry)
       if (summary.activity !== 'none') this.recoverInterrupted(entry)
     }
@@ -221,8 +227,9 @@ export class SessionService implements MainSessionPort {
     const paths = fileReferencePaths(request)
     const files = paths.length ? await this.resolveFileReferences(request.projectId, paths) : undefined
     if (files) this.project(request.projectId)
-    await this.resolveSkills(request.projectId, request.cli, request)
-    await this.resolvePastedAttachments(request.projectId, request.cli, request)
+    const skills = await this.resolveSkills(request.projectId, request.cli, request)
+    const uploads = await this.resolvePastedAttachments(request.projectId, request.cli, request)
+    await this.checkProviderInput(request.cli, request, files ?? [], skills, uploads)
     if (!this.enabledClis.has(request.cli)) throw new Error('CLI 未启用，请在 CLI 设置中启用')
     const origin = request.originViewId
     const viewContext = origin && request.viewContextAttached === true && isViewId(origin) ? this.options.buildViewContext?.(request.projectId, origin) : undefined
@@ -258,8 +265,16 @@ export class SessionService implements MainSessionPort {
     if (this.disposed || this.quitting || this.closing.has(entry.summary.projectId) || this.closed.has(entry.summary.projectId) || this.options.canOperate?.(entry.summary.projectId) === false) throw new Error('Project 正在关闭')
     const paths = fileReferencePaths(message)
     if (paths.length && !this.options.fileReferences) throw new Error('文件引用不可用')
+    const capability = this.provider(entry.summary.cli).capabilities.inputWhileRunning
+    const nativeQueue = capability === 'queue' && (entry.turn ? entry.summary.activity === 'running' && !entry.summary.stopping : this.hasQueued(entry))
+    if (nativeQueue) {
+      if (entry.queueing) throw new Error('输入正在提交')
+      entry.queueing = true
+      const task = this.queueWhileRunning(entry, message)
+      this.background.add(task)
+      return task.finally(() => this.background.delete(task))
+    }
     if (entry.turn && entry.summary.activity === 'running' && !entry.summary.stopping) {
-      const capability = this.provider(entry.summary.cli).capabilities.inputWhileRunning
       if (capability === 'none') throw new Error('当前 CLI 不支持运行中发送')
       if (entry.turn.sending) throw new Error('输入正在提交')
       entry.turn.sending = true
@@ -272,10 +287,26 @@ export class SessionService implements MainSessionPort {
     this.options.store.transaction(() => this.begin(entry, message))
   }
 
+  /** The Adapter input for a message; new turns, running input and the pre-send check all build it the same way. */
+  private providerInput(cli: SessionCli, message: SessionMessage, files: BuildUserInputOptions['files'], skills: BuildUserInputOptions['skills'], uploads: BuildUserInputOptions['uploads'], viewContextText?: string): UserInput {
+    return buildUserInput({ skills, uploads, viewContextText, files, text: message.text, strategy: FILE_REFERENCE_STRATEGY[cli],
+      filePaths: message.contextItems?.filter(item => item.type === 'file').map(item => item.path),
+      images: message.contextItems?.filter(item => item.type === 'image').map(item => item.path) })
+  }
+
+  /** The Provider's own attachment checks (image type / size) run before a turn is recorded, so a rejected input stays in the composer. */
+  private async checkProviderInput(cli: SessionCli, message: SessionMessage, files: BuildUserInputOptions['files'], skills: BuildUserInputOptions['skills'], uploads: BuildUserInputOptions['uploads']): Promise<void> {
+    const provider = this.provider(cli)
+    if (!provider.checkInput) return
+    try { await provider.checkInput(this.providerInput(cli, message, files, skills, uploads)) }
+    catch (error) { throw new Error(`附件无法发送：${toErrorInfo(error).message}`) }
+  }
+
   private async beginWithFiles(entry: Entry, message: SessionMessage, paths: readonly ProjectPath[]): Promise<void> {
     const files = paths.length ? await this.resolveFileReferences(entry.summary.projectId, paths) : []
-    await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
-    await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
+    const skills = await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
+    const uploads = await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
+    await this.checkProviderInput(entry.summary.cli, message, files, skills, uploads)
     // A turn can have begun, Stop or a Project close can have started while the files were read.
     this.ensureCanSubmit(entry)
     this.options.store.transaction(() => this.begin(entry, message, undefined, files))
@@ -330,7 +361,7 @@ export class SessionService implements MainSessionPort {
       const uploads = await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
       this.ensureProjectOpen(entry.summary.projectId)
       runtime = live()
-      const result = await runtime.sendUserInput(buildUserInput({ skills, uploads, files, filePaths: message.contextItems?.filter(item => item.type === 'file').map(item => item.path), images: message.contextItems?.filter(item => item.type === 'image').map(item => item.path), text: message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli] }))
+      const result = await runtime.sendUserInput(this.providerInput(entry.summary.cli, message, files, skills, uploads))
       if (result.turnId !== turn.adapterId) throw new Error('CLI 返回了不同的回合，输入已保留')
       this.options.store.transaction(() => {
         // Native completion/Stop can arrive before the steering acknowledgement.
@@ -341,6 +372,103 @@ export class SessionService implements MainSessionPort {
         this.publish(entry)
       })
     } finally { turn.sending = false }
+  }
+
+  /** Native queue (I-Q3): accepted once the CLI acknowledges it; it joins a turn only when the CLI takes it. */
+  private async queueWhileRunning(entry: Entry, message: SessionMessage): Promise<void> {
+    try {
+      await entry.turn?.startup
+      const runtime = entry.runtime
+      const live = (): AgentSession => {
+        if (!runtime?.queueUserInput || entry.runtime !== runtime || runtime.state === 'closed' || entry.summary.stopping) throw new Error('当前一轮已结束或正在停止，输入已保留')
+        return runtime
+      }
+      live()
+      const paths = fileReferencePaths(message)
+      // Read last, right before the input goes out; the turn can end, stop or start closing meanwhile.
+      const files = paths.length ? await this.resolveFileReferences(entry.summary.projectId, paths) : []
+      const skills = await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
+      const uploads = await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
+      this.ensureProjectOpen(entry.summary.projectId)
+      const queued: QueuedMessage = { id: this.newId(), text: message.text, contextItems: message.contextItems ?? [], queuedAt: this.now(), status: 'queued' }
+      const awaiting = entry.awaitingQueue ??= new Map()
+      awaiting.set(queued.id, queued)
+      try {
+        await live().queueUserInput!(this.providerInput(entry.summary.cli, message, files, skills, uploads), { inputId: queued.id })
+      } catch (error) {
+        awaiting.delete(queued.id)
+        throw error
+      }
+      const accepted = awaiting.get(queued.id)
+      if (!accepted) return // The CLI already took it into a turn.
+      awaiting.delete(queued.id)
+      // Renderer clears its exact submitted snapshot after this acknowledgement, as for steering.
+      entry.summary.queuedMessages = [...entry.summary.queuedMessages ?? [], accepted]
+      this.publish(entry)
+    } finally { entry.queueing = false }
+  }
+
+  private hasQueued(entry: Entry): boolean {
+    return !!entry.awaitingQueue?.size || !!entry.summary.queuedMessages?.some(message => message.status === 'queued')
+  }
+
+  /** The CLI took queued input into `adapterTurnId` (folded into the running turn, or the first input of a turn it started). */
+  private queuedStarted(entry: Entry, inputId: string, adapterTurnId: string): void {
+    const message = entry.awaitingQueue?.get(inputId) ?? entry.summary.queuedMessages?.find(candidate => candidate.id === inputId)
+    if (!message) return
+    entry.awaitingQueue?.delete(inputId)
+    entry.summary.queuedMessages = entry.summary.queuedMessages?.filter(candidate => candidate.id !== inputId)
+    const turn = entry.turn
+    this.options.store.transaction(() => {
+      if (turn?.adapterId === adapterTurnId) {
+        this.append(entry, { kind: 'user_message', text: message.text, contextItems: message.contextItems }, turn.id)
+        entry.summary.lastUserMessageAt = this.now()
+      } else entry.summary.queuedMessages = [...entry.summary.queuedMessages ?? [], { ...message, status: 'undelivered' }]
+      this.publish(entry)
+    })
+  }
+
+  /** A turn the CLI started from its own queue: no user action begins it, so it opens without a composer submission. */
+  private beginQueuedTurn(entry: Entry, adapterTurnId: string, inputIds: readonly string[]): void {
+    const first = inputIds.map(inputId => entry.awaitingQueue?.get(inputId) ?? entry.summary.queuedMessages?.find(message => message.id === inputId)).find(Boolean)
+    const at = this.now()
+    const turn: ActiveTurn = {
+      id: this.newId(), at, model: entry.summary.model, reasoningEffort: entry.summary.reasoningEffort, adapterId: adapterTurnId,
+      // Retry resends the turn's first queued message, like a turn begun from the composer.
+      message: { text: first?.text ?? '', contextItems: first?.contextItems ?? [] },
+      pending: new Map(), items: new Map(), answering: false, startup: Promise.resolve()
+    }
+    entry.turn = turn
+    Object.assign(entry.summary, { activity: 'running', stopping: false, errorUnseen: false, completionUnread: false, lastUserMessageAt: at })
+    this.options.store.transaction(() => {
+      this.options.store.startTurn(turn.id, entry.summary.id, at, turn.model, this.scrub(entry, turn.message))
+      this.options.store.bindTurn(turn.id, adapterTurnId)
+      this.publish(entry)
+    })
+  }
+
+  /** Queued input whose runtime is gone never ran; keep it so the user can put it back or remove it. */
+  private markUndelivered(entry: Entry, inputIds?: readonly string[]): void {
+    for (const inputId of inputIds ?? entry.awaitingQueue?.keys() ?? []) {
+      const waiting = entry.awaitingQueue?.get(inputId)
+      if (waiting) waiting.status = 'undelivered'
+    }
+    let changed = false
+    entry.summary.queuedMessages = entry.summary.queuedMessages?.map(message => {
+      if (message.status !== 'queued' || (inputIds && !inputIds.includes(message.id))) return message
+      changed = true
+      return { ...message, status: 'undelivered' as const }
+    })
+    if (changed) this.publish(entry)
+  }
+
+  dismissQueued(sessionId: string, messageId: string): void {
+    const entry = this.entry(sessionId)
+    const message = entry.summary.queuedMessages?.find(candidate => candidate.id === messageId)
+    if (!message) return
+    if (message.status !== 'undelivered') throw new Error('排队中的消息由 CLI 处理，无法移除')
+    entry.summary.queuedMessages = entry.summary.queuedMessages!.filter(candidate => candidate.id !== messageId)
+    this.publish(entry)
   }
 
   private begin(entry: Entry, message: SessionMessage, viewContext?: WorkbenchContext, files?: readonly ResolvedFileReference[]): void {
@@ -400,9 +528,7 @@ export class SessionService implements MainSessionPort {
       const uploads = await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, turn.message)
       if (entry.turn !== turn || entry.summary.stopping) return
       this.ensureProjectOpen(entry.summary.projectId)
-      const result = await runtime.sendUserInput(buildUserInput({
-        skills, uploads, viewContextText: turn.viewContext?.text, files: turn.files ?? [], filePaths: turn.message.contextItems?.filter(item => item.type === 'file').map(item => item.path), images: turn.message.contextItems?.filter(item => item.type === 'image').map(item => item.path), text: turn.message.text, strategy: FILE_REFERENCE_STRATEGY[entry.summary.cli]
-      }))
+      const result = await runtime.sendUserInput(this.providerInput(entry.summary.cli, turn.message, turn.files ?? [], skills, uploads, turn.viewContext?.text))
       // turn.started is synchronous; a whole turn can finish before this Promise resolves.
       if (entry.turn === turn && !turn.adapterId) {
         turn.adapterId = result.turnId
@@ -469,6 +595,12 @@ export class SessionService implements MainSessionPort {
       if (entry.turn && !entry.summary.stopping) this.finish(entry, 'failed', event.error)
       return // Stop emits both session.error and one terminal; terminal owns its Error card.
     }
+    if (event.type === 'input.cancelled') { this.markUndelivered(entry, [event.inputId]); return }
+    if (event.type === 'turn.started' && event.queuedInputIds?.length && !entry.turn) {
+      this.beginQueuedTurn(entry, event.turnId, event.queuedInputIds)
+      return
+    }
+    if (event.type === 'input.started') { this.queuedStarted(entry, event.inputId, event.turnId); return }
     const turn = entry.turn
     if (!turn || !('turnId' in event)) return
     if (event.type === 'turn.started') {
@@ -600,6 +732,7 @@ export class SessionService implements MainSessionPort {
   }
 
   private retire(entry: Entry): void {
+    this.markUndelivered(entry)
     const runtime = entry.runtime ?? entry.retiredRuntime
     if (!runtime || entry.retirementPending) return
     if (entry.runtime) {
@@ -774,8 +907,9 @@ export class SessionService implements MainSessionPort {
     this.validateMessage(message)
     const paths = fileReferencePaths(message)
     const files = paths.length ? await this.resolveFileReferences(entry.summary.projectId, paths) : []
-    await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
-    await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
+    const skills = await this.resolveSkills(entry.summary.projectId, entry.summary.cli, message)
+    const uploads = await this.resolvePastedAttachments(entry.summary.projectId, entry.summary.cli, message)
+    await this.checkProviderInput(entry.summary.cli, message, files, skills, uploads)
     this.ensureCanSubmit(entry)
     // Only the same failed turn is retried; a send or another retry may have replaced it meanwhile.
     if (this.options.store.lastTurn(entry.summary.id)?.id !== failedTurnId) throw new Error('没有可重试的失败消息')

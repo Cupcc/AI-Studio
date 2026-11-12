@@ -3,6 +3,7 @@ import type { ComposerDraft, DraftKey, InputResponse, ModelCatalogResult, Provid
 import { projectSessionState } from '@shared/session/presentation'
 import { sessionApi } from './api'
 import { editInlineReferences, sameReference } from '../input/inline-references'
+import { ipcErrorText } from '../../lib/ipc-error'
 
 export const emptyDraft = (): ComposerDraft => ({ cli: null, model: null, text: '', contextItems: [] })
 export const draftId = (key: DraftKey): string => key.kind === 'new_chat' ? (key.viewId ? `${key.projectId}:view:${key.viewId}:draft` : `${key.projectId}:draft`) : `${key.projectId}:session:${key.sessionId}`
@@ -54,6 +55,9 @@ interface SessionStore {
   answer(sessionId: string, requestId: string, response: InputResponse): Promise<boolean>
   stop(sessionId: string): Promise<boolean>
   retry(sessionId: string): Promise<boolean>
+  /** Puts an undelivered queued message back into the session draft (after any text already there), then removes it. */
+  restoreQueued(sessionId: string, messageId: string): Promise<boolean>
+  dismissQueued(sessionId: string, messageId: string): Promise<boolean>
   rename(sessionId: string, title: string): Promise<boolean>
   setReasoningEffort(sessionId: string, reasoningEffort: string | null): Promise<boolean>
   setModel(sessionId: string, model: string | null): Promise<boolean>
@@ -103,7 +107,7 @@ async function operation(key: string, work: () => Promise<void>): Promise<boolea
   if (useSessions.getState().pending[key]) return false
   useSessions.setState((s) => ({ pending: { ...s.pending, [key]: true }, errors: { ...s.errors, [key]: null } }))
   try { await work(); return true }
-  catch (error) { useSessions.setState((s) => ({ errors: { ...s.errors, [key]: String(error) } })); return false }
+  catch (error) { useSessions.setState((s) => ({ errors: { ...s.errors, [key]: ipcErrorText(error) } })); return false }
   finally { useSessions.setState((s) => ({ pending: { ...s.pending, [key]: false } })) }
 }
 
@@ -304,6 +308,21 @@ export const useSessions = create<SessionStore>()((set, get) => ({
   answer: (sessionId, requestId, response) => operation(`answer:${requestId}`, () => sessionApi().answer({ sessionId, requestId, response })),
   stop: (sessionId) => operation(`stop:${sessionId}`, () => sessionApi().stop({ sessionId })),
   retry: (sessionId) => operation(`retry:${sessionId}`, () => sessionApi().retry({ sessionId })),
+  restoreQueued: (sessionId, messageId) => operation(`queued:${messageId}`, async () => {
+    const summary = get().summaries[sessionId]
+    const message = summary?.queuedMessages?.find(item => item.id === messageId)
+    if (!summary || !message) return
+    const key: DraftKey = { projectId: summary.projectId, kind: 'session', sessionId }
+    await get().loadDraft(key)
+    const draft = get().drafts[draftId(key)]
+    const current = draft?.contextItems ?? []
+    get().updateDraft(key, {
+      text: draft?.text.trim() ? `${draft.text}\n${message.text}` : message.text,
+      contextItems: [...current, ...message.contextItems.filter(item => !current.some(existing => JSON.stringify(existing) === JSON.stringify(item)))]
+    })
+    await sessionApi().dismissQueued({ sessionId, messageId })
+  }),
+  dismissQueued: (sessionId, messageId) => operation(`queued:${messageId}`, () => sessionApi().dismissQueued({ sessionId, messageId })),
   rename: (sessionId, title) => operation(`rename:${sessionId}`, async () => {
     const startedAt = revision
     const renamed = await sessionApi().rename({ sessionId, title })

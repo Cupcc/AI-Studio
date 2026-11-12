@@ -26,6 +26,8 @@ export interface ScriptedDriverBehavior {
   onStartTurn?: (turn: TurnContext, input: UserInput, sink: SessionSink) => void | Promise<void>;
   /** When set, the driver implements `steerTurn` (input while running). */
   onSteer?: (turn: TurnContext, input: UserInput, sink: SessionSink) => void | Promise<void>;
+  /** When set, the driver implements `queueInput` (native queue); report progress with `sink.queuedInputStarted` / `queuedInputCancelled`. */
+  onQueue?: (inputId: string, input: UserInput, sink: SessionSink) => void | Promise<void>;
   /** Runs inside `interruptTurn`; default acknowledges and reports a native `interrupted` end. */
   onInterrupt?: (stop: StopContext, sink: SessionSink) => void | Promise<void>;
   /** When set, the driver implements `cleanupAfterInterrupt`. */
@@ -65,6 +67,15 @@ export class ScriptedDriver implements SessionDriver {
     return async (turn, input) => {
       this.calls.push({ method: 'steerTurn', args: [turn.turnId, input] });
       await onSteer(turn, input, this.sink);
+    };
+  }
+
+  get queueInput(): ((inputId: string, input: UserInput) => Promise<void>) | undefined {
+    const onQueue = this.behavior.onQueue;
+    if (!onQueue) return undefined;
+    return async (inputId, input) => {
+      this.calls.push({ method: 'queueInput', args: [inputId, input] });
+      await onQueue(inputId, input, this.sink);
     };
   }
 

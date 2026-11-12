@@ -39,6 +39,7 @@ export const sessionContract = defineContract('session', {
     replyWithText: invoke<{ sessionId: string; text: string }, void>('session:reply-with-text'),
     stop: invoke<{ sessionId: string }, void>('session:stop'),
     retry: invoke<{ sessionId: string }, void>('session:retry'),
+    dismissQueued: invoke<{ sessionId: string; messageId: string }, void>('session:dismiss-queued'),
     rename: invoke<{ sessionId: string; title: string }, SessionSummary>('session:rename'),
     setReasoningEffort: invoke<{ sessionId: string; reasoningEffort: string | null }, void>('session:set-reasoning-effort'),
     setModel: invoke<{ sessionId: string; model: string | null }, void>('session:set-model'),

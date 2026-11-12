@@ -5,6 +5,8 @@ import type { ShellSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
 import { Composer } from '../input/Composer'
 import { cliName, useSessions } from './store'
+import type { QueuedMessage } from '@shared/session/types'
+import { displayName } from '../../lib/display-path'
 import { CliBadge } from './Status'
 import { Transcript } from './Transcript'
 
@@ -106,6 +108,7 @@ export function SessionConversation({ sessionId, projectId, active }: { sessionI
         {conversation?.items.map((item) => <Transcript key={item.id} item={item} />)}
         {conversation?.loaded && !conversation.items.length && <p className="muted">还没有消息</p>}
         {summary?.activity === 'running' && !conversation?.items.some((item) => item.kind === 'agent_message' && !item.complete) && <p className="conversation-working"><span className="session-spinner" />{summary.stopping ? '正在停止当前一轮…' : 'Agent 正在执行…'}</p>}
+        {!!summary?.queuedMessages?.length && <QueuedMessages sessionId={sessionId} messages={summary.queuedMessages} />}
         {openError && <p role="alert" className="error-message">{openError}</p>}
       </div>
     </div>
@@ -115,6 +118,30 @@ export function SessionConversation({ sessionId, projectId, active }: { sessionI
     }}>回到最新 ↓</button>}
     <Composer draftKey={{ projectId, kind: 'session', sessionId }} active={active} />
   </div>
+}
+
+/** Input the CLI holds in its own queue (I-Q3): not part of a turn until the CLI takes it; undelivered input never ran. */
+function QueuedMessages({ sessionId, messages }: { sessionId: string; messages: QueuedMessage[] }) {
+  const pending = useSessions(s => s.pending)
+  return <section className="conversation-queue" aria-label="排队消息">
+    {messages.map(message => <article key={message.id} className={`conversation-queue__item is-${message.status}`}>
+      <p className="conversation-queue__status">{message.status === 'queued'
+        ? <><span className="conversation-queue__badge">排队中</span>CLI 会在当前步骤后或下一轮处理</>
+        : <><span className="conversation-queue__badge">未送达</span>CLI 运行时已结束，这条消息没有执行</>}</p>
+      {message.contextItems.length > 0 && <div className="transcript-user__context">{message.contextItems.map((context, index) => <span key={index}>{context.type === 'view' ? context.viewId : context.type === 'skill' ? `Skill · ${context.name}` : context.type === 'upload' ? displayName(context.name) : displayName(context.path)}</span>)}</div>}
+      <p className="conversation-queue__text">{message.text}</p>
+      {message.status === 'undelivered' && <div className="conversation-queue__actions">
+        <button className="secondary-button" disabled={!!pending[`queued:${message.id}`]} onClick={event => {
+          const composer = event.currentTarget.closest('.session-conversation')?.querySelector<HTMLElement>('.composer__editable')
+          void useSessions.getState().restoreQueued(sessionId, message.id).then(ok => { if (ok) composer?.focus() })
+        }}>放回输入框</button>
+        <button className="text-button" disabled={!!pending[`queued:${message.id}`]} onClick={event => {
+          const composer = event.currentTarget.closest('.session-conversation')?.querySelector<HTMLElement>('.composer__editable')
+          void useSessions.getState().dismissQueued(sessionId, message.id).then(ok => { if (ok) composer?.focus() })
+        }}>移除</button>
+      </div>}
+    </article>)}
+  </section>
 }
 
 export function Conversation({ project, canvas, active }: ShellSlotProps) {

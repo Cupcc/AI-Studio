@@ -1,0 +1,60 @@
+Claude Code native queue spike — 2026-11-12, Main Agent
+Claude Code 2.1.322 (claude.ai login), @anthropic-ai/claude-agent-sdk 0.3.293, model haiku,
+cwd /tmp/ai-studio-claude-spike/project, persistSession false, settingSources [], allowedTools [Bash].
+Script: streaming input; every user message carries a client uuid (labels A/B/C below). Times in ms from start.
+Session ids, frame uuids and rate-limit details removed. umus = user_message_uuids.
+system/init capabilities: interrupt_receipt_v1, interrupt_cancel_queued_v1, interrupt_send_now_v1,
+interrupt_requeue_taken_v1, msg_lifecycle_v1, ... ; claude_code_version 2.1.322
+
+== fold: B sent while A's Bash tool runs
+     3 SEND A
+   187 command_lifecycle A queued
+   188 command_lifecycle A started
+  3578 assistant tool_use {"command":"sleep 6; echo A-done"} umu=A umus=[A]
+  4579 SEND B
+  4582 command_lifecycle B queued
+  9811 user tool_result
+  9822 command_lifecycle B started            <- folded after the tool round, A still running
+ 11308 assistant text "BANANA. The sleep-and-echo command ran once and printed `A-done` ..."
+ 11314 command_lifecycle B completed
+ 11316 RESULT success umu=A umus=[A,B]       <- one result for both
+ 11318 command_lifecycle A completed
+
+== notool: B sent while A streams text without tools
+     3 SEND A
+  3255 first text delta (A); SEND B
+  3257 command_lifecycle B queued
+  4220 RESULT success umu=A umus=[A]
+  4223 command_lifecycle A completed
+  4224 command_lifecycle B started            <- after A's result: a new turn
+  5568 assistant text "BANANA" umu=B umus=[B]
+  5574 RESULT success umu=B umus=[B]
+  5575 command_lifecycle B completed
+
+== batch: B and C queued while A streams
+  3234 command_lifecycle B queued
+  3535 command_lifecycle C queued
+  3969 RESULT success umu=A umus=[A]
+  3971 command_lifecycle B started
+  3971 command_lifecycle C started
+  4991 assistant text "BANANA" umu=C umus=[B,C]
+  4994 RESULT success umu=C umus=[B,C]       <- one turn for both queued messages
+
+== stop: B queued, then interrupt during A's tool run
+  4072 command_lifecycle B queued
+  4871 INTERRUPT
+  4883 receipt {"still_queued":[B]}
+  4892 user tool_result; user text "[Request interrupted by user for tool use]"
+  4895 RESULT error_during_execution is_error=true umu=A umus=[A]
+  4897 command_lifecycle A cancelled
+  4898 command_lifecycle B started            <- queued input survives Stop and runs next
+  6385 assistant text "BANANA"
+  6394 RESULT success umu=B umus=[B]
+
+== image: base64 PNG (32x32 solid red) + text "What is the dominant color ...? one word"
+  3279 assistant text "Red."
+  3289 RESULT success umu=A umus=[A]
+
+== image size: random-noise PNGs (incompressible) sent as base64 image blocks
+noise 1250x1250, 4.7 MB  -> RESULT success "Gray"
+noise 1450x1450, 6.3 MB  -> RESULT success "Gray"

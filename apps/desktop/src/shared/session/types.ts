@@ -38,6 +38,19 @@ export interface SessionSummary {
   createdAt: number
   updatedAt: number
   lastUserMessageAt: number
+  /**
+   * Input handed to the CLI's own queue while a turn ran (Claude, I-Q3). It is not part of any turn until the
+   * CLI takes it; `undelivered` means its runtime ended first, so it never ran and is kept for the user.
+   */
+  queuedMessages?: QueuedMessage[]
+}
+
+export interface QueuedMessage {
+  id: string
+  text: string
+  contextItems: ContextItem[]
+  queuedAt: number
+  status: 'queued' | 'undelivered'
 }
 
 export type ContextItem = { type: 'view'; viewId: string } | { type: 'file'; path: string } | { type: 'image'; path: string } | { type: 'skill'; id: string; name: string } | { type: 'upload'; id: string; name: string; image: boolean }

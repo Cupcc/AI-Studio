@@ -70,8 +70,24 @@ export function createE2eProviders(): AgentProvider[] {
         { id: cli === 'codex' ? 'e2e-codex' : 'e2e-claude', displayName: cli === 'codex' ? 'E2E Codex' : 'E2E Claude', isDefault: true, reasoningEfforts: cli === 'codex' ? ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'] : ['low', 'medium', 'high', 'xhigh', 'max'] },
         { id: 'e2e-alternate', displayName: 'E2E Alternate' }
       ],
-      capabilities: { nativeTitle: true, inputWhileRunning: cli === 'codex' ? 'steer' : 'none' },
+      capabilities: { nativeTitle: true, inputWhileRunning: cli === 'codex' ? 'steer' : 'queue' },
       behavior: {
+        // Claude-style native queue: `[e2e:queue-fold]` joins the running turn after a short "tool round";
+        // anything else waits until no turn runs (e.g. after Stop) and then runs as its own turn.
+        onQueue(inputId, input, sink) {
+          const controller = provider.sessions.find(session => session.controller.queuedInputIds?.includes(inputId))?.controller
+          const take = () => {
+            if (!controller || controller.state === 'closed' || !controller.queuedInputIds?.includes(inputId)) return
+            if (input.text.includes('[e2e:queue-fold]') && controller.activeTurn) { sink.queuedInputStarted(inputId, false); return }
+            if (controller.activeTurn || controller.state !== 'idle') { setTimeout(take, 100); return }
+            const turnId = sink.queuedInputStarted(inputId, true)
+            if (turnId) setTimeout(() => {
+              sink.itemCompleted(turnId, { itemId: `${turnId}:message`, kind: 'assistant_message', status: 'completed', text: `已处理排队消息：${input.text}` })
+              sink.nativeTurnEnded(turnId, { status: 'completed', model: 'e2e-claude' })
+            }, 300)
+          }
+          setTimeout(take, 800)
+        },
         onSteer(turn, input) {
           if (input.text.includes('[e2e:steer-error]')) throw new Error('模拟追加失败，输入已保留')
           runs.get(turn.turnId)?.files.push(...references(turn, input))

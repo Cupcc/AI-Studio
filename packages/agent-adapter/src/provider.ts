@@ -137,9 +137,10 @@ export interface ProviderCapabilities {
   nativeSessionIdTiming: 'on_create' | 'after_first_input';
   /**
    * Whether `sendUserInput` is accepted while a turn runs (Shell Spec §6 "follows the CLI").
-   * `steer` adds the input to the running turn. `queue` starts a later native turn when the
-   * provider exposes that distinction. Providers must report their native behavior, not a
-   * product-wide intersection of capabilities (I-Q3 / Product Definition principle 24).
+   * `steer` adds the input to the running turn (`sendUserInput`). `queue` hands it to the CLI's own
+   * queue (`queueUserInput`); the CLI decides whether it joins the running turn or starts a later one.
+   * Providers must report their native behavior, not a product-wide intersection of capabilities
+   * (I-Q3 / Product Definition principle 24).
    */
   inputWhileRunning: 'none' | 'steer' | 'queue';
   /** Whether question requests (multiple choice / free text) are surfaced, beyond approvals. */
@@ -170,6 +171,11 @@ export interface AgentProvider {
   listModels(options: { environment: ProviderEnvironment; cwd?: string; signal?: AbortSignal }): Promise<ModelInfo[]>;
   /** Lists CLI-discovered skills without creating a native conversation. */
   listSkills?(options: { environment: ProviderEnvironment; cwd: string; signal?: AbortSignal }): Promise<NativeSkillCatalog>;
+  /**
+   * Runs the attachment checks `sendUserInput` / `queueUserInput` would run, without a session, so a host can
+   * reject input before it records a turn. Absent when the CLI itself judges attachments (Codex images).
+   */
+  checkInput?(input: UserInput): Promise<void>;
   /** Starts an isolated runtime and a new native session. Resolves when input can be sent. */
   createSession(options: CreateSessionOptions): Promise<AgentSession>;
   /**
@@ -220,6 +226,16 @@ export interface AgentSession {
    * `turn.completed` with outcome `failed`.
    */
   sendUserInput(input: UserInput): Promise<{ turnId: string }>;
+  /**
+   * Queues input natively (`capabilities.inputWhileRunning === 'queue'`), while a turn runs or earlier
+   * queued input is pending. Resolves once the CLI acknowledged the queue entry; nothing has run yet.
+   * The input later emits `input.started` (folded into the running turn, or with a `turn.started` that
+   * lists it in `queuedInputIds`) or `input.cancelled`. `inputId` lets the caller register the input
+   * before events about it can arrive. Rejects only for precondition failures.
+   */
+  queueUserInput?(input: UserInput, options?: { inputId?: string }): Promise<{ inputId: string }>;
+  /** Inputs accepted by `queueUserInput` that have neither started nor been cancelled. */
+  readonly queuedInputIds?: readonly string[];
   /** Answers one pending request. Concurrent requests are answered independently. */
   respondToInput(requestId: string, response: InputResponse): Promise<void>;
   /**

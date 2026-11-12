@@ -1,0 +1,45 @@
+Review Agent R1 — T20261112-claude-native-input — 2026-11-12
+Baseline: feat/claude-native-input 864f366 (base d924d2c), no uncommitted changes under review.
+Platform: macOS 26.6 arm64. App: electron-vite dev build of 864f366 launched from apps/desktop with an
+isolated /tmp userData and a /tmp fixture project (README.md, notes.txt, swatch.png 64x64 blue, fake.png = text bytes).
+Claude Code 2.1.322 (logged in, claude.ai), model Haiku 5.5. Clean env via env -i (no CLAUDECODE / CLAUDE_CODE_*).
+
+== 1. Scoped checks (local)
+node scripts/check-affected.mjs --base d924d2c   -> exit 0
+  adapter build + typecheck; desktop tsc node/web/e2e
+  agent-adapter vitest related: 11 files, 241 tests passed
+  desktop vitest related: 25 files, 392 tests passed
+E2E not run locally (repo rule). Remote CI on 864f366: run 43184581028 (workflow_dispatch) success,
+  selected specs claude-effort / cli-default / composer / session: 21 passed, incl.
+  "I-Q3 / FR-INPUT-001: Claude queues input while running ..." (mock provider).
+  https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43184581028
+
+== 2. CLI transcript (~/.claude/projects/<fixture slug>/*.jsonl), user message blocks as stored by Claude Code
+Files: 「作为图片附加」 swatch.png + 「添加到对话」 notes.txt
+  IMAGE base64 image/png (240 base64 chars = 180-byte file)
+  TEXT  'First, without using any tool, name the dominant colour of the attached image in one word. Then read ...'
+  TEXT  'Attached file reference (local path; file contents are not embedded):\n{"name":"notes.txt","path":"/private/tmp/ai-studio-review-r1/project/notes.txt"}'
+  file code word present in user message: False   (agent answered "Blue", then used Read on the path)
+Paste (synthetic ClipboardEvent('paste') with DataTransfer: pasted-swatch.png image/png 48x48 green + pasted-memo.txt)
+  IMAGE base64 image/png (164 chars)
+  TEXT  'Without using any tool, name the dominant colour of the pasted image ...'
+  TEXT  'Attached file reference (local path; file contents are not embedded):\n{"name":"pasted-memo.txt","path":"<userData>/attachments/<project hash>/<uuid>.data.txt"}'
+  file code word present in user message: False   (agent answered "Green", then used Read on the cache path)
+
+== 3. Adapter ordering repro (throwaway test, deleted after the run; not part of the branch)
+Setup: test/claude/provider.test.ts harness (MockQuery + FakeRuntime); FakeRuntime.snapshotDescendants delayed by 30 ms
+to approximate a real `ps` snapshot.
+  await session.sendUserInput({ text: 'A' });
+  const queued = session.queueUserInput({ text: 'B' }, { inputId: 'in-b' });
+  await 60 ms; order = q.inputs.map(i => i.message.content)
+Result: AssertionError: expected 'B,A' to be 'A,B'
+=> queued input B is written to the CLI's stdin before the turn input A, because ClaudeDriver.startTurn awaits
+   snapshotDescendants() (driver.ts:172) before pushing (driver.ts:188) while queueInput pushes at once (driver.ts:206).
+
+== 4. First-turn queue (real app)
+New Claude session, "Reply with only the word ONE." sent, "Reply with only the word TWO." sent ~1 s later while the
+runtime was still starting. Result: composer kept the text and showed
+  "Error: Error invoking remote method 'session:send': AdapterError: This Claude Code version does not report queued
+   input lifecycle (msg_lifecycle_v1)"
+although 2.1.322 reports msg_lifecycle_v1 (the queue worked later in the same runtime). "重试发送" after the turn ended
+sent it as a normal turn ("TWO").

@@ -1,0 +1,33 @@
+Review Agent R1, re-verification R2 — T20261112-claude-native-input — 2026-11-12
+Baseline: feat/claude-native-input b14f156 (fix for R1 D1-D4), base d924d2c; no uncommitted changes under review.
+Fix diff reviewed: git diff 864f366 b14f156 -- packages apps
+Platform: macOS 26.6 arm64. App: electron-vite dev build of b14f156 from apps/desktop, isolated /tmp userData and
+/tmp fixture project (README.md, notes.txt, fake.png = text bytes, big.png = 10,832,793-byte noise PNG).
+Claude Code 2.1.322 (logged in), Agent SDK 0.3.293, model Haiku 5.5, clean env via env -i.
+
+== 1. Scoped checks (local)
+node scripts/check-affected.mjs --base d924d2c   -> exit 0
+  adapter build + typecheck; desktop tsc node/web/e2e
+  agent-adapter vitest related: 11 files, 244 tests passed
+  desktop vitest related: 33 files, 489 tests passed (now includes ipc-error, diff-format, workbench api consumers)
+E2E not run locally (repo rule). Remote CI for b14f156 not run yet: the selected specs now include
+workbench.spec.ts and project-view.spec.ts, which fail on dev for unrelated reasons (fix/e2e-dev-failures).
+
+== 2. D3 ordering repro (same throwaway test as R1 section 3; created, run, deleted; not part of the branch)
+FakeRuntime.snapshotDescendants delayed 30 ms; sendUserInput({text:'A'}) then immediately queueUserInput({text:'B'}).
+R1 (864f366): expected 'B,A' to be 'A,B'  -> failed
+R2 (b14f156): order 'A,B'                 -> passed
+Code: ClaudeDriver.inOrder serializes startTurn/queueInput writes per runtime (driver.ts submissions chain);
+ClaudeSession.afterChecks chains attachment pre-checks so inputs enter the controller in call order.
+New unit test "delivers inputs to the CLI in call order even when an earlier one reads an image" passes.
+
+== 3. CLI transcript order (~/.claude/projects/<fixture slug>/<session>.jsonl, user messages in file order)
+['ONE', 'TWO', 'THREE', 'FOUR', 'MANGO', 'PLUM']
+ONE/TWO: new session, TWO sent ~1 s after ONE while the runtime started (queued, then next turn).
+THREE/FOUR: same session after app quit + relaunch (resumed runtime's first turn).
+PEAR (queued, then the claude child was killed, then removed in the UI) never reached the CLI transcript.
+
+== 4. D2 pre-send errors as shown under the composer (input and image tag kept, no turn recorded)
+existing session, fake.png : 附件无法发送：Only PNG, JPEG, GIF and WebP images can be attached: fake.png
+existing session, big.png  : 附件无法发送：Image exceeds 10 MiB: big.png
+new chat, fake.png         : 附件无法发送：Only PNG, JPEG, GIF and WebP images can be attached: fake.png (session list unchanged)

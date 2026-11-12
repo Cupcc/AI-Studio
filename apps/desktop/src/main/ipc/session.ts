@@ -254,6 +254,10 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     },
     stop: { parse: sessionRef, handle: ({ sessionId }) => service.stop(sessionId) },
     retry: { parse: sessionRef, handle: ({ sessionId }) => service.retry(sessionId) },
+    dismissQueued: {
+      parse: raw => { const value = record(raw, ['sessionId', 'messageId']); return { sessionId: id(value.sessionId, 'sessionId'), messageId: id(value.messageId, 'messageId') } },
+      handle: ({ sessionId, messageId }) => service.dismissQueued(sessionId, messageId)
+    },
     rename: {
       parse: raw => { const value = record(raw, ['sessionId', 'title']); return { sessionId: id(value.sessionId, 'sessionId'), title: expectString(value.title, 'title', { maxLength: SESSION_TITLE_MAX_LENGTH * 2 }) } },
       handle: ({ sessionId, title }) => service.rename(sessionId, title)

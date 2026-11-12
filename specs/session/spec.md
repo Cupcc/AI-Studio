@@ -93,7 +93,7 @@
 ### 3.3 FR-SESSION-002 Session 连续性
 
 1. 同一 Session 内可进行任意多轮。客户端内部以“轮”（turn）记录每次提交到终态的过程，用于状态机、完成行和 Stop 关联；“轮”不作为 UI 信息架构出现，不显示 Run / Task / Job 列表或编号（FR-SESSION-002；01 第 8 节原则 5、6）。
-2. 回合执行与输入接收分开建模：Running 中按原生能力接受当前回合追加或后续回合排队，见已确认的 input spec I-Q3。Codex 同轮追加已经接入并由 W24 真实 UI 复验；Claude 当前不报告运行中输入能力，原生队列接收与后续回合的事件 / 持久化路径留待其后续交付。排队输入尚未开始执行时不能伪造新执行回合，先前回合的终态不得丢弃后续消息；模型、等待请求与输出按原生关联归属。
+2. 回合执行与输入接收分开建模：Running 中按原生能力接受当前回合追加或后续回合排队，见已确认的 input spec I-Q3。Codex 同轮追加已经接入并由 W24 真实 UI 复验；Claude 按原生队列接入：排队消息保存在 Session 摘要的 `queuedMessages`，CLI 取用后才写入对应回合；CLI 自行开始的回合按普通回合持久化，首条排队消息作为该回合的重试输入；Runtime 结束或应用重启后未取用的消息为 `undelivered`，用户可放回输入框或移除（[input Running 中发送](../input/spec.md#running-中发送)）。排队输入尚未开始执行时不能伪造新执行回合，先前回合的终态不得丢弃后续消息；模型、等待请求与输出按原生关联归属。
 
 ### 3.4 FR-SESSION-003 多 Session 并行
 
@@ -373,7 +373,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 
 ### 5.4 与 chat、input 模块
 
-FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../tools/spec.md#41-文件引用契约)（2026-10-13 确认准备方向）。Session 是输入转交与记录的负责方：普通发送及原生支持的运行中输入均须传递经主进程校验的引用，不能只将 contextItems 存入用户消息；桌面 Session 转换 Provider 输入，Adapter 保持通用契约。Files → Input → Session → Provider 已接通：发送前重新验证，CLI 的当前文件序列化由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)负责；不提供文件内容快照，项目文件转录只保存相对引用，粘贴附件只保存 opaque 身份。普通发送、重试与 Codex 原生运行中追加共用转换；历史 W24 与本轮缓存唯一来源接收的各自基线见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)。Claude 当前报告 `inputWhileRunning: none`，运行中输入仍属原生能力对齐缺口。校验或提交失败返回错误并保留输入。
+FR-INPUT-001、FR-TOOL-001：文件引用端到端契约见 [Tools §4.1](../tools/spec.md#41-文件引用契约)（2026-10-13 确认准备方向）。Session 是输入转交与记录的负责方：普通发送及原生支持的运行中输入均须传递经主进程校验的引用，不能只将 contextItems 存入用户消息；桌面 Session 转换 Provider 输入，Adapter 保持通用契约。Files → Input → Session → Provider 已接通：发送前重新验证，并在创建 Session 或记录回合前执行 Provider 的附件前置检查（Adapter `checkInput`，如 Claude 的图片类型与大小），CLI 的当前文件序列化由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)负责；不提供文件内容快照，项目文件转录只保存相对引用，粘贴附件只保存 opaque 身份。普通发送、重试、Codex 运行中追加与 Claude 排队共用转换；历史 W24 与本轮缓存唯一来源接收的各自基线见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，Claude 的验证见[Claude 原生输入任务](../../.agents/archive/tasks/T20261112-claude-native-input/task.md)。校验或提交失败返回错误并保留输入。
 
 正式 IPC 契约为 [`shared/ipc/session.ts`](../../apps/desktop/src/shared/ipc/session.ts)，Preload 暴露 `window.studio.session`，主进程校验字段和可信发送方。参数与结果均为可序列化 DTO，不携带 Runtime 句柄。
 

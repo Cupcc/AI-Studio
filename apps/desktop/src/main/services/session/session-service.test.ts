@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { DatabaseSync } from 'node:sqlite'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { deferred, type AgentSession, type CreateSessionOptions, type InputRequestInit } from '@ai-studio/agent-adapter'
+import { adapterError, deferred, type AgentSession, type CreateSessionOptions, type InputRequestInit } from '@ai-studio/agent-adapter'
 import { FakeProvider } from '@ai-studio/agent-adapter/testing'
 import { runMigrations } from '../database/migrator'
 import { coreAppMeta } from '../database/migrations/2026100901_core_app_meta'
@@ -793,6 +793,85 @@ const referenceBlock = (paths: string[], text: string) => `${FILE_REFERENCE_HEAD
 const nativeReferences = (paths: string[], text: string) => ({ text, attachments: paths.map(path => ({ kind: 'file', path: `/tmp/p/${path}`, name: path.slice(path.lastIndexOf('/') + 1) })) })
 const files = (...paths: string[]) => paths.map(path => ({ type: 'file' as const, path }))
 const userMessages = (h: ReturnType<typeof harness>, id: string) => h.items(id).filter(item => item.kind === 'user_message')
+
+describe('Native queue while running · I-Q3 / FR-INPUT-001', () => {
+  const queueing = (onQueue: () => void | Promise<void> = () => {}) => harness(new FakeProvider('codex', { capabilities: { inputWhileRunning: 'queue' }, behavior: { onQueue } }))
+  const texts = (h: ReturnType<typeof harness>, id: string) => userMessages(h, id).map(item => [item.text, item.turnId])
+
+  it('shows accepted input as queued, outside any turn, until the CLI folds it into the running turn', async () => {
+    const gate = deferred<void>()
+    const h = queueing(() => gate.promise)
+    const session = await h.create('first'); await tick()
+    const send = h.service.send(session.id, { text: 'second' })
+    expect(() => h.service.send(session.id, { text: 'duplicate' })).toThrow('正在提交')
+    await tick()
+    expect(h.summary(session.id).queuedMessages ?? []).toEqual([]) // not shown before the CLI acknowledged it
+    gate.resolve(); await send
+    const [queued] = h.summary(session.id).queuedMessages!
+    expect(queued).toMatchObject({ text: 'second', status: 'queued', contextItems: [] })
+    expect(h.native().driver.callsTo('queueInput')[0]!.args).toEqual([queued!.id, { text: 'second' }])
+    const turnA = h.items(session.id)[0]!.turnId
+    expect(texts(h, session.id)).toEqual([['first', turnA]])
+    const runtime = h.native().controller
+    runtime.sink.queuedInputStarted(queued!.id, false)
+    expect(h.summary(session.id).queuedMessages).toEqual([])
+    expect(texts(h, session.id)).toEqual([['first', turnA], ['second', turnA]])
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'completed' })
+    expect(h.summary(session.id).activity).toBe('none')
+  })
+
+  it('opens a turn when the CLI starts queued input after the previous result, and queues new input while that queue is pending', async () => {
+    const h = queueing()
+    const session = await h.create('first'); await tick()
+    const runtime = h.native().controller
+    await h.service.send(session.id, { text: 'second' })
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'completed' })
+    expect(h.summary(session.id)).toMatchObject({ activity: 'none', queuedMessages: [{ text: 'second', status: 'queued' }] })
+    await h.service.send(session.id, { text: 'third' }) // idle, but the CLI still holds 'second': keep native order
+    expect(h.native().driver.callsTo('queueInput')).toHaveLength(2)
+    expect(h.native().driver.callsTo('startTurn')).toHaveLength(1)
+    const [b, c] = h.summary(session.id).queuedMessages!.map(message => message.id)
+    runtime.sink.queuedInputStarted(b!, true)
+    runtime.sink.queuedInputStarted(c!, false)
+    const turnB = h.store.lastTurn(session.id)!
+    expect(JSON.parse(turnB.message)).toMatchObject({ text: 'second' })
+    expect(h.summary(session.id)).toMatchObject({ activity: 'running', queuedMessages: [] })
+    expect(texts(h, session.id).slice(1)).toEqual([['second', turnB.id], ['third', turnB.id]])
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'completed' })
+    expect(h.summary(session.id).activity).toBe('none')
+    expect(h.items(session.id).filter(item => item.kind === 'turn_end')).toHaveLength(2)
+  })
+
+  it('marks queued input undelivered when the CLI cancels it or its runtime is retired, keeps it across restart, and removes it on request', async () => {
+    const h = queueing()
+    const session = await h.create('first'); await tick()
+    const runtime = h.native().controller
+    await h.service.send(session.id, { text: 'second' })
+    await h.service.send(session.id, { text: 'third' })
+    const [second, third] = h.summary(session.id).queuedMessages!.map(message => message.id)
+    runtime.sink.queuedInputCancelled(second!, 'native_cancelled')
+    expect(h.summary(session.id).queuedMessages!.map(message => message.status)).toEqual(['undelivered', 'queued'])
+    expect(() => h.service.dismissQueued(session.id, third!)).toThrow('无法移除')
+    runtime.sink.nativeTurnEnded(runtime.activeTurn!.turnId, { status: 'failed', error: { code: 'provider_error', message: 'boom' } })
+    expect(h.summary(session.id).queuedMessages!.map(message => message.status)).toEqual(['undelivered', 'undelivered'])
+    await h.restart()
+    expect(h.summary(session.id).queuedMessages!.map(message => message.text)).toEqual(['second', 'third'])
+    h.service.dismissQueued(session.id, second!)
+    expect(h.summary(session.id).queuedMessages!.map(message => message.text)).toEqual(['third'])
+    expect(texts(h, session.id).map(([text]) => text)).toEqual(['first'])
+  })
+
+  it('refuses to queue during Stop or when the CLI rejects it, adding nothing', async () => {
+    const h = queueing(() => { throw new Error('native refused') })
+    const session = await h.create('first'); await tick()
+    await expect(h.service.send(session.id, { text: 'second' })).rejects.toThrow('native refused')
+    expect(h.summary(session.id).queuedMessages ?? []).toEqual([])
+    const stopping = h.service.stop(session.id)
+    expect(() => h.service.send(session.id, { text: 'third' })).toThrow()
+    await stopping
+    expect(texts(h, session.id).map(([text]) => text)).toEqual(['first'])
+  })
+})
 const startInputs = (h: ReturnType<typeof harness>, index = 0) => h.native(index).driver.callsTo('startTurn').map(call => call.args[1])
 const steerInputs = (h: ReturnType<typeof harness>, index = 0) => h.native(index).driver.callsTo('steerTurn').map(call => call.args[1])
 
@@ -998,7 +1077,7 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     expect(steerInputs(h)).toEqual([])
   })
 
-  it('Claude has no running-turn input: a file send during a turn is refused before the resolver is asked', async () => {
+  it('a CLI without running-turn input refuses a file send during a turn before the resolver is asked', async () => {
     const fake = fileResolver()
     const h = harness(undefined, undefined, { fileReferences: fake.resolver })
     const session = await h.service.create({ projectId: 'p', cli: 'claude-code', text: 'hi' }); await tick()
@@ -1007,11 +1086,11 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
     expect(h.claude.sessions[0]!.driver.callsTo('steerTurn')).toEqual([])
   })
 
-  it.each(['codex', 'claude-code'] as const)('%s: each CLI gets its supported reference form on the first turn of a new Session', async cli => {
+  it.each(['codex', 'claude-code'] as const)('%s: file references reach the Adapter as structured attachments on the first turn of a new Session', async cli => {
     const h = harness(undefined, undefined, { fileReferences: fileResolver().resolver })
     await h.service.create({ projectId: 'p', cli, text: 'look', contextItems: files('a b/c.ts') }); await tick()
     const provider = cli === 'codex' ? h.codex : h.claude
-    expect(provider.sessions[0]!.driver.callsTo('startTurn')[0]!.args[1]).toEqual(cli === 'codex' ? nativeReferences(['a b/c.ts'], 'look') : { text: referenceBlock(['a b/c.ts'], 'look') })
+    expect(provider.sessions[0]!.driver.callsTo('startTurn')[0]!.args[1]).toEqual(nativeReferences(['a b/c.ts'], 'look'))
   })
 
   it('preserves View context and user text alongside native references', async () => {
@@ -1168,16 +1247,17 @@ describe('Files references reach the Provider · FR-TOOL-001 item 4, FR-INPUT-00
       expect(h.summary(session.id).status).toBe('completed_unread')
     })
 
-    it('Codex also lists the references of a steer sent during the turn; Claude has no running-turn input', async () => {
+    it('Codex also lists the references of a steer sent during the turn; simulated Claude queues running-turn input', async () => {
       const h = harness(undefined, undefined, { providers: createE2eProviders(), fileReferences: fileResolver().resolver })
       const session = await h.service.create({ projectId: 'p', cli: 'codex', text: 'look', contextItems: files('src/a.ts') })
       await h.service.send(session.id, { text: 'and this', contextItems: files('docs/my file.md') })
       await h.service.send(session.id, { text: 'and nothing else' })
       await settle()
       expect(reply(h, session.id)).toEqual(['已收到文件引用：src/a.ts, docs/my file.md'])
-      const claude = await h.service.create({ projectId: 'p', cli: 'claude-code', text: 'look' })
-      expect(() => h.service.send(claude.id, { text: 'more', contextItems: files('a.ts') })).toThrow('当前 CLI 不支持运行中发送')
-      expect(createE2eProviders().map(provider => provider.capabilities.inputWhileRunning)).toEqual(['steer', 'none'])
+      const claude = await h.service.create({ projectId: 'p', cli: 'claude-code', text: '[e2e:slow] look' })
+      await h.service.send(claude.id, { text: 'more', contextItems: files('a.ts') })
+      expect(h.summary(claude.id).queuedMessages).toMatchObject([{ text: 'more', status: 'queued', contextItems: files('a.ts') }])
+      expect(createE2eProviders().map(provider => provider.capabilities.inputWhileRunning)).toEqual(['steer', 'queue'])
     })
 
     it('keeps the plain simulated reply when no reference was sent', async () => {
@@ -1344,8 +1424,8 @@ describe('Native controls and attachments · Input §2 / S-Q12 / principle 24', 
     expect(h.store.pastedAttachmentReferences()).toContainEqual({ projectId: 'p', id: upload.id })
     await h.service.retry(session.id); await tick()
     expect(h.codex.sessions.flatMap(native => native.driver.callsTo('startTurn')).at(-1)!.args[1]).toMatchObject({ attachments: [attachment] })
-    await expect(h.service.create({ projectId: 'p', cli: 'claude-code', text: 'unsupported', contextItems })).rejects.toThrow('不支持粘贴附件')
-    expect(h.claude.sessions).toHaveLength(0)
+    await h.service.create({ projectId: 'p', cli: 'claude-code', text: 'pasted', contextItems }); await tick()
+    expect(h.claude.sessions[0]!.driver.callsTo('startTurn')[0]!.args[1]).toEqual({ text: 'pasted', attachments: [attachment] })
   })
 
   it('snapshots effort per turn and persists the next choice without mutating a running turn', async () => {
@@ -1408,6 +1488,32 @@ describe('Native controls and attachments · Input §2 / S-Q12 / principle 24', 
     await expect(h.service.send(session.id, { text: 'blocked', contextItems })).rejects.toThrow('符号链接')
     expect(await h.service.getDraft(key)).toMatchObject({ text: 'blocked', contextItems })
     expect(steerInputs(h)).toHaveLength(1)
+  })
+
+  it('runs the Provider input check before any Session or turn exists; a rejected image keeps the draft (I-Q3 附件边界)', async () => {
+    const fake = fileResolver({ reject: {} })
+    let invalid = true
+    const checkInput = vi.fn(async (input: { attachments?: readonly { kind: string }[] }) => {
+      if (invalid && input.attachments?.some(attachment => attachment.kind === 'image')) throw adapterError('unsupported', 'Only PNG, JPEG, GIF and WebP images can be attached: pic.png')
+    })
+    const h = harness(Object.assign(new FakeProvider('codex'), { checkInput }), undefined, { fileReferences: fake.resolver })
+    const contextItems = [{ type: 'image' as const, path: 'pic.png' }]
+    await expect(h.service.create({ projectId: 'p', cli: 'codex', text: 'look', contextItems })).rejects.toThrow('附件无法发送：Only PNG')
+    expect(h.service.list('p')).toHaveLength(0)
+    const session = await h.service.create({ projectId: 'p', cli: 'codex', text: 'plain' }); await tick()
+    h.native().controller.sink.nativeTurnEnded(h.native().controller.activeTurn!.turnId, { status: 'completed' }); await tick()
+    await expect(h.service.send(session.id, { text: 'look', contextItems })).rejects.toThrow('附件无法发送：Only PNG')
+    expect(userMessages(h, session.id)).toHaveLength(1)
+    expect(checkInput).toHaveBeenLastCalledWith({ text: 'look', attachments: [{ kind: 'image', path: '/tmp/p/pic.png' }] })
+    // Retry runs the same check: an image that became invalid after its turn failed is refused, the failed turn stays retryable.
+    invalid = false
+    await h.service.send(session.id, { text: 'look', contextItems }); await tick()
+    h.native().controller.sink.nativeTurnEnded(h.native().controller.activeTurn!.turnId, { status: 'failed', error: { code: 'provider_error', message: 'boom', retryable: true } })
+    const failedTurn = h.store.lastTurn(session.id)!.id
+    invalid = true
+    await expect(h.service.retry(session.id)).rejects.toThrow('附件无法发送：Only PNG')
+    expect(h.store.lastTurn(session.id)).toMatchObject({ id: failedTurn, outcome: 'failed' })
+    expect(userMessages(h, session.id)).toHaveLength(2)
   })
 })
 

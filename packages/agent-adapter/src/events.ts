@@ -12,6 +12,7 @@ import type {
   StopSummary,
   TurnOutcome,
   NativeTurnDiff,
+  QueuedInputCancelReason,
 } from './types.js';
 
 /**
@@ -31,7 +32,8 @@ export interface AdapterEventPayloads {
   'session.title': { title: string };
 
   /** Emitted synchronously when input is submitted, before the CLI acknowledges (FR-STATE-001). */
-  'turn.started': { turnId: string; startedAt: number };
+  /** `queuedInputIds`: the CLI started this turn from its own queue (`queueUserInput`), not from `sendUserInput`. */
+  'turn.started': { turnId: string; startedAt: number; queuedInputIds?: string[] };
   /** Replaces the native record for this exact turn; seq is its revision. */
   'turn.diff.updated': { turnId: string; diff: NativeTurnDiff };
   /** Terminal state of a turn. Emitted exactly once per turn. */
@@ -61,6 +63,11 @@ export interface AdapterEventPayloads {
   'item.completed': { turnId: string; item: ItemSnapshot };
 
   /** The CLI waits for the user (FR-STATE-002). */
+  /** A queued input was taken by the CLI into `turnId`: folded into the running turn, or one of the inputs of a turn it started. */
+  'input.started': { turnId: string; inputId: string };
+  /** A queued input will not run. */
+  'input.cancelled': { inputId: string; reason: QueuedInputCancelReason };
+
   'input.requested': { turnId: string; request: InputRequest };
   /** The request is no longer pending: answered by the user or cancelled. */
   'input.resolved': { turnId: string; requestId: string; resolution: InputResolution };

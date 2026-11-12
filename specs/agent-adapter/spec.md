@@ -30,7 +30,7 @@
 | 编号 | AI 技术决定 | 状态与证据 |
 |---|---|---|
 | A-Q1 | 保留 `tested` / `untested` / `unsupported` 分类；只在证据表明会话集成不可用时禁用 Provider，单项接口缺失按功能报告并适配。协议版本与生成类型固定作基线，实际 CLI 版本另行记录；按第 3.6 节处理 Stop 接口失败 | 主 Agent，2026-10-11；现有版本标记不能代表该版本全部功能通过，Codex 精确 Stop 的 W25 子集证据见第 3.11 节，未执行方法不外推 |
-| A-Q2 | 扩展能力、提交结果与事件模型以区分 steer / queue，保留消息与原生回合关联；排队不能伪造成当前回合追加 | 主 Agent，2026-10-11；Codex steer 已实现并取得 W24 / W25 / W26 同轮追加及文字拒绝证据，Claude queue 按 DEC-19 保留后续；接口边界见第 3.4、5.5 节 |
+| A-Q2 | 扩展能力、提交结果与事件模型以区分 steer / queue，保留消息与原生回合关联；排队不能伪造成当前回合追加 | 主 Agent，2026-10-11；Codex steer 已实现并取得 W24 / W25 / W26 同轮追加及文字拒绝证据；Claude queue 已按原生 `command_lifecycle` 实现，实测与验证见[Claude 原生输入任务](../../.agents/archive/tasks/T20261112-claude-native-input/task.md)；接口边界见第 3.4、5.5 节 |
 | A-Q3 | 对客户端启动的 Runtime 建立归属记录（宿主实例身份、PID、启动时间、进程组、Session），启动时确认原宿主已失效且进程身份仍匹配后清理；活跃其他实例、共享 MCP、用户终端不得清理。无法确认归属或退出则保留诊断，不声明零残留 | 主 Agent，2026-10-11；依据现有 Runtime 隔离责任（04 第 5 节、本文第 3.9 节）与本次遗留问题处理要求。W26 已实现持久登记与恢复，W27 真实 Node 宿主强杀 / 已观察脱离后代 / 多实例隔离通过；W26 真实 Electron 宿主强杀、启动确认旧归属清理及原 ID 续聊通过，见本文第 3.9 节。未观察进程与外部共享服务不外推；不标成人工确认异常清理已通过 |
 | A-Q4 | I-Q2 先 `turn/steer` 回执，再拒绝原请求，失败保留原请求 | 2026-10-09 已验证，见第 3.11 节；保持历史技术结论 |
 | A-Q5 | 以 CLI 原生加载结果为准核对 user / project / local 配置和 `claude_code` 预设；SDK 参数若未达到同等行为则修正，不能只凭缺省参数名称认定等价 | 主 Agent，2026-10-11；现有实现见第 3.12 节；2026-10-26 在 CLI 2.1.310 取得项目 `CLAUDE.md` 与项目 Skill 的真实自动加载证据（第 3.12 节第 9 条），user / local 来源及应用内路径仍待验证 |
@@ -85,7 +85,7 @@
 ### 3.4 回合与事件（FR-STATE-001、FR-STATE-007）
 
 1. `sendUserInput()` 在调用 CLI 之前同步发出 `turn.started`（携带 Adapter 生成的 `turnId`），不等待首个文本片段或 CLI 回执（FR-STATE-001；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 Running 行）。该方法只对前置条件失败抛错（`invalid_state`、`invalid_argument`、`unsupported`）；CLI 侧失败一律以 `turn.completed`（`failed`）报告，避免双通道。
-2. 目标行为按 A-Q2 / input I-Q3：运行中提交保留原生当前回合追加或后续回合排队语义，分别关联消息与回合；排队接受不等于新回合已经开始。当前代码已建模 `none` / `steer` / `queue`，Codex 报告并接入 `steer`，Claude 仍报告 `none`，其排队路径是待补齐的实现缺口。`none` 只有在原生确不支持或有证据的版本／协议限制下才可作为能力结论，不能代替实现。
+2. 目标行为按 A-Q2 / input I-Q3：运行中提交保留原生当前回合追加或后续回合排队语义，分别关联消息与回合；排队接受不等于新回合已经开始。Codex 报告 `steer`，经 `sendUserInput` 追加到当前回合；Claude 报告 `queue`，经 `queueUserInput(input, { inputId? })` 交给 CLI 自己的队列，收到原生 queued 回执才算接受。之后 CLI 取用时发出 `input.started { inputId, turnId }`：并入正在运行的回合，或成为 CLI 自行开始的新回合的输入（该回合的 `turn.started` 带 `queuedInputIds`）；不会执行时发出 `input.cancelled`。有排队输入未开始时，`sendUserInput` 以 `invalid_state` 拒绝，后续输入继续走队列以保持原生顺序。`none` 只有在原生确不支持或有证据的版本／协议限制下才可作为能力结论，不能代替实现。
 3. 文本：`item.delta`（`channel = text`）为增量，按 `itemId` 累加；`item.completed` 携带完整正文，替换（而非追加）已累加的文本，因此正文不重复（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节文本追加行）。原生完成事件不带全文时，由核心用已累加文本补齐。
 4. 工具活动：命令、文件修改、工具调用等以 `item.started / updated / completed` 报告，`activity.verb` 取 `read / edit / run / search / list / fetch / tool / agent / other`，`label` 为单行摘要，供“Read / Edit / Run”活动行使用（Shell Spec 第 6 节）。上层可归为 Read（read、list、search）、Edit、Run 与其他。
 5. 终态：每个回合恰好一次 `turn.completed`，`outcome` 为 `completed` / `interrupted` / `failed`；只有 `completed` 是成功终态（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节正常完成行）。`durationMs` 为提交到终态的墙钟时长（单调时钟），包含等待用户答复的时间，供“Worked for …”（FR-STATE-007；S-Q10 建议一致）；`nativeDurationMs`、`model` 在 CLI 提供时附带。
@@ -187,16 +187,18 @@
 2. 历史实现按 A-Q5 推荐加载 user / project / local `settingSources`，使用 `claude_code` 系统预设，不追加产品指令，不设产品级默认模型或权限。原生配置对齐原则现已确认，参数等价性与真实 Rule / Skill 加载仍待验证（第 1 节）。用户消息标记 `origin: human`；用户授权决定标记 SDK 的 `user_temporary` / `user_permanent` / `user_reject`。
 3. `system/init.session_id` 到达后报告原生 ID，不预造已存在的原生会话。恢复先按原 ID 初始化，CLI 的最终校验可能延后到首次发送；ID 不匹配或懒加载恢复失败均关闭，不静默新建。
 4. `message_start` 的 message ID 与内容 index 组成稳定条目 ID，完整 assistant 消息替换 partial 内容，消息及结果 UUID 去重。只有 `result.subtype = success && is_error = false` 成功，主动取消按核心取消意图判断。SDK 给出 `user_message_uuid` 时关联原回合，未给关联字段的新异步帧只能回退到当前回合，不能承诺识别任意旧生产者的乱序流。
-5. `canUseTool` 保留原生说明、工具 ID、建议权限更新与选项顺序；只在原生允许时提供持久授权。`AskUserQuestion` 按原题目与选项回写答案，SDK abort 撤回原请求。输入框拒绝以 `deny.message` 交付文字；Stop / 终态 / dispose 释放所有等待。结构化附件当前前置返回 `unsupported`，不宣称已支持。
+5. `canUseTool` 保留原生说明、工具 ID、建议权限更新与选项顺序；只在原生允许时提供持久授权。`AskUserQuestion` 按原题目与选项回写答案，SDK abort 撤回原请求。输入框拒绝以 `deny.message` 交付文字；Stop / 终态 / dispose 释放所有等待。附件：`image` 按文件头识别 PNG / JPEG / GIF / WebP，读入后作为 base64 图片块放在正文之前（上限 10 MiB，与粘贴附件一致；CLI 自行缩放大图，6.3 MB 已实测）；`file` 使用与 Codex 相同的本机路径引用文本，不内联内容；`skill` 前置返回 `unsupported`。附件问题都是发送前的前置错误。
 6. Running / Stopping 中改模型先暂存，下一轮提交前调用 `Query.setModel`；空闲时立即设置。Provider 目录探测不发送消息，使用 `persistSession:false` 调用 `supportedModels()` 后关闭。Stop 前后按本轮后代身份取得退出证明；`still_queued` 若仍含本轮输入，或清理无法确认，走旧 Runtime 退出后原 ID 恢复。没有原生 ID 时不以新建代替恢复。
 7. 验证边界：模拟结果不能替代真实 CLI 的 AC-02 / AC-03 / AC-05；实际启用的版本、输入输出、Rule / Skill、恢复、模型切换、Stop 与并发按相应真实场景验证。采样前已脱离的后代、外部 MCP 进程树与宿主崩溃清理保留证明边界。
 8. 推理强度：`listModels()` 对 `supportsEffort` 的模型把原生 `supportedEffortLevels` 报告为 `reasoningEfforts`，不支持的模型不带该字段；档位不增补、不改名。目录中 CLI 自己的选择行 `default` 标记 `isDefault`，应用在用户未手动选模型时据此解析当前模型的档位。`setReasoningEffort(level)` 通过 `Query.applyFlagSettings({ effortLevel })` 设置：空闲立即应用，Running / Stopping 中暂存到下一轮提交前（与 `setModel` 一致）；`null` 发送 `effortLevel: null`，由 CLI 回到所选模型的原生默认，不硬编码。真实 CLI 对目录外档位（探测值 `ultra`）同样返回成功而不报错，所以按所选（含暂存）模型的初始化目录校验：目录外 → `invalid_argument`，模型不支持 effort → `unsupported`，模型不在目录时回退 SDK 档位集；`null` 不校验。验证过的 Runtime 替换后，已选档位在下一轮提交前重新应用。
+
+运行中排队（I-Q3）：只在 `system/init.capabilities` 含 `msg_lifecycle_v1` 时接受，否则前置 `unsupported`；Runtime 刚启动、尚未收到 `system/init` 时先等待（上限为启动超时），Runtime 在此之前结束则 `invalid_state`。附件前置检查与写入 CLI 都按调用顺序进行，先提交的输入不会被后提交的超过。每条输入带客户端 uuid，按 `command_lifecycle`（queued / started / completed / cancelled）跟踪：`started` 时有未结束的原生回合则并入该回合，否则开始新回合；同时 `started` 的多条进入同一回合。普通 interrupt 保留排队输入，CLI 随后把它作为新回合执行；被 Stop 的回合不再接收输入，即使 `started` 先于其 result 到达也开始新回合；该回合若在上一回合 Stop 收尾时开始，核心暂存其事件，待上一回合结束后再发出 `turn.started` 与后续事件。Runtime 退出、被恢复替换或 dispose 时，未开始的排队输入以 `input.cancelled` 报告；新原生回合开始后，上一回合的后代采样停止，避免把新回合进程计入 Stop 清理。原生行为证据见[Claude 原生输入任务](../../.agents/archive/tasks/T20261112-claude-native-input/task.md)。
 
 ### 3.13 工程工具接缝
 
 FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026-10-13 确认）。文件引用与轮次补丁已接入；逻辑契约以 [Tools §4.1、§4.2](../tools/spec.md#4-状态与接口) 为准，2026-10-18 实施及真实能力边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)。
 
-- 文件输入：桌面 `main/services/session/file-reference.ts` 将校验后的文件交给 shared `attachments` 契约；Codex Adapter 将 `kind=file` 转为标有本机路径引用含义的 JSON name / path 文本，不内联内容，不改变 CLI 权限。image / skill 仍分别使用 `localImage` / `skill`。Claude 保留桌面文本路径清单及结构化附件 `unsupported`。Claude 真实接收及运行中追加 / 排队仍需相应真实场景验证。
+- 文件输入：桌面 `main/services/session/file-reference.ts` 将校验后的文件交给 shared `attachments` 契约；两个 Adapter 都将 `kind=file` 转为标有本机路径引用含义的 JSON name / path 文本（共用 `core/attachments.ts`），不内联内容，不改变 CLI 权限。image：Codex 用 `localImage`，Claude 用 base64 图片块；skill 只有 Codex 接入。Claude 的运行中排队见第 3.12 节“运行中排队”，真实验证见[Claude 原生输入任务](../../.agents/archive/tasks/T20261112-claude-native-input/task.md)。
 - 轮次数据：Codex 已接入 `turn/diff/updated` 聚合替换及完成 `fileChange` 的 patch、类型、路径和完成状态，以 `turn.diff.updated` 转交 Session；新轮绑定先输出 unknown 身份快照。来源、限额及 Git / 非 Git / Shell 的实际覆盖由 Tools §5.3 负责；不假设 Claude 具备同等数据。
 - 事件接收核对 Runtime 代次、Thread / Turn 归属及修订；Adapter 报告 unknown / empty / unavailable / failed 的依据，应用 Session 负责持久化与 App Turn 关联，Adapter 不读当前工作区伪造历史。
 - 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。Codex 真实调用按 CLI 实际结果验证，额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；Claude Code 的历史 V1 真实验收按 DEC-16 暂缓；其发布排除按 DEC-19 的 2026-11-08 后续确认解除，连接设置已于 2026-11-12 人工验收，一键安装真实流程与打包仍待验证，Adapter 层真实验证已于 2026-10-26 重新开始（第 3.12 节第 9 条）；阶段 1 的模拟文件引用链路不改变真实 CLI 结果。
@@ -262,6 +264,7 @@ CLI 连接配置由桌面主进程保存与注入，Adapter 不读写用户配�
 | `id`、`displayName`、`capabilities` | 能力：`nativeSessionIdTiming`、`inputWhileRunning`（`none` / `steer` / `queue`）、`questionRequests`、`freeTextAnswers`（questions / approvals）、`nativeTitle`、`runtimeRecovery` |
 | `checkAvailability(options)` | 第 3.2 节；不可用不抛错，以报告表达 |
 | `listModels(options)` | 不创建原生会话 |
+| `checkInput?(input)` | 不建会话，执行 `sendUserInput` / `queueUserInput` 的附件前置检查，供宿主在记录回合前拒绝；Claude 实现（图片类型与大小、Skill），Codex 由 CLI 自行判断图片，不提供 |
 | `createSession(options)` / `resumeSession(options)` | 第 3.3 节；`options`：`cwd`、`environment`、可选 `overrides`、`timeouts`、`providerOptions` |
 | `releaseRuntimes(cwd?)` | 严格、可重试地释放全部受管 Runtime，可按 Project 规范 `cwd` 限定；不销毁 Provider；未确认以 `AggregateError` 拒绝，契约见 §3.6 第 9 条 |
 | `dispose()` | 关机：处置全部活动 Session 并核对 Runtime 退出，走同一严格路径；未确认则拒绝并可重试，契约及退出证明边界见 §3.6 第 9 条 |
@@ -273,6 +276,7 @@ CLI 连接配置由桌面主进程保存与注入，Adapter 不读写用户配�
 | `sessionId`、`providerId`、`nativeSessionId`、`state`、`activeTurn`、`pendingInputs`、`model`、`capabilities` | 只读快照 |
 | `subscribe(listener)` | 全部事件；首个订阅者会收到此前缓存的事件 |
 | `sendUserInput({ text, attachments? })` → `{ turnId }` | 第 3.4 节；附件 `file` / `image` / `skill`，不支持的类型由 Provider 拒绝 |
+| `queueUserInput?(input, { inputId? })` → `{ inputId }`；`queuedInputIds?` | 仅 `queue` 能力；原生回执后返回，之后以 `input.started` / `input.cancelled` 报告（第 3.4 节） |
 | `respondToInput(requestId, response)` | 卡片答复 |
 | `replyWithText(text)` → `{ disposition, requestIds }` | 输入框回复（I-Q2） |
 | `stop()` → `StopResult` | 第 3.6 节 |
@@ -290,7 +294,8 @@ CLI 连接配置由桌面主进程保存与注入，Adapter 不读写用户配�
 | `session.title` | `title` | 原生标题（可选能力） |
 | `session.error` | `error` | 不对应回合结果的错误 |
 | `session.closed` | `reason`、`error?` | Session 不可再用 |
-| `turn.started` | `turnId`、`startedAt` | 提交时 |
+| `turn.started` | `turnId`、`startedAt`、`queuedInputIds?` | 提交时；CLI 从队列开始回合时带排队输入 |
+| `input.started` / `input.cancelled` | `turnId`、`inputId` / `inputId`、`reason` | 排队输入被 CLI 取用 / 不会执行（第 3.4 节） |
 | `turn.completed` | `outcome`、`durationMs`、`nativeDurationMs?`、`model?`、`stopRequested`、`stop?`、`error?`、`nativeTurnId?` | 每回合一次；`error` 只在 `failed` 时出现 |
 | `item.started` / `item.updated` / `item.completed` | `item`（`kind`、`status`、`text`、`activity`、`command`、`files`、`tool`） | 条目快照 |
 | `item.delta` | `itemId`、`channel`（`text` / `reasoning` / `output`）、`delta` | 增量 |
@@ -308,6 +313,7 @@ Provider 不直接实现 `AgentSession`，而是为每个 Session 提供一个�
 |---|---|
 | `startTurn` | 原生提交；被拒绝即回合失败 |
 | `steerTurn?` | 运行中追加输入（仅 `steer` 能力） |
+| `queueInput?` | 交给原生队列（仅 `queue` 能力）；进度经 `sink.queuedInputStarted` / `queuedInputCancelled` 报告 |
 | `interruptTurn` | 原生中断并释放 Stop 取消的请求 |
 | `cleanupAfterInterrupt?` | 终止本轮进程并给出退出证据 |
 | `recoverRuntime?` | 兜底：经 `RuntimeSlot.replace()` 重启并以原 ID 恢复，报告 `sink.nativeSessionId` |
@@ -333,7 +339,7 @@ Provider 不直接实现 `AgentSession`，而是为每个 Session 提供一个�
 | `setModel` 下一轮生效 | 一致 | — |
 | `runtimeExited(code, duringTurn)` | `runtime.exited` 含 `duringTurn` | — |
 | `nativeTitle(title)`（可选） | `session.title` + `capabilities.nativeTitle` | — |
-| `capabilities`：Running 中提交、自由文本答复、原生名称 | `inputWhileRunning`、`freeTextAnswers`、`nativeTitle` | `inputWhileRunning` 按原生行为报告 `none` / `steer` / `queue`；Codex 已接入 `steer`，Claude 式排队仍待建模与验证（I-Q3） |
+| `capabilities`：Running 中提交、自由文本答复、原生名称 | `inputWhileRunning`、`freeTextAnswers`、`nativeTitle` | `inputWhileRunning` 按原生行为报告 `none` / `steer` / `queue`；Codex 接入 `steer`，Claude 接入 `queue`（I-Q3） |
 | 可用性：已安装、版本、已登录、原因；版本不受支持 | 一致，`unsupported_version` 为第三种不可用原因 | 按 C-Q5 / A-Q1，仅有证据的会话集成不兼容才禁用，未验证不等于不支持 |
 | `listModels` 不创建原生会话 | 一致 | Claude 真实目录探测未新增 transcript，见第 3.12 节 |
 | `shutdownAll()` 清理受管进程并记录结果 | `ProviderRegistry.shutdownAll()` | 责任边界见 04 §5；任一未确认以 `AggregateError` 拒绝，成功不证明零残留（§3.6 第 9 条）；宿主异常退出见 A-Q3 |

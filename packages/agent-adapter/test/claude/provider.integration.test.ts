@@ -9,6 +9,10 @@ import { waitForExit, identityOf, type ProcessInfo } from '../../src/core/proces
 import { redactSecrets } from '../../src/core/redact.js';
 import type { AdapterEvent, AdapterEventOf } from '../../src/events.js';
 import type { AgentSession } from '../../src/provider.js';
+import type { UserInput } from '../../src/types.js';
+
+/** 32×32 solid red PNG. */
+const RED_PNG = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAKklEQVR4nGO4IyJCU8QwasGoBaMWjFowasGoBaMWjFowasGoBaMWDBULAJ3LED3QqzauAAAAAElFTkSuQmCC';
 
 const real = describe.skipIf(!realCliEnabled());
 function recorder(session: AgentSession) {
@@ -36,11 +40,17 @@ async function until<T>(read: () => T | undefined | false, timeoutMs = 90_000): 
   while (Date.now() - start < timeoutMs) { const result = read(); if (result) return result; await new Promise((resolve) => setTimeout(resolve, 50)); }
   throw new Error('Timed out waiting for synthetic integration result');
 }
-async function turn(session: AgentSession, events: AdapterEvent[], text: string) {
-  const { turnId } = await session.sendUserInput({ text });
-  const end = await until(() => events.find((event): event is AdapterEventOf<'turn.completed'> => event.type === 'turn.completed' && event.turnId === turnId));
-  const body = events.filter((event) => event.type === 'item.completed' && event.turnId === turnId && event.item.kind === 'assistant_message')
+function bodyOf(events: AdapterEvent[], turnId: string): string {
+  return events.filter((event) => event.type === 'item.completed' && event.turnId === turnId && event.item.kind === 'assistant_message')
     .map((event) => event.type === 'item.completed' ? event.item.text ?? '' : '').join('\n');
+}
+function completion(events: AdapterEvent[], turnId: string) {
+  return until(() => events.find((event): event is AdapterEventOf<'turn.completed'> => event.type === 'turn.completed' && event.turnId === turnId));
+}
+async function turn(session: AgentSession, events: AdapterEvent[], input: string | UserInput) {
+  const { turnId } = await session.sendUserInput(typeof input === 'string' ? { text: input } : input);
+  const end = await completion(events, turnId);
+  const body = bodyOf(events, turnId);
   // Print only safe enum outcomes; failures do not dump SDK output or authentication details.
   console.log(JSON.stringify({ check: 'turn', outcome: end.outcome, code: end.error?.code, delta: events.some((event) => event.type === 'item.delta' && event.turnId === turnId) }));
   expect(end.outcome).toBe('completed');
@@ -270,6 +280,67 @@ real('Claude real CLI — explicit opt-in, temporary projects, bounded synthetic
       const again = await turn(sessionB, eventsB, `Reply exactly ${marker}_B2. No tools.`);
       expect(again.body).toContain(`${marker}_B2`);
       console.log(JSON.stringify({ check: 'concurrent-stop-isolated', runtimes: runtimes.length, stopCleanup: stop.summary?.cleanup, otherIdle: true }));
+    } finally { await provider.dispose(); }
+  });
+  it('queues input while a turn runs: the CLI starts it in that turn or the next, and Stop keeps it queued (I-Q3)', async () => {
+    const { cwd } = await createScratchProject('claude-queue');
+    const environment = hostEnvironmentForTests(); const provider = new ClaudeProvider();
+    const marker = `QUEUE_${randomUUID().replaceAll('-', '').slice(0, 12)}`;
+    try {
+      const session = await provider.createSession({ cwd, environment, overrides: { model: 'haiku', permissionMode: 'default' },
+        providerOptions: { settingSources: [], tools: ['Bash'], maxTurns: 4, maxBudgetUsd: 0.4 } });
+      const events = recorder(session);
+      session.subscribe((event) => {
+        if (event.type === 'input.requested' && event.request.kind === 'approval') void session.respondToInput(event.request.requestId, { kind: 'approval', optionId: 'allow' });
+      });
+      const commandStarted = (turnId: string) => until(() => events.some((event) => event.type === 'item.started' && event.turnId === turnId && event.item.kind === 'command'));
+      const inputStarted = (inputId: string) => until(() => events.find((event): event is AdapterEventOf<'input.started'> => event.type === 'input.started' && event.inputId === inputId));
+
+      const { turnId: first } = await session.sendUserInput({ text: `Run exactly this Bash command once and wait for it:\nsleep 6; echo ${marker}_A\nThen reply with one short sentence.` });
+      await commandStarted(first);
+      const { inputId } = await session.queueUserInput!({ text: `Also include the word ${marker}_B in your reply.` });
+      const started = await inputStarted(inputId);
+      expect((await completion(events, started.turnId)).outcome).toBe('completed');
+      expect(bodyOf(events, started.turnId)).toContain(`${marker}_B`);
+      await until(() => session.state === 'idle');
+      expect(events.filter((event) => event.type === 'turn.completed' && event.turnId === first)).toHaveLength(1);
+      console.log(JSON.stringify({ check: 'queue-started', joinedRunningTurn: started.turnId === first }));
+
+      const { turnId: long } = await session.sendUserInput({ text: `Run exactly this Bash command once and wait for completion:\npython3 -c 'import time;time.sleep(60)' ${marker}` });
+      await commandStarted(long);
+      const queued = await session.queueUserInput!({ text: `Reply exactly ${marker}_S. No tools.` });
+      expect((await session.stop()).status).toBe('stopped');
+      const after = await inputStarted(queued.inputId);
+      expect(after.turnId).not.toBe(long);
+      expect((await completion(events, after.turnId)).outcome).toBe('completed');
+      expect(bodyOf(events, after.turnId)).toContain(`${marker}_S`);
+      expect(events.some((event) => event.type === 'input.cancelled')).toBe(false);
+      console.log(JSON.stringify({ check: 'queue-survives-stop', ranAsOwnTurn: true }));
+    } finally { await provider.dispose(); }
+  });
+
+  it('sends an image as a native image block and a file as a path-only reference (FR-INPUT-001, Tools §4.1)', async () => {
+    const { cwd } = await createScratchProject('claude-attachments');
+    const environment = hostEnvironmentForTests(); const provider = new ClaudeProvider();
+    const marker = `NOTE_${randomUUID().replaceAll('-', '').slice(0, 12)}`;
+    await writeFile(join(cwd, 'swatch.png'), Buffer.from(RED_PNG, 'base64'));
+    await writeFile(join(cwd, 'note.txt'), `Secret word: ${marker}\n`);
+    try {
+      const session = await provider.createSession({ cwd, environment, overrides: { model: 'haiku', permissionMode: 'default' },
+        providerOptions: { settingSources: [], tools: ['Read'], maxTurns: 3, maxBudgetUsd: 0.4 } });
+      const events = recorder(session);
+      session.subscribe((event) => {
+        if (event.type === 'input.requested' && event.request.kind === 'approval') void session.respondToInput(event.request.requestId, { kind: 'approval', optionId: 'allow' });
+      });
+      const { body, end } = await turn(session, events, {
+        text: 'Without using any tool, name the dominant color of the attached image in one word. Then read the referenced file and reply with its secret word.',
+        attachments: [{ kind: 'image', path: join(cwd, 'swatch.png') }, { kind: 'file', path: join(cwd, 'note.txt'), name: 'note.txt' }],
+      });
+      expect(body.toLowerCase()).toContain('red');
+      expect(body).toContain(marker);
+      // The image needs no tool; the reference carries only the path, so the agent reads the note itself.
+      const reads = events.filter((event) => event.type === 'item.started' && event.turnId === end.turnId && event.item.kind !== 'assistant_message' && event.item.kind !== 'reasoning');
+      console.log(JSON.stringify({ check: 'attachments', imageNamed: true, referenceRead: true, toolItems: reads.length }));
     } finally { await provider.dispose(); }
   });
 });

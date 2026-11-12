@@ -1,7 +1,8 @@
 import { claudeConnectionSettings } from './connection-options.js';
 import { randomUUID } from 'node:crypto';
 import type { EffortLevel, ModelInfo as SDKModelInfo, Options, SDKMessage, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
-import { deferred, withTimeout } from '../core/async.js';
+import { deferred, withTimeout, type Deferred } from '../core/async.js';
+import { attachedFileReference, readImageAttachment } from '../core/attachments.js';
 import { AsyncQueue } from '../core/async-queue.js';
 import { defaultProcessLister, identityOf, waitForExit, type ProcessInfo } from '../core/process-probe.js';
 import { RuntimeProcess, type RuntimeHandle } from '../core/runtime-process.js';
@@ -30,7 +31,27 @@ interface RuntimeState {
   sent: Map<string, string>;
   results: Set<string>;
   pump?: Promise<void>;
+  /** `msg_lifecycle_v1` on system/init: the CLI reports queued / started / cancelled per input uuid. */
+  lifecycle: boolean;
+  /** Native uuid → adapter input id, from push until the CLI starts or cancels it. */
+  queued: Map<string, string>;
+  /** Native `queued` acknowledgements awaited by `queueInput`. */
+  acks: Map<string, Deferred<void>>;
+  /** Turns the CLI started from its queue that have not reported a result → their input ids. */
+  queuedTurns: Map<string, string[]>;
+  /** Settles on system/init, which carries the capabilities; the CLI sends it after reading its first input. */
+  initReady: Deferred<void>;
+  /** Tail of the writes to the CLI, so inputs reach it in call order (see `inOrder`). */
+  submissions: Promise<void>;
+  /** The turn a Stop interrupted: input the CLI starts while it is still current belongs to a new turn. */
+  interrupted?: string;
 }
+
+/** Not part of the SDK's SDKMessage union in 0.3.293; observed on Claude Code 2.1.322 with `msg_lifecycle_v1`. */
+interface CommandLifecycle { type: 'command_lifecycle'; command_uuid: string; state: 'queued' | 'started' | 'completed' | 'cancelled' }
+const isLifecycle = (message: unknown): message is CommandLifecycle =>
+  !!message && typeof message === 'object' && (message as { type?: unknown }).type === 'command_lifecycle'
+  && typeof (message as { command_uuid?: unknown }).command_uuid === 'string';
 interface TurnProcesses {
   baseline: Set<string>;
   observed: Map<string, ProcessInfo>;
@@ -38,10 +59,16 @@ interface TurnProcesses {
   sample?: Promise<void>;
   timer?: ReturnType<typeof setInterval>;
   queuedAfterInterrupt?: boolean;
+  /** Another native turn has started; new descendants are no longer attributable to this turn. */
+  frozen?: boolean;
 }
+type ClaudeContent = SDKUserMessage['message']['content'];
+type ContentBlockParam = Exclude<ClaudeContent, string>[number];
 const processKey = (p: ProcessInfo) => `${p.pid}@${p.startedAt}`;
 /** Used only when the model is absent from the native catalog; the CLI accepts any string without error. */
 const SDK_EFFORT_LEVELS: readonly string[] = ['low', 'medium', 'high', 'xhigh', 'max'];
+/** Same bound as the app's pasted attachments; Claude Code downsizes larger images itself (6.3 MB verified). */
+export const CLAUDE_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 
 export class ClaudeDriver implements SessionDriver {
   private readonly timeouts;
@@ -94,7 +121,9 @@ export class ClaudeDriver implements SessionDriver {
   private async spawn(generation: number): Promise<RuntimeHandle> {
     if (this.closed) throw adapterError('disposed', 'Claude driver is closed');
     const state: RuntimeState = { generation, input: new AsyncQueue(), closing: false, initialized: false, resumed: this.nativeId !== undefined,
-      permissions: new ClaudePermissions(this.sink), turns: new Map(), sent: new Map(), results: new Set() };
+      permissions: new ClaudePermissions(this.sink), turns: new Map(), sent: new Map(), results: new Set(),
+      lifecycle: false, queued: new Map(), acks: new Map(), queuedTurns: new Map(), initReady: deferred<void>(), submissions: Promise.resolve() };
+    state.initReady.promise.catch(() => {});
     this.state = state;
     const ready = deferred<RuntimeHandle>();
     const sdkOptions: Options = {
@@ -137,6 +166,11 @@ export class ClaudeDriver implements SessionDriver {
 
   async startTurn(turn: TurnContext, input: UserInput): Promise<void> {
     const state = this.current();
+    await this.inOrder(state, () => this.submitTurn(state, turn, input));
+  }
+
+  private async submitTurn(state: RuntimeState, turn: TurnContext, input: UserInput): Promise<void> {
+    const content = await claudeContent(input);
     if (this.modelDirty) {
       await state.query!.setModel(this.model);
       this.modelDirty = false;
@@ -161,18 +195,108 @@ export class ClaudeDriver implements SessionDriver {
     state.currentTurn = turn.turnId;
     state.turns.set(turn.turnId, new ClaudeMessages(this.sink, turn.turnId));
     const uuid = randomUUID();
-    state.sent.set(uuid, turn.turnId);
+    this.correlate(state, uuid, turn.turnId);
+    state.input.push(this.userMessage(uuid, content));
+  }
+
+  /**
+   * Hands input to Claude Code's own command queue. Resolves on the native `queued` lifecycle frame; the
+   * CLI then folds it into the running turn after a tool round, or starts a later turn with it.
+   */
+  async queueInput(inputId: string, input: UserInput): Promise<void> {
+    const state = this.current();
+    const ack = await this.inOrder(state, async () => {
+      // A runtime that is still starting has not sent system/init yet; its capabilities are unknown until then.
+      await withTimeout(() => state.initReady.promise, this.timeouts.startupMs, 'Claude Code initialization');
+      if (!state.lifecycle) {
+        throw adapterError('unsupported', 'This Claude Code version does not report queued input lifecycle (msg_lifecycle_v1)');
+      }
+      const content = await claudeContent(input);
+      if (state !== this.state || state.closing || this.closed) throw adapterError('invalid_state', 'The Claude runtime was replaced before the input was queued');
+      const uuid = randomUUID();
+      const written = deferred<void>();
+      state.queued.set(uuid, inputId);
+      state.acks.set(uuid, written);
+      state.input.push(this.userMessage(uuid, content));
+      return written;
+    });
+    // No timeout: once written the input may still run, so it stays tracked until started, cancelled or the runtime ends.
+    await ack.promise;
+  }
+
+  /** Inputs reach the CLI in call order: reading attachments or applying model / effort must not let a later input overtake. */
+  private inOrder<T>(state: RuntimeState, work: () => Promise<T>): Promise<T> {
+    const run = state.submissions.then(work);
+    state.submissions = run.then(() => undefined, () => undefined);
+    return run;
+  }
+
+  private userMessage(uuid: string, content: ClaudeContent): SDKUserMessage {
+    return { type: 'user', uuid: uuid as SDKUserMessage['uuid'], session_id: this.nativeId ?? '', parent_tool_use_id: null,
+      origin: { kind: 'human' }, message: { role: 'user', content } };
+  }
+
+  private correlate(state: RuntimeState, uuid: string, turnId: string): void {
+    state.sent.set(uuid, turnId);
     // Bound retained correlation keys while preserving recent-turn late-event routing.
     if (state.sent.size > 128) {
       const oldest = state.sent.keys().next().value!;
-      state.turns.delete(state.sent.get(oldest)!);
+      const oldTurn = state.sent.get(oldest)!;
       state.sent.delete(oldest);
+      if (![...state.sent.values()].includes(oldTurn)) state.turns.delete(oldTurn);
     }
-    state.input.push({ type: 'user', uuid, session_id: this.nativeId ?? '', parent_tool_use_id: null,
-      origin: { kind: 'human' }, message: { role: 'user', content: input.text } });
+  }
+
+  private onLifecycle(state: RuntimeState, frame: CommandLifecycle): void {
+    const uuid = frame.command_uuid;
+    if (frame.state === 'queued' || frame.state === 'started') state.acks.get(uuid)?.resolve();
+    if (frame.state !== 'started' && frame.state !== 'cancelled') return;
+    const inputId = state.queued.get(uuid);
+    if (inputId === undefined) return; // inputs submitted through startTurn, or uuids the CLI enqueued itself
+    state.queued.delete(uuid);
+    state.acks.delete(uuid);
+    if (frame.state === 'cancelled') { this.sink.queuedInputCancelled(inputId, 'native_cancelled'); return; }
+    // An interrupted turn takes no more input: anything started now opens the next turn, even before the stopped turn's result.
+    const newTurn = state.currentTurn === undefined || state.currentTurn === state.interrupted;
+    const turnId = this.sink.queuedInputStarted(inputId, newTurn);
+    if (!turnId) return;
+    this.correlate(state, uuid, turnId);
+    if (!newTurn) return;
+    for (const tracking of this.processes.values()) tracking.frozen = true;
+    state.currentTurn = turnId;
+    state.queuedTurns.set(turnId, [inputId]);
+    state.turns.set(turnId, new ClaudeMessages(this.sink, turnId));
+    const tracking: TurnProcesses = { baseline: new Set(), observed: new Map(), probeFailed: false };
+    this.processes.set(turnId, tracking);
+    void state.runtime!.snapshotDescendants().then((processes) => { tracking.baseline = new Set(processes.map(processKey)); },
+      () => { tracking.probeFailed = true; }).then(() => {
+      if (state !== this.state || this.closed || !this.processes.has(turnId) || state.currentTurn !== turnId) return;
+      tracking.timer = setInterval(() => { void this.sample(turnId, state); }, 200);
+      tracking.timer.unref();
+    });
+  }
+
+  /** The runtime holding the native queue is gone: nothing it still held can run. */
+  private abandonQueue(state: RuntimeState, reason: 'runtime_exited' | 'disposed'): void {
+    for (const ack of state.acks.values()) ack.reject(adapterError('invalid_state', 'The Claude runtime ended before the input was queued'));
+    state.acks.clear();
+    const pending = [...state.queued.values(), ...[...state.queuedTurns.values()].flat()];
+    state.queued.clear();
+    state.queuedTurns.clear();
+    for (const inputId of pending) this.sink.queuedInputCancelled(inputId, reason === 'disposed' ? 'disposed' : 'runtime_exited');
   }
 
   private async consume(state: RuntimeState): Promise<void> {
+    try {
+      await this.read(state);
+    } finally {
+      // Stream over: whatever this runtime still had queued will never start.
+      state.initReady.reject(adapterError('invalid_state', 'The Claude runtime ended before it reported its capabilities'));
+      if (state.queued.size || state.acks.size) this.abandonQueue(state, this.closed ? 'disposed' : 'runtime_exited');
+    }
+  }
+
+  private async read(state: RuntimeState): Promise<void> {
     try {
       for await (const message of state.query!) {
         if (state !== this.state || state.closing || this.closed) continue;
@@ -203,7 +327,10 @@ export class ClaudeDriver implements SessionDriver {
   }
 
   private accept(state: RuntimeState, message: SDKMessage): void {
+    if (isLifecycle(message)) { this.onLifecycle(state, message); return; }
     if (message.type === 'system' && message.subtype === 'init') {
+      state.lifecycle = message.capabilities?.includes('msg_lifecycle_v1') ?? false;
+      state.initReady.resolve();
       this.sink.nativeSessionId(message.session_id);
       if (this.nativeId && this.nativeId !== message.session_id) return;
       this.nativeId = message.session_id;
@@ -231,6 +358,7 @@ export class ClaudeDriver implements SessionDriver {
     let error = mapper.error ?? claudeError(description || `Claude returned ${message.subtype}`, message.subtype);
     if (state.resumed && !state.initialized && !success) error = { ...error, code: 'resume_failed' };
     if (state.currentTurn === turnId) state.currentTurn = undefined;
+    state.queuedTurns.delete(turnId);
     const tracking = this.processes.get(turnId);
     if (tracking?.timer) clearInterval(tracking.timer);
     this.sink.nativeTurnEnded(turnId, { status: success ? 'completed' : 'failed',
@@ -239,7 +367,7 @@ export class ClaudeDriver implements SessionDriver {
 
   private async sample(turnId: string, state: RuntimeState): Promise<void> {
     const tracking = this.processes.get(turnId);
-    if (!tracking) return;
+    if (!tracking || tracking.frozen) return;
     if (tracking.sample) return tracking.sample;
     tracking.sample = (async () => {
       try {
@@ -254,6 +382,7 @@ export class ClaudeDriver implements SessionDriver {
   async interruptTurn(stop: StopContext): Promise<void> {
     const state = this.current();
     await this.sample(stop.turnId, state); // before interrupt can reparent/terminate children
+    state.interrupted = stop.turnId;
     const receipt = state.query!.interrupt();
     for (const input of stop.cancelledInputs) state.permissions.cancel(input);
     const result = await receipt;
@@ -287,6 +416,7 @@ export class ClaudeDriver implements SessionDriver {
     const previous = this.current();
     previous.closing = true;
     previous.permissions.close();
+    this.abandonQueue(previous, 'runtime_exited');
     // Do not end stdin before RuntimeSlot takes a final descendant snapshot.
     const replaced = await this.slot.replace();
     previous.input.end();
@@ -355,7 +485,7 @@ export class ClaudeDriver implements SessionDriver {
     this.closed = true;
     for (const tracking of this.processes.values()) if (tracking.timer) clearInterval(tracking.timer);
     const state = this.state;
-    if (state) { state.closing = true; state.permissions.close(); }
+    if (state) { state.closing = true; state.permissions.close(); this.abandonQueue(state, 'disposed'); }
     try {
       const report = await this.slot.shutdown();
       if (report && !report.confirmed) throw adapterError('stop_cleanup_failed', 'Claude runtime exit could not be verified');
@@ -375,4 +505,22 @@ export class ClaudeDriver implements SessionDriver {
     if (!this.state || this.closed) throw adapterError('disposed', 'Claude driver is closed');
     return this.state;
   }
+}
+
+/** Claude user content: images as native base64 blocks, the typed text, then file references (never contents). */
+export async function claudeContent(input: UserInput): Promise<ClaudeContent> {
+  if (!input.attachments?.length) return input.text;
+  const images: ContentBlockParam[] = [];
+  const references: ContentBlockParam[] = [];
+  for (const attachment of input.attachments) {
+    if (attachment.kind === 'image') {
+      const { mediaType, data } = await readImageAttachment(attachment.path, CLAUDE_IMAGE_MAX_BYTES);
+      images.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: data.toString('base64') } });
+    } else if (attachment.kind === 'file') {
+      references.push({ type: 'text', text: attachedFileReference(attachment) });
+    } else {
+      throw adapterError('unsupported', 'Claude Code skills are not exposed as attachments');
+    }
+  }
+  return [...images, ...(input.text ? [{ type: 'text' as const, text: input.text }] : []), ...references];
 }

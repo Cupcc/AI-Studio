@@ -217,6 +217,12 @@ export type InputResolution =
       reason: 'turn_stopping' | 'turn_ended' | 'runtime_exited' | 'native_resolved' | 'disposed';
     };
 
+/**
+ * Why input accepted by `AgentSession.queueUserInput` will not start: the CLI cancelled it, the runtime
+ * holding the native queue exited or was replaced, or the session closed / was disposed first.
+ */
+export type QueuedInputCancelReason = 'native_cancelled' | 'runtime_exited' | 'session_closed' | 'disposed';
+
 /** Outcome of `AgentSession.replyWithText` (I-Q2, confirmed 2026-10-09). */
 export interface ReplyWithTextResult {
   /** `answered`: the text answered the single pending request; `declined`: all pending requests were declined with it. */

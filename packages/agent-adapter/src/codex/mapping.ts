@@ -1,8 +1,8 @@
-import { basename } from 'node:path';
 import type { ApprovalOption, InputResponse, ItemSnapshot, ItemStatus, UserInput } from '../types.js';
 import type { InputRequestInit } from '../core/session-controller.js';
 import type { IncomingRequest } from '../core/json-rpc.js';
 import { adapterError } from '../errors.js';
+import { attachedFileReference } from '../core/attachments.js';
 import type { ThreadItem } from './protocol/v2/ThreadItem.js';
 import type { UserInput as NativeUserInput } from './protocol/v2/UserInput.js';
 import type { CommandExecutionRequestApprovalParams } from './protocol/v2/CommandExecutionRequestApprovalParams.js';
@@ -22,9 +22,7 @@ export function nativeInput(input: UserInput): NativeUserInput[] {
     else if (attachment.kind === 'file') {
       // Codex `mention` selects apps/plugins; a filesystem path there contributes no model input.
       // Keep the host's trusted file identity, but tell the model its path explicitly (never embed contents).
-      const reference = JSON.stringify({ name: attachment.name ?? basename(attachment.path), path: attachment.path })
-        .replace(/[\u0085\u2028\u2029]/g, char => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`);
-      result.push({ type: 'text', text: `\n\nAttached file reference (local path; file contents are not embedded):\n${reference}`, text_elements: [] });
+      result.push({ type: 'text', text: `\n\n${attachedFileReference(attachment)}`, text_elements: [] });
     }
     else throw adapterError('unsupported', 'Unsupported Codex attachment');
   }

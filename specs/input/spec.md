@@ -26,7 +26,7 @@
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
 | I-Q2 | 在输入框输入的回复对 CLI 意味着什么？有多个未答复请求时作用于哪一个？ | 只有一个未答复请求且该请求原生接受自由文本（如提问）时，文字作为该请求的答案；其他情况下，所有未答复请求按“拒绝并附该文字为说明”解决（Claude `canUseTool` 拒绝可附说明；Codex 先由同轮 turn/steer 交付文字、确认接收后拒绝原请求，W25 / W26 已真实验证）。对话中显示为用户消息 | 产品已确认；Codex实现与真实验证已完成，Claude后续 | 采纳建议（2026-10-09 确认）；Codex具体交付方式已由Adapter与UI验证，见§3（技术结果2026-10-18） |
-| I-Q3 | Running 中是否允许发送？ | 按各 CLI 原生能力接入，保留 Codex 当前回合追加与 Claude 后续回合排队的差异；消息归属及 Stop 对队列的行为由 Adapter 验证并如实呈现 | 产品问题已解决；Codex 同轮追加已实现及真实复验，Claude queue 后续 | 依据 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>)（2026-10-11 确认）；不再采用“本切片不支持”作为产品决定，diff 待审阅 |
+| I-Q3 | Running 中是否允许发送？ | 按各 CLI 原生能力接入，保留 Codex 当前回合追加与 Claude 后续回合排队的差异；消息归属及 Stop 对队列的行为由 Adapter 验证并如实呈现 | 产品问题已解决；Codex 同轮追加已实现及真实复验，Claude queue 已实现，验证见[Claude 原生输入任务](../../.agents/archive/tasks/T20261112-claude-native-input/task.md) | 依据 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>)（2026-10-11 确认）；不再采用“本切片不支持”作为产品决定，diff 待审阅 |
 
 ### 1.3 技术决定
 
@@ -72,7 +72,7 @@
 1. `+` 打开按来源分组的 Add 菜单：文件入口复用 Files；View 草稿中的当前 View 标签可在移除后重新附加；Skills 列出当前 Project 的真实原生目录，并标明已添加项。这里的 Plugins 指 CLI 原生插件，自定义工作台的创建入口由[工作台规格](../workbench/spec.md)负责。原生 Plugins 无 catalog 接口时显示明确的不可用状态，不能把原型示例列成真实能力。Files 选择与添加行为见 §1.3；原生图片仍沿用 Files 的“作为图片附加”入口（DEC-23，2026-10-23）。
 2. 上下文标签位：显示当前 View、从 Files 添加的文件和粘贴附件，每个标签可单独移除（Shell Spec 第 7 节；FR-VIEW-007 第 3 项；FR-TOOL-001）。草稿的上下文类型含 View、项目文件、项目图片、Skill 和粘贴附件；行内引用的位置另存草稿。Conversation Mode 下不出现 View 标签；默认 View 标签的出现规则与首条注入方式由 [Project View spec](../project-view/spec.md)决定。自定义工作台每次发送前展示可移除的当前实例上下文并读取最新目标状态，移除后本轮不自动写回；详细规则见 [workbench §4.2](../workbench/spec.md#42-向-ai-提供任务上下文)（FR-WB-003，2026-11-10 接受方向，2026-11-11 调整为插件架构先行，此处业务接缝留到后续业务阶段设计与评审）。
 3. 发送时上下文项随用户消息交给 session 模块，记录在对话记录的用户消息中（session spec 第 4.4 节）。文件项还须按 [Tools §4.1](../tools/spec.md#41-文件引用契约) 转交 Adapter，覆盖普通发送与原生支持的运行中追加 / 排队；标签显示不等于 CLI 接收。发送失败保留未接受的文本与标签，不能静默丢弃不支持的附件（2026-10-13 确认，DEC-14）。
-   - 当前转换由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)负责：Codex 的文件经结构化宿主契约转为明确的本机路径文本引用，图片 / Skill 使用各自原生输入；Claude 文件使用文本路径清单。引用不是文件内容快照；本轮缓存接收及历史验证的边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
+   - 当前转换由 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)负责：Codex 的文件经结构化宿主契约转为明确的本机路径文本引用，图片 / Skill 使用各自原生输入；Claude 的文件使用同一路径引用文本，图片为 base64 图片块，Skill 尚未接入。引用不是文件内容快照；本轮缓存接收及历史验证的边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)，不由 Input 重复维护能力结论。
 4. Files 添加动作绑定当前 Project 与实际显示的草稿 / Session，异步校验后再次核对身份；文件删除、路径失效与切换 Project 不会把标签误加到其他对话。发送时传递 `contextItems`，主进程重新校验并按 [Tools §5.2](../tools/spec.md#52-files--项目-diff-实现细化) 转换。Needs Input 答复暂只接受文本，有文件、图片、粘贴附件或 Skill 时明确阻止答复并保留输入，避免附件被无声清空；运行中发送遵循 Provider 的实际能力。
 
 5. 原生图片由 Files 的「作为图片附加」明确选择，主进程沿用文件路径边界和发送前重校验，传 Codex `localImage`；同一文件可同时保留 file / image 两种显式语义。图片内容和模型是否支持由 CLI 实际结果判定，不能静默改成路径文字（原则 24；2026-10-18 技术实现）。
@@ -120,7 +120,7 @@
 
 按 I-Q3 与 FR-INPUT-001，运行中发送是必须接入的原生能力。Codex 当前回合追加与 Claude 后续回合排队分别呈现；发送接收确认后再清空对应输入，失败保留内容，排队接受不显示为已执行。回合结束、Stop 与继续发送的竞态应依原生语义处理，不自行重放、丢弃或合并排队消息。
 
-当前 Adapter 的 `capabilities.inputWhileRunning` 已建模 `none` / `steer` / `queue`，Codex 已接入原生 `steer`；Claude 的排队能力尚未建模，UI 和 IPC 仍需贯通并验证。Claude Stop 后队列行为仍待真实验证（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 `still_queued`），不能以此长期禁止 Running 中发送。
+Codex 报告 `steer`，发送进入当前回合。Claude 报告 `queue`：CLI 确认入队后清空输入，消息显示在对话末尾的“排队中”列表，不属于任何回合；CLI 在工具步骤之间取用时，消息写入当前回合，当前回合结束后才取用时，CLI 开始新回合，消息成为新回合的开头，同时取用的多条进入同一回合。Stop 只停止当前回合，排队消息按原生行为随后执行。有排队消息时，空闲状态下的新发送也进入队列，保持原生顺序。Runtime 结束前未被取用的消息标为“未送达”，用户可放回输入框或移除，应用不自动重发。原生行为与验证见[Claude 原生输入任务](../../.agents/archive/tasks/T20261112-claude-native-input/task.md)。
 
 #### 在输入框答复 Needs Input
 

@@ -1,5 +1,8 @@
 import { randomUUID } from 'node:crypto';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CanUseTool, ModelInfo as SDKModel, Options, SDKMessage, SDKUserMessage } from '@anthropic-ai/claude-agent-sdk';
 import { ClaudeProvider, type ClaudeQuery } from '../../src/claude/index.js';
 import { AsyncQueue } from '../../src/core/async-queue.js';
@@ -31,7 +34,8 @@ class MockQuery implements ClaudeQuery {
   }
   [Symbol.asyncIterator]() { return this.output[Symbol.asyncIterator](); }
   emit(value: unknown) { this.output.push(value as SDKMessage); }
-  init(id = nativeId) { this.emit({ type: 'system', subtype: 'init', session_id: id }); }
+  init(id = nativeId, capabilities: string[] = ['msg_lifecycle_v1']) { this.emit({ type: 'system', subtype: 'init', session_id: id, capabilities }); }
+  lifecycle(uuid: string, state: 'queued' | 'started' | 'completed' | 'cancelled') { this.emit({ type: 'command_lifecycle', command_uuid: uuid, state, uuid: randomUUID(), session_id: nativeId }); }
   end(success = true, extra: Record<string, unknown> = {}) {
     this.emit({ type: 'result', subtype: success ? 'success' : 'error_during_execution', is_error: !success,
       result: 'ok', errors: ['cancelled'], duration_ms: 12, session_id: nativeId, uuid: randomUUID(), ...extra });
@@ -589,8 +593,218 @@ describe('Claude Provider — FR-CHAT-003 / FR-STATE-001..003 / AC-02, AC-03, AC
     await expect(h.provider.createSession({ ...options, providerOptions: { resume: 'other' } })).rejects.toMatchObject({ code: 'unsupported' });
     await expect(h.provider.resumeSession({ ...options, nativeSessionId: 'not-uuid' })).rejects.toMatchObject({ code: 'resume_failed' });
     const { session, events } = await h.session();
-    await expect(session.sendUserInput({ text: '', attachments: [{ kind: 'image', path: '/tmp/image.png' }] })).rejects.toMatchObject({ code: 'unsupported' });
+    await expect(session.sendUserInput({ text: '', attachments: [{ kind: 'skill', name: 'review', path: '/tmp/SKILL.md' }] })).rejects.toMatchObject({ code: 'unsupported' });
+    await expect(session.sendUserInput({ text: 'x', attachments: [{ kind: 'image', path: '/tmp/definitely-missing-image.png' }] })).rejects.toMatchObject({ code: 'invalid_argument' });
     expect(events.some((e) => e.type === 'turn.started')).toBe(false);
+  });
+});
+
+const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452000000010000000108020000009077533de00000000c49444154789c63f8cfc00000030101009c2d36a50000000049454e44ae426082', 'hex');
+
+describe('Claude structured attachments — FR-INPUT-001 / Tools §4.1', () => {
+  let dir: string;
+  beforeEach(async () => { dir = await mkdtemp(join(tmpdir(), 'claude-attach-')); });
+  afterEach(async () => { await rm(dir, { recursive: true, force: true }); });
+
+  it('sends images as native base64 blocks first, then the text, then path-only file references', async () => {
+    const image = join(dir, 'shot.bin'); // the type comes from the header, not the name
+    await writeFile(image, PNG);
+    const { session, q } = await harness().session();
+    await session.sendUserInput({ text: 'describe', attachments: [
+      { kind: 'file', path: '/repo/src/a "quoted".ts', name: 'a "quoted".ts' }, { kind: 'image', path: image }] });
+    await vi.waitFor(() => expect(q.inputs).toHaveLength(1));
+    const content = q.inputs[0]!.message.content as unknown as Array<Record<string, unknown>>;
+    expect(content.map((block) => block.type)).toEqual(['image', 'text', 'text']);
+    expect(content[0]).toEqual({ type: 'image', source: { type: 'base64', media_type: 'image/png', data: PNG.toString('base64') } });
+    expect(content[1]).toEqual({ type: 'text', text: 'describe' });
+    expect(content[2]!.text).toBe('Attached file reference (local path; file contents are not embedded):\n{"name":"a \\"quoted\\".ts","path":"/repo/src/a \\"quoted\\".ts"}');
+  });
+
+  it('keeps plain text input as a string and rejects files that are not supported images before Running', async () => {
+    const fake = join(dir, 'fake.png');
+    await writeFile(fake, 'not an image');
+    const provider = new ClaudeProvider();
+    await expect(provider.checkInput({ text: 'x', attachments: [{ kind: 'image', path: fake }] })).rejects.toMatchObject({ code: 'unsupported' });
+    await expect(provider.checkInput({ text: 'x', attachments: [{ kind: 'skill', name: 'review', path: '/tmp/SKILL.md' }] })).rejects.toMatchObject({ code: 'unsupported' });
+    await expect(provider.checkInput({ text: 'x', attachments: [{ kind: 'file', path: fake }] })).resolves.toBeUndefined();
+    const { session, q, events } = await harness().session();
+    await expect(session.sendUserInput({ text: 'x', attachments: [{ kind: 'image', path: fake }] })).rejects.toMatchObject({ code: 'unsupported' });
+    expect(events.some((e) => e.type === 'turn.started')).toBe(false);
+    await session.sendUserInput({ text: 'plain' });
+    await vi.waitFor(() => expect(q.inputs).toHaveLength(1));
+    expect(q.inputs[0]!.message.content).toBe('plain');
+  });
+});
+
+describe('Claude native queue — I-Q3 / A-Q2', () => {
+  const ofType = <K extends AdapterEvent['type']>(events: AdapterEvent[], type: K) => events.filter((e): e is Extract<AdapterEvent, { type: K }> => e.type === type);
+  async function queued(session: AgentSession, q: MockQuery, inputId: string, text = 'next') {
+    const receipt = session.queueUserInput!({ text }, { inputId });
+    await flush();
+    const uuid = q.inputs.at(-1)!.uuid!;
+    q.lifecycle(uuid, 'queued');
+    await expect(receipt).resolves.toEqual({ inputId });
+    return uuid;
+  }
+
+  it('reports queue capability and refuses queueing while idle, and plain sends while input is queued', async () => {
+    const { session, q } = await harness().session();
+    expect(session.capabilities.inputWhileRunning).toBe('queue');
+    await expect(session.queueUserInput!({ text: 'x' })).rejects.toMatchObject({ code: 'invalid_state' });
+    const first = await sent(session, q);
+    await queued(session, q, 'in-1');
+    q.end(true, { user_message_uuid: q.inputs[0]!.uuid });
+    await flush();
+    expect(session.state).toBe('idle');
+    await expect(session.sendUserInput({ text: 'skip the queue' })).rejects.toMatchObject({ code: 'invalid_state' });
+    expect(session.queuedInputIds).toEqual(['in-1']);
+    expect(first).toBeTruthy();
+  });
+
+  it('folds queued input into the running turn after a tool round: one turn, one completion', async () => {
+    const { session, q, events } = await harness().session();
+    const turnId = await sent(session, q);
+    const uuid = await queued(session, q, 'in-1');
+    expect(ofType(events, 'input.started')).toEqual([]);
+    q.lifecycle(uuid, 'started');
+    await flush();
+    expect(ofType(events, 'input.started')).toMatchObject([{ turnId, inputId: 'in-1' }]);
+    expect(session.queuedInputIds).toEqual([]);
+    q.end(true, { user_message_uuid: q.inputs[0]!.uuid, user_message_uuids: [q.inputs[0]!.uuid, uuid] });
+    await flush();
+    expect(ofType(events, 'turn.completed')).toMatchObject([{ turnId, outcome: 'completed' }]);
+    expect(ofType(events, 'turn.started')).toHaveLength(1);
+  });
+
+  it('starts a native turn for input started after the previous result, and batches inputs started together', async () => {
+    const { session, q, events } = await harness().session();
+    const first = await sent(session, q);
+    const b = await queued(session, q, 'in-b');
+    const c = await queued(session, q, 'in-c');
+    q.end(true, { user_message_uuid: q.inputs[0]!.uuid });
+    await flush();
+    q.lifecycle(b, 'started');
+    q.lifecycle(c, 'started');
+    q.emit({ type: 'assistant', uuid: randomUUID(), session_id: nativeId, parent_tool_use_id: null, user_message_uuid: c,
+      message: { id: 'msg-b', model: 'haiku', content: [{ type: 'text', text: 'BANANA' }] } });
+    await flush();
+    const started = ofType(events, 'turn.started');
+    expect(started).toHaveLength(2);
+    const next = started[1]!;
+    expect(next.turnId).not.toBe(first);
+    expect(next.queuedInputIds).toEqual(['in-b']);
+    expect(ofType(events, 'input.started').map((e) => [e.inputId, e.turnId])).toEqual([['in-b', next.turnId], ['in-c', next.turnId]]);
+    expect(ofType(events, 'item.completed').at(-1)).toMatchObject({ turnId: next.turnId, item: { text: 'BANANA' } });
+    expect(session.state).toBe('running');
+    q.end(true, { user_message_uuid: c, user_message_uuids: [b, c] });
+    await flush();
+    expect(ofType(events, 'turn.completed').map((e) => e.turnId)).toEqual([first, next.turnId]);
+    expect(session.state).toBe('idle');
+  });
+
+  it('keeps queued input across Stop and starts its turn only after the stopped turn finished', async () => {
+    const { session, q, events } = await harness().session();
+    const stopped = await sent(session, q);
+    const b = await queued(session, q, 'in-b');
+    q.interrupt = async () => {
+      q.interruptCalls++;
+      q.end(false, { user_message_uuid: q.inputs[0]!.uuid });
+      q.lifecycle(q.inputs[0]!.uuid!, 'cancelled');
+      q.lifecycle(b, 'started');
+      q.emit({ type: 'assistant', uuid: randomUUID(), session_id: nativeId, parent_tool_use_id: null, user_message_uuid: b,
+        message: { id: 'msg-b', model: 'haiku', content: [{ type: 'text', text: 'after stop' }] } });
+      return { still_queued: [b] };
+    };
+    const result = await session.stop();
+    await flush();
+    expect(result.status).toBe('stopped');
+    const order = events.filter((e) => ['turn.started', 'turn.completed', 'item.completed', 'input.started', 'input.cancelled'].includes(e.type))
+      .map((e) => `${e.type}:${'turnId' in e && e.turnId === stopped ? 'A' : 'B'}`);
+    expect(order).toEqual(['turn.started:A', 'turn.completed:A', 'turn.started:B', 'input.started:B', 'item.completed:B']);
+    expect(ofType(events, 'turn.completed')[0]).toMatchObject({ outcome: 'interrupted' });
+    expect(session.state).toBe('running');
+  });
+
+  it('cancels queued input natively, on runtime crash, and refuses queueing without the lifecycle capability', async () => {
+    const h = harness();
+    const { session, q, events, runtime } = await h.session();
+    await sent(session, q);
+    const uuid = await queued(session, q, 'in-1');
+    await queued(session, q, 'in-2');
+    q.lifecycle(uuid, 'cancelled');
+    await flush();
+    expect(ofType(events, 'input.cancelled')).toMatchObject([{ inputId: 'in-1', reason: 'native_cancelled' }]);
+    runtime.crash(1);
+    await flush();
+    expect(ofType(events, 'input.cancelled').map((e) => e.inputId)).toEqual(['in-1', 'in-2']);
+    expect(session.queuedInputIds).toEqual([]);
+
+    const old = await harness().session();
+    old.q.init(nativeId, []);
+    await sent(old.session, old.q);
+    await expect(old.session.queueUserInput!({ text: 'x' })).rejects.toMatchObject({ code: 'unsupported' });
+    expect(old.session.queuedInputIds).toEqual([]);
+  });
+
+  it('waits for system/init before deciding whether a starting runtime can queue, and fails if it ends first', async () => {
+    const h = harness();
+    const session = await h.provider.createSession({ ...options });
+    const q = h.queries.at(-1)!;
+    await session.sendUserInput({ text: 'hello' });
+    await flush();
+    const receipt = session.queueUserInput!({ text: 'next' }, { inputId: 'in-1' });
+    await flush();
+    expect(q.inputs).toHaveLength(1);
+    q.init();
+    await vi.waitFor(() => expect(q.inputs).toHaveLength(2));
+    q.lifecycle(q.inputs[1]!.uuid!, 'queued');
+    await expect(receipt).resolves.toEqual({ inputId: 'in-1' });
+
+    const second = await h.provider.createSession({ ...options });
+    await second.sendUserInput({ text: 'hello' });
+    await flush();
+    const refused = second.queueUserInput!({ text: 'next' }, { inputId: 'in-2' });
+    await flush();
+    h.runtimes.at(-1)!.crash(1);
+    await expect(refused).rejects.toMatchObject({ code: 'invalid_state' });
+    expect(second.queuedInputIds).toEqual([]);
+  });
+
+  it('delivers inputs to the CLI in call order even when an earlier one reads an image', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'claude-order-'));
+    const image = join(dir, 'a.png');
+    await writeFile(image, PNG);
+    const textOf = (input: SDKUserMessage) => typeof input.message.content === 'string' ? input.message.content
+      : (input.message.content as { type: string; text?: string }[]).find((block) => block.type === 'text')!.text;
+    const { session, q } = await harness().session();
+    const turn = session.sendUserInput({ text: 'A', attachments: [{ kind: 'image', path: image }] });
+    const first = session.queueUserInput!({ text: 'B', attachments: [{ kind: 'image', path: image }] }, { inputId: 'in-b' });
+    const second = session.queueUserInput!({ text: 'C' }, { inputId: 'in-c' });
+    await vi.waitFor(() => expect(q.inputs).toHaveLength(3));
+    expect(q.inputs.map(textOf)).toEqual(['A', 'B', 'C']);
+    await turn;
+    for (const input of q.inputs.slice(1)) q.lifecycle(input.uuid!, 'queued');
+    await expect(Promise.all([first, second])).resolves.toEqual([{ inputId: 'in-b' }, { inputId: 'in-c' }]);
+  });
+
+  it('opens a new turn for input the CLI starts after Stop, even before the stopped turn reports its result', async () => {
+    const { session, q, events } = await harness().session();
+    const stopped = await sent(session, q);
+    const b = await queued(session, q, 'in-b');
+    q.interrupt = async () => {
+      q.interruptCalls++;
+      q.lifecycle(b, 'started');
+      q.end(false, { user_message_uuid: q.inputs[0]!.uuid });
+      q.lifecycle(q.inputs[0]!.uuid!, 'cancelled');
+      return { still_queued: [b] };
+    };
+    expect((await session.stop()).status).toBe('stopped');
+    await flush();
+    const started = ofType(events, 'input.started');
+    expect(started).toHaveLength(1);
+    expect(started[0]!.turnId).not.toBe(stopped);
+    expect(ofType(events, 'turn.started').at(-1)).toMatchObject({ turnId: started[0]!.turnId, queuedInputIds: ['in-b'] });
+    expect(ofType(events, 'turn.completed')).toMatchObject([{ turnId: stopped, outcome: 'interrupted' }]);
   });
 });
 
@@ -609,12 +823,12 @@ describe('Claude availability', () => {
     expect(JSON.stringify(report)).not.toContain('private@example.com');
     expect(report.status).toBe(loggedIn ? 'available' : 'not_logged_in');
   });
-  it.each([['2.1.295', 'tested'], ['2.1.310', 'tested'], ['2.1.311', 'untested']])('classifies CLI %s as %s', async (version, compatibility) => {
+  it.each([['2.1.295', 'tested'], ['2.1.310', 'tested'], ['2.1.322', 'tested'], ['2.1.323', 'untested']])('classifies CLI %s as %s', async (version, compatibility) => {
     const p = new ClaudeProvider({ resolveExecutable: async () => ({ path: '/claude', source: 'explicit' }),
       exec: async (_file, args) => ({ code: 0, signal: null, stderr: '', timedOut: false, truncated: false,
         stdout: args[0] === '--version' ? `${version} (Claude Code)` : JSON.stringify({ loggedIn: true, authMethod: 'claude.ai' }) }) });
     const report = await p.checkAvailability({ environment: options.environment });
-    expect(report.version).toMatchObject({ status: 'ok', value: { compatibility, testedVersions: '2.1.294, 2.1.295, 2.1.310' } });
+    expect(report.version).toMatchObject({ status: 'ok', value: { compatibility, testedVersions: '2.1.294, 2.1.295, 2.1.310, 2.1.322' } });
   });
   it('handles malformed authentication output without echoing it', async () => {
     const p = new ClaudeProvider({ resolveExecutable: async () => ({ path: '/claude', source: 'path' }),

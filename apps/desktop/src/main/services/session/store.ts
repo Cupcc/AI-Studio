@@ -114,13 +114,14 @@ export class SessionStore {
       .get(sessionId) as unknown as StoredTurn | undefined
   }
 
-  /** All pages of history and failed-turn retry input count, including closed Projects. */
+  /** All pages of history, failed-turn retry input and queued / undelivered messages count, including closed Projects. */
   pastedAttachmentReferences(): PastedAttachmentReference[] {
     return this.db.prepare(`WITH messages(projectId, data) AS (
       SELECT project_id, data FROM session_drafts
       UNION ALL SELECT s.project_id, t.message FROM session_turns t JOIN sessions s ON s.id=t.session_id
       UNION ALL SELECT s.project_id, i.data FROM transcript_items i JOIN sessions s ON s.id=i.session_id
         WHERE json_extract(i.data, '$.kind')='user_message'
+      UNION ALL SELECT s.project_id, q.value FROM sessions s, json_each(s.data, '$.queuedMessages') AS q
     ) SELECT DISTINCT messages.projectId, json_extract(item.value, '$.id') AS id
       FROM messages, json_each(messages.data, '$.contextItems') AS item
       WHERE json_extract(item.value, '$.type')='upload'`).all() as unknown as PastedAttachmentReference[]

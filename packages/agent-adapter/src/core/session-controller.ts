@@ -16,6 +16,7 @@ import type {
   NativeTurnDiff,
   ProviderId,
   QuestionRequest,
+  QueuedInputCancelReason,
   RecoveryReport,
   ReplyWithTextResult,
   RuntimeExitInfo,
@@ -80,6 +81,11 @@ export interface SessionDriver {
   /** Adds input to the running turn. Only used when `capabilities.inputWhileRunning === 'steer'`. */
   steerTurn?(turn: TurnContext, input: UserInput): Promise<void>;
   /**
+   * Hands input to the CLI's own queue (`capabilities.inputWhileRunning === 'queue'`). Resolve once the
+   * CLI acknowledged the entry; report later progress through `sink.queuedInputStarted` / `queuedInputCancelled`.
+   */
+  queueInput?(inputId: string, input: UserInput): Promise<void>;
+  /**
    * Stop phase 1: request the native interrupt (and release `cancelledInputs`). Resolve on
    * acknowledgement; the terminal state is reported through `sink.nativeTurnEnded`.
    */
@@ -142,6 +148,16 @@ export interface SessionSink {
   findInputByNativeRef(predicate: (nativeRef: unknown) => boolean): PendingInputRecord | undefined;
   /** Native terminal state. A `failed` end with code `resume_failed` also closes the session. */
   nativeTurnEnded(turnId: string, end: NativeTurnEnd): void;
+  /**
+   * The CLI took queued input `inputId`. `newTurn`: no native turn was running, so this input starts one;
+   * otherwise it joins the running native turn. Returns the adapter turn id that now owns the input (route
+   * the turn's native events there), or `undefined` when the input is unknown or the session is closed.
+   * A new turn that starts while the previous turn is still finishing Stop is held and its events are
+   * replayed once that turn has ended.
+   */
+  queuedInputStarted(inputId: string, newTurn: boolean): string | undefined;
+  /** Queued input will not run (native cancel, runtime exit or replacement). Ignored once it has started. */
+  queuedInputCancelled(inputId: string, reason: QueuedInputCancelReason): void;
   modelChanged(model: string | null): void;
   /** Conversation title reported by the CLI (optional capability). */
   nativeTitle(title: string): void;
@@ -187,6 +203,14 @@ interface ActiveTurn {
   stop?: { requestedAt: number; promise: Promise<StopResult>; cancelled: PendingInputRecord[] };
 }
 
+/** A turn the CLI started from its queue while the previous turn was still finishing (Stop cleanup). */
+interface DeferredTurn {
+  turnId: string;
+  inputIds: string[];
+  /** Sink calls for this turn, replayed in order once it becomes the active turn. */
+  backlog: (() => void)[];
+}
+
 const MAX_BUFFERED_EVENTS = 2000;
 
 /**
@@ -210,6 +234,9 @@ export class SessionController implements AgentSession {
   private modelValue: string | undefined;
   private active: ActiveTurn | undefined;
   private readonly pending = new Map<string, PendingEntry>();
+  /** Accepted by `queueUserInput`, not yet started or cancelled. */
+  private readonly queued = new Set<string>();
+  private readonly deferredTurns: DeferredTurn[] = [];
   private runtimeGeneration = 0;
   private fatalError: AdapterError | undefined;
   private closeError: AdapterErrorInfo | undefined;
@@ -269,6 +296,10 @@ export class SessionController implements AgentSession {
     return this.modelValue;
   }
 
+  get queuedInputIds(): readonly string[] {
+    return [...this.queued];
+  }
+
   /** Resolves with the close reason once the session is closed (used for shutdown tracking). */
   get closed(): Promise<SessionCloseReason> {
     return this.closedSignal.promise;
@@ -302,6 +333,10 @@ export class SessionController implements AgentSession {
       return { turnId: turn.record.turnId };
     }
     this.guard.assertCanSubmit();
+    if (this.queued.size || this.deferredTurns.length) {
+      // The CLI would run this after its queue; only the queue path keeps that attribution honest.
+      throw adapterError('invalid_state', 'Queued input is pending; submit through queueUserInput');
+    }
 
     const turnId = randomUUID();
     const record = this.guard.beginTurn(turnId, this.now(), this.monotonic());
@@ -331,6 +366,32 @@ export class SessionController implements AgentSession {
       },
     );
     return { turnId };
+  }
+
+  async queueUserInput(input: UserInput, options: { inputId?: string } = {}): Promise<{ inputId: string }> {
+    validateUserInput(input);
+    if (this.capabilities.inputWhileRunning !== 'queue' || !this.driver.queueInput) {
+      throw adapterError('unsupported', 'The provider does not queue input natively');
+    }
+    if (this.guard.state === 'closed') throw adapterError('invalid_state', 'The session is closed');
+    if (this.guard.state === 'stopping') throw adapterError('invalid_state', 'The session is stopping; submissions are paused');
+    if (this.guard.state === 'idle' && !this.queued.size && !this.deferredTurns.length) {
+      throw adapterError('invalid_state', 'No turn is running; submit through sendUserInput');
+    }
+    const inputId = options.inputId ?? randomUUID();
+    if (typeof inputId !== 'string' || !inputId.trim()) throw adapterError('invalid_argument', 'inputId must be a non-empty string');
+    if (this.queued.has(inputId) || this.deferredTurns.some((turn) => turn.inputIds.includes(inputId))) {
+      throw adapterError('invalid_argument', `Input ${inputId} is already queued`);
+    }
+    // Registered first: the CLI can report `started` before the acknowledgement settles.
+    this.queued.add(inputId);
+    try {
+      await this.driver.queueInput(inputId, input);
+    } catch (error) {
+      this.queued.delete(inputId);
+      throw toAdapterError(error, 'provider_error');
+    }
+    return { inputId };
   }
 
   async respondToInput(requestId: string, response: InputResponse): Promise<void> {
@@ -704,6 +765,82 @@ export class SessionController implements AgentSession {
     if (this.guard.state !== previous && this.guard.state === 'idle') {
       this.emit('session.state', { state: 'idle', previous });
     }
+    this.startDeferredTurn();
+  }
+
+  // -------------------------------------------------------------------------
+  // Native queue (capabilities.inputWhileRunning === 'queue')
+  // -------------------------------------------------------------------------
+
+  private onQueuedInputStarted(inputId: string, newTurn: boolean): string | undefined {
+    if (!this.queued.delete(inputId)) {
+      this.diagnostic('unhandled_native', `Queued input ${inputId} started but is not pending`);
+      return undefined;
+    }
+    if (this.guard.state === 'closed') {
+      this.emit('input.cancelled', { inputId, reason: 'session_closed' });
+      return undefined;
+    }
+    const newest = this.deferredTurns.at(-1);
+    if (!newTurn && newest) {
+      newest.inputIds.push(inputId);
+      return newest.turnId;
+    }
+    if (!newTurn && this.active) {
+      this.emit('input.started', { turnId: this.active.record.turnId, inputId });
+      return this.active.record.turnId;
+    }
+    const turnId = randomUUID();
+    if (this.active || this.deferredTurns.length || this.guard.state !== 'idle') {
+      this.deferredTurns.push({ turnId, inputIds: [inputId], backlog: [] });
+      return turnId;
+    }
+    this.beginQueuedTurn(turnId, [inputId]);
+    return turnId;
+  }
+
+  private onQueuedInputCancelled(inputId: string, reason: QueuedInputCancelReason): void {
+    if (this.queued.delete(inputId)) {
+      this.emit('input.cancelled', { inputId, reason });
+      return;
+    }
+    // A held turn that never became visible: its inputs did not run as far as the user can tell.
+    const index = this.deferredTurns.findIndex((turn) => turn.inputIds.includes(inputId));
+    if (index < 0) return;
+    const [turn] = this.deferredTurns.splice(index, 1) as [DeferredTurn];
+    for (const id of turn.inputIds) this.emit('input.cancelled', { inputId: id, reason });
+  }
+
+  private beginQueuedTurn(turnId: string, inputIds: readonly string[]): void {
+    const record = this.guard.beginTurn(turnId, this.now(), this.monotonic());
+    this.active = {
+      record,
+      abort: new AbortController(),
+      startPromise: Promise.resolve(),
+      nativeEnd: deferred<void>(),
+      openItems: new Map(),
+      text: new Map(),
+      runtimeExited: false,
+    };
+    this.emit('session.state', { state: 'running', previous: 'idle' });
+    this.emit('turn.started', { turnId, startedAt: record.startedAt, queuedInputIds: [...inputIds] });
+    for (const inputId of inputIds) this.emit('input.started', { turnId, inputId });
+  }
+
+  private startDeferredTurn(): void {
+    while (!this.active && this.guard.state === 'idle' && this.deferredTurns.length) {
+      const next = this.deferredTurns.shift() as DeferredTurn;
+      this.beginQueuedTurn(next.turnId, next.inputIds);
+      for (const replay of next.backlog) replay();
+    }
+  }
+
+  /** Holds a sink call for a turn that is not active yet. */
+  private deferFor(turnId: string, replay: () => void): boolean {
+    const turn = this.deferredTurns.find((candidate) => candidate.turnId === turnId);
+    if (!turn) return false;
+    turn.backlog.push(replay);
+    return true;
   }
 
   // -------------------------------------------------------------------------
@@ -737,6 +874,11 @@ export class SessionController implements AgentSession {
   private completeClose(reason: SessionCloseReason, previous: SessionRuntimeState, error?: AdapterErrorInfo): void {
     if (error) this.closeError = error;
     const cancelReason: CancelReason = reason === 'disposed' ? 'disposed' : 'runtime_exited';
+    const queuedReason: QueuedInputCancelReason = reason === 'disposed' ? 'disposed' : reason === 'runtime_exited' ? 'runtime_exited' : 'session_closed';
+    const notStarted = [...this.queued, ...this.deferredTurns.flatMap((turn) => turn.inputIds)];
+    this.queued.clear();
+    this.deferredTurns.length = 0;
+    for (const inputId of notStarted) this.emit('input.cancelled', { inputId, reason: queuedReason });
     for (const [requestId, entry] of this.pending) {
       this.pending.delete(requestId);
       this.releaseInput(entry, cancelReason);
@@ -831,35 +973,41 @@ export class SessionController implements AgentSession {
       },
       nativeSessionId: (id) => this.onNativeSessionId(id),
       bindNativeTurnId: (turnId, nativeTurnId) => {
+        if (this.deferFor(turnId, () => self.sink.bindNativeTurnId(turnId, nativeTurnId))) return;
         if (!this.guard.bindNativeTurnId(turnId, nativeTurnId)) {
           this.diagnostic('warning', `Cannot bind native turn ${nativeTurnId} to turn ${turnId}`);
         }
       },
       turnIdForNative: (nativeTurnId) => this.guard.turnIdForNative(nativeTurnId),
       turnDiffUpdated: (turnId, diff) => {
+        if (this.deferFor(turnId, () => self.sink.turnDiffUpdated(turnId, diff))) return;
         const turn = this.turnFor(turnId, 'turn.diff.updated');
         if (!turn || turn.record.nativeTurnId !== diff.nativeTurnId || this.nativeSessionId !== diff.nativeSessionId) return;
         this.emit('turn.diff.updated', { turnId, diff });
       },
       itemStarted: (turnId, item) => {
+        if (this.deferFor(turnId, () => self.sink.itemStarted(turnId, item))) return;
         const turn = this.turnFor(turnId, 'item.started');
         if (!turn) return;
         if (item.status === 'in_progress') turn.openItems.set(item.itemId, item);
         this.emit('item.started', { turnId, item });
       },
       itemDelta: (turnId, itemId, channel, delta) => {
+        if (this.deferFor(turnId, () => self.sink.itemDelta(turnId, itemId, channel, delta))) return;
         const turn = this.turnFor(turnId, 'item.delta');
         if (!turn) return;
         if (channel !== 'output') turn.text.set(itemId, (turn.text.get(itemId) ?? '') + delta);
         this.emit('item.delta', { turnId, itemId, channel, delta });
       },
       itemUpdated: (turnId, item) => {
+        if (this.deferFor(turnId, () => self.sink.itemUpdated(turnId, item))) return;
         const turn = this.turnFor(turnId, 'item.updated');
         if (!turn) return;
         if (turn.openItems.has(item.itemId)) turn.openItems.set(item.itemId, item);
         this.emit('item.updated', { turnId, item });
       },
       itemCompleted: (turnId, item) => {
+        if (this.deferFor(turnId, () => self.sink.itemCompleted(turnId, item))) return;
         const turn = this.turnFor(turnId, 'item.completed');
         if (!turn) return;
         const completed: ItemSnapshot = { ...item };
@@ -869,7 +1017,15 @@ export class SessionController implements AgentSession {
         turn.text.delete(item.itemId);
         this.emit('item.completed', { turnId, item: completed });
       },
-      inputRequested: (turnId, init, nativeRef) => this.onInputRequested(turnId, init, nativeRef),
+      inputRequested: (turnId, init, nativeRef) => {
+        const reserved = randomUUID();
+        if (this.deferFor(turnId, () => {
+          if (this.onInputRequested(turnId, init, nativeRef, reserved)) return;
+          const request = { ...init, requestId: reserved, turnId, createdAt: this.now() } as InputRequest;
+          this.releaseInput({ request, nativeRef, answering: false }, 'turn_ended');
+        })) return reserved;
+        return this.onInputRequested(turnId, init, nativeRef);
+      },
       inputResolvedNatively: (requestId) => {
         const entry = this.pending.get(requestId);
         if (!entry) return;
@@ -886,7 +1042,12 @@ export class SessionController implements AgentSession {
         }
         return undefined;
       },
-      nativeTurnEnded: (turnId, end) => this.handleNativeEnd(turnId, end),
+      nativeTurnEnded: (turnId, end) => {
+        if (this.deferFor(turnId, () => this.handleNativeEnd(turnId, end))) return;
+        this.handleNativeEnd(turnId, end);
+      },
+      queuedInputStarted: (inputId, newTurn) => this.onQueuedInputStarted(inputId, newTurn),
+      queuedInputCancelled: (inputId, reason) => this.onQueuedInputCancelled(inputId, reason),
       modelChanged: (model) => {
         this.modelValue = model ?? undefined;
         this.emit('model.changed', { model });
@@ -939,7 +1100,7 @@ export class SessionController implements AgentSession {
     this.failAndClose('resume_failed', error.info);
   }
 
-  private onInputRequested(turnId: string, init: InputRequestInit, nativeRef: unknown): string | undefined {
+  private onInputRequested(turnId: string, init: InputRequestInit, nativeRef: unknown, reservedId?: string): string | undefined {
     const turn = this.active;
     if (
       !turn ||
@@ -951,7 +1112,7 @@ export class SessionController implements AgentSession {
       this.diagnostic('late_event', `Input request (${init.nativeType}) for turn ${turnId} not accepted in state ${this.guard.state}`);
       return undefined;
     }
-    const requestId = randomUUID();
+    const requestId = reservedId ?? randomUUID();
     const request = { ...init, requestId, turnId, createdAt: this.now() } as InputRequest;
     this.pending.set(requestId, { request, nativeRef, answering: false });
     this.emit('input.requested', { turnId, request });

@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { StudioApi } from '@shared/ipc/contracts'
 import { defaultUiState } from '@shared/project/ui-state'
@@ -31,6 +31,7 @@ beforeEach(() => {
     getSkillContent: vi.fn(async () => ({ name: 'code-review', text: '# Review changes', truncated: false })),
     pasteAttachment: vi.fn(async () => ({ type: 'upload' as const, id: 'attachment', name: 'attachment', image: false })),
     setCliEnabled: vi.fn(async () => providers),
+    dismissQueued: vi.fn(async () => undefined),
     getTurnDiff: vi.fn(async () => { throw new Error('unused') }), list: vi.fn(async () => []), getConversation: vi.fn(async () => ({ session: summary(), items: [], hasMore: false, nextBeforeSequence: null })), create: vi.fn(async () => summary({ activity: 'running', status: 'running' })), send: vi.fn(async () => {}), answer: vi.fn(async () => {}), replyWithText: vi.fn(async () => {}), stop: vi.fn(async () => {}), retry: vi.fn(async () => {}), rename: vi.fn(async ({ title }) => summary({ title, titleSource: 'user' })), setReasoningEffort: vi.fn(async () => {}), setModel: vi.fn(async () => {}), getProviders: vi.fn(async () => providers), getSkills: vi.fn(async () => ({ skills: [], error: null })), getModels: vi.fn(async () => ({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true }, { id: 'm2', displayName: 'Model Two' }], error: null })), getGlobalDefaultCli: vi.fn(async () => 'codex' as const), setGlobalDefaultCli: vi.fn(async () => {}), getDefaultCli: vi.fn(async () => 'codex' as const), setDefaultCli: vi.fn(async () => {}), getDraft: vi.fn(async () => emptyDraft()), saveDraft: vi.fn(async () => {}), updateViewing: vi.fn(async () => {}), opened: vi.fn(async () => {}), getProjectState: vi.fn(async () => ({ projectId: 'p', attention: null, counts: { running: 0, needsInput: 0 } })), stopProject: vi.fn(async () => ({ stopped: [], failed: [] })), projectClosed: vi.fn(async () => {}),
     getCliConnections: vi.fn(async () => []), saveCliConnection: vi.fn(async () => ({ cli: 'codex' as const, mode: 'local' as const, profile: null, revision: 'local' })), testCliConnection: vi.fn(async () => ({ ok: true as const, message: 'ok', model: 'native-model', reply: 'Hi!', durationMs: 100 })), getCliInstallations: vi.fn(async () => []), installCli: vi.fn(async () => {}), cancelCliInstallation: vi.fn(async () => {}), onCliConnectionsChanged: () => () => {}, onCliInstallationsChanged: () => () => {},
     onSummaryChanged: (listener) => { summaryEvent = listener; return () => {} }, onTranscriptChanged: (listener) => { transcriptEvent = listener; return () => {} }, onProvidersChanged: () => () => {}
@@ -241,6 +242,34 @@ describe('Session IPC store · FR-SESSION/STATE · AC-02–05', () => {
 })
 
 describe('Conversation scrolling · FR-SESSION-001', () => {
+  it('lists native-queued input apart from the transcript; undelivered input can go back to the composer or be removed (I-Q3)', async () => {
+    const queuedMessages = [
+      { id: 'q1', text: 'also check tests', contextItems: [{ type: 'file' as const, path: 'src/a.ts' }], queuedAt: 1, status: 'queued' as const },
+      { id: 'q2', text: 'never ran', contextItems: [{ type: 'file' as const, path: 'src/b.ts' }], queuedAt: 2, status: 'undelivered' as const }
+    ]
+    vi.mocked(api.getDraft).mockResolvedValue({ ...emptyDraft(), text: 'typing', contextItems: [{ type: 'file', path: 'src/a.ts' }] })
+    const session = summary({ cli: 'claude-code', activity: 'running', queuedMessages })
+    vi.mocked(api.getConversation).mockResolvedValue({ session, items: [], hasMore: false, nextBeforeSequence: null })
+    useSessions.setState({ summaries: { s: session }, providers })
+    render(<Conversation project={project} canvas={{ mode: 'session', sessionId: 's' }} active />)
+    const list = await screen.findByLabelText('排队消息')
+    expect(list.textContent).toContain('排队中')
+    expect(list.textContent).toContain('also check tests')
+    expect(within(list).getAllByRole('button', { hidden: true }).map(button => button.textContent)).toEqual(['放回输入框', '移除'])
+    await waitFor(() => expect(useSessions.getState().drafts['p:session:s']?.text).toBe('typing'))
+    const restore = within(screen.getByLabelText('排队消息')).getByRole('button', { name: '放回输入框', hidden: true })
+    restore.focus()
+    fireEvent.click(restore)
+    await waitFor(() => expect(api.dismissQueued).toHaveBeenCalledWith({ sessionId: 's', messageId: 'q2' }))
+    expect(useSessions.getState().drafts['p:session:s']).toMatchObject({ text: 'typing\nnever ran', contextItems: [{ type: 'file', path: 'src/a.ts' }, { type: 'file', path: 'src/b.ts' }] })
+    await waitFor(() => expect(document.activeElement?.getAttribute('aria-label')).toBe('消息'))
+    const remove = within(screen.getByLabelText('排队消息')).getByRole('button', { name: '移除', hidden: true })
+    remove.focus()
+    fireEvent.click(remove)
+    await waitFor(() => expect(api.dismissQueued).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(document.activeElement?.getAttribute('aria-label')).toBe('消息'))
+  })
+
   it('keeps following when a queued latest scroll arrives after the composer shrinks the viewport; user scrolling still pauses it', async () => {
     const observers: { notify: () => void; targets: Set<Element> }[] = []
     vi.stubGlobal('ResizeObserver', class {

@@ -1,0 +1,35 @@
+# Real Claude CLI integration — Claude Code 2.1.322, Agent SDK 0.3.293, model haiku, 2026-11-12
+# Command (packages/agent-adapter, clean env via env -i): AI_STUDIO_REAL_CLI=1 pnpm exec vitest run --config vitest.integration.config.ts test/claude/provider.integration.test.ts
+
+{"check":"turn","outcome":"completed","delta":true}
+{"check":"turn","outcome":"completed","delta":true}
+{"check":"turn","outcome":"completed","delta":true}
+{"check":"catalog-rules-skills-resume-model","modelCount":14,"catalogWroteSession":false,"rules":true,"skills":true,"resume":true,"modelChanged":true}
+{"check":"turn","outcome":"completed","delta":true}
+{"check":"approval-stop-process-continue","approvalCount":1,"cleanup":"confirmed","processExited":true,"trackedProcesses":2,"nativeIdPreserved":true,"runtimeRestarted":false}
+{"check":"effort-applied","low":"low","max":"max","reset":"medium"}
+{"check":"turn","outcome":"completed","delta":true}
+{"check":"question-card-and-text","card":true,"text":true}
+{"check":"approval-declined-with-text","requested":true,"agentUsedText":true}
+{"check":"turn","outcome":"completed","delta":true}
+{"check":"turn","outcome":"completed","delta":true}
+{"check":"concurrent-stop-isolated","runtimes":2,"stopCleanup":"confirmed","otherIdle":true}
+{"check":"queue-started","joinedRunningTurn":true}
+{"check":"queue-survives-stop","ranAsOwnTurn":true}
+{"check":"turn","outcome":"completed","delta":true}
+{"check":"attachments","imageNamed":true,"referenceRead":true,"toolItems":1}
+ ✓ test/claude/provider.integration.test.ts (8 tests) 77665ms
+   ✓ Claude real CLI — explicit opt-in, temporary projects, bounded synthetic calls (8)
+     ✓ availability/catalog do not persist conversations; native project rules/skills, streaming, resume and model switch 14929ms
+     ✓ allows one synthetic command, verifies interrupt child exit, then continues original session 7194ms
+     ✓ applies the selected reasoning effort to the next turn (Bash sees CLAUDE_EFFORT) and null restores the model default 12549ms
+     ✓ answers a real AskUserQuestion from the card and from composer text (Needs Input) 9933ms
+     ✓ declines a pending real approval with composer text and the agent continues with it (I-Q2) 6196ms
+     ✓ runs two Claude sessions concurrently; Stop of one leaves the other usable (AC-03 Adapter part) 7339ms
+     ✓ queues input while a turn runs: the CLI starts it in that turn or the next, and Stop keeps it queued (I-Q3) 14199ms
+     ✓ sends an image as a native image block and a file as a path-only reference (FR-INPUT-001, Tools §4.1) 5325ms
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  16:35:01
+   Duration  78.15s (tests 100%)
+exit=0

@@ -5,16 +5,16 @@ import { FILES_LIMITS, type FileReferenceFailureReason, type ProjectPath, type R
 import type { SessionCli } from '@shared/session/types'
 
 /**
- * `text`: a path list in the prompt. `attachments`: the Adapter's structured input contract;
- * Codex serializes file name/path as text and image/skill as native inputs; Claude throws `unsupported`.
+ * `text`: a path list in the prompt. `attachments`: the Adapter's structured input contract; both
+ * Providers serialize file name/path as text and embed or reference images natively (skills: Codex only).
  */
 export type FileReferenceStrategy = 'text' | 'attachments'
 
 /**
  * File serialization belongs to the Adapter, including cache paths outside the Project root.
- * Evidence: T20261031-inline-attachments (2026-11-01); earlier mention tests did not prove cache-only delivery.
+ * Evidence: T20261031-inline-attachments (2026-11-01); Claude since T20261112-claude-native-input.
  */
-export const FILE_REFERENCE_STRATEGY: Record<SessionCli, FileReferenceStrategy> = { codex: 'attachments', 'claude-code': 'text' }
+export const FILE_REFERENCE_STRATEGY: Record<SessionCli, FileReferenceStrategy> = { codex: 'attachments', 'claude-code': 'attachments' }
 
 export const FILE_REFERENCE_HEADER = 'Referenced files (paths relative to the Project root; these are references, not file contents):'
 

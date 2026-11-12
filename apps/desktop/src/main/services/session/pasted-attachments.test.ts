@@ -113,7 +113,7 @@ describe('pasted attachment lifecycle', () => {
   })
 })
 
-it('retains database references across all draft types, old transcript pages and failed retry input', () => {
+it('retains database references across all draft types, old transcript pages, failed retry input and queued messages', () => {
   const db = new DatabaseSync(':memory:')
   try {
     runMigrations(db, [coreAppMeta, projectCore, sessionCore])
@@ -129,8 +129,10 @@ it('retains database references across all draft types, old transcript pages and
     store.startTurn('t', 's', 1, null, { text: 'retry', contextItems: [upload('failed')] })
     store.endTurn('t', 'failed', 2)
     store.saveItem({ id: 'old', sessionId: 's', turnId: 't', sequence: 1, at: 1, kind: 'user_message', text: 'old', contextItems: [upload('history')] })
+    db.prepare('INSERT INTO sessions VALUES (?,?,?,?,?,?,?)').run('s2', 'p', 'claude-code', null, 1, 1,
+      JSON.stringify({ queuedMessages: [{ id: 'q', text: '', contextItems: [upload('queued')], queuedAt: 1, status: 'undelivered' }] }))
     for (let index = 2; index < 150; index++) store.saveItem({ id: `${index}`, sessionId: 's', turnId: 't', sequence: index, at: index, kind: 'agent_message', text: '', complete: true, nativeItemId: `${index}` })
-    expect(store.pastedAttachmentReferences()).toEqual(expect.arrayContaining(['draft', 'view', 'session', 'failed', 'history'].map(id => ({ projectId: 'p', id }))))
+    expect(store.pastedAttachmentReferences()).toEqual(expect.arrayContaining(['draft', 'view', 'session', 'failed', 'history', 'queued'].map(id => ({ projectId: 'p', id }))))
     store.deleteDraft({ projectId: 'p', kind: 'new_chat' })
     expect(store.pastedAttachmentReferences().map(ref => ref.id)).not.toContain('draft')
   } finally { db.close() }

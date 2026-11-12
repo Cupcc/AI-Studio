@@ -11,16 +11,18 @@ import { adapterError, toAdapterError } from '../errors.js';
 import type { AgentProvider, AgentSession, AvailabilityOptions, AvailabilityReport, CheckResult, CreateSessionOptions,
   LoginInfo, ModelCatalog, ProviderCapabilities, ProviderEnvironment, ResumeSessionOptions, SessionOptionsBase, VersionInfo } from '../provider.js';
 import type { ModelInfo, UserInput } from '../types.js';
-import { ClaudeDriver } from './driver.js';
+import { CLAUDE_IMAGE_MAX_BYTES, ClaudeDriver } from './driver.js';
+import { readImageAttachment } from '../core/attachments.js';
 import type { ClaudeProviderDependencies, ClaudeProviderOptions } from './types.js';
 
 export const CLAUDE_CAPABILITIES: ProviderCapabilities = {
-  nativeSessionIdTiming: 'after_first_input', inputWhileRunning: 'none', questionRequests: true,
+  nativeSessionIdTiming: 'after_first_input', inputWhileRunning: 'queue', questionRequests: true,
   freeTextAnswers: { questions: true, approvals: false }, nativeTitle: false, runtimeRecovery: true,
 };
 
 /** 2.1.310: real streaming, Rule / Skill, resume, model switch, command Stop and effort (T20261026-claude-adapt). */
-const CLAUDE_TESTED_VERSIONS: readonly string[] = ['2.1.294', '2.1.295', '2.1.310'];
+/** 2.1.322: the full real suite plus native queue and attachments (T20261112-claude-native-input). */
+const CLAUDE_TESTED_VERSIONS: readonly string[] = ['2.1.294', '2.1.295', '2.1.310', '2.1.322'];
 
 /** Official Streaming Input SDK driving the host's installed Claude Code executable. */
 export class ClaudeProvider implements AgentProvider {
@@ -36,6 +38,8 @@ export class ClaudeProvider implements AgentProvider {
     this.dependencies = { ...dependencies, query: dependencies.query ?? query,
       startRuntime: (options: Parameters<typeof RuntimeProcess.start>[0]) => this.resources.start(options, dependencies.startRuntime ?? RuntimeProcess.start) };
   }
+
+  checkInput(input: UserInput): Promise<void> { return checkAttachments(input); }
 
   async checkAvailability(options: AvailabilityOptions): Promise<AvailabilityReport> {
     const env = options.environment.env;
@@ -152,11 +156,27 @@ export class ClaudeProvider implements AgentProvider {
   }
 }
 
-/** Keep unsupported attachments in the precondition error channel, before Running. */
+/** Attachment problems are precondition errors: they reject before Running and keep the composer input. */
 class ClaudeSession extends SessionController {
-  override async sendUserInput(input: UserInput): Promise<{ turnId: string }> {
-    if (input?.attachments?.length) throw adapterError('unsupported', 'Claude attachment blocks are not implemented; send a textual file reference');
-    return super.sendUserInput(input);
+  /** Attachment pre-checks read files; chaining them keeps inputs entering the session, and so the CLI, in call order. */
+  private checks: Promise<void> = Promise.resolve();
+  override sendUserInput(input: UserInput): Promise<{ turnId: string }> {
+    return this.afterChecks(input, () => super.sendUserInput(input));
+  }
+  override queueUserInput(input: UserInput, options?: { inputId?: string }): Promise<{ inputId: string }> {
+    return this.afterChecks(input, () => super.queueUserInput(input, options));
+  }
+  private afterChecks<T>(input: UserInput, submit: () => Promise<T>): Promise<T> {
+    const checked = this.checks.then(() => checkAttachments(input));
+    this.checks = checked.catch(() => undefined);
+    return checked.then(submit);
+  }
+}
+
+async function checkAttachments(input: UserInput): Promise<void> {
+  for (const attachment of input?.attachments ?? []) {
+    if (attachment.kind === 'skill') throw adapterError('unsupported', 'Claude Code skills are not exposed as attachments');
+    if (attachment.kind === 'image') await readImageAttachment(attachment.path, CLAUDE_IMAGE_MAX_BYTES);
   }
 }
 
