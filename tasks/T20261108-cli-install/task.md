@@ -60,7 +60,7 @@ created: 2026-11-08
 
 同日用户追加「UI 太丑了，重新设计」后，将列表内展开表单改为独立连接详情页，保留分类导航，增加本机 / 自定义分段选择、固定保存栏及独立测试结果区。保存后留页；未保存时禁测，字段变化清除旧结果，测试完成自动滚动至回复。Main Agent 通过 agent-browser 操作隔离 Electron（独立 userData、回环 HTTP fixture），验证保存、重开、修改禁测、浅 / 深色与结果可见；fixture 收到 `/v1/responses`、本机模型与 `hi`，未调用 CLI。
 
-证据：[浅色表单](evidence/W1-cli-connection-light.png)、[浅色结果](evidence/W1-cli-connection-result.png)、[深色结果](evidence/W1-cli-connection-dark.png)、[真实 Codex API 回复](evidence/W1-direct-api.json)。UI 截图中的回复来自本地 fixture，真实远端请求单独记在 JSON，不混用通过范围。独立评审结论见 [acceptance](acceptance.md)；人工状态为待验收。
+证据：[浅色表单](evidence/W1-cli-connection-light.png)、[浅色结果](evidence/W1-cli-connection-result.png)、[深色结果](evidence/W1-cli-connection-dark.png)、[真实 Codex API 回复](evidence/W1-direct-api.json)。UI 截图中的回复来自本地 fixture，真实远端请求单独记在 JSON，不混用通过范围。独立评审结论与人工状态见 [acceptance](acceptance.md)。
 
 最终验证：桌面类型检查与构建通过；连接服务 / 直接 API / 设置 / Session 共 63 项测试通过，最后保存状态防护修改后设置 15 项再次通过。设置与布局 Electron E2E 首轮 16 项通过、1 项纯色聊天入口等待超时；相同基线仅复跑该项，1 项通过（未重跑全量，偶发超时原因未确定）。日志保存在 worktree `.runtime/cli-connection-inherit/final-e2e.log` 与 `final-e2e-retry.log`。Adapter 最终 116 项 Provider 测试与类型检查由独立评审执行并记录。文档检查 0 新问题，4 项基线问题未新增；最终 diff 无空白错误。
 

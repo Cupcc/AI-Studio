@@ -47,4 +47,4 @@ Main Agent `/root` 于 2026-11-11 完成自检与收尾，独立 Review Agent `/
 - 锁屏和原生窗口失焦分别有实际证据，后者显示发送时 focused=true、完成时 focused=false；未修改焦点产品行为或放宽断言，见[诊断](evidence/W0-focus-diagnostic.log)。诊断代码未保留在产品或测试中。
 - 已核对产品定义、需求、UX、技术模型、验收、路线图各状态区、DEC-29、WB-Q8、workbench/project-view/navigation/session/chat spec、桌面说明与设计组件。历史知识内容和插件验收保留原基线，迁移与隐藏/重排的未决状态已分开。
 
-独立验收覆盖结构审计、200 项独立测试、实际 Electron 操作、两轮真实 Codex 首条上下文及重启恢复，无阻塞发现。人工产品验收待进行，文档 diff 待用户审阅。最终变更回传主工作区，未提交或推送。
+独立验收覆盖结构审计、200 项独立测试、实际 Electron 操作、两轮真实 Codex 首条上下文及重启恢复，无阻塞发现。人工产品验收已于 2026-11-12 通过（见[验收记录](acceptance.md#人工功能验收)），文档 diff 待用户审阅。最终变更回传主工作区，未提交或推送。

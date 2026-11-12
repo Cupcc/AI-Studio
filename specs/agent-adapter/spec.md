@@ -199,7 +199,7 @@ FR-TOOL-001、FR-TOOL-002、FR-INPUT-001；04 第 1 节事项 13；DEC-14（2026
 - 文件输入：桌面 `main/services/session/file-reference.ts` 将校验后的文件交给 shared `attachments` 契约；Codex Adapter 将 `kind=file` 转为标有本机路径引用含义的 JSON name / path 文本，不内联内容，不改变 CLI 权限。image / skill 仍分别使用 `localImage` / `skill`。Claude 保留桌面文本路径清单及结构化附件 `unsupported`。Claude 真实接收及运行中追加 / 排队仍需相应真实场景验证。
 - 轮次数据：Codex 已接入 `turn/diff/updated` 聚合替换及完成 `fileChange` 的 patch、类型、路径和完成状态，以 `turn.diff.updated` 转交 Session；新轮绑定先输出 unknown 身份快照。来源、限额及 Git / 非 Git / Shell 的实际覆盖由 Tools §5.3 负责；不假设 Claude 具备同等数据。
 - 事件接收核对 Runtime 代次、Thread / Turn 归属及修订；Adapter 报告 unknown / empty / unavailable / failed 的依据，应用 Session 负责持久化与 App Turn 关联，Adapter 不读当前工作区伪造历史。
-- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。Codex 真实调用按 CLI 实际结果验证，额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；Claude Code 的历史 V1 真实验收按 DEC-16 暂缓；其发布排除按 DEC-19 的 2026-11-08 后续确认解除，当前安装与连接路径仍待验收，Adapter 层真实验证已于 2026-10-26 重新开始（第 3.12 节第 9 条）；阶段 1 的模拟文件引用链路不改变真实 CLI 结果。
+- 能力验证最先安排，但不阻塞 Files 的非 CLI 部分、项目 Diff 或 Terminal；不等待原生能力对齐全部遗留项。Codex 真实调用按 CLI 实际结果验证，额度、限流及限流后的停止 / 错误由 CLI / 上游服务提供方决定；Claude Code 的历史 V1 真实验收按 DEC-16 暂缓；其发布排除按 DEC-19 的 2026-11-08 后续确认解除，连接设置已于 2026-11-12 人工验收，一键安装真实流程与打包仍待验证，Adapter 层真实验证已于 2026-10-26 重新开始（第 3.12 节第 9 条）；阶段 1 的模拟文件引用链路不改变真实 CLI 结果。
 
 ### 3.14 应用连接覆盖
 

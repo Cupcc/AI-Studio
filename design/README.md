@@ -6,10 +6,10 @@ AI Developer Studio V1.0 的设计工作区，用于保存设计资料、参考�
 
 - 自定义工作台的已接受方向与待评审问题见 [09 讨论记录](<../docs/09. Workbench Discussion.md>)；插件机制按已确认方案实施，具体契约见[工作台规格 §9](../specs/workbench/spec.md#9-fr-wb-001006008-最小插件机制实现契约)；[03 交互草案](<../docs/03. UX Specification.md#用户自定义工作台>)随对应阶段评审，五图业务设计与验证留到后续，阶段见[路线图 §4.2](<../docs/06. Development Roadmap.md#42-插件架构与工作台建设>)。现有 v06 不作为新增工作台的交付证据。
 
-- [页面布局与输入体验评审 v02](layout-ux-review-v02.md#6-采用记录)：v06 UI 的采用范围、五格静态思考指示、选中切换反馈及待人工复验事项；可操作稿见[原型 v06](prototypes/README.md#studio-灰度交互原型-v06)，初始布局反馈与竞品观察见 [v01](layout-ux-review-v01.md)。
+- [页面布局与输入体验评审 v02](layout-ux-review-v02.md#6-采用记录)：v06 UI 的采用范围、五格静态思考指示、选中切换反馈及人工复验结果；可操作稿见[原型 v06](prototypes/README.md#studio-灰度交互原型-v06)，初始布局反馈与竞品观察见 [v01](layout-ux-review-v01.md)。
 - [组件修订确认记录](components/shell-spec-v02.md#1-已确认与待确认)。
-- [视觉参数待确定项](visual-direction.md#1-高保真阶段待确定)；字体基线已按 [1.2 系统字体优先](visual-direction.md#12-系统字体优先2026-11-12)修订，待人工体验。
-- [工作台界面规范化设计稿](screens/README.md#3-方案索引)：宿主单行标题栏、“更多操作”、状态变体与选品悬浮条（2026-11-12 确认）；实现待人工验收，见[界面规范化任务](../tasks/T20261112-workbench-ui-polish/task.md)。
+- [视觉参数待确定项](visual-direction.md#1-高保真阶段待确定)；字体基线已按 [1.2 系统字体优先](visual-direction.md#12-系统字体优先2026-11-12)修订，已人工验收。
+- [工作台界面规范化设计稿](screens/README.md#3-方案索引)：宿主单行标题栏、“更多操作”、状态变体与选品悬浮条（2026-11-12 确认）；实现已人工验收，见[界面规范化任务](../tasks/T20261112-workbench-ui-polish/task.md#人工功能验收)。
 
 ## 1. 设计依据
 

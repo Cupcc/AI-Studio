@@ -34,7 +34,7 @@ owner: main-agent
 - 实施：项目内导航偏好与服务操作，再接导航交互。
 - 验证：受影响 TypeScript 项目、WorkBench 与 Shell 直接回归、Electron 管理场景、agent-browser 实际界面。
 - 需要独立 AI 评审（本任务含 IPC 与数据库迁移），实施完成后安排未参与实现的 Review Agent，在 `acceptance.md` 留证。
-- 人工产品验收：待进行；范围确认不等于产品验收。
+- 人工产品验收：已验收。2026-11-12 用户回复“所有待验收均已验收通过”，体验版本为主目录 `dev` @ `872978b`，见[集中验收记录](../../.agents/archive/tasks/T20261112-dev-acceptance/task.md)。
 
 ## 文档复核
 
@@ -42,8 +42,8 @@ owner: main-agent
 
 ## dev 集成与本轮边界
 
-用户于 2026-11-11 要求统一集成到 dev，并明确由其自行验证，AI 本轮只处理提交、集成和冲突。管理操作已移植到标准网页包宿主，保留新版 PackageRuntime、统一快照、iframe 和公共资源。原工作目录与历史验收基线保留；本轮提交门禁不等于组合后的功能验收。当前操作入口为主目录 dev 的 `pnpm dev`，人工产品验收待进行；不再把旧的“等待 Main 释放窗口”作为本轮前置条件。集成记录见[dev 任务](../../.agents/archive/tasks/T20261111-dev-integration/task.md)。
+用户于 2026-11-11 要求统一集成到 dev，并明确由其自行验证，AI 本轮只处理提交、集成和冲突。管理操作已移植到标准网页包宿主，保留新版 PackageRuntime、统一快照、iframe 和公共资源。原工作目录与历史验收基线保留；本轮提交门禁不等于组合后的功能验收。当前操作入口为主目录 dev 的 `pnpm dev`，人工产品验收状态见上文；不再把旧的“等待 Main 释放窗口”作为本轮前置条件。集成记录见[dev 任务](../../.agents/archive/tasks/T20261111-dev-integration/task.md)。
 
 ## 来源目录清理
 
-2026-11-11 用户明确要求删除已经整合的旧 worktree 且本次无需快照，原 workbench-management 目录和旧分支已删除。当前管理代码已在 dev；后续反馈从最新 dev 创建修复分支，不再回旧目录修改。清理与工作流纠正见[后续任务](../../.agents/archive/tasks/T20261111-worktree-workflow/task.md)。人工产品验收仍待进行。
+2026-11-11 用户明确要求删除已经整合的旧 worktree 且本次无需快照，原 workbench-management 目录和旧分支已删除。当前管理代码已在 dev；后续反馈从最新 dev 创建修复分支，不再回旧目录修改。清理与工作流纠正见[后续任务](../../.agents/archive/tasks/T20261111-worktree-workflow/task.md)。

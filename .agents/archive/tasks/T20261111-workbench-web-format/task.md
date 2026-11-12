@@ -36,7 +36,7 @@ created: 2026-11-11
 
 ## 收尾
 
-独立分支及工作副本保留开始时主工作区的已暂存、未暂存及未跟踪基线。仅回传本任务差异，合并期间主工作区的新修改。Main Agent `/root` 完成实现、自检与收尾；独立 Review Agent `/root/rationale` 已完成技术验收。人工产品验收待进行，文档 diff 待用户审阅。
+独立分支及工作副本保留开始时主工作区的已暂存、未暂存及未跟踪基线。仅回传本任务差异，合并期间主工作区的新修改。Main Agent `/root` 完成实现、自检与收尾；独立 Review Agent `/root/rationale` 已完成技术验收。人工产品验收已于 2026-11-12 通过（见[验收记录](acceptance.md#人工功能验收)），文档 diff 待用户审阅。
 
 
 独立结论见 [acceptance.md](acceptance.md)。本轮完成：三项 TypeScript 检查、74 项脚本测试、555 项受影响应用单测、32 项相关 Electron 场景的有效分批通过结果，以及独立 70 项检查。CSS 修正另有生成页面与实际浅/深色复验。实测包含五个预设 iframe、精确复制的 Overview 作为自定义草稿和实例、两轮真实 Codex 上下文及实际 .app 的 Architecture、Overview、自定义页面。
