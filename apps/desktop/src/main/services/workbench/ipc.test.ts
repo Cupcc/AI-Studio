@@ -40,7 +40,7 @@ it('routes the registered contract through actual persistence and blocks plugin 
   await invoke('workbench:create-draft', { projectId, source: 'template' })
   expect(await invoke('workbench:list', { projectId })).toEqual(expect.arrayContaining([expect.objectContaining({ viewId: 'overview', origin: 'preset' }), expect.objectContaining({ projectId, source: 'template', origin: 'custom', kind: 'draft' })]))
   expect(await invoke('workbench:get-snapshot', { projectId, viewId: 'architecture' })).toMatchObject({ status: 'ready', page: { resources: { knowledge: { status: 'empty' } } } })
-  expect(await invoke('workbench:get-context', { projectId, viewId: 'architecture' })).toMatchObject({ text: expect.stringContaining('Current Workbench: Architecture') })
+  expect(await invoke('workbench:get-context', { projectId, viewId: 'architecture' })).toMatchObject({ text: expect.stringContaining('Current Workbench: 架构') })
   expect(existsSync(join(directory, 'project/.ai-studio/knowledge'))).toBe(false)
   expect(broadcast).toHaveBeenCalledWith(workbenchContract.events.changed, expect.objectContaining({ projectId }))
   await expect(invoke('workbench:create-draft', { projectId, source: 'arbitrary' })).rejects.toThrow('source')
@@ -83,7 +83,7 @@ it('routes preset, design-draft and live contexts through the same Session callb
   const instance = await workbench.handlers.applyDraft.handle({ ref: draftRef, expectedPackageRevision: preview.page.packageRevision }, ctx)
   expect(provider.sessions).toHaveLength(0)
   const cases = [
-    { viewId: 'architecture', expected: 'Current Workbench: Architecture' },
+    { viewId: 'architecture', expected: 'Current Workbench: 架构' },
     { viewId: draft.viewId, expected: '当前任务是创建或编辑 AI Studio 工作台页面' },
     { viewId: instance.viewId, expected: '这是工作台使用对话，不是页面结构编辑' }
   ] as const

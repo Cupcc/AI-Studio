@@ -3,7 +3,7 @@
   "pluginId": "studio-business-flow",
   "version": "1.0.0",
   "sdkVersion": 1,
-  "title": "Business Flow",
+  "title": "业务流程",
   "entry": "index.html",
   "capabilities": [
     "state.read",

@@ -197,9 +197,9 @@ test('FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges al
 })
 
 test('FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440', async () => {
-  await workspace().getByRole('button', { name: 'Overview', exact: true }).click()
-  await expect(workspace().getByRole('button', { name: 'Overview', exact: true })).toHaveAttribute('aria-current', 'page')
-  await expect(workspace().getByRole('button', { name: 'Preview', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await workspace().getByRole('button', { name: '概览', exact: true }).click()
+  await expect(workspace().getByRole('button', { name: '概览', exact: true })).toHaveAttribute('aria-current', 'page')
+  await expect(workspace().getByRole('button', { name: '预览', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await atEachWidth('view-overview', 'view')
   await workspace().getByRole('button', { name: 'Files', exact: true }).click()
   await expect(workspace().getByRole('button', { name: 'Files', exact: true })).toHaveAttribute('aria-pressed', 'true')
@@ -239,7 +239,7 @@ test('FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1
 test('FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280', async () => {
   test.setTimeout(90_000)
   await fit(BASE)
-  await workspace().getByRole('button', { name: 'New Chat', exact: true }).first().click()
+  await workspace().getByRole('button', { name: '新对话', exact: true }).first().click()
   await expect(composer()).toBeVisible()
   await assertLayout('draft', 'session', BASE); await snap('draft', BASE.width)
   // v06: the greeting stays in the body while the composer uses the bottom row; the header has no duplicate CLI name.

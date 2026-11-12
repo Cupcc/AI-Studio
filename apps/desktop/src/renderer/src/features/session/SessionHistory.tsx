@@ -106,7 +106,7 @@ export function SessionHistory({ project, canvas, active }: ShellSlotProps) {
     requestAnimationFrame(() => ref.current?.querySelector<HTMLButtonElement>(`[data-session-row="${CSS.escape(row.id)}"] .session-row__open`)?.focus())
   }
   if (projectState?.error) return <div className="navigation__empty"><p role="alert">{projectState.error}</p><button onClick={() => void useSessions.getState().loadProject(project.id)}>重试</button></div>
-  if (!rows.length) return <div className="navigation__empty">{projectState?.loading ? <p>正在加载对话…</p> : <><p>还没有对话</p><button className="text-button" onClick={() => useProjectShell.getState().startDraft(project.id)}>New Chat</button></>}</div>
+  if (!rows.length) return <div className="navigation__empty">{projectState?.loading ? <p>正在加载对话…</p> : <p>还没有对话</p>}</div>
   const visible = visibleHistoryRows(rows, scrollTop, height)
   const totalHeight = rows.at(-1)!.top + rows.at(-1)!.height
   return <div className="session-history" aria-label="Session History" ref={ref} onScroll={(event) => { const top = event.currentTarget.scrollTop; setScrollTop(top); offsets.set(project.id, top) }}>

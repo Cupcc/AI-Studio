@@ -3,7 +3,7 @@
   "pluginId": "studio-overview",
   "version": "1.0.0",
   "sdkVersion": 1,
-  "title": "Overview",
+  "title": "概览",
   "entry": "index.html",
   "capabilities": [
     "state.read",

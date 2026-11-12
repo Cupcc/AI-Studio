@@ -3,7 +3,7 @@
   "pluginId": "studio-progress",
   "version": "1.0.0",
   "sdkVersion": 1,
-  "title": "Progress",
+  "title": "进度",
   "entry": "index.html",
   "capabilities": [
     "state.read",

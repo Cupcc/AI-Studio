@@ -30,7 +30,7 @@ describe('Project View files, watcher, last-good and boundaries', () => {
     expect(existsSync(join(h.roots.a, '.ai-studio'))).toBe(false)
     const context = h.service.buildContext('a', 'architecture', true)
     h.service.buildContext('a', 'architecture', true)
-    expect(context.text).toContain('Current Workbench: Architecture')
+    expect(context.text).toContain('Current Workbench: 架构')
     expect(readFileSync(join(h.roots.a, '.ai-studio/.gitignore'), 'utf8')).toBe('*\n')
     expect(existsSync(join(h.roots.a, '.ai-studio/knowledge'))).toBe(false)
     expect(existsSync(join(h.roots.a, '.ai-studio/views'))).toBe(false)

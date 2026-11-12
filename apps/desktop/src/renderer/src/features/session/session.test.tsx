@@ -298,13 +298,13 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     vi.mocked(api.getModels).mockResolvedValue({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true, reasoningEfforts: ['high', 'max', 'ultra'] }], error: null })
   }
   function chooseEffort(value: string) {
-    fireEvent.click(screen.getByRole('button', { name: 'Reasoning Effort' }))
+    fireEvent.click(screen.getByRole('button', { name: '思考强度' }))
     fireEvent.click(screen.getByRole('button', { name: value }))
   }
   it('places effort before the model, lists only native tiers, and offers a separate default reset', async () => {
     nativeEffortCatalog()
     await mount({ text: 'Keep draft' })
-    const effort = screen.getByRole('button', { name: 'Reasoning Effort' })
+    const effort = screen.getByRole('button', { name: '思考强度' })
     expect(effort.parentElement?.nextElementSibling?.contains(screen.getByRole('button', { name: 'Model Selector' }))).toBe(true)
     fireEvent.click(effort)
     expect(screen.queryByRole('button', { name: '默认' })).toBeNull()
@@ -324,7 +324,7 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     const sessionKey = { projectId: 'p', kind: 'session' as const, sessionId: 's' }
     useSessions.setState({ providers, summaries: { s: summary({ reasoningEffort: 'high' }) }, drafts: { [draftId(sessionKey)]: { ...emptyDraft(), cli: 'codex' } } })
     const view = render(<Composer draftKey={sessionKey} active />)
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Reasoning Effort' }).hasAttribute('disabled')).toBe(false))
+    await waitFor(() => expect(screen.getByRole('button', { name: '思考强度' }).hasAttribute('disabled')).toBe(false))
     let accepted!: () => void
     vi.mocked(api.setReasoningEffort).mockImplementationOnce(() => new Promise<void>(resolve => { accepted = resolve }))
     chooseEffort('max')
@@ -397,7 +397,7 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
   it('selects native max/ultra, exposes the current effort, and preserves unknown values across model changes', async () => {
     vi.mocked(api.getModels).mockResolvedValue({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true, reasoningEfforts: ['low', 'max', 'ultra'] }, { id: 'm2', displayName: 'Model Two' }], error: null })
     await mount({ text: 'Keep this' })
-    const effort = screen.getByRole('button', { name: 'Reasoning Effort' })
+    const effort = screen.getByRole('button', { name: '思考强度' })
     fireEvent.click(effort); fireEvent.click(screen.getByRole('button', { name: 'max' }))
     expect(effort.getAttribute('aria-description')).toBe('思考强度 · max')
     expect(useSessions.getState().drafts[draftId(key)]).toMatchObject({ text: 'Keep this', reasoningEffort: 'max' })
@@ -410,7 +410,7 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     expect(useSessions.getState().drafts[draftId(key)]!.reasoningEffort).toBe('ultra')
     fireEvent.click(screen.getByRole('button', { name: '使用默认' }))
     expect(useSessions.getState().drafts[draftId(key)]!.reasoningEffort).toBeNull()
-    expect(screen.queryByRole('button', { name: 'Reasoning Effort' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '思考强度' })).toBeNull()
   })
   it('retries a failed model catalog without losing settings and restores model focus', async () => {
     vi.mocked(api.getModels).mockResolvedValueOnce({ models: [], error: 'offline' }).mockResolvedValueOnce({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true, reasoningEfforts: ['high'] }], error: null })

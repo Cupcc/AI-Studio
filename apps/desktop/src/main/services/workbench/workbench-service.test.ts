@@ -133,7 +133,7 @@ it('returns package diagnostics in the common snapshot, requires a fresh preview
 })
 it('provides all contexts through one entry and initializes preset helpers only at the attached-send boundary', async () => {
   const context = service.buildContext(presetRef())
-  expect(context).toMatchObject({ originViewId: 'architecture', text: expect.stringContaining('Current Workbench: Architecture') })
+  expect(context).toMatchObject({ originViewId: 'architecture', text: expect.stringContaining('Current Workbench: 架构') })
   expect(existsSync(join(root, '.ai-studio'))).toBe(false)
   service.buildContext(presetRef(), true)
   expect(readFileSync(join(root, '.ai-studio/.gitignore'), 'utf8')).toBe('*\n')
@@ -216,7 +216,7 @@ it('renames presets, instances and drafts without changing identities, package f
   service.rename({ ref: presetRef(), title: '  项目架构  ' })
   expect(service.list(projectId).find(entry => entry.viewId === 'architecture')?.title).toBe('项目架构')
   expect(await service.getSnapshot(presetRef())).toMatchObject({ entry: { title: '项目架构' } })
-  expect(service.list(otherId).find(entry => entry.viewId === 'architecture')?.title).toBe('Architecture')
+  expect(service.list(otherId).find(entry => entry.viewId === 'architecture')?.title).toBe('架构')
   const { ref, draft, instance } = await install()
   service.rename({ ref, title: '项目笔记' })
   service.rename({ ref: draftRef(draft), title: '笔记设计' })

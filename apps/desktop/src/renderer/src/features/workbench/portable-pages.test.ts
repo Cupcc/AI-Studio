@@ -64,12 +64,12 @@ it('keeps the last rendered document on render failure, latches the error and re
 it('fills a new unsent conversation draft from an empty page and follows later Knowledge updates', async () => {
   const initial = snapshot(); initial.resources!.knowledge = { ...knowledge(), snapshot: null, status: 'empty' }
   const { doc, api, receive } = await boot('architecture', initial)
-  const generate = Array.from(doc.querySelectorAll('button')).find(button => button.textContent === '生成 Architecture')!
+  const generate = Array.from(doc.querySelectorAll('button')).find(button => button.textContent === '生成 架构')!
   generate.click()
-  expect(api.setDraft).toHaveBeenCalledWith(expect.stringContaining('生成 Architecture'), { target: 'new' })
+  expect(api.setDraft).toHaveBeenCalledWith(expect.stringContaining('生成 架构'), { target: 'new' })
   receive(snapshot())
   expect(doc.body.textContent).toContain('Payment')
-  expect(doc.body.textContent).not.toContain('生成 Architecture')
+  expect(doc.body.textContent).not.toContain('生成 架构')
 })
 it('renders a copied Overview package in a custom draft and uses the ordinary openSession SDK', async () => {
   const initial = snapshot('overview')

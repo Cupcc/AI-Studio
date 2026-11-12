@@ -3,7 +3,7 @@
   "pluginId": "studio-agent-team",
   "version": "1.0.0",
   "sdkVersion": 1,
-  "title": "Agent Team",
+  "title": "Agent 团队",
   "entry": "index.html",
   "capabilities": [
     "state.read",

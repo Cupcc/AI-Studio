@@ -22,7 +22,7 @@ const presetSnapshot = (): WorkbenchSnapshot => ({
   entry: presetWorkbench('architecture'),
   page: {
     target: { projectId: 'p', kind: 'instance', id: 'architecture' },
-    manifest: { schemaVersion: 1, sdkVersion: 1, pluginId: 'studio-architecture', version: '1.0.0', title: 'Architecture', entry: 'index.html', capabilities: ['state.read', 'project.knowledge.read'] },
+    manifest: { schemaVersion: 1, sdkVersion: 1, pluginId: 'studio-architecture', version: '1.0.0', title: '架构', entry: 'index.html', capabilities: ['state.read', 'project.knowledge.read'] },
     packageRevision: 'r1', stateRevision: 0, state: {}, pageUrl: 'app://workbench/architecture/index.html', enabled: true,
     resources: { knowledge: { projectId: 'p', viewId: 'architecture', revision: 1, status: 'ready', error: null,
       snapshot: { projectId: 'p', viewId: 'architecture', catalog: catalogEntry('architecture'), revision: 1, updatedAt: 1,
@@ -51,9 +51,9 @@ it('shows presets, custom instances and drafts in one navigable workbench list',
   }
   render(<Navigation />)
   const region = screen.getByRole('region', { name: '工作台' })
-  await within(region).findByRole('button', { name: 'Business Flow' })
+  await within(region).findByRole('button', { name: '业务流程' })
   expect(within(region).getByRole('button', { name: '随手记' })).toBeTruthy()
-  const overview = within(region).getByRole('button', { name: 'Overview' })
+  const overview = within(region).getByRole('button', { name: '概览' })
   overview.focus()
   fireEvent.keyDown(overview, { key: 'End' })
   const draftButton = within(region).getByRole('button', { name: '草稿：新工作台' })

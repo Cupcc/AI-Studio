@@ -8,7 +8,7 @@ const appDir = join(__dirname, '..')
 let app: ElectronApplication, page: Page, dir: string
 const workspace = () => page.locator('.project-workspace:not([hidden])')
 const input = () => workspace().getByLabel('消息', { exact: true })
-const effort = () => workspace().getByRole('button', { name: 'Reasoning Effort', exact: true })
+const effort = () => workspace().getByRole('button', { name: '思考强度', exact: true })
 const panel = () => workspace().locator('.composer__effort-control .composer__control-panel')
 async function launch() {
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })

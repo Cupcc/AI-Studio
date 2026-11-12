@@ -20,7 +20,7 @@ export function Navigation(props: ShellSlotProps) {
     <div className="navigation__divider" />
     <h2 className="navigation__heading">{S.sessions}</h2>
     <div className="navigation__sessions" data-testid={`sessions-${project.id}`}>
-      {slots.SessionHistory ? <slots.SessionHistory {...props} /> : <div className="navigation__empty"><p>{S.sessionsEmpty}</p><button className="text-button" onClick={() => shell.startDraft(project.id)}>{S.newChat}</button></div>}
+      {slots.SessionHistory ? <slots.SessionHistory {...props} /> : <div className="navigation__empty"><p>{S.sessionsEmpty}</p></div>}
     </div>
     {slots.NavigationFooter && <div className="navigation__footer"><slots.NavigationFooter {...props} /></div>}
   </aside>

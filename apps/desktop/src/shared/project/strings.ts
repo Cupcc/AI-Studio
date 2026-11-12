@@ -59,10 +59,10 @@ export const S = {
 
   // Left navigation
   navLabel: 'Project 导航',
-  newChat: 'New Chat',
+  newChat: '新对话',
   chooseCli: '选择 CLI',
   workbenches: '工作台',
-  sessions: 'SESSIONS',
+  sessions: '对话',
   sessionsEmpty: '还没有对话',
   untitledSession: '未命名对话',
   cliMenuPending: 'CLI 菜单由 Session 模块提供',
@@ -74,7 +74,7 @@ export const S = {
   placeholderViewConversation: '当前工作台的对话将在这里显示。',
   placeholderPreview: (view: string) => `${view} 的项目预览将在这里显示。`,
   placeholderTool: (tool: string) => `${tool} 的工具内容将在这里显示。`,
-  preview: 'Preview',
+  preview: '预览',
   close: '关闭',
   resizeSidebar: '调整右侧边栏宽度',
   resizeConversation: '调整对话列宽度',

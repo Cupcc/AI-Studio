@@ -50,22 +50,22 @@ beforeEach(() => {
   } as unknown as StudioApi })
 })
 afterEach(async () => { cleanup(); await useProjectShell.getState().flush(); restoreIntegration(); vi.unstubAllGlobals() })
-async function mount() { await act(async () => { render(<App />) }); await screen.findByRole('button', { name: 'Architecture' }) }
+async function mount() { await act(async () => { render(<App />) }); await screen.findByRole('button', { name: '架构' }) }
 
 describe('Project shell · FR-PROJ/NAV · AC-01', () => {
   it('isolates three canvases and both right-area modes, persisting every user action', async () => {
     await mount()
-    fireEvent.click(screen.getByRole('button', { name: 'Architecture' }))
+    fireEvent.click(screen.getByRole('button', { name: '架构' }))
     fireEvent.click(screen.getByRole('button', { name: 'Terminal' }))
     fireEvent.click(screen.getByRole('tab', { name: 'b' }))
-    expect(screen.getByRole('button', { name: 'Overview', current: 'page' })).toBeTruthy()
-    fireEvent.click(screen.getAllByRole('button', { name: 'New Chat' })[0]!)
+    expect(screen.getByRole('button', { name: '概览', current: 'page' })).toBeTruthy()
+    fireEvent.click(screen.getAllByRole('button', { name: '新对话' })[0]!)
     fireEvent.click(screen.getByRole('button', { name: '右侧边栏' }))
     fireEvent.click(screen.getByRole('button', { name: 'Diff' }))
     fireEvent.click(screen.getByRole('tab', { name: 'c' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Progress' }))
+    fireEvent.click(screen.getByRole('button', { name: '进度' }))
     fireEvent.click(screen.getByRole('tab', { name: 'a' }))
-    expect(screen.getByRole('button', { name: 'Architecture', current: 'page' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: '架构', current: 'page' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Terminal', pressed: true })).toBeTruthy()
     await useProjectShell.getState().flush()
     const s = useProjectShell.getState()

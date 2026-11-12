@@ -117,7 +117,7 @@ test('FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one 
 
 test('FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart', async () => {
   await openProject('Theme Project')
-  await page.getByRole('button', { name: 'Architecture', exact: true }).click()
+  await page.getByRole('button', { name: '架构', exact: true }).click()
   await page.getByRole('textbox', { name: '消息', exact: true }).fill('草稿保持不变')
   await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
   await themeRadio('纯色').click()
@@ -128,7 +128,7 @@ test('FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was,
   await expect(dialog().getByRole('radiogroup', { name: '毛玻璃背景' })).toHaveCount(0)
   await snap('settings-dialog-solid')
   await page.keyboard.press('Escape')
-  await expect(page.getByRole('button', { name: 'Architecture', exact: true })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('button', { name: '架构', exact: true })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('textbox', { name: '消息', exact: true })).toHaveText('草稿保持不变')
   expect(await page.evaluate(() => [getComputedStyle(document.querySelector('.topbar')!).backgroundColor, getComputedStyle(document.querySelector('.project-tab')!).borderRadius]))
     .toEqual(['rgb(239, 238, 235)', '8px 8px 0px 0px'])

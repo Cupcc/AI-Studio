@@ -81,14 +81,14 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
   return <div className="project-workspace" hidden={!active} data-project-id={projectId}>
     {!shell.windowState.navCollapsed && <Navigation {...props} />}
     <main className={`canvas-mode ${view ? 'canvas-mode--view' : 'canvas-mode--session'}`} ref={ref} style={{ '--pane-width': `${width}px` } as CSSProperties}>
-      <section className="conversation-pane" aria-label={view ? '工作台对话' : 'Conversation'}>
+      <section className="conversation-pane" aria-label={view ? '工作台对话' : '对话'}>
         <header className="canvas-header">{ui.mainCanvas.mode === 'view' && slots.ViewConversationHeader
           ? <slots.ViewConversationHeader {...props} viewId={ui.mainCanvas.viewId} />
           : !view && slots.ConversationHeader ? <slots.ConversationHeader {...props} />
           : <span>{ui.mainCanvas.mode === 'view' ? `${ui.mainCanvas.conversation.kind === 'draft' ? S.draftTitle : ui.mainCanvas.conversation.sessionId} · ${viewTitle}` : ui.mainCanvas.mode === 'draft' ? S.draftTitle : ui.mainCanvas.sessionId}</span>}</header>
         <div className="conversation-pane__content">{view && ui.mainCanvas.mode === 'view'
           ? slots.ViewConversation ? <slots.ViewConversation {...props} viewId={ui.mainCanvas.viewId} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{S.draftTitle}</h2><p>{S.placeholderViewConversation}</p></div>
-          : slots.Conversation ? <slots.Conversation {...props} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{ui.mainCanvas.mode === 'draft' ? S.draftTitle : 'Conversation'}</h2><p>{ui.mainCanvas.mode === 'draft' ? S.placeholderDraft : S.placeholderConversation}</p></div>}
+          : slots.Conversation ? <slots.Conversation {...props} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{ui.mainCanvas.mode === 'draft' ? S.draftTitle : '对话'}</h2><p>{ui.mainCanvas.mode === 'draft' ? S.placeholderDraft : S.placeholderConversation}</p></div>}
         </div>
         {view && <ResizeHandle width={width} min={VIEW_CONVERSATION_WIDTH.min} max={Math.min(VIEW_CONVERSATION_WIDTH.max, available - 400)} direction={1} label={S.resizeConversation} onPreview={setDragWidth} onCommit={(w) => shell.updateUiState(projectId, { viewConversationWidth: w })} />}
       </section>

@@ -135,7 +135,7 @@ test('FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through t
     put(project, 'bad\nname.txt', 'a newline in the name\n')
   })
   // A new conversation starts with the right sidebar collapsed; the user opens it from the top bar.
-  await workspace().getByRole('button', { name: 'New Chat', exact: true }).first().click()
+  await workspace().getByRole('button', { name: '新对话', exact: true }).first().click()
   await page.getByRole('button', { name: '右侧边栏', exact: true }).click()
   await workspace().getByRole('button', { name: 'Files', exact: true }).click()
   await expect(row('src')).toBeVisible()

@@ -7,7 +7,7 @@ import { _electron as electron, expect, test, type ElectronApplication, type Pag
 const appDir = join(__dirname, '..')
 let app: ElectronApplication, page: Page, dir: string
 const workspace = () => page.locator('.project-workspace:not([hidden])')
-const effort = () => workspace().getByRole('button', { name: 'Reasoning Effort', exact: true })
+const effort = () => workspace().getByRole('button', { name: '思考强度', exact: true })
 const panel = () => workspace().locator('.composer__effort-control .composer__control-panel')
 
 test.beforeEach(async () => {

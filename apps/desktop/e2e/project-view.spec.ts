@@ -15,14 +15,14 @@ test.beforeEach(async () => {
     app.focus({ steal: true }); BrowserWindow.getAllWindows()[0]!.focus()
   }, projectPath)
   await page.getByRole('button', { name: '打开本地目录', exact: true }).click()
-  await workspace().getByRole('button', { name: 'Architecture', exact: true }).click()
-  await expect(preview().getByRole('button', { name: '生成 Architecture', exact: true })).toBeVisible()
+  await workspace().getByRole('button', { name: '架构', exact: true }).click()
+  await expect(preview().getByRole('button', { name: '生成 架构', exact: true })).toBeVisible()
 })
 test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
 test('AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart', async () => {
   expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
-  await preview().getByRole('button', { name: '生成 Architecture', exact: true }).click()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 Architecture/)
+  await preview().getByRole('button', { name: '生成 架构', exact: true }).click()
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 架构/)
   expect(await workspace().locator('[data-session-row]').count()).toBe(0)
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('重新整理支付模块架构。')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
@@ -32,7 +32,7 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
   await expect(workspace().locator('.transcript-user summary')).toHaveText('当前工作台')
   await expect(workspace().locator('[data-session-row]')).toHaveCount(1)
   expect(readFileSync(join(projectPath, '.ai-studio/.gitignore'), 'utf8')).toBe('*\n')
-  await expect(workspace().getByRole('button', { name: '放大 Preview' })).toHaveCount(0)
+  await expect(workspace().getByRole('button', { name: /^(放大|缩小|重置)/ })).toHaveCount(0)
   await workspace().getByRole('button', { name: 'Files', exact: true }).click()
   const path = join(projectPath, '.ai-studio/knowledge/architecture.json')
   const valid = JSON.parse(readFileSync(path, 'utf8'))
@@ -61,9 +61,9 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
 })
 test('removed View label sends without creating helpers, and each View has an independent draft', async () => {
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('保留架构草稿')
-  await workspace().getByRole('button', { name: 'Progress', exact: true }).click()
+  await workspace().getByRole('button', { name: '进度', exact: true }).click()
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('')
-  await workspace().getByRole('button', { name: 'Architecture', exact: true }).click()
+  await workspace().getByRole('button', { name: '架构', exact: true }).click()
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('保留架构草稿')
   await workspace().getByRole('button', { name: '移除上下文 architecture' }).click()
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
@@ -76,13 +76,13 @@ test('removed View label sends without creating helpers, and each View has an in
 
 
 test('five presets use the same webpage frame and keep all page content inside it', async () => {
-  for (const title of ['Overview', 'Progress', 'Architecture', 'Agent Team', 'Business Flow']) {
+  for (const title of ['概览', '进度', '架构', 'Agent 团队', '业务流程']) {
     await workspace().getByRole('button', { name: title, exact: true }).click()
     await expect(preview().getByRole('button', { name: `生成 ${title}`, exact: true })).toBeVisible()
     await expect(workspace().locator('iframe[title="工作台页面"]')).toHaveCount(1)
     await expect(workspace().locator('.view-empty, .view-node, .view-client-sessions')).toHaveCount(0)
   }
-  await workspace().getByRole('button', { name: 'Overview', exact: true }).click()
+  await workspace().getByRole('button', { name: '概览', exact: true }).click()
   await expect(preview().getByText('Recent Sessions', { exact: true })).toBeVisible()
   await expect(preview().getByText('Needs Input', { exact: true })).toBeVisible()
   await expect(preview().getByText('Recently Completed', { exact: true })).toBeVisible()
@@ -105,7 +105,7 @@ async function copyPresetIntoOrdinaryDraft(id: string) {
 
 test('a preset copied into an ordinary custom draft uses the same knowledge subscription', async () => {
   await copyPresetIntoOrdinaryDraft('architecture')
-  await expect(preview().getByRole('button', { name: '生成 Architecture', exact: true })).toBeVisible()
+  await expect(preview().getByRole('button', { name: '生成 架构', exact: true })).toBeVisible()
   const directory = join(projectPath, '.ai-studio/knowledge')
   mkdirSync(directory, { recursive: true })
   writeFileSync(join(directory, 'architecture.json'), JSON.stringify({ schemaVersion: 1, viewId: 'architecture', data: { summary: 'PORTABLE_KNOWLEDGE_OK' } }))
@@ -116,7 +116,7 @@ test('a preset copied into an ordinary custom draft uses the same knowledge subs
 })
 
 test('a copied Overview package reads scoped Session cards and opens a conversation through the SDK', async () => {
-  await workspace().getByRole('button', { name: 'New Chat', exact: true }).first().click()
+  await workspace().getByRole('button', { name: '新对话', exact: true }).first().click()
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('Portable Overview Session')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
@@ -131,8 +131,8 @@ test('the package generate action starts a new unsent workbench draft from an ex
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('仅回复这条消息，不整理项目知识')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
-  await preview().getByRole('button', { name: '生成 Architecture', exact: true }).click()
-  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 Architecture/)
+  await preview().getByRole('button', { name: '生成 架构', exact: true }).click()
+  await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 架构/)
   await expect(workspace().locator('.transcript-user')).toHaveCount(0)
   await expect(workspace().locator('[data-session-row]')).toHaveCount(1)
 })

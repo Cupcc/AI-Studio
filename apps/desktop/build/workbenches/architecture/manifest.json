@@ -3,7 +3,7 @@
   "pluginId": "studio-architecture",
   "version": "1.0.0",
   "sdkVersion": 1,
-  "title": "Architecture",
+  "title": "架构",
   "entry": "index.html",
   "capabilities": [
     "state.read",

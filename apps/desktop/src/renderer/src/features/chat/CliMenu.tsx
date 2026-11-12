@@ -16,7 +16,7 @@ export function CliMenu({ project, dismiss }: ShellSlotProps & { dismiss(): void
     const provider = providers.find((p) => p.cli === cli)
     return { available: provider?.status === 'available', reason: provider?.reason ?? (provider?.status === 'checking' || !provider ? '正在检查 CLI…' : 'CLI 不可用') }
   }
-  return <div className="session-cli-menu" aria-label="选择 New Chat CLI">
+  return <div className="session-cli-menu" aria-label="选择新对话的 CLI">
     <p className="menu-heading">选择 CLI 新建对话</p>
     {!providers.length && !providersError && <p role="status" className="menu-item__sub">正在检查 CLI…</p>}
     {clis.map((cli) => {
