@@ -6,12 +6,27 @@ on:
   pull_request:
     branches: [main, dev]
   workflow_dispatch:
+    inputs:
+      scope:
+        description: 'affected: changes since the merge base with dev; e2e: only the listed specs; full: complete checks and packaging'
+        type: choice
+        options: [full, affected, e2e]
+        default: full
+      specs:
+        description: 'e2e scope: space-separated spec files, e.g. workbench.spec.ts project.spec.ts'
+        type: string
+        default: ''
+      grep:
+        description: 'e2e scope: optional Playwright --grep pattern'
+        type: string
+        default: ''
 
 permissions:
   contents: read
 
+# Manual runs get their own group so a reviewer's run never cancels another check of the same branch.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -27,6 +42,8 @@ jobs:
       app: ${{ steps.scope.outputs.app }}
       base: ${{ steps.scope.outputs.base }}
       e2e: ${{ steps.scope.outputs.e2e }}
+      mode: ${{ steps.scope.outputs.mode }}
+      specs: ${{ steps.scope.outputs.specs }}
     steps:
       - name: Checkout complete comparison history
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -54,7 +71,7 @@ jobs:
       - name: Check documentation regressions
         env:
           CHECK_BASE: ${{ steps.scope.outputs.base }}
-        # Manual full CI has no diff baseline; historical docs audit is separate.
+        # Manual full and spec runs have no diff baseline; historical docs audit is separate.
         run: pnpm check:docs --base "${CHECK_BASE:-HEAD}" --head HEAD
 
   desktop:
@@ -87,12 +104,15 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck and unit tests
-        if: github.event_name == 'workflow_dispatch'
+        if: needs.scope.outputs.mode == 'full'
         run: pnpm check:code
 
+      # The desktop main process loads the Adapter from dist; spec-only runs skip check:code, which builds it.
       - name: Build desktop once for E2E and packaging
-        if: github.event_name == 'workflow_dispatch'
-        run: pnpm --filter @ai-studio/desktop run build
+        if: needs.scope.outputs.mode != 'affected'
+        run: |
+          pnpm --filter @ai-studio/agent-adapter run build
+          pnpm --filter @ai-studio/desktop run build
 
       - name: Configure desktop display for layout tests
         if: needs.scope.outputs.e2e == 'true'
@@ -107,21 +127,31 @@ jobs:
           displayplacer list
 
       - name: Check affected modules and selected Electron specs
-        if: github.event_name != 'workflow_dispatch'
+        if: needs.scope.outputs.mode == 'affected'
         env:
           CHECK_BASE: ${{ needs.scope.outputs.base }}
         run: node scripts/check-affected.mjs --base "$CHECK_BASE" --head HEAD --ci
 
+      - name: Requested Electron specs
+        if: needs.scope.outputs.mode == 'e2e'
+        env:
+          E2E_SPECS: ${{ needs.scope.outputs.specs }}
+          E2E_GREP: ${{ inputs.grep }}
+        run: |
+          read -ra args <<< "$E2E_SPECS"
+          if [ -n "$E2E_GREP" ]; then args+=(--grep "$E2E_GREP"); fi
+          pnpm --filter @ai-studio/desktop run test:e2e:built "${args[@]}"
+
       - name: Electron E2E and native smoke
-        if: github.event_name == 'workflow_dispatch'
+        if: needs.scope.outputs.mode == 'full'
         run: pnpm --filter @ai-studio/desktop run test:e2e:built
 
       - name: Package unsigned macOS app
-        if: github.event_name == 'workflow_dispatch'
+        if: needs.scope.outputs.mode == 'full'
         run: pnpm --filter @ai-studio/desktop run package:built
 
       - name: Install pinned CLIs for packaged discovery smoke
-        if: github.event_name == 'workflow_dispatch'
+        if: needs.scope.outputs.mode == 'full'
         run: |
           npm install --prefix "$RUNNER_TEMP/studio-cli" --no-audit --no-fund \
             @openai/codex@0.161.0 @anthropic-ai/claude-code@2.1.294
@@ -137,7 +167,7 @@ jobs:
           "$ci_cli_bin/claude" --version
 
       - name: Packaged app smoke
-        if: github.event_name == 'workflow_dispatch'
+        if: needs.scope.outputs.mode == 'full'
         run: pnpm smoke:packaged
 
       - name: Upload test evidence

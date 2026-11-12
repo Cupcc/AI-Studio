@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, chmodSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync, chmodSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
@@ -126,14 +126,14 @@ test('CI covers the whole push, PR comparison, manual, empty and missing baselin
   const base = commit()
   write('README.md', '# Second')
   const docsHead = commit()
-  expect(ciScope('push', { before: base }, cwd)).toEqual({ app: false, base })
-  expect(ciScope('pull_request', { pull_request: { base: { sha: base } } }, cwd)).toEqual({ app: false, base })
+  expect(ciScope('push', { before: base }, cwd)).toEqual({ app: false, base, mode: 'affected' })
+  expect(ciScope('pull_request', { pull_request: { base: { sha: base } } }, cwd)).toEqual({ app: false, base, mode: 'affected' })
   write('code.ts', 'export const changed = true')
   commit()
   write('README.md', '# Third')
   commit()
   expect(ciScope('push', { before: docsHead }, cwd).app).toBe(true)
-  expect(ciScope('workflow_dispatch', {}, cwd)).toEqual({ app: true, base: '' })
+  expect(ciScope('workflow_dispatch', {}, cwd)).toEqual({ app: true, base: '', mode: 'full' })
   expect(ciScope('push', { before: '0'.repeat(40) }, cwd).error).toContain('baseline')
   expect(ciScope('push', { before: '1'.repeat(40) }, cwd).error).toContain('baseline')
   expect(ciScope('push', { before: git(['rev-parse', 'HEAD'], cwd).trim() }, cwd).app).toBe(false)
@@ -148,9 +148,34 @@ test('first dev push compares against main and requires a valid shared baseline'
   const event = { before: '0'.repeat(40), ref: 'refs/heads/dev' }
   expect(ciScope('push', event, cwd).error).toContain('baseline')
   git(['update-ref', 'refs/remotes/origin/main', base], cwd)
-  expect(ciScope('push', event, cwd)).toEqual({ app: true, base })
+  expect(ciScope('push', event, cwd)).toEqual({ app: true, base, mode: 'affected' })
   expect(ciScope('push', { ...event, ref: 'refs/heads/feat/example' }, cwd).error).toContain('baseline')
   expect(ciScope('push', { ref: event.ref }, cwd).error).toContain('baseline')
+})
+
+test('manual runs check a task branch against dev, requested specs or everything', () => {
+  const { cwd, write, commit } = repo()
+  write('README.md', '# Dev')
+  write('apps/desktop/e2e/workbench.spec.ts', '')
+  write('apps/desktop/e2e/project.spec.ts', '')
+  const dev = commit()
+  git(['update-ref', 'refs/remotes/origin/dev', dev], cwd)
+  write('README.md', '# Task docs')
+  commit()
+  const manual = inputs => ciScope('workflow_dispatch', { inputs }, cwd)
+  expect(manual({ scope: 'affected' })).toEqual({ app: false, base: dev, mode: 'affected' })
+  write('code.ts', 'export const task = true')
+  commit()
+  expect(manual({ scope: 'affected' })).toEqual({ app: true, base: dev, mode: 'affected' })
+  expect(manual({ scope: 'full', specs: 'ignored' })).toEqual({ app: true, base: '', mode: 'full' })
+  expect(manual({ scope: 'e2e', specs: ' workbench.spec.ts e2e/project.spec.ts workbench.spec.ts ' }))
+    .toEqual({ app: true, base: '', mode: 'e2e', specs: 'e2e/workbench.spec.ts e2e/project.spec.ts' })
+  expect(manual({ scope: 'e2e', specs: '' }).error).toContain('spec files')
+  expect(manual({ scope: 'e2e', specs: 'missing.spec.ts' }).error).toContain('missing.spec.ts')
+  expect(manual({ scope: 'e2e', specs: '../e2e/project.spec.ts' }).error).toContain('not found')
+  expect(manual({ scope: 'nightly' }).error).toContain('nightly')
+  git(['update-ref', '-d', 'refs/remotes/origin/dev'], cwd)
+  expect(manual({ scope: 'affected' }).error).toContain('baseline')
 })
 
 test.each(['push', 'workflow_dispatch', 'invalid'])('CI command entry point: %s', kind => {
@@ -168,7 +193,10 @@ test.each(['push', 'workflow_dispatch', 'invalid'])('CI command entry point: %s'
   expect(result.error).toBeUndefined()
   expect(result.status).toBe(kind === 'invalid' ? 1 : 0)
   if (kind === 'push') expect(result.stdout).toContain('"app":false')
-  if (kind === 'workflow_dispatch') expect(result.stdout).toContain('"app":true')
+  if (kind === 'workflow_dispatch') {
+    expect(result.stdout).toContain('"app":true')
+    expect(readFileSync(path.join(cwd, 'output'), 'utf8')).toContain('e2e=true\nmode=full\nspecs=\n')
+  }
 })
 
 test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code', 'unknown', 'partial'])('commit entry point: %s', kind => {

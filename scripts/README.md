@@ -19,6 +19,7 @@
 | `pnpm check:commit` | 检查暂存文档及受影响模块；未知范围阻断，pre-commit 使用同一入口 |
 | `node scripts/check-affected.mjs --dry-run` | 预览 HEAD 与工作树之间的检查范围；去掉 `--dry-run` 执行，`--ci` 追加选中的 E2E |
 | `pnpm test:e2e` | 构建桌面应用并运行模拟 Session Provider 的 Electron E2E，不调用模型 |
+| `node scripts/remote-ci.mjs` | 在 GitHub macOS runner 上检查已推送的分支，等待结果并下载证据，见[远端 E2E](#远端-e2e) |
 | `pnpm package` | 构建未签名的 macOS arm64 应用目录 |
 | `pnpm smoke:packaged` | 启动打包应用并检查原生依赖 |
 
@@ -60,7 +61,8 @@ node scripts/integrate-branch.mjs --unfreeze  # 删除记录并输出该提交
 | dev / main push 及面向它们的 PR | 文档回归＋同一选择器的受影响检查＋明确选中的 E2E spec；不自动打包 |
 | 空变更、设计素材、任务证据 | 不触发应用测试；文档链接检查仍适用 |
 | 未映射路径／全局配置／缺失比较基线 | 阻断并提示补充影响映射或恢复比较基线；不自动退回全量 |
-| 显式完整命令／手动 CI | 完整基础检查；手动 CI 另运行全量 E2E、打包与冒烟 |
+| 显式完整命令／手动 CI 的 full 模式 | 完整基础检查；full 另运行全量 E2E、打包与冒烟 |
+| AI 需要运行 Electron E2E | 默认在远端 CI 运行，见[远端 E2E](#远端-e2e)；本机运行须用户同意 |
 | 功能／里程碑 | 按 [Task Protocol](../tasks/README.md#acceptance)执行交互、独立、真实 CLI 及人工验收；局部测试不能替代这些要求 |
 
 开发、提交、CI 均按影响范围验证。执行前说明改动、测试范围和理由，不把「准备提交／合并」当作全量测试理由。相同代码／依赖／配置／环境基线已有有效结果时引用其来源、时间和覆盖范围，不手工重复门禁将要执行的检查；发生相关变化或冲突修复后重跑受影响部分。当前门禁不缓存测试成功结果，重试提交仍会执行选中的局部检查。
@@ -147,10 +149,10 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 
 配置：[ci.yml](../.github/workflows/ci.yml)，触发条件、runner、Node 版本、CLI 版本、超时、权限与产物保留期均以该文件为准；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。
 
-- 仅 dev / main push、面向 dev / main 的 PR 与手动触发运行；任务分支备份 push 不再与 PR 重复。main 合入后的验证针对新基线，仍保留。
-- Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。首次创建 dev 的 push 以 origin/main 与当前提交的共同祖先为基线；其他无效／缺失基线阻断，空 diff 跳过应用；手动 CI 的文档以 HEAD 为基线，不声称历史审计通过。
-- macOS arm64 job 冻结 lockfile 安装，普通事件执行 `check-affected.mjs --ci`：受影响类型检查、相关单测，以及选中的 E2E spec。仅有工作流脚本改动时只执行脚本测试；无 E2E 时不构建桌面或配置显示器。需要 E2E 时构建桌面一次，无自动打包。
-- 仅手动 `workflow_dispatch` 执行 `check:code`、完整 E2E、`package:built` 和 `smoke:packaged`。构建产物只在本 job 的同一基线复用，不跨运行缓存输出。显式根命令保留原语义。
+- 仅 dev / main push、面向 dev / main 的 PR 与手动触发运行；任务分支 push 不触发 CI，需要时手动触发（见[远端 E2E](#远端-e2e)）。main 合入后的验证针对新基线，仍保留。新的 push 或 PR 运行会取消同一分支或 PR 上的旧运行；手动运行各用独立的并发组，互不取消。
+- Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。首次创建 dev 的 push 以 origin/main 与当前提交的共同祖先为基线；其他无效／缺失基线阻断，空 diff 跳过应用。手动 affected 模式以 origin/dev 与 HEAD 的 merge-base 为基线；手动 full 与 e2e 模式的文档以 HEAD 为基线，不声称历史审计通过。
+- macOS arm64 job 冻结 lockfile 安装，push、PR 与手动 affected 模式执行 `check-affected.mjs --ci`：受影响类型检查、相关单测，以及选中的 E2E spec。仅有工作流脚本改动时只执行脚本测试；无 E2E 时不构建桌面或配置显示器。需要 E2E 时构建桌面一次，无自动打包。
+- 手动 e2e 模式构建桌面一次，只运行指定的 spec，不做类型检查和单测。仅手动 full 模式（界面手动触发的默认值）执行 `check:code`、完整 E2E、`package:built` 和 `smoke:packaged`。构建产物只在本 job 的同一基线复用，不跨运行缓存输出。显式根命令保留原语义。
 - CI 设置 `HUSKY=0` 显式运行检查；应用 job 保留依赖安装脚本以安装 Electron 与修复 PTY helper。
 - E2E 前用 `displayplacer` 放大 runner 的虚拟屏幕：默认屏幕会把窗口高度限制到 684px，容纳不下桌面端的布局检查尺寸。此步骤只修改临时 CI runner。
 - E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录；`runtime-tools.spec.ts` 另使用真实本地 Shell / PTY 与回环 HTTP fixture（外站跳转只验证提示，不访问外网）。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
@@ -161,6 +163,31 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 Runner 架构依据：[GitHub runner images](https://github.com/actions/runner-images#available-images)；pnpm 版本读取方式依据：[pnpm/action-setup](https://github.com/pnpm/action-setup#version)。
 
 事件与分支过滤依据：[GitHub workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)。本次配置在本地验证；远端部署与运行结果见实现任务，不以配置已修改等同远端 CI 已通过。
+
+### 远端 E2E
+
+Electron E2E 会在桌面上打开真实窗口，部分用例还会抢占焦点。用户同时使用电脑时，浮层、拖拽等依赖焦点的用例会偶发失败，测试也会打扰用户。所以 AI 需要运行 E2E 时，默认在 GitHub Actions 的 macOS runner 上运行。本机 E2E 只在用户同意时运行，同一时间只运行一份。AI 交互验收用 agent-browser 操作本机应用，不在此列，见 [Task Protocol](../tasks/README.md#acceptance)。
+
+在任务 worktree 中提交并推送后执行：
+
+```sh
+git push -u origin feat/example   # rebase 后用 --force-with-lease
+node scripts/remote-ci.mjs        # 默认 affected 模式
+node scripts/remote-ci.mjs --scope e2e --spec workbench.spec.ts --spec project.spec.ts --grep "drag"
+node scripts/remote-ci.mjs --scope full
+```
+
+| 模式 | 运行内容 |
+|---|---|
+| `affected`（默认） | 以 origin/dev 与分支的 merge-base 为基线，执行与 push 相同的文档回归和受影响检查，包括选中的 E2E |
+| `e2e` | 构建桌面应用，只运行 `--spec` 指定的 `apps/desktop/e2e` 文件，可加 `--grep` |
+| `full` | `check:code`、全量 E2E、打包与打包冒烟 |
+
+- 命令先检查当前在分支上、工作区没有改动或未跟踪文件、origin 上的同名分支等于 HEAD。不满足时退出并给出推送命令；命令本身不推送。
+- 运行使用分支上的 `ci.yml`，分支须包含上述模式。本功能之前创建的分支先 rebase dev。
+- 命令用 `gh workflow run` 触发，每 30 秒查询一次，job 状态变化时输出一行。结束后把上传的证据下载到 `.runtime/remote-ci/<run-id>/`。失败时把完整的失败日志存为同目录的 `failed.log`，终端只打印最后 60 行。通过时退出码为 0，否则为 1。
+- 只跑脚本测试约 3 分钟，构建后跑少量 spec 约 3～5 分钟，全量 10 分钟以上，排队时间另计。AI 在后台运行命令，结束后读取结果。
+- runner 是独立的 macOS 虚拟机，有自己的屏幕和焦点，与用户桌面无关；E2E 使用模拟 Provider，不需要密钥。仓库公开，推送的分支所有人可见。
 
 ## GitHub Release 发布准备
 

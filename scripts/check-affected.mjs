@@ -179,7 +179,7 @@ export function affectedPlan(files, available, comparison = {}) {
       e2e.add('e2e/app.spec.ts')
       continue
     }
-    if (/^(?:scripts\/(?:check-[\w-]+(?:\.test)?|integrate-branch(?:\.test)?|vitest\.config)\.mjs|\.codex\/(?:hooks\.json|scripts\/agent-docs-hook(?:\.test)?\.mjs)|\.husky\/(?:pre-commit|commit-msg)|commitlint\.config\.cjs|\.github\/workflows\/ci\.yml)$/.test(file)) {
+    if (/^(?:scripts\/(?:check-[\w-]+(?:\.test)?|integrate-branch(?:\.test)?|remote-ci(?:\.test)?|vitest\.config)\.mjs|\.codex\/(?:hooks\.json|scripts\/agent-docs-hook(?:\.test)?\.mjs)|\.husky\/(?:pre-commit|commit-msg)|commitlint\.config\.cjs|\.github\/workflows\/ci\.yml)$/.test(file)) {
       seeds.scripts.add(file)
       if (file === '.codex/hooks.json') seeds.scripts.add('.codex/scripts/agent-docs-hook.test.mjs')
       else if (/^(?:\.husky\/|commitlint\.|\.github\/)/.test(file)) {

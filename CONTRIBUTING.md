@@ -53,9 +53,9 @@ pnpm install
 
 - 新 worktree 先运行 `pnpm install` 再提交。`core.hooksPath` 指向 Husky 生成的 `.husky/_/`，这个目录缺失时 Git 会跳过提交检查。
 - 并行工作开始前核对写入范围。会修改同一文件的工作按先后顺序进行。
-- 本机资源同一时间只给一个 worktree 用。开发模式下各 worktree 共用同一份 userData 与数据库（见[桌面端说明](apps/desktop/README.md)），所以 `pnpm dev` 不能同时运行。需要窗口焦点的 Electron E2E 同一时间也只能运行一份。
+- 本机资源同一时间只给一个 worktree 用。开发模式下各 worktree 共用同一份 userData 与数据库（见[桌面端说明](apps/desktop/README.md)），所以 `pnpm dev` 不能同时运行。需要窗口焦点的 Electron E2E 同一时间也只能运行一份；AI 默认把 E2E 放到远端 CI 运行，不占用本机桌面，见[远端 E2E](scripts/README.md#远端-e2e)。
 
-任务分支用 rebase 同步 dev，不把 dev merge 进任务分支。任务分支可以按需推送备份。个人分支 rebase 后，先确认远端没有他人的新提交，再使用 `--force-with-lease`。禁止对 dev 或 main 强推。
+任务分支用 rebase 同步 dev，不把 dev merge 进任务分支。任务分支可以按需推送，用于备份或远端 CI。个人分支 rebase 后，先确认远端没有他人的新提交，再使用 `--force-with-lease`。禁止对 dev 或 main 强推。
 
 ## 3. 提交规范
 
@@ -84,7 +84,7 @@ PR 可选。需要集中查看较大的 diff、邀请他人审阅或协作时再
 
 功能或修复 PR 以 dev 为目标，标题遵循[第 3 节](#3-提交规范)的格式。描述写明目的、验证结果、相关任务及适用的 FR / AC。界面变化附截图，未决问题逐条列出。
 
-提交与日常 CI 只检查受影响的范围，见[测试分层](scripts/README.md#测试分层)。提交或合并本身不是全量回归的理由。同一基线已有有效的检查结果时，不手工重复，只按改动补充必要的验证。推送 dev、main 或更新 PR 后检查 CI 结果，失败时修复。使用 PR 时，等最新版本的 CI 通过再合并。没有 PR 的任务分支推送只作备份；手动触发 CI 表示选择完整的自动化检查。本地集成仍须完成第 5 节的必要验证。
+提交与日常 CI 只检查受影响的范围，见[测试分层](scripts/README.md#测试分层)。提交或合并本身不是全量回归的理由。同一基线已有有效的检查结果时，不手工重复，只按改动补充必要的验证。推送 dev、main 或更新 PR 后检查 CI 结果，失败时修复。使用 PR 时，等最新版本的 CI 通过再合并。任务分支推送不触发 CI；需要远端检查时手动触发，模式见[远端 E2E](scripts/README.md#远端-e2e)。本地集成仍须完成第 5 节的必要验证。
 
 ## 5. 合并与收尾
 

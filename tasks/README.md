@@ -70,7 +70,7 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 
 | 层次 | 执行方式 | 检查内容 |
 |---|---|---|
-| 自动化检查 | 类型检查、单元测试、Playwright Electron E2E，以及适用的数据库／进程检查 | 逻辑、边界、异常与回归；命令和门禁遵循 [桌面端说明](../apps/desktop/README.md)与[贡献指南](../CONTRIBUTING.md) |
+| 自动化检查 | 类型检查、单元测试、Playwright Electron E2E，以及适用的数据库／进程检查；E2E 默认在[远端 CI](../scripts/README.md#远端-e2e) 运行 | 逻辑、边界、异常与回归；命令和门禁遵循 [桌面端说明](../apps/desktop/README.md)与[贡献指南](../CONTRIBUTING.md) |
 | AI 交互验收 | 涉及用户界面的改动，必须用 agent-browser 操作实际 Electron 应用，并查看关键步骤截图 | 从用户入口执行点击、输入、滚动、切换等相关操作，核对流程、反馈、布局与可用性 |
 | 人工产品验收 | 查看功能或阶段结论、未覆盖项与关键证据，体验核心流程 | 判断是否符合预期、是否接受交付；状态按 Lifecycle 单独记录，不逐项签收内部 task |
 
@@ -96,7 +96,7 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 
 - 验收记录开头先列未覆盖与边界、待决事项及适用的人工功能验收入口，再给出 AI 总体结论（通过／部分通过／不通过）和逐项结果。使用 [验收模板](templates/acceptance.md)；无内容的可选区块删除。
 - 记录验收者及是否参与实现、代码基线（commit；有未提交改动时标明 diff 范围）、平台、应用形态（开发／构建／打包）、Provider 类型与相关 CLI 版本。逐项关联来源、操作、预期与实际结果、结论及证据。
-- 关键交互保留截图，自动化保留结果或日志；失败项记录复现步骤、修复与复验结果。证据文件遵循 Evidence，使用隔离测试数据，原生窗口检查的并行限制遵循贡献指南。
+- 关键交互保留截图，自动化保留结果或日志，远端 CI 记录 run 链接与提交；失败项记录复现步骤、修复与复验结果。证据文件遵循 Evidence，使用隔离测试数据，原生窗口检查的并行限制遵循贡献指南。
 - Review Agent 给出独立结论，Main Agent 核对 Lifecycle 完成条件、更新任务状态并归档；不另加一次形式化签收。功能或阶段准备就绪后，提供可运行版本、核心操作、关键证据与已知限制供人验收。AI 评审通过、任务完成、提交和合并均不等同于人工产品验收。
 
 ## Parallel Workers

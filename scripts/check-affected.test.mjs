@@ -164,13 +164,16 @@ test('deleted or renamed selected E2E blocks instead of silently losing coverage
 test('unit selection must find tests; no green pass for an empty selection', () => {
   expect(commandText(plan(['scripts/check-affected.mjs']))).toContain('--no-passWithNoTests')
 })
-test('automatic workflow cannot run full checks or package', () => {
+// Only manual runs can select the full or e2e mode; push and PR scopes are always affected (check-workflow.test.mjs).
+test('automatic workflow cannot run full checks, requested specs or package', () => {
   const workflow = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8')
-  for (const step of workflow.split(/\n      - name:/).slice(1)) {
+  const steps = workflow.split(/\n      - name:/).slice(1)
+  for (const step of steps) {
     if (/run: pnpm (check:code|smoke:packaged)|run: pnpm --filter @ai-studio\/desktop run (test:e2e:built|package:built)/.test(step)) {
-      expect(step).toContain("if: github.event_name == 'workflow_dispatch'")
+      expect(step).toContain("if: needs.scope.outputs.mode == 'full'")
     }
   }
+  expect(steps.find(step => step.includes('test:e2e:built "${args[@]}"'))).toContain("if: needs.scope.outputs.mode == 'e2e'")
   expect(workflow).toContain('node scripts/check-affected.mjs --base "$CHECK_BASE" --head HEAD --ci')
 })
 
@@ -314,8 +317,10 @@ test('classifies removed templates only when their owning replacement exists', (
   }
 })
 
-test('integration command and its tests run script checks without application suites', () => {
-  const files = ['scripts/integrate-branch.mjs', 'scripts/integrate-branch.test.mjs']
+test.each([
+  ['integration command', ['scripts/integrate-branch.mjs', 'scripts/integrate-branch.test.mjs']],
+  ['remote CI command', ['scripts/remote-ci.mjs', 'scripts/remote-ci.test.mjs']]
+])('%s and its tests run script checks without application suites', (_name, files) => {
   for (const file of files) {
     const result = affectedPlan([file], [...available, ...files])
     expect(result.unknown).toEqual([])
