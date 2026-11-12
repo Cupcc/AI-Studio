@@ -1,0 +1,21 @@
+# 打包应用（诊断重打包产物，见 acceptance）真实 Session 采样，基线 0310fa6
+## Claude Code 第一轮（Haiku 5.5）：对话区 innerText 长度，每 300ms 记录变化
+0ms len=156
+301ms len=122
+4218ms len=128
+5123ms len=182
+5424ms len=226
+5725ms len=282
+6026ms len=324
+6332ms len=377 DONE
+doneAt=6332
+## Claude Code 第二轮（同一会话，约 1500 字长文）
+发送后长度 391 → 437 → 443 → 508 → 569 → 635 → 720（每 0.5 秒）；点击 Stop 时 1540，1.5 秒后 1573，再 3 秒后 1573；完成行：Worked for 14s · 已停止；Stop 按钮消失
+## 原生会话记录（只读 ~/.claude/projects/-private-tmp-ai-studio-retest-project/*.jsonl 的 assistant.message.model）
+4 claude-haiku-5-5
+## 运行中 Runtime 参数（摘要）
+claude --output-format stream-json --verbose --input-format stream-json --model haiku ...；codex app-server --listen stdio://（父进程均为打包应用主进程）
+## Codex（GPT-6.1-Sol，本机默认）
+t+0s len=120 → t+10s 146 → t+11s 170 → t+12s 186；完成行：Worked for 11s · Done
+## 退出
+向打包应用主进程发送 SIGTERM；10 秒内应用进程、上述 claude / codex Runtime 全部结束

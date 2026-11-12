@@ -1,0 +1,66 @@
+# W2 复验记录（基线 1780c63，2026-11-12 16:43～16:55 本机时区）
+
+## 1. D-W2-1 原始 pnpm package（无额外 -c 参数）
+pnpm package：exit 0；日志含 executing @electron/fuses 与 skipped macOS code signing（identity: null）
+## codesign --verify --verbose=2 Electron Framework.framework
+Contents/Frameworks/Electron Framework.framework/Versions/Current/Helpers/chrome_crashpad_handler
+Contents/Frameworks/Electron Framework.framework/Versions/Current/Helpers/chrome_crashpad_handler
+Contents/Frameworks/Electron Framework.framework: valid on disk
+Contents/Frameworks/Electron Framework.framework: satisfies its Designated Requirement
+## codesign -dv Electron Framework.framework
+CodeDirectory v=20400 size=393334 flags=0x2(adhoc) hashes=12285+3 location=embedded
+Signature=adhoc
+## codesign --verify --deep app
+dist/mac-arm64/AI Developer Studio.app: valid on disk
+dist/mac-arm64/AI Developer Studio.app: satisfies its Designated Requirement
+pnpm smoke:packaged：exit 0，Result: PASS（报告见 W2-R-packaged-smoke.json）
+原始产物以 open -n、最小环境、真实 HOME、隔离 userData 启动：设置 → CLI 显示 Codex 可用（默认）、Claude Code 可用
+Claude Code + Haiku 5.5 一轮：对话区长度 t+0s 121 → t+3s 162 → t+4s 212，Worked for 3s · Done；原生会话记录 assistant model = claude-haiku-5-5
+SIGTERM 退出：应用进程与其子进程（claude / codex Runtime）全部结束
+
+## 2. D-W2-2 开发构建网络失败（env -i，隔离 HOME，独立 userData）
+### 2a. https_proxy=http://127.0.0.1:9（拒绝连接）
+点击 Claude Code 一键安装后 0.5 秒：行内 role=alert 显示「安装命令失败（退出码 7）。请检查网络、代理及目录权限；可在终端运行官方命令查看详情。」，按钮恢复为可用的「一键安装」
+关闭设置再从「设置」入口进入 CLI：同一错误仍显示
+再次点击（页面内每 10ms 记录，按钮文本 / 是否禁用 / 是否有 alert）：
+0ms before: 一键安装[enabled] +alert | 0ms 一键安装[enabled] +alert | 12ms 正在安装…[disabled] -alert | 34ms 一键安装[enabled] +alert
+
+### 2b. https_proxy 指向本地慢速测试代理（接受 CONNECT，4 秒后返回 502，用于看清重试期间的界面）
+首次安装约 4 秒后显示「安装命令失败（退出码 22）……」
+再次点击（同上记录方式）：
+before: 一键安装[enabled] +alert | 0ms 一键安装[enabled] +alert | 12ms 正在安装…[disabled] -alert | 4029ms 一键安装[enabled] +alert
+
+用快照引用点击后立即截图：错误消失，按钮为禁用的「正在安装…」（W2-R03）；约 4 秒后错误重新出现（W2-R04）
+临时目录 ai-studio-cli-install-* 已删除，隔离 HOME 无写入；应用退出后无残留进程
+
+## 3. 受影响回归：node scripts/check-affected.mjs --base d924d2c（不带 --ci）
+exit 0；unknown []，missingTests []；packaging [apps/desktop/electron-builder.yml]，并提示需 remote-ci --scope full
+脚本测试 vitest related：4 文件 82 项通过
+Adapter build、desktop tsc -p tsconfig.web.json：通过
+desktop vitest related SettingsDialog.tsx / settings.test.tsx：2 文件 24 项通过
+计划中的 e2e/settings.spec.ts 仅在 --ci 时执行，本次未运行
+
+## 4. 用户真实 CLI 安装
+复验前后 ~/.local/bin/claude、codex 链接、版本目录、二进制哈希与 shell profile 快照除时间戳外一致
+
+## 5. 原始产物补跑（同一 1780c63 原始包，构建于 16:43:41，未重建；16:50～16:55）
+测试 Project 先由同一基线开发构建登记到两个隔离 userData（真实 HOME / 临时 HOME），再由原始包打开。下文 $R 指 /tmp/ai-studio-retest。
+### 5a. 连接详情页（真实 HOME，只读）
+Claude Code「配置」：已保存 / 本机配置，说明「与本机 CLI 保持一致」；切到自定义连接后只有 Base URL、API Key，显示 Key / 测试连接 / 保存均禁用；返回列表
+Codex「配置」：同上，自定义连接下状态为「未保存」，测试连接与保存禁用；返回后再次打开仍为本机配置（未持久化）；列表仍为 Codex 可用、Claude Code 可用
+### 5b. Claude Code（Haiku 5.5）Stop
+约 1500 字长文请求；对话区长度 114 → 120 → 128 → 213 → 299 → 369（每 0.4 秒）时点击 Stop；点击时 496，1.5 秒后 519，再 3 秒后 519
+完成行：Worked for 18s · 已停止；Stop 按钮消失；无 Error；原生会话记录 assistant model 共 2 条 claude-haiku-5-5
+### 5c. Codex（本机默认 GPT-6.1-Sol）
+t+0s len=120 → t+14s 154 → t+15s 173 → t+16s 189；完成行：Worked for 15s · Done；回复切题
+SIGTERM 退出：主进程子进程 claude（stream-json Runtime）与 codex app-server 均结束，无残留
+### 5d. 原始包内一键安装（HOME=$R/home2，open -n 最小环境，16:53:39 点击，约 50 秒完成）
+t+0s state={"cli":"claude-code","status":"installing","phase":"downloading"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=51299 /usr/bin/curl --fail --silent --show-error --location --proto =https --proto-redir =https --connect-
+t+3s state={"cli":"claude-code","status":"installing","phase":"installing"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=51393 /bin/bash $R/tmp/ai-studio-cli-install-o0ZhMa/install.sh;
+t+48s state={"cli":"claude-code","status":"installing","phase":"checking"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=53692 $R/home2/.local/bin/claude --version;
+t+50s state={"cli":"claude-code","status":"complete"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未登录 配置 移除 处理方法" procs=54013 $R/home2/.local/bin/claude auth status --json;
+结果：$R/home2/.local/bin/claude -> $R/home2/.local/share/claude/versions/2.1.322；claude --version = 2.1.322；处理方法展开为未登录提示；临时目录删除
+npm 记录：uninstall --global @anthropic-ai/claude-code，reify moves {}，exit 0
+退出后无残留进程
+### 5e. 用户真实 CLI 安装
+补跑前（16:50:34）与补跑后快照除时间戳外一致；/opt/homebrew/lib/node_modules mtime 保持 2026-11-11 22:05:48

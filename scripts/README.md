@@ -62,6 +62,7 @@ node scripts/integrate-branch.mjs --unfreeze  # 删除记录并输出该提交
 | 空变更、设计素材、任务证据 | 不触发应用测试；文档链接检查仍适用 |
 | 未映射路径／全局配置／缺失比较基线 | 阻断并提示补充影响映射或恢复比较基线；不自动退回全量 |
 | 显式完整命令／手动 CI 的 full 模式 | 完整基础检查；full 另运行全量 E2E、打包与冒烟 |
+| 打包输入变更／手动 CI 的 package 模式 | 只构建、打包与打包冒烟，不运行 E2E 与单测 |
 | AI 需要运行 Electron E2E | 默认在远端 CI 运行，见[远端 E2E](#远端-e2e)；本机运行须用户同意 |
 | 功能／里程碑 | 按 [Task Protocol](../tasks/README.md#acceptance)执行交互、独立、真实 CLI 及人工验收；局部测试不能替代这些要求 |
 
@@ -72,6 +73,8 @@ node scripts/integrate-branch.mjs --unfreeze  # 删除记录并输出该提交
 CSS 与 Renderer HTML 只选择对应界面 E2E，不触发后端单测或 TypeScript 检查。本地提交不自动执行 E2E，界面改动仍须完成 Task Protocol 要求的交互验收。工作台通过同一 iframe 承载预设与自定义包，两类界面由 `project-view` / `workbench` E2E 覆盖，见 [DEC-29](<../docs/07. Decisions.md#dec-29-预设与自定义工作台统一架构>)。
 
 网页包 JS、HTML、manifest 与生成脚本绕过源码导入图，明确选择读取构建产物的 `package-runtime`、`workbench-service`、`portable-pages` 三份单测。TypeScript 配置仅新增网页包 JSON include 时也使用该范围，其他编译配置须另行映射。`electron.vite.config.ts` 或桌面 Vitest 配置仅增删既定网页包构建 import 与调用时使用该范围，Electron 构建配置另选应用启动。CSP 数组变化选择安全策略单测、工作台界面、应用启动及 `runtime-tools` 中的 Shell 和 Browser 场景；共享工具样式也覆盖这两个界面场景，不带入终端关闭流程。同批修改运行时模块或该 E2E 文件时保留完整 runtime-tools。其他构建和测试配置变化须补充映射，不能套用工作台范围。
+
+打包输入 `apps/desktop/electron-builder.yml` 与 `apps/desktop/scripts/after-pack.cjs` 只影响打包产物。本地检查不启动 Electron，自动 CI 不打包，所以选择器对它们不运行检查，并提示集成前运行手动 package 模式（`node scripts/remote-ci.mjs --scope package`，只构建、打包与打包冒烟），run 记入任务。
 
 所有 `related` 命令显式使用 `--no-passWithNoTests`，找不到测试时失败。删除源码后没有剩余模块测试时也阻断，须补充消费者映射。选择器回归除了断言计划，还通过 Vitest 实际依赖图核对必须包含和不得包含的测试，通过真实子进程检查空选择退出码。清单检查不执行应用测试；它先构建 Adapter 以解析桌面依赖，并由测试配置生成本地辅助产物。
 
@@ -152,7 +155,7 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 - 仅 dev / main push、面向 dev / main 的 PR 与手动触发运行；任务分支 push 不触发 CI，需要时手动触发（见[远端 E2E](#远端-e2e)）。main 合入后的验证针对新基线，仍保留。新的 push 或 PR 运行会取消同一分支或 PR 上的旧运行；手动运行各用独立的并发组，互不取消。
 - Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。首次创建 dev 的 push 以 origin/main 与当前提交的共同祖先为基线；其他无效／缺失基线阻断，空 diff 跳过应用。手动 affected 模式以 origin/dev 与 HEAD 的 merge-base 为基线；手动 full 与 e2e 模式的文档以 HEAD 为基线，不声称历史审计通过。
 - macOS arm64 job 冻结 lockfile 安装，push、PR 与手动 affected 模式执行 `check-affected.mjs --ci`：受影响类型检查、相关单测，以及选中的 E2E spec。仅有工作流脚本改动时只执行脚本测试；无 E2E 时不构建桌面或配置显示器。需要 E2E 时构建桌面一次，无自动打包。
-- 手动 e2e 模式构建桌面一次，只运行指定的 spec，不做类型检查和单测。仅手动 full 模式（界面手动触发的默认值）执行 `check:code`、完整 E2E、`package:built` 和 `smoke:packaged`。构建产物只在本 job 的同一基线复用，不跨运行缓存输出。显式根命令保留原语义。
+- 手动 e2e 模式构建桌面一次，只运行指定的 spec，不做类型检查和单测。仅手动 full 模式（界面手动触发的默认值）执行 `check:code` 与完整 E2E；`package:built` 和 `smoke:packaged` 只在手动 full 与 package 模式执行，package 模式不运行 E2E，也不配置显示器。构建产物只在本 job 的同一基线复用，不跨运行缓存输出。显式根命令保留原语义。
 - CI 设置 `HUSKY=0` 显式运行检查；应用 job 保留依赖安装脚本以安装 Electron 与修复 PTY helper。
 - E2E 前用 `displayplacer` 放大 runner 的虚拟屏幕：默认屏幕会把窗口高度限制到 684px，容纳不下桌面端的布局检查尺寸。此步骤只修改临时 CI runner。
 - E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录；`runtime-tools.spec.ts` 另使用真实本地 Shell / PTY 与回环 HTTP fixture（外站跳转只验证提示，不访问外网）。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
@@ -174,6 +177,7 @@ Electron E2E 会在桌面上打开真实窗口，部分用例还会抢占焦点�
 git push -u origin feat/example   # rebase 后用 --force-with-lease
 node scripts/remote-ci.mjs        # 默认 affected 模式
 node scripts/remote-ci.mjs --scope e2e --spec workbench.spec.ts --spec project.spec.ts --grep "drag"
+node scripts/remote-ci.mjs --scope package
 node scripts/remote-ci.mjs --scope full
 ```
 
@@ -181,6 +185,7 @@ node scripts/remote-ci.mjs --scope full
 |---|---|
 | `affected`（默认） | 以 origin/dev 与分支的 merge-base 为基线，执行与 push 相同的文档回归和受影响检查，包括选中的 E2E |
 | `e2e` | 构建桌面应用，只运行 `--spec` 指定的 `apps/desktop/e2e` 文件，可加 `--grep` |
+| `package` | 构建桌面应用、打包并运行打包冒烟；不运行单测与 E2E，用于打包输入变更 |
 | `full` | `check:code`、全量 E2E、打包与打包冒烟 |
 
 - 命令先检查当前在分支上、工作区没有改动或未跟踪文件、origin 上的同名分支等于 HEAD。不满足时退出并给出推送命令；命令本身不推送。

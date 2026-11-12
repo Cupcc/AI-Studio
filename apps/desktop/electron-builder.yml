@@ -32,7 +32,10 @@ asarUnpack:
 # node-pty ships N-API prebuilds that load in Electron as-is; no Electron rebuild.
 npmRebuild: false
 afterPack: scripts/after-pack.cjs
+# Flipping fuses rewrites the Electron Framework binary. With signing skipped (identity: null), arm64 macOS
+# kills the app at launch (Code Signature Invalid) unless the ad-hoc signature is reset afterwards.
 electronFuses:
+  resetAdHocDarwinSignature: true
   runAsNode: false
   enableCookieEncryption: true
   enableNodeOptionsEnvironmentVariable: false

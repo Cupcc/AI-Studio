@@ -98,5 +98,13 @@ test('rejects options that do not match the scope', async () => {
   await expect(run(f, { scope: 'e2e' })).rejects.toThrow('--spec')
   await expect(run(f, { grep: 'drag' })).rejects.toThrow('--spec')
   await expect(run(f, { scope: 'nightly' })).rejects.toThrow('Usage')
+  await expect(run(f, { scope: 'package', specs: ['workbench.spec.ts'] })).rejects.toThrow('--spec')
   expect(f.calls()).toEqual([])
+})
+
+test('dispatches the package scope without spec inputs', async () => {
+  const f = fixture()
+  f.push()
+  await run(f, { scope: 'package' })
+  expect(f.calls()[0]).toBe('workflow run ci.yml --ref feat/example -f scope=package')
 })

@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
 import { git } from './check-paths.mjs'
 
-const usage = 'Usage: node scripts/remote-ci.mjs [--scope affected|e2e|full] [--spec <file>]... [--grep <pattern>]'
+const usage = 'Usage: node scripts/remote-ci.mjs [--scope affected|e2e|package|full] [--spec <file>]... [--grep <pattern>]'
 const gh = (args, cwd) => execFileSync('gh', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 64 * 1024 * 1024 })
 
 // The runner checks out the pushed commit, so local changes and unpushed commits would make the result misleading.
@@ -25,7 +25,7 @@ export function pushedHead(cwd = process.cwd()) {
 }
 
 export async function remoteCi({ scope = 'affected', specs = [], grep = '', cwd = process.cwd(), pollMs = 30_000, log = console.log } = {}) {
-  if (!['affected', 'e2e', 'full'].includes(scope)) throw new Error(usage)
+  if (!['affected', 'e2e', 'package', 'full'].includes(scope)) throw new Error(usage)
   if ((scope === 'e2e') !== (specs.length > 0) || (grep && scope !== 'e2e')) throw new Error('--spec is required for, and --spec/--grep only apply to, --scope e2e.')
   const { branch, head } = pushedHead(cwd)
   const fields = ['-f', `scope=${scope}`, ...(scope === 'e2e' ? ['-f', `specs=${specs.join(' ')}`, '-f', `grep=${grep}`] : [])]

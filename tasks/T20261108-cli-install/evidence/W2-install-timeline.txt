@@ -1,0 +1,48 @@
+# W2 一键安装时间线（开发构建，隔离 HOME=$R/home，$R=/tmp/ai-studio-retest）
+# 基线 0310fa6；每行 t+秒 / 主进程安装状态（只读 IPC getCliInstallations）/ 设置页按钮文本 / 安装相关进程（截断）。仅保留状态或界面变化的行。
+
+## A. 网络失败路径（启动环境设置 https_proxy=http://127.0.0.1:9，Claude Code 一键安装）
+主进程状态：{"cli":"claude-code","status":"error","message":"安装命令失败（退出码 7）。请检查网络、代理及目录权限；可在终端运行官方命令查看详情。"}
+设置页（点击后 0.5～3 秒每 0.5 秒采样 6 次，以及关闭重开后）：Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 一键安装 —— 未显示任何错误文本
+临时目录 ai-studio-cli-install-*：已删除；隔离 HOME：无写入
+
+## B. Claude Code 真实安装（16:08:16 点击，约 71 秒完成）
+t+0s state={"cli":"claude-code","status":"installing","phase":"downloading"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=65650 /usr/bin/curl --fail --silent --show-error --location --proto =https --proto-redir =https --connect-timeout 30 --max-time 120 --max-fi;
+t+3s state={"cli":"claude-code","status":"installing","phase":"installing"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=65938 /bin/bash $R/tmp/ai-studio-cli-install-HC32Sx/install.sh;65945 /bin/bash $R/tmp/ai-studio-cli-install-HC32Sx/install.sh;
+t+14s state={"cli":"claude-code","status":"installing","phase":"installing"} ui="(settings closed)" procs=65938 /bin/bash $R/tmp/ai-studio-cli-install-HC32Sx/install.sh;66713 curl -fsSL -o $R/home/.claude/downloads/claude-2.1.322-darwin-arm64.zst https://downloads.claude.ai/claude-code-releases/2.1.322/darwi;
+t+26s state={"cli":"claude-code","status":"installing","phase":"installing"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 一键安装" procs=65938 /bin/bash $R/tmp/ai-studio-cli-install-HC32Sx/install.sh;72307 $R/home/.claude/downloads/claude-2.1.322-darwin-arm64 install;
+t+31s state={"cli":"claude-code","status":"installing","phase":"installing"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=65938 /bin/bash $R/tmp/ai-studio-cli-install-HC32Sx/install.sh;72307 $R/home/.claude/downloads/claude-2.1.322-darwin-arm64 install;
+t+69s state={"cli":"claude-code","status":"installing","phase":"checking"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=81592 $R/home/.local/bin/claude --version;
+t+71s state={"cli":"claude-code","status":"complete"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未登录 配置 移除 处理方法" procs=
+
+安装器调用的 npm 记录（隔离 HOME 下 .npm/_logs）：argv "uninstall" "--global" "@anthropic-ai/claude-code"；npm=/opt/homebrew/bin/npm；reify moves {}（无改动）；exit 0
+
+## C. Codex 真实安装（16:10:48 点击，约 35 秒完成）
+t+0s state={"cli":"codex","status":"installing","phase":"downloading"} ui="Codex 未安装 配置 移除 正在安装… [btn disabled] | Claude Code 未登录 配置 移除 处理方法" procs=94143 /usr/bin/curl --fail --silent --show-error --location --proto =https --proto-redir =https --connect-timeout 30 --max-time 120 --max-fi;
+t+2s state={"cli":"codex","status":"installing","phase":"installing"} ui="(settings closed)" procs=94596 /bin/sh $R/tmp/ai-studio-cli-install-RDfaAX/install.sh;
+t+8s state={"cli":"codex","status":"installing","phase":"installing"} ui="Codex 未安装 配置 移除 正在安装… [btn disabled] | Claude Code 未登录 配置 移除 处理方法" procs=94596 /bin/sh $R/tmp/ai-studio-cli-install-RDfaAX/install.sh;
+t+35s state={"cli":"codex","status":"complete"} ui="Codex 未登录 配置 移除 处理方法 | Claude Code 未登录 配置 移除 处理方法" procs=
+
+## D. 安装中关闭再打开设置（页面内每 20ms 记录 Codex / Claude 安装按钮的状态变化）
+重装准备：仅删除隔离 HOME 中的 claude 链接，点击「重新检测」后该行回到「未安装 / 一键安装」；第 2 次 Claude 安装 31 秒完成，状态同 B。
+Codex 安装中重开：811ms (no button) | 1814ms 正在安装…[disabled]
+Claude 第 3 次安装中重开（距上次检测 >30 秒）：536ms (no button) | 1537ms 正在安装…[disabled]
+B 段 t+26s 的采样曾记录到重开后 Claude 行显示「一键安装」且按钮可用，主进程状态仍为 installing；上述两次定点复测未复现。
+
+## E. 安装中退出应用（第 4 次 Claude 安装进行中，主进程 app.quit()）
+退出前：bash install.sh ×2（同一进程组），状态 installing/installing
+退出 5 秒后：ai-studio-retest 相关进程 0；临时目录 ai-studio-cli-install-* 已删除；HOME/.claude/downloads 为空
+
+## F. 安装结果（隔离 HOME）
+$R/home/.local/bin/claude -> $R/home/.local/share/claude/versions/2.1.322；claude --version = 2.1.322 (Claude Code)
+$R/home/.local/bin/codex -> $R/home/.codex/packages/standalone/current/bin/codex；codex --version = codex-cli 0.167.2
+Codex 安装器未写入 $R/home/.zprofile / .zshrc（文件不存在）
+
+## G. 打包应用（诊断重打包产物）中的 Claude Code 一键安装（隔离 HOME=$R/home2，open -n 以最小 PATH 启动；16:25:48 点击，约 59 秒完成）
+t+0s state={"cli":"claude-code","status":"installing","phase":"preparing"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=85244 /usr/bin/curl --fail --silent --show-error --location --proto =https --proto-redir =https --connect-timeout 30 --max-time 120 --max-fi;
+t+1s state={"cli":"claude-code","status":"installing","phase":"downloading"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=85244 /usr/bin/curl --fail --silent --show-error --location --proto =https --proto-redir =https --connect-timeout 30 --max-time 120 --max-fi;
+t+6s state={"cli":"claude-code","status":"installing","phase":"installing"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=89893 /bin/bash $R/tmp/ai-studio-cli-install-kOUI72/install.sh;89911 /bin/bash $R/tmp/ai-studio-cli-install-kOUI72/install.sh;
+t+57s state={"cli":"claude-code","status":"installing","phase":"checking"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未安装 配置 移除 正在安装… [btn disabled]" procs=99384 $R/home2/.local/bin/claude --version;
+t+59s state={"cli":"claude-code","status":"complete"} ui="Codex 未安装 配置 移除 一键安装 | Claude Code 未登录 配置 移除 处理方法" procs=99608 $R/home2/.local/bin/claude auth status --json;
+npm 记录同 B：uninstall --global @anthropic-ai/claude-code，reify moves {}，exit 0
+结果：$R/home2/.local/bin/claude -> $R/home2/.local/share/claude/versions/2.1.322；临时目录已删除；退出后无残留进程

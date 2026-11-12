@@ -1,0 +1,15 @@
+# pnpm package 原始产物启动崩溃摘要（2026-11-12 16:18:43 +0800，基线 0310fa6）
+{"app_name":"AI Developer Studio","timestamp":"2026-11-12 16:17:22.00 +0800","os_version":"macOS 26.6 (25G72)","bundleID":"dev.aistudio.desktop"}
+{"exception":{"codes":"0x0000000000000032, 0x000000011a4d3aee","rawCodes":[50,4736236270],"type":"EXC_BAD_ACCESS","signal":"SIGKILL (Code Signature Invalid)","subtype":"UNKNOWN_0x32 at 0x000000011a4d3aee"},"termination":{"namespace":"CODESIGNING","indicator":"Invalid Page"},"crashedFrame0":"electron::fuses::IsRunAsNodeEnabled()"}
+## codesign --verify Frameworks/Electron Framework.framework
+Contents/Frameworks/Electron Framework.framework: invalid signature (code or signature have been modified)
+In architecture: arm64
+## pnpm smoke:packaged
+$ pnpm --filter @ai-studio/desktop run smoke:packaged
+$ node scripts/packaged-smoke.mjs
+The app did not write a smoke report.
+[ELIFECYCLE] Command failed with exit code 1.
+Error: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL
+  × "pnpm recursive run" failed in <repo>
+## 直接启动可执行文件（同一隔离 userData 与 smoke 参数）
+exit=137 (SIGKILL)，未写出报告

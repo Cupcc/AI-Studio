@@ -130,6 +130,30 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
     } finally { useSessions.setState(previous, true) }
   })
 
+  it('shows why a one-click install failed, keeps it after reopening, and clears it on the next attempt (T20261108 D-W2-2)', async () => {
+    const previous = useSessions.getState()
+    const failure = '安装命令失败（退出码 7）。请检查网络、代理及目录权限。'
+    let installations: unknown[] = [{ cli: 'claude-code', status: 'error', message: failure }]
+    let notify: ((state: unknown[]) => void) | null = null
+    const installCli = vi.fn(async () => { notify?.(installations = [{ cli: 'claude-code', status: 'installing', phase: 'downloading' }]) })
+    Object.assign(window.studio, { session: {
+      getProviders: async () => [{ cli: 'claude-code', displayName: 'Claude Code', status: 'not_installed', reason: '未找到 claude' }],
+      getGlobalDefaultCli: async () => null, getCliInstallations: async () => installations, installCli,
+      onCliInstallationsChanged: (cb: typeof notify) => { notify = cb; return () => { notify = null } },
+    } })
+    useSessions.setState({ providers: [], providersError: null, projects: {}, defaultCli: {}, drafts: {} })
+    try {
+      await openDialog(); fireEvent.click(screen.getByRole('button', { name: 'CLI' }))
+      expect((await screen.findByRole('alert')).textContent).toBe(failure)
+      fireEvent.click(screen.getByRole('button', { name: '一键安装' }))
+      await screen.findByRole('button', { name: '正在安装…' })
+      expect(screen.queryByRole('alert')).toBeNull()
+      act(() => notify?.([{ cli: 'claude-code', status: 'error', message: failure }]))
+      expect((await screen.findByRole('alert')).textContent).toBe(failure)
+      expect(screen.getByRole('button', { name: '一键安装' })).toBeTruthy()
+    } finally { useSessions.setState(previous, true) }
+  })
+
   it('groups added and not-added CLI and supports removing all then adding and rechecking', async () => {
     const previous = useSessions.getState()
     let providers = [

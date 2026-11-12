@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       scope:
-        description: 'affected: changes since the merge base with dev; e2e: only the listed specs; full: complete checks and packaging'
+        description: 'affected: changes since the merge base with dev; e2e: only the listed specs; package: build, package and packaged smoke only; full: complete checks and packaging'
         type: choice
-        options: [full, affected, e2e]
+        options: [full, affected, e2e, package]
         default: full
       specs:
         description: 'e2e scope: space-separated spec files, e.g. workbench.spec.ts project.spec.ts'
@@ -147,11 +147,11 @@ jobs:
         run: pnpm --filter @ai-studio/desktop run test:e2e:built
 
       - name: Package unsigned macOS app
-        if: needs.scope.outputs.mode == 'full'
+        if: needs.scope.outputs.mode == 'full' || needs.scope.outputs.mode == 'package'
         run: pnpm --filter @ai-studio/desktop run package:built
 
       - name: Install pinned CLIs for packaged discovery smoke
-        if: needs.scope.outputs.mode == 'full'
+        if: needs.scope.outputs.mode == 'full' || needs.scope.outputs.mode == 'package'
         run: |
           npm install --prefix "$RUNNER_TEMP/studio-cli" --no-audit --no-fund \
             @openai/codex@0.161.0 @anthropic-ai/claude-code@2.1.294
@@ -167,7 +167,7 @@ jobs:
           "$ci_cli_bin/claude" --version
 
       - name: Packaged app smoke
-        if: needs.scope.outputs.mode == 'full'
+        if: needs.scope.outputs.mode == 'full' || needs.scope.outputs.mode == 'package'
         run: pnpm smoke:packaged
 
       - name: Upload test evidence

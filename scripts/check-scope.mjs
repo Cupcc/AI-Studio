@@ -15,6 +15,8 @@ function requestedSpecs(value = '', cwd = '.') {
 export function ciScope(eventName, event, cwd) {
   const scope = eventName === 'workflow_dispatch' ? event.inputs?.scope || 'full' : 'affected'
   if (scope === 'full') return { app: true, base: '', mode: 'full' }
+  // Packaging inputs (see check-affected.mjs): build, package and packaged smoke, without E2E.
+  if (scope === 'package') return { app: true, base: '', mode: 'package' }
   if (scope === 'e2e') {
     const { specs, error } = requestedSpecs(event.inputs?.specs, cwd)
     return error ? { app: false, base: '', error } : { app: true, base: '', mode: 'e2e', specs }
@@ -56,7 +58,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     }
     result.app = plan.commands.length > 0 || plan.e2e.length > 0
     result.e2e = plan.e2e.length > 0
-  } else result.e2e = true
+  } else result.e2e = result.mode !== 'package'
   console.log(JSON.stringify(result))
   if (process.env.GITHUB_OUTPUT) {
     appendFileSync(process.env.GITHUB_OUTPUT, `app=${result.app}\nbase=${result.base}\ne2e=${result.e2e}\nmode=${result.mode}\nspecs=${result.specs ?? ''}\n`)

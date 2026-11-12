@@ -194,6 +194,20 @@ test('plugin assets and navigation keep the workbench regression selected', () =
     expect(result.e2e).toContain('e2e/workbench.spec.ts')
   }
 })
+test('packaging inputs run nothing locally or in affected CI and require the manual package mode', () => {
+  const run = vi.fn(() => ({ status: 0 }))
+  const builder = `${d}electron-builder.yml`
+  const only = plan([builder, `${d}scripts/after-pack.cjs`])
+  expect(only).toMatchObject({ commands: [], e2e: [], unknown: [], packaging: [builder, `${d}scripts/after-pack.cjs`] })
+  expect(runPlan(only, { run, ci: true })).toBe(0)
+  expect(run).not.toHaveBeenCalled()
+  expect(console.log).toHaveBeenCalledWith(expect.stringContaining('node scripts/remote-ci.mjs --scope package'))
+  const mixed = plan([builder, `${d}src/renderer/src/features/settings/settings.test.tsx`])
+  expect(mixed.packaging).toEqual([builder])
+  expect(commandText(mixed)).toContain('settings.test.tsx')
+  expect(commandText(mixed)).not.toMatch(/package|smoke/)
+})
+
 test('unknown desktop config changes and missing baselines block', () => {
   for (const file of [`${d}electron.vite.config.ts`, `${d}vitest.config.ts`]) {
     expect(plan([file]).unknown).toEqual([file])

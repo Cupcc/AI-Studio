@@ -74,6 +74,7 @@ function CliSettings() {
     try { await sessionApi().installCli({ cli }); await useSessions.getState().loadProviders(true) }
     catch (reason) { setError(String(reason)) }
   }
+  const installError = (cli: SessionCli) => { const state = installations.find(item => item.cli === cli); return state?.status === 'error' ? state.message : null }
   const connectionFor = (cli: SessionCli) => connections.find(item => item.cli === cli) ?? { cli, mode: 'local' as const, profile: null, revision: 'local' }
   const openConnection = (cli: SessionCli) => { setError(null); setConnectionOpen(cli) }
   const enabled = providers.filter(provider => provider.status !== 'disabled')
@@ -118,6 +119,7 @@ function CliSettings() {
               </div>
               {failed && <div className="cli-settings__failure">
                 {provider.status === 'not_installed' ? <button className="text-button cli-settings__help" disabled={installations.some(item => item.cli === provider.cli && item.status === 'installing')} onClick={() => void install(provider.cli)}>{installations.find(item => item.cli === provider.cli)?.status === 'installing' ? '正在安装…' : '一键安装'}</button> : <button className="text-button cli-settings__help" aria-expanded={details === provider.cli} onClick={() => setDetails(details === provider.cli ? null : provider.cli)}>处理方法</button>}
+                {installError(provider.cli) && <p role="alert" className="error-message cli-settings__install-error">{installError(provider.cli)}</p>}
                 {details === provider.cli && <p className="cli-settings__recovery">{provider.reason}<br />{provider.status === 'not_installed' ? `安装 ${name} 后点击右上角“重新检测”。` : provider.status === 'not_logged_in' ? `在终端完成 ${name} 登录后，点击右上角“重新检测”。` : '确认 CLI 在终端中可正常运行后，点击右上角“重新检测”。'}</p>}
               </div>}
             </div>

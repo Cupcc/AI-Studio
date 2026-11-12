@@ -168,6 +168,7 @@ test('manual runs check a task branch against dev, requested specs or everything
   commit()
   expect(manual({ scope: 'affected' })).toEqual({ app: true, base: dev, mode: 'affected' })
   expect(manual({ scope: 'full', specs: 'ignored' })).toEqual({ app: true, base: '', mode: 'full' })
+  expect(manual({ scope: 'package' })).toEqual({ app: true, base: '', mode: 'package' })
   expect(manual({ scope: 'e2e', specs: ' workbench.spec.ts e2e/project.spec.ts workbench.spec.ts ' }))
     .toEqual({ app: true, base: '', mode: 'e2e', specs: 'e2e/workbench.spec.ts e2e/project.spec.ts' })
   expect(manual({ scope: 'e2e', specs: '' }).error).toContain('spec files')
@@ -178,16 +179,16 @@ test('manual runs check a task branch against dev, requested specs or everything
   expect(manual({ scope: 'affected' }).error).toContain('baseline')
 })
 
-test.each(['push', 'workflow_dispatch', 'invalid'])('CI command entry point: %s', kind => {
+test.each(['push', 'workflow_dispatch', 'package', 'invalid'])('CI command entry point: %s', kind => {
   const { cwd, write, commit } = repo()
   write('README.md', '# Baseline')
   const base = commit()
   write('README.md', '# Updated')
   commit()
-  write('event.json', JSON.stringify({ before: kind === 'invalid' ? '0'.repeat(40) : base }))
+  write('event.json', JSON.stringify({ before: kind === 'invalid' ? '0'.repeat(40) : base, ...(kind === 'package' ? { inputs: { scope: 'package' } } : {}) }))
   const result = spawnSync(process.execPath, [fileURLToPath(new URL('./check-scope.mjs', import.meta.url))], {
     cwd, encoding: 'utf8', timeout: 10000,
-    env: { ...process.env, GITHUB_EVENT_NAME: kind === 'invalid' ? 'push' : kind,
+    env: { ...process.env, GITHUB_EVENT_NAME: kind === 'invalid' ? 'push' : kind === 'package' ? 'workflow_dispatch' : kind,
       GITHUB_EVENT_PATH: path.join(cwd, 'event.json'), GITHUB_OUTPUT: path.join(cwd, 'output') }
   })
   expect(result.error).toBeUndefined()
@@ -197,6 +198,8 @@ test.each(['push', 'workflow_dispatch', 'invalid'])('CI command entry point: %s'
     expect(result.stdout).toContain('"app":true')
     expect(readFileSync(path.join(cwd, 'output'), 'utf8')).toContain('e2e=true\nmode=full\nspecs=\n')
   }
+  // Package runs need no display setup or Electron specs.
+  if (kind === 'package') expect(readFileSync(path.join(cwd, 'output'), 'utf8')).toContain('e2e=false\nmode=package\nspecs=\n')
 })
 
 test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code', 'unknown', 'partial'])('commit entry point: %s', kind => {

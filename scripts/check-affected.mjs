@@ -125,6 +125,7 @@ export function affectedPlan(files, available, comparison = {}) {
   const e2eFilters = {}
   const unknown = []
   const missingTests = []
+  const packaging = []
   const tests = available.filter(file => unit.test(file) && !file.includes('.integration.test.'))
   const addTests = (group, predicate) => {
     const selected = tests.filter(predicate)
@@ -204,6 +205,12 @@ export function affectedPlan(files, available, comparison = {}) {
       types.add('node'); types.add('web')
       addDomain('session')
       if (provider === 'claude') e2e.add('e2e/claude-effort.spec.ts')
+      continue
+    }
+    // Packaging inputs only shape the electron-builder output. Local checks never launch Electron and automatic CI
+    // never packages, so only a manual package (or full) CI run covers them; runPlan says so.
+    if (file === `${desktop}electron-builder.yml` || file === `${desktop}scripts/after-pack.cjs`) {
+      packaging.push(file)
       continue
     }
     if (file === `${desktop}electron.vite.config.ts`) {
@@ -314,7 +321,7 @@ export function affectedPlan(files, available, comparison = {}) {
   // must not turn another change's focused scenarios into an entire E2E suite.
   for (const file of fullE2e) delete e2eFilters[file]
   missingTests.push(...selectedE2e.filter(file => !available.includes(`${desktop}${file}`)))
-  return { files, commands, e2e: selectedE2e, e2eFilters, unknown, missingTests: [...new Set(missingTests)] }
+  return { files, commands, e2e: selectedE2e, e2eFilters, unknown, missingTests: [...new Set(missingTests)], packaging }
 }
 
 export function runPlan(plan, { ci = false, cwd = process.cwd(), run = spawnSync } = {}) {
@@ -326,6 +333,9 @@ export function runPlan(plan, { ci = false, cwd = process.cwd(), run = spawnSync
   if (plan.missingTests.length) {
     console.error(`Selected tests are missing: ${plan.missingTests.join(', ')}. Update the module mapping; do not silently drop coverage.`)
     return 1
+  }
+  if (plan.packaging?.length) {
+    console.log(`Packaging inputs changed (${plan.packaging.join(', ')}): no local or affected check covers them. Before integrating, run \`node scripts/remote-ci.mjs --scope package\` (build, package and packaged smoke) and record the run in the task.`)
   }
   const commands = [...plan.commands]
   if (ci && plan.e2e.length) {

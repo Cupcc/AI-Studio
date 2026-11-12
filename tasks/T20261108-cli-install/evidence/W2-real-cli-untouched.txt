@@ -1,0 +1,64 @@
+# 用户真实 CLI 安装只读快照（W2 测试前 / 全部测试后）
+# 对比结果：除时间戳行外完全一致（diff 无输出）。另查 /opt/homebrew/lib/node_modules 目录 mtime 保持 2026-11-11 22:05:48。
+
+## 测试前
+# 2026-11-12 16:05:15 +0800
+~/.local/bin/claude -> ~/.local/share/claude/versions/2.1.322 | lmtime=2026-11-12 08:44:53
+~/.local/bin/codex -> ~/.codex/packages/standalone/current/bin/codex | lmtime=2026-11-12 09:14:46
+~/.local/bin/codex-code-mode-host -> ~/.codex/packages/standalone/current/bin/codex-code-mode-host | lmtime=2026-11-12 09:14:46
+## ~/.local/share/claude/versions
+total 1261136
+-rwxr-xr-x@ 1 <user>  staff  321995200 Nov  9 16:29:07 2026 2.1.319
+-rwxr-xr-x@ 2 <user>  staff  323702464 Nov 12 08:44:52 2026 2.1.322
+## ~/.codex/packages/standalone
+~/.codex/packages/standalone:
+total 16
+-rw-r--r--@ 1 <user>  staff   28 Nov 12 09:14:46 2026 auto-update-version
+lrwxr-xr-x@ 1 <user>  staff   79 Nov 12 09:14:46 2026 current -> ~/.codex/packages/standalone/releases/0.167.2-aarch64-apple-darwin
+-rw-r--r--@ 1 <user>  staff    0 Nov  9 11:37:32 2026 install.lock
+drwxr-xr-x@ 5 <user>  staff  160 Nov 12 09:14:44 2026 releases
+-rw-r--r--@ 1 <user>  staff   96 Nov 12 09:14:46 2026 selection-history
+
+~/.codex/packages/standalone/releases:
+total 0
+drwxr-xr-x@ 7 <user>  staff  224 Nov  9 11:37:54 2026 0.167.0-aarch64-apple-darwin
+drwxr-xr-x@ 7 <user>  staff  224 Nov 11 07:59:04 2026 0.167.1-aarch64-apple-darwin
+drwxr-xr-x@ 7 <user>  staff  224 Nov 12 09:14:44 2026 0.167.2-aarch64-apple-darwin
+~/.local/share/claude/versions/2.1.322 | mtime=2026-11-12 08:44:52 | size=323702464
+a9d237949db816a0
+~/.codex/packages/standalone/releases/0.167.2-aarch64-apple-darwin/bin/codex | mtime=2026-11-12 05:52:22 | size=271027872
+97bc82fd46f117cf
+## shell profiles
+~/.zshrc | mtime=2026-11-12 10:47:03
+~/.zprofile | mtime=2026-11-12 10:42:57
+
+## 全部测试后（两次打包应用运行均已退出）
+# 2026-11-12 16:27:04 +0800
+~/.local/bin/claude -> ~/.local/share/claude/versions/2.1.322 | lmtime=2026-11-12 08:44:53
+~/.local/bin/codex -> ~/.codex/packages/standalone/current/bin/codex | lmtime=2026-11-12 09:14:46
+~/.local/bin/codex-code-mode-host -> ~/.codex/packages/standalone/current/bin/codex-code-mode-host | lmtime=2026-11-12 09:14:46
+## ~/.local/share/claude/versions
+total 1261136
+-rwxr-xr-x@ 1 <user>  staff  321995200 Nov  9 16:29:07 2026 2.1.319
+-rwxr-xr-x@ 2 <user>  staff  323702464 Nov 12 08:44:52 2026 2.1.322
+## ~/.codex/packages/standalone
+~/.codex/packages/standalone:
+total 16
+-rw-r--r--@ 1 <user>  staff   28 Nov 12 09:14:46 2026 auto-update-version
+lrwxr-xr-x@ 1 <user>  staff   79 Nov 12 09:14:46 2026 current -> ~/.codex/packages/standalone/releases/0.167.2-aarch64-apple-darwin
+-rw-r--r--@ 1 <user>  staff    0 Nov  9 11:37:32 2026 install.lock
+drwxr-xr-x@ 5 <user>  staff  160 Nov 12 09:14:44 2026 releases
+-rw-r--r--@ 1 <user>  staff   96 Nov 12 09:14:46 2026 selection-history
+
+~/.codex/packages/standalone/releases:
+total 0
+drwxr-xr-x@ 7 <user>  staff  224 Nov  9 11:37:54 2026 0.167.0-aarch64-apple-darwin
+drwxr-xr-x@ 7 <user>  staff  224 Nov 11 07:59:04 2026 0.167.1-aarch64-apple-darwin
+drwxr-xr-x@ 7 <user>  staff  224 Nov 12 09:14:44 2026 0.167.2-aarch64-apple-darwin
+~/.local/share/claude/versions/2.1.322 | mtime=2026-11-12 08:44:52 | size=323702464
+a9d237949db816a0
+~/.codex/packages/standalone/releases/0.167.2-aarch64-apple-darwin/bin/codex | mtime=2026-11-12 05:52:22 | size=271027872
+97bc82fd46f117cf
+## shell profiles
+~/.zshrc | mtime=2026-11-12 10:47:03
+~/.zprofile | mtime=2026-11-12 10:42:57
