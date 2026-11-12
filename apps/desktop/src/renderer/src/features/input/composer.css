@@ -37,15 +37,15 @@
 .composer__effort-label { min-width: 0; overflow-wrap: anywhere; }
 .composer__effort-check { display: inline-flex; width: 16px; min-height: 16px; align-items: center; justify-content: flex-end; }
 .composer__effort-reset { color: var(--color-text-muted); padding-left: 46px; }
-/* Five static bars. Ultra uses the current theme's gradient at the same ceiling. */
-.effort-signal { display: inline-flex; align-items: flex-end; justify-content: center; gap: 2px; width: 28px; height: 16px; flex: none; color: var(--color-text-3); }
+/* Five static bars in ink; Max turns violet and Ultra spans one blue → violet → pink gradient. */
+.effort-signal { display: inline-flex; align-items: flex-end; justify-content: center; gap: 2px; width: 28px; height: 16px; flex: none; color: var(--color-text-2); }
 .effort-signal i { display: block; width: 4px; height: 4px; border-radius: 2px; background: currentColor; opacity: .18; }
 .effort-signal i:nth-child(2) { height: 7px; }
 .effort-signal i:nth-child(3) { height: 10px; }
 .effort-signal i:nth-child(4) { height: 13px; }
 .effort-signal i:nth-child(5) { height: 16px; }
 .effort-signal i.is-on { opacity: 1; }
-.effort-signal--auto i { opacity: .55; }
+.effort-signal--auto i { opacity: .4; }
 .effort-signal--unknown i { opacity: .4; background: transparent; border: 1px solid currentColor; }
 .composer__effort-option .effort-signal { margin: 0; }
 .effort-signal--max { color: var(--color-effort-max); }

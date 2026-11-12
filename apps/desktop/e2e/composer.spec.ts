@@ -107,7 +107,7 @@ test('five static effort bars; max / ultra ignite only on selection, across four
   await expect(effort()).toHaveCount(0)
 })
 
-test('effort precedes model, keeps menu columns aligned, and uses a quiet Max palette', async () => {
+test('effort precedes model, keeps menu columns aligned, and uses a violet Max palette', async () => {
   const model = workspace().getByRole('button', { name: 'Model Selector', exact: true })
   const effortBox = (await effort().boundingBox())!, modelBox = (await model.boundingBox())!
   expect(effortBox.x + effortBox.width).toBeLessThanOrEqual(modelBox.x)
@@ -135,7 +135,7 @@ test('effort precedes model, keeps menu columns aligned, and uses a quiet Max pa
     const before = await measure()
     for (const row of before) expect(row).toEqual(before[0])
     await expect(panel().locator('.composer__effort-check svg')).toHaveCount(1)
-    expect(await effort().locator('.effort-signal').evaluate(node => getComputedStyle(node).color)).toBe(mode === 'light' ? 'rgb(86, 103, 161)' : 'rgb(170, 183, 234)')
+    expect(await effort().locator('.effort-signal').evaluate(node => getComputedStyle(node).color)).toBe(mode === 'light' ? 'rgb(106, 76, 255)' : 'rgb(169, 152, 255)')
     await panel().getByRole('button', { name: 'high', exact: true }).click()
     await effort().click(); await page.mouse.move(0, 0)
     expect(await measure()).toEqual(before)
@@ -144,7 +144,7 @@ test('effort precedes model, keeps menu columns aligned, and uses a quiet Max pa
   }
 })
 
-test('Ultra uses a static gradient that follows the theme palette without replaying selection feedback', async () => {
+test('Ultra uses one static gradient per colour mode, whatever the theme or wallpaper, without replaying selection feedback', async () => {
   await observeEffortSwitches()
   await page.evaluate(async () => {
     const api = window.studio as StudioApi
@@ -154,40 +154,29 @@ test('Ultra uses a static gradient that follows the theme palette without replay
   await selectEffort('ultra')
   await expect.poll(async () => (await switches()).length).toBe(1)
   await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
-  const gradient = () => effort().locator('.effort-signal i').first().evaluate(node => getComputedStyle(node).backgroundImage)
-  const palettes = new Set<string>()
+  const sample = async () => {
+    await expect(effort().locator('.effort-signal i')).toHaveCount(5)
+    expect(await effort().locator('.effort-signal').evaluate(node => node.getAnimations({ subtree: true }).length)).toBe(0)
+    return effort().locator('.effort-signal i').first().evaluate(node => getComputedStyle(node).backgroundImage)
+  }
+  const expected = {
+    light: 'linear-gradient(90deg, rgb(60, 120, 255), rgb(138, 77, 255) 52%, rgb(236, 74, 143))',
+    dark: 'linear-gradient(90deg, rgb(115, 160, 255), rgb(181, 144, 255) 52%, rgb(255, 128, 180))'
+  }
   for (const mode of ['light', 'dark'] as const) {
     await page.evaluate(async mode => { await (window.studio as StudioApi).settings.setMode({ mode }) }, mode)
     await expect(page.locator('html')).toHaveAttribute('data-scheme', mode)
+    await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'glass' }) })
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass')
     for (const color of ['aurora', 'mint', 'sunset', 'haze', 'none'] as const) {
       await page.evaluate(async color => { await (window.studio as StudioApi).settings.setGlassColor({ color }) }, color)
       await expect(page.locator('html')).toHaveAttribute('data-glass-color', color)
-      const image = await gradient()
-      expect(image).toContain('linear-gradient('); palettes.add(image)
-      await expect(effort().locator('.effort-signal i')).toHaveCount(5)
-      expect(await effort().locator('.effort-signal').evaluate(node => node.getAnimations({ subtree: true }).length)).toBe(0)
+      expect(await sample()).toBe(expected[mode])
     }
+    await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'solid' }) })
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'solid')
+    expect(await sample()).toBe(expected[mode])
   }
-  expect(palettes.size).toBe(10)
-  await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'solid' }) })
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'solid')
-  const neutral = await gradient()
-  await page.evaluate(async () => { await (window.studio as StudioApi).settings.setGlassColor({ color: 'sunset' }) })
-  expect(await gradient()).toBe(neutral)
-  // Respect the OS fallback even when the saved preference is glass.
-  await app.evaluate(({ nativeTheme }) => {
-    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => true })
-    nativeTheme.emit('updated')
-  })
-  await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'glass' }) })
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'solid')
-  expect(await gradient()).toBe(neutral)
-  await app.evaluate(({ nativeTheme }) => {
-    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => false })
-    nativeTheme.emit('updated')
-  })
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass')
-  expect(await gradient()).not.toBe(neutral)
   expect(await switches()).toHaveLength(1)
 })
 
