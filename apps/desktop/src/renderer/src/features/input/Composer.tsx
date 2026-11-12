@@ -157,7 +157,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
   const modelMissing = !!model && !!catalog && !catalog.error && !catalog.models.some(item => item.id === model)
   const effortMissing = !!reasoningEffort && !!catalog && !catalog.error && !effortLevels.includes(reasoningEffort)
   const effortOptions = [...new Set([...effortLevels, ...(effortMissing ? [reasoningEffort] : [])])]
-  const modelLabel = model ? selectedModel?.displayName ?? model : nativeDefault ? `${nativeDefault.displayName}（默认）` : 'CLI 默认'
+  const modelLabel = model ? selectedModel?.displayName ?? model : nativeDefault?.displayName ?? 'CLI 默认'
   const suggestions = useSuggestions({ draftKey, text, input, active, cli, skills, loadSkills, report: setNotice, inlineReferences: draft?.inlineReferences ?? [] })
   const operationError = errors[id] || (session && (errors[`stop:${session.id}`] || errors[`effort:${session.id}`] || errors[`model:${session.id}`]))
   return <div className="composer" ref={root}>
@@ -232,7 +232,7 @@ export function Composer({ draftKey, active, originViewId = null }: ComposerProp
           </ControlMenu>}
           <ControlMenu key={`model:${id}:${cli}`} label="Model Selector" title={modelLabel} className="composer__model-control" disabled={!cli || !catalog || !!catalog.error || catalogLoading || !!(session && pending[`model:${session.id}`])} trigger={<><span className="composer__model-name">{modelLabel}</span><Icon name="chevron" size={12} /></>}>
             <div className="composer__menu-heading">模型</div>
-            <button className="menu-item" aria-pressed={model === null} onClick={() => setModel(null)}><span>{nativeDefault ? `${nativeDefault.displayName}（默认）` : 'CLI 默认'}</span>{model === null && <Icon name="check" size={13} />}</button>
+            <button className="menu-item" aria-pressed={model === null} onClick={() => setModel(null)}><span>{nativeDefault?.displayName ?? 'CLI 默认'}</span><span className="menu-item__meta">{nativeDefault && '默认'}{model === null && <Icon name="check" size={13} />}</span></button>
             {knownModels.map(item => <button className="menu-item" key={item.id} aria-pressed={model === item.id} onClick={() => setModel(item.id)}><span>{item.displayName}</span>{model === item.id && <Icon name="check" size={13} />}</button>)}
             {model && !knownModels.some(item => item.id === model) && <button className="menu-item" aria-pressed onClick={() => setModel(model)}>{model}（目录未列出）<Icon name="check" size={13} /></button>}
           </ControlMenu>

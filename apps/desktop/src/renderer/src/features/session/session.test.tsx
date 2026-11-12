@@ -394,6 +394,17 @@ describe('Composer · FR-CHAT/INPUT · AC-02/05', () => {
     expect(api.setModel).not.toHaveBeenCalledWith({ sessionId: 's', model: null })
     await waitFor(() => expect(api.send).toHaveBeenCalledWith(expect.objectContaining({ text: 'Next' })))
   })
+  it('shows the CLI default model by name and marks the default item in the menu', async () => {
+    await mount()
+    const picker = screen.getByRole('button', { name: 'Model Selector' })
+    expect(picker.textContent).toBe('Model One')
+    fireEvent.click(picker)
+    const [followDefault, explicit] = screen.getAllByRole('button', { name: /^Model One/ })
+    expect(followDefault!.getAttribute('aria-pressed')).toBe('true')
+    expect(followDefault!.querySelector('.menu-item__meta')?.textContent).toBe('默认')
+    expect(explicit!.getAttribute('aria-pressed')).toBe('false')
+    expect(explicit!.querySelector('.menu-item__meta')).toBeNull()
+  })
   it('selects native max/ultra, exposes the current effort, and preserves unknown values across model changes', async () => {
     vi.mocked(api.getModels).mockResolvedValue({ models: [{ id: 'm1', displayName: 'Model One', isDefault: true, reasoningEfforts: ['low', 'max', 'ultra'] }, { id: 'm2', displayName: 'Model Two' }], error: null })
     await mount({ text: 'Keep this' })
