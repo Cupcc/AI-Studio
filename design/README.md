@@ -59,7 +59,7 @@ design/
 | 高保真界面 | 工作台界面规范化 v01（2026-11-12 确认），见 [screens](screens/README.md#3-方案索引)；Session 与 Project View 主界面尚无 |
 | 应用图标 | 本机采用的版本与确认范围见[图标索引](icons/README.md#本机采用) |
 | 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) 基线；工具行为、原型 v01 对齐后的组件修订与原型 v02 的 Conversation 修订均已确认，见 [Shell Spec v02](components/shell-spec-v02.md)；外观主题与设置见其第 12 节（2026-10-12 确认，diff 待审阅） |
-| 外观主题 | 毛玻璃（默认）取自交互原型 v04，纯色（浅色）取自 v03，均保留；颜色模式默认跟随系统，深色取值与“纯色”名称已按 SET-Q6 / Q7 确认（2026-10-18，[DEC-20](<../docs/07. Decisions.md#dec-20-terminal-视觉取舍与深色主题方案>)）；见 [prototypes](prototypes/README.md#3-原型索引) |
+| 外观主题 | 毛玻璃取自交互原型 v04，纯色（浅色）取自 v03；2026-11-12 起设置只保留毛玻璃，纯色仅作“降低透明度”回退（[DEC-31](<../docs/07. Decisions.md#dec-31-设置移除纯色主题选项>)）；颜色模式默认跟随系统，深色取值与“纯色”名称已按 SET-Q6 / Q7 确认（2026-10-18，[DEC-20](<../docs/07. Decisions.md#dec-20-terminal-视觉取舍与深色主题方案>)）；见 [prototypes](prototypes/README.md#3-原型索引) |
 | 交互原型 | [v06](prototypes/README.md#studio-灰度交互原型-v06) 的 UI 采用范围见[采用记录](layout-ux-review-v02.md#6-采用记录)，继承既有主题与未改动组件 |
 
 方案确认后，在本节添加所采用版本的文件链接或原型链接。各版本的状态、确认日期和探索中的版本只记录在对应目录索引；探索稿继续保留在对应目录。

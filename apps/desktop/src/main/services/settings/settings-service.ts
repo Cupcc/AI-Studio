@@ -3,18 +3,17 @@
 // without Electron; ../../window/appearance.ts applies the result to windows.
 import type { DatabaseSync } from 'node:sqlite'
 import {
-  appearanceOf, DEFAULT_PREFERENCES, isColorMode, isGlassColor, isThemePreference,
-  type AppearancePreferences, type AppearanceState, type AppearanceSystem, type ColorMode, type GlassColor, type ThemePreference
+  appearanceOf, DEFAULT_PREFERENCES, isColorMode, isGlassColor,
+  type AppearancePreferences, type AppearanceState, type AppearanceSystem, type ColorMode, type GlassColor
 } from '@shared/ipc/settings'
 import { getAppMeta, setAppMeta } from '../database/app-meta'
 
-/** app_meta keys of the appearance preferences (SET-T3). */
+/** app_meta keys of the appearance preferences (SET-T3). A theme saved by earlier versions is ignored. */
 export const META_KEYS = {
-  theme: 'settings.appearance.theme',
   glassColor: 'settings.appearance.glassColor',
   mode: 'settings.appearance.mode'
 } as const satisfies Record<keyof AppearancePreferences, string>
-const VALID = { theme: isThemePreference, glassColor: isGlassColor, mode: isColorMode }
+const VALID = { glassColor: isGlassColor, mode: isColorMode }
 
 export interface AppearanceProbe {
   /** macOS "Reduce transparency"; read on every refresh, never cached. */
@@ -28,7 +27,6 @@ export interface AppearanceProbe {
 export interface SettingsService {
   appearance(): AppearanceState
   /** Each setter saves its preference; listeners hear about it only when the appearance changed. */
-  setTheme(theme: ThemePreference): AppearanceState
   setGlassColor(color: GlassColor): AppearanceState
   setMode(mode: ColorMode): AppearanceState
   /** Re-reads the system state and notifies listeners if the appearance changed. */
@@ -48,7 +46,7 @@ export function createSettingsService(options: { db: () => DatabaseSync; system:
         const stored = getAppMeta(options.db(), META_KEYS[key])
         return (VALID[key](stored) ? stored : DEFAULT_PREFERENCES[key]) as AppearancePreferences[K]
       }
-      saved = { theme: load('theme'), glassColor: load('glassColor'), mode: load('mode') }
+      saved = { glassColor: load('glassColor'), mode: load('mode') }
       options.system.applyMode(saved.mode)
     }
     return saved
@@ -68,7 +66,6 @@ export function createSettingsService(options: { db: () => DatabaseSync; system:
   }
   return {
     appearance: current,
-    setTheme: (theme) => save('theme', theme),
     setGlassColor: (color) => save('glassColor', color),
     setMode: (mode) => save('mode', mode),
     refreshSystem() {

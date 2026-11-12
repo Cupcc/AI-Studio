@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { StudioApi } from '@shared/ipc/contracts'
-import { appearanceOf, type AppearanceState, type ColorMode, type GlassColor, type ThemePreference } from '@shared/ipc/settings'
+import { appearanceOf, type AppearanceState, type ColorMode, type GlassColor } from '@shared/ipc/settings'
 import { SettingsDialog } from './SettingsDialog'
 import { installSettingsIntegration, SettingsEntry } from './integration'
 import { useSettings } from './store'
@@ -11,17 +11,16 @@ import { useSessions } from '../session/store'
 const initial = useSettings.getState()
 let state: AppearanceState
 let changed: ((state: AppearanceState) => void) | null, openRequested: (() => void) | null
-let setTheme: ReturnType<typeof vi.fn>, setGlassColor: ReturnType<typeof vi.fn>, setMode: ReturnType<typeof vi.fn>
+let setGlassColor: ReturnType<typeof vi.fn>, setMode: ReturnType<typeof vi.fn>
 beforeEach(() => {
   useSettings.setState(initial, true)
   for (const key of ['theme', 'scheme', 'glassColor']) delete document.documentElement.dataset[key]
   state = appearanceOf(); changed = null; openRequested = null
   const next = (change: Partial<AppearanceState>) => (state = appearanceOf({ ...state, ...change }, { ...state, ...change }))
-  setTheme = vi.fn(async ({ theme }: { theme: ThemePreference }) => next({ theme }))
   setGlassColor = vi.fn(async ({ color }: { color: GlassColor }) => next({ glassColor: color }))
   setMode = vi.fn(async ({ mode }: { mode: ColorMode }) => next({ mode, dark: mode === 'dark' }))
   Object.defineProperty(window, 'studio', { configurable: true, value: { settings: {
-    getAppearance: async () => state, setTheme, setGlassColor, setMode,
+    getAppearance: async () => state, setGlassColor, setMode,
     onAppearanceChanged: (cb: typeof changed) => { changed = cb; return () => { changed = null } },
     onOpenRequested: (cb: typeof openRequested) => { openRequested = cb; return () => { openRequested = null } }
   } } as unknown as StudioApi })
@@ -183,14 +182,14 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
   })
 
   it('applies the saved appearance to <html> before the first render and follows main-process changes', async () => {
-    state = appearanceOf({ theme: 'solid', glassColor: 'mint', mode: 'dark' }, { dark: true })
+    state = appearanceOf({ glassColor: 'mint', mode: 'dark' }, { dark: true })
     const integration = installSettingsIntegration()
     await integration.ready
-    expect({ ...document.documentElement.dataset }).toEqual({ theme: 'solid', scheme: 'dark', glassColor: 'mint' })
+    expect({ ...document.documentElement.dataset }).toEqual({ theme: 'glass', scheme: 'dark', glassColor: 'mint' })
     expect(shellIntegration().NavigationFooter).toBe(SettingsEntry)
     act(() => changed!(appearanceOf({}, { reducedTransparency: true })))
     expect({ ...document.documentElement.dataset }).toEqual({ theme: 'solid', scheme: 'light', glassColor: 'aurora' })
-    expect(useSettings.getState().appearance).toEqual({ theme: 'glass', glassColor: 'aurora', mode: 'system', reducedTransparency: true, dark: false, effective: 'solid' })
+    expect(useSettings.getState().appearance).toEqual({ glassColor: 'aurora', mode: 'system', reducedTransparency: true, dark: false, effective: 'solid' })
     act(() => openRequested!())
     expect(useSettings.getState().dialogOpen).toBe(true)
     integration.dispose()
@@ -204,39 +203,17 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
     expect(useSettings.getState().dialogOpen).toBe(true)
   })
 
-  it('shows the Appearance category with mode and theme radio groups; the current mode is checked and focused', async () => {
+  it('shows the Appearance category with mode and glass background radio groups, no theme choice; the current mode is checked and focused', async () => {
     await openDialog()
     expect(screen.getByRole('dialog', { name: '设置' })).toBeTruthy()
     expect(screen.getByRole('button', { name: '外观', current: 'page' })).toBeTruthy()
-    expect(screen.getByRole('radiogroup', { name: '主题' })).toBeTruthy()
-    expect(radio('毛玻璃').getAttribute('aria-checked')).toBe('true')
-    expect(radio('毛玻璃').textContent).toContain('默认')
-    expect(radio('纯色').getAttribute('aria-checked')).toBe('false')
-    expect(radio('纯色').tabIndex).toBe(-1)
+    expect(screen.getAllByRole('radiogroup').map((group) => group.getAttribute('aria-labelledby'))).toEqual(['settings-mode', 'settings-glass-color'])
+    expect(screen.queryByRole('radiogroup', { name: '主题' })).toBeNull()
+    expect(screen.queryByText('纯色')).toBeNull()
     expect(screen.queryByText('点选后立即生效。')).toBeNull()
     const modes = screen.getByRole('radiogroup', { name: '模式' })
     expect([...modes.querySelectorAll('[role=radio]')].map((el) => [el.textContent, el.getAttribute('aria-checked')])).toEqual([['跟随系统', 'true'], ['浅色', 'false'], ['深色', 'false']])
     expect(document.activeElement).toBe(radio('跟随系统'))
-  })
-
-  it('a click applies the theme at once and keeps the dialog open', async () => {
-    await openDialog()
-    await act(async () => { fireEvent.click(radio('纯色')) })
-    expect(setTheme).toHaveBeenCalledWith({ theme: 'solid' })
-    expect(document.documentElement.dataset.theme).toBe('solid')
-    expect(radio('纯色').getAttribute('aria-checked')).toBe('true')
-    expect(useSettings.getState().dialogOpen).toBe(true)
-    await act(async () => { fireEvent.click(radio('纯色')) })
-    expect(setTheme).toHaveBeenCalledTimes(1)
-  })
-
-  it('arrow keys move and select within the radio group', async () => {
-    await openDialog()
-    await act(async () => { fireEvent.keyDown(radio('毛玻璃'), { key: 'ArrowRight' }) })
-    expect(setTheme).toHaveBeenLastCalledWith({ theme: 'solid' })
-    expect(document.activeElement).toBe(radio('纯色'))
-    await act(async () => { fireEvent.keyDown(radio('纯色'), { key: 'ArrowRight' }) })
-    expect(setTheme).toHaveBeenLastCalledWith({ theme: 'glass' })
   })
 
   it('closes on Esc, the close button and a click outside, returning focus', async () => {
@@ -260,28 +237,31 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
     expect(useSettings.getState().dialogOpen).toBe(true)
     const close = screen.getByRole('button', { name: '关闭设置' })
     close.focus()
-    // Order: close, category, checked mode, checked theme, checked glass colour (one tab stop per radio group).
+    // Order: close, category, checked mode, checked glass colour (one tab stop per radio group).
     fireEvent.keyDown(close, { key: 'Tab', shiftKey: true })
     expect(document.activeElement).toBe(screen.getByRole('radio', { name: '极光' }))
     fireEvent.keyDown(document.activeElement!, { key: 'Tab' })
     expect(document.activeElement).toBe(close)
   })
 
-  it('explains "Reduce transparency" only for a glass choice, and reports a failed save', async () => {
-    useSettings.setState({ appearance: appearanceOf({}, { reducedTransparency: true }) })
+  it('explains "Reduce transparency" while it shows solid, and reports a failed save', async () => {
+    state = appearanceOf({}, { reducedTransparency: true })
+    useSettings.setState({ appearance: state })
     await openDialog()
-    expect(screen.getByRole('status').textContent).toContain('降低透明度')
-    setTheme.mockRejectedValueOnce(new Error('disk full'))
+    expect(screen.getByRole('status').textContent).toBe('系统已开启“降低透明度”，当前显示为纯色外观。')
+    setGlassColor.mockRejectedValueOnce(new Error('disk full'))
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    await act(async () => { fireEvent.click(radio('纯色')) })
+    await act(async () => { fireEvent.click(radio('薄荷')) })
     expect(screen.getByRole('alert').textContent).toBe('未能保存外观设置。')
-    expect(radio('毛玻璃').getAttribute('aria-checked')).toBe('true')
-    await act(async () => { fireEvent.click(radio('纯色')) })
+    expect(radio('极光').getAttribute('aria-checked')).toBe('true')
+    await act(async () => { fireEvent.click(radio('薄荷')) })
     await waitFor(() => expect(screen.queryByRole('alert')).toBeNull())
-    expect(screen.queryByRole('status')).toBeNull()
+    // The colour is kept for when transparency returns; the note stays while the system setting is on.
+    expect(radio('薄荷').getAttribute('aria-checked')).toBe('true')
+    expect(screen.getByRole('status').textContent).toBe('系统已开启“降低透明度”，当前显示为纯色外观。')
   })
 
-  it('offers glass background colours only for the glass theme; a click applies one at once (SET-Q5)', async () => {
+  it('offers the glass background colours; a click applies one at once (SET-Q5)', async () => {
     await openDialog()
     const group = screen.getByRole('radiogroup', { name: '毛玻璃背景' })
     const swatch = (name: string) => screen.getByRole('radio', { name })
@@ -294,8 +274,6 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
     await act(async () => { fireEvent.keyDown(swatch('薄荷'), { key: 'ArrowLeft' }) })
     expect(setGlassColor).toHaveBeenLastCalledWith({ color: 'aurora' })
     expect(document.activeElement).toBe(swatch('极光'))
-    await act(async () => { fireEvent.click(radio('纯色')) })
-    expect(screen.queryByRole('radiogroup', { name: '毛玻璃背景' })).toBeNull()
   })
 
   it('the colour mode applies at once and sets the scheme on <html> (FR-SET-002, 2026-10-12)', async () => {

@@ -41,7 +41,6 @@ async function openProject(name: string) {
 }
 const html = () => page.locator('html')
 const dialog = () => page.getByRole('dialog', { name: '设置' })
-const themeRadio = (name: '毛玻璃' | '纯色') => dialog().getByRole('radio', { name: new RegExp(`^${name}`) })
 const modeRadio = (name: '跟随系统' | '浅色' | '深色') => dialog().getByRole('radiogroup', { name: '模式' }).getByRole('radio', { name, exact: true })
 const colorRadio = (name: string) => dialog().getByRole('radiogroup', { name: '毛玻璃背景' }).getByRole('radio', { name, exact: true })
 /** Native window background: getBackgroundColor() drops alpha, so the glass window's transparent colour reads #000000. */
@@ -93,7 +92,10 @@ test('FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one 
   await menuSettings(); await expect(dialog()).toBeVisible()
   await menuSettings(); await expect(page.getByRole('dialog')).toHaveCount(1)
   await expect(dialog().getByRole('button', { name: '外观', exact: true })).toHaveAttribute('aria-current', 'page')
-  await expect(themeRadio('毛玻璃')).toHaveAttribute('aria-checked', 'true')
+  // Appearance offers the mode and the glass background only; there is no theme choice (2026-11-12).
+  await expect(dialog().getByRole('radiogroup')).toHaveCount(2)
+  await expect(dialog().getByRole('radiogroup', { name: '主题' })).toHaveCount(0)
+  await expect(dialog().getByText('纯色')).toHaveCount(0)
   await expect(modeRadio('跟随系统')).toBeFocused()
   await page.keyboard.press('Escape'); await expect(dialog()).toHaveCount(0)
 
@@ -115,31 +117,19 @@ test('FR-SET-001 · AC-08: the navigation entry, the menu bar and ⌘, open one 
   await page.mouse.click(30, 780); await expect(dialog()).toHaveCount(0)
 })
 
-test('FR-SET-002 · AC-08: solid applies at once, keeps the workspace as it was, and survives a restart', async () => {
+test('FR-SET-002 · AC-08: the solid fallback applies at once and keeps the workspace as it was', async () => {
   await openProject('Theme Project')
   await page.getByRole('button', { name: '架构', exact: true }).click()
   await page.getByRole('textbox', { name: '消息', exact: true }).fill('草稿保持不变')
-  await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
-  await themeRadio('纯色').click()
+  await setReducedTransparency(true)
   await expect(html()).toHaveAttribute('data-theme', 'solid')
   await expect.poll(windowBackground).toBe(SOLID_LIGHT)
-  await expect(themeRadio('纯色')).toHaveAttribute('aria-checked', 'true')
-  await expect(dialog()).toBeVisible()
-  await expect(dialog().getByRole('radiogroup', { name: '毛玻璃背景' })).toHaveCount(0)
-  await snap('settings-dialog-solid')
-  await page.keyboard.press('Escape')
   await expect(page.getByRole('button', { name: '架构', exact: true })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('textbox', { name: '消息', exact: true })).toHaveText('草稿保持不变')
   expect(await page.evaluate(() => [getComputedStyle(document.querySelector('.topbar')!).backgroundColor, getComputedStyle(document.querySelector('.project-tab')!).borderRadius]))
     .toEqual(['rgb(239, 238, 235)', '8px 8px 0px 0px'])
   await snap('solid-architecture-1280')
-
-  await relaunch()
-  // The first render waits for the saved appearance, so the shell never appears in the other theme.
-  expect(await page.evaluate(() => document.documentElement.dataset.theme)).toBe('solid')
-  expect(await windowBackground()).toBe(SOLID_LIGHT)
-  await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
-  await themeRadio('毛玻璃').click()
+  await setReducedTransparency(false)
   await expect(html()).toHaveAttribute('data-theme', 'glass')
   await expect.poll(windowBackground).toBe(TRANSPARENT)
 })
@@ -172,7 +162,7 @@ async function mutedContrast(): Promise<number> {
   }, png)
 }
 
-test('FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist, keep text readable; "none" leaves the material', async () => {
+test('FR-SET-002 · AC-08: glass colours apply at once, persist, keep text readable; "none" leaves the material', async () => {
   await openProject('Colour Project')
   await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
   await expect(colorRadio('极光')).toHaveAttribute('aria-checked', 'true')
@@ -192,9 +182,6 @@ test('FR-SET-002 · AC-08: glass colours apply at once, hide for solid, persist,
   await colorRadio('无').click()
   await expect(html()).toHaveAttribute('data-glass-color', 'none')
   expect(await page.evaluate(() => getComputedStyle(document.body, '::before').content)).toBe('none')
-  await themeRadio('纯色').click()
-  await expect(dialog().getByRole('radiogroup', { name: '毛玻璃背景' })).toHaveCount(0)
-  await themeRadio('毛玻璃').click()
   await expect(colorRadio('无')).toHaveAttribute('aria-checked', 'true')
   await colorRadio('晚霞').click()
   await relaunch()
@@ -207,8 +194,11 @@ test('FR-SET-002 · AC-08: "Reduce transparency" shows solid with a note, and gl
   await expect(html()).toHaveAttribute('data-theme', 'solid')
   await expect.poll(windowBackground).toBe(SOLID_LIGHT)
   await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
-  await expect(themeRadio('毛玻璃')).toHaveAttribute('aria-checked', 'true')
   await expect(dialog().getByRole('status')).toHaveText('系统已开启“降低透明度”，当前显示为纯色外观。')
+  // The glass colour stays selectable and is kept for when transparency returns.
+  await colorRadio('薄荷').click()
+  await expect(html()).toHaveAttribute('data-glass-color', 'mint')
+  await expect(html()).toHaveAttribute('data-theme', 'solid')
   await snap('reduced-transparency')
   await setReducedTransparency(false)
   await expect(html()).toHaveAttribute('data-theme', 'glass')
@@ -246,7 +236,7 @@ test('FR-SET-002 · AC-08: the colour mode follows the system by default; light 
     await snap(`glass-dark-${name === '无' ? 'none' : 'aurora'}-1280`)
     await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
   }
-  await themeRadio('纯色').click()
+  await setReducedTransparency(true)
   await expect.poll(windowBackground).toBe(SOLID_DARK)
   await page.keyboard.press('Escape')
   contrast.solid = await mutedContrast()
@@ -257,7 +247,9 @@ test('FR-SET-002 · AC-08: the colour mode follows the system by default; light 
   await relaunch()
   await setSystemDark(false)
   await expect(html()).toHaveAttribute('data-scheme', 'dark')
-  expect(await windowBackground()).toBe(SOLID_DARK)
+  await expect(html()).toHaveAttribute('data-theme', 'glass')
+  await setReducedTransparency(true)
+  await expect.poll(windowBackground).toBe(SOLID_DARK)
   await page.locator('.navigation__footer').getByRole('button', { name: '设置', exact: true }).click()
   await modeRadio('浅色').click()
   await expect(html()).toHaveAttribute('data-scheme', 'light')

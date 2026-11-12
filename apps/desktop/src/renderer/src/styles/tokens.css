@@ -9,7 +9,8 @@
  * 2026-11-11 readability revision (design/visual-direction.md §1.1). Keep
  * every visual value here so that a revision touches one file. Layout sizes
  * follow Shell Spec v01 §1–2. Appearances (Product Definition principle 23;
- * FR-SET-002, 2026-10-12): theme solid or glass × colour mode light or dark.
+ * FR-SET-002): theme glass, or solid while macOS "Reduce transparency" is on
+ * (not user-selectable since 2026-11-12) × colour mode light or dark.
  *   :root                                      solid, light (prototypes v01–v03)
  *   :root[data-theme="glass"]                  glass, light (prototype v04, layer "适中")
  *   :root[data-scheme="dark"]                  dark colours of the solid theme
@@ -65,7 +66,6 @@
   --settings-dialog-width: 640px;
   --settings-dialog-height: 520px;
   --settings-categories-width: 160px;
-  --theme-preview-height: 96px;
   --glass-swatch-size: 28px;
   --glass-color-width: 52px;
   --dialog-padding: 20px 22px;
@@ -212,17 +212,8 @@
   --backdrop-floating: none;
   --canvas-gutter: 0px;
 
-  /* Settings theme sketches: each theme's own colours, shown in either theme */
+  /* Frame of the glass background swatches in settings */
   --preview-frame: rgba(0, 0, 0, .1);
-  --preview-solid-bar: #efeeeb;
-  --preview-solid-nav: #f7f7f5;
-  --preview-solid-canvas: #ffffff;
-  --preview-solid-ink: #e6e5e0;
-  --preview-solid-input: #d9d8d3;
-  --preview-glass-tint: rgba(244, 244, 242, .5);
-  --preview-glass-canvas: rgba(255, 255, 255, .42);
-  --preview-glass-ink: rgba(255, 255, 255, .85);
-  --preview-glass-input: rgba(255, 255, 255, .9);
   /* Workbench host (T20261112-workbench-ui-polish): text of the needs-input tinted "草稿" chip, >= 4.5:1 on --color-needs-input-bg */
   --color-needs-input-text: #9a5512;
 }
@@ -355,15 +346,6 @@
   --shadow-floating: 0 4px 14px rgba(0, 0, 0, .4);
 
   --preview-frame: rgba(255, 255, 255, .12);
-  --preview-solid-bar: #171717;
-  --preview-solid-nav: #1a1a1a;
-  --preview-solid-canvas: #212121;
-  --preview-solid-ink: #3a3a3a;
-  --preview-solid-input: #4a4a4a;
-  --preview-glass-tint: rgba(22, 22, 24, .5);
-  --preview-glass-canvas: rgba(255, 255, 255, .08);
-  --preview-glass-ink: rgba(255, 255, 255, .22);
-  --preview-glass-input: rgba(255, 255, 255, .18);
   /* Workbench host (T20261112-workbench-ui-polish): text of the needs-input tinted "草稿" chip, >= 4.5:1 on --color-needs-input-bg */
   --color-needs-input-text: #f59e0b;
 }
@@ -427,13 +409,13 @@
 
 /* Glass background colours (user request 2026-10-12; palette and default confirmed 2026-10-12, specs/settings/spec.md SET-Q5).
    Aurora and mint are prototype v04's sample wallpapers A and B. Any element with data-glass-color gets its
-   --glass-wall: <html> for the window, and the settings previews and swatches for themselves. */
+   --glass-wall: <html> for the window, and the settings swatches for themselves. */
 :root {
   --glass-wall-aurora: radial-gradient(34% 44% at 9% 14%, #a9c1f2, transparent 72%), radial-gradient(32% 44% at 16% 76%, #d3bff0, transparent 72%), radial-gradient(38% 46% at 50% 38%, #c4d3f6, transparent 72%), radial-gradient(36% 46% at 88% 18%, #b9dced, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f4c6b2, transparent 72%), radial-gradient(30% 40% at 48% 100%, #efcde3, transparent 72%), #e3e5ee;
   --glass-wall-mint: radial-gradient(34% 44% at 9% 14%, #bfe3cd, transparent 72%), radial-gradient(32% 44% at 16% 76%, #b6d5ea, transparent 72%), radial-gradient(38% 46% at 50% 38%, #f0e1b6, transparent 72%), radial-gradient(36% 46% at 88% 18%, #cbe5be, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f2cda6, transparent 72%), radial-gradient(30% 40% at 48% 100%, #c6e0e6, transparent 72%), #e6e9e4;
   --glass-wall-sunset: radial-gradient(34% 44% at 9% 14%, #f6c9b4, transparent 72%), radial-gradient(32% 44% at 16% 76%, #f2c2d6, transparent 72%), radial-gradient(38% 46% at 50% 38%, #f7dcc0, transparent 72%), radial-gradient(36% 46% at 88% 18%, #e3c6ee, transparent 72%), radial-gradient(40% 48% at 84% 88%, #f5d3a8, transparent 72%), radial-gradient(30% 40% at 48% 100%, #f0c4c4, transparent 72%), #efe6e3;
   --glass-wall-haze: radial-gradient(34% 44% at 9% 14%, #c9d3df, transparent 72%), radial-gradient(32% 44% at 16% 76%, #d5d9e3, transparent 72%), radial-gradient(38% 46% at 50% 38%, #cfd8e2, transparent 72%), radial-gradient(36% 46% at 88% 18%, #c4d5e0, transparent 72%), radial-gradient(40% 48% at 84% 88%, #dcd8d4, transparent 72%), radial-gradient(30% 40% at 48% 100%, #d2dbe4, transparent 72%), #e2e5e9;
-  /* 'none': only the native material; the swatch and preview show a plain grey stand-in */
+  /* 'none': only the native material; the swatch shows a plain grey stand-in */
   --glass-wall-none: #dedede;
   --glass-wall: var(--glass-wall-aurora);
   /* Over the wall, as in v04: the glass tint, then a faint grain so blurred gradients do not band */

@@ -2,10 +2,11 @@
 // FR-SET-001, FR-SET-002).
 import { defineContract, event, invoke } from './contract'
 
-/** Glass (prototype v04, default) or solid (prototype v03 in light mode); 2026-10-12 confirmation. */
-export const THEME_PREFERENCES = ['glass', 'solid'] as const
-export type ThemePreference = (typeof THEME_PREFERENCES)[number]
-export const DEFAULT_THEME: ThemePreference = 'glass'
+/**
+ * What the window shows: glass (prototype v04), or solid (prototype v03 in light mode) while macOS
+ * "Reduce transparency" is on. Users no longer choose a theme (user decision 2026-11-12, DEC-31).
+ */
+export type Theme = 'glass' | 'solid'
 
 /** Colour mode: follows the system by default, or forced light / dark (2026-10-12 confirmation). */
 export const COLOR_MODES = ['system', 'light', 'dark'] as const
@@ -22,8 +23,7 @@ export type GlassColor = (typeof GLASS_COLORS)[number]
 export const DEFAULT_GLASS_COLOR: GlassColor = 'aurora'
 
 export interface AppearancePreferences {
-  theme: ThemePreference
-  /** Background colour of the glass theme; kept while solid is chosen. */
+  /** Background colour of the glass theme; kept while "Reduce transparency" shows solid. */
   glassColor: GlassColor
   mode: ColorMode
 }
@@ -36,30 +36,27 @@ export interface AppearanceSystem {
 }
 
 export interface AppearanceState extends AppearancePreferences, AppearanceSystem {
-  /** What the window shows: glass only when chosen and transparency is allowed (FR-SET-002). */
-  effective: ThemePreference
+  /** What the window shows: glass unless transparency is reduced (FR-SET-002). */
+  effective: Theme
 }
 
-export interface SetThemeRequest { theme: ThemePreference }
 export interface SetGlassColorRequest { color: GlassColor }
 export interface SetModeRequest { mode: ColorMode }
 
 const isOneOf = <T extends string>(values: readonly T[]) => (value: unknown): value is T => (values as readonly unknown[]).includes(value)
-export const isThemePreference = isOneOf(THEME_PREFERENCES)
 export const isGlassColor = isOneOf(GLASS_COLORS)
 export const isColorMode = isOneOf(COLOR_MODES)
 
-export const DEFAULT_PREFERENCES: AppearancePreferences = { theme: DEFAULT_THEME, glassColor: DEFAULT_GLASS_COLOR, mode: DEFAULT_COLOR_MODE }
+export const DEFAULT_PREFERENCES: AppearancePreferences = { glassColor: DEFAULT_GLASS_COLOR, mode: DEFAULT_COLOR_MODE }
 
 export function appearanceOf(preferences: Partial<AppearancePreferences> = {}, system: Partial<AppearanceSystem> = {}): AppearanceState {
   const p = { ...DEFAULT_PREFERENCES, ...preferences }, s = { reducedTransparency: false, dark: false, ...system }
-  return { ...p, ...s, effective: p.theme === 'glass' && !s.reducedTransparency ? 'glass' : 'solid' }
+  return { ...p, ...s, effective: s.reducedTransparency ? 'solid' : 'glass' }
 }
 
 export const settingsContract = defineContract('settings', {
   invoke: {
     getAppearance: invoke<void, AppearanceState>('settings:get-appearance'),
-    setTheme: invoke<SetThemeRequest, AppearanceState>('settings:set-theme'),
     setGlassColor: invoke<SetGlassColorRequest, AppearanceState>('settings:set-glass-color'),
     setMode: invoke<SetModeRequest, AppearanceState>('settings:set-mode')
   },

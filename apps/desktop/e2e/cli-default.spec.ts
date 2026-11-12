@@ -10,6 +10,14 @@ async function launch() {
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
   await expect(page.getByTestId('topbar')).toBeVisible()
+  await setReducedTransparency(false)
+}
+/** Solid shows only while macOS "Reduce transparency" is on; users no longer choose a theme (DEC-31). */
+async function setReducedTransparency(on: boolean) {
+  await app.evaluate(({ nativeTheme }, value) => {
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => value })
+    nativeTheme.emit('updated')
+  }, on)
 }
 async function openProject(name: string) {
   const path = join(dir, name); mkdirSync(path)
@@ -96,7 +104,7 @@ test('enabled CLI are shared across Projects and restart; disabled entries disap
   await expect(workspace().getByRole('button', { name: 'Send', exact: true })).toBeEnabled()
 })
 
-test('CLI header action stays fixed with a long list in both themes and colour modes', async () => {
+test('CLI header action stays fixed with a long list in both appearances and colour modes', async () => {
   // Layout-only fixture: additional disabled future providers, never selected or executed.
   const providers = await page.evaluate(() => window.studio.session.getProviders())
   await app.evaluate(({ ipcMain }, providers) => {
@@ -105,9 +113,10 @@ test('CLI header action stays fixed with a long list in both themes and colour m
   }, providers)
   await openProject('Layout')
   await workspace().getByRole('button', { name: '设置', exact: true }).click()
-  for (const theme of ['毛玻璃', '纯色']) for (const mode of ['浅色', '深色']) {
+  for (const theme of ['glass', 'solid'] as const) for (const mode of ['浅色', '深色']) {
+    await setReducedTransparency(theme === 'solid')
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
     await page.getByRole('button', { name: '外观', exact: true }).click()
-    await page.getByRole('radio', { name: new RegExp(`^${theme}`) }).click()
     await page.getByRole('radio', { name: mode, exact: true }).click()
     await page.getByRole('button', { name: 'CLI', exact: true }).click()
     const refresh = page.getByRole('button', { name: '重新检测', exact: true })

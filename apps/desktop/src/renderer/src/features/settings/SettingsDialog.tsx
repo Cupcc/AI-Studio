@@ -1,6 +1,6 @@
 import { CliConnectionPanel } from './CliConnectionPanel'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { COLOR_MODES, DEFAULT_THEME, GLASS_COLORS, THEME_PREFERENCES, type ColorMode, type GlassColor, type ThemePreference } from '@shared/ipc/settings'
+import { COLOR_MODES, GLASS_COLORS, type ColorMode, type GlassColor } from '@shared/ipc/settings'
 import type { SessionCli } from '@shared/session/types'
 import type { CliConnection } from '@shared/session/cli-connection'
 import type { CliInstallation } from '@shared/session/cli-installation'
@@ -9,14 +9,6 @@ import { Icon } from '../../app/Icon'
 import { cliName, useSessions } from '../session/store'
 import { sessionApi } from '../session/api'
 import { useSettings } from './store'
-
-/** Static sketch of a theme, independent of the theme currently shown (Shell Spec v02 §12). */
-function ThemePreview({ theme, glassColor }: { theme: ThemePreference; glassColor: GlassColor }) {
-  return <span className={`theme-preview theme-preview--${theme}`} data-glass-color={theme === 'glass' ? glassColor : undefined} aria-hidden="true">
-    <span className="theme-preview__bar" /><span className="theme-preview__nav" />
-    <span className="theme-preview__canvas"><span className="theme-preview__bubble" /><span className="theme-preview__line" /><span className="theme-preview__input" /></span>
-  </span>
-}
 
 /** Arrow keys move the checked option of a radio group, wrapping at the ends. */
 function arrowStep(event: KeyboardEvent): number {
@@ -150,13 +142,12 @@ function CliSettings() {
   </section>
 }
 
-/** FR-SET-001 / FR-SET-002: one "外观" category with mode, theme and glass-colour radio groups; choices apply at once. */
+/** FR-SET-001 / FR-SET-002: one "外观" category with mode and glass-colour radio groups; choices apply at once. */
 export function SettingsDialog() {
-  const { appearance, saveFailed, closeDialog, setTheme, setGlassColor, setMode } = useSettings()
+  const { appearance, saveFailed, closeDialog, setGlassColor, setMode } = useSettings()
   const dialog = useRef<HTMLDivElement>(null)
   const category = useSettings(state => state.category)
   const setCategory = (category: 'appearance' | 'cli') => useSettings.setState({ category })
-  const radios = useRef<Partial<Record<ThemePreference, HTMLButtonElement | null>>>({})
   const swatches = useRef<Partial<Record<GlassColor, HTMLButtonElement | null>>>({})
   const modes = useRef<Partial<Record<ColorMode, HTMLButtonElement | null>>>({})
   useEffect(() => {
@@ -166,7 +157,6 @@ export function SettingsDialog() {
     else dialog.current?.querySelector<HTMLButtonElement>('.settings-category[aria-current="page"]')?.focus()
     return () => previous?.focus()
   }, [])
-  const choose = (theme: ThemePreference) => { radios.current[theme]?.focus(); void setTheme(theme) }
   const chooseColor = (color: GlassColor) => { swatches.current[color]?.focus(); void setGlassColor(color) }
   const chooseMode = (mode: ColorMode) => { modes.current[mode]?.focus(); void setMode(mode) }
   const onKeyDown = (event: KeyboardEvent) => {
@@ -200,35 +190,20 @@ export function SettingsDialog() {
               </button>
             })}
           </div>
-          <h3 id="settings-theme" className="settings-dialog__subheading">{T.theme}</h3>
-          <div className="theme-options" role="radiogroup" aria-labelledby="settings-theme">
-            {THEME_PREFERENCES.map((theme, index) => {
-              const checked = appearance.theme === theme
-              return <button key={theme} ref={(el) => { radios.current[theme] = el }} className={`theme-option ${checked ? 'is-checked' : ''}`}
-                role="radio" aria-checked={checked} tabIndex={checked ? 0 : -1} data-theme-option={theme}
-                onClick={() => choose(theme)} onKeyDown={(event) => { const step = arrowStep(event); if (step) choose(wrap(THEME_PREFERENCES, index + step)) }}>
-                <ThemePreview theme={theme} glassColor={appearance.glassColor} />
-                <span className="theme-option__name">{T.themeNames[theme]}{theme === DEFAULT_THEME && <span className="theme-option__badge">{T.defaultBadge}</span>}{checked && <span className="theme-option__check"><Icon name="check" size={14} /></span>}</span>
-                <span className="theme-option__hint">{T.themeHints[theme]}</span>
+          <h3 id="settings-glass-color" className="settings-dialog__subheading">{T.glassColor}</h3>
+          <div className="glass-colors" role="radiogroup" aria-labelledby="settings-glass-color">
+            {GLASS_COLORS.map((color, index) => {
+              const checked = appearance.glassColor === color
+              return <button key={color} ref={(el) => { swatches.current[color] = el }} className={`glass-color ${checked ? 'is-checked' : ''}`}
+                role="radio" aria-checked={checked} tabIndex={checked ? 0 : -1} data-glass-color={color}
+                title={color === 'none' ? T.glassColorNone : undefined}
+                onClick={() => chooseColor(color)} onKeyDown={(event) => { const step = arrowStep(event); if (step) chooseColor(wrap(GLASS_COLORS, index + step)) }}>
+                <span className="glass-color__swatch" aria-hidden="true" />
+                <span className="glass-color__name">{T.glassColorNames[color]}</span>
               </button>
             })}
           </div>
-          {appearance.theme === 'glass' && <>
-            <h3 id="settings-glass-color" className="settings-dialog__subheading">{T.glassColor}</h3>
-            <div className="glass-colors" role="radiogroup" aria-labelledby="settings-glass-color">
-              {GLASS_COLORS.map((color, index) => {
-                const checked = appearance.glassColor === color
-                return <button key={color} ref={(el) => { swatches.current[color] = el }} className={`glass-color ${checked ? 'is-checked' : ''}`}
-                  role="radio" aria-checked={checked} tabIndex={checked ? 0 : -1} data-glass-color={color}
-                  title={color === 'none' ? T.glassColorNone : undefined}
-                  onClick={() => chooseColor(color)} onKeyDown={(event) => { const step = arrowStep(event); if (step) chooseColor(wrap(GLASS_COLORS, index + step)) }}>
-                  <span className="glass-color__swatch" aria-hidden="true" />
-                  <span className="glass-color__name">{T.glassColorNames[color]}</span>
-                </button>
-              })}
-            </div>
-          </>}
-          {appearance.theme === 'glass' && appearance.reducedTransparency && <p className="settings-note settings-note--notice" role="status">{T.reducedTransparency}</p>}
+          {appearance.reducedTransparency && <p className="settings-note settings-note--notice" role="status">{T.reducedTransparency}</p>}
           {saveFailed && <p className="error-message" role="alert">{T.saveFailed}</p>}
         </section>}
       </div>

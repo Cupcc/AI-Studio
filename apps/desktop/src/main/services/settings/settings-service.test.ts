@@ -19,7 +19,7 @@ function setup({ reduced = false, systemDark = false } = {}) {
   const service = () => createSettingsService({ db: () => db, system })
   return { db, system, service }
 }
-const base = { theme: 'glass', glassColor: 'aurora', mode: 'system', reducedTransparency: false, dark: false, effective: 'glass' }
+const base = { glassColor: 'aurora', mode: 'system', reducedTransparency: false, dark: false, effective: 'glass' }
 
 describe('settings service · FR-SET-002', () => {
   it('defaults to glass, aurora and the system mode, reading the system only when first asked', () => {
@@ -33,20 +33,18 @@ describe('settings service · FR-SET-002', () => {
   it('saves each choice app-wide so a new service (restart) starts with it and applies the saved mode', () => {
     const { db, system, service } = setup()
     const settings = service()
-    expect(settings.setTheme('solid')).toEqual({ ...base, theme: 'solid', effective: 'solid' })
     settings.setGlassColor('mint'); settings.setMode('dark')
-    expect(Object.values(META_KEYS).map((key) => getAppMeta(db, key))).toEqual(['solid', 'mint', 'dark'])
+    expect(Object.values(META_KEYS).map((key) => getAppMeta(db, key))).toEqual(['mint', 'dark'])
     system.applyMode.mockClear()
-    expect(service().appearance()).toEqual({ ...base, theme: 'solid', glassColor: 'mint', mode: 'dark', dark: true, effective: 'solid' })
+    expect(service().appearance()).toEqual({ ...base, glassColor: 'mint', mode: 'dark', dark: true })
     expect(system.applyMode).toHaveBeenCalledWith('dark')
   })
 
   it('treats unknown stored values as defaults and rejects unknown values', () => {
     const { db, service } = setup()
-    setAppMeta(db, META_KEYS.theme, 'white'); setAppMeta(db, META_KEYS.glassColor, 'rainbow'); setAppMeta(db, META_KEYS.mode, 'sepia')
+    setAppMeta(db, META_KEYS.glassColor, 'rainbow'); setAppMeta(db, META_KEYS.mode, 'sepia')
     const settings = service()
     expect(settings.appearance()).toEqual(base)
-    expect(() => settings.setTheme('white' as never)).toThrow()
     expect(() => settings.setGlassColor('rainbow' as never)).toThrow()
     expect(() => settings.setMode('sepia' as never)).toThrow()
     expect(getAppMeta(db, META_KEYS.mode)).toBe('sepia')
@@ -56,11 +54,11 @@ describe('settings service · FR-SET-002', () => {
     const { service } = setup()
     const settings = service(), listener = vi.fn()
     const off = settings.subscribe(listener)
-    settings.setTheme('glass'); settings.setMode('system')
+    settings.setGlassColor('aurora'); settings.setMode('system')
     expect(listener).not.toHaveBeenCalled()
-    settings.setTheme('solid')
-    expect(listener).toHaveBeenLastCalledWith({ ...base, theme: 'solid', effective: 'solid' })
-    off(); settings.setTheme('glass')
+    settings.setGlassColor('mint')
+    expect(listener).toHaveBeenLastCalledWith({ ...base, glassColor: 'mint' })
+    off(); settings.setGlassColor('aurora')
     expect(listener).toHaveBeenCalledTimes(1)
   })
 
@@ -98,14 +96,20 @@ describe('settings service · FR-SET-002', () => {
     expect(settings.appearance().effective).toBe('solid')
   })
 
-  it('keeps the glass colour while solid is chosen (SET-Q5)', () => {
-    const { service } = setup()
+  it('keeps the glass colour while "Reduce transparency" shows solid (SET-Q5)', () => {
+    const { system, service } = setup({ reduced: true })
     const settings = service(), listener = vi.fn()
     settings.subscribe(listener)
-    expect(settings.setGlassColor('mint')).toMatchObject({ glassColor: 'mint', effective: 'glass' })
+    expect(settings.setGlassColor('mint')).toMatchObject({ glassColor: 'mint', effective: 'solid' })
     settings.setGlassColor('mint')
     expect(listener).toHaveBeenCalledTimes(1)
-    settings.setTheme('solid')
-    expect(service().appearance()).toMatchObject({ theme: 'solid', glassColor: 'mint' })
+    system.reduced = false
+    expect(service().appearance()).toMatchObject({ glassColor: 'mint', effective: 'glass' })
+  })
+
+  it('ignores a solid theme saved by earlier versions, so the window shows glass (2026-11-12)', () => {
+    const { db, service } = setup()
+    setAppMeta(db, 'settings.appearance.theme', 'solid')
+    expect(service().appearance()).toEqual(base)
   })
 })

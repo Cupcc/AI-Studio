@@ -20,6 +20,14 @@ async function launch() {
     nativeTheme.emit('updated')
   })
 }
+/** Appearance setup: solid shows only while "Reduce transparency" is on. */
+async function useTheme(theme: 'glass' | 'solid') {
+  await app.evaluate(({ nativeTheme }, reduced) => {
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => reduced })
+    nativeTheme.emit('updated')
+  }, theme === 'solid')
+  await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
+}
 async function selectEffort(value: string) { await effort().click(); await panel().getByRole('button', { name: value, exact: true }).click() }
 async function observeEffortSwitches() {
   await page.evaluate(() => {
@@ -65,7 +73,7 @@ test('five static effort bars; max / ultra ignite only on selection, across four
   let selections = 0
   for (const theme of ['glass', 'solid'] as const) for (const mode of ['light', 'dark'] as const) {
     // Appearance setup only; effort selection is always through the UI.
-    await page.evaluate(async ({ theme, mode }) => { const api = window.studio as StudioApi; await api.settings.setTheme({ theme }); await api.settings.setMode({ mode }) }, { theme, mode })
+    await useTheme(theme); await page.evaluate(async mode => { await (window.studio as StudioApi).settings.setMode({ mode }) }, mode)
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
     await expect(page.locator('html')).toHaveAttribute('data-scheme', mode)
     for (const value of ['max', 'ultra']) {
@@ -112,10 +120,8 @@ test('effort precedes model, keeps menu columns aligned, and uses a violet Max p
   const effortBox = (await effort().boundingBox())!, modelBox = (await model.boundingBox())!
   expect(effortBox.x + effortBox.width).toBeLessThanOrEqual(modelBox.x)
   for (const theme of ['glass', 'solid'] as const) for (const mode of ['light', 'dark'] as const) {
-    await page.evaluate(async ({ theme, mode }) => {
-      await (window.studio as StudioApi).settings.setTheme({ theme })
-      await (window.studio as StudioApi).settings.setMode({ mode })
-    }, { theme, mode })
+    await useTheme(theme)
+    await page.evaluate(async mode => { await (window.studio as StudioApi).settings.setMode({ mode }) }, mode)
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
     await expect(page.locator('html')).toHaveAttribute('data-scheme', mode)
     await selectEffort('max')
@@ -147,8 +153,7 @@ test('effort precedes model, keeps menu columns aligned, and uses a violet Max p
 test('Ultra uses one static gradient per colour mode, whatever the theme or wallpaper, without replaying selection feedback', async () => {
   await observeEffortSwitches()
   await page.evaluate(async () => {
-    const api = window.studio as StudioApi
-    await api.settings.setTheme({ theme: 'glass' }); await api.settings.setMode({ mode: 'light' })
+    await (window.studio as StudioApi).settings.setMode({ mode: 'light' })
   })
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass')
   await selectEffort('ultra')
@@ -166,15 +171,13 @@ test('Ultra uses one static gradient per colour mode, whatever the theme or wall
   for (const mode of ['light', 'dark'] as const) {
     await page.evaluate(async mode => { await (window.studio as StudioApi).settings.setMode({ mode }) }, mode)
     await expect(page.locator('html')).toHaveAttribute('data-scheme', mode)
-    await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'glass' }) })
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'glass')
+    await useTheme('glass')
     for (const color of ['aurora', 'mint', 'sunset', 'haze', 'none'] as const) {
       await page.evaluate(async color => { await (window.studio as StudioApi).settings.setGlassColor({ color }) }, color)
       await expect(page.locator('html')).toHaveAttribute('data-glass-color', color)
       expect(await sample()).toBe(expected[mode])
     }
-    await page.evaluate(async () => { await (window.studio as StudioApi).settings.setTheme({ theme: 'solid' }) })
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'solid')
+    await useTheme('solid')
     expect(await sample()).toBe(expected[mode])
   }
   expect(await switches()).toHaveLength(1)

@@ -16,15 +16,11 @@ describe('settings feature handlers · specs/settings/spec.md §5', () => {
 
   it('getAppearance takes no input', async () => {
     expect(() => handlers.getAppearance.parse({})).toThrow(IpcValidationError)
-    expect(await handlers.getAppearance.handle(handlers.getAppearance.parse(undefined), ctx)).toEqual({ theme: 'glass', glassColor: 'aurora', mode: 'system', reducedTransparency: false, dark: false, effective: 'glass' })
+    expect(await handlers.getAppearance.handle(handlers.getAppearance.parse(undefined), ctx)).toEqual({ glassColor: 'aurora', mode: 'system', reducedTransparency: false, dark: false, effective: 'glass' })
   })
 
-  it('setTheme accepts exactly { theme: "glass" | "solid" }', async () => {
-    for (const bad of [undefined, null, 'solid', [], {}, { theme: 'white' }, { theme: 1 }, { theme: 'solid', extra: true }]) {
-      expect(() => handlers.setTheme.parse(bad)).toThrow(IpcValidationError)
-    }
-    expect(await handlers.setTheme.handle(handlers.setTheme.parse({ theme: 'solid' }), ctx)).toMatchObject({ theme: 'solid', effective: 'solid' })
-    expect(service.appearance().theme).toBe('solid')
+  it('offers no theme choice: solid only follows "Reduce transparency" (2026-11-12)', () => {
+    expect(Object.keys(handlers)).not.toContain('setTheme')
   })
 
   it('setGlassColor accepts exactly { color } with a known colour', async () => {

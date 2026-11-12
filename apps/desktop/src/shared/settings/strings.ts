@@ -1,6 +1,6 @@
 // Settings UI copy (FR-SET-001, FR-SET-002). Wording follows the 2026-10-12
-// confirmations; "纯色" for the non-glass theme is a proposal (specs/settings/spec.md SET-Q6).
-import type { ColorMode, GlassColor, ThemePreference } from '../ipc/settings'
+// confirmations; "纯色" names the reduced-transparency appearance (specs/settings/spec.md SET-Q6).
+import type { ColorMode, GlassColor } from '../ipc/settings'
 
 export const SETTINGS_STRINGS = {
   menuItem: '设置…',
@@ -17,13 +17,6 @@ export const SETTINGS_STRINGS = {
   cliSaveFailed: '未能保存默认 CLI 设置。',
   mode: '模式',
   modeNames: { system: '跟随系统', light: '浅色', dark: '深色' } satisfies Record<ColorMode, string>,
-  theme: '主题',
-  themeNames: { glass: '毛玻璃', solid: '纯色' } satisfies Record<ThemePreference, string>,
-  themeHints: {
-    glass: '透出并模糊窗口后方的桌面',
-    solid: '不透明的背景与中性色'
-  } satisfies Record<ThemePreference, string>,
-  defaultBadge: '默认',
   glassColor: '毛玻璃背景',
   glassColorNames: {
     aurora: '极光', mint: '薄荷', sunset: '晚霞', haze: '海雾', none: '无'

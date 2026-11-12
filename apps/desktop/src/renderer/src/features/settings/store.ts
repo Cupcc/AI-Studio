@@ -1,7 +1,7 @@
 // Settings dialog and appearance state (specs/settings/spec.md §3–4).
 import { create } from 'zustand'
 import type { FeatureBridge } from '@shared/ipc/contract'
-import { appearanceOf, type AppearanceState, type ColorMode, type GlassColor, type settingsContract, type ThemePreference } from '@shared/ipc/settings'
+import { appearanceOf, type AppearanceState, type ColorMode, type GlassColor, type settingsContract } from '@shared/ipc/settings'
 import { studio } from '../../lib/studio'
 
 export type SettingsApi = FeatureBridge<typeof settingsContract>
@@ -27,7 +27,6 @@ export interface SettingsState {
   watchEvents(): () => void
   openDialog(category?: 'appearance' | 'cli'): void
   closeDialog(): void
-  setTheme(theme: ThemePreference): Promise<void>
   setGlassColor(color: GlassColor): Promise<void>
   setMode(mode: ColorMode): Promise<void>
 }
@@ -61,9 +60,6 @@ export const useSettings = create<SettingsState>((set, get) => {
     },
     openDialog: (category = 'appearance') => set({ dialogOpen: true, category, saveFailed: false }),
     closeDialog: () => set({ dialogOpen: false }),
-    async setTheme(theme) {
-      if (theme !== get().appearance.theme) await save(() => settingsApi().setTheme({ theme }))
-    },
     async setGlassColor(color) {
       if (color !== get().appearance.glassColor) await save(() => settingsApi().setGlassColor({ color }))
     },

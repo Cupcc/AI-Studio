@@ -4,7 +4,6 @@ import { join } from 'node:path'
 import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
 import type { FeatureBridge } from '../src/shared/ipc/contract'
 import type { sessionContract } from '../src/shared/ipc/session'
-import type { settingsContract } from '../src/shared/ipc/settings'
 import type { SessionSummary } from '../src/shared/session/types'
 
 // T20261009-prototype-alignment (W3): captures the aligned shell at the three review widths
@@ -13,9 +12,9 @@ import type { SessionSummary } from '../src/shared/session/types'
 // T20261010-prototype-v02-alignment adds Markdown and equal message / composer edges (Shell Spec v02 §2.2).
 // T20261023-v06-ui-effort replaces the centred draft with v06's bottom composer and greeting starters.
 // T20261012-settings-theme runs the layout states in both appearances (Shell Spec v02 §12): glass, the
-// default, adds an 8px gutter right of and below the canvas; solid keeps the original geometry.
+// default, adds an 8px gutter right of and below the canvas; solid, the "Reduce transparency" fallback,
+// keeps the original geometry.
 type SessionApi = FeatureBridge<typeof sessionContract>
-type SettingsApi = FeatureBridge<typeof settingsContract>
 type Theme = 'glass' | 'solid'
 const appDir = join(__dirname, '..')
 const evidence = process.env.STUDIO_E2E_EVIDENCE_DIR ?? join(appDir, '../../.runtime/desktop-e2e/screenshots/alignment')
@@ -72,10 +71,13 @@ async function snap(state: string, width: number) {
   mkdirSync(evidence, { recursive: true })
   await page.screenshot({ path: join(evidence, `W3-${state}-${theme}-${width}.png`) })
 }
-/** Test preparation: the settings dialog itself is covered by settings.spec.ts. */
+/** Test preparation: solid shows only while "Reduce transparency" is on; settings.spec.ts covers the dialog. */
 async function useTheme(next: Theme) {
   theme = next
-  await page.evaluate((t) => (window.studio as unknown as { settings: SettingsApi }).settings.setTheme({ theme: t }), next)
+  await app.evaluate(({ nativeTheme }, reduced) => {
+    Object.defineProperty(nativeTheme, 'prefersReducedTransparency', { configurable: true, get: () => reduced })
+    nativeTheme.emit('updated')
+  }, next === 'solid')
   await expect(page.locator('html')).toHaveAttribute('data-theme', next)
 }
 /** Shell Spec v01 section 1 invariants for the visible Project workspace. */
