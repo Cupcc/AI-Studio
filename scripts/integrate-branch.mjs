@@ -71,8 +71,11 @@ export function integrateBranch({ branch, title, body = '', cwd = process.cwd() 
 
   // dev is an ancestor of the source, so the squash commit gets exactly the tree the task branch committed and checked.
   const squashed = git(['log', '--reverse', '--format=- %h %s', `${head}..${sourceCommit}`], cwd).trim().split('\n').map(line => line.slice(0, 100))
-  const message = [title.trim(), body.trim(), ['Squashed commits:', ...squashed].join('\n'),
-    `Source-Branch: ${branch}\nSource-Commit: ${sourceCommit}`].filter(Boolean).join('\n\n') + '\n'
+  // Git reads trailers only from the last paragraph, so the body's trailers move below the commit list.
+  const paragraphs = body.trim() ? body.trim().split(/\n\s*\n/) : []
+  const trailers = paragraphs.length && paragraphs.at(-1).split('\n').every(line => /^[\w-]+: \S/.test(line)) ? paragraphs.pop() : ''
+  const message = [title.trim(), paragraphs.join('\n\n'), ['Squashed commits:', ...squashed].join('\n'),
+    [trailers, `Source-Branch: ${branch}`, `Source-Commit: ${sourceCommit}`].filter(Boolean).join('\n')].filter(Boolean).join('\n\n') + '\n'
   lintMessage(message)
   const tree = git(['rev-parse', `${sourceCommit}^{tree}`], cwd).trim()
   const commit = execFileSync('git', ['commit-tree', tree, '-p', head, '-F', '-'], { cwd, input: message, encoding: 'utf8' }).trim()

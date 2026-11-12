@@ -60,6 +60,17 @@ test('squashes the task branch into one dev commit with the checked tree', () =>
   expect(git(['status', '--porcelain'], f.source)).toBe('')
 })
 
+test('keeps body trailers in the final trailer block', () => {
+  const f = fixture(), head = feature(f)
+  const body = 'Checked with the fixture.\nNote: the first line stays in the body.\n\nCo-Authored-By: Helper <helper@example.invalid>\n'
+  integrateBranch({ branch: 'feat/example', title, body, cwd: f.dev })
+  const message = git(['log', '-1', '--format=%B', 'HEAD'], f.dev)
+  expect(message).toContain('Checked with the fixture.\nNote: the first line stays in the body.\n\nSquashed commits:')
+  expect(git(['log', '-1', '--format=%(trailers:only,unfold)', 'HEAD'], f.dev).trim().split('\n')).toEqual([
+    'Co-Authored-By: Helper <helper@example.invalid>', 'Source-Branch: feat/example', `Source-Commit: ${head}`
+  ])
+})
+
 test('requires a Conventional Commit title before changing dev', () => {
   const f = fixture(); feature(f)
   expect(() => integrateBranch({ branch: 'feat/example', title: ' ', cwd: f.dev })).toThrow('--title')
