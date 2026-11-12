@@ -16,7 +16,8 @@ import type { editor } from 'monaco-editor/editor/editor.api.js'
  *   both backgrounds and on the persistent line tints (line highlight, inserted / removed diff lines). Transient
  *   overlays (selection, find matches, word-level diff highlights) may lower syntax colours to >= 3:1 on the worst glass;
  *   the default text stays >= 7:1 (>= 4.5:1 on the strongest emphasis tints). The thresholds live in the test.
- * - The app loads IBM Plex Mono 400 and 500 only (upright): no rule uses italic, and `strong` renders in the 500 face.
+ * - Code uses the system monospace face first (Menlo on macOS, which has bold and italic); the bundled fallback IBM Plex
+ *   Mono ships 400 and 500 only (upright), so no rule uses italic, and with Plex `strong` renders in the 500 face.
  *
  * Only data and plain functions here: no Monaco runtime import, so the panels and tests can load it freely.
  */

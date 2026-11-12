@@ -112,9 +112,12 @@
   --space-6: 24px;
   --space-8: 32px;
 
-  /* Typography */
-  --font-sans: 'IBM Plex Sans', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Typography: system fonts first, the bundled IBM Plex (`fonts.css`) as the last named fallback.
+     Simplified Chinese faces follow system-ui so Han text does not depend on <html lang> or the platform cascade.
+     Chromium does not support ui-monospace (WebKit does) and only sees 'SF Mono' when the user installed it, so on
+     macOS the mono stack resolves to Menlo. */
+  --font-sans: system-ui, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'IBM Plex Sans', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'IBM Plex Mono', monospace;
   --font-size-xs: 12px;
   --font-size-sm: 13px;
   --font-size-md: 14px;

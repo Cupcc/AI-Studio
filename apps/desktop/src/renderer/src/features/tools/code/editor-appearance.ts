@@ -14,9 +14,10 @@ export interface EditorAppearance {
  * Font and theme plumbing shared by both viewers, bound to the lifetime of one editor.
  *
  * - Font: the family comes from the `--font-mono` token. Monaco measures its character cell once per font string and caches
- *   it globally, so when IBM Plex Mono is still loading the editor must not measure the fallback face: the gate holds
- *   creation until the face is usable (at most `FONT_WAIT_MS`), the cache is cleared with `remeasureFonts()` if the wait was
- *   needed, and again whenever the document finishes loading more fonts (`loadingdone`).
+ *   it globally, so while the bundled fallback IBM Plex Mono in that stack is still loading the editor must not measure a
+ *   different face: the gate (`terminal-font.ts`) holds creation until the face is usable (at most `FONT_WAIT_MS`), the
+ *   cache is cleared with `remeasureFonts()` if the wait was needed, and again whenever the document finishes loading more
+ *   fonts (`loadingdone`).
  * - Theme: Monaco's theme is global. A MutationObserver on `<html data-scheme>` switches it live; open editors keep their
  *   model, scroll position and selection.
  */

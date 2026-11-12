@@ -15,12 +15,15 @@ type Fonts = Pick<FontFaceSet, 'check' | 'load' | 'addEventListener' | 'removeEv
 
 /**
  * xterm measures its cells when the terminal opens and after a resize that changes the grid, not when a web font
- * arrives. In a fresh app IBM Plex Mono is still `unloaded` at that point (it loads lazily), so the first fit used
- * fallback metrics (37 rows x 19px or 18px) and nothing corrected it. The gate starts the load, tells the screen to
- * hold its fits while that is outstanding, and reports later font loads so the screen can re-measure and refit.
+ * arrives. The `--font-mono` stack prefers system faces and names the bundled IBM Plex Mono as its fallback; where no
+ * system face matches, Plex is still `unloaded` at that point (it loads lazily), so the first fit used other metrics
+ * (37 rows x 19px or 18px) and nothing corrected it. The gate starts the load, tells the screen to hold its fits while
+ * that is outstanding, and reports later font loads so the screen can re-measure and refit. Chromium's `check()` skips
+ * installed families but still reports an unloaded web face in the list, so on macOS (Menlo) the gate waits once per
+ * document for the small local Plex file although Menlo is what renders; measuring Menlo early would be correct too.
  *
- * `font` is a CSS font shorthand such as `12px 'IBM Plex Mono', monospace`. Without `document.fonts` (jsdom) or when the
- * shorthand is rejected, the gate is never pending.
+ * `font` is a CSS font shorthand such as `12px Menlo, 'IBM Plex Mono', monospace`. Without `document.fonts` (jsdom) or
+ * when the shorthand is rejected, the gate is never pending.
  */
 export function createFontGate(font: string, options: { fonts?: Fonts; timeoutMs?: number } = {}): FontGate {
   const fonts = options.fonts ?? (typeof document === 'undefined' ? undefined : (document.fonts as Fonts | undefined))

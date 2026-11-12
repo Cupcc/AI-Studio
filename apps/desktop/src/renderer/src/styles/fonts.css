@@ -1,5 +1,5 @@
-/* IBM Plex (SIL OFL 1.1), bundled with the app: CSP allows fonts from 'self' only.
-   Latin subsets only; Chinese text falls back to the system PingFang SC. */
+/* IBM Plex (SIL OFL 1.1), bundled with the app as the fallback after the system fonts (`--font-sans` / `--font-mono`
+   in tokens.css): CSP allows fonts from 'self' only. Latin subsets only. A face is fetched only when it is needed. */
 @import '@fontsource/ibm-plex-sans/latin-400.css';
 @import '@fontsource/ibm-plex-sans/latin-500.css';
 @import '@fontsource/ibm-plex-sans/latin-600.css';
