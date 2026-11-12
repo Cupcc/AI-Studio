@@ -24,6 +24,7 @@
 | 尺寸复核 | 第 2 节尺寸需在交互原型中按 1024 / 1280 / 1440 宽度复核 |
 | 工具开发准备 | Browser 首轮边界、文件引用贯通与终端合并关闭确认按 DEC-14（2026-10-13 确认）；本次仅同步说明，不修改原型或实现应用，diff 待审阅 |
 | 工具基本操作与 Search | 当前工具行为按 DEC-25（2026-10-26 确认）及 [工具规格 §5.4](../../specs/tools/spec.md#54-vs-code-对齐2026-10-26)；新增 Search、Terminal 分屏和 Browser 共享持久数据取代首轮相应边界，diff 待审阅 |
+| 工作台界面规范化 | 第 4、8、10 节的导航文案、右侧区域顶栏、Preview 容器与空状态按用户 2026-11-12 确认更新（[DEC-30](<../../docs/07. Decisions.md#dec-30-工作台宿主精简系统字体与中文界面>)），设计稿见 [screens](../screens/README.md#3-方案索引)；diff 待审阅，实现待人工验收 |
 | 外观主题与设置 | 第 12 节依据用户 2026-10-12 对话确认新增（[DEC-12](<../../docs/07. Decisions.md#dec-12-外观主题与设置>)）；SET-Q1～Q5 已确认，“纯色”命名与深色取值待确认（[settings spec](../../specs/settings/spec.md) 第 1.1 节）；本次 diff 待审阅 |
 
 本文件中的颜色仅用于区分状态语义，具体色值见交互原型 v01；代码块高亮色见交互原型 v02。尺寸单位为 px。
@@ -75,9 +76,9 @@
 
 | 组件 | 尺寸 | 结构 | 状态 | 需求 |
 |---|---|---|---|---|
-| New Chat 分裂按钮 | 高 36 | 主区：图标 + New Chat，使用 Default CLI；右区：▾ 打开 CLI 菜单 | Default / Hover / Focus | FR-CHAT-001、FR-CHAT-002 |
+| New Chat 分裂按钮 | 高 36 | 主区：图标 + “新对话”，使用 Default CLI；右区：▾ 打开 CLI 菜单 | Default / Hover / Focus | FR-CHAT-001、FR-CHAT-002 |
 | CLI 菜单 | 宽 260 | 每项：CLI 名称、默认标记、“设为此 Project 默认”；不可用项禁用并说明原因 | Default / Hover / Disabled | FR-CHAT-002；UX D-11 |
-| 区域标题 | 高 28 | 工作台 / SESSIONS，小号标题（2026-11-11，DEC-29） | — | FR-NAV-001 |
+| 区域标题 | 高 28 | 工作台 / 对话，小号标题（2026-11-11，DEC-29；文案按 [NAV-Q13](../../specs/navigation/spec.md#12-已确认)）；“工作台”右侧为添加入口“+” | — | FR-NAV-001 |
 | 工作台项 | 高 32 | 图标 + 名称 | Default / Hover / Selected / Focus | FR-NAV-002 |
 | 日期分组标题 | 高 24 | 今天 / 昨天 / 过去 7 天 / 更早 | — | FR-NAV-003 |
 | Session 项 | 高 32 | CLI 标识 + 标题（单行截断）+ 右侧状态；悬停时在状态左侧显示 ⋯ | Default / Hover / Selected / Focus / Renaming | FR-NAV-003；UX P-D |
@@ -140,10 +141,10 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 |---|---|---|
 | Conversation 列顶栏 | 草稿：“新对话 · <View 名称>”；对话中：CLI 标识 + Session 标题 + 新建对话按钮 | UX P-A |
 | 最近对话块 | 草稿的底部输入框上方显示该 View 最近 3 条对话（按最近用户消息排序，无记录时不显示区块；DEC-23）；更早的对话在 Session History 中查找 | UX P-A |
-| 右侧区域顶栏 | 当前内容名称 + 更新时间 + 图标切换组：Preview ｜ Files、Search、Diff、Browser、Terminal | UX P-B；DEC-25 |
+| 右侧区域顶栏 | 当前内容名称 + 图标切换组：预览 ｜ Files、Search、Diff、Browser、Terminal；显示工作台页面时，名称后接状态标记，草稿在切换组前显示主按钮，切换组后为“更多操作”菜单，见[工作台规格 §9.7](../../specs/workbench/spec.md#生命周期与通用呈现) | UX P-B；DEC-25；DEC-30 |
 | 工具关闭入口 | 工具打开时，图标切换组右侧保留“关闭右侧工具”×；行为见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>) | UX 第 5 节；2026-10-11 确认 |
 | 图标提示 | 悬停 500ms 后在图标下方显示名称 | UX P-B |
-| Preview 容器 | 只读，可滚动与缩放；显示“已更新 · 时间”；示例数据标注“示例数据” | FR-VIEW-003；UX D-06 |
+| Preview 容器 | 只读，可滚动；宿主不提供缩放（DEC-30）；显示“已更新 · 时间”；示例数据标注“示例数据” | FR-VIEW-003；UX D-06 |
 | Preview 空状态 | 说明 + “生成 <View 名称>”按钮；点击后把可编辑的生成指令填入左侧输入框 | FR-VIEW-003 |
 | Preview 渲染失败 | 保留上一版内容，顶部显示错误提示条 | UX D-06 |
 
@@ -164,7 +165,7 @@ Session Mode 的新对话草稿：顶栏只显示 CLI 标识与“新对话”�
 |---|---|---|
 | 启动页 | 居中：产品名、“打开本地目录”主按钮、最近 Projects 列表（名称、路径、最近打开时间） | UX D-09 |
 | 关闭确认对话框 | 标题“关闭 <Project>？”；一次列明受影响 Session 与未退出 Terminal，说明对话历史保留、终端结束；按钮：取消 / 关闭并停止；退出应用同样合并，失败保留诊断与重试 | FR-PROJ-002；UX D-10；DEC-14（2026-10-13 确认） |
-| 空状态 | Session History 为空：“还没有对话” + New Chat；Diff 无变更；Files 空目录 | — |
+| 空状态 | Session History 为空：只显示“还没有对话”（2026-11-12）；Diff 无变更；Files 空目录 | — |
 | 加载中 | Conversation 与 Preview 使用骨架行，不使用全屏遮罩 | — |
 | CLI 不可用 | 说明未安装或未登录，并给出安装 / 登录指引 | FR-CHAT-002 |
 

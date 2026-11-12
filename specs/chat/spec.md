@@ -71,7 +71,7 @@
 
 #### New Chat 分裂按钮与 CLI 菜单
 
-1. 主区：图标 + “New Chat”，使用应用级 Default CLI（UX 第 6 节 New Chat 第 1 项）。
+1. 主区：图标 + “新对话”，使用应用级 Default CLI（UX 第 6 节 New Chat 第 1 项；界面文案见 [navigation NAV-Q13](../navigation/spec.md#12-已确认)）。
 2. 右区 ▾：打开 CLI 菜单，只列出已添加项，按 Codex CLI、Claude Code 固定顺序（当前正式 Provider 启用范围遵循 DEC-19 的 2026-11-08 后续确认）；每项包含名称、默认标记，可将可用项设为所有 Project 默认。底部提供“CLI 设置”，无已添加项时显示空状态（2026-10-25 确认）。
 3. 点击菜单中的 CLI 名称：打开使用该 CLI 的草稿，不改变应用级默认 CLI。已有草稿时改变该草稿的 CLI（建议，C-Q2）。
 4. 点击“设为所有 Project 默认”：把该 CLI 写入应用级默认偏好；不打开草稿，不影响已有 Session 和已有草稿的 CLI。旧版本的 Project 默认值保留为兼容回退值。

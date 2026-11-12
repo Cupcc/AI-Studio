@@ -10,6 +10,7 @@
 | 相关验收 | AC-06；05 第 4 节的 Project Knowledge / View 数据分离与本地持久化专项 |
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 2、6、8、10 节；[线框图 v02](../../design/wireframes/README.md)；[Visual Direction](../../design/visual-direction.md) |
 | 来源 | 02 第 2～4 节；03 第 4、6、10 节；04 第 3、6、1、8 节；[DEC-04～07](<../../docs/07. Decisions.md>)；2026-10-10 起草；用户明确“我都已经全部确定了”（2026-10-11 确认） |
+| 后续修订 | 宿主缩放按 [DEC-30](<../../docs/07. Decisions.md#dec-30-工作台宿主精简系统字体与中文界面>)（2026-11-12 确认）取消，见 FR-VIEW-005 第 4 条与 PV-Q9、PV-Q13；本次 diff 待审阅 |
 
 > 本规格负责预设网页包的 Knowledge、Definition 数据与 DEC-04～07 内容行为。统一宿主、目录、定位、快照、事件、生命周期与上下文入口由[工作台规格 §9.7](../workbench/spec.md#97-预设与自定义工作台统一宿主)负责，依据用户 2026-11-11“统一为同一种架构”（DEC-29）。网页包迁移见[网页格式统一任务](../../.agents/archive/tasks/T20261111-workbench-web-format/task.md)。
 
@@ -33,18 +34,18 @@
 | PV-Q6 | Overview 的 Session 摘要区块是否由客户端固定渲染？ | 是（2026-10-09）。 |
 | PV-Q7 | V1 文件上限是否暂定 256 KB、500 节点？ | 是，作为实现防护上限，渲染原型校准后如需调整需更新规格（2026-10-09）。 |
 | PV-Q8 | `ViewSnapshot` 是否同时推送完整 Knowledge 与 Definition，还是只推送渲染后的模型？ | 采用已校验的声明式快照，包含完整 Knowledge 与 Definition，便于 Renderer 保持可测试和 last-good；不推送 Session 敏感区块（2026-10-11，依据 DEC-05、04 第 3 节）。 |
-| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 缩放比例只保存在当前 View 的运行期状态，不扩展 Project `ui_state`；具体手势交给高保真设计确认（2026-10-11，依据 FR-VIEW-005、Project spec 状态边界）。控件与手势已按[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q1 确认（2026-10-11），见 FR-VIEW-005 第 4 条。 |
+| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 缩放比例只保存在当前 View 的运行期状态，不扩展 Project `ui_state`；具体手势交给高保真设计确认（2026-10-11，依据 FR-VIEW-005、Project spec 状态边界）。控件与手势已按[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q1 确认（2026-10-11），见 FR-VIEW-005 第 4 条。宿主缩放已由 DEC-30（2026-11-12）取消，本条仅保留历史结论。 |
 | PV-Q10 | `schemaVersion` 升级是否只支持同版本读取，还是提供迁移器？ | V1 只接受当前支持版本；未知版本进入 `error` 并保留 last-good，迁移器作为后续 task（2026-10-11，依据 DEC-04 与本地文件可回退原则）。 |
 | PV-Q11 | View Context 生成文本是否显示在 transcript 的可折叠区域，还是只作为用户消息元数据？ | 显示可折叠“当前 View”标签，底层保存 `view_context_attached` 与路径元数据，不复制完整模板（2026-10-11，依据 DEC-06、Input spec 上下文标签规则）。 |
 | PV-Q12 | 默认 View 的内置 Definition 是否通过代码常量提供，还是作为应用资源 JSON 打包？ | 作为版本化应用资源 JSON 打包，启动时解析并用同一 Schema 校验；不写入 Project，便于视觉调整（2026-10-11，依据 FR-VIEW-001、DEC-05）。 |
-| PV-Q13 | Preview 缩放的比例范围与步长？ | 50%～200%，每次 10%，与[原型 v03](../../tasks/T20261011-prototype-v03/task.md)一致；高保真阶段如需调整再改本条。用户对话“PV-Q13 采纳答案”（2026-10-11 确认）。 |
+| PV-Q13 | Preview 缩放的比例范围与步长？ | 50%～200%，每次 10%，与[原型 v03](../../tasks/T20261011-prototype-v03/task.md)一致；高保真阶段如需调整再改本条。用户对话“PV-Q13 采纳答案”（2026-10-11 确认）。宿主缩放已由 DEC-30（2026-11-12）取消，本条仅保留历史结论。 |
 
 ## 2. 职责与边界
 
 - 负责：
   - 五个预设工作台的项目知识语义与内容要求（FR-VIEW-001）；目录、标题、顺序与实例定位由工作台宿主负责。
   - Project Knowledge 与 View Definition 的文件发现、读取、Schema 校验、版本检查和快照发布（FR-VIEW-003～004；DEC-04、DEC-07）。
-  - 预设网页包中的受信内容脚本与 Preview 的空状态、加载、刷新、缩放、错误回退和只读行为（FR-VIEW-003～005；DEC-05、DEC-07）。
+  - 预设网页包中的受信内容脚本与 Preview 的空状态、加载、刷新、错误回退和只读行为（FR-VIEW-003～005；DEC-05、DEC-07）。
   - 预设的首条上下文内容规则（FR-VIEW-005～008；DEC-06）；Conversation、最近对话、标签与 Session 接入由统一工作台负责。
   - 监听 Project 内 `.ai-studio/` 的变化，并在 Project 打开、CLI 回合结束、窗口重新获得焦点时补扫。
   - 向工作台宿主提供已验证的声明式内容；公共快照与事件由宿主提供。
@@ -148,10 +149,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 1. Project View Mode 的 Main Canvas 固定为左 Conversation、右 View Preview 的两列结构。尺寸、拖拽分隔线和右侧工具共用区域由 Project spec 统一定义。
 2. Preview 右侧区域顶部提供 Preview、Files、Diff、Browser、Terminal 的图标切换；同一时刻只显示一个工具。工具打开时替换 Preview；Files 查看文件时的额外列及返回 Preview 的入口（含工具关闭 ×）见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)（P-B；2026-10-11 确认，文件列按 2026-10-30 请求调整）。
 3. 刷新 Preview 不自动打开右侧区域、不把工具切回 Preview，也不改变 Conversation 列宽度。
-4. Preview 是只读区域，支持纵向滚动和二维内容缩放；修改必须通过左侧普通 CLI Session 完成。缩放比例只保存在当前 View 的运行期状态，不写入 Project `ui_state`（PV-Q9，2026-10-11 确认）。缩放入口（[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q1，2026-10-11 确认）：
-   - 右侧区域顶栏常驻缩放控件“− 比例 +”，点击比例恢复 100%；右侧区域变窄时只保留比例；
-   - 焦点在 Preview 内时可用 ⌘ + / − / 0；Preview 内 ⌘ / Ctrl + 滚轮或触控板捏合；
-   - 比例范围与步长见 PV-Q13。
+4. Preview 是只读区域，支持滚动；修改必须通过左侧普通 CLI Session 完成。宿主不提供页面缩放，缩放属于带画布的页面（用户 2026-11-12 确认，DEC-30）。原型 v03 Q1 的缩放控件与 PV-Q9、PV-Q13 的比例规则不再适用。
 5. 通过导航进入 View 时，右侧默认为 Preview；从 Project Tab 切回或启动恢复时遵循 Project spec 保存的完整状态，不重新套用进入规则（D-15）。
 
 ### FR-VIEW-006 Project View Conversation
@@ -232,7 +230,7 @@ Relevant files: <relative paths>
 Rules: update the relevant Knowledge and View Definition files when the user asks to change this view; keep facts separate from presentation; do not add executable HTML or scripts.
 ```
 
-实际发送时模板文本由 Session / Adapter 组装，Renderer 不自行拼接、转义或决定 CLI 分支。对话记录保存 `view_context_attached` 与 `view_context_paths` 的可折叠元数据和用户文本；不复制完整模板或 Knowledge 内容进 transcript（PV-Q11，2026-10-11 确认）。
+`<view title>` 取页面包清单的标题，预设为中文名称（如 `Current Workbench: 架构`，见 [navigation NAV-Q13](../navigation/spec.md#12-已确认)）；模板其余部分保持英文。实际发送时模板文本由 Session / Adapter 组装，Renderer 不自行拼接、转义或决定 CLI 分支。对话记录保存 `view_context_attached` 与 `view_context_paths` 的可折叠元数据和用户文本；不复制完整模板或 Knowledge 内容进 transcript（PV-Q11，2026-10-11 确认）。
 
 ## 5. 接口与事件
 

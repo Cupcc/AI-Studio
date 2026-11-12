@@ -25,18 +25,29 @@
 | NAV-Q5 | 已处于某个 View 的 Project View Mode 时，再次点击导航中同一个 View 的行为：忽略，还是回到新草稿 / 回到 Preview？ | 忽略（不改变左列当前对话与右侧区域）。依据：P-A 的“新草稿”限定为“进入 View”；左列顶栏已提供“新建对话”按钮（Shell 第 8 节），无需用导航承担该功能；避免意外丢弃草稿 | 否 | |
 | NAV-Q6 | Session Mode 下停留在 New Chat 草稿时，导航是否有条目高亮（例如 New Chat 按钮呈 Selected）？ | 无任何条目高亮，New Chat 按钮也不呈 Selected。依据：03 第 8 节与 Shell 第 4 节只规定 Session 项与 View 项的 Selected；New Chat 按钮的状态仅列 Default / Hover / Focus | 否 | |
 | NAV-Q7 | 自定义 View 加入后（FR-VIEW-002，P1），工作台 区域过高时如何处理：独立滚动、限制高度、折叠？ | 工作台实例进入当前 Project 导航，插件机制交互中设计区域高度和滚动；完整多实例管理后续评估。依据：DEC-28、FR-WB-006；03 第 8 节要求 Session History 可持续增长 | 否 | |
-| NAV-Q8 | 折叠后顶栏的 New Chat 按钮、以及空状态中的 New Chat 按钮，是否也带 CLI 下拉？ | 都只是单个按钮，使用 Default CLI，不带下拉；需要选其他 CLI 时展开导航，用顶部分裂按钮。依据：Shell 第 3 节顶栏写“New Chat 按钮”，第 4 节导航写“分裂按钮”，第 10 节空状态写“New Chat”，措辞不同；FR-CHAT-002 只要求提供扩展入口。该决定由 `specs/chat/` 最终确认 | 否 | |
+| NAV-Q8 | 折叠后顶栏的 New Chat 按钮是否也带 CLI 下拉？（空状态中的按钮已随 2026-11-12 设计移除，见 3.3.8） | 只是单个按钮，使用 Default CLI，不带下拉；需要选其他 CLI 时展开导航，用顶部分裂按钮。依据：Shell 第 3 节顶栏写“New Chat 按钮”，第 4 节导航写“分裂按钮”，第 10 节空状态写“New Chat”，措辞不同；FR-CHAT-002 只要求提供扩展入口。该决定由 `specs/chat/` 最终确认 | 否 | |
 | NAV-Q9 | V1 没有删除或归档 Session 的入口，列表只增不减，是否符合预期？ | 符合，V1 不提供。依据：02 与 03 均未定义删除 / 归档；“不添加文档之外的需求”；04 第 7 节要求大量历史 Session 不卡顿，说明按只增长设计 | 否 | |
 | NAV-Q10 | 左侧导航的折叠状态是否随应用重启保留？ | 保留（与窗口级状态一起保存）。依据：03 第 8 节称之为“窗口级偏好”，偏好通常持久；与 `specs/project/spec.md` PROJ-Q1 一并确认 | 否 | |
 | NAV-Q11 | 导航是否需要键盘快捷键（折叠 / 展开、New Chat、在 Session 间移动、触发 Rename）？ | V1 只保证 3.5 的键盘可达（Tab、方向键、Enter、Esc），不规定全局快捷键；若需要，建议 `⌘B` 折叠、`⌘N` 新建对话（New Chat）。依据：文档仅规定焦点环（Shell 第 11 节）；快捷键属新增需求，需人确认 | 否 | |
 | NAV-Q12 | “大量历史 Session”的验收规模是多少？ | 以单个 Project 2,000 条 Session 为性能测试规模：滚动不掉帧、Tab 切换即时、单个状态变化不重排。依据：04 第 7 节与 05 第 4 节只说“大量”，没有数值，测试需要一个目标 | 否 | |
-| NAV-Q13 | 界面文案语言：Shell 示例使用中文文案（“今天”“还没有对话”）并保留英文产品名（New Chat、SESSIONS；工作台标题按 DEC-29），V1 是否仅提供中文文案？ | 是，沿用 Shell 的混合写法，字符串集中定义以便日后本地化。依据：Shell 第 4、10 节、03 第 8 节；文档没有语言策略 | 否 | |
 
 ### 1.2 已确认
 
 | 编号 | 问题 | 建议答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
 | NAV-Q4 | FR-NAV-003 属 P0 并要求支持 Rename，但 02 第 6 节 MVP 范围表把“Session / Rename”标为 P1，两处优先级不一致，Rename 是否纳入 session-slice 的首个交付？ | 纳入，依据 FR-NAV-003 与 05 第 4 节的 Rename 专项要求。 | 否 | Rename 为 P0，纳入 session-slice；02 第 6 节 MVP 表同步改为 P0（2026-10-09 确认） |
+| NAV-Q13 | 界面文案语言：此前 Shell 示例为中文文案加英文产品名（New Chat、SESSIONS 等），V1 采用哪种语言？ | 原建议沿用混合写法；用户改为统一中文。字符串集中定义以便日后本地化。 | 否 | 界面统一为中文（2026-11-12，[DEC-30](<../../docs/07. Decisions.md#dec-30-工作台宿主精简系统字体与中文界面>)），名称对照见下文 |
+
+NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界面显示右列文案。
+
+| 概念名 | 界面文案 |
+|---|---|
+| New Chat（导航主按钮、折叠后顶栏按钮） | 新对话 |
+| SESSIONS（Session History 区域标题） | 对话 |
+| Preview（右侧区域的预览切换与区域名称） | 预览 |
+| Overview / Progress / Architecture / Agent Team / Business Flow | 概览 / 进度 / 架构 / Agent 团队 / 业务流程。名称取自预设包清单的 title；`viewId` 不变，用户在列表中重命名的名称优先 |
+
+保留英文的范围：工具名 Files、Search、Diff、Browser、Terminal；Project、CLI、Agent 等产品术语；Composer 中 Model Selector、Send、Stop 的无障碍名称及“Plugins”分类标题；Session History 列表的无障碍名称与重命名输入框的“Session 标题”；预设页面内部的内容。
 
 ## 2. 职责与边界
 
@@ -64,11 +75,11 @@
 
 | 序 | 区域 | 尺寸 | 说明 | 来源 |
 |---|---|---|---|---|
-| 1 | New Chat 分裂按钮 | 高 36 | 位于导航顶部。主区：图标 + “New Chat”，使用 Default CLI；右区：▾ 打开 CLI 菜单。按钮行为、菜单内容归 `specs/chat/` | 03 第 6、8 节；D-11；Shell 第 4 节 |
-| 2 | 区域标题“工作台” | 高 28 | 小号标题 | 03；DEC-29 |
+| 1 | New Chat 分裂按钮 | 高 36 | 位于导航顶部。主区：图标 + “新对话”，使用 Default CLI；右区：▾ 打开 CLI 菜单。按钮行为、菜单内容归 `specs/chat/` | 03 第 6、8 节；D-11；Shell 第 4 节 |
+| 2 | 区域标题“工作台” | 高 28 | 小号标题；右侧为添加入口“+”，见 3.2.1 | 03；DEC-29 |
 | 3 | 工作台列表 | 每项高 32 | 统一显示预设、自定义实例及设计草稿，见 FR-NAV-002 | FR-NAV-001 |
 | 4 | 分隔线 | — | 清晰但低视觉噪音（FR-NAV-001）；具体线宽与色值在高保真阶段确定 | FR-NAV-001 |
-| 5 | 区域标题“SESSIONS” | 高 28 | 小号标题 | 03；DEC-29 |
+| 5 | 区域标题“对话”（概念名 SESSIONS） | 高 28 | 小号标题 | 03；DEC-29；NAV-Q13 |
 | 6 | Session History | 占满剩余高度 | 见 FR-NAV-003 | FR-NAV-001 |
 
 规则：
@@ -83,7 +94,7 @@
 
 #### 3.2.1 列表
 
-默认目录包含五项，初始顺序和默认名称使用 FR-NAV-002 的英文名。用户可以按[工作台列表管理](../workbench/spec.md#98-fr-wb-001006008-工作台列表管理)重命名、排序、移除和恢复：
+默认目录包含五项，初始顺序按 FR-NAV-002，默认名称按 NAV-Q13 显示为中文（概览、进度、架构、Agent 团队、业务流程）。用户可以按[工作台列表管理](../workbench/spec.md#98-fr-wb-001006008-工作台列表管理)重命名、排序、移除和恢复：
 
 1. Overview
 2. Progress
@@ -91,13 +102,13 @@
 4. Agent Team
 5. Business Flow
 
-每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 4 节）。图标采用交互原型 v01。默认项首次打开时显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。移除项从当前导航隐藏，但可以从底部的“添加工作台”入口恢复。添加入口使用浮层，不改变工作台列表或 Session History 的布局。
+每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 4 节）。图标采用交互原型 v01。默认项首次打开时显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。移除项从当前导航隐藏，但可以从“工作台”标题右侧的“+”（添加工作台）恢复。添加入口使用浮层，不改变工作台列表或 Session History 的布局。
 
 #### 工作台实例导航
 
 来源：FR-VIEW-002、FR-WB-006、DEC-28（2026-11-10 接受方向，2026-11-11 确认方案并实施最小插件机制，具体接缝见 workbench §9）。宿主从当前 Project 的实例目录生成入口，按 `instanceId` 定位并核实 Project 与固定包版本；首期名称取清单 title，使用宿主固定的工作台图标。预设五项的内容、ID 和顺序保持，所有条目来自统一工作台目录，不把工作台实例塞入默认 View ID 枚举。
 
-点击实例打开对应工作台，不因打开或安装自动创建 Session / 出图。导航选中状态仍由 Main Canvas 决定；首期提供底部添加入口、草稿与实例入口、重命名、排序、移除恢复、停用和启用。草稿删除仍由工作台管理菜单负责，候选行为由[工作台生命周期](../workbench/spec.md#62-导航与生命周期)和[工作台列表管理](../workbench/spec.md#98-fr-wb-001006008-工作台列表管理)负责。
+点击实例打开对应工作台，不因打开或安装自动创建 Session / 出图。导航选中状态仍由 Main Canvas 决定；首期提供标题旁的添加入口、草稿与实例入口、重命名、排序、移除恢复、停用和启用。草稿删除仍由工作台管理菜单负责，候选行为由[工作台生命周期](../workbench/spec.md#62-导航与生命周期)和[工作台列表管理](../workbench/spec.md#98-fr-wb-001006008-工作台列表管理)负责。
 
 #### 3.2.2 点击 View 的导航契约
 
@@ -237,8 +248,7 @@
 
 当前 Project 没有任何 Session 时（Shell 第 10 节）：
 
-- “SESSIONS”区域标题保留；列表区域显示“还没有对话”和一个 New Chat 按钮；不显示日期分组标题（提案：标题保留，列表区居中放置文案与按钮）。
-- 按钮的行为同顶部 New Chat 的主区，使用 Default CLI（NAV-Q8）。
+- “对话”区域标题保留；列表区域只显示弱化的“还没有对话”，不显示日期分组标题，也不另设按钮；新建对话使用其上方的“新对话”按钮（2026-11-12 设计）。
 - 第一个 Session 创建成功后，空状态立即被分组列表取代。草稿本身不使列表变为非空（FR-CHAT-001）。
 
 #### 3.3.9 选中规则
@@ -343,7 +353,7 @@
 
 ### 5.3 与 chat
 
-- 导航放置 New Chat 分裂按钮与空状态按钮；点击主区调用 chat 模块的 `startNewChat(project_id)`（使用 Default CLI）；▾ 展示 chat 模块提供的菜单。草稿创建、Session 创建的结果通过 session 模块的 `added` 事件进入列表。
+- 导航放置 New Chat 分裂按钮；点击主区调用 chat 模块的 `startNewChat(project_id)`（使用 Default CLI）；▾ 展示 chat 模块提供的菜单。草稿创建、Session 创建的结果通过 session 模块的 `added` 事件进入列表。
 - 导航不读取、不修改 `default_cli`。
 
 ### 5.4 与 project-view
