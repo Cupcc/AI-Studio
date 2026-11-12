@@ -210,12 +210,13 @@ test('FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, m
   await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.contentView.children.length)).toBe(0)
   await page.getByRole('button', { name: '关闭设置', exact: true }).click()
   await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.contentView.children.length)).toBe(1)
-  const preview = app.context().pages().find(candidate => candidate.url() === address)
-  expect(preview).toBeDefined()
-  await preview!.getByRole('button', { name: 'Set cookie', exact: true }).click()
+  // The re-attached WebContentsView reaches Playwright asynchronously.
+  await expect.poll(() => app.context().pages().some(candidate => candidate.url() === address)).toBe(true)
+  const preview = app.context().pages().find(candidate => candidate.url() === address)!
+  await preview.getByRole('button', { name: 'Set cookie', exact: true }).click()
   await expect.poll(previewText).toContain('test=alpha')
   // History: back and forward use the page's own navigation history.
-  await preview!.getByRole('link', { name: 'Next local page', exact: true }).click()
+  await preview.getByRole('link', { name: 'Next local page', exact: true }).click()
   await expect.poll(() => browserInfo().then(info => info?.url)).toBe(address + 'next')
   await workspace().getByRole('button', { name: '后退', exact: true }).click()
   await expect.poll(() => browserInfo().then(info => info?.url)).toBe(address)
@@ -224,7 +225,7 @@ test('FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, m
   await expect(addressBar()).toHaveValue(address + 'next')
   // mailto: (link or redirect) asks before handing over to the system; cancel keeps the page.
   // Clicked from page script: Playwright would otherwise wait for a navigation that is (correctly) never committed.
-  await preview!.evaluate(() => (document.querySelector('a[href^="mailto:"]') as HTMLAnchorElement).click())
+  await preview.evaluate(() => (document.querySelector('a[href^="mailto:"]') as HTMLAnchorElement).click())
   await expect(workspace().getByRole('alertdialog', { name: '用系统应用打开？' })).toBeVisible()
   await capture('browser-mailto-choice')
   await workspace().getByRole('button', { name: '取消', exact: true }).click()

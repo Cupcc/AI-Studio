@@ -51,7 +51,7 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
   await expect(workspace().getByRole('button', { name: '在工作台中打开' })).toBeVisible()
   await workspace().getByRole('button', { name: '在工作台中打开' }).click()
   await expect(workspace().locator('.transcript-user')).toContainText('重新整理支付模块架构。')
-  await workspace().getByRole('button', { name: '新对话', exact: true }).click()
+  await workspace().getByRole('region', { name: '工作台对话', exact: true }).getByRole('button', { name: '新对话', exact: true }).click()
   await expect(workspace().locator('.view-recent').getByRole('button', { name: '重新整理支付模块架构。', exact: true })).toBeVisible()
   await page.screenshot({ path: test.info().outputPath('ac06-ready.png') })
   await app.close()

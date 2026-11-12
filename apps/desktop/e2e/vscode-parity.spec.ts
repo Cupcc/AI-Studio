@@ -78,6 +78,14 @@ async function metaClickRow(rowLocator: ReturnType<Page['locator']>, x: number) 
   await page.mouse.down(); await page.mouse.up()
   await page.keyboard.up('Meta')
 }
+
+// The Browser tool's WebContentsView reaches Playwright after its content may already be readable; wait for it.
+async function browserPage(url: string) {
+  const find = () => app.context().pages().find(candidate => candidate.url() === url)
+  await expect.poll(() => find() !== undefined).toBe(true)
+  return find()!
+}
+
 async function previewText(): Promise<string> {
   return app.evaluate(async ({ BrowserWindow }) => {
     const view = (BrowserWindow.getAllWindows()[0]!.contentView.children[0] as import('electron').WebContentsView | undefined)?.webContents
@@ -311,8 +319,7 @@ test('FR-TOOL-003 step 3: popups open as tabs, tabs switch and close, favorites 
   const address = workspace().getByRole('combobox', { name: '网址', exact: true })
   await address.fill(base); await address.press('Enter')
   await expect.poll(previewText).toContain('First page')
-  const preview = () => app.context().pages().find(candidate => candidate.url() === base)
-  await preview()!.evaluate(() => (document.querySelector('a[target=_blank]') as HTMLAnchorElement).click())
+  await (await browserPage(base)).evaluate(() => (document.querySelector('a[target=_blank]') as HTMLAnchorElement).click())
   const tabs = workspace().getByRole('tablist', { name: 'Browser 标签页' })
   await expect(tabs.getByRole('tab')).toHaveCount(2)
   await expect.poll(previewText).toContain('Second page')
@@ -337,7 +344,7 @@ test('FR-TOOL-003 step 3: popups open as tabs, tabs switch and close, favorites 
   // A permission request is asked once per site and remembered.
   await address.fill(`${base}notify`); await address.press('Enter')
   await expect.poll(previewText).toContain('Ask')
-  const notify = app.context().pages().find(candidate => candidate.url() === `${base}notify`)!
+  const notify = await browserPage(`${base}notify`)
   await notify.evaluate(() => (document.querySelector('button') as HTMLButtonElement).click())
   const prompt = workspace().getByRole('alertdialog', { name: '网站请求权限' })
   await expect(prompt).toContainText('显示通知')

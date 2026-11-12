@@ -9,6 +9,9 @@
 .workbench-navigation__row:hover .navigation__view:not(.is-selected) { background: var(--color-hover); }
 .workbench-navigation__manage { position: absolute; top: calc((var(--nav-row-height) - 24px) / 2); right: 4px; width: 24px; height: 24px; opacity: 0; }
 .workbench-navigation__row:hover .workbench-navigation__manage, .workbench-navigation__row:focus-within .workbench-navigation__manage, .workbench-navigation__manage[aria-expanded="true"] { opacity: 1; }
+/* The list scrolls. A tip below the last row would overflow it and get clipped; with classic scrollbars the added
+   scrollbar also narrows the row, the button slides out from under the pointer and the tip flickers. Keep it inside the row. */
+.workbench-navigation .workbench-navigation__manage[data-tip]:is(:hover, :focus-visible)::after { top: 50%; right: calc(100% + var(--tooltip-offset)); left: auto; transform: translateY(-50%); }
 .workbench-navigation__row .navigation__view > span { flex: 1; text-align: left; }
 .workbench-navigation__row .navigation__view > svg { flex-shrink: 0; }
 .workbench-navigation__row.is-dragging { opacity: .5; }
