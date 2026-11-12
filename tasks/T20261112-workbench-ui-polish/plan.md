@@ -14,7 +14,7 @@ Worker 不运行 `pnpm dev`；阶段一不运行 E2E（需要窗口焦点的 Ele
 | W2 | 选品页面：悬浮流程条与操作、提示位置、流程标题遮挡、窄宽度、模板版本 | `apps/desktop/build/workbenches/product-selection/**`；`apps/desktop/src/main/services/workbench/` 下读取该包的测试；`apps/desktop/e2e/product-selection.spec.ts` 的页面内选择器 | 分支 `feat/workbench-ui-polish-page` | — | done |
 | W3 | 字体：界面与等宽字体改为系统优先 | `apps/desktop/src/renderer/src/styles/**`；`apps/desktop/build/workbench-common/**`；五个预设包的样式；`src/shared/workbench/resources/` 中的字体行；Terminal / Monaco 的字体配置及其测试 | 分支 `feat/workbench-ui-polish-shell` | — | done |
 | W4 | 中文文案统一；整合后串行运行受影响 E2E 并修复 | 整合后的任务分支上的全部应用代码与测试（单一写者） | 任务分支上的提交 | W1、W2、W3 集成完成 | in_progress |
-| W5 | 文档回写：规格、UX、视觉方向、决定、路线图、桌面说明 | `docs/**`、`specs/**`、`design/**`、`apps/desktop/README.md` | 任务分支上的提交 | W4 | todo |
+| W5 | 文档回写：规格、UX、视觉方向、决定、路线图、桌面说明 | `docs/**`、`specs/**`、`design/**`、`apps/desktop/README.md` | 任务分支上的提交 | W4 的文案提交 | done |
 | R1 | 独立验收：实际 Electron 应用操作与截图 | `tasks/T20261112-workbench-ui-polish/acceptance.md`、`evidence/` | 验收记录 | W4 | todo |
 
 状态：`todo` | `in_progress` | `done` | `blocked`
@@ -28,3 +28,4 @@ Worker 不运行 `pnpm dev`；阶段一不运行 E2E（需要窗口焦点的 Ele
 - 2026-11-12 14:32 用户追加：模型名称不显示“（默认）”。并入 W4。三条分支整合完成，任务分支为 `4de67e7`，启动 W4。
 - 2026-11-12 14:50 用户要求先并入 dev 实测。dev 此时多出其他会话的文档提交 `bdb1ed4`；将阶段一分支 `feat/workbench-ui-polish-host` rebase 到 dev（无冲突，三个提交变为 `36f2613`、`f117fd2`、`009286a`），用集成命令快进并入本地 dev，未推送。通知 W4 先提交文案改动并暂缓全部 E2E，避免测试窗口与用户实测争抢焦点。
 - 2026-11-12 15:00 W4 提交中文文案 `5ab3085` 与模型名称 `242c499`（rebase 前的 SHA），源 worktree 干净。自检：桌面类型检查通过，桌面全量单测 116 个文件、1438 个用例通过；11 个 E2E 文件已按新文案修改但一份未运行。任务分支 rebase 到 dev 后并入本地 dev。W4 的 E2E 部分待用户实测结束后继续。
+- 2026-11-12 15:20 W5 完成文档回写，提交 `f7d2836`，文档检查无新增问题，源 worktree 干净；涉及 13 份文档，清单见 `report.md`。W5 发现模拟 Provider 仍匹配英文工作台名称（`e2e-providers.ts`），交 W4 修正。设计画布登记在 `design/screens/README.md`（静态高保真稿，不属于交互原型）。Main Agent 起草 `report.md` 变更清单；E2E 与独立验收仍待用户实测结束后进行。
