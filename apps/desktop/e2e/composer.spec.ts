@@ -150,7 +150,7 @@ test('effort precedes model, keeps menu columns aligned, and uses a violet Max p
   }
 })
 
-test('Ultra uses one static gradient per colour mode, whatever the theme or wallpaper, without replaying selection feedback', async () => {
+test('Max and Ultra follow the glass background colour; none and the solid fallback keep the base palette; no replayed feedback', async () => {
   await observeEffortSwitches()
   await page.evaluate(async () => {
     await (window.studio as StudioApi).settings.setMode({ mode: 'light' })
@@ -159,26 +159,36 @@ test('Ultra uses one static gradient per colour mode, whatever the theme or wall
   await selectEffort('ultra')
   await expect.poll(async () => (await switches()).length).toBe(1)
   await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
+  /** Ultra's bar gradient and the Max colour token, as the current appearance resolves them. */
   const sample = async () => {
     await expect(effort().locator('.effort-signal i')).toHaveCount(5)
     expect(await effort().locator('.effort-signal').evaluate(node => node.getAnimations({ subtree: true }).length)).toBe(0)
-    return effort().locator('.effort-signal i').first().evaluate(node => getComputedStyle(node).backgroundImage)
+    const ultra = await effort().locator('.effort-signal i').first().evaluate(node => getComputedStyle(node).backgroundImage)
+    const max = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--color-effort-max').trim())
+    return `${max} ${ultra}`
   }
-  const expected = {
-    light: 'linear-gradient(90deg, rgb(60, 120, 255), rgb(138, 77, 255) 52%, rgb(236, 74, 143))',
-    dark: 'linear-gradient(90deg, rgb(115, 160, 255), rgb(181, 144, 255) 52%, rgb(255, 128, 180))'
+  const base = {
+    light: '#6a4cff linear-gradient(90deg, rgb(60, 120, 255), rgb(138, 77, 255) 52%, rgb(236, 74, 143))',
+    dark: '#a998ff linear-gradient(90deg, rgb(115, 160, 255), rgb(181, 144, 255) 52%, rgb(255, 128, 180))'
   }
   for (const mode of ['light', 'dark'] as const) {
     await page.evaluate(async mode => { await (window.studio as StudioApi).settings.setMode({ mode }) }, mode)
     await expect(page.locator('html')).toHaveAttribute('data-scheme', mode)
     await useTheme('glass')
+    const palettes = new Map<string, string>()
     for (const color of ['aurora', 'mint', 'sunset', 'haze', 'none'] as const) {
       await page.evaluate(async color => { await (window.studio as StudioApi).settings.setGlassColor({ color }) }, color)
       await expect(page.locator('html')).toHaveAttribute('data-glass-color', color)
-      expect(await sample()).toBe(expected[mode])
+      palettes.set(color, await sample())
     }
+    // Each wallpaper has its own Max colour and Ultra gradient; "none" keeps the base palette.
+    expect(new Set(palettes.values()).size).toBe(5)
+    expect(new Set([...palettes.values()].map(value => value.split(' ')[0])).size).toBe(4)
+    expect(palettes.get('none')).toBe(base[mode])
+    // The solid fallback ignores the wallpaper and uses the base palette.
+    await page.evaluate(async () => { await (window.studio as StudioApi).settings.setGlassColor({ color: 'sunset' }) })
     await useTheme('solid')
-    expect(await sample()).toBe(expected[mode])
+    expect(await sample()).toBe(base[mode])
   }
   expect(await switches()).toHaveLength(1)
 })

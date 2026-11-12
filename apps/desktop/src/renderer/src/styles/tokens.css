@@ -168,8 +168,9 @@
   --color-code-comment: #8a8a84;
   --color-focus-ring: #2563eb;
   --color-focus-ring-soft: #2563eb2e;
-  /* Thinking effort (input spec): low–xhigh use ink; Max is violet, Ultra a static
-     blue → violet → pink gradient. Same hues in both themes, tuned per colour mode. */
+  /* Thinking effort (input spec): low–xhigh use ink; Max and Ultra are coloured. These base values
+     (violet; blue → violet → pink) serve the solid fallback and glass "none"; each glass background
+     colour overrides them at the end of this file. */
   --color-effort-max: #6a4cff;
   --color-effort-max-end: #9b7bff;
   --color-effort-ultra: #3c78ff;
@@ -442,3 +443,15 @@
 :root {
   --effort-ultra-gradient: linear-gradient(90deg, var(--color-effort-ultra), var(--color-effort-ultra-middle) 52%, var(--color-effort-ultra-end));
 }
+
+/* Thinking effort follows the glass background colour (user 2026-11-12): Max and Ultra use saturated
+   versions of that wallpaper's hues, at least 3:1 against the light input as small bars, lighter in dark
+   mode. Glass "none" and the solid fallback keep the base values. */
+:root[data-theme="glass"][data-glass-color="aurora"] { --color-effort-max: #6a4cff; --color-effort-max-end: #9b7bff; --color-effort-ultra: #3c78ff; --color-effort-ultra-middle: #8a4dff; --color-effort-ultra-end: #e8604f; }
+:root[data-theme="glass"][data-glass-color="mint"] { --color-effort-max: #0c917c; --color-effort-max-end: #2bb39a; --color-effort-ultra: #12a07a; --color-effort-ultra-middle: #2b8fd6; --color-effort-ultra-end: #bd8210; }
+:root[data-theme="glass"][data-glass-color="sunset"] { --color-effort-max: #e0457b; --color-effort-max-end: #f0709a; --color-effort-ultra: #ec6a3c; --color-effort-ultra-middle: #e0457b; --color-effort-ultra-end: #9a5ae0; }
+:root[data-theme="glass"][data-glass-color="haze"] { --color-effort-max: #4a6d9c; --color-effort-max-end: #7393c0; --color-effort-ultra: #3f78b8; --color-effort-ultra-middle: #3f97a6; --color-effort-ultra-end: #a07d62; }
+:root[data-theme="glass"][data-scheme="dark"][data-glass-color="aurora"] { --color-effort-max: #a998ff; --color-effort-max-end: #c4b5ff; --color-effort-ultra: #73a0ff; --color-effort-ultra-middle: #b590ff; --color-effort-ultra-end: #ff9580; }
+:root[data-theme="glass"][data-scheme="dark"][data-glass-color="mint"] { --color-effort-max: #4fd1b5; --color-effort-max-end: #8ae3cf; --color-effort-ultra: #4fd1a5; --color-effort-ultra-middle: #6cb8f0; --color-effort-ultra-end: #f0c050; }
+:root[data-theme="glass"][data-scheme="dark"][data-glass-color="sunset"] { --color-effort-max: #ff7fa8; --color-effort-max-end: #ffa8c4; --color-effort-ultra: #ff9a6e; --color-effort-ultra-middle: #ff7fa8; --color-effort-ultra-end: #c49cff; }
+:root[data-theme="glass"][data-scheme="dark"][data-glass-color="haze"] { --color-effort-max: #8fb0dd; --color-effort-max-end: #b3c9e8; --color-effort-ultra: #82b0e0; --color-effort-ultra-middle: #7cc4cf; --color-effort-ultra-end: #d0b49a; }
