@@ -78,9 +78,11 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
   }, [])
   const view = ui.mainCanvas.mode === 'view'
   const width = view ? effectiveConversationWidth(available, dragWidth ?? ui.viewConversationWidth) : effectiveSidebarWidth(available, dragWidth ?? ui.sidebarWidth)
+  // The file tree keeps the Project's sidebar width in both modes; View Mode uses it while a file is open.
+  const sidebarWidth = view ? effectiveSidebarWidth(available, ui.sidebarWidth) : width
   return <div className="project-workspace" hidden={!active} data-project-id={projectId}>
     {!shell.windowState.navCollapsed && <Navigation {...props} />}
-    <main className={`canvas-mode ${view ? 'canvas-mode--view' : 'canvas-mode--session'}`} ref={ref} style={{ '--pane-width': `${width}px` } as CSSProperties}>
+    <main className={`canvas-mode ${view ? 'canvas-mode--view' : 'canvas-mode--session'}`} ref={ref} style={{ '--pane-width': `${width}px`, '--sidebar-width': `${sidebarWidth}px` } as CSSProperties}>
       <section className="conversation-pane" aria-label={view ? '工作台对话' : '对话'}>
         <header className="canvas-header">{ui.mainCanvas.mode === 'view' && slots.ViewConversationHeader
           ? <slots.ViewConversationHeader {...props} viewId={ui.mainCanvas.viewId} />

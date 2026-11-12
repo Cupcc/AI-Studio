@@ -219,6 +219,72 @@ test('FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a select
 })
 })
 
+test('FR-TOOL-001 / FR-VIEW-005 · AC-07: Files viewer column in View Mode and Session at 1024 / 1280 / 1440', async () => {
+  writeFileSync(join(dir, 'Session Project', 'notes.md'), '# notes\n')
+  const viewer = () => workspace().getByRole('region', { name: '文件查看器' })
+  const openFile = async () => {
+    await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+    await workspace().getByRole('treeitem', { name: 'notes.md', exact: true }).click()
+    await expect(viewer()).toContainText('# notes')
+  }
+  // UX §5: the conversation, file content and file tree compress together, so the content column
+  // is never starved next to the conversation; View Mode keeps the conversation's set width, so the
+  // content column may be a little narrower there (T20261030-file-viewer-column).
+  const columns = async (state: string) => {
+    for (const size of SIZES) {
+      await fit(size)
+      const m = await page.evaluate(() => {
+        const ws = document.querySelector('.project-workspace:not([hidden])')!
+        const width = (selector: string) => ws.querySelector(selector)!.getBoundingClientRect().width
+        const header = ws.querySelector('.right-area__header')!
+        const column = ws.querySelector('.file-viewer-column')!.getBoundingClientRect()
+        const clipped = [...ws.querySelectorAll('.files-viewer__actions button')].filter((button) => {
+          const box = button.getBoundingClientRect()
+          return box.left < column.left - 0.5 || box.right > column.right + 0.5
+        }).length
+        return { innerWidth, document: document.documentElement.scrollWidth, conversation: width('.conversation-pane'), viewer: width('.file-viewer-column'), right: width('.right-pane'), headerClient: header.clientWidth, headerScroll: header.scrollWidth, clipped }
+      })
+      metrics.push({ state, theme, ...size, ...m })
+      const label = `${state} ${size.width}: ${m.conversation} / ${m.viewer} / ${m.right}`
+      expect(m.document, label).toBeLessThanOrEqual(m.innerWidth)
+      expect(m.viewer, label).toBeGreaterThanOrEqual(Math.max(180, 0.85 * m.conversation))
+      // The right pane never narrows past its tool header, so every tool and close button stays reachable.
+      expect(m.headerScroll, label).toBeLessThanOrEqual(m.headerClient)
+      // Markdown adds a preview button; the viewer actions wrap instead of running past the column.
+      expect(m.clipped, label).toBe(0)
+      await snap(state, size.width)
+    }
+  }
+  await workspace().getByRole('button', { name: '概览', exact: true }).click()
+  await openFile()
+  await columns('view-file-viewer')
+  // At 1440 the conversation handle moves the conversation edge both ways while a file is open;
+  // narrowing gives the room to the file content.
+  const widths = () => page.evaluate(() => ['.conversation-pane', '.file-viewer-column'].map((selector) => document.querySelector(`.project-workspace:not([hidden]) ${selector}`)!.getBoundingClientRect().width))
+  const [conversation, content] = await widths()
+  const handle = workspace().getByRole('separator', { name: '调整对话列宽度', exact: true })
+  await handle.focus()
+  for (let i = 0; i < 8; i++) await handle.press('ArrowLeft')
+  await expect.poll(async () => (await widths())[0]).toBeLessThan(conversation!)
+  expect((await widths())[1]).toBeGreaterThan(content!)
+  for (let i = 0; i < 16; i++) await handle.press('ArrowRight')
+  await expect.poll(async () => (await widths())[0]).toBeGreaterThan(conversation!)
+  const treeWidth = () => page.evaluate(() => document.querySelector('.project-workspace:not([hidden]) .right-pane')!.getBoundingClientRect().width)
+  const [, viewContent] = await widths(), viewTree = await treeWidth()
+  await newChat()
+  await page.getByRole('button', { name: '右侧边栏', exact: true }).click()
+  await openFile()
+  await columns('session-file-viewer')
+  // A tree widened in Session keeps its width in View Mode without widening the content column.
+  const sidebar = workspace().getByRole('separator', { name: '调整右侧边栏宽度', exact: true })
+  await sidebar.focus()
+  for (let i = 0; i < 16; i++) await sidebar.press('ArrowLeft')
+  await workspace().getByRole('button', { name: '概览', exact: true }).click()
+  await openFile()
+  await expect.poll(treeWidth).toBeGreaterThan(viewTree)
+  expect((await widths())[1]).toBeLessThanOrEqual(viewContent! + 0.5)
+})
+
 test('FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280', async () => {
   await newChat(); const approval = await send('检查回调为什么跳回登录页。[e2e:approval]')
   await expect(workspace().getByRole('region', { name: '等待你的确认' })).toBeVisible()
