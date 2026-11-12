@@ -29,13 +29,24 @@
 分支流程由[贡献指南 §5](../CONTRIBUTING.md#5-合并与收尾)负责。源 worktree 提交完成后，在主目录 dev 执行：
 
 ```sh
-node scripts/integrate-branch.mjs feat/example
+node scripts/integrate-branch.mjs feat/example --title "feat(example): add the example view" --body-file <path>
 git push origin dev
 ```
 
-命令检查主目录在 dev、源分支有独立 worktree、两边均无暂存或未暂存改动及未跟踪文件、源提交包含当前 dev 且有新增提交，再以 `--ff-only` 合入核对的源 SHA。失败返回非零状态，不修改源 worktree。命令不自动提交、暂存、复制、rebase 或推送；分支落后时先回源 worktree 同步并解决冲突。忽略的构建产物和依赖不计入工作区脏状态。
+命令先做以下检查：主目录在 dev 且 dev 未冻结；源分支有独立的 worktree；两边都没有暂存或未暂存的改动及未跟踪文件；源提交包含当前 dev 且有新增提交。检查通过后，命令用 `git commit-tree` 生成一个提交，文件树取自源提交，父提交是当前 dev，然后快进 dev。提交信息依次是 `--title`、`--body-file` 的内容（可省略）、原提交列表，以及 `Source-Branch` 与 `Source-Commit`。命令先用 commitlint 检查这份提交信息。文件树与源分支末端相同，所以命令不运行 pre-commit。
 
-脚本回归使用临时 Git 仓库，覆盖未提交文件拒绝、无新增提交拒绝、分叉拒绝和正常快进。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
+失败时命令返回非零状态，不修改 dev 或源 worktree。命令不暂存、复制、rebase 或推送；分支落后时，先回源 worktree 同步并解决冲突。忽略的构建产物和依赖不计入工作区的脏状态。
+
+人工验收期间冻结 dev：
+
+```sh
+node scripts/integrate-branch.mjs --freeze    # 要求主目录在 dev 且干净，记录当前提交
+node scripts/integrate-branch.mjs --unfreeze  # 删除记录并输出该提交
+```
+
+冻结记录保存在 Git 公共目录的 `ai-studio-acceptance` 文件中（主目录下为 `.git/ai-studio-acceptance`）。它对本机所有 worktree 生效，不随推送同步。
+
+脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、冻结期间集成这几种拒绝场景，并核对正常 squash 后的文件树、父提交、提交信息与 CLI 参数。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
 
 ## 测试分层
 
