@@ -39,15 +39,18 @@ function RightArea({ props, ui, area, viewMode, fileViewerHost }: { props: Shell
   const viewId = props.canvas.mode === 'view' ? props.canvas.viewId : 'overview'
   const viewTitle = useViewTitle(props.project.id, viewId)
   const title = <span className="right-area__title">{area === 'preview' ? viewTitle : TOOL_NAMES[area]}</span>
-  const tools = TOOL_IDS.map((tool, i) => <button key={tool} className={`icon-button ${area === tool ? 'is-selected' : ''}`} aria-label={TOOL_NAMES[tool]} aria-pressed={area === tool} data-tip={TOOL_NAMES[tool]} data-tip-align={viewMode && i === TOOL_IDS.length - 1 && area === 'preview' ? 'end' : undefined} onClick={() => { slots.toolSelected?.(props.project.id, tool); shell.updateUiState(props.project.id, selectRightArea(ui, tool)) }}><Icon name={tool} /></button>)
+  const PreviewHeader = viewMode && area === 'preview' ? slots.PreviewHeader : undefined
+  const tools = TOOL_IDS.map((tool, i) => <button key={tool} className={`icon-button ${area === tool ? 'is-selected' : ''}`} aria-label={TOOL_NAMES[tool]} aria-pressed={area === tool} data-tip={TOOL_NAMES[tool]} data-tip-align={viewMode && i === TOOL_IDS.length - 1 && area === 'preview' && !PreviewHeader ? 'end' : undefined} onClick={() => { slots.toolSelected?.(props.project.id, tool); shell.updateUiState(props.project.id, selectRightArea(ui, tool)) }}><Icon name={tool} /></button>)
   return <section className={`right-area ${viewMode ? 'right-area--view' : ''} ${area === 'preview' ? 'right-area--preview' : ''}`} aria-label={area === 'preview' ? S.preview : TOOL_NAMES[area]}>
     <header className="canvas-header right-area__header">
       {viewMode ? <>
-        {title}<span className="grow" />
+        {title}{PreviewHeader && <PreviewHeader {...props} viewId={viewId} part="status" />}<span className="grow" />
+        {PreviewHeader && <PreviewHeader {...props} viewId={viewId} part="actions" />}
         <div className="tool-switcher" aria-label="右侧工具">
           <button className={`icon-button ${area === 'preview' ? 'is-selected' : ''}`} aria-label={S.preview} aria-pressed={area === 'preview'} data-tip={`${S.preview} · ${viewTitle}`} onClick={() => shell.updateUiState(props.project.id, selectRightArea(ui, 'preview'))}><Icon name="preview" /></button><span className="tool-switcher__divider" />
           {tools}
         </div>
+        {PreviewHeader && <><span className="tool-switcher__divider" /><PreviewHeader {...props} viewId={viewId} part="menu" /></>}
       </> : <><div className="tool-switcher" aria-label="右侧工具">{tools}</div>{title}<span className="grow" /></>}
       {area !== 'preview' && <button className="icon-button" aria-label="关闭右侧工具" data-tip={S.close} data-tip-align="end" onClick={() => shell.updateUiState(props.project.id, closeRightSidebar(ui))}><Icon name="close" size={15} /></button>}
     </header>

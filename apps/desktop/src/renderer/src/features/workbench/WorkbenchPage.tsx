@@ -6,9 +6,7 @@ import { useSettings } from '../settings/store'
 import { appendWorkbenchDraft, openWorkbenchSession } from './conversation'
 import { describeWorkbenchError, workbenchApi } from './api'
 import { attachWorkbenchPageBridge } from './page-bridge'
-import { useWorkbenches } from './store'
-
-export type PageStatus = { kind: 'loading' } | { kind: 'ready' } | { kind: 'error'; message: string }
+import { useWorkbenches, type PageStatus } from './store'
 
 export function pageWithEnvironment(page: WorkbenchPageSnapshot, sessions: WorkbenchSessionLink[], appearance: WorkbenchPageSnapshot['appearance']): WorkbenchPageSnapshot {
   const resources = {
@@ -18,10 +16,10 @@ export function pageWithEnvironment(page: WorkbenchPageSnapshot, sessions: Workb
   return { ...page, resources, appearance }
 }
 
-export function WorkbenchPage({ workbenchRef, page, zoom, onPageStatus, onSaveStatus }: {
-  workbenchRef: WorkbenchRef; page: WorkbenchPageSnapshot; zoom: number
+export function WorkbenchPage({ workbenchRef, page, onPageStatus, onSaveStatus }: {
+  workbenchRef: WorkbenchRef; page: WorkbenchPageSnapshot
   onPageStatus(status: PageStatus): void
-  onSaveStatus(status: string): void
+  onSaveStatus(status: string, failed?: boolean): void
 }) {
   const iframe = useRef<HTMLIFrameElement>(null)
   const summaries = useSessions(s => s.summaries), appearance = useSettings(s => s.appearance)
@@ -63,7 +61,7 @@ export function WorkbenchPage({ workbenchRef, page, zoom, onPageStatus, onSaveSt
           const result = pageWithEnvironment(next.page, current.current.page.resources?.sessions ?? [], current.current.page.appearance)
           if (!disposed) { current.current = { workbenchRef: next.ref, page: result }; onSaveStatus('已保存') }
           return result
-        } catch (error) { if (!disposed) onSaveStatus(`保存失败：${describeWorkbenchError(error)}`); throw error }
+        } catch (error) { if (!disposed) onSaveStatus(`保存失败：${describeWorkbenchError(error)}`, true); throw error }
       },
       setDraft: (text, isActive, target) => appendWorkbenchDraft(current.current.workbenchRef, text, isActive, target),
       openSession: (sessionId, isActive) => openWorkbenchSession(current.current.workbenchRef, sessionId, isActive)
@@ -74,6 +72,5 @@ export function WorkbenchPage({ workbenchRef, page, zoom, onPageStatus, onSaveSt
     iframe.current?.contentWindow?.postMessage({ channel: WORKBENCH_MESSAGE, type: 'snapshot', snapshot: decorated }, '*')
   }, [decorated])
   return <div className="workbench-page-viewport"><iframe ref={iframe} className="workbench-page" title="工作台页面" src={page.pageUrl}
-    style={{ width: `${100 / zoom}%`, height: `${100 / zoom}%`, transform: `scale(${zoom})` }}
     sandbox="allow-scripts allow-same-origin allow-downloads" onError={() => onPageStatus({ kind: 'error', message: '页面加载失败，请检查文件后重试。' })} /></div>
 }

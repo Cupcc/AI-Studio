@@ -18,7 +18,7 @@ const webSnapshot = (revision = 1): WorkbenchSnapshot => ({
   status: 'error', error: 'Missing entry', page: null, entry: instance
 })
 beforeEach(() => {
-  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {} })
+  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, hosts: {} })
   list = vi.fn(async () => [])
   getSnapshot = vi.fn(async () => presetSnapshot())
   Object.defineProperty(window, 'studio', { configurable: true, value: { workbench: { list, getSnapshot, onChanged: (listener: typeof change) => { change = listener; return () => {} } } } })
@@ -78,19 +78,20 @@ it('keeps the last good snapshot on a failed read and clears errors after recove
   change({ kind: 'snapshot', snapshot: presetSnapshot(2) })
   expect(useWorkbenches.getState().snapshotErrors['p:architecture']).toBeNull()
 })
-it('clears only the closed project and refuses its late snapshots, replies and zoom', async () => {
+it('clears only the closed project and refuses its late snapshots, replies and host state', async () => {
   let resolve!: (snapshot: WorkbenchSnapshot) => void
   vi.mocked(getSnapshot).mockImplementationOnce(() => new Promise<WorkbenchSnapshot>(done => { resolve = done }))
   const pending = useWorkbenches.getState().loadSnapshot(presetSnapshot().ref)
   await useWorkbenches.getState().loadCatalog('other')
   useWorkbenches.getState().acceptSnapshot(presetSnapshot(2, 'other'))
-  useWorkbenches.getState().setZoom(presetSnapshot().ref, 5)
-  expect(useWorkbenches.getState().zoom['p:architecture']).toBe(2)
+  useWorkbenches.getState().updateHost(presetSnapshot().ref, { pending: true })
+  expect(useWorkbenches.getState().hosts['p:architecture']).toMatchObject({ pending: true, saveStatus: '已读取保存状态' })
   useWorkbenches.getState().close('p')
+  useWorkbenches.getState().updateHost(presetSnapshot().ref, { pending: false })
   change({ kind: 'snapshot', snapshot: presetSnapshot(8) }); resolve(presetSnapshot(9)); await pending
   expect(useWorkbenches.getState().snapshots['p:architecture']).toBeUndefined()
   expect(useWorkbenches.getState().snapshots['other:architecture']).toBeTruthy()
-  expect(useWorkbenches.getState().zoom['p:architecture']).toBeUndefined()
+  expect(useWorkbenches.getState().hosts['p:architecture']).toBeUndefined()
   expect(useWorkbenches.getState().loading['p:architecture']).toBeUndefined()
   await useWorkbenches.getState().loadSnapshot(presetSnapshot().ref)
   expect(useWorkbenches.getState().snapshots['p:architecture']).toEqual(presetSnapshot())

@@ -19,7 +19,7 @@ function Navigation() {
 beforeEach(() => {
   catalog = [...PRESET_WORKBENCHES, draft]; removed = []
   useProjectShell.setState({ projects: { p: project }, uiStates: { p: defaultUiState() } })
-  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {} })
+  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, hosts: {} })
   api = {
     startAgent: vi.fn(), listAgents: vi.fn(), getAgent: vi.fn(), stopAgent: vi.fn(),
     list: vi.fn(async () => catalog), listRemoved: vi.fn(async () => removed), getSnapshot: vi.fn(), getContext: vi.fn(), createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(), setEnabled: vi.fn(), onChanged: vi.fn(),
@@ -37,10 +37,11 @@ afterEach(async () => { cleanup(); await useProjectShell.getState().flush(); use
 async function manage(name: string) { fireEvent.click(await screen.findByRole('button', { name: `管理 ${name}` })) }
 const list = () => document.querySelector('.workbench-navigation__items')!
 
-it('keeps the add control below the list and opens its choices in a floating menu', async () => {
+it('puts the add control beside the heading and opens its choices in a floating menu', async () => {
   render(<Navigation />)
   const items = list(), add = screen.getByRole('button', { name: '添加工作台' })
-  expect(items.nextElementSibling).toBe(add)
+  expect(add.closest('.workbench-navigation__heading')).toBeTruthy()
+  expect(add.getAttribute('aria-haspopup')).toBe('menu')
   expect(add.closest('.workbench-navigation__items')).toBeNull()
   fireEvent.click(add)
   const menu = await screen.findByRole('menu', { name: '工作台操作' })

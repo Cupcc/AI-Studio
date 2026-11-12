@@ -32,8 +32,7 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
   await expect(workspace().locator('.transcript-user summary')).toHaveText('当前工作台')
   await expect(workspace().locator('[data-session-row]')).toHaveCount(1)
   expect(readFileSync(join(projectPath, '.ai-studio/.gitignore'), 'utf8')).toBe('*\n')
-  await workspace().getByRole('button', { name: '放大 Preview' }).click()
-  await expect(workspace().getByRole('button', { name: '重置 Preview 缩放' })).toHaveText('110%')
+  await expect(workspace().getByRole('button', { name: '放大 Preview' })).toHaveCount(0)
   await workspace().getByRole('button', { name: 'Files', exact: true }).click()
   const path = join(projectPath, '.ai-studio/knowledge/architecture.json')
   const valid = JSON.parse(readFileSync(path, 'utf8'))
@@ -59,7 +58,6 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
   app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
   await expect(preview().getByText('修复后恢复', { exact: true })).toBeVisible()
-  await expect(workspace().getByRole('button', { name: '重置 Preview 缩放' })).toHaveText('100%')
 })
 test('removed View label sends without creating helpers, and each View has an independent draft', async () => {
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('保留架构草稿')
@@ -101,7 +99,8 @@ async function copyPresetIntoOrdinaryDraft(id: string) {
   const directory = join(folder, draft)
   rmSync(directory, { recursive: true })
   cpSync(join(appDir, 'out/workbench-packages', id), directory, { recursive: true })
-  await workspace().getByRole('button', { name: '刷新工作台预览', exact: true }).click()
+  await workspace().getByRole('button', { name: '更多操作', exact: true }).click()
+  await page.getByRole('menuitem', { name: '重新加载', exact: true }).click()
 }
 
 test('a preset copied into an ordinary custom draft uses the same knowledge subscription', async () => {

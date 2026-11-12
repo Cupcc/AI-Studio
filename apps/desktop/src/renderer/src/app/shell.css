@@ -119,3 +119,5 @@
    Tabs no longer join the canvas (a gutter sits between), so they become centred pills. */
 :root[data-theme="glass"] :is(.topbar, .topbar__tabs) { align-items: center; }
 :root[data-theme="glass"] .project-workspace > .canvas-mode:first-child { margin-left: var(--canvas-gutter); }
+/* Workbench header: the divider before "更多操作" sits directly in the header row, whose gap already spaces it. */
+.right-area__header > .tool-switcher__divider { margin: 0; }

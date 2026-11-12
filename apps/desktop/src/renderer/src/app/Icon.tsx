@@ -47,7 +47,11 @@ const paths: Record<string, ReactNode> = {
   check: <path d="M3 8.5l3.2 3L13 4.5" />,
   // Settings (FR-SET-001): gear entry and the "外观" category
   settings: <><circle cx="8" cy="8" r="2" /><path d="M8 1.8v1.7M8 12.5v1.7M14.2 8h-1.7M3.5 8H1.8M12.4 3.6l-1.2 1.2M4.8 11.2l-1.2 1.2M12.4 12.4l-1.2-1.2M4.8 4.8L3.6 3.6" /><circle cx="8" cy="8" r="4.5" /></>,
-  appearance: <><circle cx="8" cy="8" r="5.5" /><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor" stroke="none" /></>
+  appearance: <><circle cx="8" cy="8" r="5.5" /><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor" stroke="none" /></>,
+  // Workbench host menu, about dialog, disabled page and error banner
+  info: <><circle cx="8" cy="8" r="5.75" /><path d="M8 7.3v3.7M8 5.1v.01" /></>,
+  power: <path d="M8 2.5V8M4.8 4.6a4.9 4.9 0 1 0 6.4 0" />,
+  alert: <path d="M8 2.6l5.9 10.4H2.1zM8 6.6v3M8 11.3v.01" />
 }
 
 export function Icon({ name, size = 16 }: { name: string; size?: number }) {

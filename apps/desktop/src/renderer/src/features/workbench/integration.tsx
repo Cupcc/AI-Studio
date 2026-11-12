@@ -1,6 +1,7 @@
 import { registerShellIntegration } from '../project/integration'
 import { useProjectShell } from '../project/store'
 import { WorkbenchPreview } from './WorkbenchPreview'
+import { WorkbenchHeader } from './WorkbenchHeader'
 import { WorkbenchNavigation } from './WorkbenchNavigation'
 import { WorkbenchConversation, WorkbenchConversationHeader } from './WorkbenchConversation'
 import { useWorkbenches, watchWorkbenches } from './store'
@@ -10,7 +11,7 @@ import './workbench.css'
 export function installWorkbenchIntegration(): () => void {
   const unwatch = watchWorkbenches()
   const unregister = registerShellIntegration({
-    Preview: WorkbenchPreview, Workbenches: WorkbenchNavigation,
+    Preview: WorkbenchPreview, PreviewHeader: WorkbenchHeader, Workbenches: WorkbenchNavigation,
     ViewConversation: WorkbenchConversation, ViewConversationHeader: WorkbenchConversationHeader
   })
   for (const tab of useProjectShell.getState().windowState.tabs) {

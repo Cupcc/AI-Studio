@@ -3,6 +3,21 @@ import type { WorkbenchCatalog, WorkbenchRef, WorkbenchSnapshot } from '@shared/
 import { describeWorkbenchError, workbenchApi } from './api'
 
 export const workbenchKey = ({ projectId, viewId }: WorkbenchRef): string => `${projectId}:${viewId}`
+export type PageStatus = { kind: 'loading' } | { kind: 'ready' } | { kind: 'error'; message: string }
+/** Host chrome state shared by the right-area header and the page body of one workbench view. */
+export interface WorkbenchHost {
+  pageStatus: PageStatus
+  /** Package revision whose page reported `pageStatus`; older revisions never count as connected. */
+  connectedRevision: string | null
+  saveStatus: string
+  saveFailed: boolean
+  actionError: string | null
+  pending: boolean
+  /** Bumped by a refresh to remount the page iframe. */
+  reload: number
+}
+export type HostPatch = Partial<WorkbenchHost> | ((host: WorkbenchHost) => Partial<WorkbenchHost>)
+export const initialHost: WorkbenchHost = { pageStatus: { kind: 'loading' }, connectedRevision: null, saveStatus: '已读取保存状态', saveFailed: false, actionError: null, pending: false, reload: 0 }
 const catalogLoads = new Map<string, { promise: Promise<void>; dirty: boolean }>()
 const snapshotLoads = new Map<string, Promise<void>>()
 const generations = new Map<string, number>()
@@ -14,14 +29,14 @@ export const useWorkbenches = create<{
   errors: Record<string, string | null>
   snapshotErrors: Record<string, string | null>
   loading: Record<string, boolean>
-  zoom: Record<string, number>
+  hosts: Record<string, WorkbenchHost>
   loadCatalog(projectId: string): Promise<void>
   loadSnapshot(ref: WorkbenchRef): Promise<void>
   acceptSnapshot(snapshot: WorkbenchSnapshot): void
-  setZoom(ref: WorkbenchRef, value: number): void
+  updateHost(ref: WorkbenchRef, patch: HostPatch): void
   close(projectId: string): void
 }>()((set, get) => ({
-  catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {},
+  catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, hosts: {},
   loadCatalog(projectId) {
     closed.delete(projectId)
     const existing = catalogLoads.get(projectId)
@@ -68,8 +83,13 @@ export const useWorkbenches = create<{
     if ((get().snapshots[key]?.revision ?? -1) >= snapshot.revision) return
     set(s => ({ snapshots: { ...s.snapshots, [key]: snapshot }, snapshotErrors: { ...s.snapshotErrors, [key]: null } }))
   },
-  setZoom(ref, value) {
-    set(s => ({ zoom: { ...s.zoom, [workbenchKey(ref)]: Math.max(.5, Math.min(2, value)) } }))
+  updateHost(ref, patch) {
+    if (closed.has(ref.projectId)) return
+    const key = workbenchKey(ref)
+    set(s => {
+      const host = s.hosts[key] ?? initialHost
+      return { hosts: { ...s.hosts, [key]: { ...host, ...(typeof patch === 'function' ? patch(host) : patch) } } }
+    })
   },
   close(projectId) {
     closed.add(projectId)
@@ -82,10 +102,13 @@ export const useWorkbenches = create<{
       catalogs: Object.fromEntries(Object.entries(s.catalogs).filter(([id]) => id !== projectId)),
       errors: Object.fromEntries(Object.entries(s.errors).filter(([id]) => id !== projectId)),
       snapshots: keepOther(s.snapshots), snapshotErrors: keepOther(s.snapshotErrors),
-      loading: keepOther(s.loading), zoom: keepOther(s.zoom)
+      loading: keepOther(s.loading), hosts: keepOther(s.hosts)
     }))
   }
 }))
+
+/** Changes when the Project closes, so late host actions can drop their results. */
+export const workbenchGeneration = (projectId: string): number => generations.get(projectId) ?? 0
 
 export function watchWorkbenches(): () => void {
   return workbenchApi().onChanged(change => {

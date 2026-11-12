@@ -28,14 +28,13 @@ export function WorkbenchConversationHeader(props: ViewSlotProps) {
     </select>}</>
 }
 export function WorkbenchConversation({ project, canvas, active, viewId }: ViewSlotProps) {
-  const title = useViewTitle(project.id, viewId)
   const entry = useWorkbenches(s => s.catalogs[project.id]?.find(item => item.viewId === viewId))
   const isDraft = entry?.kind === 'draft'
   const summaries = useSessions(s => s.summaries)
   const recent = sortSessions(Object.values(summaries).filter(s => s.projectId === project.id && s.originViewId === viewId)).slice(0, 3)
   if (canvas.mode === 'view' && canvas.conversation.kind === 'session') return <SessionConversation key={canvas.conversation.sessionId} projectId={project.id} sessionId={canvas.conversation.sessionId} active={active} />
   return <div className="view-conversation-draft">
-    <div className="view-draft-prompt"><h2>{isDraft ? '想创建怎样的工作台？' : `在 ${title} 中继续工作`}</h2><p className="muted">{isDraft ? '描述页面的用途与交互。AI 修改草稿文件，你可以在右侧预览后应用。' : entry?.editable ? '结合右侧页面继续对话。修改布局和交互，请使用“编辑工作台”。' : '描述目标，结合右侧工作台继续讨论。'}</p></div>
+    <div className="view-draft-prompt"><h2>{isDraft ? '想创建怎样的工作台？' : '和 AI 讨论这个工作台'}</h2><p className="muted">{isDraft ? '描述页面的用途与交互。AI 修改草稿文件，你可以在右侧预览后应用。' : entry?.editable ? '右侧页面会作为对话上下文。要改布局和交互，用“编辑工作台”。' : '右侧页面会作为对话上下文。'}</p></div>
     {recent.length > 0 && <div className="view-recent"><h3>继续最近的对话</h3>{recent.map(session =>
       <button key={session.id} className="view-session-link" title={session.title} onClick={() => useProjectShell.getState().setViewConversation(project.id, { kind: 'session', sessionId: session.id })}>{session.title}</button>
     )}</div>}

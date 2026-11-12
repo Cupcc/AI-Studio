@@ -33,7 +33,7 @@ const presetSnapshot = (): WorkbenchSnapshot => ({
 })
 beforeEach(() => {
   useProjectShell.setState({ projects: { p: project }, uiStates: { p: defaultUiState() } })
-  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {} })
+  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, hosts: {} })
   api = {
     startAgent: vi.fn(), listAgents: vi.fn(), getAgent: vi.fn(), stopAgent: vi.fn(),
     list: vi.fn(async () => catalog), getSnapshot: vi.fn(async () => presetSnapshot()), getContext: vi.fn(),
@@ -71,8 +71,8 @@ it('loads a preset as an ordinary iframe and updates its Knowledge resource with
   await waitFor(() => expect(document.querySelector('iframe')).toBeTruthy())
   const iframe = document.querySelector('iframe')!, post = vi.spyOn(iframe.contentWindow!, 'postMessage')
   expect(api.getSnapshot).toHaveBeenCalledExactlyOnceWith({ projectId: 'p', viewId: 'architecture' })
-  fireEvent.click(screen.getByRole('button', { name: '放大 Preview' }))
-  expect(screen.getByRole('button', { name: '重置 Preview 缩放' }).textContent).toBe('110%')
+  expect(screen.queryByRole('button', { name: /Preview|缩放|100%/ })).toBeNull()
+  expect(iframe.getAttribute('style')).toBeNull()
   const snapshot = presetSnapshot()
   if (!snapshot.page?.resources?.knowledge) throw new Error('fixture requires Knowledge resource')
   snapshot.revision = 2

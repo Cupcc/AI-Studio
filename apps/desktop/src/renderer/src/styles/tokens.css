@@ -218,6 +218,8 @@
   --preview-glass-canvas: rgba(255, 255, 255, .42);
   --preview-glass-ink: rgba(255, 255, 255, .85);
   --preview-glass-input: rgba(255, 255, 255, .9);
+  /* Workbench host (T20261112-workbench-ui-polish): text of the needs-input tinted "草稿" chip, >= 4.5:1 on --color-needs-input-bg */
+  --color-needs-input-text: #9a5512;
 }
 
 /* Glass appearance (prototype v04, content layer "适中"; FR-SET-002, 2026-10-12). The window is the macOS
@@ -284,6 +286,8 @@
   --radius-canvas: 12px;
   --radius-tab: 9px;
   --radius-dialog: 16px;
+  /* Workbench host (T20261112-workbench-ui-polish): text of the needs-input tinted "草稿" chip, >= 4.5:1 on --color-needs-input-bg */
+  --color-needs-input-text: #8a4a0e;
 }
 
 /* Dark colours (FR-SET-002 colour mode, 2026-10-12; values are proposals, SET-Q7). Neutral greys as in
@@ -349,6 +353,8 @@
   --preview-glass-canvas: rgba(255, 255, 255, .08);
   --preview-glass-ink: rgba(255, 255, 255, .22);
   --preview-glass-input: rgba(255, 255, 255, .18);
+  /* Workbench host (T20261112-workbench-ui-polish): text of the needs-input tinted "草稿" chip, >= 4.5:1 on --color-needs-input-bg */
+  --color-needs-input-text: #f59e0b;
 }
 
 /* Glass in dark: the material turns dark with the mode (measured about #2c2b29); panels become translucent white
@@ -401,6 +407,8 @@
   --shadow-canvas: inset 0 0 0 1px rgba(255, 255, 255, .06), 0 0 0 1px rgba(0, 0, 0, .25), 0 8px 24px rgba(0, 0, 0, .25);
   --shadow-popover: 0 0 0 .5px rgba(255, 255, 255, .1), 0 12px 36px rgba(0, 0, 0, .5);
   --shadow-dialog: 0 0 0 .5px rgba(255, 255, 255, .12), 0 24px 60px rgba(0, 0, 0, .6);
+  /* Workbench host (T20261112-workbench-ui-polish): text of the needs-input tinted "草稿" chip, >= 4.5:1 on --color-needs-input-bg */
+  --color-needs-input-text: #f7b13a;
 }
 
 /* Glass background colours (user request 2026-10-12; palette and default confirmed 2026-10-12, specs/settings/spec.md SET-Q5).

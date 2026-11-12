@@ -82,7 +82,8 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
   }
   const selected = canvas.mode === 'view' ? canvas.viewId : null
   return <section ref={root} className="workbench-navigation" aria-label="工作台">
-    <div className="workbench-navigation__heading"><h2 className="navigation__heading">工作台</h2></div>
+    <div className="workbench-navigation__heading"><h2 className="navigation__heading">工作台</h2>
+      <button ref={addButton} className="icon-button workbench-navigation__add" aria-label="添加工作台" data-tip="添加工作台" data-tip-align="end" aria-haspopup="menu" aria-expanded={choosing} disabled={pending} onClick={() => { setMenu(null); setChoosing(!choosing) }}><Icon name="plus" size={15} /></button></div>
     <div className="workbench-navigation__items" aria-label="工作台列表">
       {catalog?.map((entry, index) => <div key={entry.viewId} data-workbench-id={entry.viewId} className={`workbench-navigation__row ${drop?.viewId === entry.viewId ? drop.after ? 'is-drop-after' : 'is-drop-before' : ''} ${dragging === entry.viewId ? 'is-dragging' : ''}`} draggable={!pending}
         onDragStart={event => { setMenu(null); setDragging(entry.viewId); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', entry.viewId) }}
@@ -104,8 +105,7 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
       </div>)}
       {catalog?.length === 0 && <p className="workbench-navigation__empty">还没有工作台，点击 + 添加。</p>}
     </div>
-    <button ref={addButton} className="workbench-add-button" aria-label="添加工作台" data-tip="添加工作台" data-tip-align="end" aria-expanded={choosing} disabled={pending} onClick={() => { setMenu(null); setChoosing(!choosing) }}><Icon name="plus" size={14} /><span>添加工作台</span></button>
-    {choosing && addButton.current && <WorkbenchMenu anchor={addButton.current} className="workbench-add-menu" dismiss={() => { setChoosing(false); addButton.current?.focus() }}>
+    {choosing && addButton.current && <WorkbenchMenu anchor={addButton.current} align="end" className="workbench-add-menu" dismiss={() => { setChoosing(false); addButton.current?.focus() }}>
       <div className="workbench-choices" aria-label="创建工作台" onKeyDown={event => { if (event.key === 'Escape') { setChoosing(false); addButton.current?.focus() } }}>
         <button disabled={pending} onClick={() => void create('ai')}><Icon name="chat" /><span>AI 对话创建<small>描述工作方式，由 AI 编写页面</small></span></button>
         <button disabled={pending} onClick={() => void create('template')}><Icon name="preview" /><span>从简单模板开始<small>先体验预览、保存与对话</small></span></button>
@@ -117,7 +117,7 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
         <button disabled={pending} aria-label="添加 选品工作台" onClick={() => void create('template', 'product-selection')}><Icon name="preview" /><span>选品工作台<small>四阶段画布，预览后添加到项目</small></span><small>添加</small></button>
         {removed.some(entry => entry.origin === 'custom') && <><h3>已移除的工作台</h3>{removed.filter(entry => entry.origin === 'custom').map(entry => <button key={entry.viewId} disabled={pending || choiceLoading || !!choiceError} aria-label={`恢复 ${entry.title}`} onClick={() => visibility(entry, true)}><Icon name={entry.icon} /><span>{entry.title}</span><small>恢复</small></button>)}</>}
         {choiceLoading && <p role="status">正在读取可用工作台…</p>}
-        {choiceError && <p role="alert">{choiceError}<button className="text-button" onClick={() => { setChoosing(false); setActionError(choiceError) }}>关闭后重试</button></p>}
+        {choiceError && <p role="alert">{choiceError} <button className="secondary-button button--small" onClick={() => { setChoosing(false); setActionError(choiceError) }}>关闭后重试</button></p>}
       </div>
     </WorkbenchMenu>}
     {menu && <WorkbenchMenu anchor={menu.anchor} dismiss={() => setMenu(null)}>
@@ -142,6 +142,6 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
         await useWorkbenches.getState().loadCatalog(project.id)
       } finally { setPending(false) }
     }} />}
-    {(actionError || error) && <p className="workbench-navigation__error" role="alert">{actionError || error}<button className="text-button" onClick={() => { setActionError(null); void useWorkbenches.getState().loadCatalog(project.id) }}>重试</button></p>}
+    {(actionError || error) && <p className="workbench-navigation__error" role="alert">{actionError || error} <button className="secondary-button button--small" onClick={() => { setActionError(null); void useWorkbenches.getState().loadCatalog(project.id) }}>重试</button></p>}
   </section>
 }

@@ -20,6 +20,8 @@ export interface RendererSessionPort {
 export interface ShellSlotProps { project: ProjectRecord; canvas: MainCanvas; active: boolean }
 export interface RightSlotProps extends ShellSlotProps { area: RightArea; fileViewerHost?: HTMLElement | null }
 export interface ViewSlotProps extends ShellSlotProps { viewId: ViewId }
+/** Header of the preview area in view mode: `status` follows the title, `actions` precede the tool switcher, `menu` ends the row. */
+export interface PreviewHeaderProps extends ViewSlotProps { part: 'status' | 'actions' | 'menu' }
 export interface ShellIntegration {
   openTurnDiff?(ref: TurnDiffRef): void
   toolSelected?(projectId: string, area: RightArea): void
@@ -31,6 +33,7 @@ export interface ShellIntegration {
   ViewConversation?: ComponentType<ViewSlotProps>
   ViewConversationHeader?: ComponentType<ViewSlotProps>
   Preview?: ComponentType<ViewSlotProps>
+  PreviewHeader?: ComponentType<PreviewHeaderProps>
   Tool?: ComponentType<RightSlotProps>
   CliMenu?: ComponentType<ShellSlotProps & { dismiss(): void }>
   /** Default CLI shown on the New Chat button (prototype v01). */

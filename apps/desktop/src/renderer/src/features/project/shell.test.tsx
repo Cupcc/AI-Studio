@@ -25,7 +25,7 @@ let api: StudioApi['project']
 let closeResult: CloseProjectResult
 beforeEach(() => {
   useProjectShell.setState(initial, true)
-  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, zoom: {} })
+  useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, hosts: {} })
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
   attention = {}; attentionListeners = new Set()
   port = {
