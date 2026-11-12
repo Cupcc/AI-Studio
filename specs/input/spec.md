@@ -127,7 +127,7 @@
 依据：UX 第 6 节 Needs Input 呈现；D-03；FR-STATE-002；Shell Spec 第 6 节 Needs Input 卡片“也可以在下方直接回复”。
 
 1. Needs Input 时输入框可用，输入非空时按钮为 Send。发送后：文字作为用户消息出现在对话中，未答复的卡片按 I-Q2 的规则解决并变为只读（显示“已在输入框回复”），Session 回到 Running，Needs Input 清除（session spec E5）。
-2. Codex 授权请求只接受批准 / 拒绝；W25 Adapter 与 W26 最终包 UI 真实复验确认输入框文字会先通过同一回合 `turn/steer` 交付，再拒绝待处理请求并继续，已落实 I-Q2。Claude 的 `canUseTool` 返回允许 / 拒绝（拒绝可附说明），提问类请求可能接受自由文本；其真实语义按 DEC-16 留待后续验证。
+2. Codex 授权请求只接受批准 / 拒绝；W25 Adapter 与 W26 最终包 UI 真实复验确认输入框文字会先通过同一回合 `turn/steer` 交付，再拒绝待处理请求并继续，已落实 I-Q2。Claude 的 `canUseTool` 返回允许 / 拒绝（拒绝可附说明），提问类请求可能接受自由文本。2026-11-12 的真实 UI 验收已覆盖通过卡片选择回答 AskUserQuestion，以及审批的拒绝和“允许一次”（见 [Claude 真实验收](../../.agents/archive/tasks/T20261112-claude-cli-acceptance/acceptance.md)）；在输入框回复以及拒绝时附说明仍待验证。
 
 #### 候选输入与控件键盘操作
 

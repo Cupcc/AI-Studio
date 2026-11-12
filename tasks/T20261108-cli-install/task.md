@@ -70,3 +70,7 @@ created: 2026-11-08
 ## 2026-11-11 线性集成
 
 用户要求全部合入 main 并清理临时分支。Main Agent 将本轮连接变更同步到最新 main，保留工作台和既有人工验收文档，解决路线图 / DEC-27 文案冲突；同时补齐 `smol-toml` 的受影响检查映射，不绕过提交门禁。集成、最终验证与清理进度见[本次集成](../../.agents/archive/tasks/T20261111-main-integration/task.md)。上文“未提交、未合入”保留为 11-10 的历史交付状态；独立验收也保留原基线，本次 Git 集成不自动补记 Claude 远端、安装、打包或人工验收通过。
+
+## 2026-11-12 Claude 真实验收
+
+Claude Code Session 核心链路（使用本机登录）已完成真实验收，并获用户确认“测试通过”，见 [Claude 真实验收](../../.agents/archive/tasks/T20261112-claude-cli-acceptance/acceptance.md)。该记录中的未覆盖项包括一键安装、自定义 URL / Key 的 Claude 远端调用和打包应用。用户当日表示这些项“不需要你测了”，因此不作为该轮前置，也不记为通过。本任务的状态与保留项不因此自动改变。
