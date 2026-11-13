@@ -1,8 +1,8 @@
-import { claudeWireModel, isClaudeAlias, nativeTestModel, testApiConnection } from './connection-test'
+import { testApiConnection } from './connection-test'
 import { randomUUID } from 'node:crypto'
-import type { ModelInfo, ProviderEnvironment } from '@ai-studio/agent-adapter'
+import type { ProviderEnvironment } from '@ai-studio/agent-adapter'
 import { SESSION_CLIS, type SessionCli } from '@shared/session/types'
-import type { CliConnection, ConnectionProfile, ConnectionTestResult, SaveCliConnection } from '@shared/session/cli-connection'
+import { DEFAULT_TEST_MODELS, type CliConnection, type ConnectionProfile, type ConnectionTestResult, type SaveCliConnection } from '@shared/session/cli-connection'
 import type { SessionStore } from './store'
 import type { Env } from '../shell-env/login-env'
 
@@ -38,7 +38,8 @@ export class CliConnections {
       if (data.profile !== null) {
         const p = data.profile
         if (!p || typeof p !== 'object' || !('baseUrl' in p) || typeof p.baseUrl !== 'string' || !('auth' in p) || !(p.auth === 'api_key' || p.auth === 'bearer') || !('encryptedKey' in p) || typeof p.encryptedKey !== 'string' || !p.encryptedKey) throw new Error()
-        profile = { baseUrl: validateBaseUrl(p.baseUrl), auth: p.auth, encryptedKey: p.encryptedKey }
+        const testModel = 'testModel' in p && typeof p.testModel === 'string' ? p.testModel : ''
+        profile = { baseUrl: validateBaseUrl(p.baseUrl), auth: p.auth, encryptedKey: p.encryptedKey, ...(testModel ? { testModel } : {}) }
       }
       if (data.mode === 'app' && !profile) throw new Error()
       return { mode: data.mode === 'app' ? 'app' : 'local', revision: data.revision, profile }
@@ -47,7 +48,8 @@ export class CliConnections {
 
   get(cli: SessionCli): CliConnection {
     const saved = this.read(`connection:${cli}`)
-    return { cli, mode: saved.mode, revision: saved.revision, profile: saved.profile ? { baseUrl: saved.profile.baseUrl, auth: saved.profile.auth, hasApiKey: true } : null }
+    const profile = saved.profile
+    return { cli, mode: saved.mode, revision: saved.revision, profile: profile ? { baseUrl: profile.baseUrl, auth: profile.auth, hasApiKey: true, ...(profile.testModel ? { testModel: profile.testModel } : {}) } : null }
   }
   list(): CliConnection[] { return SESSION_CLIS.map(cli => this.get(cli)) }
 
@@ -59,6 +61,8 @@ export class CliConnections {
       let profile = previous.profile
       if (request.mode === 'app') {
         const baseUrl = validateBaseUrl(request.baseUrl)
+        const testModel = request.testModel?.trim()
+        if (testModel && /\s/.test(testModel)) throw new Error('测试模型不能包含空格。')
         if (request.cli === 'codex' && request.auth !== 'api_key') throw new Error('Codex 使用 API Key 认证。')
         const key = request.apiKey
         if (!key && (!profile || profile.baseUrl !== baseUrl || profile.auth !== request.auth)) throw new Error('请为此连接填写 API Key。修改地址或认证方式后需重新填写。')
@@ -66,7 +70,7 @@ export class CliConnections {
         let encryptedKey: string
         try { encryptedKey = key ? (await this.secrets.encrypt(key)).toString('base64') : profile!.encryptedKey }
         catch { throw new Error('无法安全保存 API Key，请检查系统钥匙串后重试。') }
-        profile = { baseUrl, auth: request.auth, encryptedKey }
+        profile = { baseUrl, auth: request.auth, encryptedKey, ...(testModel ? { testModel } : {}) }
       }
       this.store.setPreference(`connection:${request.cli}`, JSON.stringify({ mode: request.mode, revision: randomUUID(), profile } satisfies StoredConnection))
       return this.get(request.cli)
@@ -89,23 +93,11 @@ export class CliConnections {
     return { env, connection: { baseUrl: profile.baseUrl, apiKey, auth: profile.auth } }
   }
 
-  /** `catalog` reads the CLI's model catalog (a handshake that sends no message) to resolve Claude Code aliases. */
-  async test(cli: SessionCli, env: Env, catalog: (environment: ProviderEnvironment) => Promise<ModelInfo[]>): Promise<ConnectionTestResult> {
-    const environment = await this.environment(cli, env)
-    const { connection } = environment
+  /** Checks that the gateway answers; it never starts the CLI, so the CLI path itself is not covered. */
+  async test(cli: SessionCli): Promise<ConnectionTestResult> {
+    const { connection } = await this.environment(cli, {})
     if (!connection) return { ok: false, message: '请先保存应用连接配置。' }
-    let model: string
-    try { model = await nativeTestModel(cli, env) }
-    catch { return { ok: false, message: '无法读取本机模型配置，请检查 CLI 配置文件。' } }
-    if (cli === 'claude-code') {
-      try { model = claudeWireModel(model, await catalog(environment)) }
-      catch {
-        // A full model ID needs no catalog; only an alias or an unset model depends on it.
-        if (!model || isClaudeAlias(model)) return { ok: false, message: '无法读取 Claude Code 的模型目录，不能确定测试模型。请确认 Claude Code 可用后重试。' }
-        model = model.replace(/\[1m\]$/i, '')
-      }
-    }
-    return testApiConnection(cli, connection, model)
+    return testApiConnection(cli, connection, this.get(cli).profile?.testModel || DEFAULT_TEST_MODELS[cli])
   }
 
 }

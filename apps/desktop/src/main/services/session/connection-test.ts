@@ -1,48 +1,21 @@
-import { readFile } from 'node:fs/promises'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
-import { parse } from 'smol-toml'
 import type { SessionCli } from '@shared/session/types'
 import type { ConnectionTestResult } from '@shared/session/cli-connection'
-import type { ModelInfo, ProviderConnection } from '@ai-studio/agent-adapter'
-import type { Env } from '../shell-env/login-env'
+import type { ProviderConnection } from '@ai-studio/agent-adapter'
 
 function record(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
 }
 const text = (value: unknown) => typeof value === 'string' ? value.trim() : ''
 
-/** Tests use the user-level native model; project/session model choices are independent. */
-export async function nativeTestModel(cli: SessionCli, env: Env): Promise<string> {
-  const home = env.HOME || homedir()
-  if (cli === 'codex') {
-    const config = parse(await readFile(join(env.CODEX_HOME || join(home, '.codex'), 'config.toml'), 'utf8'))
-    const profile = record(record(config.profiles)[text(config.profile)])
-    return text(profile.model) || text(config.model)
-  }
-  let config: Record<string, unknown> = {}
-  try { config = record(JSON.parse(await readFile(join(env.CLAUDE_CONFIG_DIR || join(home, '.claude'), 'settings.json'), 'utf8'))) }
-  catch (error) { if (!error || typeof error !== 'object' || !('code' in error) || error.code !== 'ENOENT') throw error }
-  const settingsEnv = record(config.env)
-  const model = text(settingsEnv.ANTHROPIC_MODEL) || text(env.ANTHROPIC_MODEL) || text(config.model)
-  const alias = model.replace(/\[1m\]$/, '').toLowerCase()
-  if (['sonnet', 'opus', 'haiku'].includes(alias)) {
-    const name = `ANTHROPIC_DEFAULT_${alias.toUpperCase()}_MODEL`
-    return text(settingsEnv[name]) || text(env[name]) || model
-  }
-  return model
-}
+// Error shapes of the Anthropic / OpenAI APIs and common gateways for an unknown or unserved model.
+const MODEL_UNAVAILABLE = /model_not_found|not_found_error|no available channel for model|model\b[^.]{0,80}\b(?:not found|does not exist|not exist|unavailable|not available|not supported)|(?:invalid|unknown|unsupported) model/i
 
-/** Claude Code's model aliases (https://code.claude.com/docs/en/model-config); only these need the CLI catalog. */
-export function isClaudeAlias(model: string): boolean {
-  return ['default', 'best', 'sonnet', 'opus', 'haiku', 'opusplan'].includes(model.replace(/\[1m\]$/i, '').toLowerCase())
-}
-
-/** Claude Code sends the catalog's resolved ID for an alias, and its `default` row's model when none is set. */
-export function claudeWireModel(model: string, catalog: readonly ModelInfo[]): string {
-  const plain = model.replace(/\[1m\]$/i, '')
-  const row = (id: string) => catalog.find(item => item.id.toLowerCase() === id.toLowerCase())
-  return (row(model || 'default') ?? row(plain))?.resolvedModel?.replace(/\[1m\]$/i, '') || plain
+/** Says which side failed without echoing the response body, which could carry request details. */
+function failure(status: number, body: string, model: string): string {
+  if (status === 401 || status === 403) return `服务拒绝了 API Key（HTTP ${status}），请检查 Key 与权限。`
+  if (status === 402 || status === 429) return `服务返回 HTTP ${status}，可能是额度不足或被限流，请稍后重试或检查额度。`
+  if (MODEL_UNAVAILABLE.test(body)) return `网关可达，但模型 ${model} 不可用（HTTP ${status}），请换一个测试模型。`
+  return `服务返回 HTTP ${status}，请检查地址、Key 和额度。`
 }
 
 function responseText(value: unknown, claude: boolean): string {
@@ -73,7 +46,6 @@ function streamReply(body: string, claude: boolean): string {
 
 /** A single direct API request. Never starts a CLI, retries or creates a chat session. */
 export async function testApiConnection(cli: SessionCli, connection: ProviderConnection, model: string): Promise<ConnectionTestResult> {
-  if (!model) return { ok: false, message: '本机配置未指定模型，无法发送测试请求。请先在本机 CLI 配置中设置模型。' }
   const claude = cli === 'claude-code'
   const base = connection.baseUrl.replace(/\/+$/, '')
   const endpoint = claude ? `${base.replace(/\/v1$/, '')}/v1/messages` : `${base}/responses`
@@ -87,10 +59,7 @@ export async function testApiConnection(cli: SessionCli, connection: ProviderCon
         ? { model, max_tokens: 1024, stream: true, messages: [{ role: 'user', content: 'hi' }] }
         : { model, input: [{ role: 'user', content: [{ type: 'input_text', text: 'hi' }] }], instructions: '', stream: true, store: false })
     })
-    if (!response.ok) {
-      await response.body?.cancel()
-      return { ok: false, message: `服务返回 HTTP ${response.status}，请检查地址、凭据、本机模型和额度。` }
-    }
+    if (!response.ok) return { ok: false, message: failure(response.status, (await response.text().catch(() => '')).slice(0, 4096), model) }
     const body = await response.text()
     const reply = response.headers.get('content-type')?.includes('text/event-stream') ? streamReply(body, claude) : responseText(JSON.parse(body), claude)
     if (!reply) return { ok: false, message: '服务未返回完整模型回复，连接测试未通过。' }

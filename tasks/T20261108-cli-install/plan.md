@@ -7,6 +7,8 @@
 | W2 | 一键安装真实联网流程（隔离 HOME）；打包应用的 CLI 设置、Claude / Codex Session 与安装路径 | `tasks/T20261108-cli-install/acceptance.md` 新增章节、`tasks/T20261108-cli-install/evidence/W2-*` | `../AI Stduio.worktrees/cli-install-retest` / `test/cli-install-retest` | 完成：补测部分通过，修复后复验通过 |
 | W3 | Claude 自定义连接真实实测（Main Agent 执行，同时实现修复） | `evidence/W3-*` | `../AI Stduio.worktrees/claude-custom-connection` / `fix/claude-custom-connection` | 完成 |
 | R1 | W3 的独立评审与界面复核（未参与实现） | 只读，结论由 Main Agent 转录；`evidence/R1-*` | 同 W3 | 有条件通过，条件已处理 |
+| W4 | 连接测试改为测试模型后的真实检查（Main Agent 执行，同时实现改动） | `evidence/W4-*` | `../AI Stduio.worktrees/connection-test-model` / `fix/connection-test-model` | 完成 |
+| R2 | W4 的独立评审与界面复核（未参与实现） | 只读，结论由 Main Agent 转录；`evidence/R2-*` | 同 W4 | 有条件通过，条件已处理 |
 
 W2 只做验证，不修改产品代码；发现缺陷交回 Main Agent。需要窗口焦点的 Electron 操作在 W2 完成前不与其他 worktree 并行。
 
@@ -21,3 +23,4 @@ W2 只做验证，不修改产品代码；发现缺陷交回 Main Agent。需要
 - 2026-11-12：rebase 到含 E2E 修复的 dev 后再次触发 full 模式；因 dev 新出现的 `product-selection.spec.ts` 失败同样会在打包前终止，且 full 为打包检查附带全量 E2E，Main Agent 取消该次运行（run 43227767866），按用户指示新增远端 CI 的 package 模式（只构建、打包与打包冒烟），选择器对打包输入改为提示该模式。
 - 2026-11-12：远端 CI package 模式（[run 43229407183](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43229407183)，`dceac2c`）通过：干净 runner 上构建、`package:built`、固定版本 CLI 与 `smoke:packaged` 均成功（`ok: true`），未运行 E2E。Main Agent 随后集成本分支。
 - 2026-11-13：用户提供 Claude 兼容网关后，Main Agent 在 `fix/claude-custom-connection` 放开 HTTP 地址（用户决定）、修正连接测试的模型别名，并完成真实实测，见 [W3](acceptance.md#2026-11-13-claude-自定义连接实测w3)。
+- 2026-11-13：用户纠正连接测试只检查网关是否可达、不经 CLI，并要求可填写测试模型、未填写时用内置模型。Main Agent 在 `fix/connection-test-model` 实现并实测（[W4](acceptance.md#2026-11-13-连接测试改为测试模型w4)），R2 独立评审有条件通过，条件已处理。

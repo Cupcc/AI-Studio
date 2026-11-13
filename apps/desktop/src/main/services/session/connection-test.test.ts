@@ -1,15 +1,10 @@
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
 import { createServer, type Server, type RequestListener } from 'node:http'
 import { afterEach, describe, expect, it } from 'vitest'
-import { claudeWireModel, isClaudeAlias, nativeTestModel, testApiConnection } from './connection-test'
+import { testApiConnection } from './connection-test'
 
-const directories: string[] = []
 const servers: Server[] = []
 afterEach(async () => {
   await Promise.all(servers.splice(0).map(server => new Promise<void>((resolve, reject) => { server.closeAllConnections(); server.close(error => error ? reject(error) : resolve()) })))
-  await Promise.all(directories.splice(0).map(path => rm(path, { recursive: true, force: true })))
 })
 async function fixture(handler: RequestListener) {
   const server = createServer(handler); servers.push(server)
@@ -56,33 +51,16 @@ describe('direct API connection test', () => {
     expect((await testApiConnection('codex', { baseUrl, apiKey: 'secret', auth: 'api_key' }, 'native-model')).ok).toBe(false)
   })
 
-  it('does not guess a model when local configuration has none', async () => {
-    expect(await testApiConnection('codex', { baseUrl: 'http://127.0.0.1:1', apiKey: 'secret', auth: 'api_key' }, '')).toMatchObject({ ok: false, message: expect.stringContaining('未指定模型') })
-  })
-
-  it('maps a Claude Code alias or an unset model to the ID the CLI sends', () => {
-    const catalog = [{ id: 'default', displayName: 'Default', resolvedModel: 'claude-main' }, { id: 'opus', displayName: 'Opus', resolvedModel: 'claude-opus-x' },
-      { id: 'claude-wide[1m]', displayName: 'Wide', resolvedModel: 'claude-wide' }, { id: 'haiku', displayName: 'Haiku' }]
-    expect(claudeWireModel('', catalog)).toBe('claude-main')
-    expect(claudeWireModel('Opus', catalog)).toBe('claude-opus-x')
-    expect(claudeWireModel('opus[1m]', catalog)).toBe('claude-opus-x')
-    expect(claudeWireModel('claude-wide[1m]', catalog)).toBe('claude-wide')
-    expect(claudeWireModel('gateway-model', catalog)).toBe('gateway-model')
-    expect(claudeWireModel('haiku', catalog)).toBe('haiku')
-    expect(claudeWireModel('', [])).toBe('')
-    expect(['opus', 'Sonnet[1m]', 'default', 'opusplan'].every(isClaudeAlias)).toBe(true)
-    expect(['claude-opus-5-5', 'gateway-model', ''].some(isClaudeAlias)).toBe(false)
-  })
-
-  it('reads native config files without running a CLI and respects model aliases', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'studio-api-model-')); directories.push(home)
-    await mkdir(join(home, '.codex')); await mkdir(join(home, '.claude'))
-    await writeFile(join(home, '.codex/config.toml'), 'model = "base"\nprofile = "work"\n[profiles.work]\nmodel = "native-model"\n')
-    await writeFile(join(home, '.claude/settings.json'), JSON.stringify({ model: 'sonnet', env: { ANTHROPIC_DEFAULT_SONNET_MODEL: 'native-sonnet' } }))
-    expect(await nativeTestModel('codex', { HOME: home })).toBe('native-model')
-    expect(await nativeTestModel('claude-code', { HOME: home })).toBe('native-sonnet')
-    expect(await nativeTestModel('claude-code', { HOME: home, ANTHROPIC_MODEL: 'environment-model' })).toBe('environment-model')
-    await writeFile(join(home, '.claude/settings.json'), JSON.stringify({ env: { ANTHROPIC_MODEL: 'settings-model' } }))
-    expect(await nativeTestModel('claude-code', { HOME: home, ANTHROPIC_MODEL: 'environment-model' })).toBe('settings-model')
+  it.each([
+    { status: 401, body: '{"error":{"type":"authentication_error"}}', expected: 'API Key（HTTP 401）' },
+    { status: 503, body: '{"error":{"code":"model_not_found","message":"No available channel for model x"}}', expected: '网关可达，但模型 native-model 不可用（HTTP 503）' },
+    { status: 404, body: '{"type":"error","error":{"type":"not_found_error","message":"model: claude-x"}}', expected: '网关可达，但模型 native-model 不可用（HTTP 404）' },
+    { status: 429, body: '{"error":{"message":"Rate limit reached. Received Model Group=claude"}}', expected: '额度不足或被限流' },
+    { status: 500, body: '{"error":{"message":"Model Group=x upstream failure"}}', expected: '服务返回 HTTP 500' },
+  ])('tells a rejected key, an unavailable model and other HTTP errors apart: $status', async ({ status, body, expected }) => {
+    const baseUrl = await fixture((_request, response) => { response.writeHead(status, { 'Content-Type': 'application/json' }); response.end(body) })
+    const result = await testApiConnection('claude-code', { baseUrl, apiKey: 'secret', auth: 'api_key' }, 'native-model')
+    expect(result).toMatchObject({ ok: false, message: expect.stringContaining(expected) })
+    expect(result.message).not.toContain('channel')
   })
 })

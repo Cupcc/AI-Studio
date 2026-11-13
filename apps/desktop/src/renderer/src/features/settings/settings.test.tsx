@@ -43,7 +43,7 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
   it('saves URL and key without a model and shows the direct API hi test result', async () => {
     const previous = useSessions.getState()
     const connection = { cli: 'codex', mode: 'local', profile: null, revision: 'local' }
-    const saveCliConnection = vi.fn(async (request) => ({ ...connection, ...request, revision: 'saved', profile: { baseUrl: request.baseUrl, auth: request.auth, hasApiKey: true } }))
+    const saveCliConnection = vi.fn(async (request) => ({ ...connection, ...request, revision: 'saved', profile: { baseUrl: request.baseUrl, auth: request.auth, hasApiKey: true, ...(request.testModel ? { testModel: request.testModel } : {}) } }))
     const testCliConnection = vi.fn(async () => ({ ok: true, message: '连接测试通过。回复：Hi!', model: 'native-model', reply: 'Hi!', durationMs: 1200 }))
     Object.assign(window.studio, { session: {
       getProviders: async () => [{ cli: 'codex', displayName: 'Codex CLI', status: 'available', reason: null }],
@@ -61,6 +61,7 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
       expect(screen.queryByLabelText('认证方式')).toBeNull()
       fireEvent.change(screen.getByLabelText('Base URL'), { target: { value: 'https://gateway.example/v1' } })
       fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'secret' } })
+      expect(screen.getByLabelText<HTMLInputElement>('测试模型').placeholder).toBe('gpt-6.1-sol（默认）')
       expect(screen.getByRole('button', { name: '测试连接' }).hasAttribute('disabled')).toBe(true)
       expect(screen.getByText('保存后即可测试')).toBeTruthy()
       fireEvent.click(screen.getByRole('button', { name: '保存' }))
@@ -69,6 +70,7 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
       await waitFor(() => expect(saveCliConnection).toHaveBeenCalledWith({ cli: 'codex', mode: 'app', auth: 'api_key', baseUrl: 'https://gateway.example/v1', apiKey: 'secret' }))
       expect(testCliConnection).not.toHaveBeenCalled()
       await waitFor(() => expect(screen.getByText('已安全保存')).toBeTruthy())
+      expect(screen.getByText('发送 hi，检查网关是否可达')).toBeTruthy()
       expect(screen.getByLabelText('Base URL')).toBeTruthy()
       fireEvent.click(screen.getByRole('button', { name: '测试连接' }))
       await waitFor(() => expect(screen.getByRole('status').textContent).toContain('Hi!'))
@@ -81,6 +83,12 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
       fireEvent.click(screen.getByRole('button', { name: '返回 CLI 列表' }))
       fireEvent.click(screen.getByRole('button', { name: '配置' }))
       expect(screen.getByLabelText<HTMLInputElement>('Base URL').value).toBe('https://gateway.example/v1')
+      fireEvent.change(screen.getByLabelText('测试模型'), { target: { value: ' gateway-model ' } })
+      expect(screen.getByText('保存后即可测试')).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: '保存' }))
+      await waitFor(() => expect(saveCliConnection).toHaveBeenLastCalledWith({ cli: 'codex', mode: 'app', auth: 'api_key', baseUrl: 'https://gateway.example/v1', testModel: 'gateway-model' }))
+      await waitFor(() => expect(screen.getByText('发送 hi，检查网关是否可达')).toBeTruthy())
+      expect(screen.getByLabelText<HTMLInputElement>('测试模型').value).toBe('gateway-model')
     } finally { useSessions.setState(previous, true) }
   })
 

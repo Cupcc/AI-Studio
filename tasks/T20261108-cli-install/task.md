@@ -49,7 +49,7 @@ created: 2026-11-08
 
 用户要求移除 CLI 连接设置的 model，只替换 URL / API Key，其他设置保持本机行为，并用模型实际发送 `hi` 验证。本轮在 `fix/cli-connection-inherit` 独立 worktree 实施；主工作区既有文档整理不在本轮写入范围。
 
-验收场景：设置入口不再显示或提交 model；旧连接记录 / 会话快照中的 model 不再作为连接覆盖；CLI 原生模型目录、模型与思考强度继续继承；后续用户明确纠正为直接 API 调用，并指定参考 Cockpit Tools 唤醒；测试读取用户级本机模型，直接发送 `hi`，不启动 CLI（2026-11-13 起 Claude 测试经 CLI 模型目录握手解析别名，见[下文](#2026-11-13-claude-自定义连接实测与-o-w2-4-决定)）。成功必须收到完整回复，HTTP 错误 / 流失败 / 截断 / 空回复 / 超时不记通过。保存配置不发模型请求。覆盖服务与 Adapter 定向测试、设置界面实际操作与截图、双 CLI 实测；跨模块契约由独立 Review Agent 复核。真实请求使用本机已配置的连接或应用已保存连接，不记录凭据，不修改本机 CLI 文件。
+验收场景：设置入口不再显示或提交 model；旧连接记录 / 会话快照中的 model 不再作为连接覆盖；CLI 原生模型目录、模型与思考强度继续继承；后续用户明确纠正为直接 API 调用，并指定参考 Cockpit Tools 唤醒；测试读取用户级本机模型，直接发送 `hi`，不启动 CLI（2026-11-13 曾改为经 CLI 模型目录解析 Claude 别名，随后按用户纠正撤回，现为测试模型，见[下文](#2026-11-13-连接测试改为测试模型)）。成功必须收到完整回复，HTTP 错误 / 流失败 / 截断 / 空回复 / 超时不记通过。保存配置不发模型请求。覆盖服务与 Adapter 定向测试、设置界面实际操作与截图、双 CLI 实测；跨模块契约由独立 Review Agent 复核。真实请求使用本机已配置的连接或应用已保存连接，不记录凭据，不修改本机 CLI 文件。
 
 本轮实现、界面自检与独立技术评审已完成。改动保存在 `fix/cli-connection-inherit` worktree，未提交、未合入 main；新增 TOML 依赖涉及 `apps/desktop/package.json` 与 `pnpm-lock.yaml`，现有受影响检查未映射这两项，不能视为提交门禁通过。本轮不绕过门禁，也不扩展为检查工具改造。原任务的一键安装 / 打包 / 人工验收保留项不因本轮局部验证自动关闭。
 
@@ -89,7 +89,7 @@ Worker 分工与进度见 [plan](plan.md)。
 
 用户回复「放到.env.local 里面了」，提供 Claude 兼容网关与 Key（存于未跟踪的 `apps/desktop/.env.local`，不写入记录）。该网关是公网 IP 上的 HTTP 地址，原规则只允许 HTTPS 与本机 HTTP，在设置中无法保存。用户决定「允许http和https，不用警告」（2026-11-13），规则见 [settings spec](../../specs/settings/spec.md#cli-连接配置2026-11-08-确认)第 5 条。
 
-实测中还发现，连接测试把本机配置的模型别名 `opus` 原样发给 API，网关返回 `model_not_found`；Claude Code 自身会把别名解析为实际模型 ID。现改为经 CLI 模型目录（握手，不发送消息）取 `resolvedModel`，未设置模型时用目录的默认项，见 settings spec 第 4 条与 [Adapter 规格](../../specs/agent-adapter/spec.md#314-应用连接覆盖)。
+实测中还发现，连接测试把本机配置的模型别名 `opus` 原样发给 API，网关返回 `model_not_found`；Claude Code 自身会把别名解析为实际模型 ID。现改为经 CLI 模型目录（握手，不发送消息）取 `resolvedModel`，未设置模型时用目录的默认项。该做法已由用户纠正撤回，见[连接测试改为测试模型](#2026-11-13-连接测试改为测试模型)。
 
 结果（AI 验证，不是人工验收）：在隔离 Electron 中保存该 HTTP 网关、测试连接，以及新建 Claude Code 会话发送 `hi`，均成功，网关用量随之增加，见[验收记录](acceptance.md#2026-11-13-claude-自定义连接实测w3)。
 
@@ -100,4 +100,10 @@ Worker 分工与进度见 [plan](plan.md)。
 
 用户对 O-W2-2（安装阶段与取消入口）回复「收到」，该项仍为可选的产品问题，不在本轮实现。
 
-独立评审（R1）有条件通过，条件已处理，见 [R1](acceptance.md#独立评审r1)。用户随后回复「accept, implemnt,commit and integrate」（2026-11-13）：确认 settings spec 第 4 条与 DEC-27 中 Claude 测试的变化（经 CLI 模型目录握手、未设置模型时用目录默认项）；同意顺带实现两项建议：设置页的错误提示去掉 Electron 的 IPC 包装前缀（改用现有的 `ipcErrorText`），以及 `.gitignore` 忽略 `.env*.local`，避免含密钥的本地环境文件被提交。
+独立评审（R1）有条件通过，条件已处理，见 [R1](acceptance.md#独立评审r1)。用户随后回复「accept, implemnt,commit and integrate」（2026-11-13）：确认 settings spec 第 4 条与 DEC-27 中 Claude 测试的变化（经 CLI 模型目录握手、未设置模型时用目录默认项，随后被用户纠正撤回，见下一节）；同意顺带实现两项建议：设置页的错误提示去掉 Electron 的 IPC 包装前缀（改用现有的 `ipcErrorText`），以及 `.gitignore` 忽略 `.env*.local`，避免含密钥的本地环境文件被提交。
+
+## 2026-11-13 连接测试改为测试模型
+
+集成后用户纠正：「测试只测试网关连通性，确认该api是否可达，不通过cli测试完整的路径」。在给出的选项中选择“仍发 hi，模型名原样用”，并补充「增加一个测试模型选项填写」「如果没有填写，用app内置的模型名」（2026-11-13）。
+
+实现：连接表单增加可选的“测试模型”，随连接保存，只用于连接测试，不影响 Session 的模型。未填写时用内置默认模型：Codex `gpt-6.1-sol`、Claude Code `claude-opus-5-5`，分别取自 Codex 0.167.2 与 Claude Code 2.1.323 当前的默认模型。测试不再读取本机模型配置，也不经 CLI 解析别名，因此移除了本机模型读取、经 CLI 模型目录的握手（含 Adapter 的 `resolvedModel` 与 `SessionService.nativeModels`），以及只为读取 Codex 配置引入的 `smol-toml`。失败提示区分 Key 被拒、模型不可用与其他错误。规则见 [settings spec](../../specs/settings/spec.md#cli-连接配置2026-11-08-确认) 第 4、6 条。

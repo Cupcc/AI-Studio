@@ -35,7 +35,7 @@ export function inventory(cwd = process.cwd()) {
     .filter(file => existsSync(`${cwd}/${file}`))
 }
 
-// smol-toml is a leaf runtime dependency used only by the CLI connection reader.
+// smol-toml was a leaf runtime dependency of the CLI connection reader; kept until its removal reaches dev.
 // Compare both snapshots so unrelated manifest/lock changes still fail closed.
 export function connectionDependencyChange(beforeManifest, afterManifest, beforeLock, afterLock) {
   const normalize = (manifest, lock) => {

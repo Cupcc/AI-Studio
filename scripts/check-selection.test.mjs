@@ -86,7 +86,8 @@ test('actual desktop dependency graph keeps leaf changes focused and IPC consume
   expect(selected.title).toEqual([
     'src/renderer/src/features/input/file-references.test.tsx',
     'src/renderer/src/features/project/shell.test.tsx',
-    'src/renderer/src/features/session/session.test.tsx'
+    'src/renderer/src/features/session/session.test.tsx',
+    'src/renderer/src/features/workbench/lifecycle.test.tsx'
   ])
   expect(selected.input).toContain('src/renderer/src/features/input/file-references.test.tsx')
   expect(selected.testOnly).toEqual([paths.testOnly])

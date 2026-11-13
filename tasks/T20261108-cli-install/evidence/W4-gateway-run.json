@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-13",
+  "executor": "Main Agent (implementer of this round)",
+  "baseline": "fix/connection-test-model at ef68bec (on dev 86ae248)",
+  "app": "pnpm build output started directly with Electron; isolated userData (deleted afterwards); real providers; agent-browser over CDP",
+  "gateway": "the same user-provided HTTP gateway as W3; host and key not recorded",
+  "credentials": "read from the untracked apps/desktop/.env.local through shell substitution; not printed, logged or stored",
+  "steps": [
+    { "cli": "claude-code", "testModel": "(empty)", "ui": "placeholder claude-opus-5-5（默认）; hint 用 claude-opus-5-5 发送 hi，检查网关是否可达", "result": "连接正常, 2.8 s, claude-opus-5-5, reply \"Hi there! How can I help you today?\"", "gatewayUsage": { "before": 66179, "after": 66339 } },
+    { "cli": "claude-code", "testModel": "opus", "ui": "editing marks 未保存 and 保存后即可测试; after save the hint names opus", "result": "连接失败: 网关可达，但模型 opus 不可用（HTTP 503），请换一个测试模型。", "gatewayUsage": { "before": 66339, "after": 66339 } },
+    { "cli": "codex", "baseUrl": "same gateway with /v1", "testModel": "(empty)", "ui": "placeholder gpt-6.1-sol（默认）", "result": "连接正常, 2.2 s, gpt-6.1-sol, reply \"Hi! How can I help you today?\"", "gatewayUsage": { "before": 66339, "after": 66411 } }
+  ],
+  "cliProcesses": "not sampled; the test code calls only the direct API (CliConnections.test -> testApiConnection). Saving still triggers the usual availability recheck of the CLI",
+  "screenshots": ["W4-01-claude-default-model-pass.jpg", "W4-02-claude-model-unavailable.jpg", "W4-03-codex-default-model-pass.jpg"]
+}

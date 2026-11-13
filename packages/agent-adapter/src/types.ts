@@ -41,8 +41,6 @@ export interface ModelInfo {
   description?: string;
   /** True for the CLI's own default model, when the CLI reports one. */
   isDefault?: boolean;
-  /** Model ID the CLI sends to the API for this entry (for example an alias's current model), when the CLI reports one. */
-  resolvedModel?: string;
   /** True when the CLI marks the model as hidden from pickers. */
   hidden?: boolean;
   /** Reasoning effort levels the CLI reports for the model, if any. */

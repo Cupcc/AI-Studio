@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CliConnection, ConnectionTestResult, SaveCliConnection } from '@shared/session/cli-connection'
+import { DEFAULT_TEST_MODELS, type CliConnection, type ConnectionTestResult, type SaveCliConnection } from '@shared/session/cli-connection'
 import { Icon } from '../../app/Icon'
 import { sessionApi } from '../session/api'
 import { ipcErrorText } from '../../lib/ipc-error'
@@ -17,6 +17,7 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
   const [mode, setMode] = useState(connection.mode)
   const [baseUrl, setBaseUrl] = useState(connection.profile?.baseUrl ?? '')
   const [apiKey, setApiKey] = useState('')
+  const [testModel, setTestModel] = useState(connection.profile?.testModel ?? '')
   const [showKey, setShowKey] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -25,10 +26,12 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
   const body = useRef<HTMLDivElement>(null)
   const active = useRef(true)
   useEffect(() => { active.current = true; back.current?.focus(); return () => { active.current = false } }, [])
+  // Results and errors render at the end of the scrolling body; bring them into view.
   useEffect(() => {
-    if (test.status === 'complete' && body.current) body.current.scrollTop = body.current.scrollHeight
-  }, [test])
-  const dirty = mode !== saved.mode || (mode === 'app' && (baseUrl.trim().replace(/\/+$/, '') !== saved.profile?.baseUrl || Boolean(apiKey)))
+    if ((test.status === 'complete' || error) && body.current) body.current.scrollTop = body.current.scrollHeight
+  }, [test, error])
+  const dirty = mode !== saved.mode || (mode === 'app' && (baseUrl.trim().replace(/\/+$/, '') !== saved.profile?.baseUrl || Boolean(apiKey) || testModel.trim() !== (saved.profile?.testModel ?? '')))
+  const defaultModel = DEFAULT_TEST_MODELS[connection.cli]
   const busy = saving || test.status === 'running'
   const hasKey = saved.profile?.hasApiKey && baseUrl.trim().replace(/\/+$/, '') === saved.profile.baseUrl
   const canSave = dirty && (mode === 'local' || Boolean(baseUrl.trim() && (apiKey || hasKey)))
@@ -37,12 +40,12 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
     if (!canSave || busy) return
     setSaving(true); setError(null); setTest({ status: 'idle' })
     const request: SaveCliConnection = mode === 'local' ? { cli: connection.cli, mode }
-      : { cli: connection.cli, mode, baseUrl: baseUrl.trim(), auth: saved.profile?.auth ?? 'api_key', ...(apiKey ? { apiKey } : {}) }
+      : { cli: connection.cli, mode, baseUrl: baseUrl.trim(), auth: saved.profile?.auth ?? 'api_key', ...(apiKey ? { apiKey } : {}), ...(testModel.trim() ? { testModel: testModel.trim() } : {}) }
     try {
       const next = await sessionApi().saveCliConnection(request)
       onSaved(next)
       if (!active.current) return
-      setSaved(next); setBaseUrl(next.profile?.baseUrl ?? ''); setApiKey(''); setShowKey(false)
+      setSaved(next); setBaseUrl(next.profile?.baseUrl ?? ''); setApiKey(''); setShowKey(false); setTestModel(next.profile?.testModel ?? '')
     } catch (reason) { if (active.current) setError(ipcErrorText(reason)) }
     finally { if (active.current) setSaving(false) }
   }
@@ -73,7 +76,7 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
         <h4>与本机 CLI 保持一致</h4>
         <p>使用本机的连接地址、凭据与模型。<br />在终端中修改配置，这里也会沿用。</p>
       </div> : <>
-        <p className="cli-connection__hint">仅替换地址与密钥，模型和其他设置沿用本机。</p>
+        <p className="cli-connection__hint">仅替换地址与密钥；会话的模型和其他设置沿用本机。</p>
         <div className="cli-connection__fields">
           <label htmlFor="connection-url">Base URL</label>
           <input id="connection-url" value={baseUrl} spellCheck={false} autoComplete="off" disabled={busy} placeholder={connection.cli === 'codex' ? 'https://api.example.com/v1' : 'https://api.example.com'} onChange={event => { setBaseUrl(event.target.value); setTest({ status: 'idle' }) }} />
@@ -82,9 +85,11 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
             <input id="connection-key" type={showKey ? 'text' : 'password'} value={apiKey} autoComplete="new-password" spellCheck={false} disabled={busy} placeholder={hasKey ? '留空保留已保存的密钥' : '输入 API Key'} onChange={event => { setApiKey(event.target.value); setTest({ status: 'idle' }) }} />
             <button aria-label={showKey ? '隐藏 API Key' : '显示 API Key'} disabled={!apiKey} onClick={() => setShowKey(value => !value)}>{showKey ? '隐藏' : '显示'}</button>
           </div>
+          <label className="cli-connection__spaced" htmlFor="connection-test-model">测试模型</label>
+          <input id="connection-test-model" value={testModel} spellCheck={false} autoComplete="off" disabled={busy} placeholder={`${defaultModel}（默认）`} onChange={event => { setTestModel(event.target.value); setTest({ status: 'idle' }) }} />
         </div>
         <section className="cli-connection__test" aria-label="连接测试">
-          <div className="cli-connection__test-heading"><div><h4>连接测试</h4><p>{dirty ? '保存后即可测试' : '沿用本机配置的模型，发送 hi'}</p></div>
+          <div className="cli-connection__test-heading"><div><h4>连接测试</h4><p>{dirty ? '保存后即可测试' : '发送 hi，检查网关是否可达'}</p></div>
             <button className="secondary-button" disabled={busy || dirty || saved.mode !== 'app'} onClick={() => void runTest()}><Icon name="refresh" size={14} />{test.status === 'running' ? '测试中…' : '测试连接'}</button>
           </div>
           {test.status === 'complete' && <div className={`cli-connection__result ${test.result.ok ? 'is-success' : 'is-error'}`} role="status">

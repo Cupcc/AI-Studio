@@ -1,8 +1,6 @@
-import { mkdtemp, rm } from 'node:fs/promises'
 import { createServer } from 'node:http'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { DEFAULT_TEST_MODELS } from '@shared/session/cli-connection'
 import { CliConnections, validateBaseUrl } from './cli-connection'
 
 type Store = { values: Map<string, string>; getPreference(key: string): string | null; setPreference(key: string, value: string): void }
@@ -39,8 +37,7 @@ describe('CliConnections', () => {
     expect(db.getPreference('connection:codex')).not.toContain('model')
   })
 
-  it('tests Claude Code with the model ID its catalog resolves for the local alias', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'studio-connection-'))
+  it('tests with the saved test model, or the built-in default, and keeps it out of the Session connection', async () => {
     const models: string[] = []
     const server = createServer(async (request, response) => {
       let raw = ''; for await (const chunk of request) raw += chunk
@@ -51,26 +48,19 @@ describe('CliConnections', () => {
     try {
       const address = server.address()
       if (!address || typeof address === 'string') throw new Error('No TCP address')
+      const baseUrl = `http://127.0.0.1:${address.port}`
       const connections = new CliConnections(store(), secrets())
-      await connections.save({ cli: 'claude-code', mode: 'app', baseUrl: `http://127.0.0.1:${address.port}`, auth: 'api_key', apiKey: 'secret' })
-      const env = { HOME: home, ANTHROPIC_MODEL: 'opus' }
-      const catalog = async (environment: { connection?: { apiKey: string } }) => {
-        expect(environment.connection?.apiKey).toBe('secret')
-        return [{ id: 'default', displayName: 'Default', resolvedModel: 'claude-default-native' }, { id: 'opus', displayName: 'Opus', resolvedModel: 'claude-opus-native' }]
-      }
-      await expect(connections.test('claude-code', env, catalog)).resolves.toMatchObject({ ok: true, model: 'claude-opus-native', reply: 'Hello' })
-      await expect(connections.test('claude-code', { HOME: home }, catalog)).resolves.toMatchObject({ ok: true, model: 'claude-default-native' })
-      expect(models).toEqual(['claude-opus-native', 'claude-default-native'])
-      const unavailable = async () => { throw new Error('spawn failed') }
-      await expect(connections.test('claude-code', env, unavailable)).resolves.toMatchObject({ ok: false, message: expect.stringContaining('模型目录') })
-      await expect(connections.test('claude-code', { HOME: home }, unavailable)).resolves.toMatchObject({ ok: false, message: expect.stringContaining('模型目录') })
-      expect(models).toHaveLength(2)
-      await expect(connections.test('claude-code', { HOME: home, ANTHROPIC_MODEL: 'claude-full-id[1m]' }, unavailable)).resolves.toMatchObject({ ok: true, model: 'claude-full-id' })
-      expect(models).toEqual(['claude-opus-native', 'claude-default-native', 'claude-full-id'])
+      await connections.save({ cli: 'claude-code', mode: 'app', baseUrl, auth: 'api_key', apiKey: 'secret' })
+      expect(connections.get('claude-code').profile).not.toHaveProperty('testModel')
+      await expect(connections.test('claude-code')).resolves.toMatchObject({ ok: true, model: DEFAULT_TEST_MODELS['claude-code'], reply: 'Hello' })
+      await expect(connections.save({ cli: 'claude-code', mode: 'app', baseUrl, auth: 'api_key', testModel: 'claude opus' })).rejects.toThrow('测试模型不能包含空格')
+      const saved = await connections.save({ cli: 'claude-code', mode: 'app', baseUrl, auth: 'api_key', testModel: ' gateway-model ' })
+      expect(saved.profile).toMatchObject({ testModel: 'gateway-model', hasApiKey: true })
+      await expect(connections.test('claude-code')).resolves.toMatchObject({ ok: true, model: 'gateway-model' })
+      expect(models).toEqual([DEFAULT_TEST_MODELS['claude-code'], 'gateway-model'])
+      expect((await connections.environment('claude-code', {})).connection).toEqual({ baseUrl, apiKey: 'secret', auth: 'api_key' })
     } finally {
       server.closeAllConnections(); server.close()
-      await rm(home, { recursive: true, force: true })
     }
   })
-
 })

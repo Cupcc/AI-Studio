@@ -5,7 +5,7 @@
 - 本记录仅覆盖 2026-11-10 的 model 移除、连接字段覆盖和直接 API `hi` 测试，不验收原任务的一键安装或完整打包交付。
 - 新版独立详情页已完成本轮 AI 交互与截图复核，人工体验已于 2026-11-12 验收通过；被否定的旧版界面不计为交付。
 - 当前未取得可用于本轮远端调用的 Claude API Key。Claude 的直接 HTTP 协议由回环服务验证，原生配置继承由真实 CLI + 回环服务验证；均不等同于 Claude 远端模型调用成功。2026-11-13 已用真实网关补测，见 [W3](#2026-11-13-claude-自定义连接实测w3)。
-- 组织管理配置、特殊网关协议、旧 CLI 版本及打包应用未在本轮独立复测。直接 API 测试读取用户级模型，不覆盖项目 / 会话专属模型；缺少明确模型时返回错误，不猜测默认模型。
+- 组织管理配置、特殊网关协议、旧 CLI 版本及打包应用未在本轮独立复测。直接 API 测试读取用户级模型，不覆盖项目 / 会话专属模型；缺少明确模型时返回错误，不猜测默认模型。2026-11-13 起改为连接中的测试模型或内置默认模型，见 [W4](#2026-11-13-连接测试改为测试模型w4)。
 
 ## 人工功能验收
 
@@ -197,7 +197,7 @@
 | 编号 | 问题 | 处理 |
 |---|---|---|
 | D-W3-1 | 网关是公网 IP 上的 HTTP 地址，没有 HTTPS。原规则只允许 HTTPS 与本机 HTTP，设置中无法保存 | 用户 2026-11-13 决定「允许http和https，不用警告」；`validateBaseUrl` 改为接受任意主机的 HTTP / HTTPS，仍拒绝其他协议、凭据、查询参数与片段 |
-| D-W3-2 | 连接测试把本机配置的模型别名 `opus` 原样发给 API，网关返回 HTTP 503 `model_not_found`。Claude Code 自身发出的是 `claude-opus-5-5`；本机未设置模型时，测试直接报“未指定模型” | Adapter 目录带出 CLI 的 `resolvedModel`；Claude 测试先经模型目录握手（不发送消息）解析别名，未设置模型时用目录的 `default` 行，目录读取失败则测试不通过 |
+| D-W3-2 | 连接测试把本机配置的模型别名 `opus` 原样发给 API，网关返回 HTTP 503 `model_not_found`。Claude Code 自身发出的是 `claude-opus-5-5`；本机未设置模型时，测试直接报“未指定模型” | Adapter 目录带出 CLI 的 `resolvedModel`；Claude 测试先经模型目录握手（不发送消息）解析别名，未设置模型时用目录的 `default` 行，目录读取失败则测试不通过。该做法随后被用户纠正撤回，改为测试模型，见 [task](task.md#2026-11-13-连接测试改为测试模型) |
 
 ### 结果
 
@@ -236,3 +236,41 @@
 R1-F1、R1-F2 修复后，session 服务测试 146 项通过，新增测试在修复前的代码上失败。修复只影响目录读取失败的路径和应用退出流程，读取成功的路径没有变，上文真实实测的结论仍然有效。这两项修复没有再交 R1 复核，由修复前失败、修复后通过的单测验证。
 
 远端 CI：affected 模式 [run 43341428051](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43341428051)（`757e523`）通过，E2E 21 项（claude-effort、cli-default、composer、session）与单测均通过；设置页错误提示修改后，`settings.spec.ts` 单项 [run 43343623862](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43343623862)（`3914b87`）6 项通过。
+
+## 2026-11-13 连接测试改为测试模型（W4）
+
+用户纠正后（见 [task](task.md#2026-11-13-连接测试改为测试模型)），连接测试只直接请求 API，不再启动 CLI。本节由 Main Agent 执行，它同时实现了这次改动；独立评审见 [R2](#独立评审r2)。网关与 W3 相同，地址与 Key 不写入记录。
+
+| 场景 | 操作 | 实际结果 | 结论 | 证据 |
+|---|---|---|---|---|
+| Claude 未填测试模型 | 自定义连接只填 URL 与 Key，保存后测试 | 占位文字为“claude-opus-5-5（默认）”，提示“用 claude-opus-5-5 发送 hi，检查网关是否可达”；连接正常，2.8 秒，回复 “Hi there! How can I help you today?”；网关用量 66179 → 66339 | 通过 | [截图](evidence/W4-01-claude-default-model-pass.jpg) |
+| Claude 填写不可用的模型 | 测试模型填 `opus`，保存后测试 | 编辑时显示“未保存 / 保存后即可测试”；测试失败，提示“网关可达，但模型 opus 不可用（HTTP 503），请换一个测试模型。”；网关用量不变 | 通过 | [截图](evidence/W4-02-claude-model-unavailable.jpg) |
+| Codex 未填测试模型 | Codex 自定义连接，同一网关加 `/v1`，保存后测试 | 占位文字为“gpt-6.1-sol（默认）”；连接正常，2.2 秒，回复 “Hi! How can I help you today?”；网关用量 66339 → 66411 | 通过 | [截图](evidence/W4-03-codex-default-model-pass.jpg)、[记录](evidence/W4-gateway-run.json) |
+| 自动化 | 提交门禁、全仓类型检查、session / settings 测试 | Adapter 244 项、桌面 248 项（含新增的测试模型、失败分类与设置页用例）通过 | 通过 | 本节 |
+
+测试代码只直接请求 API（`CliConnections.test` → `testApiConnection`），不调用 Provider；本节没有另做进程采样。保存配置后的可用性重检仍按原有规则检测 CLI。未覆盖：Bearer 认证、HTTPS 网关、打包应用。
+
+### 独立评审（R2）
+
+未参与实现的评审 Agent 在 `1eb8c99` 上复核代码、文档与证据，并在隔离 Electron（真实 Provider）中操作界面。只发起 1 次计费的真实测试，另做 1 次不计费的模型不可用测试。报告由 Main Agent 转录。结论：有条件通过；测试只直接请求 API、不经 CLI，与用户原话一致，没有超出范围的改动。
+
+| 场景 | 结果 | 结论 | 证据 |
+|---|---|---|---|
+| 未填测试模型 | 占位文字与提示显示 `claude-opus-5-5`；连接正常，回复 “Hi there! How can I help you today?”（36.6 秒，网关本次较慢）。测试期间两轮采样 Electron 子进程，均无 claude / codex 进程 | 通过 | [截图](evidence/R2-01-default-model-pass.jpg) |
+| 测试模型填 `opus` | “网关可达，但模型 opus 不可用（HTTP 503）……”，未计费 | 通过 | 本节 |
+| 清空后重开 | 输入框为空，占位文字与提示恢复默认模型；存储中不再有 `testModel` | 通过 | [截图](evidence/R2-02-cleared-back-to-default.jpg) |
+| 测试模型带空格 | 保存被拒，但提示是英文 `Invalid test model` | 有问题（R2-F1） | 本节 |
+| 泄露检查与自动化 | 网关地址、Key 在 diff、证据、日志与截图中均为 0 次；类型检查、session / settings 160 项、Adapter 60 项、桌面构建通过 | 通过 | 本节 |
+
+发现与处理：
+
+| 编号 | 发现 | 处理 |
+|---|---|---|
+| R2-F1（P3） | 测试模型带空格时提示英文 `Invalid test model`，没有说明原因 | 校验移到连接服务，提示“测试模型不能包含空格。”，补了单测 |
+| R2-F2（P3） | 错误正文里只要出现 “model” 就判为模型不可用，会把 LiteLLM、OpenRouter 的限流或额度错误误判 | 402 / 429 单独提示额度或限流；模型不可用只匹配 `model_not_found`、`not_found_error`、“no available channel for model”、“model … not found / does not exist / unavailable” 等形式；spec 第 4 条同步，补了单测 |
+| R2-F3（P4） | acceptance 开头、task 11-10 场景、DEC-27 有三处旧描述没指向新做法；plan 缺 W4 条目 | 已补指向与 plan 条目 |
+| 建议 | 测试提示重复了输入框里的模型名；表单顶部“模型沿用本机”与测试模型字段并列，读起来有点矛盾；测试路径不再需要 shell 环境 | 提示改为“发送 hi，检查网关是否可达”；顶部改为“仅替换地址与密钥；会话的模型和其他设置沿用本机。”；测试不再读取 shell 环境 |
+
+上文 W4 截图里的测试提示是修改前的文案。修复后 Main Agent 用占位网关 `http://203.0.113.7:3000` 和假 Key 复查界面，没有发请求：顶部说明为“仅替换地址与密钥；会话的模型和其他设置沿用本机。”，测试提示为“发送 hi，检查网关是否可达”，占位文字为“claude-opus-5-5（默认）”（[截图](evidence/W4-05-final-copy.jpg)）。测试模型填 `claude opus` 后保存被拒，提示“测试模型不能包含空格。”。复查时还发现，保存错误显示在可滚动区域底部，需要手动滚动才看得到（R1 记为改动前已有的问题）；现在出错时和测试结果一样自动滚到可见位置（[截图](evidence/W4-04-space-rejected-in-view.jpg)）。session / settings 测试 162 项、类型检查通过。
+
+远端 CI：affected 模式 [run 43346293605](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43346293605)（`ef68bec`）与修复、rebase 后的 [run 43348967482](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43348967482)（`2040353`）均通过，E2E 33 项（app、claude-effort、cli-default、composer、session、settings）。中间一次运行（`1416b46`）因 dev 上 `scripts/check-selection.test.mjs` 的固定预期过时而失败（`4c2ff32` 新增的 `workbench/lifecycle.test.tsx` 依赖 `use-view-title`），已在本分支更新该预期。

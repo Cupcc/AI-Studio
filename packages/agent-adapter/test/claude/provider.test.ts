@@ -535,13 +535,13 @@ describe('Claude Provider — FR-CHAT-003 / FR-STATE-001..003 / AC-02, AC-03, AC
     ]);
   });
 
-  it("marks the CLI's own default row and reports the model ID each row resolves to", async () => {
+  it("marks the CLI's own default row so the app can resolve effort levels before a model is chosen", async () => {
     const catalog: SDKModel[] = [{ value: 'default', displayName: 'Default (recommended)', description: 'native', supportsEffort: true, supportedEffortLevels: ['low', 'high'] },
-      { value: 'sonnet', displayName: 'Sonnet', description: 'native', resolvedModel: 'claude-sonnet-native' }];
+      { value: 'sonnet', displayName: 'Sonnet', description: 'native' }];
     const { session } = await harness({ catalog }).session();
     expect(await session.listModels()).toEqual([
       { id: 'default', displayName: 'Default (recommended)', description: 'native', isDefault: true, reasoningEfforts: ['low', 'high'] },
-      { id: 'sonnet', displayName: 'Sonnet', description: 'native', resolvedModel: 'claude-sonnet-native' },
+      { id: 'sonnet', displayName: 'Sonnet', description: 'native' },
     ]);
   });
 

@@ -67,6 +67,7 @@
 .cli-connection__fields input::placeholder { color: var(--color-text-muted); }
 .cli-connection__fields input:focus { outline: 2px solid var(--color-focus-ring-soft); border-color: var(--color-focus-ring); }
 .cli-connection__key-label { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-2); }
+.cli-connection__spaced { margin-top: var(--space-2); }
 .cli-connection__key-label span { display: flex; align-items: center; gap: var(--space-1); color: var(--color-text-muted); font-size: var(--font-size-xs); }
 .cli-connection__key { position: relative; }
 .cli-connection__key input { padding-right: 52px; }
