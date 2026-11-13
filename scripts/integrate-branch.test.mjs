@@ -58,7 +58,7 @@ function unchanged(f) {
 
 const title = 'feat(example): add the example feature'
 const runUrl = 'https://github.com/owner/repo/actions/runs/7'
-// Runs as remote-ci.mjs records them: by default one passing affected run at the current branch tip.
+// Runs as vm-ci.mjs records them: by default one passing affected run at the current branch tip.
 const passing = (f, overrides = {}) => () => [{ id: '7', url: runUrl, branch: 'feat/example',
   headSha: git(['rev-parse', 'feat/example'], f.main).trim(), scope: 'affected', conclusion: 'success', ...overrides }]
 const integrate = (f, branch = 'feat/example', cwd = f.main) => integrateBranch({ branch, title, cwd, runs: passing(f) })
@@ -187,7 +187,7 @@ test('requires a passing affected or full run that covers the source changes', (
   const f = fixture(), head = feature(f)
   const attempt = runs => () => integrateBranch({ branch: 'feat/example', title, cwd: f.main, runs })
   expect(attempt(() => [])).toThrow('No passing affected or full CI run covers the changes of feat/example')
-  expect(attempt(passing(f, { conclusion: 'failure' }))).toThrow('node scripts/remote-ci.mjs')
+  expect(attempt(passing(f, { conclusion: 'failure' }))).toThrow('node scripts/vm-ci.mjs')
   // A manual e2e run checks only the listed specs; a run of other changes or another branch says nothing about these.
   expect(attempt(passing(f, { scope: 'e2e' }))).toThrow('No passing')
   expect(attempt(passing(f, { headSha: f.base }))).toThrow('No passing')
@@ -239,7 +239,7 @@ test('packaging inputs need a package or full run', () => {
 
 const cli = (args, cwd) => spawnSync(process.execPath, [fileURLToPath(new URL('./integrate-branch.mjs', import.meta.url)), ...args], { cwd, encoding: 'utf8' })
 
-// The CLI reads the runs remote-ci.mjs recorded in the Git common directory.
+// The CLI reads the runs vm-ci.mjs recorded in the Git common directory.
 function recordRun(f) {
   const dir = path.join(f.main, '.git', 'ai-studio-ci')
   mkdirSync(dir, { recursive: true })

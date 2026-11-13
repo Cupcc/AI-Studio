@@ -2,7 +2,7 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, 
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { launchElectron } from './harness'
+import { hoverInPage, launchElectron } from './harness'
 const appDir = join(__dirname, '..')
 let dir: string, projectPath: string, app: ElectronApplication, page: Page
 const workspace = () => page.locator('.project-workspace:not([hidden])')
@@ -22,7 +22,9 @@ test.beforeEach(async () => {
 test.afterEach(async () => { await app?.close(); rmSync(dir, { recursive: true, force: true }) })
 test('AC-06: ordinary Session updates Architecture; last-good, tool stability, history, context, restart', async () => {
   expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
-  await preview().getByRole('button', { name: '生成 架构', exact: true }).click()
+  const generate = preview().getByRole('button', { name: '生成 架构', exact: true })
+  // The first click into a freshly loaded workbench page can land on the host's iframe element (e2e/harness.ts).
+  await hoverInPage(generate); await generate.click()
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 架构/)
   expect(await workspace().locator('[data-session-row]').count()).toBe(0)
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('重新整理支付模块架构。')
@@ -124,7 +126,8 @@ test('a copied Overview package reads scoped Session cards and opens a conversat
   await copyPresetIntoOrdinaryDraft('overview')
   const sessions = preview().getByLabel('项目 Session 摘要')
   await expect(sessions.getByText('Recent Sessions', { exact: true })).toBeVisible()
-  await sessions.getByRole('button', { name: 'Portable Overview Session', exact: true }).first().click()
+  const card = sessions.getByRole('button', { name: 'Portable Overview Session', exact: true }).first()
+  await hoverInPage(card); await card.click()
   await expect(workspace().locator('.transcript-user')).toContainText('Portable Overview Session')
 })
 
@@ -132,7 +135,9 @@ test('the package generate action starts a new unsent workbench draft from an ex
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('仅回复这条消息，不整理项目知识')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
-  await preview().getByRole('button', { name: '生成 架构', exact: true }).click()
+  const generate = preview().getByRole('button', { name: '生成 架构', exact: true })
+  // The first click into a freshly loaded workbench page can land on the host's iframe element (e2e/harness.ts).
+  await hoverInPage(generate); await generate.click()
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText(/生成 架构/)
   await expect(workspace().locator('.transcript-user')).toHaveCount(0)
   await expect(workspace().locator('[data-session-row]')).toHaveCount(1)

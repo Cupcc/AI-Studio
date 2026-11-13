@@ -91,6 +91,26 @@ it('restores the ANSI snapshot before ACK, parses each sequenced output once and
   expect(emulator.registerCsiHandler).toHaveBeenCalledWith({ final: 'n' }, expect.any(Function))
 })
 
+it('focuses the restored screen unless the user is typing in another field by then', async () => {
+  const field = document.body.appendChild(document.createElement('input'))
+  const button = document.body.appendChild(document.createElement('button'))
+  const view = render(<TerminalScreen terminal={terminal} active onError={vi.fn()} />)
+  await waitFor(() => expect(emulator.writes).toHaveLength(1))
+  button.focus()
+  act(() => emulator.writes[0]!.parsed!()); act(() => emulator.writes[1]!.parsed!())
+  expect(emulator.focus).toHaveBeenCalledTimes(1)
+
+  view.rerender(<TerminalScreen terminal={terminal} active={false} onError={vi.fn()} />)
+  view.rerender(<TerminalScreen terminal={terminal} active onError={vi.fn()} />)
+  await waitFor(() => expect(emulator.writes).toHaveLength(3))
+  field.focus()
+  act(() => emulator.writes[2]!.parsed!()); act(() => emulator.writes[3]!.parsed!())
+  expect(emulator.restore).toHaveBeenCalledTimes(2)
+  expect(emulator.focus).toHaveBeenCalledTimes(1)
+  expect(document.activeElement).toBe(field)
+  field.remove(); button.remove()
+})
+
 it('detaches a snapshot that resolves after the screen unmounts without writing it', async () => {
   let resolve!: (snapshot: TerminalSnapshot) => void
   vi.mocked(api.attach).mockReturnValue(new Promise(done => { resolve = done }))

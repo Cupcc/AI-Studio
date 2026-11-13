@@ -191,7 +191,11 @@ export default function TerminalScreen({ terminal, active, onError, projectRoot 
             term.options.disableStdin = latest.current.terminal.state !== 'running'
             sent = { cols: snapshot.terminal.cols, rows: snapshot.terminal.rows }
             ready = true; latest.current.onError(null)
-            ack(current, snapshot.sequence); resize(); term.focus()
+            ack(current, snapshot.sequence); resize()
+            // A restore finishes asynchronously; by then the user may be typing elsewhere (⌘F during the restore
+            // opens find). Take focus only from a control that does not take text.
+            const focused = document.activeElement
+            if (!(focused instanceof HTMLElement && !host.current?.contains(focused) && (focused.isContentEditable || focused.matches('input, textarea, select')))) term.focus()
           })
         })
       } catch (error) { fail('无法恢复终端', error) }

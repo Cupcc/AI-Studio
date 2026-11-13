@@ -26,7 +26,7 @@ function patchId(base, commit, cwd) {
 }
 
 // The dev push runs the same selector, so the branch must already have passed the checks it selects, in a recorded run
-// (remote-ci.mjs writes the records). A run from before a rebase still counts when the branch's own changes are
+// (vm-ci.mjs, or remote-ci.mjs as the fallback, writes the records). A run from before a rebase still counts when the branch's own changes are
 // identical; the dev push run covers the combination.
 export function verifyCi({ branch, head, sourceCommit, source, repo, runs = ciRecords }) {
   const plan = affectedPlan(changedPaths(head, sourceCommit, repo), inventory(source), { base: head, head: sourceCommit, cwd: source })
@@ -45,8 +45,8 @@ export function verifyCi({ branch, head, sourceCommit, source, repo, runs = ciRe
     const run = passed.find(item => scopes.includes(item.scope) && same(item.headSha))
     if (run) return run.headSha === sourceCommit ? run.url : `${run.url} (before rebase)`
     throw new Error(`No passing ${scopes.join(' or ')} CI run covers the changes of ${branch} at ${sourceCommit.slice(0, 12)}. ` +
-      `Push the branch and run \`node scripts/remote-ci.mjs${scopes.includes('package') ? ' --scope package' : ''}\` in its worktree, ` +
-      'then integrate. If CI cannot judge this change, pass --skip-ci "<reason>".')
+      `Run \`node scripts/vm-ci.mjs${scopes.includes('package') ? ' --scope package' : ''}\` in its worktree, then integrate. ` +
+      'If CI cannot judge this change, pass --skip-ci "<reason>".')
   })
 }
 

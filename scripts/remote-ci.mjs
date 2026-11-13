@@ -54,7 +54,7 @@ export function e2eSummary(dir, cwd = process.cwd()) {
 }
 
 // When dev's own push run is red, the same failure on a branch is most likely not the branch's.
-function devRed(branch, cwd) {
+export function devRed(branch, cwd) {
   if (branch === 'dev') return ''
   try {
     const [last] = JSON.parse(gh(['run', 'list', '--workflow', 'ci.yml', '--branch', 'dev', '--event', 'push', '--limit', '1',

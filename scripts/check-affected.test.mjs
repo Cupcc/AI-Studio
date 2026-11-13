@@ -210,7 +210,7 @@ test('packaging inputs run nothing locally or in affected CI and require the man
   expect(only).toMatchObject({ commands: [], e2e: [], unknown: [], packaging: [builder, `${d}scripts/after-pack.cjs`] })
   expect(runPlan(only, { run, ci: true })).toBe(0)
   expect(run).not.toHaveBeenCalled()
-  expect(console.log).toHaveBeenCalledWith(expect.stringContaining('node scripts/remote-ci.mjs --scope package'))
+  expect(console.log).toHaveBeenCalledWith(expect.stringContaining('node scripts/vm-ci.mjs --scope package'))
   const mixed = plan([builder, `${d}src/renderer/src/features/settings/settings.test.tsx`])
   expect(mixed.packaging).toEqual([builder])
   expect(commandText(mixed)).toContain('settings.test.tsx')
@@ -342,7 +342,8 @@ test('classifies removed templates only when their owning replacement exists', (
 
 test.each([
   ['integration command', ['scripts/integrate-branch.mjs', 'scripts/integrate-branch.test.mjs']],
-  ['remote CI command', ['scripts/remote-ci.mjs', 'scripts/remote-ci.test.mjs']]
+  ['remote CI command', ['scripts/remote-ci.mjs', 'scripts/remote-ci.test.mjs']],
+  ['local VM CI command', ['scripts/vm-ci.mjs', 'scripts/vm-ci.test.mjs']]
 ])('%s and its tests run script checks without application suites', (_name, files) => {
   for (const file of files) {
     const result = affectedPlan([file], [...available, ...files])
