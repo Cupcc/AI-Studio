@@ -31,7 +31,7 @@
   --conversation-max-width: 720px;
   --session-conversation-min-width: 400px;
   --view-conversation-min-width: 360px;
-  --view-right-min-width: 400px;
+  --workbench-min-width: 400px;
   --sidebar-min-width: 320px;
   --sidebar-default-width: 400px;
   --tab-height: 32px;
@@ -82,6 +82,7 @@
 
   /* Stacking */
   --z-handle: 5;
+  --z-overlay-pane: 10;
   --z-popover: 40;
   --z-tooltip: 60;
   --z-modal: 80;

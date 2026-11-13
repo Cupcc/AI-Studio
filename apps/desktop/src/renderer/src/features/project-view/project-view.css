@@ -1,6 +1,7 @@
 .view-conversation-draft { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto; min-height: 0; overflow: hidden; }
 .view-conversation-draft > .composer { grid-area: 3 / 1; }
 .view-recent { grid-area: 2 / 1; min-height: 0; max-height: min(150px, 25vh); overflow: auto; margin: 0 var(--space-5); padding: var(--space-1-5) 0; border-top: 1px solid var(--color-border-soft); }
+.canvas-mode--single .view-recent { width: calc(100% - 2 * var(--space-5)); max-width: var(--conversation-max-width); margin-inline: auto; }
 .view-recent h3 { margin: 0; padding: var(--space-1-5) 0; font-size: var(--font-size-xs); font-weight: 600; color: var(--color-text-3); }
 .view-recent .view-session-link { min-height: 32px; padding: var(--space-1) 0; font-size: var(--font-size-sm); }
 .view-draft-prompt { grid-area: 1 / 1; align-self: center; min-height: 0; max-height: 100%; overflow: auto; padding: 18px var(--space-6); text-align: center; }

@@ -72,7 +72,7 @@ describe('Project persistence and identity · FR-PROJ-001/003 · AC-01', () => {
     const a = open('a'), b = open('b'), c = open('c')
     projects.updateUiState(a.project.id, { mainCanvas: { mode: 'session', sessionId: 's1' }, sidebarOpen: true, lastTool: 'diff', sidebarWidth: 510 })
     projects.updateUiState(b.project.id, { mainCanvas: { mode: 'draft' }, sidebarOpen: false, lastTool: 'terminal' })
-    projects.updateUiState(c.project.id, { mainCanvas: { mode: 'view', viewId: 'architecture', conversation: { kind: 'session', sessionId: 's3' } }, viewRightArea: 'browser', viewConversationWidth: 480 })
+    projects.updateUiState(c.project.id, { mainCanvas: { mode: 'view', viewId: 'architecture', conversation: { kind: 'session', sessionId: 's3' } }, workbenchOpen: false, sidebarOpen: true, lastTool: 'browser', viewConversationWidth: 480 })
     let window = projects.loadWindowState()
     window = placeOpenedProject(window, a.project.id, window.currentTabId)
     window = placeOpenedProject(window, b.project.id, null)
@@ -84,7 +84,7 @@ describe('Project persistence and identity · FR-PROJ-001/003 · AC-01', () => {
     expect(boot.windowState).toEqual(window)
     expect(boot.uiStates[a.project.id]).toMatchObject({ sidebarOpen: true, lastTool: 'diff', sidebarWidth: 510, mainCanvas: { mode: 'session', sessionId: 's1' } })
     expect(boot.uiStates[b.project.id]).toMatchObject({ mainCanvas: { mode: 'draft' }, sidebarOpen: false, lastTool: 'terminal' })
-    expect(boot.uiStates[c.project.id]).toMatchObject({ viewRightArea: 'browser', viewConversationWidth: 480, mainCanvas: { mode: 'view', viewId: 'architecture' } })
+    expect(boot.uiStates[c.project.id]).toMatchObject({ workbenchOpen: false, sidebarOpen: true, lastTool: 'browser', viewConversationWidth: 480, mainCanvas: { mode: 'view', viewId: 'architecture' } })
   })
   it('hides recent entries without deleting records and reopens with saved state', () => {
     const a = open()

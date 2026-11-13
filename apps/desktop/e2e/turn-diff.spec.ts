@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { launchElectron } from './harness'
+import { launchElectron, showTool } from './harness'
 
 // Simulated native records. Real native coverage is verified separately against a versioned CLI.
 const appDir = join(__dirname, '..')
@@ -47,7 +47,7 @@ test('saved native patch survives working-tree edits and restart; toolbar explic
   await panel().getByRole('combobox', { name: '原生补丁范围' }).selectOption('0')
   await expect(panel()).toContainText('补丁记录不代表写入成功')
   await expect(panel()).toContainText('+saved-version')
-  await workspace().getByRole('button', { name: 'Diff', exact: true }).click()
+  await showTool(page, 'Diff')
   await expect(workspace().getByRole('region', { name: '项目变更', exact: true })).toContainText('此目录不是 Git 仓库')
   await workspace().getByRole('button', { name: '查看本轮变更', exact: true }).click()
   await expect(panel()).toContainText('+saved-version')

@@ -2,7 +2,7 @@ import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync }
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { launchElectron } from './harness'
+import { launchElectron, showTool } from './harness'
 
 // FR-TOOL-001 / FR-INPUT-001 against the built app. Session Providers are simulated (STUDIO_E2E_PROVIDERS=1) and
 // no CLI or model runs; fixture Projects live under os.tmpdir(). Only the native directory chooser is replaced:
@@ -66,7 +66,7 @@ test('FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, sp
     document.addEventListener('securitypolicyviolation', event => w.__csp.push(`${event.effectiveDirective} ${event.blockedURI}`))
   })
 
-  await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+  await showTool(page, 'Files')
   // Only the root is read when the panel opens; nested entries appear when a directory is expanded.
   await expect(row('src')).toBeVisible()
   await expect(row('a.ts')).toHaveCount(0)
@@ -120,8 +120,8 @@ test('FR-TOOL-001: lazy tree, viewing without tags, live refresh, kept state, sp
   // Switching tools and back keeps expansion and the open file.
   await row('created-live.ts').click()
   await expect(viewer()).toContainText('created while open')
-  await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
-  await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+  await showTool(page, 'Browser')
+  await showTool(page, 'Files')
   await expect(row('created-live.ts')).toBeVisible()
   await expect(viewer()).toContainText('created while open')
 
@@ -138,7 +138,7 @@ test('FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through t
   // A new conversation starts with the right sidebar collapsed; the user opens it from the top bar.
   await workspace().getByRole('button', { name: '新对话', exact: true }).first().click()
   await page.getByRole('button', { name: '右侧边栏', exact: true }).click()
-  await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+  await showTool(page, 'Files')
   await expect(row('src')).toBeVisible()
   await row('src').click()
   await row('a.ts').click()
@@ -175,7 +175,7 @@ test('FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through t
   await capture('files-reference-delivered')
 
   // A file that disappears before sending blocks the send and keeps the text and the tags.
-  await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+  await showTool(page, 'Files')
   await row('lib').click()
   await row('b.ts').click()
   await add.click()

@@ -15,9 +15,6 @@ export type ViewId = WorkbenchId
 export const TOOL_IDS = ['files', 'search', 'diff', 'browser', 'terminal'] as const
 export type ToolId = (typeof TOOL_IDS)[number]
 
-/** What the right area shows in Project View Mode (UX P-B). */
-export type RightArea = 'preview' | ToolId
-
 export type ViewConversation = { kind: 'draft' } | { kind: 'session'; sessionId: SessionId }
 
 /** Main Canvas content of one Project (spec §3.2 `main_canvas`). */
@@ -26,17 +23,17 @@ export type MainCanvas =
   | { mode: 'draft' }
   | { mode: 'view'; viewId: ViewId; conversation: ViewConversation }
 
-/** Per-Project UI state (spec §3.2; PROJ-Q3 confirmed 2026-10-09). */
+/** Per-Project UI state (spec §4.2; DEC-33: one tool sidebar for both modes). */
 export interface UiState {
   schemaVersion: 1
   mainCanvas: MainCanvas
-  /** Session Mode: right sidebar expanded. */
+  /** Right tool sidebar expanded, in both modes. */
   sidebarOpen: boolean
-  /** Project View Mode: what the right area shows. */
-  viewRightArea: RightArea
-  /** Shared by both modes; null = default tool (PROJ-Q14). */
+  /** Project View Mode: the workbench column is shown. */
+  workbenchOpen: boolean
+  /** Tool the sidebar shows; null = default tool (PROJ-Q14). */
   lastTool: ToolId | null
-  /** Session Mode sidebar width; null = default. */
+  /** Tool sidebar width; null = default. */
   sidebarWidth: number | null
   /** Project View Mode conversation column width; null = default. */
   viewConversationWidth: number | null

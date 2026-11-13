@@ -3,7 +3,7 @@ import { createServer, type Server } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { launchElectron } from './harness'
+import { launchElectron, showTool } from './harness'
 import { commitAll, initRepo, put } from './git-fixture'
 import { closeTestApp } from './quit'
 
@@ -18,7 +18,6 @@ const tree = () => workspace().getByRole('tree', { name: '项目文件' })
 const viewer = () => workspace().getByRole('region', { name: '文件查看器' })
 const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 const row = (name: string) => tree().locator('.files-row').filter({ has: page.locator('.files-row__name', { hasText: new RegExp(`^${escape(name)}$`) }) })
-const tool = (name: string) => workspace().getByRole('button', { name, exact: true })
 
 async function launch() {
   app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
@@ -121,7 +120,7 @@ test('FR-TOOL-001 / DEC-25: explorer context menu, inline new / rename, clipboar
     put(project, 'src/new.ts', 'untracked\n')
     put(project, 'dist/out.js', 'built\n')
   })
-  await tool('Files').click()
+  await showTool(page, 'Files')
   await expect(row('src')).toHaveAttribute('data-git', 'modified')
   await expect(row('dist')).toHaveClass(/is-ignored/)
   await row('src').click()
@@ -235,7 +234,7 @@ test('FR-TOOL-002 / DEC-25: Diff stays read-only with tree view, inline toggle, 
     commitAll(project)
     put(project, 'src/a.ts', Array.from({ length: 40 }, (_, i) => i === 3 || i === 30 ? `changed ${i}` : `line ${i}`).join('\n') + '\n')
   })
-  await tool('Diff').click()
+  await showTool(page, 'Diff')
   await workspace().getByRole('button', { name: '以树形查看', exact: true }).click()
   await expect(workspace().locator('.diff-group__label')).toContainText('src')
   await workspace().getByRole('option', { name: /a\.ts/ }).click()
@@ -255,7 +254,7 @@ test('FR-TOOL-004 / DEC-25: ⌘-click links to Browser and Files, find, ⌘K cle
   await new Promise<void>(resolve => server!.listen(0, '127.0.0.1', resolve))
   const url = `http://127.0.0.1:${(server.address() as { port: number }).port}/`
   const root = await openProject('Terminal Project', project => { put(project, 'src/app.ts', 'one\ntwo\nthree\n') })
-  await tool('Terminal').click()
+  await showTool(page, 'Terminal')
   await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
   await plainShell()
   await terminalCommand(`printf '%s\\n' 'src/app.ts:3' '${url}'`)
@@ -264,14 +263,14 @@ test('FR-TOOL-004 / DEC-25: ⌘-click links to Browser and Files, find, ⌘K cle
   await metaClickRow(fileRow, 20)
   await expect(viewer().locator('.files-viewer__name')).toHaveText('app.ts')
 
-  await tool('Terminal').click()
+  await showTool(page, 'Terminal')
   const linkRow = workspace().locator('.xterm-rows > div').filter({ hasText: new RegExp(`^${escape(url)}$`) })
   await expect(linkRow).toHaveCount(1)
   await metaClickRow(linkRow, 30)
   await expect.poll(previewText).toContain('Linked preview')
   await expect(workspace().getByRole('combobox', { name: '网址', exact: true })).toHaveValue(url)
 
-  await tool('Terminal').click()
+  await showTool(page, 'Terminal')
   // Returning to Terminal mounts a new screen that restores its buffer asynchronously; find runs once per input.
   await expect(workspace().locator('.xterm-rows > div').filter({ hasText: /^PLAIN_42$/ })).toHaveCount(1)
   await workspace().locator('.xterm-helper-textarea').focus()
@@ -288,7 +287,7 @@ test('FR-TOOL-004 / DEC-25: ⌘-click links to Browser and Files, find, ⌘K cle
   await workspace().locator('.xterm-helper-textarea').focus()
   await page.keyboard.press('Meta+k')
   await expect(workspace().locator('.xterm-rows')).not.toContainText('PLAIN_42')
-  await tool('Files').click(); await tool('Terminal').click()
+  await showTool(page, 'Files'); await showTool(page, 'Terminal')
   await expect(workspace().locator('.xterm-rows')).not.toContainText('PLAIN_42')
 
   // Double-click renames the tab.
@@ -298,7 +297,7 @@ test('FR-TOOL-004 / DEC-25: ⌘-click links to Browser and Files, find, ⌘K cle
   await expect(workspace().getByRole('tab', { name: 'dev server', exact: true })).toBeVisible()
 
   // Files → 在集成终端中打开 starts a new Terminal in that folder.
-  await tool('Files').click()
+  await showTool(page, 'Files')
   await chooseNativeMenu('在集成终端中打开')
   await row('src').click({ button: 'right' })
   await expect(workspace().getByRole('tab', { name: 'Terminal 2', exact: true })).toHaveAttribute('aria-selected', 'true')
@@ -318,7 +317,7 @@ test('FR-TOOL-003 step 3: popups open as tabs, tabs switch and close, favorites 
   await new Promise<void>(resolve => server!.listen(0, '127.0.0.1', resolve))
   const base = `http://127.0.0.1:${(server.address() as { port: number }).port}/`
   await openProject('Tabs Project', () => {})
-  await tool('Browser').click()
+  await showTool(page, 'Browser')
   const address = workspace().getByRole('combobox', { name: '网址', exact: true })
   await address.fill(base); await address.press('Enter')
   await expect.poll(previewText).toContain('First page')
@@ -362,7 +361,7 @@ test('FR-TOOL-003 step 3: popups open as tabs, tabs switch and close, favorites 
 
 test('FR-TOOL-004 step 3: ⌘\\ splits the Terminal side by side, panes keep their own shells and output', async () => {
   await openProject('Split Project', () => {})
-  await tool('Terminal').click()
+  await showTool(page, 'Terminal')
   await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
   await plainShell()
   await terminalCommand('echo LEFT_$((1+1))')
@@ -378,7 +377,7 @@ test('FR-TOOL-004 step 3: ⌘\\ splits the Terminal side by side, panes keep the
   await expect(panes.nth(0).locator('.xterm-rows')).not.toContainText('RIGHT_4')
   await capture('terminal-split')
   // Hidden and shown again, both panes keep their output; closing one leaves its neighbour focused.
-  await tool('Files').click(); await tool('Terminal').click()
+  await showTool(page, 'Files'); await showTool(page, 'Terminal')
   await expect(panes.nth(0).locator('.xterm-rows')).toContainText('LEFT_2')
   await workspace().getByRole('button', { name: '关闭 Terminal 2', exact: true }).click()
   await workspace().getByRole('button', { name: '结束并关闭', exact: true }).click()

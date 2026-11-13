@@ -2,7 +2,7 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, 
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { hoverInPage, launchElectron } from './harness'
+import { hoverInPage, launchElectron, showTool } from './harness'
 const appDir = join(__dirname, '..')
 let dir: string, projectPath: string, app: ElectronApplication, page: Page
 const workspace = () => page.locator('.project-workspace:not([hidden])')
@@ -36,7 +36,7 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
   await expect(workspace().locator('[data-session-row]')).toHaveCount(1)
   expect(readFileSync(join(projectPath, '.ai-studio/.gitignore'), 'utf8')).toBe('*\n')
   await expect(workspace().getByRole('button', { name: /^(放大|缩小|重置)/ })).toHaveCount(0)
-  await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+  await showTool(page, 'Files')
   const path = join(projectPath, '.ai-studio/knowledge/architecture.json')
   const valid = JSON.parse(readFileSync(path, 'utf8'))
   valid.data.summary = '后台外部更新'

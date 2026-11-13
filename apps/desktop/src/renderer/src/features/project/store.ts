@@ -23,6 +23,10 @@ export interface ProjectShellState {
   closeDialog: CloseDialog | null
   quitRequest: QuitRequest | null
   quitting: boolean
+  /** The current workspace's open columns do not fit beside the navigation (DEC-33); not saved. */
+  navSpaceShort: boolean
+  /** The user reopened the navigation while space was short; cleared once space returns. */
+  navKeptOpen: boolean
   bootstrap(): Promise<void>
   openDirectory(): Promise<void>
   openPath(path: string): Promise<void>
@@ -31,6 +35,7 @@ export interface ProjectShellState {
   newTab(): void
   cycleTab(delta: 1 | -1): void
   toggleNav(): void
+  setNavSpaceShort(short: boolean): void
   updateUiState(projectId: string, patch: UiStatePatch | null): void
   enterView(projectId: string, viewId: ViewId): void
   openSession(projectId: string, sessionId: string): void
@@ -99,9 +104,14 @@ async function finishOpen(result: OpenProjectResult, origin: string): Promise<vo
   useProjectShell.setState({ recent: await studio().project.listRecent() })
 }
 
+/** Navigation hidden: collapsed by the user, or for space while the user has not reopened it (DEC-33). */
+export function navHidden(s: Pick<ProjectShellState, 'windowState' | 'navSpaceShort' | 'navKeptOpen'>): boolean {
+  return s.windowState.navCollapsed || (s.navSpaceShort && !s.navKeptOpen)
+}
+
 export const useProjectShell = create<ProjectShellState>()((set, get) => ({
   status: 'idle', error: null, windowState: initialWindowState(), projects: {}, uiStates: {}, recent: [],
-  opening: false, foreground: document.hasFocus(), closeDialog: null, quitRequest: null, quitting: false,
+  opening: false, foreground: document.hasFocus(), closeDialog: null, quitRequest: null, quitting: false, navSpaceShort: false, navKeptOpen: false,
   async bootstrap() {
     if (get().status !== 'idle') return
     set({ status: 'loading' })
@@ -133,7 +143,16 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
   activateTab(tabId) { set({ windowState: activateTab(get().windowState, tabId) }); saveWindow(); syncViewing(true) },
   newTab() { set({ windowState: addLauncherTab(get().windowState), error: null }); saveWindow(); syncViewing() },
   cycleTab(delta) { set({ windowState: cycleTab(get().windowState, delta) }); saveWindow(); syncViewing(true) },
-  toggleNav() { set({ windowState: { ...get().windowState, navCollapsed: !get().windowState.navCollapsed } }); saveWindow() },
+  toggleNav() {
+    const s = get(), collapsed = s.windowState.navCollapsed
+    // Reopening a navigation that collapsed for space keeps the saved preference; the sidebar then floats instead.
+    if (navHidden(s) && !collapsed) { set({ navKeptOpen: true }); return }
+    set({ windowState: { ...s.windowState, navCollapsed: !collapsed }, navKeptOpen: collapsed && s.navSpaceShort }); saveWindow()
+  },
+  setNavSpaceShort(short) {
+    const s = get()
+    if (short !== s.navSpaceShort || (!short && s.navKeptOpen)) set({ navSpaceShort: short, navKeptOpen: short && s.navKeptOpen })
+  },
   updateUiState(projectId, patch) {
     if (!patch || !get().uiStates[projectId]) return
     const next = applyUiStatePatch(get().uiStates[projectId]!, patch)

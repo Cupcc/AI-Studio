@@ -4,7 +4,7 @@ import { describeWorkbenchError, workbenchApi } from './api'
 
 export const workbenchKey = ({ projectId, viewId }: WorkbenchRef): string => `${projectId}:${viewId}`
 export type PageStatus = { kind: 'loading' } | { kind: 'ready' } | { kind: 'error'; message: string }
-/** Host chrome state shared by the right-area header and the page body of one workbench view. */
+/** Host chrome state shared by the workbench column header and the page body of one workbench view. */
 export interface WorkbenchHost {
   pageStatus: PageStatus
   /** Package revision whose page reported `pageStatus`; older revisions never count as connected. */

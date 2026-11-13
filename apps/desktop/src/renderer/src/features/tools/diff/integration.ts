@@ -3,7 +3,7 @@ import { diffApi } from './api'
 import { useDiff } from './diff-store'
 import { useTurnDiff } from './turn-diff-store'
 import { registerShellIntegration } from '../../project/integration'
-import { selectRightArea } from '@shared/project/ui-rules'
+import { selectTool } from '@shared/project/ui-rules'
 
 /**
  * Routes the service events into the store and forgets a Project when its tab closes. The events arrive only for
@@ -16,7 +16,7 @@ export function installDiffIntegration(): () => void {
       const ui = shell.uiStates[ref.projectId]
       if (!ui) return
       useTurnDiff.getState().select(ref)
-      shell.updateUiState(ref.projectId, selectRightArea(ui, 'diff'))
+      shell.updateUiState(ref.projectId, selectTool(ui, 'diff'))
     },
     toolSelected(projectId, area) { if (area === 'diff') useTurnDiff.getState().clear(projectId) }
   })

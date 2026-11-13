@@ -5,7 +5,7 @@ import { Icon } from '../../app/Icon'
 import { applyWorkbenchDraft, editWorkbench, refreshWorkbench, useWorkbenchHost, type HostView } from './host'
 import { WorkbenchAbout, WorkbenchMenu } from './WorkbenchControls'
 
-/** Workbench parts of the right-area header: status after the title, the draft action, and "更多操作". */
+/** Workbench parts of the column header: status after the title, the draft action, and "更多操作". */
 export function WorkbenchHeader({ project, viewId, part }: PreviewHeaderProps) {
   const ref = { projectId: project.id, viewId }, view = useWorkbenchHost(ref)
   if (part === 'status') return <HeaderStatus view={view} />

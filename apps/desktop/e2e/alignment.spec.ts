@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { launchElectron } from './harness'
+import { launchElectron, showTool } from './harness'
 import type { FeatureBridge } from '../src/shared/ipc/contract'
 import type { sessionContract } from '../src/shared/ipc/session'
 import type { SessionSummary } from '../src/shared/session/types'
@@ -81,8 +81,9 @@ async function useTheme(next: Theme) {
   }, next === 'solid')
   await expect(page.locator('html')).toHaveAttribute('data-theme', next)
 }
-/** Shell Spec v01 section 1 invariants for the visible Project workspace. */
-async function assertLayout(state: string, kind: 'session' | 'session-sidebar' | 'view', size: { width: number; height: number }) {
+type Kind = 'session' | 'session-sidebar' | 'view' | 'view-tool'
+/** Shell Spec v02 §2 invariants for the visible Project workspace. */
+async function assertLayout(state: string, kind: Kind, size: { width: number; height: number }) {
   const m = await page.evaluate(() => {
     const ws = document.querySelector('.project-workspace:not([hidden])')!
     const width = (selector: string) => ws.querySelector(selector)?.getBoundingClientRect().width ?? null
@@ -90,7 +91,8 @@ async function assertLayout(state: string, kind: 'session' | 'session-sidebar' |
       innerWidth, document: document.documentElement.scrollWidth, workspace: ws.scrollWidth,
       topbar: document.querySelector('[data-testid="topbar"]')!.getBoundingClientRect().height,
       nav: width('.navigation'), headers: [...ws.querySelectorAll('.canvas-header')].map((header) => header.getBoundingClientRect().height),
-      conversation: width('.conversation-pane'), right: width('.right-pane'),
+      conversation: width('.conversation-pane'), workbench: width('.workbench-pane'), right: width('.right-pane'),
+      overlay: ws.querySelector('.canvas-mode--overlay') ? 1 : 0,
       column: width('.session-conversation__transcript'), composer: width('.composer__box'),
       edges: (() => {
         const column = ws.querySelector('.session-conversation__transcript'), box = ws.querySelector('.session-conversation:not(.session-conversation--draft) .composer__box')
@@ -104,12 +106,19 @@ async function assertLayout(state: string, kind: 'session' | 'session-sidebar' |
   expect(m.document).toBeLessThanOrEqual(m.innerWidth)
   expect(m.workspace).toBe(m.innerWidth)
   expect(m.topbar).toBe(40)
-  expect(m.nav).toBe(248)
+  // DEC-33: a workbench beside the tool sidebar needs 360 + 400 + 320; below 1440 the navigation collapses for it,
+  // and at 1024 the sidebar also floats over the workbench.
+  const label = `${state} ${size.width}`
+  expect(m.nav, label).toBe(kind === 'view-tool' && size.width < 1440 ? null : 248)
+  expect(m.overlay, label).toBe(kind === 'view-tool' && size.width === 1024 ? 1 : 0)
   expect(m.headers.length).toBeGreaterThan(0)
   for (const height of m.headers) expect(height).toBe(48)
-  expect(m.conversation).toBeGreaterThanOrEqual(kind === 'view' ? 360 : 400)
-  if (kind === 'session') expect(m.right).toBeNull()
-  else expect(m.right).toBeGreaterThanOrEqual(kind === 'view' ? 400 : 320)
+  const view = kind === 'view' || kind === 'view-tool'
+  expect(m.conversation, label).toBeGreaterThanOrEqual(view ? 360 : 400)
+  if (view) expect(m.workbench, label).toBeGreaterThanOrEqual(400)
+  else expect(m.workbench).toBeNull()
+  if (kind === 'session' || kind === 'view') expect(m.right).toBeNull()
+  else expect(m.right, label).toBeGreaterThanOrEqual(320)
   if (m.column !== null) expect(m.column).toBeLessThanOrEqual(720 + 2 * 24)
   if (m.composer !== null) expect(m.composer).toBeLessThanOrEqual(720)
   // Shell Spec v02 §2.2: message column content and composer share left and right edges
@@ -119,7 +128,7 @@ async function assertLayout(state: string, kind: 'session' | 'session-sidebar' |
     expect(Math.abs(right! - composerRight!), `${state} ${size.width}: ${m.edges.join(' / ')}`).toBeLessThanOrEqual(0.5)
   }
 }
-async function atEachWidth(state: string, kind: 'session' | 'session-sidebar' | 'view') {
+async function atEachWidth(state: string, kind: Kind) {
   for (const size of SIZES) { await fit(size); await assertLayout(state, kind, size); await snap(state, size.width) }
 }
 
@@ -177,7 +186,7 @@ test('FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right
   await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
   await expect(workspace().locator('.transcript-tool')).not.toHaveCount(0)
   await page.getByRole('button', { name: '右侧边栏', exact: true }).click()
-  await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+  await showTool(page, 'Files')
   await expect(workspace().getByRole('button', { name: 'Files', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await atEachWidth('session-sidebar', 'session-sidebar')
   // DEC-02: IBM Plex is bundled and loads from app://studio on demand; the UI and code stacks prefer system faces
@@ -212,11 +221,18 @@ test('FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges al
 test('FR-PROJ-002 / FR-NAV-002 · AC-01: Project View Mode Overview and a selected tool at 1024 / 1280 / 1440', async () => {
   await workspace().getByRole('button', { name: '概览', exact: true }).click()
   await expect(workspace().getByRole('button', { name: '概览', exact: true })).toHaveAttribute('aria-current', 'page')
-  await expect(workspace().getByRole('button', { name: '预览', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(workspace().getByRole('region', { name: '工作台页面', exact: true })).toBeVisible()
   await atEachWidth('view-overview', 'view')
-  await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+  await showTool(page, 'Files')
   await expect(workspace().getByRole('button', { name: 'Files', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  await atEachWidth('view-tool', 'view')
+  await expect(workspace().getByRole('region', { name: '工作台页面', exact: true })).toBeVisible()
+  await atEachWidth('view-tool', 'view-tool')
+  // Closing the workbench gives its space to the conversation, laid out as in Session Mode.
+  await workspace().getByRole('button', { name: '关闭工作台', exact: true }).click()
+  await expect(workspace().getByRole('region', { name: '工作台页面', exact: true })).toHaveCount(0)
+  await atEachWidth('view-no-workbench', 'session-sidebar')
+  await workspace().getByRole('button', { name: '工作台', exact: true }).click()
+  await expect(workspace().getByRole('region', { name: '工作台页面', exact: true })).toBeVisible()
 })
 })
 
@@ -224,13 +240,14 @@ test('FR-TOOL-001 / FR-VIEW-005 · AC-07: Files viewer column in View Mode and S
   writeFileSync(join(dir, 'Session Project', 'notes.md'), '# notes\n')
   const viewer = () => workspace().getByRole('region', { name: '文件查看器' })
   const openFile = async () => {
-    await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+    await showTool(page, 'Files')
     await workspace().getByRole('treeitem', { name: 'notes.md', exact: true }).click()
     await expect(viewer()).toContainText('# notes')
   }
   // UX §5: the conversation, file content and file tree compress together, so the content column
   // is never starved next to the conversation; View Mode keeps the conversation's set width, so the
-  // content column may be a little narrower there (T20261030-file-viewer-column).
+  // content column may be a little narrower there (T20261030-file-viewer-column). In View Mode the content
+  // takes the workbench's place (DEC-33).
   const columns = async (state: string) => {
     for (const size of SIZES) {
       await fit(size)
@@ -259,6 +276,7 @@ test('FR-TOOL-001 / FR-VIEW-005 · AC-07: Files viewer column in View Mode and S
   await workspace().getByRole('button', { name: '概览', exact: true }).click()
   await openFile()
   await columns('view-file-viewer')
+  await expect(workspace().getByRole('region', { name: '工作台页面', exact: true })).toBeHidden()
   // At 1440 the conversation handle moves the conversation edge both ways while a file is open;
   // narrowing gives the room to the file content.
   const widths = () => page.evaluate(() => ['.conversation-pane', '.file-viewer-column'].map((selector) => document.querySelector(`.project-workspace:not([hidden]) ${selector}`)!.getBoundingClientRect().width))
@@ -267,23 +285,30 @@ test('FR-TOOL-001 / FR-VIEW-005 · AC-07: Files viewer column in View Mode and S
   await handle.focus()
   for (let i = 0; i < 8; i++) await handle.press('ArrowLeft')
   await expect.poll(async () => (await widths())[0]).toBeLessThan(conversation!)
+  const [narrowed] = await widths()
   expect((await widths())[1]).toBeGreaterThan(content!)
   for (let i = 0; i < 16; i++) await handle.press('ArrowRight')
-  await expect.poll(async () => (await widths())[0]).toBeGreaterThan(conversation!)
+  await expect.poll(async () => (await widths())[0]).toBeGreaterThan(narrowed!)
   const treeWidth = () => page.evaluate(() => document.querySelector('.project-workspace:not([hidden]) .right-pane')!.getBoundingClientRect().width)
   const [, viewContent] = await widths(), viewTree = await treeWidth()
+  // The tool sidebar stays open across modes (DEC-33).
   await newChat()
-  await page.getByRole('button', { name: '右侧边栏', exact: true }).click()
+  await expect(page.getByRole('button', { name: '右侧边栏', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await openFile()
   await columns('session-file-viewer')
-  // A tree widened in Session keeps its width in View Mode without widening the content column.
+  // The tree width is shared with Session (DEC-33); in View Mode it gives way so the content keeps the workbench's minimum.
   const sidebar = workspace().getByRole('separator', { name: '调整右侧边栏宽度', exact: true })
   await sidebar.focus()
   for (let i = 0; i < 16; i++) await sidebar.press('ArrowLeft')
-  await workspace().getByRole('button', { name: '概览', exact: true }).click()
-  await openFile()
   await expect.poll(treeWidth).toBeGreaterThan(viewTree)
-  expect((await widths())[1]).toBeLessThanOrEqual(viewContent! + 0.5)
+  // Entering the workbench brings it back in front of the open file; picking the file shows it again.
+  await workspace().getByRole('button', { name: '概览', exact: true }).click()
+  await expect(workspace().getByRole('region', { name: '工作台页面', exact: true })).toBeVisible()
+  await expect(viewer()).toHaveCount(0)
+  await openFile()
+  await expect.poll(treeWidth).toBeCloseTo(viewTree, 0)
+  expect((await widths())[1]).toBeGreaterThanOrEqual(400 - 0.5)
+  expect((await widths())[1]).toBeCloseTo(viewContent!, 0)
 })
 
 test('FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths and a question card at 1280', async () => {

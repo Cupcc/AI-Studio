@@ -35,7 +35,7 @@ beforeEach(() => {
   detach = watchWorkbenches()
 })
 afterEach(() => { cleanup(); detach(); useWorkbenches.getState().close('p') })
-/** The right-area header parts and the page body, as Workspace renders them for a workbench view. */
+/** The workbench column header parts and the page body, as Workspace renders them for a workbench view. */
 function Host(props: ViewSlotProps) {
   return <><header><span>title</span><WorkbenchHeader {...props} part="status" /><WorkbenchHeader {...props} part="actions" /><WorkbenchHeader {...props} part="menu" /></header><WorkbenchPreview {...props} /></>
 }

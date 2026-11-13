@@ -53,7 +53,7 @@
   - Project 的打开、Tab、`ui_state` 持久化、左右区域尺寸及 Project 间隔离 → [Project spec](../project/spec.md)。
   - Session 生命周期、Conversation 内容、状态提醒、CLI Runtime、首条消息创建 → [Session spec](../session/spec.md)、[Chat spec](../chat/spec.md)、[Agent Adapter spec](../agent-adapter/spec.md)。
   - 输入区的通用布局、Model Selector、Send / Stop → [Input spec](../input/spec.md)。本模块只规定预设上下文内容。
-  - Files、Search、Diff、Browser、Terminal 的内容 → [tools spec](../tools/spec.md)；Project View Mode 下它们复用右侧区域切换契约，切换内容不释放工具的 Project 级资源（DEC-10，2026-10-12 确认）。
+  - Files、Search、Diff、Browser、Terminal 的内容 → [tools spec](../tools/spec.md)；Project View Mode 下它们显示在与 Session Mode 相同的右侧边栏中，切换内容不释放工具的 Project 级资源（DEC-10，2026-10-12 确认；DEC-33）。
   - 所有工作台的目录、公共宿主、会话入口，以及自定义包、实例和后续业务 → [workbench spec](../workbench/spec.md)（FR-WB-001～008）。
 
 ## 3. 行为细则
@@ -146,11 +146,11 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 
 ### FR-VIEW-005 左右布局
 
-1. Project View Mode 的 Main Canvas 固定为左 Conversation、右 View Preview 的两列结构。尺寸、拖拽分隔线和右侧工具共用区域由 Project spec 统一定义。
-2. Preview 右侧区域顶部提供 Preview、Files、Diff、Browser、Terminal 的图标切换；同一时刻只显示一个工具。工具打开时替换 Preview；Files 查看文件时的额外列及返回 Preview 的入口（含工具关闭 ×）见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)（P-B；2026-10-11 确认，文件列按 2026-10-30 请求调整）。
-3. 刷新 Preview 不自动打开右侧区域、不把工具切回 Preview，也不改变 Conversation 列宽度。
+1. Project View Mode 的 Main Canvas 为左 Conversation、右工作台列（View Preview）的两列结构；右侧边栏打开时位于工作台列右侧，形成四列（[DEC-33](<../../docs/07. Decisions.md#dec-33-工作台与右侧工具栏分列>)）。尺寸、拖拽分隔线与空间不足时的处理由 Project spec 统一定义。
+2. 工作台列顶栏只放工作台名称、状态、操作与“关闭工作台”×；工具在右侧边栏中切换，与 Session Mode 相同。工作台列关闭后 Conversation 占用其宽度，Conversation 顶栏的“工作台”按钮重新打开。Files 查看文件时，文件内容列临时占用工作台列的位置，见 [UX 第 5 节](<../../docs/03. UX Specification.md#5-context-panel-交互模型>)（取代 P-B 的共用右侧区域）。
+3. 刷新 Preview 不自动打开工作台列或右侧边栏、不切换工具，也不改变 Conversation 列宽度。
 4. Preview 是只读区域，支持滚动；修改必须通过左侧普通 CLI Session 完成。宿主不提供页面缩放，缩放属于带画布的页面（用户 2026-11-12 确认，DEC-30）。原型 v03 Q1 的缩放控件与 PV-Q9、PV-Q13 的比例规则不再适用。
-5. 通过导航进入 View 时，右侧默认为 Preview；从 Project Tab 切回或启动恢复时遵循 Project spec 保存的完整状态，不重新套用进入规则（D-15）。
+5. 通过导航进入 View 时打开工作台列，右侧边栏保持原状；从 Project Tab 切回或启动恢复时遵循 Project spec 保存的完整状态，不重新套用进入规则（D-15）。
 
 ### FR-VIEW-006 Project View Conversation
 

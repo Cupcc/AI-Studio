@@ -9,7 +9,7 @@ const appDir = join(__dirname, '..')
 let dir: string, projectPath: string, app: ElectronApplication, page: Page
 const workspace = () => page.locator('.project-workspace:not([hidden])')
 const plugin = () => page.frameLocator('iframe[title="工作台页面"]')
-const headerStatus = () => workspace().locator('.right-area__header').getByRole('status')
+const headerStatus = () => workspace().locator('.workbench-pane__header').getByRole('status')
 async function more(action: string) {
   await workspace().getByRole('button', { name: '更多操作', exact: true }).click()
   await page.getByRole('menu', { name: '更多操作', exact: true }).getByRole('menuitem', { name: action, exact: true }).click()
@@ -32,7 +32,7 @@ async function template() {
   await workspace().getByRole('button', { name: '添加工作台', exact: true }).click()
   await page.getByRole('button', { name: /从简单模板开始/ }).click()
   await expect(plugin().getByRole('heading', { name: '随手记', exact: true })).toBeVisible()
-  await expect(workspace().locator('.right-area__header').getByText('草稿', { exact: true })).toBeVisible()
+  await expect(workspace().locator('.workbench-pane__header').getByText('草稿', { exact: true })).toBeVisible()
   await expect(workspace().getByRole('button', { name: '添加至当前项目', exact: true })).toBeEnabled()
 }
 

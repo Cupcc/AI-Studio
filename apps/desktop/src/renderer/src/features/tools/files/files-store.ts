@@ -59,6 +59,8 @@ interface FilesStore {
   select(projectId: string, path: ProjectPath, options?: { pin?: boolean }): Promise<void>
   /** Closes the viewer's current tab; the neighbour becomes current. */
   closeViewer(projectId: string): void
+  /** Puts the file content away and keeps its tabs: entering a workbench brings the workbench back (DEC-33). */
+  hideViewer(projectId: string): void
   closeTab(projectId: string, path: ProjectPath): void
   pinTab(projectId: string, path: ProjectPath): void
   /** Selects in the tree: one row, ⌘ toggle, or ⇧ range over the visible `order`. */
@@ -448,6 +450,10 @@ export const useFiles = create<FilesStore>((set, get) => {
       const path = current.viewer?.path ?? current.selected
       if (path !== null && current.tabs.some(tab => tab.path === path)) get().closeTab(projectId, path)
       else patchProject(projectId, { selected: null, viewer: null })
+    },
+
+    hideViewer(projectId) {
+      if (project(projectId)?.viewer) patchProject(projectId, { selected: null, viewer: null })
     },
 
     closeTab(projectId, path) {

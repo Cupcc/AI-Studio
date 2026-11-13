@@ -49,6 +49,5 @@ export function Tools(props: RightSlotProps) {
   if (props.area === 'files') return <FilesPanel projectId={props.project.id} canvas={props.canvas} active={props.active} root={props.project.canonicalPath} viewerHost={props.fileViewerHost} />
   if (props.area === 'search') return <SearchPanel projectId={props.project.id} active={props.active} />
   if (props.area === 'diff') return <DiffPanel projectId={props.project.id} active={props.active} />
-  if (props.area === 'preview') return null
   return <div className="canvas-placeholder"><Icon name={props.area} size={28} /><h2>{TOOL_NAMES[props.area]}</h2><p>{S.placeholderTool(TOOL_NAMES[props.area])}</p></div>
 }

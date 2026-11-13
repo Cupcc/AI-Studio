@@ -190,11 +190,11 @@ describe('Composer: + menu, tags and Needs Input · I-Q4, FR-INPUT-001', () => {
     expect(draftOf(draftKey)!.contextItems).toEqual([])
   })
 
-  it('selects Files in the right area of a Project View too', async () => {
+  it('selects Files in the tool sidebar of a Project View too', async () => {
     show({ mode: 'view', viewId: 'architecture', conversation: { kind: 'draft' } })
     await mount(viewDraftKey)
     openMenu(); fireEvent.click(screen.getByRole('button', { name: '从 Files 添加文件' }))
-    expect(useProjectShell.getState().uiStates.p).toMatchObject({ viewRightArea: 'files', lastTool: 'files' })
+    expect(useProjectShell.getState().uiStates.p).toMatchObject({ sidebarOpen: true, lastTool: 'files', workbenchOpen: true })
   })
 
   it('shows each file tag by its file name with the full path as title, and removes tags one at a time', async () => {

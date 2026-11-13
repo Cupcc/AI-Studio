@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { S, TOOL_NAMES } from '@shared/project/strings'
-import { TOOL_IDS, type RightArea, type UiState } from '@shared/project/types'
+import { TOOL_IDS, type UiState, type ViewId } from '@shared/project/types'
 import { currentTool, SIDEBAR_WIDTH, VIEW_CONVERSATION_WIDTH } from '@shared/project/ui-state'
-import { effectiveConversationWidth, effectiveSidebarWidth } from '@shared/project/layout'
-import { closeRightSidebar, selectRightArea } from '@shared/project/ui-rules'
+import { canvasLayout } from '@shared/project/layout'
+import { closeRightSidebar, selectTool, toggleWorkbench } from '@shared/project/ui-rules'
 import { Icon } from '../../app/Icon'
 import { useViewTitle } from '../workbench/use-view-title'
 import { Navigation } from '../navigation/Navigation'
@@ -34,30 +34,32 @@ function ResizeHandle({ width, min, max, direction, label, onPreview, onCommit }
       target.addEventListener('pointermove', move); target.addEventListener('pointerup', finish); target.addEventListener('pointercancel', cancel)
     }} />
 }
-function RightArea({ props, ui, area, viewMode, fileViewerHost }: { props: ShellSlotProps; ui: UiState; area: RightArea; viewMode: boolean; fileViewerHost: HTMLElement | null }) {
+/** Right tool sidebar: the same column in Session and Project View Mode (DEC-33). */
+function ToolSidebar({ props, ui, fileViewerHost }: { props: ShellSlotProps; ui: UiState; fileViewerHost: HTMLElement | null }) {
   const slots = useShellIntegration(), shell = useProjectShell()
-  const viewId = props.canvas.mode === 'view' ? props.canvas.viewId : 'overview'
-  const viewTitle = useViewTitle(props.project.id, viewId)
-  const title = <span className="right-area__title">{area === 'preview' ? viewTitle : TOOL_NAMES[area]}</span>
-  const PreviewHeader = viewMode && area === 'preview' ? slots.PreviewHeader : undefined
-  const tools = TOOL_IDS.map((tool, i) => <button key={tool} className={`icon-button ${area === tool ? 'is-selected' : ''}`} aria-label={TOOL_NAMES[tool]} aria-pressed={area === tool} data-tip={TOOL_NAMES[tool]} data-tip-align={viewMode && i === TOOL_IDS.length - 1 && area === 'preview' && !PreviewHeader ? 'end' : undefined} onClick={() => { slots.toolSelected?.(props.project.id, tool); shell.updateUiState(props.project.id, selectRightArea(ui, tool)) }}><Icon name={tool} /></button>)
-  return <section className={`right-area ${viewMode ? 'right-area--view' : ''} ${area === 'preview' ? 'right-area--preview' : ''}`} aria-label={area === 'preview' ? S.preview : TOOL_NAMES[area]}>
+  const tool = currentTool(ui)
+  return <section className="right-area" aria-label={TOOL_NAMES[tool]}>
     <header className="canvas-header right-area__header">
-      {viewMode ? <>
-        {title}{PreviewHeader && <PreviewHeader {...props} viewId={viewId} part="status" />}<span className="grow" />
-        {PreviewHeader && <PreviewHeader {...props} viewId={viewId} part="actions" />}
-        <div className="tool-switcher" aria-label="右侧工具">
-          <button className={`icon-button ${area === 'preview' ? 'is-selected' : ''}`} aria-label={S.preview} aria-pressed={area === 'preview'} data-tip={`${S.preview} · ${viewTitle}`} onClick={() => shell.updateUiState(props.project.id, selectRightArea(ui, 'preview'))}><Icon name="preview" /></button><span className="tool-switcher__divider" />
-          {tools}
-        </div>
-        {PreviewHeader && <><span className="tool-switcher__divider" /><PreviewHeader {...props} viewId={viewId} part="menu" /></>}
-      </> : <><div className="tool-switcher" aria-label="右侧工具">{tools}</div>{title}<span className="grow" /></>}
-      {area !== 'preview' && <button className="icon-button" aria-label="关闭右侧工具" data-tip={S.close} data-tip-align="end" onClick={() => shell.updateUiState(props.project.id, closeRightSidebar(ui))}><Icon name="close" size={15} /></button>}
+      <div className="tool-switcher" aria-label="右侧工具">{TOOL_IDS.map((id) => <button key={id} className={`icon-button ${tool === id ? 'is-selected' : ''}`} aria-label={TOOL_NAMES[id]} aria-pressed={tool === id} data-tip={TOOL_NAMES[id]} onClick={() => { slots.toolSelected?.(props.project.id, id); shell.updateUiState(props.project.id, selectTool(ui, id)) }}><Icon name={id} /></button>)}</div>
+      <span className="right-area__title">{TOOL_NAMES[tool]}</span><span className="grow" />
+      <button className="icon-button" aria-label={S.closeSidebar} data-tip={S.close} data-tip-align="end" onClick={() => shell.updateUiState(props.project.id, closeRightSidebar(ui))}><Icon name="close" size={15} /></button>
     </header>
-    <div className="right-area__content">{area === 'preview'
-      ? slots.Preview ? <slots.Preview {...props} viewId={viewId} /> : <div className="canvas-placeholder"><Icon name={viewId} size={28} /><h2>{viewTitle}</h2><p>{S.placeholderPreview(viewTitle)}</p></div>
-      : slots.Tool ? <slots.Tool {...props} area={area} fileViewerHost={fileViewerHost} /> : <div className="canvas-placeholder"><Icon name={area} size={28} /><h2>{TOOL_NAMES[area]}</h2><p>{S.placeholderTool(TOOL_NAMES[area])}</p></div>}
-    </div>
+    <div className="right-area__content">{slots.Tool ? <slots.Tool {...props} area={tool} fileViewerHost={fileViewerHost} /> : <div className="canvas-placeholder"><Icon name={tool} size={28} /><h2>{TOOL_NAMES[tool]}</h2><p>{S.placeholderTool(TOOL_NAMES[tool])}</p></div>}</div>
+  </section>
+}
+
+/** Workbench column of Project View Mode: the page with its host header; closing it gives the space to the conversation (DEC-33). */
+function WorkbenchColumn({ props, ui, viewId }: { props: ShellSlotProps; ui: UiState; viewId: ViewId }) {
+  const slots = useShellIntegration(), shell = useProjectShell()
+  const viewTitle = useViewTitle(props.project.id, viewId)
+  const Header = slots.PreviewHeader
+  return <section className="workbench-pane" aria-label={S.workbenchColumn}>
+    <header className="canvas-header workbench-pane__header">
+      <span className="workbench-pane__title">{viewTitle}</span>{Header && <Header {...props} viewId={viewId} part="status" />}<span className="grow" />
+      {Header && <><Header {...props} viewId={viewId} part="actions" /><Header {...props} viewId={viewId} part="menu" /></>}
+      <button className="icon-button" aria-label={S.closeWorkbench} data-tip={S.closeWorkbench} data-tip-align="end" onClick={() => shell.updateUiState(props.project.id, toggleWorkbench(ui))}><Icon name="close" size={15} /></button>
+    </header>
+    <div className="workbench-pane__content">{slots.Preview ? <slots.Preview {...props} viewId={viewId} /> : <div className="canvas-placeholder"><Icon name={viewId} size={28} /><h2>{viewTitle}</h2><p>{S.placeholderPreview(viewTitle)}</p></div>}</div>
   </section>
 }
 
@@ -66,38 +68,51 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
   const project = shell.projects[projectId]!, ui = shell.uiStates[projectId]!
   const props = { project, canvas: ui.mainCanvas, active }
   const viewTitle = useViewTitle(projectId, ui.mainCanvas.mode === 'view' ? ui.mainCanvas.viewId : 'overview')
-  const ref = useRef<HTMLDivElement>(null)
-  const [available, setAvailable] = useState(window.innerWidth - (shell.windowState.navCollapsed ? 0 : 248))
-  const [dragWidth, setDragWidth] = useState<number | null>(null)
+  const root = useRef<HTMLDivElement>(null), canvasRef = useRef<HTMLElement>(null)
+  const [size, setSize] = useState({ workspace: window.innerWidth, gutter: 0, measured: false })
+  const [drag, setDrag] = useState<{ conversation?: number | null; sidebar?: number | null }>({})
   const [fileViewerHost, setFileViewerHost] = useState<HTMLDivElement | null>(null)
-  useEffect(() => {
-    const node = ref.current!
-    const measure = () => { if (node.clientWidth) setAvailable(node.clientWidth) }
-    const observer = new ResizeObserver(measure); observer.observe(node); measure()
+  // Measured before paint so an automatic navigation collapse does not flash.
+  useLayoutEffect(() => {
+    const node = root.current!, canvas = canvasRef.current!
+    const measure = () => {
+      if (!node.clientWidth) return
+      const workspace = node.clientWidth, gutter = parseFloat(getComputedStyle(canvas).marginRight) || 0
+      setSize((prev) => prev.measured && prev.workspace === workspace && prev.gutter === gutter ? prev : { workspace, gutter, measured: true })
+    }
+    // The canvas is observed too: a theme change alters its gutter without resizing the workspace.
+    const observer = new ResizeObserver(measure); observer.observe(node); observer.observe(canvas); measure()
     return () => observer.disconnect()
   }, [])
   const view = ui.mainCanvas.mode === 'view'
-  const width = view ? effectiveConversationWidth(available, dragWidth ?? ui.viewConversationWidth) : effectiveSidebarWidth(available, dragWidth ?? ui.sidebarWidth)
-  // The file tree keeps the Project's sidebar width in both modes; View Mode uses it while a file is open.
-  const sidebarWidth = view ? effectiveSidebarWidth(available, ui.sidebarWidth) : width
-  return <div className="project-workspace" hidden={!active} data-project-id={projectId}>
-    {!shell.windowState.navCollapsed && <Navigation {...props} />}
-    <main className={`canvas-mode ${view ? 'canvas-mode--view' : 'canvas-mode--session'}`} ref={ref} style={{ '--pane-width': `${width}px`, '--sidebar-width': `${sidebarWidth}px` } as CSSProperties}>
+  const workbench = ui.mainCanvas.mode === 'view' && ui.workbenchOpen
+  const layout = canvasLayout({
+    workspace: size.workspace, gutter: size.gutter, navExpanded: !shell.windowState.navCollapsed, navKeptOpen: shell.navKeptOpen || !size.measured,
+    workbench, sidebar: ui.sidebarOpen, conversationWidth: drag.conversation ?? ui.viewConversationWidth, sidebarWidth: drag.sidebar ?? ui.sidebarWidth
+  })
+  const { setNavSpaceShort } = shell
+  useEffect(() => { if (active && size.measured) setNavSpaceShort(layout.spaceShort) }, [active, size.measured, layout.spaceShort, setNavSpaceShort])
+  return <div className="project-workspace" ref={root} hidden={!active} data-project-id={projectId}>
+    {layout.nav && <Navigation {...props} />}
+    <main className={`canvas-mode ${view ? 'canvas-mode--view' : 'canvas-mode--session'} ${workbench ? 'canvas-mode--split' : 'canvas-mode--single'}${layout.overlay ? ' canvas-mode--overlay' : ''}`} ref={canvasRef} style={{ '--conversation-width': `${layout.conversation}px`, '--sidebar-width': `${layout.sidebar}px` } as CSSProperties}>
       <section className="conversation-pane" aria-label={view ? '工作台对话' : '对话'}>
         <header className="canvas-header">{ui.mainCanvas.mode === 'view' && slots.ViewConversationHeader
           ? <slots.ViewConversationHeader {...props} viewId={ui.mainCanvas.viewId} />
           : !view && slots.ConversationHeader ? <slots.ConversationHeader {...props} />
-          : <span>{ui.mainCanvas.mode === 'view' ? `${ui.mainCanvas.conversation.kind === 'draft' ? S.draftTitle : ui.mainCanvas.conversation.sessionId} · ${viewTitle}` : ui.mainCanvas.mode === 'draft' ? S.draftTitle : ui.mainCanvas.sessionId}</span>}</header>
+          : <span>{ui.mainCanvas.mode === 'view' ? `${ui.mainCanvas.conversation.kind === 'draft' ? S.draftTitle : ui.mainCanvas.conversation.sessionId} · ${viewTitle}` : ui.mainCanvas.mode === 'draft' ? S.draftTitle : ui.mainCanvas.sessionId}</span>}
+          {view && <button className={`icon-button workbench-toggle ${ui.workbenchOpen ? 'is-selected' : ''}`} aria-label={S.workbench} aria-pressed={ui.workbenchOpen} data-tip={S.workbench} data-tip-align="end" onClick={() => shell.updateUiState(projectId, toggleWorkbench(ui))}><Icon name="preview" /></button>}
+        </header>
         <div className="conversation-pane__content">{view && ui.mainCanvas.mode === 'view'
           ? slots.ViewConversation ? <slots.ViewConversation {...props} viewId={ui.mainCanvas.viewId} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{S.draftTitle}</h2><p>{S.placeholderViewConversation}</p></div>
           : slots.Conversation ? <slots.Conversation {...props} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{ui.mainCanvas.mode === 'draft' ? S.draftTitle : '对话'}</h2><p>{ui.mainCanvas.mode === 'draft' ? S.placeholderDraft : S.placeholderConversation}</p></div>}
         </div>
-        {view && <ResizeHandle width={width} min={VIEW_CONVERSATION_WIDTH.min} max={Math.min(VIEW_CONVERSATION_WIDTH.max, available - 400)} direction={1} label={S.resizeConversation} onPreview={setDragWidth} onCommit={(w) => shell.updateUiState(projectId, { viewConversationWidth: w })} />}
+        {workbench && <ResizeHandle width={layout.conversation} min={VIEW_CONVERSATION_WIDTH.min} max={layout.conversationMax} direction={1} label={S.resizeConversation} onPreview={(w) => setDrag({ conversation: w })} onCommit={(w) => shell.updateUiState(projectId, { viewConversationWidth: w })} />}
       </section>
+      {ui.mainCanvas.mode === 'view' && workbench && <WorkbenchColumn props={props} ui={ui} viewId={ui.mainCanvas.viewId} />}
       <div className="file-viewer-column" ref={setFileViewerHost} />
-      {(view || ui.sidebarOpen) && <div className="right-pane">
-        {!view && <ResizeHandle width={width} min={SIDEBAR_WIDTH.min} max={Math.min(SIDEBAR_WIDTH.max, available - 400)} direction={-1} label={S.resizeSidebar} onPreview={setDragWidth} onCommit={(w) => shell.updateUiState(projectId, { sidebarWidth: w })} />}
-        <RightArea props={props} ui={ui} area={view ? ui.viewRightArea : currentTool(ui)} viewMode={view} fileViewerHost={fileViewerHost} />
+      {ui.sidebarOpen && <div className="right-pane">
+        <ResizeHandle width={layout.sidebar} min={SIDEBAR_WIDTH.min} max={layout.sidebarMax} direction={-1} label={S.resizeSidebar} onPreview={(w) => setDrag({ sidebar: w })} onCommit={(w) => shell.updateUiState(projectId, { sidebarWidth: w })} />
+        <ToolSidebar props={props} ui={ui} fileViewerHost={fileViewerHost} />
       </div>}
     </main>
   </div>

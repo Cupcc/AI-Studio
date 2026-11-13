@@ -51,37 +51,45 @@
 
 /* Canvas: conversation column and headers (prototype .hdr: 48px, soft bottom border) */
 /* The canvas is the glass theme's frosted layer; in white the tokens make it plain (Shell Spec v02 §12) */
-.canvas-mode { display: flex; flex: 1; min-width: 0; height: calc(100% - var(--canvas-gutter)); margin: 0 var(--canvas-gutter) 0 0; background: var(--color-canvas); border-radius: var(--radius-canvas); box-shadow: var(--shadow-canvas); }
+.canvas-mode { position: relative; display: flex; flex: 1; min-width: 0; height: calc(100% - var(--canvas-gutter)); margin: 0 var(--canvas-gutter) 0 0; background: var(--color-canvas); border-radius: var(--radius-canvas); box-shadow: var(--shadow-canvas); }
 .conversation-pane { position: relative; display: flex; flex-direction: column; flex: 1; min-width: var(--session-conversation-min-width); }
-.canvas-mode--view .conversation-pane { flex: 0 0 var(--pane-width); width: var(--pane-width); min-width: var(--view-conversation-min-width); }
 .canvas-header { display: flex; flex: 0 0 var(--canvas-header-height); align-items: center; gap: var(--space-2-5); height: var(--canvas-header-height); min-width: 0; padding: 0 var(--space-3) 0 var(--space-5); border-bottom: 1px solid var(--color-border-soft); font-size: var(--font-size-md); }
 .canvas-header > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.canvas-header > .workbench-toggle { flex: none; margin-left: auto; }
 .conversation-pane__content { flex: 1; min-height: 0; overflow: auto; }
+/* Session Mode centres the text column; View conversations centre their own feed and composer (DEC-33). */
 .canvas-mode--session .conversation-pane__content > * { max-width: var(--conversation-max-width); margin-left: auto; margin-right: auto; }
 
-/* Right area: Session Mode sidebar and Project View Mode area (white with a tool, preview colour with Preview) */
-.right-pane { position: relative; flex: 0 0 var(--pane-width); width: var(--pane-width); min-width: var(--sidebar-min-width); background: var(--color-pane); border-left: 1px solid var(--color-border); }
-.canvas-mode--view .right-pane { flex: 1; width: auto; min-width: var(--view-right-min-width); }
+/* Four columns (DEC-33): conversation | workbench | tool sidebar; the workbench takes the rest of the width. */
+.canvas-mode--split .conversation-pane { flex: 0 0 var(--conversation-width); width: var(--conversation-width); min-width: var(--view-conversation-min-width); }
+.workbench-pane { display: flex; flex-direction: column; flex: 1; min-width: var(--workbench-min-width); min-height: 0; background: var(--color-surface-preview); border-left: 1px solid var(--color-border); }
+.workbench-pane__header { gap: var(--space-2-5); padding: 0 var(--space-3) 0 var(--space-5); background: var(--color-pane); border-bottom-color: var(--color-border); }
+.workbench-pane__title { font-weight: 600; }
+.workbench-pane__content { flex: 1; min-height: 0; overflow: auto; }
+.right-pane { position: relative; flex: 0 0 var(--sidebar-width); width: var(--sidebar-width); min-width: var(--sidebar-min-width); background: var(--color-pane); border-left: 1px solid var(--color-border); }
+/* Too narrow even without the navigation: the sidebar floats over the workbench instead of squeezing it. */
+.canvas-mode--overlay .right-pane { position: absolute; top: 0; right: 0; bottom: 0; z-index: var(--z-overlay-pane); background: var(--color-floating); -webkit-backdrop-filter: var(--backdrop-floating); backdrop-filter: var(--backdrop-floating); border-radius: 0 var(--radius-canvas) var(--radius-canvas) 0; box-shadow: var(--shadow-popover); }
+
+/* Files content column: between the conversation and the file tree; in View Mode it takes the workbench's place. */
 .file-viewer-column { display: none; }
 .file-viewer-column:has(.files-viewer-pane) { display: flex; flex: 1 1 0; min-width: 0; min-height: 0; overflow: hidden; background: var(--color-pane); border-left: 1px solid var(--color-border); }
+.canvas-mode:has(.files-viewer-pane) .workbench-pane { display: none; }
 .canvas-mode:has(.files-viewer-pane) .conversation-pane { flex: 1 1 0; width: auto; min-width: 0; }
-/* The tool header sets the narrowest the right pane goes, so its buttons stay reachable; the file tree does not. */
-.canvas-mode:has(.files-viewer-pane) .right-pane { flex: 0 1 var(--pane-width); min-width: min-content; }
-/* View Mode: the conversation keeps its set width and the tree its sidebar width; the file content takes the rest.
+/* The tool header sets the narrowest the right pane goes, so its buttons stay reachable; the file tree does not.
+   With a file open the sidebar never floats: the three columns compress together instead. */
+.canvas-mode:has(.files-viewer-pane) .right-pane { position: relative; flex: 0 1 var(--sidebar-width); min-width: min-content; background: var(--color-pane); -webkit-backdrop-filter: none; backdrop-filter: none; border-radius: 0; box-shadow: none; }
+/* Split: the conversation keeps its set width and the tree its sidebar width; the file content takes the rest.
    The content column starts from the default sidebar width, so all three compress together when the window is
    narrow, and a widened tree does not widen it. */
-.canvas-mode--view:has(.files-viewer-pane) .conversation-pane { flex: 0 1 var(--pane-width); }
-.canvas-mode--view:has(.files-viewer-pane) .right-pane { flex-basis: var(--sidebar-width); }
-.canvas-mode--view:has(.files-viewer-pane) .file-viewer-column { flex-basis: var(--sidebar-default-width); }
+.canvas-mode--split:has(.files-viewer-pane) .conversation-pane { flex: 0 1 var(--conversation-width); }
+.canvas-mode--split:has(.files-viewer-pane) .file-viewer-column { flex-basis: var(--sidebar-default-width); }
 .canvas-mode:has(.files-viewer-pane) .right-area__content { contain: inline-size; }
+
+/* Tool sidebar */
 .right-area { display: flex; flex-direction: column; height: 100%; background: var(--color-pane); }
-.right-area--preview { background: var(--color-surface-preview); }
 .right-area__header { gap: var(--space-0); padding: 0 var(--space-2) 0 var(--space-2-5); }
-.right-area--view .right-area__header { gap: var(--space-2-5); padding: 0 var(--space-3) 0 var(--space-5); background: var(--color-pane); border-bottom-color: var(--color-border); }
 .right-area__title { margin-left: var(--space-2); font-weight: 500; }
-.right-area--view .right-area__title { margin-left: 0; font-weight: 600; }
 .tool-switcher { display: flex; align-items: center; gap: var(--space-0); }
-.right-area--view .tool-switcher { gap: var(--space-2-5); }
 .tool-switcher__divider { flex: none; width: 1px; height: var(--vsep-height); margin: 0 var(--space-1); background: var(--color-border); }
 .right-area__content { flex: 1; min-height: 0; overflow: auto; }
 .resize-handle { position: absolute; top: 0; bottom: 0; width: var(--resize-hit-width); z-index: var(--z-handle); cursor: col-resize; touch-action: none; }
@@ -126,5 +134,3 @@
    Tabs no longer join the canvas (a gutter sits between), so they become centred pills. */
 :root[data-theme="glass"] :is(.topbar, .topbar__tabs) { align-items: center; }
 :root[data-theme="glass"] .project-workspace > .canvas-mode:first-child { margin-left: var(--canvas-gutter); }
-/* Workbench header: the divider before "更多操作" sits directly in the header row, whose gap already spaces it. */
-.right-area__header > .tool-switcher__divider { margin: 0; }

@@ -2,16 +2,16 @@
 // to apply, or null when the action changes nothing. Only user actions call
 // these: agent or background events never change the layout (01 §8, 21–22).
 import { currentTool } from './ui-state'
-import type { RightArea, SessionId, ToolId, UiState, UiStatePatch, ViewConversation, ViewId } from './types'
+import type { SessionId, ToolId, UiState, UiStatePatch, ViewConversation, ViewId } from './types'
 
-/** Entering a View from the left navigation (navigation spec §2.2.2; P-A; PROJ-Q3). */
+/** Entering a View from the left navigation shows its workbench column; the tool sidebar stays as it is (P-A; DEC-33). */
 export function enterViewFromNav(state: UiState, viewId: ViewId): UiStatePatch | null {
   const canvas = state.mainCanvas
   // NAV-Q5 recommendation: clicking the current View again is ignored.
   if (canvas.mode === 'view' && canvas.viewId === viewId) return null
   return {
     mainCanvas: { mode: 'view', viewId, conversation: { kind: 'draft' } },
-    viewRightArea: 'preview'
+    workbenchOpen: true
   }
 }
 
@@ -38,31 +38,22 @@ export function setViewConversation(state: UiState, conversation: ViewConversati
   return { mainCanvas: { ...canvas, conversation } }
 }
 
-/**
- * Top-bar right sidebar button. Session Mode toggles the sidebar; View Mode
- * switches the right area between Preview and the last tool (P-B).
- */
+/** Top-bar right sidebar button: toggles the tool sidebar in both modes (DEC-33). */
 export function toggleRightSidebar(state: UiState): UiStatePatch {
-  if (state.mainCanvas.mode === 'view') {
-    return { viewRightArea: state.viewRightArea === 'preview' ? currentTool(state) : 'preview' }
-  }
   return { sidebarOpen: !state.sidebarOpen }
 }
 
-/** Icon switch in the sidebar header (Session Mode) or right area header (View Mode). */
-export function selectRightArea(state: UiState, area: RightArea): UiStatePatch | null {
-  if (state.mainCanvas.mode === 'view') {
-    if (area === 'preview') return state.viewRightArea === 'preview' ? null : { viewRightArea: 'preview' }
-    return { viewRightArea: area, lastTool: area }
-  }
-  if (area === 'preview') return null
-  return { sidebarOpen: true, lastTool: area as ToolId }
+/** Icon switch in the sidebar header, or a user action that asks for a tool: shows that tool in the sidebar. */
+export function selectTool(state: UiState, tool: ToolId): UiStatePatch | null {
+  return state.sidebarOpen && currentTool(state) === tool ? null : { sidebarOpen: true, lastTool: tool }
 }
 
-/** Close button of the sidebar / tool area. */
+/** Close button of the tool sidebar. */
 export function closeRightSidebar(state: UiState): UiStatePatch | null {
-  if (state.mainCanvas.mode === 'view') {
-    return state.viewRightArea === 'preview' ? null : { viewRightArea: 'preview' }
-  }
   return state.sidebarOpen ? { sidebarOpen: false } : null
+}
+
+/** Workbench button in the View conversation header and the workbench column's close button (DEC-33). */
+export function toggleWorkbench(state: UiState): UiStatePatch | null {
+  return state.mainCanvas.mode === 'view' ? { workbenchOpen: !state.workbenchOpen } : null
 }

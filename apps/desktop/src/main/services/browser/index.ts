@@ -21,7 +21,7 @@ export function browserFor(core: CoreServices): BrowserService {
         const tab = state.tabs.find(tab => tab.id === state.currentTabId)
         if (tab?.kind !== 'project' || tab.projectId !== id) return false
         const ui = shell.projects.getUiState(id)
-        return ui.mainCanvas.mode === 'view' ? ui.viewRightArea === 'browser' : ui.sidebarOpen && ui.lastTool === 'browser'
+        return ui.sidebarOpen && ui.lastTool === 'browser'
       },
       findWindow: senderId => {
         const sender = webContents.fromId(senderId)

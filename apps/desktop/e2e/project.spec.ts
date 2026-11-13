@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSyn
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { launchElectron } from './harness'
+import { launchElectron, showTool } from './harness'
 import { closeTestApp } from './quit'
 
 const appDir = join(__dirname, '..')
@@ -31,21 +31,28 @@ async function pickDirectory(path: string, expectedError?: string) {
   else await expect(page.getByRole('tab', { name: basename(realpathSync(path)), exact: true })).toHaveAttribute('aria-selected', 'true')
 }
 const workspace = () => page.locator('.project-workspace:not([hidden])')
-async function capture(mode: string, width: number, height: number) {
+async function resize(width: number, height: number) {
   await app.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0]!.setContentSize(size.width, size.height), { width, height })
   await expect.poll(() => page.evaluate(() => innerWidth)).toBe(width)
-  await expect.poll(() => workspace().locator('.navigation').evaluate((el) => el.getBoundingClientRect().width)).toBe(248)
+}
+/** `nav`: whether the navigation shows; a workbench beside the tool sidebar collapses it below 1440 (DEC-33). */
+async function capture(mode: string, width: number, height: number, nav = true) {
+  await resize(width, height)
+  await expect(workspace().locator('.navigation')).toHaveCount(nav ? 1 : 0)
   await expect.poll(() => workspace().locator('.canvas-header').first().evaluate((el) => el.getBoundingClientRect().height)).toBe(48)
-  // Pane widths follow a ResizeObserver measurement of the canvas, so they settle a render after the window.
+  // Pane widths follow a ResizeObserver measurement of the workspace, so they settle a render after the window.
   await expect.poll(() => workspace().evaluate((el) => el.scrollWidth)).toBe(width)
   const dims = await workspace().evaluate((el) => {
-    const conversation = el.querySelector('.conversation-pane')!.getBoundingClientRect()
-    const right = el.querySelector('.right-pane')!.getBoundingClientRect()
-    return { conversation: conversation.width, right: right.width, total: el.scrollWidth, window: innerWidth }
+    const width = (selector: string) => el.querySelector(selector)?.getBoundingClientRect().width ?? null
+    return {
+      conversation: width('.conversation-pane'), workbench: width('.workbench-pane'), right: width('.right-pane'),
+      overlay: !!el.querySelector('.canvas-mode--overlay'), total: el.scrollWidth, window: innerWidth
+    }
   })
   expect(dims.total).toBe(dims.window)
   expect(dims.conversation).toBeGreaterThanOrEqual(mode === 'view' ? 360 : 400)
-  expect(dims.right).toBeGreaterThanOrEqual(mode === 'view' ? 400 : 320)
+  expect(dims.right).toBeGreaterThanOrEqual(320)
+  if (mode === 'view') expect(dims.workbench).toBeGreaterThanOrEqual(400)
   await page.screenshot({ path: join(evidence, `project-${mode}-${width}.png`) })
   return dims
 }
@@ -62,7 +69,10 @@ test('FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, t
   await pickDirectory(paths[0]!)
   await expect(page.getByRole('tab', { name: 'Alpha' })).toHaveAttribute('aria-selected', 'true')
   await workspace().getByRole('button', { name: '架构', exact: true }).click()
-  await workspace().getByRole('button', { name: 'Terminal', exact: true }).click()
+  await showTool(page, 'Terminal')
+  // At the default 1280 the workbench and the tool sidebar do not fit beside the navigation, which collapses for them.
+  await expect(page.getByRole('button', { name: '展开导航' })).toBeVisible()
+  await expect(workspace().getByRole('region', { name: '工作台页面', exact: true })).toBeVisible()
   await workspace().getByRole('separator', { name: '调整对话列宽度' }).focus()
   await page.keyboard.press('ArrowRight')
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
@@ -71,33 +81,38 @@ test('FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, t
   await pickDirectory(paths[1]!)
   await workspace().getByRole('button', { name: '新对话', exact: true }).first().click()
   await page.getByRole('button', { name: '右侧边栏' }).click()
-  await workspace().getByRole('button', { name: 'Diff', exact: true }).click()
+  await showTool(page, 'Diff')
   await workspace().getByRole('separator', { name: '调整右侧边栏宽度' }).focus()
   await page.keyboard.press('ArrowLeft')
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
   await pickDirectory(paths[2]!)
   await workspace().getByRole('button', { name: '进度', exact: true }).click()
   await page.getByRole('tab', { name: 'Alpha' }).click()
-  await expect(workspace().getByRole('button', { name: '架构', exact: true })).toHaveAttribute('aria-current', 'page')
   await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
   await expect(workspace().getByRole('button', { name: 'Terminal', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  const view1024 = await capture('view', 1024, 640)
-  // 1024 − nav 248 − right minimum 400; the default glass appearance also leaves its 8px canvas gutter (Shell Spec v02 §12)
+  // The default glass appearance leaves its 8px canvas gutter (Shell Spec v02 §12), on the left too once the navigation is hidden.
   const gutter = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-gutter')))
   expect(gutter).toBe(8)
-  expect(view1024.conversation).toBe(376 - gutter); expect(view1024.right).toBe(400)
-  await capture('view', 1280, 800); await capture('view', 1440, 900)
+  // 1024: 1008 wide without the navigation is less than 360 + 400 + 320, so the sidebar floats over the workbench.
+  expect(await capture('view', 1024, 640, false)).toMatchObject({ overlay: true, conversation: 450, workbench: 1024 - 2 * gutter - 450, right: 400 })
+  // 1280: the four columns fit once the navigation is collapsed; the workbench takes the rest.
+  expect(await capture('view', 1280, 800, false)).toMatchObject({ overlay: false, conversation: 450, workbench: 1280 - 2 * gutter - 450 - 400, right: 400 })
+  // 1440: all four fit; the workbench shrinks to its minimum first, then the sidebar gives way.
+  expect(await capture('view', 1440, 900)).toMatchObject({ overlay: false, conversation: 450, workbench: 400, right: 1440 - 248 - gutter - 450 - 400 })
+  await expect(workspace().getByRole('button', { name: '架构', exact: true })).toHaveAttribute('aria-current', 'page')
   await page.getByRole('tab', { name: 'Beta' }).click()
   await expect(workspace().getByRole('button', { name: 'Diff', exact: true })).toHaveAttribute('aria-pressed', 'true')
-  await capture('session', 1024, 640); await capture('session', 1280, 800); await capture('session', 1440, 900)
+  expect(await capture('session', 1024, 640)).toMatchObject({ workbench: null, right: 1024 - 248 - gutter - 400 })
+  expect(await capture('session', 1280, 800)).toMatchObject({ workbench: null, right: 410 })
+  await capture('session', 1440, 900)
   const boot = await page.evaluate(() => window.studio.project.bootstrap())
   const alpha = boot.projects.find((p) => p.name === 'Alpha')!, beta = boot.projects.find((p) => p.name === 'Beta')!, gamma = boot.projects.find((p) => p.name === 'Gamma')!
-  expect(boot.uiStates[alpha.id]).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'architecture' }, viewRightArea: 'terminal', viewConversationWidth: 450 })
+  expect(boot.uiStates[alpha.id]).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'architecture' }, workbenchOpen: true, sidebarOpen: true, lastTool: 'terminal', viewConversationWidth: 450 })
   expect(boot.uiStates[beta.id]).toMatchObject({ mainCanvas: { mode: 'draft' }, sidebarOpen: true, lastTool: 'diff', sidebarWidth: 410 })
-  expect(boot.uiStates[gamma.id]).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'progress' }, viewRightArea: 'preview' })
+  expect(boot.uiStates[gamma.id]).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'progress' }, workbenchOpen: true, sidebarOpen: false })
   await page.getByRole('button', { name: '折叠导航' }).click()
   await expect(workspace().locator('.navigation')).toHaveCount(0)
-  await closeTestApp(app, page); await launch()
+  await closeTestApp(app, page); await launch(); await resize(1440, 900)
   await expect(page.getByRole('tab', { name: 'Beta' })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('tab')).toHaveCount(3)
   await expect(page.getByRole('button', { name: '展开导航' })).toBeVisible()

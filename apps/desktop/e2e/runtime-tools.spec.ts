@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type Server } from 'node:http'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { launchElectron } from './harness'
+import { launchElectron, showTool } from './harness'
 import { closeTestApp } from './quit'
 
 // Real Shell/PTY + local HTTP fixtures; Session Providers are simulated. Only
@@ -16,7 +16,9 @@ async function launch() {
   app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
   await expect(page.getByTestId('topbar')).toBeVisible()
-  await app.evaluate(({ BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; win.setContentSize(1280, 800); win.show(); win.focus() })
+  // Tools open beside the default workbench (DEC-33): at 1600 the navigation stays and the tool sidebar keeps its
+  // default 400, wide enough for the colour probe's line not to wrap.
+  await app.evaluate(({ BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; win.setContentSize(1600, 900); win.show(); win.focus() })
 }
 async function openProject(name: string) {
   const path = join(dir, name); mkdirSync(path)
@@ -103,7 +105,7 @@ test('FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolati
     w.__cspViolations = []
     document.addEventListener('securitypolicyviolation', event => w.__cspViolations.push(event.effectiveDirective))
   })
-  await workspace().getByRole('button', { name: 'Terminal', exact: true }).click()
+  await showTool(page, 'Terminal')
   await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
   await plainShell()
   await terminalCommand("printf '\\033[31mANSI_MARKER\\033[0m\\n'")
@@ -147,9 +149,9 @@ test('FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolati
   for (const [name, cell] of Object.entries(probe)) expect(cell!.ratio, `${name} ${cell!.color} on ${cell!.background}`).toBeGreaterThanOrEqual(4.5)
   expect(await page.evaluate(() => (window as unknown as { __cspViolations: string[] }).__cspViolations.filter(name => name.startsWith('style-src')))).toEqual([])
   await terminalCommand("(sleep 1; printf '\\rHIDDEN_MARKER\\n') &")
-  await workspace().getByRole('button', { name: 'Files', exact: true }).click()
+  await showTool(page, 'Files')
   await page.waitForTimeout(1300) // fixture emits once after hidden; time defines the tested event.
-  await workspace().getByRole('button', { name: 'Terminal', exact: true }).click()
+  await showTool(page, 'Terminal')
   await terminalHas('ANSI_MARKER'); await terminalHas('HIDDEN_MARKER')
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]!.setContentSize(1024, 640))
   await terminalCommand("node -e 'process.stdout.write((\"load \".repeat(12)+\"\\n\").repeat(6000)+\"PRESSURE_DONE\\n\")'")
@@ -174,8 +176,9 @@ test('FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolati
   await expect(page.getByRole('dialog')).toContainText('Terminal 2')
   await capture('project-terminal-confirmation')
   await page.getByRole('button', { name: '取消', exact: true }).click()
-  await page.getByRole('button', { name: '右侧边栏', exact: true }).click()
-  await workspace().getByRole('button', { name: 'Terminal', exact: true }).click()
+  // The tool sidebar stays open from the workbench into the new conversation (DEC-33).
+  await expect(workspace().getByRole('tab', { name: 'Terminal 2', exact: true })).toBeVisible()
+  await showTool(page, 'Terminal')
   await workspace().getByRole('button', { name: '关闭 Terminal 2', exact: true }).click()
   await workspace().getByRole('button', { name: '取消', exact: true }).click()
   await expect(workspace().getByRole('tab', { name: 'Terminal 2', exact: true })).toBeVisible()
@@ -186,8 +189,8 @@ test('FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolati
   await workspace().getByRole('button', { name: '关闭 Terminal 1', exact: true }).click()
   await workspace().getByRole('button', { name: '结束并关闭', exact: true }).click()
   await expect(workspace().getByRole('heading', { name: '没有打开的终端' })).toBeVisible()
-  await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
-  await workspace().getByRole('button', { name: 'Terminal', exact: true }).click()
+  await showTool(page, 'Browser')
+  await showTool(page, 'Terminal')
   await expect(workspace().getByRole('heading', { name: '没有打开的终端' })).toBeVisible()
   await page.getByRole('button', { name: '关闭 Terminal Project', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'AI Developer Studio' })).toBeVisible()
@@ -195,7 +198,7 @@ test('FR-TOOL-004 / DEC-14: independent Shells, hidden ANSI output, Stop isolati
 
 test('FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, mailto choice, menu, shared persistent data', async () => {
   await openProject('Browser Project')
-  await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
+  await showTool(page, 'Browser')
   const addressBar = () => workspace().getByRole('combobox', { name: '网址', exact: true })
   // No scheme typed: a loopback address is completed with http:// (TOOLS-Q9).
   await addressBar().fill(address.replace('http://', ''))
@@ -247,7 +250,7 @@ test('FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, m
   // Browsing data is shared by every Project (TOOLS-Q10).
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
   await openProject('Other Browser')
-  await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
+  await showTool(page, 'Browser')
   await addressBar().fill(address)
   await workspace().getByRole('button', { name: '前往网址', exact: true }).click()
   await expect.poll(() => app.evaluate(({ webContents }) => webContents.getAllWebContents().filter(wc => wc.getURL().startsWith('http://127.0.0.1:')).length)).toBe(2)
@@ -275,21 +278,21 @@ test('FR-TOOL-003 / DEC-25: isolated web preview, address completion, history, m
 
 test('FR-PROJ-002 / AC-07: Terminal server → Browser, exact Project cleanup and Terminal-only/mixed quit', async () => {
   await openProject('Server Project')
-  await workspace().getByRole('button', { name: 'Terminal', exact: true }).click()
+  await showTool(page, 'Terminal')
   await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
   await plainShell()
   await terminalCommand('node -e \'const s=require("node:http").createServer((q,r)=>r.end("<h1>PTY Server Preview</h1>"));s.listen(0,"127.0.0.1",()=>console.log("CHAIN_URL:http://127.0.0.1:"+s.address().port+"/"))\'')
   const chainUrl = async () => (await workspace().locator('.xterm-rows').textContent())?.match(/CHAIN_URL:(http:\/\/127\.0\.0\.1:\d+\/)/)?.[1] ?? ''
   await expect.poll(chainUrl).not.toBe('')
   const url = await chainUrl()
-  await workspace().getByRole('button', { name: 'Browser', exact: true }).click()
+  await showTool(page, 'Browser')
   await workspace().getByRole('combobox', { name: '网址', exact: true }).fill(url)
   await workspace().getByRole('button', { name: '前往网址', exact: true }).click()
   await expect.poll(previewText).toContain('PTY Server Preview')
   await capture('terminal-server-browser-chain')
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
   const survivingId = await openProject('Surviving Project')
-  await workspace().getByRole('button', { name: 'Terminal', exact: true }).click()
+  await showTool(page, 'Terminal')
   await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()
   await plainShell()
   await page.getByRole('tab', { name: 'Server Project', exact: true }).click()

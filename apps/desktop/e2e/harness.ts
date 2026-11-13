@@ -1,4 +1,4 @@
-import { _electron, expect, test, type ElectronApplication, type Locator } from '@playwright/test'
+import { _electron, expect, test, type ElectronApplication, type Locator, type Page } from '@playwright/test'
 
 /**
  * Launch the app under test. Playwright's `trace` option covers only the browser contexts it creates, not Electron's,
@@ -33,4 +33,14 @@ export async function launchElectron(options: Parameters<typeof _electron.launch
  */
 export async function hoverInPage(target: Locator): Promise<void> {
   await expect.poll(async () => { await target.hover(); return target.evaluate(element => element.matches(':hover')) }).toBe(true)
+}
+
+/**
+ * Shows a tool the way a user does: opens the right tool sidebar from the top bar when it is closed, then picks the
+ * tool's icon. The sidebar is one column for both modes; a workbench no longer carries the tool icons (DEC-33).
+ */
+export async function showTool(page: Page, name: 'Files' | 'Search' | 'Diff' | 'Browser' | 'Terminal'): Promise<void> {
+  const toggle = page.getByRole('button', { name: '右侧边栏', exact: true })
+  if (await toggle.getAttribute('aria-pressed') !== 'true') await toggle.click()
+  await page.locator('.project-workspace:not([hidden])').getByRole('button', { name, exact: true }).click()
 }

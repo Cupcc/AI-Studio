@@ -44,7 +44,7 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
 |---|---|
 | New Chat（导航主按钮、折叠后顶栏按钮） | 新对话 |
 | SESSIONS（Session History 区域标题） | 对话 |
-| Preview（右侧区域的预览切换与区域名称） | 预览 |
+| Preview（工作台列的页面区域） | 工作台页面 |
 | Overview / Progress / Architecture / Agent Team / Business Flow | 概览 / 进度 / 架构 / Agent 团队 / 业务流程。名称取自预设包清单的 title；`viewId` 不变，用户在列表中重命名的名称优先 |
 
 保留英文的范围：工具名 Files、Search、Diff、Browser、Terminal；Project、CLI、Agent 等产品术语；Composer 中 Model Selector、Send、Stop 的无障碍名称及“Plugins”分类标题；Session History 列表的无障碍名称与重命名输入框的“Session 标题”；预设页面内部的内容。
@@ -114,10 +114,10 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
 
 点击某个 View，导航保证（细节行为归 `specs/project-view/`）：
 
-1. Main Canvas 切换为 Project View Mode：左 Conversation、右 Preview（FR-NAV-002；FR-VIEW-005；03 第 6 节“Project View 打开”）。
+1. Main Canvas 切换为 Project View Mode：左 Conversation、右工作台列（FR-NAV-002；FR-VIEW-005；03 第 6 节“Project View 打开”）。
 2. **不创建 Session**：进入 View 本身不产生 Session，也不进入 Session History（D-01；FR-VIEW-007）。
 3. 左侧 Conversation 为**新对话草稿**；草稿的底部输入框上方列出该 View 最近的对话，无记录时不显示区块（Shell v02 第 8 节：最近 3 条；DEC-23，2026-10-23 确认）；这一规则只适用于“从左侧导航进入 View”，即使刚才在同一 View 中打开过某个对话（P-A；D-15）。同一 View 被再次点击的情形见 NAV-Q5。
-4. 右侧区域显示该 View 的 Preview（不沿用 Session Mode 下已展开的工具），见 `specs/project/spec.md` PROJ-Q3。
+4. 工作台列打开并显示该 View 的页面，即使之前被用户关闭；右侧边栏保持原状，两种模式共用（[DEC-33](<../../docs/07. Decisions.md#dec-33-工作台与右侧工具栏分列>)，取代 PROJ-Q3）。
 5. 当前 View 作为 Session Context 的一部分（03 第 6 节；FR-VIEW-007，注入方式归 project-view / input）。
 6. 导航在上述动作完成后，才把 `ui_state.main_canvas` 更新为 `view` 分支（`specs/project/spec.md` 4.2），保证重启后恢复。
 7. 从其他 Tab 切回时不走本契约，而是按 D-15 原样恢复（`specs/project/spec.md` 3.3.2）。
@@ -266,15 +266,16 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
 1. **按钮位置**：折叠 / 展开按钮位于顶栏左侧、窗口控制区之后（macOS 为交通灯之后），尺寸 30×28，侧栏图标；展开与折叠使用同一个按钮、同一位置。状态 Default / Hover / Focus。
 2. **折叠**：点击后左侧导航完全隐藏，宽度变为 0；Main Canvas 获得空间，已保存的右侧边栏宽度与 Conversation 列宽度不变，Main Canvas 的伸缩与压缩遵循 `specs/project/spec.md` 3.4。
 3. **折叠后顶栏保留**：展开按钮，其右侧紧邻 New Chat 按钮，然后是 Project Tabs（Shell 第 3 节）。New Chat 按钮的行为同导航中的主区，使用 Default CLI；是否带 CLI 下拉见 NAV-Q8。
-4. **展开**：点击展开按钮恢复 248 宽度，列表滚动位置与高亮保持。展开会占用 Main Canvas 宽度，窗口宽度不足时按 `specs/project/spec.md` 3.4.2 压缩右侧区域，不会自动关闭右侧边栏。
+4. **展开**：点击展开按钮恢复 248 宽度，列表滚动位置与高亮保持。展开会占用 Main Canvas 宽度，窗口宽度不足时按 `specs/project/spec.md` 3.4.2 压缩各列，不会自动关闭右侧边栏或工作台列。
 5. **注意力点**：仅在**折叠**状态下，当前 Project 存在 Needs Input、Error 或 Completed Unread 的 Session 时，展开按钮右上角显示一个 7px 的点；优先级为 Needs Input > Error > Completed Unread，与 Tab 注意力点相同，不显示数量与 Running（03 第 8 节；Shell 第 3、5 节）。
    - 数据来自 session 模块的 `getProjectAttention(current_project_id)`（5.1），导航只订阅并渲染。
    - 只反映**当前** Project；其他 Project 的状态在各自 Tab 的点上显示（`specs/project/spec.md` 3.2.3）。
    - 展开状态不显示该点，相关状态已在 Session History 中可见。
 6. **偏好范围**：折叠状态是窗口级偏好，切换 Project 时保持不变（D-14），不属于任何 Project 的 `ui_state`。是否随应用重启保留见 NAV-Q10。
-7. 折叠时仍然能打开 New Chat；要切换 Project View 或 Session 需先展开（03 第 8 节“折叠后导航完全隐藏”）。折叠期间 Project View Mode 的选中 View 与 Session 的选中状态保持，展开后仍然高亮。
-8. 键盘焦点在导航内时折叠，焦点移到展开按钮（技术方案，待实现确认）。
-9. 折叠 / 展开的动画：文档未规定，V1 不要求动画；若实现，不得造成内容重排闪烁（提案）。
+7. **因空间自动折叠**（[DEC-33](<../../docs/07. Decisions.md#dec-33-工作台与右侧工具栏分列>)）：当前 Project 的工作台列与右侧边栏同时打开、列的最小宽度放不下导航时，导航自动隐藏，顶栏按折叠状态显示展开按钮、New Chat 与注意力点。它不写入折叠偏好，空间恢复后导航回来；此时点展开按钮，导航按用户选择展开，右侧边栏改为浮在工作台上方，直到空间恢复或用户再次折叠。规则与核算见 `specs/project/spec.md` 3.4.2。
+8. 折叠时仍然能打开 New Chat；要切换 Project View 或 Session 需先展开（03 第 8 节“折叠后导航完全隐藏”）。折叠期间 Project View Mode 的选中 View 与 Session 的选中状态保持，展开后仍然高亮。
+9. 键盘焦点在导航内时折叠，焦点移到展开按钮（技术方案，待实现确认）。
+10. 折叠 / 展开的动画：文档未规定，V1 不要求动画；若实现，不得造成内容重排闪烁（提案）。
 
 ### 3.5 键盘焦点与交互状态
 
@@ -360,7 +361,7 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
 
 - 调用：`enterView(view_id, { origin: "nav" })`，契约见 3.2.2。
 - 读取：Views 列表（4.1）。
-- project-view 负责在进入时构造新草稿与最近对话块，并决定右侧区域显示 Preview。
+- project-view 负责在进入时构造新草稿与最近对话块，并打开工作台列（DEC-33）。
 
 ### 5.5 事件
 

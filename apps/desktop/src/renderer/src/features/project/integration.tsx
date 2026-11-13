@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore, type ComponentType } from 'react'
-import type { MainCanvas, ProjectAttention, ProjectRecord, RightArea, ViewId } from '@shared/project/types'
+import type { MainCanvas, ProjectAttention, ProjectRecord, ToolId, ViewId } from '@shared/project/types'
 import type { TurnDiffRef } from '@shared/tools/turn-diff'
 
 /** Session owns attention and read rules. Focus changes are never user-open operations. */
@@ -18,13 +18,13 @@ export interface RendererSessionPort {
 }
 
 export interface ShellSlotProps { project: ProjectRecord; canvas: MainCanvas; active: boolean }
-export interface RightSlotProps extends ShellSlotProps { area: RightArea; fileViewerHost?: HTMLElement | null }
+export interface RightSlotProps extends ShellSlotProps { area: ToolId; fileViewerHost?: HTMLElement | null }
 export interface ViewSlotProps extends ShellSlotProps { viewId: ViewId }
-/** Header of the preview area in view mode: `status` follows the title, `actions` precede the tool switcher, `menu` ends the row. */
+/** Workbench column header: `status` follows the title, `actions` and `menu` precede the close button. */
 export interface PreviewHeaderProps extends ViewSlotProps { part: 'status' | 'actions' | 'menu' }
 export interface ShellIntegration {
   openTurnDiff?(ref: TurnDiffRef): void
-  toolSelected?(projectId: string, area: RightArea): void
+  toolSelected?(projectId: string, area: ToolId): void
   session: RendererSessionPort
   Workbenches?: ComponentType<ShellSlotProps>
   SessionHistory?: ComponentType<ShellSlotProps>

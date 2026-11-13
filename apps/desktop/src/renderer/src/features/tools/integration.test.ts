@@ -8,6 +8,8 @@ import { installToolsIntegration } from './integration'
 import { useTerminals } from './terminal-store'
 import { shellIntegration } from '../project/integration'
 import { useReferenceInspector } from '../input/reference-preview'
+import { defaultUiState } from '@shared/project/ui-state'
+import { useFiles } from './files/files-store'
 
 vi.mock('./api', () => ({ terminalApi: vi.fn(), browserApi: vi.fn() }))
 vi.mock('./files/api', () => ({ filesApi: vi.fn() }))
@@ -50,4 +52,23 @@ it('drops cached terminals when the Project tab closes and creates a new first s
     expect(api.create).toHaveBeenCalledTimes(2)
     expect(useTerminals.getState().projects.lifecycle?.activeId).toBe('t2')
   } finally { dispose() }
+})
+
+it('puts the open file away when a workbench is entered, keeping its tabs (DEC-33)', () => {
+  vi.mocked(terminalApi).mockReturnValue({ list: vi.fn(), onChanged: vi.fn(() => () => {}) } as unknown as TerminalApi)
+  vi.mocked(diffApi).mockReturnValue({ onInvalidated: vi.fn(() => () => {}), onWatchChanged: vi.fn(() => () => {}) } as unknown as ReturnType<typeof diffApi>)
+  vi.mocked(filesApi).mockReturnValue({ onChanged: vi.fn(() => () => {}), onWatchChanged: vi.fn(() => () => {}) } as unknown as ReturnType<typeof filesApi>)
+  const viewing = { selected: 'a.md', viewer: { path: 'a.md', phase: 'loading' }, tabs: [{ path: 'a.md', pinned: true }] }
+  const files = () => useFiles.getState().projects.lifecycle
+  useProjectShell.setState({ uiStates: { lifecycle: { ...defaultUiState(), mainCanvas: { mode: 'draft' } } } })
+  const dispose = installToolsIntegration()
+  try {
+    useFiles.setState({ projects: { ...useFiles.getState().projects, lifecycle: { dirs: new Map(), expanded: new Set(), watch: null, split: 0.45, marked: [], anchor: null, edit: null, reveal: null, ...viewing } as never } })
+    useProjectShell.getState().updateUiState('lifecycle', { mainCanvas: { mode: 'view', viewId: 'overview', conversation: { kind: 'draft' } } })
+    expect(files()).toMatchObject({ selected: null, viewer: null, tabs: viewing.tabs })
+    // Changing the conversation inside the same workbench keeps a file the user opened there.
+    useFiles.setState({ projects: { ...useFiles.getState().projects, lifecycle: { ...files()!, ...viewing } as never } })
+    useProjectShell.getState().updateUiState('lifecycle', { mainCanvas: { mode: 'view', viewId: 'overview', conversation: { kind: 'session', sessionId: 's1' } } })
+    expect(files()?.viewer).toEqual(viewing.viewer)
+  } finally { dispose(); useFiles.getState().forget('lifecycle') }
 })

@@ -2,7 +2,7 @@ import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } 
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
-import { launchElectron } from './harness'
+import { launchElectron, showTool } from './harness'
 import { commitAll, git, initRepo, put } from './git-fixture'
 
 // FR-TOOL-002 (project changes relative to HEAD) against the built app, with real temporary Git repositories.
@@ -27,7 +27,7 @@ async function openProject(path: string, name: string) {
   await page.getByRole('button', { name: '打开本地目录', exact: true }).click()
   await expect(page.getByRole('tab', { name, exact: true })).toHaveAttribute('aria-selected', 'true')
 }
-async function openDiff() { await workspace().getByRole('button', { name: 'Diff', exact: true }).click(); await expect(panel()).toBeVisible() }
+async function openDiff() { await showTool(page, 'Diff'); await expect(panel()).toBeVisible() }
 async function capture(name: string) { mkdirSync(evidence, { recursive: true }); await page.screenshot({ path: join(evidence, `W0-${name}.png`) }) }
 
 test.beforeEach(async () => { dir = mkdtempSync(join(tmpdir(), 'studio diff ')); await launch() })

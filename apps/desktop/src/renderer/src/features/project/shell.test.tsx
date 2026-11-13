@@ -53,10 +53,18 @@ afterEach(async () => { cleanup(); await useProjectShell.getState().flush(); res
 async function mount() { await act(async () => { render(<App />) }); await screen.findByRole('button', { name: '架构' }) }
 
 describe('Project shell · FR-PROJ/NAV · AC-01', () => {
-  it('isolates three canvases and both right-area modes, persisting every user action', async () => {
+  it('isolates three canvases, the tool sidebar and the workbench column, persisting every user action', async () => {
     await mount()
     fireEvent.click(screen.getByRole('button', { name: '架构' }))
+    fireEvent.click(screen.getByRole('button', { name: '右侧边栏' }))
     fireEvent.click(screen.getByRole('button', { name: 'Terminal' }))
+    // Four columns: the workbench stays beside the tool sidebar (DEC-33).
+    expect(screen.getByRole('region', { name: '工作台页面' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '关闭工作台' }))
+    expect(screen.queryByRole('region', { name: '工作台页面' })).toBeNull()
+    expect(document.querySelector('.canvas-mode--single')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '工作台', pressed: false }))
+    expect(screen.getByRole('region', { name: '工作台页面' })).toBeTruthy()
     fireEvent.click(screen.getByRole('tab', { name: 'b' }))
     expect(screen.getByRole('button', { name: '概览', current: 'page' })).toBeTruthy()
     fireEvent.click(screen.getAllByRole('button', { name: '新对话' })[0]!)
@@ -69,9 +77,9 @@ describe('Project shell · FR-PROJ/NAV · AC-01', () => {
     expect(screen.getByRole('button', { name: 'Terminal', pressed: true })).toBeTruthy()
     await useProjectShell.getState().flush()
     const s = useProjectShell.getState()
-    expect(s.uiStates.a).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'architecture' }, viewRightArea: 'terminal', sidebarOpen: false })
+    expect(s.uiStates.a).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'architecture' }, workbenchOpen: true, sidebarOpen: true, lastTool: 'terminal' })
     expect(s.uiStates.b).toMatchObject({ mainCanvas: { mode: 'draft' }, sidebarOpen: true, lastTool: 'diff' })
-    expect(s.uiStates.c).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'progress' }, viewRightArea: 'preview' })
+    expect(s.uiStates.c).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'progress' }, workbenchOpen: true, sidebarOpen: false })
     expect(api.updateUiState).toHaveBeenCalled()
   })
   it('renders attention only on background tabs, updates without moving layout, and on the collapsed navigation button', async () => {
@@ -86,10 +94,30 @@ describe('Project shell · FR-PROJ/NAV · AC-01', () => {
     fireEvent.click(screen.getByRole('tab', { name: /b，/ }))
     expect(useProjectShell.getState().windowState.navCollapsed).toBe(true)
   })
+  it('collapses the navigation for space without changing the saved preference, and lets the user reopen it (DEC-33)', async () => {
+    await mount()
+    act(() => useProjectShell.getState().setNavSpaceShort(true))
+    expect(screen.getByRole('button', { name: '展开导航' })).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: '新对话' }).length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: '展开导航' }))
+    expect(screen.getByRole('button', { name: '折叠导航' })).toBeTruthy()
+    expect(useProjectShell.getState()).toMatchObject({ navKeptOpen: true, windowState: { navCollapsed: false } })
+    act(() => useProjectShell.getState().setNavSpaceShort(false))
+    act(() => useProjectShell.getState().setNavSpaceShort(true))
+    expect(screen.getByRole('button', { name: '展开导航' })).toBeTruthy()
+    // Collapsing by hand saves the preference; expanding it while space is short keeps it open.
+    fireEvent.click(screen.getByRole('button', { name: '展开导航' }))
+    fireEvent.click(screen.getByRole('button', { name: '折叠导航' }))
+    expect(useProjectShell.getState()).toMatchObject({ navKeptOpen: false, windowState: { navCollapsed: true } })
+    fireEvent.click(screen.getByRole('button', { name: '展开导航' }))
+    expect(useProjectShell.getState()).toMatchObject({ navKeptOpen: true, windowState: { navCollapsed: false } })
+    expect(screen.getByRole('button', { name: '折叠导航' })).toBeTruthy()
+  })
   it('gives every icon-only shell button a prototype v01 tooltip (data-tip) except Tab close buttons', async () => {
     await mount()
     const missing = () => [...document.querySelectorAll('button')].filter((b) => !b.textContent?.trim() && !b.classList.contains('project-tab__close') && !b.dataset.tip).map((b) => b.getAttribute('aria-label'))
     expect(missing()).toEqual([])
+    fireEvent.click(screen.getByRole('button', { name: '右侧边栏' }))
     fireEvent.click(screen.getByRole('button', { name: 'Terminal' }))
     expect(screen.getByRole('button', { name: '关闭右侧工具' }).dataset.tip).toBeTruthy()
     expect(missing()).toEqual([])

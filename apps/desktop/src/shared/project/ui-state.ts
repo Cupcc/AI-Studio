@@ -6,7 +6,6 @@ import {
   TOOL_IDS,
   type BuiltinViewId,
   type MainCanvas,
-  type RightArea,
   type ToolId,
   type UiState,
   type UiStatePatch,
@@ -16,11 +15,11 @@ import {
 
 export const UI_STATE_VERSION = 1
 
-/** Shell Spec v01 §1.2 (exploratory sizes). */
+/** Shell Spec v02 §2.2. */
 export const SIDEBAR_WIDTH = { min: 320, max: 560, default: 400 } as const
 export const VIEW_CONVERSATION_WIDTH = { min: 360, max: 560, default: 440 } as const
 export const SESSION_CONVERSATION_MIN_WIDTH = 400
-export const VIEW_RIGHT_AREA_MIN_WIDTH = 400
+export const WORKBENCH_MIN_WIDTH = 400
 export const NAV_WIDTH = 248
 
 /** PROJ-Q14 recommendation: first expansion shows Files. */
@@ -40,10 +39,6 @@ export function isToolId(value: unknown): value is ToolId {
   return typeof value === 'string' && (TOOL_IDS as readonly string[]).includes(value)
 }
 
-export function isRightArea(value: unknown): value is RightArea {
-  return value === 'preview' || isToolId(value)
-}
-
 function isSessionId(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0 && value.length <= SESSION_ID_MAX_LENGTH
 }
@@ -58,7 +53,7 @@ export function defaultUiState(): UiState {
     schemaVersion: UI_STATE_VERSION,
     mainCanvas: overviewCanvas(),
     sidebarOpen: false,
-    viewRightArea: 'preview',
+    workbenchOpen: true,
     lastTool: null,
     sidebarWidth: null,
     viewConversationWidth: null
@@ -118,7 +113,8 @@ export function normalizeUiState(raw: unknown): UiState {
     schemaVersion: UI_STATE_VERSION,
     mainCanvas: parseMainCanvas(r.mainCanvas) ?? base.mainCanvas,
     sidebarOpen: typeof r.sidebarOpen === 'boolean' ? r.sidebarOpen : base.sidebarOpen,
-    viewRightArea: isRightArea(r.viewRightArea) ? r.viewRightArea : base.viewRightArea,
+    // Older versions kept a separate View Mode right area (`viewRightArea`); it is dropped (DEC-33).
+    workbenchOpen: typeof r.workbenchOpen === 'boolean' ? r.workbenchOpen : base.workbenchOpen,
     lastTool: isToolId(r.lastTool) ? r.lastTool : null,
     sidebarWidth: sidebarWidth === undefined ? null : sidebarWidth,
     viewConversationWidth: viewConversationWidth === undefined ? null : viewConversationWidth
@@ -128,7 +124,7 @@ export function normalizeUiState(raw: unknown): UiState {
 const PATCH_KEYS = [
   'mainCanvas',
   'sidebarOpen',
-  'viewRightArea',
+  'workbenchOpen',
   'lastTool',
   'sidebarWidth',
   'viewConversationWidth'
@@ -147,13 +143,11 @@ export function parseUiStatePatch(raw: unknown): UiStatePatch {
     if (!canvas) throw new Error('mainCanvas is invalid')
     patch.mainCanvas = canvas
   }
-  if ('sidebarOpen' in r) {
-    if (typeof r.sidebarOpen !== 'boolean') throw new Error('sidebarOpen must be a boolean')
-    patch.sidebarOpen = r.sidebarOpen
-  }
-  if ('viewRightArea' in r) {
-    if (!isRightArea(r.viewRightArea)) throw new Error('viewRightArea is invalid')
-    patch.viewRightArea = r.viewRightArea
+  for (const key of ['sidebarOpen', 'workbenchOpen'] as const) {
+    if (key in r) {
+      if (typeof r[key] !== 'boolean') throw new Error(`${key} must be a boolean`)
+      patch[key] = r[key]
+    }
   }
   if ('lastTool' in r) {
     if (r.lastTool !== null && !isToolId(r.lastTool)) throw new Error('lastTool is invalid')
@@ -191,7 +185,7 @@ export function isViewMode(state: UiState): boolean {
   return state.mainCanvas.mode === 'view'
 }
 
-/** Whether the top-bar right sidebar button shows as Selected. */
-export function isRightSidebarActive(state: UiState): boolean {
-  return isViewMode(state) ? state.viewRightArea !== 'preview' : state.sidebarOpen
+/** Whether the workbench column is shown: View Mode with the column open (DEC-33). */
+export function isWorkbenchShown(state: UiState): boolean {
+  return isViewMode(state) && state.workbenchOpen
 }

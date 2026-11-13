@@ -40,7 +40,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
 |---|---|---|---|---|
 | PROJ-Q1 | 应用重启后是否恢复上次打开的 Tab 集合与当前 Tab？文档只要求“重新打开 Project 时恢复状态”，且“没有打开任何 Project 时显示启动页” | 恢复 Tab 集合、顺序与当前 Tab；启动页只在没有可恢复 Tab 或首次使用时出现。依据：01 第 6 节“恢复上一次使用状态”的精神与桌面应用惯例；Running 的 CLI 进程不随重启恢复，只恢复界面，不触发 `last_opened_at` 更新 | 是（影响窗口级状态的持久化设计与启动流程） | 采纳建议：重启后恢复 Tab 集合、顺序与当前 Tab（2026-10-09 确认） |
 | PROJ-Q2 | 启动页 Tab 的模型：启动页是否总以一个 Tab 呈现？关闭最后一个 Tab 后是回到启动页、还是关闭窗口？已有启动页 Tab 时再点 `+` 如何处理？从启动页 Tab 选中已打开的目录后，该启动页 Tab 是保留还是关闭？启动页 Tab 激活时左侧导航与右侧边栏如何呈现、Tab 标题是什么？ | 启动页总以 Tab 呈现；最后一个 Project Tab 关闭后回到启动页，窗口不关闭；仅剩一个启动页 Tab 时不可关闭；已有启动页 Tab 时 `+` 切换到它；选中已打开目录时关闭该启动页 Tab（它是为了打开 Project 才创建的）；启动页激活时导航与边栏相关按钮 Disabled 并说明；Tab 标题取“新标签页”（文案待定）。依据：D-09“`+` 在新 Tab 中打开同一启动页”、03 第 6 节、Shell 第 11 节 Disabled 规则 | 是（影响 Tab 数据模型与关闭流程） | 采纳建议：启动页总以 Tab 呈现，规则同建议答案；Tab 标题文案“新标签页”仍待定（2026-10-09 确认） |
-| PROJ-Q3 | 右侧边栏的展开状态在 Session Mode 与 Project View Mode 之间是共享还是各自独立？从导航进入 View 时，右侧区域显示 Preview 还是沿用已展开的工具？（AC-06 要求打开 Architecture 即看到 Preview；P-B 又规定打开工具会替换 Preview；FR-PROJ-003 只列“展开状态”一项） | 两种模式各自保存：Session Mode 用 `sidebar_open`，View Mode 用 `view_right_area`，`last_tool` 共享；切换模式互不改写；从导航进入 View 时 `view_right_area` 置为 Preview；Tab 切换与重新打开按 D-15 原样恢复。依据：AC-06、P-B、D-15 | 是（决定 `ui_state` 的形状，也决定 tools 与 project-view 的接口） | 采纳建议：两种模式各自保存，`last_tool` 共享，从导航进入 View 时右侧回到 Preview（2026-10-09 确认） |
+| PROJ-Q3 | 右侧边栏的展开状态在 Session Mode 与 Project View Mode 之间是共享还是各自独立？从导航进入 View 时，右侧区域显示 Preview 还是沿用已展开的工具？（AC-06 要求打开 Architecture 即看到 Preview；P-B 又规定打开工具会替换 Preview；FR-PROJ-003 只列“展开状态”一项） | 两种模式各自保存：Session Mode 用 `sidebar_open`，View Mode 用 `view_right_area`，`last_tool` 共享；切换模式互不改写；从导航进入 View 时 `view_right_area` 置为 Preview；Tab 切换与重新打开按 D-15 原样恢复。依据：AC-06、P-B、D-15 | 是（决定 `ui_state` 的形状，也决定 tools 与 project-view 的接口） | 采纳建议：两种模式各自保存，`last_tool` 共享，从导航进入 View 时右侧回到 Preview（2026-10-09 确认）；已由 [DEC-33](<../../docs/07. Decisions.md#dec-33-工作台与右侧工具栏分列>) 取代（2026-11-13）：右侧边栏两种模式共用一份状态，从导航进入 View 时打开工作台列、不改变右侧边栏 |
 | PROJ-Q13 | 回到某 Project 的 Tab 时，恢复出的 Session 若带有 Completed Unread / Error，是否因“已展示在 Conversation 中”而视为已查看并清除？ | 视为已查看并清除（与 D-05 对 Project View 左列的处理一致）；仅当该 Project 是当前 Tab 且 Session 实际显示时才算。依据：D-05、FR-STATE-005。本条规则最终归 `specs/session/`，此处提出是因为信号来自 project 模块（5.2） | 否 | 按 S-Q1（b）：视为已查看并清除（2026-10-09 确认） |
 
 ## 2. 职责与边界
@@ -221,7 +221,7 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
 | 状态 | 归属 | 说明 | 来源 |
 |---|---|---|---|
 | Main Canvas 当前内容 | Project | 以下三种之一：某个 Session 的 Conversation；New Chat 草稿；某个 Project View（含该 View 下左侧 Conversation 所显示的对话：某个 Session，或草稿） | FR-PROJ-003；D-15 |
-| 右侧边栏展开状态 | Project | Session Mode 下是否展开；Project View Mode 下右侧区域显示 Preview 还是某个工具（两种模式是否独立，见 PROJ-Q3） | FR-PROJ-003；03 第 5 节；P-B |
+| 右侧边栏展开状态 | Project | 右侧边栏是否展开及显示哪个工具，两种模式共用；Project View Mode 下工作台列是否打开 | FR-PROJ-003；03 第 5 节；DEC-33 |
 | 当前工具 | Project | 最近一次选择的工具（Files / Search / Diff / Browser / Terminal），展开时默认显示它（P-C） | FR-PROJ-003；P-C |
 | 右侧边栏宽度 | Project | Session Mode 下，范围 320–560，默认 400 | D-13；Shell 第 2.2 节 |
 | Conversation 列宽度 | Project | Project View Mode 下，范围 360–560，默认 440 | Shell 第 2.2 节 |
@@ -287,20 +287,21 @@ Files 查看文件时新增内容列；这一状态下的布局及窄窗口压�
 | 左侧导航 | 宽 248 | 固定；折叠后为 0 | 不提供拖拽调整宽度；折叠为窗口级偏好 |
 | 主画布顶栏 | 高 48 | 固定 | 显示当前 Session 或 View 信息，内容归 session / project-view |
 | Session Mode：Conversation 区 | 随窗口伸缩 | 最小 400；正文最大宽 720，居中 | |
-| Session Mode：右侧边栏 | 宽 400 | 320–560，可拖拽 | 按 Project 记忆；收起时宽度为 0，Conversation 区占满 |
-| Project View Mode：Conversation 列 | 宽 440 | 360–560，可拖拽分隔线 | 按 Project 记忆 |
-| Project View Mode：右侧区域 | 剩余宽度 | 最小 400 | Preview 与工具共享（P-B） |
+| 右侧边栏（两种模式） | 宽 400 | 320–560，可拖拽 | 按 Project 记忆，两种模式共用；收起时宽度为 0 |
+| Project View Mode：Conversation 列 | 宽 440 | 360–560，可拖拽分隔线 | 按 Project 记忆；工作台列关闭时按 Session Mode 的 Conversation 区伸缩 |
+| Project View Mode：工作台列 | 剩余宽度 | 最小 400 | 位于 Conversation 与右侧边栏之间，可单独关闭（DEC-33） |
 
 #### 3.4.2 空间不足时的压缩顺序
 
-规则来自 Shell 第 2.3 节：
+规则来自 Shell 第 2.3 节（DEC-33）：
 
-1. 先把右侧区域（View Mode）或右侧边栏（Session Mode）压缩到其最小宽度，再把 Conversation 区或列压缩到其最小宽度。
-2. 不因空间不足自动折叠左侧导航，也不自动关闭右侧边栏或把工具切回 Preview：布局变化只由用户操作触发（对应 Product Definition 第 8 节原则 21、22 与 task 验收标准）。
-3. 最小窗口按最小值核算，均不超过 1024：View Mode 为 248 + 360 + 400 = 1008；Session Mode 打开右侧边栏为 248 + 400 + 320 = 968（Shell 第 2.3 节）。导航折叠时可用宽度增大 248。
-4. 保存的宽度（用户拖拽值）与实际生效宽度分离：窗口缩小时生效值按上述顺序压缩，保存值不变；窗口恢复变大时回到保存值（技术方案，待实现确认）。
-5. 拖拽调整时的上下限取各自范围与另一侧最小值共同决定的较小者，不允许把另一侧挤到最小值以下（提案）。
-6. 在 1024 以上的任何窗口宽度，Shell 的最小值组合均可容纳，因此不需要“窗口宽度不足”的降级布局；该判断需在 1024 / 1280 / 1440 复核中确认（Shell 第 1 节）。
+1. 依次把工作台列、右侧边栏、Conversation 区或列压缩到各自的最小宽度。
+2. 仍放不下时自动折叠左侧导航；折叠导航后仍放不下时，右侧边栏浮在工作台上方。自动折叠只改变显示，不写入窗口级折叠偏好（4.3），空间恢复后导航回来；期间用户点展开按钮，导航按用户选择展开，直到空间恢复或用户再次折叠。
+3. 不因空间不足关闭右侧边栏或工作台列，也不切换工具：这些开关只由用户操作触发（对应 Product Definition 第 8 节原则 21、22）。
+4. 最小窗口按最小值核算：工作台模式不开右侧边栏为 248 + 360 + 400 = 1008；Session Mode 打开右侧边栏为 248 + 400 + 320 = 968；工作台模式打开右侧边栏需要 360 + 400 + 320 = 1080，超过 1024 − 248，因此会触发第 2 条。
+5. 保存的宽度（用户拖拽值）与实际生效宽度分离：窗口缩小时生效值按上述顺序压缩，保存值不变；窗口恢复变大时回到保存值。
+6. 拖拽调整时的上下限取各自范围与其他列最小值共同决定的较小者，不允许把其他列挤到最小值以下。
+7. 实现为 [`layout.ts`](../../apps/desktop/src/shared/project/layout.ts) 的 `canvasLayout`；Workspace 测量整个 Project 区域的宽度，导航是否因空间折叠由当前 Project 的列计算得出（AI 技术决定，2026-11-13）。
 
 ## 4. 状态与数据
 
@@ -327,10 +328,10 @@ Files 查看文件时新增内容列；这一状态下的布局及窄窗口压�
 |---|---|---|
 | `schema_version` | 整数 | 读取时校验，未知版本回落默认 |
 | `main_canvas` | `{ mode: "session", session_id }` / `{ mode: "draft" }` / `{ mode: "view", view_id, conversation: { kind: "draft" } 或 { kind: "session", session_id } }` | 对应“上一次选中的 Project View 或 Session”与 D-15；`draft` 表示 New Chat 草稿（其文字不在此保存，PROJ-Q11） |
-| `sidebar_open` | 布尔 | Session Mode 下右侧边栏是否展开 |
-| `view_right_area` | `"preview"` / `"files"` / `"search"` / `"diff"` / `"browser"` / `"terminal"` | Project View Mode 下右侧区域显示什么；按已确认 PROJ-Q3 与 `sidebar_open` 分别保存 |
-| `last_tool` | `"files"` / `"search"` / `"diff"` / `"browser"` / `"terminal"` / 空 | 右侧边栏展开时默认显示的工具；空时用默认工具（PROJ-Q14） |
-| `sidebar_width` | 数值，空表示默认 | 320–560 |
+| `sidebar_open` | 布尔 | 右侧边栏是否展开，两种模式共用（DEC-33） |
+| `workbench_open` | 布尔，默认是 | Project View Mode 下工作台列是否打开；从导航进入 View 时置为是。旧版本保存的 `view_right_area` 读取时忽略 |
+| `last_tool` | `"files"` / `"search"` / `"diff"` / `"browser"` / `"terminal"` / 空 | 右侧边栏显示的工具；空时用默认工具（PROJ-Q14） |
+| `sidebar_width` | 数值，空表示默认 | 320–560，两种模式共用 |
 | `view_conversation_width` | 数值，空表示默认 | 360–560 |
 
 `ui_state` 只保存 ID 与取值，不保存 Session 内容；各工具的内部状态由对应模块在自己的字段中保存。
@@ -341,7 +342,7 @@ Files 查看文件时新增内容列；这一状态下的布局及窄窗口压�
 |---|---|
 | `tabs` | 有序列表，元素为 `{ kind: "project", project_id }` 或 `{ kind: "launcher" }` |
 | `current_tab` | 当前 Tab |
-| `nav_collapsed` | 左侧导航是否折叠（D-14，归 navigation spec，此处仅列出存放位置） |
+| `nav_collapsed` | 用户的左侧导航折叠偏好（D-14，归 navigation spec，此处仅列出存放位置）；因空间不足的自动折叠不写入（3.4.2） |
 
 窗口级状态是否持久化到下次启动，见 PROJ-Q1。
 
@@ -384,8 +385,8 @@ Project 记录与 `ui_state` 存入应用 SQLite 的 `projects` 表，窗口级�
 
 ### 5.5 与 project-view、tools（后续 task）
 
-- project-view 读取 `ui_state.main_canvas` 中 `view` 分支，写入左列 `conversation`、`view_right_area`；使用 `view_conversation_width`。
-- tools 读取 `sidebar_open`、`view_right_area`、`last_tool`、`sidebar_width`，写入 `last_tool`；右侧边栏容器（开关、图标切换、宽度拖拽）由本 task 提供；四工具内容已由工程工具任务接入，运行时与 Files / 项目 Diff 的细化分别见 [Tools §5.1](../tools/spec.md#51-运行时实现细化)、[§5.2](../tools/spec.md#52-files--项目-diff-实现细化)。
+- project-view 读取 `ui_state.main_canvas` 中 `view` 分支，写入左列 `conversation`、`workbench_open`；使用 `view_conversation_width`。
+- tools 读取 `sidebar_open`、`last_tool`、`sidebar_width`，写入 `last_tool`；右侧边栏容器（开关、图标切换、宽度拖拽）由本 task 提供；四工具内容已由工程工具任务接入，运行时与 Files / 项目 Diff 的细化分别见 [Tools §5.1](../tools/spec.md#51-运行时实现细化)、[§5.2](../tools/spec.md#52-files--项目-diff-实现细化)。
 - 工具实例与缓存按 [tools spec](../tools/spec.md#4-状态与接口) 管理；壳层隐藏 / 卸载内容时不能销毁用户 PTY 或丢失输出状态，Project 的可信关闭流程负责调用工具清理。壳层不持有历史补丁或网页权限（DEC-10，2026-10-12 确认）。
 - 关闭编排新增工具端口：查询所属未退出 Terminal、阻止新实例创建、释放所属资源并返回逐项成功 / 失败；与 Session 计数合并生成 §3.2.4 的确认信息。已实现为 [`MainToolPort`](../../apps/desktop/src/main/services/project/tool-port.ts)（`activeTerminals`、`closeProject`、`closeAll`），由 close-flow 与 quit-flow 与 Session 计数合并；失败或超时保留 Project，并保留底层实际清理锁直到清理 settled（AI 技术决定，2026-10-13）。
 - 两者都通过本模块的 `updateUiState(project_id, patch)` 写入，由本模块统一落盘（3.3.4）；不得各自存储同一事实。

@@ -1,4 +1,4 @@
-import { closeRightSidebar, selectRightArea } from '@shared/project/ui-rules'
+import { closeRightSidebar } from '@shared/project/ui-rules'
 import { currentTool } from '@shared/project/ui-state'
 import { studio } from '../../lib/studio'
 import { registerShellIntegration, shellIntegration } from '../project/integration'
@@ -26,11 +26,10 @@ function onToolCommand(command: string): void {
     case 'showDiff': showTool(projectId, 'diff'); break
     case 'showBrowser': showTool(projectId, 'browser'); break
     case 'toggleTerminal': {
-      // ⌃`: shows the Terminal, or hides the panel when the Terminal is already showing (Session Mode).
+      // ⌃`: shows the Terminal, or hides the sidebar when the Terminal is already showing.
       const shell = useProjectShell.getState(), ui = shell.uiStates[projectId]
       if (!ui) return
-      const showing = ui.mainCanvas.mode === 'view' ? ui.viewRightArea === 'terminal' : ui.sidebarOpen && currentTool(ui) === 'terminal'
-      if (showing) shell.updateUiState(projectId, ui.mainCanvas.mode === 'view' ? selectRightArea(ui, 'preview') : closeRightSidebar(ui))
+      if (ui.sidebarOpen && currentTool(ui) === 'terminal') shell.updateUiState(projectId, closeRightSidebar(ui))
       else showTool(projectId, 'terminal')
       break
     }
@@ -55,6 +54,11 @@ export function installToolsIntegration(): () => void {
     }
   })
   const unsubscribe = useProjectShell.subscribe((state, previous) => {
+    // In View Mode the file content takes the workbench's place; entering a workbench shows the workbench again.
+    for (const [projectId, ui] of Object.entries(state.uiStates)) {
+      const before = previous.uiStates[projectId]?.mainCanvas, now = ui.mainCanvas
+      if (before && before !== now && now.mode === 'view' && (before.mode !== 'view' || before.viewId !== now.viewId)) useFiles.getState().hideViewer(projectId)
+    }
     const open = new Set(state.windowState.tabs.filter(t => t.kind === 'project').map(t => t.projectId))
     for (const tab of previous.windowState.tabs) {
       if (tab.kind !== 'project' || open.has(tab.projectId)) continue
