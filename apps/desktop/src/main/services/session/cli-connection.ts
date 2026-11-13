@@ -15,11 +15,13 @@ export interface SecretStorage {
 }
 const LOCAL: StoredConnection = { mode: 'local', revision: 'local', profile: null }
 
-export function validateBaseUrl(value: string): string {
+/** A Codex address without a path names an OpenAI-compatible service, whose API lives under `/v1`. */
+export function validateBaseUrl(value: string, cli: SessionCli): string {
   let url: URL
   try { url = new URL(value) } catch { throw new Error('请输入有效的 Base URL。') }
   if (url.username || url.password || url.search || url.hash) throw new Error('Base URL 不能包含凭据、查询参数或片段。')
   if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error('Base URL 须以 http:// 或 https:// 开头。')
+  if (cli === 'codex' && /^\/*$/.test(url.pathname)) url.pathname = '/v1'
   return url.href.replace(/\/+$/, '')
 }
 
@@ -28,7 +30,7 @@ export class CliConnections {
   private readonly saving = new Set<SessionCli>()
   constructor(private readonly store: Pick<SessionStore, 'getPreference' | 'setPreference'>, private readonly secrets: SecretStorage) {}
 
-  private read(key: string): StoredConnection {
+  private read(key: string, cli: SessionCli): StoredConnection {
     const raw = this.store.getPreference(key)
     if (raw === null) return LOCAL
     try {
@@ -39,7 +41,7 @@ export class CliConnections {
         const p = data.profile
         if (!p || typeof p !== 'object' || !('baseUrl' in p) || typeof p.baseUrl !== 'string' || !('auth' in p) || !(p.auth === 'api_key' || p.auth === 'bearer') || !('encryptedKey' in p) || typeof p.encryptedKey !== 'string' || !p.encryptedKey) throw new Error()
         const testModel = 'testModel' in p && typeof p.testModel === 'string' ? p.testModel : ''
-        profile = { baseUrl: validateBaseUrl(p.baseUrl), auth: p.auth, encryptedKey: p.encryptedKey, ...(testModel ? { testModel } : {}) }
+        profile = { baseUrl: validateBaseUrl(p.baseUrl, cli), auth: p.auth, encryptedKey: p.encryptedKey, ...(testModel ? { testModel } : {}) }
       }
       if (data.mode === 'app' && !profile) throw new Error()
       return { mode: data.mode === 'app' ? 'app' : 'local', revision: data.revision, profile }
@@ -47,7 +49,7 @@ export class CliConnections {
   }
 
   get(cli: SessionCli): CliConnection {
-    const saved = this.read(`connection:${cli}`)
+    const saved = this.read(`connection:${cli}`, cli)
     const profile = saved.profile
     return { cli, mode: saved.mode, revision: saved.revision, profile: profile ? { baseUrl: profile.baseUrl, auth: profile.auth, hasApiKey: true, ...(profile.testModel ? { testModel: profile.testModel } : {}) } : null }
   }
@@ -57,10 +59,10 @@ export class CliConnections {
     if (this.saving.has(request.cli)) throw new Error('正在保存此 CLI 的配置，请稍后重试。')
     this.saving.add(request.cli)
     try {
-      const previous = this.read(`connection:${request.cli}`)
+      const previous = this.read(`connection:${request.cli}`, request.cli)
       let profile = previous.profile
       if (request.mode === 'app') {
-        const baseUrl = validateBaseUrl(request.baseUrl)
+        const baseUrl = validateBaseUrl(request.baseUrl, request.cli)
         const testModel = request.testModel?.trim()
         if (testModel && /\s/.test(testModel)) throw new Error('测试模型不能包含空格。')
         if (request.cli === 'codex' && request.auth !== 'api_key') throw new Error('Codex 使用 API Key 认证。')
@@ -79,11 +81,11 @@ export class CliConnections {
 
   /** Called inside the Session creation transaction; old sessions without a snapshot remain native. */
   bind(sessionId: string, cli: SessionCli): void {
-    this.store.setPreference(`connection:session:${sessionId}`, JSON.stringify(this.read(`connection:${cli}`)))
+    this.store.setPreference(`connection:session:${sessionId}`, JSON.stringify(this.read(`connection:${cli}`, cli)))
   }
 
   async environment(cli: SessionCli, env: Env, sessionId?: string): Promise<ProviderEnvironment> {
-    const saved = this.read(sessionId ? `connection:session:${sessionId}` : `connection:${cli}`)
+    const saved = this.read(sessionId ? `connection:session:${sessionId}` : `connection:${cli}`, cli)
     if (saved.mode === 'local') return { env }
     const profile = saved.profile
     if (!profile) throw new Error('应用连接配置不完整，请重新保存。')

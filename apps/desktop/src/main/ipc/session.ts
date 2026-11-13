@@ -40,7 +40,7 @@ function connectionRequest(raw: unknown): SaveCliConnection {
   }
   expectOnlyKeys(value, ['cli', 'mode', 'baseUrl', 'auth', 'apiKey', 'testModel'])
   if (value.mode !== 'app' || (value.auth !== 'api_key' && value.auth !== 'bearer')) throw new IpcValidationError('Invalid connection mode or authentication')
-  const baseUrl = validateBaseUrl(expectString(value.baseUrl, 'baseUrl', { minLength: 1, maxLength: 2048 }))
+  const baseUrl = validateBaseUrl(expectString(value.baseUrl, 'baseUrl', { minLength: 1, maxLength: 2048 }), provider)
   const apiKey = value.apiKey === undefined ? undefined : expectString(value.apiKey, 'apiKey', { minLength: 1, maxLength: 8192 })
   if (apiKey && /[\r\n\0]/.test(apiKey)) throw new IpcValidationError('Invalid API Key')
   const testModel = value.testModel === undefined ? '' : expectString(value.testModel, 'testModel', { maxLength: 256 }).trim()

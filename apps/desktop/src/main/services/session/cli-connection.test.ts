@@ -9,9 +9,9 @@ function secrets() { return { available: async () => true, encrypt: async (value
 
 describe('CliConnections', () => {
   it('accepts HTTP and HTTPS endpoints and keeps local mode separate', async () => {
-    expect(validateBaseUrl('http://203.0.113.7:3000/')).toBe('http://203.0.113.7:3000')
-    expect(validateBaseUrl('https://example.com/v1/')).toBe('https://example.com/v1')
-    for (const url of ['ftp://example.com', 'https://user:pass@example.com', 'https://example.com/?key=1', 'example.com']) expect(() => validateBaseUrl(url)).toThrow()
+    expect(validateBaseUrl('http://203.0.113.7:3000/', 'claude-code')).toBe('http://203.0.113.7:3000')
+    expect(validateBaseUrl('https://example.com/v1/', 'codex')).toBe('https://example.com/v1')
+    for (const url of ['ftp://example.com', 'https://user:pass@example.com', 'https://example.com/?key=1', 'example.com']) expect(() => validateBaseUrl(url, 'codex')).toThrow()
     const db = store(); const connections = new CliConnections(db, secrets())
     expect(connections.get('codex')).toMatchObject({ mode: 'local', profile: null })
     const saved = await connections.save({ cli: 'codex', mode: 'app', baseUrl: 'https://gateway.example/v1', auth: 'api_key', apiKey: 'secret' })
@@ -20,6 +20,20 @@ describe('CliConnections', () => {
     await expect(connections.environment('codex', { PATH: '/bin' })).resolves.toMatchObject({ env: { PATH: '/bin' }, connection: { baseUrl: 'https://gateway.example/v1', apiKey: 'secret' } })
     await connections.save({ cli: 'codex', mode: 'local' })
     await expect(connections.environment('codex', { PATH: '/bin' })).resolves.toEqual({ env: { PATH: '/bin' } })
+  })
+
+  it('reads a Codex address without a path as the /v1 root, when saving and when loading an older record', async () => {
+    const db = store(); const connections = new CliConnections(db, secrets())
+    const saved = await connections.save({ cli: 'codex', mode: 'app', baseUrl: 'http://203.0.113.7:3000/', auth: 'api_key', apiKey: 'secret' })
+    expect(saved.profile?.baseUrl).toBe('http://203.0.113.7:3000/v1')
+    await expect(connections.save({ cli: 'codex', mode: 'app', baseUrl: 'http://203.0.113.7:3000', auth: 'api_key' })).resolves.toMatchObject({ profile: { baseUrl: 'http://203.0.113.7:3000/v1' } })
+    const older = JSON.stringify({ mode: 'app', revision: 'old', profile: { baseUrl: 'http://203.0.113.7:3000', auth: 'api_key', encryptedKey: Buffer.from('sealed:secret').toString('base64') } })
+    db.setPreference('connection:codex', older)
+    db.setPreference('connection:session:old', older)
+    expect(connections.get('codex').profile?.baseUrl).toBe('http://203.0.113.7:3000/v1')
+    expect((await connections.environment('codex', {}, 'old')).connection?.baseUrl).toBe('http://203.0.113.7:3000/v1')
+    for (const url of ['https://gateway.example/api/v3', 'https://gateway.example/openai']) expect(validateBaseUrl(url, 'codex')).toBe(url)
+    await expect(connections.save({ cli: 'claude-code', mode: 'app', baseUrl: 'http://203.0.113.7:3000', auth: 'api_key', apiKey: 'secret' })).resolves.toMatchObject({ profile: { baseUrl: 'http://203.0.113.7:3000' } })
   })
 
   it('requires a new key when the endpoint changes and refuses plaintext fallback', async () => {

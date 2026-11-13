@@ -46,7 +46,7 @@ AI 的界面交互验收现在用 agent-browser 操作本机的 Electron 应用�
 - 连接测试：Codex 与 Claude Code 都显示“连接正常”，用时 2～5 秒，回复来自真实模型。
 - 真实会话：Codex 三秒内回复“7 乘 6 等于 42。”（[截图](evidence/W2-real-codex-session.png)）；Claude Code 八秒内回复“9 减 4 等于 5。”（[截图](evidence/W2-real-claude-session.png)）。
 - 偶发：三次 Claude Code 对话里有一次在 60 秒内没有完成，界面停在“Agent 正在执行…”（[截图](evidence/W2-real-claude-session-unfinished.png)），当时没有等到结束就停了虚拟机，原因未查明；另外两次分别用时 5 秒和 8 秒。
-- 发现：Codex 的地址不带 `/v1` 时，连接测试请求到网关的管理页面，应用提示“API 请求失败、超时或响应无效”；带上 `/v1` 后通过。Claude Code 的测试会自己补 `/v1`，两者不一致。处理方式待人决定，见[后续任务](../../../../tasks/T20261113-codex-base-url/task.md)。
+- 发现：Codex 的地址不带 `/v1` 时，连接测试请求到网关的管理页面，应用提示“API 请求失败、超时或响应无效”；带上 `/v1` 后通过。Claude Code 的测试会自己补 `/v1`，两者不一致。用户 2026-11-13 决定自动补上 `/v1`，见[后续任务](../T20261113-codex-base-url/task.md)。
 - 保密：证据目录和日志里没有 Key（按 `sk-` 前缀扫描）。显示网关地址的连接页截图没有提交，仓库是公开的。
 
 ## 验收标准
