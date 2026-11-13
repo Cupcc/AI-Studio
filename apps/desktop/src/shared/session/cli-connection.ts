@@ -14,8 +14,7 @@ export interface CliConnection {
   profile: (ConnectionProfile & { hasApiKey: boolean }) | null
   revision: string
 }
-export type SaveCliConnection = { cli: SessionCli } & (
-  | { mode: 'local' }
-  | ({ mode: 'app'; apiKey?: string } & ConnectionProfile)
-)
+/** The form's app connection; without `apiKey` the saved key is used. */
+export type CliConnectionDraft = { cli: SessionCli; apiKey?: string } & ConnectionProfile
+export type SaveCliConnection = { cli: SessionCli; mode: 'local' } | ({ mode: 'app' } & CliConnectionDraft)
 export type ConnectionTestResult = { ok: true; message: string; model: string; reply: string; durationMs: number } | { ok: false; message: string }

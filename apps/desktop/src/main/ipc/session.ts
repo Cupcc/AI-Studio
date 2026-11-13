@@ -1,5 +1,5 @@
 import { app, BrowserWindow, safeStorage } from 'electron'
-import type { SaveCliConnection } from '@shared/session/cli-connection'
+import type { CliConnectionDraft, SaveCliConnection } from '@shared/session/cli-connection'
 import { CliConnections, validateBaseUrl } from '../services/session/cli-connection'
 import { CodexProvider } from '@ai-studio/agent-adapter/codex'
 import { ClaudeProvider } from '@ai-studio/agent-adapter/claude'
@@ -31,20 +31,25 @@ function record(raw: unknown, keys: readonly string[]) {
   expectOnlyKeys(value, keys)
   return value
 }
-function connectionRequest(raw: unknown): SaveCliConnection {
-  const value = expectRecord(raw)
+function connectionDraft(value: Record<string, unknown>, keys: string[]): CliConnectionDraft {
+  expectOnlyKeys(value, [...keys, 'cli', 'baseUrl', 'auth', 'apiKey', 'testModel'])
   const provider = cli(value.cli)
-  if (value.mode === 'local') {
-    expectOnlyKeys(value, ['cli', 'mode'])
-    return { cli: provider, mode: 'local' }
-  }
-  expectOnlyKeys(value, ['cli', 'mode', 'baseUrl', 'auth', 'apiKey', 'testModel'])
-  if (value.mode !== 'app' || (value.auth !== 'api_key' && value.auth !== 'bearer')) throw new IpcValidationError('Invalid connection mode or authentication')
+  if (value.auth !== 'api_key' && value.auth !== 'bearer') throw new IpcValidationError('Invalid connection authentication')
   const baseUrl = validateBaseUrl(expectString(value.baseUrl, 'baseUrl', { minLength: 1, maxLength: 2048 }), provider)
   const apiKey = value.apiKey === undefined ? undefined : expectString(value.apiKey, 'apiKey', { minLength: 1, maxLength: 8192 })
   if (apiKey && /[\r\n\0]/.test(apiKey)) throw new IpcValidationError('Invalid API Key')
   const testModel = value.testModel === undefined ? '' : expectString(value.testModel, 'testModel', { maxLength: 256 }).trim()
-  return { cli: provider, mode: 'app', baseUrl, auth: value.auth, ...(apiKey ? { apiKey } : {}), ...(testModel ? { testModel } : {}) }
+  return { cli: provider, baseUrl, auth: value.auth, ...(apiKey ? { apiKey } : {}), ...(testModel ? { testModel } : {}) }
+}
+
+function connectionRequest(raw: unknown): SaveCliConnection {
+  const value = expectRecord(raw)
+  if (value.mode === 'local') {
+    expectOnlyKeys(value, ['cli', 'mode'])
+    return { cli: cli(value.cli), mode: 'local' }
+  }
+  if (value.mode !== 'app') throw new IpcValidationError('Invalid connection mode')
+  return { mode: 'app', ...connectionDraft(value, ['mode']) }
 }
 function projectRef(raw: unknown) { const value = record(raw, ['projectId']); return { projectId: id(value.projectId, 'projectId') } }
 function sessionRef(raw: unknown) { const value = record(raw, ['sessionId']); return { sessionId: id(value.sessionId, 'sessionId') } }
@@ -204,10 +209,11 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
       await service.connectionChanged(request.cli)
       return saved
     } },
-    testCliConnection: {
+    getCliConnectionKey: {
       parse: raw => { const value = record(raw, ['cli']); return { cli: cli(value.cli) } },
-      handle: ({ cli }) => connections.test(cli)
+      handle: ({ cli }) => connections.key(cli)
     },
+    testCliConnection: { parse: raw => connectionDraft(expectRecord(raw), []), handle: draft => connections.test(draft) },
     getCliInstallations: { parse: noInput, handle: () => installer.snapshot() },
     installCli: {
       parse: raw => { const value = record(raw, ['cli']); return { cli: cli(value.cli) } },

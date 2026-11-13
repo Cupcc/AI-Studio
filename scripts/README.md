@@ -272,7 +272,7 @@ node scripts/vm-ui.mjs stop <label>
 
 - 检查的是已提交的 HEAD。工作区有改动或未跟踪文件时 `start` 拒绝运行，同名虚拟机已存在时也拒绝。代码经只读共享的 Git 公共目录拉取临时引用 `refs/vm-ui/<label>/head`。改了代码后先提交，再 `stop` 并重新 `start`。
 - 默认使用模拟 Provider（`STUDIO_E2E_PROVIDERS=1`），不发送模型请求。`--real` 在虚拟机里安装被测提交 `ci.yml` 固定版本的 Codex 与 Claude Code，并以真实 Provider 启动应用。虚拟机里没有 CLI 登录状态，两个 CLI 起初显示“未登录”，要在应用的“设置 → CLI → 配置”里选“自定义连接”并填入地址和 Key 后才能使用。真实模式会发送模型请求，只在需要验证真实链路时使用。原生系统交互仍在本机进行，沿用[贡献指南](../CONTRIBUTING.md#主目录与-worktree)的本机限制。
-- 地址和 Key 不写在命令里。`ab` 把参数中的 `{{名称}}` 换成主目录 `apps/desktop/.env.local` 里同名的值，例如 `ab <label> find role textbox fill "{{codex_api_key}}" --name "API Key"`。这个文件不纳入 Git，任务 worktree 里没有它，所以命令从 `git worktree list` 的第一项读取；名称不存在时命令列出可用的名称并退出。应用界面只显示“已安全保存”，不回显 Key。截图里出现网关地址时不提交到仓库，仓库是公开的。
+- 地址和 Key 不写在命令里。`ab` 把参数中的 `{{名称}}` 换成主目录 `apps/desktop/.env.local` 里同名的值，例如 `ab <label> find role textbox fill "{{codex_api_key}}" --name "API Key"`。这个文件不纳入 Git，任务 worktree 里没有它，所以命令从 `git worktree list` 的第一项读取；名称不存在时命令列出可用的名称并退出。已保存的 Key 在输入框里遮盖显示，点“显示”才出现明文，截图和快照前不要点它。截图里出现网关地址时不提交到仓库，仓库是公开的。
 - agent-browser 不能操作原生的目录选择框。`open-project` 经主进程 inspector 把 `dialog.showOpenDialog` 换成固定返回值，其余操作仍从界面入口执行。验收记录按 [Task Protocol](../tasks/README.md#验收准备与分层) 说明这项注入。
 - 界面检查与虚拟机 CI 共用每台主机两台 macOS 虚拟机的名额，名额不够时排队并输出占用者。`start` 运行期间一直占用一个名额，检查完就 `stop`。
 - `start` 收到 SIGINT、SIGTERM 或 SIGHUP、某一步失败，或运行满 `--ttl`（从 READY 起算，默认 60 分钟）时，停止并删除虚拟机，删除临时引用，释放名额。`start` 进程被强行结束时，用 `stop <label>` 清理遗留的虚拟机、引用和名额。

@@ -86,6 +86,7 @@
 .cli-connection__model { display: block; margin: var(--space-2) 0 0 23px; color: var(--color-text-muted); font-family: var(--font-mono); font-size: var(--font-size-xs); overflow-wrap: anywhere; }
 .cli-connection__result p { margin: var(--space-2) 0 0 23px; font-size: var(--font-size-sm); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 .cli-connection__testing { margin: var(--space-3) 0 0; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.cli-connection__result p.cli-connection__result-note { color: var(--color-text-muted); font-size: var(--font-size-xs); }
 .cli-connection__footer { display: flex; flex-shrink: 0; justify-content: flex-end; gap: var(--space-2); padding: var(--space-3) var(--space-6); border-top: 1px solid var(--color-border-soft); }
 .cli-connection__footer button { min-width: 64px; font-size: var(--font-size-sm); }
 .cli-connection__native { padding: var(--space-8) var(--space-2); text-align: center; }

@@ -36,9 +36,16 @@ describe('CliConnections', () => {
     await expect(connections.save({ cli: 'claude-code', mode: 'app', baseUrl: 'http://203.0.113.7:3000', auth: 'api_key', apiKey: 'secret' })).resolves.toMatchObject({ profile: { baseUrl: 'http://203.0.113.7:3000' } })
   })
 
-  it('requires a new key when the endpoint changes and refuses plaintext fallback', async () => {
-    const db = store(); const connections = new CliConnections(db, { ...secrets(), available: async () => false })
-    await expect(connections.save({ cli: 'claude-code', mode: 'app', baseUrl: 'https://gateway.example', auth: 'api_key', apiKey: 'secret' })).rejects.toThrow('密钥保护')
+  it('keeps the saved key when the endpoint changes, returns it for the form, and refuses plaintext fallback', async () => {
+    const connections = new CliConnections(store(), secrets())
+    await expect(connections.key('claude-code')).resolves.toBeNull()
+    await expect(connections.save({ cli: 'claude-code', mode: 'app', baseUrl: 'https://gateway.example', auth: 'api_key' })).rejects.toThrow('请为此连接填写 API Key')
+    await connections.save({ cli: 'claude-code', mode: 'app', baseUrl: 'https://gateway.example', auth: 'api_key', apiKey: 'secret' })
+    await connections.save({ cli: 'claude-code', mode: 'app', baseUrl: 'https://other.example', auth: 'api_key' })
+    await expect(connections.key('claude-code')).resolves.toBe('secret')
+    expect((await connections.environment('claude-code', {})).connection).toEqual({ baseUrl: 'https://other.example', apiKey: 'secret', auth: 'api_key' })
+    const locked = new CliConnections(store(), { ...secrets(), available: async () => false })
+    await expect(locked.save({ cli: 'claude-code', mode: 'app', baseUrl: 'https://gateway.example', auth: 'api_key', apiKey: 'secret' })).rejects.toThrow('密钥保护')
   })
   it('ignores a legacy model in saved profiles and session snapshots', async () => {
     const db = store(); const connections = new CliConnections(db, secrets())
@@ -51,11 +58,11 @@ describe('CliConnections', () => {
     expect(db.getPreference('connection:codex')).not.toContain('model')
   })
 
-  it('tests with the saved test model, or the built-in default, and keeps it out of the Session connection', async () => {
-    const models: string[] = []
+  it('tests the unsaved form with its test model, or the built-in default, and keeps it out of the Session connection', async () => {
+    const models: string[] = [], keys: string[] = []
     const server = createServer(async (request, response) => {
       let raw = ''; for await (const chunk of request) raw += chunk
-      models.push(JSON.parse(raw).model)
+      models.push(JSON.parse(raw).model); keys.push(String(request.headers['x-api-key']))
       response.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ content: [{ type: 'text', text: 'Hello' }] }))
     })
     await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
@@ -63,15 +70,19 @@ describe('CliConnections', () => {
       const address = server.address()
       if (!address || typeof address === 'string') throw new Error('No TCP address')
       const baseUrl = `http://127.0.0.1:${address.port}`
-      const connections = new CliConnections(store(), secrets())
+      const db = store(); const connections = new CliConnections(db, secrets())
+      await expect(connections.test({ cli: 'claude-code', baseUrl, auth: 'api_key' })).resolves.toEqual({ ok: false, message: '请填写 API Key。' })
+      await expect(connections.test({ cli: 'claude-code', baseUrl, auth: 'api_key', apiKey: 'draft-key', testModel: ' draft-model ' })).resolves.toMatchObject({ ok: true, model: 'draft-model', reply: 'Hello' })
+      expect(db.values.size).toBe(0)
       await connections.save({ cli: 'claude-code', mode: 'app', baseUrl, auth: 'api_key', apiKey: 'secret' })
       expect(connections.get('claude-code').profile).not.toHaveProperty('testModel')
-      await expect(connections.test('claude-code')).resolves.toMatchObject({ ok: true, model: DEFAULT_TEST_MODELS['claude-code'], reply: 'Hello' })
+      await expect(connections.test({ cli: 'claude-code', baseUrl, auth: 'api_key' })).resolves.toMatchObject({ ok: true, model: DEFAULT_TEST_MODELS['claude-code'], reply: 'Hello' })
+      await expect(connections.test({ cli: 'claude-code', baseUrl, auth: 'api_key', testModel: 'claude opus' })).rejects.toThrow('测试模型不能包含空格')
       await expect(connections.save({ cli: 'claude-code', mode: 'app', baseUrl, auth: 'api_key', testModel: 'claude opus' })).rejects.toThrow('测试模型不能包含空格')
       const saved = await connections.save({ cli: 'claude-code', mode: 'app', baseUrl, auth: 'api_key', testModel: ' gateway-model ' })
       expect(saved.profile).toMatchObject({ testModel: 'gateway-model', hasApiKey: true })
-      await expect(connections.test('claude-code')).resolves.toMatchObject({ ok: true, model: 'gateway-model' })
-      expect(models).toEqual([DEFAULT_TEST_MODELS['claude-code'], 'gateway-model'])
+      expect(models).toEqual(['draft-model', DEFAULT_TEST_MODELS['claude-code']])
+      expect(keys).toEqual(['draft-key', 'secret'])
       expect((await connections.environment('claude-code', {})).connection).toEqual({ baseUrl, apiKey: 'secret', auth: 'api_key' })
     } finally {
       server.closeAllConnections(); server.close()

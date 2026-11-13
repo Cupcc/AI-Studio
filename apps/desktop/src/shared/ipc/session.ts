@@ -1,4 +1,4 @@
-import type { CliConnection, SaveCliConnection, ConnectionTestResult } from '../session/cli-connection'
+import type { CliConnection, CliConnectionDraft, SaveCliConnection, ConnectionTestResult } from '../session/cli-connection'
 import { defineContract, event, invoke } from './contract'
 import type { CliInstallation } from '../session/cli-installation'
 import type { TurnDiffRecord, TurnDiffRef } from '../tools/turn-diff'
@@ -45,7 +45,10 @@ export const sessionContract = defineContract('session', {
     setModel: invoke<{ sessionId: string; model: string | null }, void>('session:set-model'),
     getCliConnections: invoke<void, CliConnection[]>('session:get-cli-connections'),
     saveCliConnection: invoke<SaveCliConnection, CliConnection>('session:save-cli-connection'),
-    testCliConnection: invoke<{ cli: SessionCli }, ConnectionTestResult>('session:test-cli-connection'),
+    /** The saved API Key, decrypted for the masked key field; null when none is saved. */
+    getCliConnectionKey: invoke<{ cli: SessionCli }, string | null>('session:get-cli-connection-key'),
+    /** Tests the form as filled in; saving is not required first. */
+    testCliConnection: invoke<CliConnectionDraft, ConnectionTestResult>('session:test-cli-connection'),
     getCliInstallations: invoke<void, CliInstallation[]>('session:get-cli-installations'),
     installCli: invoke<{ cli: SessionCli }, void>('session:install-cli'),
     cancelCliInstallation: invoke<{ cli: SessionCli }, void>('session:cancel-cli-installation'),

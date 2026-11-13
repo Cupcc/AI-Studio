@@ -2,7 +2,7 @@ import { testApiConnection } from './connection-test'
 import { randomUUID } from 'node:crypto'
 import type { ProviderEnvironment } from '@ai-studio/agent-adapter'
 import { SESSION_CLIS, type SessionCli } from '@shared/session/types'
-import { DEFAULT_TEST_MODELS, type CliConnection, type ConnectionProfile, type ConnectionTestResult, type SaveCliConnection } from '@shared/session/cli-connection'
+import { DEFAULT_TEST_MODELS, type CliConnection, type CliConnectionDraft, type ConnectionProfile, type ConnectionTestResult, type SaveCliConnection } from '@shared/session/cli-connection'
 import type { SessionStore } from './store'
 import type { Env } from '../shell-env/login-env'
 
@@ -55,6 +55,20 @@ export class CliConnections {
   }
   list(): CliConnection[] { return SESSION_CLIS.map(cli => this.get(cli)) }
 
+  /** Shared by save and test, so a draft that tests is one that saves. */
+  private profileOf(draft: CliConnectionDraft): ConnectionProfile {
+    const baseUrl = validateBaseUrl(draft.baseUrl, draft.cli)
+    const testModel = draft.testModel?.trim()
+    if (testModel && /\s/.test(testModel)) throw new Error('测试模型不能包含空格。')
+    if (draft.cli === 'codex' && draft.auth !== 'api_key') throw new Error('Codex 使用 API Key 认证。')
+    return { baseUrl, auth: draft.auth, ...(testModel ? { testModel } : {}) }
+  }
+
+  private async decrypt(encryptedKey: string, message: string): Promise<string> {
+    try { return await this.secrets.decrypt(Buffer.from(encryptedKey, 'base64')) }
+    catch { throw new Error(message) }
+  }
+
   async save(request: SaveCliConnection): Promise<CliConnection> {
     if (this.saving.has(request.cli)) throw new Error('正在保存此 CLI 的配置，请稍后重试。')
     this.saving.add(request.cli)
@@ -62,21 +76,24 @@ export class CliConnections {
       const previous = this.read(`connection:${request.cli}`, request.cli)
       let profile = previous.profile
       if (request.mode === 'app') {
-        const baseUrl = validateBaseUrl(request.baseUrl, request.cli)
-        const testModel = request.testModel?.trim()
-        if (testModel && /\s/.test(testModel)) throw new Error('测试模型不能包含空格。')
-        if (request.cli === 'codex' && request.auth !== 'api_key') throw new Error('Codex 使用 API Key 认证。')
+        const next = this.profileOf(request)
         const key = request.apiKey
-        if (!key && (!profile || profile.baseUrl !== baseUrl || profile.auth !== request.auth)) throw new Error('请为此连接填写 API Key。修改地址或认证方式后需重新填写。')
+        if (!key && !profile) throw new Error('请为此连接填写 API Key。')
         if (!await this.secrets.available()) throw new Error('系统密钥保护暂不可用，配置未保存。')
         let encryptedKey: string
         try { encryptedKey = key ? (await this.secrets.encrypt(key)).toString('base64') : profile!.encryptedKey }
         catch { throw new Error('无法安全保存 API Key，请检查系统钥匙串后重试。') }
-        profile = { baseUrl, auth: request.auth, encryptedKey, ...(testModel ? { testModel } : {}) }
+        profile = { ...next, encryptedKey }
       }
       this.store.setPreference(`connection:${request.cli}`, JSON.stringify({ mode: request.mode, revision: randomUUID(), profile } satisfies StoredConnection))
       return this.get(request.cli)
     } finally { this.saving.delete(request.cli) }
+  }
+
+  /** The saved key for the settings form, which masks it until the user reveals it. */
+  async key(cli: SessionCli): Promise<string | null> {
+    const profile = this.read(`connection:${cli}`, cli).profile
+    return profile ? this.decrypt(profile.encryptedKey, '无法读取已保存的 API Key，请解锁系统钥匙串后重试。') : null
   }
 
   /** Called inside the Session creation transaction; old sessions without a snapshot remain native. */
@@ -89,17 +106,16 @@ export class CliConnections {
     if (saved.mode === 'local') return { env }
     const profile = saved.profile
     if (!profile) throw new Error('应用连接配置不完整，请重新保存。')
-    let apiKey: string
-    try { apiKey = await this.secrets.decrypt(Buffer.from(profile.encryptedKey, 'base64')) }
-    catch { throw new Error('无法读取此会话的 API Key，请解锁系统钥匙串后重试。') }
+    const apiKey = await this.decrypt(profile.encryptedKey, '无法读取此会话的 API Key，请解锁系统钥匙串后重试。')
     return { env, connection: { baseUrl: profile.baseUrl, apiKey, auth: profile.auth } }
   }
 
-  /** Checks that the gateway answers; it never starts the CLI, so the CLI path itself is not covered. */
-  async test(cli: SessionCli): Promise<ConnectionTestResult> {
-    const { connection } = await this.environment(cli, {})
-    if (!connection) return { ok: false, message: '请先保存应用连接配置。' }
-    return testApiConnection(cli, connection, this.get(cli).profile?.testModel || DEFAULT_TEST_MODELS[cli])
+  /** Tests the form as filled in, falling back to the saved key. It checks that the gateway answers and never starts the CLI. */
+  async test(draft: CliConnectionDraft): Promise<ConnectionTestResult> {
+    const { baseUrl, auth, testModel } = this.profileOf(draft)
+    const apiKey = draft.apiKey || await this.key(draft.cli)
+    if (!apiKey) return { ok: false, message: '请填写 API Key。' }
+    return testApiConnection(draft.cli, { baseUrl, apiKey, auth }, testModel || DEFAULT_TEST_MODELS[draft.cli])
   }
 
 }

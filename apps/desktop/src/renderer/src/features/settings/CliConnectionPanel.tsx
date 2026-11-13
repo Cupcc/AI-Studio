@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { DEFAULT_TEST_MODELS, type CliConnection, type ConnectionTestResult, type SaveCliConnection } from '@shared/session/cli-connection'
+import { DEFAULT_TEST_MODELS, type CliConnection, type CliConnectionDraft, type ConnectionTestResult } from '@shared/session/cli-connection'
 import { Icon } from '../../app/Icon'
 import { sessionApi } from '../session/api'
 import { ipcErrorText } from '../../lib/ipc-error'
@@ -17,6 +17,8 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
   const [mode, setMode] = useState(connection.mode)
   const [baseUrl, setBaseUrl] = useState(connection.profile?.baseUrl ?? '')
   const [apiKey, setApiKey] = useState('')
+  /** The saved key once loaded into the masked field; null when none is saved or it could not be read. */
+  const [savedKey, setSavedKey] = useState<string | null>(null)
   const [testModel, setTestModel] = useState(connection.profile?.testModel ?? '')
   const [showKey, setShowKey] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -26,34 +28,44 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
   const body = useRef<HTMLDivElement>(null)
   const active = useRef(true)
   useEffect(() => { active.current = true; back.current?.focus(); return () => { active.current = false } }, [])
+  // Fill the masked key field with the saved key, unless the user has already typed one. If it cannot be read, leaving the field empty keeps the saved key.
+  useEffect(() => {
+    if (!connection.profile?.hasApiKey) return
+    void sessionApi().getCliConnectionKey({ cli: connection.cli }).then(key => {
+      if (!active.current || !key) return
+      setSavedKey(key); setApiKey(current => current || key)
+    }, () => {})
+  }, [connection.cli, connection.profile?.hasApiKey])
   // Results and errors render at the end of the scrolling body; bring them into view.
   useEffect(() => {
     if ((test.status === 'complete' || error) && body.current) body.current.scrollTop = body.current.scrollHeight
   }, [test, error])
-  const dirty = mode !== saved.mode || (mode === 'app' && (baseUrl.trim().replace(/\/+$/, '') !== saved.profile?.baseUrl || Boolean(apiKey) || testModel.trim() !== (saved.profile?.testModel ?? '')))
+  const keyChanged = Boolean(apiKey) && apiKey !== savedKey
+  const dirty = mode !== saved.mode || (mode === 'app' && (baseUrl.trim().replace(/\/+$/, '') !== saved.profile?.baseUrl || keyChanged || testModel.trim() !== (saved.profile?.testModel ?? '')))
   const defaultModel = DEFAULT_TEST_MODELS[connection.cli]
   const busy = saving || test.status === 'running'
-  const hasKey = saved.profile?.hasApiKey && baseUrl.trim().replace(/\/+$/, '') === saved.profile.baseUrl
-  const canSave = dirty && (mode === 'local' || Boolean(baseUrl.trim() && (apiKey || hasKey)))
+  const hasKey = Boolean(saved.profile?.hasApiKey)
+  const complete = Boolean(baseUrl.trim() && (apiKey || hasKey))
+  const canSave = dirty && (mode === 'local' || complete)
+  const draft = (): CliConnectionDraft => ({ cli: connection.cli, baseUrl: baseUrl.trim(), auth: saved.profile?.auth ?? 'api_key', ...(keyChanged ? { apiKey } : {}), ...(testModel.trim() ? { testModel: testModel.trim() } : {}) })
   const changeMode = (next: 'local' | 'app') => { setMode(next); setTest({ status: 'idle' }); setError(null) }
   const save = async () => {
     if (!canSave || busy) return
     setSaving(true); setError(null); setTest({ status: 'idle' })
-    const request: SaveCliConnection = mode === 'local' ? { cli: connection.cli, mode }
-      : { cli: connection.cli, mode, baseUrl: baseUrl.trim(), auth: saved.profile?.auth ?? 'api_key', ...(apiKey ? { apiKey } : {}), ...(testModel.trim() ? { testModel: testModel.trim() } : {}) }
     try {
-      const next = await sessionApi().saveCliConnection(request)
+      const next = await sessionApi().saveCliConnection(mode === 'local' ? { cli: connection.cli, mode } : { mode, ...draft() })
       onSaved(next)
       if (!active.current) return
-      setSaved(next); setBaseUrl(next.profile?.baseUrl ?? ''); setApiKey(''); setShowKey(false); setTestModel(next.profile?.testModel ?? '')
+      if (mode === 'app' && apiKey) setSavedKey(apiKey)
+      setSaved(next); setBaseUrl(next.profile?.baseUrl ?? ''); setShowKey(false); setTestModel(next.profile?.testModel ?? '')
     } catch (reason) { if (active.current) setError(ipcErrorText(reason)) }
     finally { if (active.current) setSaving(false) }
   }
   const runTest = async () => {
-    if (busy || dirty || saved.mode !== 'app') return
-    setTest({ status: 'running' })
+    if (busy || mode !== 'app' || !complete) return
+    setTest({ status: 'running' }); setError(null)
     try {
-      const result = await sessionApi().testCliConnection({ cli: connection.cli })
+      const result = await sessionApi().testCliConnection(draft())
       if (active.current) setTest({ status: 'complete', result })
     } catch (reason) { if (active.current) setTest({ status: 'complete', result: { ok: false, message: ipcErrorText(reason) } }) }
   }
@@ -89,12 +101,12 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
           <input id="connection-test-model" value={testModel} spellCheck={false} autoComplete="off" disabled={busy} placeholder={`${defaultModel}（默认）`} onChange={event => { setTestModel(event.target.value); setTest({ status: 'idle' }) }} />
         </div>
         <section className="cli-connection__test" aria-label="连接测试">
-          <div className="cli-connection__test-heading"><div><h4>连接测试</h4><p>{dirty ? '保存后即可测试' : '发送 hi，检查网关是否可达'}</p></div>
-            <button className="secondary-button" disabled={busy || dirty || saved.mode !== 'app'} onClick={() => void runTest()}><Icon name="refresh" size={14} />{test.status === 'running' ? '测试中…' : '测试连接'}</button>
+          <div className="cli-connection__test-heading"><div><h4>连接测试</h4><p>{complete ? '用当前填写的内容发送 hi，检查网关是否可达' : '填写 Base URL 与 API Key 后即可测试'}</p></div>
+            <button className="secondary-button" disabled={busy || !complete} onClick={() => void runTest()}><Icon name="refresh" size={14} />{test.status === 'running' ? '测试中…' : '测试连接'}</button>
           </div>
           {test.status === 'complete' && <div className={`cli-connection__result ${test.result.ok ? 'is-success' : 'is-error'}`} role="status">
             <div className="cli-connection__result-heading"><Icon name={test.result.ok ? 'check' : 'close'} size={15} /><strong>{test.result.ok ? '连接正常' : '连接失败'}</strong>{test.result.ok && <span>{(test.result.durationMs / 1000).toFixed(1)} s</span>}</div>
-            {test.result.ok ? <><span className="cli-connection__model">{test.result.model}</span><p>{test.result.reply}</p></> : <p>{test.result.message}</p>}
+            {test.result.ok ? <><span className="cli-connection__model">{test.result.model}</span><p>{test.result.reply}</p>{dirty && <p className="cli-connection__result-note">尚未保存，保存后新会话才会使用此连接。</p>}</> : <p>{test.result.message}</p>}
           </div>}
           {test.status === 'running' && <p className="cli-connection__testing" role="status">正在等待 API 回复…</p>}
         </section>
