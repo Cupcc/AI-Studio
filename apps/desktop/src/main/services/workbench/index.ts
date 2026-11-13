@@ -12,6 +12,7 @@ export function workbenchesFor(core: CoreServices): WorkbenchService {
     service = new WorkbenchService({
       database: () => core.database().db,
       presetRoot: join(app.getAppPath(), 'out/workbench-packages'),
+      packageStore: join(app.getPath('userData'), 'workbench-packages'),
       projectPath: id => {
         const project = projectShellFor(core).projects.getProject(id)
         if (!project) throw new Error('找不到 Project')

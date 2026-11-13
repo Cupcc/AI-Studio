@@ -16,7 +16,7 @@ const changes: WorkbenchChange[] = []
 function start() {
   database = openDatabase({ userDataDir: join(directory, 'data'), migrations })
   const projects = createProjectService(() => database.db)
-  service = new WorkbenchService({ database: () => database.db, presetRoot: fileURLToPath(new URL('../../../../out/workbench-packages/', import.meta.url)), projectPath: id => {
+  service = new WorkbenchService({ database: () => database.db, presetRoot: fileURLToPath(new URL('../../../../out/workbench-packages/', import.meta.url)), packageStore: join(directory, 'data/workbench-packages'), projectPath: id => {
     const project = projects.getProject(id)
     if (!project) throw new Error('Unknown Project')
     return project.canonicalPath

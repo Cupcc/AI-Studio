@@ -339,7 +339,7 @@ flowchart LR
 
 最小包由 `manifest.json` 与本地 HTML 入口组成，可包含 JS、CSS 和静态资源。清单字段以 [PluginManifest](../../apps/desktop/src/shared/workbench/types.ts)为准：`schemaVersion: 1`、`pluginId`、`version`、`sdkVersion: 1`、`title`、`entry`、`capabilities`。基础能力为 `state.read`、`state.write` 和 `conversation.draft`；资源能力见 §9.7，真实节点执行能力 `agent.execute` 见 §9.9。能力清单不提供任意 Node、文件系统或密钥访问；节点请求由宿主已有 Session Provider 执行。
 
-草稿位于 `.ai-studio/workbench/drafts/<draftId>/`，应用时携带已预览的 `expectedPackageRevision`，校验当前文件仍对应同一修订后复制到 `.ai-studio/workbench/packages/<revision>/`。文件在预览后变化时须重新预览。修订按内容固定。实例引用该修订，修改草稿不会改变已经打开的实例。包身份和版本描述可复用页面，实例 ID 标识当前 Project 的状态；导航使用 `workbench:<instanceId>`，编辑使用 `workbench-draft:<draftId>`。统一目录由 App 预设、Project 内实例及设计草稿合成，预设声明是其稳定 ID、标题及顺序的唯一来源。
+草稿位于 `.ai-studio/workbench/drafts/<draftId>/`，应用时携带已预览的 `expectedPackageRevision`，校验当前文件仍对应同一修订后复制到 `.ai-studio/workbench/packages/<revision>/`。文件在预览后变化时须重新预览。修订按内容固定。已应用的包由宿主维护：包内文件只读，宿主另在 userData 的 `workbench-packages/<revision>/` 保存同一修订的副本。读取实例或由实例创建编辑草稿时，包目录缺失或内容与修订不符，就从副本还原；没有副本时报错，要求从草稿重新预览并应用。还原只针对误改，例如使用对话中的 Agent 改了包文件；宿主不收回 CLI 的文件权限（[§4.4](#44-出图能力独立于工作台)），结构修改仍须走编辑入口。实例引用该修订，修改草稿不会改变已经打开的实例。包身份和版本描述可复用页面，实例 ID 标识当前 Project 的状态；导航使用 `workbench:<instanceId>`，编辑使用 `workbench-draft:<draftId>`。统一目录由 App 预设、Project 内实例及设计草稿合成，预设声明是其稳定 ID、标题及顺序的唯一来源。
 
 SQLite 保存草稿来源、编辑目标、实例与包修订的绑定及 JSON 状态版本。编辑应用只改变目标实例的包修订，保留其当前已保存状态；预览操作使用草稿自身状态，首次添加保留该草稿已保存状态。添加或应用成功后草稿关闭：宿主删除草稿记录，首次添加的实例接替草稿在列表中的位置与名称，草稿文件保留在磁盘。其他实例不随编辑更新。所有页面状态写入都经过宿主，带 `expectedRevision`，冲突返回错误供页面重读。该 JSON 状态接口不等于后续业务的文件产物协议。
 

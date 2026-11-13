@@ -20,7 +20,7 @@ async function fixture() {
   const projectId = opened.project.id, provider = new FakeProvider('codex')
   const sessions = new SessionService({ store: new SessionStore(database.db), projects, providers: [provider], environment: async () => ({ env: {} }) })
   const createHost = () => {
-    const host = new WorkbenchService({ database: () => database.db, projectPath: () => root, presetRoot: fileURLToPath(new URL('../../../../out/workbench-packages', import.meta.url)), changed: () => {} })
+    const host = new WorkbenchService({ database: () => database.db, projectPath: () => root, presetRoot: fileURLToPath(new URL('../../../../out/workbench-packages', import.meta.url)), packageStore: join(dir, 'data/workbench-packages'), changed: () => {} })
     host.setAgentPort(sessions); return host
   }
   const host = createHost()

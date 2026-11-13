@@ -12,6 +12,8 @@ export interface WorkbenchOptions {
   database(): DatabaseSync
   projectPath(projectId: string): string
   presetRoot: string
+  /** See PackageRuntimeOptions.packageStore. */
+  packageStore: string
   changed(change: WorkbenchChange): void
   settleMs?: number
 }
@@ -82,7 +84,7 @@ export class WorkbenchService {
 
   constructor(private readonly options: WorkbenchOptions) {
     this.knowledge = new KnowledgeResources({ projectPath: options.projectPath, settleMs: options.settleMs, changed: state => this.knowledgeChanged(state) })
-    this.packages = new PackageRuntime({ database: options.database, projectPath: options.projectPath, presetRoot: options.presetRoot, changed: (target, catalog, page) => this.packageChanged(target, catalog, page) })
+    this.packages = new PackageRuntime({ database: options.database, projectPath: options.projectPath, presetRoot: options.presetRoot, packageStore: options.packageStore, changed: (target, catalog, page) => this.packageChanged(target, catalog, page) })
   }
   private key(ref: WorkbenchRef): string { return `${ref.projectId}\0${ref.viewId}` }
   private titled<T extends WorkbenchEntry>(projectId: string, entry: T): T {

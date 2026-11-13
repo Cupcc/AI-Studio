@@ -41,10 +41,13 @@ function storedDraft(row: Record<string, unknown>): DraftRow {
 export interface PackageRuntimeOptions {
   database(): DatabaseSync
   presetRoot: string
+  /** App-data folder with a copy of every applied package revision, used to restore one changed inside a Project. */
+  packageStore: string
   projectPath(projectId: string): string
   changed(target: WorkbenchTarget, catalog: boolean, snapshot?: WorkbenchPageSnapshot): void
 }
 const ROOT = '.ai-studio/workbench'
+const READ_ONLY = 0o444
 const TYPES: Record<string, string> = {
   html: 'text/html; charset=utf-8', htm: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8', mjs: 'text/javascript; charset=utf-8',
   css: 'text/css; charset=utf-8', json: 'application/json; charset=utf-8', svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', ico: 'image/x-icon', woff: 'font/woff', woff2: 'font/woff2', txt: 'text/plain; charset=utf-8'
@@ -107,7 +110,7 @@ export class PackageRuntime {
         this.db().prepare('DELETE FROM workbench_drafts WHERE id=? AND project_id=?').run(reopened.id, projectId)
       }
     }
-    const files = template ? template.files : original ? readPackage(root, join(root, ROOT, 'packages', original.package_revision)).files : new Map([
+    const files = template ? template.files : original ? this.installedPackage(root, original.package_revision).files : new Map([
       ['manifest.json', Buffer.from(JSON.stringify({ schemaVersion: 1, pluginId: `workbench-${id}`, version: '1.0.0', sdkVersion: 1, title: source === 'ai' ? '新的工作台' : '随手记', entry: 'index.html', capabilities: ['state.read', 'state.write', 'conversation.draft'] }, null, 2))],
       ['index.html', Buffer.from(TEMPLATE_HTML)]
     ])
@@ -127,11 +130,43 @@ export class PackageRuntime {
       if (pkg.manifest.pluginId !== presetWorkbench(target.id).pluginId) throw new Error('App 工作台包标识不匹配，请重新构建应用')
       return { row: { state: '{}', state_revision: 0 }, package: pkg }
     }
-    const row = target.kind === 'draft' ? this.draftRow(target.projectId, target.id) : this.instanceRow(target.projectId, target.id)
-    const directory = 'directory' in row ? row.directory : `${ROOT}/packages/${row.package_revision}`
-    const pkg = readPackage(this.root(target.projectId), join(this.root(target.projectId), directory))
-    if ('package_revision' in row && pkg.revision !== row.package_revision) throw new Error('已应用的包文件被外部修改，请从草稿重新预览并应用')
-    return { row, package: pkg }
+    const root = this.root(target.projectId)
+    if (target.kind === 'instance') {
+      const row = this.instanceRow(target.projectId, target.id)
+      return { row, package: this.installedPackage(root, row.package_revision) }
+    }
+    const row = this.draftRow(target.projectId, target.id)
+    return { row, package: readPackage(root, join(root, row.directory)) }
+  }
+  private readOrNull(root: string, directory: string): PackageFiles | null {
+    try { return readPackage(root, directory) } catch { return null }
+  }
+  /** Writes `files` as a read-only package at `destination` through a staging folder, replacing whatever is there. */
+  private placePackage(root: string, destination: string, files: Map<string, Buffer>): void {
+    assertInside(root, destination)
+    const staging = `${destination}-${randomUUID()}`, replaced = `${staging}-replaced`
+    try {
+      writePackage(root, staging, files, READ_ONLY)
+      if (existsSync(destination)) renameSync(destination, replaced)
+      renameSync(staging, destination)
+    } finally { rmSync(staging, { recursive: true, force: true }) }
+    // The package is already in place; a leftover replaced copy is only clutter.
+    try { rmSync(replaced, { recursive: true, force: true }) } catch {}
+  }
+  /** Applied packages are host-owned: their files are read-only and App data keeps a copy of each revision. A package
+   *  changed inside the Project, for example by an agent in a usage conversation, is restored from that copy on read. */
+  private installedPackage(root: string, revision: string): PackageFiles {
+    const directory = join(root, ROOT, 'packages', revision), backup = join(this.options.packageStore, revision)
+    const current = this.readOrNull(root, directory)
+    if (current?.revision === revision) {
+      // Packages applied before the copies existed get one on their first read.
+      if (!existsSync(backup)) this.placePackage(this.options.packageStore, backup, current.files)
+      return current
+    }
+    const saved = this.readOrNull(this.options.packageStore, backup)
+    if (saved?.revision !== revision) throw new Error('已应用的包文件被外部修改，请从草稿重新预览并应用')
+    this.placePackage(root, directory, saved.files)
+    return saved
   }
   getSnapshot(target: WorkbenchTarget): WorkbenchPageSnapshot {
     const result = this.package(target)
@@ -142,13 +177,9 @@ export class PackageRuntime {
     return { target, manifest: pkg.manifest, packageRevision: pkg.revision, state: parseJsonState(JSON.parse(row.state)), stateRevision: row.state_revision, pageUrl }
   }
   private storePackage(root: string, pkg: PackageFiles): void {
-    const destination = join(root, ROOT, 'packages', pkg.revision)
-    assertInside(root, destination)
-    if (!existsSync(destination)) {
-      const staging = `${destination}-${randomUUID()}`
-      try { writePackage(root, staging, pkg.files); renameSync(staging, destination) }
-      finally { rmSync(staging, { recursive: true, force: true }) }
-    } else if (readPackage(root, destination).revision !== pkg.revision) throw new Error('已保存的包版本不完整，请修复包目录后重试')
+    const backup = join(this.options.packageStore, pkg.revision), directory = join(root, ROOT, 'packages', pkg.revision)
+    if (this.readOrNull(this.options.packageStore, backup)?.revision !== pkg.revision) this.placePackage(this.options.packageStore, backup, pkg.files)
+    if (this.readOrNull(root, directory)?.revision !== pkg.revision) this.placePackage(root, directory, pkg.files)
   }
   /** Applying closes the draft: its record goes away (files stay on disk) and the instance is the only entry left. */
   applyDraft(projectId: string, draftId: string, expectedPackageRevision: string): { instance: WorkbenchInstance; created: boolean } {
@@ -179,11 +210,11 @@ export class PackageRuntime {
     return instance(this.instanceRow(projectId, id))
   }
   private revisionOf(root: string, directory: string): string | null {
-    try { return readPackage(root, join(root, directory)).revision } catch { return null }
+    return this.readOrNull(root, join(root, directory))?.revision ?? null
   }
   /** Unreadable draft files return null; such a draft is reopened so its error stays fixable in its conversation. */
   private versionOf(root: string, directory: string): string | null {
-    try { return readPackage(root, join(root, directory)).manifest.version } catch { return null }
+    return this.readOrNull(root, join(root, directory))?.manifest.version ?? null
   }
   /** Closes drafts flagged by the legacy migration whose files still equal their base revision (the revision they were last
    *  applied as, or copied from), so nothing unapplied is lost, including drafts a later version superseded; flagged drafts
@@ -235,7 +266,7 @@ export class PackageRuntime {
       return { originViewId: viewId, paths, text: `当前任务是创建或编辑 AI Studio 工作台页面。先读取 ${paths.slice(0, 3).join('、')}，参考 ${paths[3]}。只在草稿目录 ${row.directory} 中创建或修改插件包，入口由 manifest.json 指定。开发指南与宿主 SDK 1 对应，不要猜测接口。宿主“刷新预览”会检查包并显示错误，修正错误后让用户再次预览并实际操作；只有用户“添加至当前项目”或“应用更新”才生效。不要修改 packages、数据库或其他实例；不要自动安装依赖或启动模型任务。当前是草稿预览，不能宣称已添加或已验收。` }
     }
     const snapshot = this.getSnapshot(target)
-    return { originViewId: viewId, paths: [], text: `当前工作台：${snapshot.manifest.title}；实例 ${target.id}；包版本 ${snapshot.manifest.version}；状态版本 ${snapshot.stateRevision}。当前已保存状态：${JSON.stringify(snapshot.state)}。这是工作台使用对话，不是页面结构编辑。不要改插件包、草稿、packages 或数据库；结构变化应由用户进入“编辑工作台”。SDK 1 不提供 AI 状态提交或图片产物通道，不能声称已写回内容。` }
+    return { originViewId: viewId, paths: [], text: `当前工作台：${snapshot.manifest.title}；实例 ${target.id}；包版本 ${snapshot.manifest.version}；状态版本 ${snapshot.stateRevision}。当前已保存状态：${JSON.stringify(snapshot.state)}。这是工作台使用对话，不是页面结构编辑。不要改插件包、草稿、packages 或数据库；packages 中的文件只读，宿主读取时会还原其中的任何修改。结构变化应由用户进入“编辑工作台”。SDK 1 不提供 AI 状态提交或图片产物通道，不能声称已写回内容。` }
   }
   async handleRequest(request: Request): Promise<Response> {
     const headers = { 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' }

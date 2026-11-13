@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -14,7 +14,7 @@ const changed = vi.fn()
 function start() {
   database = openDatabase({ userDataDir: join(dir, 'data'), migrations })
   const projects = createProjectService(() => database.db)
-  service = new PackageRuntime({ database: () => database.db, presetRoot: fileURLToPath(new URL('../../../../out/workbench-packages/', import.meta.url)), projectPath: id => {
+  service = new PackageRuntime({ database: () => database.db, presetRoot: fileURLToPath(new URL('../../../../out/workbench-packages/', import.meta.url)), packageStore: join(dir, 'data/workbench-packages'), projectPath: id => {
     const project = projects.getProject(id)
     if (!project) throw new Error('Unknown Project')
     return project.canonicalPath
@@ -160,9 +160,33 @@ it('binds every read and write to the owning Project and enforces declared state
   expect(() => service.updateState(target(draft), {}, 0)).toThrow('state.write')
   expect(() => service.updateState(target(draft), { invalid: Infinity }, 0)).toThrow()
 })
-it('detects externally modified installed packages instead of silently serving an unreviewed version', () => {
+it('keeps applied packages read-only and restores a changed or missing package from the App copy before serving it', async () => {
   const { instance, selected } = install()
-  writeFileSync(join(root, '.ai-studio/workbench/packages', instance.packageRevision, 'index.html'), '<p>unreviewed</p>')
+  const directory = join(root, '.ai-studio/workbench/packages', instance.packageRevision), entry = join(directory, 'index.html')
+  const backup = join(dir, 'data/workbench-packages', instance.packageRevision), original = readFileSync(entry)
+  expect(statSync(entry).mode & 0o222).toBe(0)
+  expect(() => writeFileSync(entry, '<p>unreviewed</p>')).toThrow()
+  // An agent that lifts the read-only bit still cannot change what the instance or a new edit draft starts from.
+  const tamper = () => { chmodSync(entry, 0o644); writeFileSync(entry, '<p>unreviewed</p>'); writeFileSync(join(directory, 'extra.js'), '') }
+  tamper()
+  const edit = service.createDraft(projectId, 'ai', instance.id)
+  expect(readFileSync(join(root, edit.directory, 'index.html'))).toEqual(original)
+  expect(existsSync(join(root, edit.directory, 'extra.js'))).toBe(false)
+  tamper()
+  const snapshot = service.getSnapshot(selected)
+  expect(snapshot.packageRevision).toBe(instance.packageRevision)
+  expect(readFileSync(entry)).toEqual(original)
+  expect(existsSync(join(directory, 'extra.js'))).toBe(false)
+  expect(statSync(entry).mode & 0o222).toBe(0)
+  rmSync(directory, { recursive: true })
+  const response = await service.handleRequest(new Request(snapshot.pageUrl))
+  expect(response.status).toBe(200)
+  expect(readFileSync(entry)).toEqual(original)
+  // A package applied before App copies existed gets one on its first intact read; without any copy a change is reported.
+  rmSync(backup, { recursive: true })
+  service.getSnapshot(selected)
+  expect(existsSync(backup)).toBe(true)
+  rmSync(backup, { recursive: true }); tamper()
   expect(() => service.getSnapshot(selected)).toThrow('被外部修改')
 })
 it('provides authoring context without requiring a valid draft and separates ordinary instance use', () => {
@@ -174,6 +198,7 @@ it('provides authoring context without requiring a valid draft and separates ord
   const usage = service.buildContext(projectId, `workbench:${instance.id}`)
   expect(usage.paths).toEqual([])
   expect(usage.text).toContain('不是页面结构编辑')
+  expect(usage.text).toContain('packages 中的文件只读')
 })
 it('refuses unpreviewed changed files on both first add and update, then applies only after a fresh preview', () => {
   const created = service.createDraft(projectId, 'template')

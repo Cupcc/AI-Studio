@@ -82,13 +82,14 @@ export function readPackage(projectRoot: string, directory: string): PackageFile
   return { manifest, revision: hash.digest('hex'), files }
 }
 
-export function writePackage(root: string, directory: string, files: Map<string, Buffer>): void {
+/** `mode` sets the permission bits of new files; applied packages pass 0o444 so their files are read-only. */
+export function writePackage(root: string, directory: string, files: Map<string, Buffer>, mode?: number): void {
   assertInside(root, directory)
   mkdirSync(directory, { recursive: true })
   for (const [name, content] of files) {
     const path = join(directory, packagePath(name))
     assertInside(root, path)
     mkdirSync(dirname(path), { recursive: true })
-    writeFileSync(path, content, { flag: 'wx' })
+    writeFileSync(path, content, { flag: 'wx', ...(mode === undefined ? {} : { mode }) })
   }
 }
