@@ -35,46 +35,6 @@ export function inventory(cwd = process.cwd()) {
     .filter(file => existsSync(`${cwd}/${file}`))
 }
 
-// smol-toml was a leaf runtime dependency of the CLI connection reader; kept until its removal reaches dev.
-// Compare both snapshots so unrelated manifest/lock changes still fail closed.
-export function connectionDependencyChange(beforeManifest, afterManifest, beforeLock, afterLock) {
-  const normalize = (manifest, lock) => {
-    const value = JSON.parse(manifest)
-    const version = value.dependencies?.['smol-toml']
-    if (version !== undefined) {
-      if (!/^\d+\.\d+\.\d+$/.test(version)) return null
-      const importer = `      smol-toml:\n        specifier: ${version}\n        version: ${version}\n`
-      let removed = false
-      lock = lock.replace(/^  apps\/desktop:\n[\s\S]*?(?=^  [^ ]|^packages:)/m, block => {
-        removed = block.includes(importer)
-        return block.replace(importer, '')
-      })
-      if (!removed) return null
-      const escaped = version.replaceAll('.', '\\.')
-      lock = lock.replace(new RegExp(`^  smol-toml@${escaped}:\\n    resolution: \\{integrity: [^\\n]+\\}\\n    engines: \\{node: [^\\n]+\\}\\n\\n`, 'm'), '')
-      lock = lock.replace(`  smol-toml@${version}: {}\n\n`, '')
-      delete value.dependencies['smol-toml']
-    }
-    if (lock.includes('smol-toml')) return null
-    return JSON.stringify([value, lock])
-  }
-  try {
-    const before = normalize(beforeManifest, beforeLock)
-    return before !== null && before === normalize(afterManifest, afterLock)
-  } catch { return false }
-}
-
-function connectionDependencyPaths(files, { base = 'HEAD', head, cwd = process.cwd() }) {
-  const manifest = `${desktop}package.json`
-  const lock = 'pnpm-lock.yaml'
-  if (!files.includes(manifest) && !files.includes(lock)) return new Set()
-  try {
-    const read = (ref, file) => ref ? git(['show', `${ref}:${file}`], cwd) : readFileSync(`${cwd}/${file}`, 'utf8')
-    return connectionDependencyChange(read(base, manifest), read(head, manifest), read(base, lock), read(head, lock))
-      ? new Set([manifest, lock]) : new Set()
-  } catch { return new Set() }
-}
-
 export function workbenchPackageIncludeChange(before, after) {
   const prior = JSON.parse(before), next = JSON.parse(after)
   const include = 'build/workbenches/**/*.json'
@@ -116,7 +76,6 @@ function configChange(file, comparison) {
 }
 
 export function affectedPlan(files, available, comparison = {}) {
-  const connectionDependencies = connectionDependencyPaths(files, comparison)
   const workbenchConfigs = workbenchConfigPaths(files, comparison)
   const seeds = { scripts: new Set(), desktop: new Set(), adapter: new Set() }
   const types = new Set()
@@ -176,12 +135,6 @@ export function affectedPlan(files, available, comparison = {}) {
     // `.ignore` and `.gitignore` only decide what search and Git see; no code reads them.
     if (docsOnly([file]) || file === '.ignore' || file === '.gitignore' || /^\.codex\/agents\/[\w-]+\.toml$/.test(file) ||
       /^(?:\.agents\/archive|tasks\/archive|tasks\/T[^/]+\/evidence|design)\//.test(file)) continue
-    if (connectionDependencies.has(file)) {
-      types.add('node'); types.add('web')
-      addDomain('session'); addDomain('settings')
-      e2e.add('e2e/app.spec.ts')
-      continue
-    }
     if (/^(?:scripts\/(?:check-[\w-]+(?:\.test)?|integrate-branch(?:\.test)?|remote-ci(?:\.test)?|vitest\.config)\.mjs|\.codex\/(?:hooks\.json|scripts\/agent-docs-hook(?:\.test)?\.mjs)|\.husky\/(?:pre-commit|commit-msg)|commitlint\.config\.cjs|\.github\/workflows\/ci\.yml)$/.test(file)) {
       seeds.scripts.add(file)
       if (file === '.codex/hooks.json') seeds.scripts.add('.codex/scripts/agent-docs-hook.test.mjs')
