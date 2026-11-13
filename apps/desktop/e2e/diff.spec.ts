@@ -1,7 +1,8 @@
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 import { commitAll, git, initRepo, put } from './git-fixture'
 
 // FR-TOOL-002 (project changes relative to HEAD) against the built app, with real temporary Git repositories.
@@ -16,7 +17,7 @@ const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 const row = (name: string) => list().getByRole('option').filter({ has: page.locator('.diff-row__name', { hasText: new RegExp(`^${escape(name)}$`) }) })
 
 async function launch() {
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
   await expect(page.getByTestId('topbar')).toBeVisible()
   await app.evaluate(({ BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; win.setContentSize(1280, 800); win.show(); win.focus() })

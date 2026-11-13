@@ -31,10 +31,11 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 `draft` → `ready` → `in_progress` → `verifying` → `done`, or `blocked` at any point. Status lives in the `task.md` frontmatter and is changed only by the main agent.
 
 - `draft` → `ready`: authorized scope and completion criteria are clear, with no blocking open questions. Humans decide product questions; AI resolves technical questions within its authority. Record each resolution with its source, owner and date, distinguishing human confirmation from AI decisions; update every document that still shows it as pending. Non-blocking questions retain their owner and impact.
-- `verifying` → `done`: the main agent checks that the agreed deliverables are complete, required checks and independent review have passed, blocking findings are resolved, and related documents and evidence are current. Record who reviewed, the applicable baseline, evidence and the closure date. No additional human task sign-off is required.
+- `verifying` → `done`: the main agent checks that the agreed deliverables are complete, required checks and any required independent review have passed, blocking findings are resolved, and related documents and evidence are current. Record who reviewed, the applicable baseline, evidence and the closure date. No additional human task sign-off is required.
 - 文档同步的触发时机、影响追踪及收尾记录按 [贡献指南的文档同步与收尾复核](../CONTRIBUTING.md#文档同步与收尾复核) 执行。
 - `done` means this task's deliverables are complete; it does not mean the feature has been human-accepted, a draft specification is human-confirmed, or further work is authorized. A draft-delivery task can finish while the draft awaits product review. If human review is an explicit prerequisite of the deliverable, it must still be completed; do not silently redefine scope to close a task.
 - Incomplete required checks or unresolved blocking findings keep the task in `verifying` or `blocked`. A later human acceptance issue reopens the task or creates a linked fix task. Acceptance of partial delivery does not automatically satisfy the task's remaining criteria.
+- 一项交付集成 dev 后即收尾。之后的修复与补测另开任务（小修复不建任务），不在已交付的任务里追加评审轮次或验收记录。
 - 标记 `done` 后，在同一次变更中按 Archiving 将任务目录移入归档。
 - There is no shared task index; parallel edits to one would conflict. Query frontmatter with `rg` instead.
 
@@ -78,11 +79,12 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 
 ### 验收范围与独立性
 
-- 小改动、普通文档或过程任务：执行适用检查；涉及界面仍须交互验收。可由 Main Agent 自检收尾，遵循 When to Create a Task，不强制新增任务或独立验收文件；文档人工审阅规则仍适用。
-- 复杂或高风险改动：如跨模块契约、数据迁移、权限或进程隔离变更，须由未参与实现的 Review Agent 独立检查受影响范围并在 `acceptance.md` 留证。Main Agent 若参与实现，其检查仅为自检；独立评审不能只认可实现者的报告。
-- 功能完成：开发者自检后，由未参与该功能实现的 AI 独立验收，在 `acceptance.md` 记录结果。验收者读取需求、独立执行场景并检查证据，不能只转述实现者报告。
+- 默认由实现者自检后集成：执行适用的自动化检查并取得通过的远端 CI，涉及界面时做交互验收。小改动、文档、过程任务及一般功能和修复都按此收尾，不安排独立评审，也不强制新增任务或验收文件；功能由人在 dev 体验验收。文档人工审阅规则仍适用。
+- 数据迁移或删除用户数据、权限与安全边界、进程隔离的改动，集成前另由未参与实现的 Review Agent 独立检查受影响范围，在 `acceptance.md` 留证。新增或修改类型化 IPC 本身不构成独立评审的理由。独立评审不能只认可实现者的报告。
 - 里程碑交付：由独立 AI 验收已纳入本次交付的完整核心场景，补充真实 CLI 链路与打包应用检查；明确尚未交付的范围。
-- 缺陷交回实现者修复，再由验收者复验失败场景及受影响回归。验收者若参与修复，修复部分须交给另一位未参与实现的验收者；安排 worker 时遵循 Parallel Workers。
+- 评审发现分阻断与非阻断。阻断指结果错误、数据丢失或损坏、安全或权限问题、与已确认规格不符；其余为非阻断，记入任务的后续项，不在本分支修，也不触发复验。
+- 只有阻断项交回实现者修复。复验由同一评审者续做，只检查阻断项的修复 diff 及其直接影响，不重新全面审查。评审者只报告，不修改被评审的代码；安排 worker 时遵循 Parallel Workers。
+- 最多两轮：首轮评审加一轮复验。复验后仍有阻断项时停止评审，交给用户决定先集成再跟进修复，还是继续修改。
 - 按改动影响选择检查范围；同一代码基线已有有效结果可引用，注明来源与适用范围。修复后更新基线，重跑受影响检查，避免把旧版本证据当作新版本通过。
 
 ### 模拟环境与真实 CLI
@@ -94,8 +96,8 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 
 ### 结论与证据
 
-- 验收记录开头先列未覆盖与边界、待决事项及适用的人工功能验收入口，再给出 AI 总体结论（通过／部分通过／不通过）和逐项结果。使用 [验收模板](templates/acceptance.md)；无内容的可选区块删除。
-- 记录验收者及是否参与实现、代码基线（commit；有未提交改动时标明 diff 范围）、平台、应用形态（开发／构建／打包）、Provider 类型与相关 CLI 版本。逐项关联来源、操作、预期与实际结果、结论及证据。
+- 验收记录开头先列未覆盖与边界、待决事项及适用的人工功能验收入口，再给出 AI 总体结论（通过／部分通过／不通过）、阻断项与复验、后续项。逐场景结果只在里程碑验收中列出；其他评审不复述实现者已有的测试结果。探针脚本只有转为正式测试时才提交。使用 [验收模板](templates/acceptance.md)；无内容的可选区块删除。
+- 记录验收者及是否参与实现、代码基线（commit；有未提交改动时标明 diff 范围）、平台、应用形态（开发／构建／打包）、Provider 类型与相关 CLI 版本。阻断项与里程碑的逐项结果关联来源、操作、预期与实际结果、结论及证据。
 - 关键交互保留截图，自动化保留结果或日志，远端 CI 记录 run 链接与提交；失败项记录复现步骤、修复与复验结果。证据文件遵循 Evidence，使用隔离测试数据，原生窗口检查的并行限制遵循贡献指南。
 - Review Agent 给出独立结论，Main Agent 核对 Lifecycle 完成条件、更新任务状态并归档；不另加一次形式化签收。功能或阶段准备就绪后，提供可运行版本、核心操作、关键证据与已知限制供人验收。AI 评审通过、任务完成、提交和合并均不等同于人工产品验收。
 

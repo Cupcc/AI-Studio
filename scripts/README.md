@@ -34,11 +34,13 @@ node "../AI Stduio.worktrees/example/scripts/integrate-branch.mjs" feat/example 
 git push origin dev
 ```
 
-命令先做以下检查：没有任何目录检出 dev 分支；源分支有独立的 worktree，且没有暂存或未暂存的改动及未跟踪文件；源提交包含当前 dev 且有新增提交。主目录的状态不在检查之列。检查通过后，命令用 `git commit-tree` 生成一个提交，文件树取自源提交，父提交是当前 dev，再用 `git update-ref` 把 dev 移到这个提交，不改动任何目录的文件。更新时核对 dev 仍是检查时的提交，其间被别的集成移动过就拒绝，需要重新 rebase。提交信息依次是 `--title`、`--body-file` 的内容（可省略）、原提交列表，最后是 trailer 段。`--body-file` 末段的 trailer（例如 `Co-Authored-By`）会移到这一段，后接 `Source-Branch` 与 `Source-Commit`，因为 Git 只把最后一段识别为 trailer。命令先用 commitlint 检查这份提交信息。文件树与源分支末端相同，所以命令不运行 pre-commit。更新 dev 后，命令删除源 worktree（`git worktree remove`，不加 `--force`），再删除本地任务分支；分支只在仍指向源提交时删除。删除失败时（例如 worktree 被锁定），dev 保持已集成，命令仍以零状态退出，在 stderr 输出原因，按[贡献指南的清理](../CONTRIBUTING.md#清理)手动处理。
+命令先做以下检查：没有任何目录检出 dev 分支；源分支有独立的 worktree，且没有暂存或未暂存的改动及未跟踪文件；源提交包含当前 dev 且有新增提交；CI 已通过（见下段）。主目录的状态不在检查之列。检查通过后，命令用 `git commit-tree` 生成一个提交，文件树取自源提交，父提交是当前 dev，再用 `git update-ref` 把 dev 移到这个提交，不改动任何目录的文件。更新时核对 dev 仍是检查时的提交，其间被别的集成移动过就拒绝，需要重新 rebase。提交信息依次是 `--title`、`--body-file` 的内容（可省略）、原提交列表，最后是 trailer 段。`--body-file` 末段的 trailer（例如 `Co-Authored-By`）会移到这一段，后接 `Source-Branch`、`Source-Commit` 与 `CI-Run`，因为 Git 只把最后一段识别为 trailer。命令先用 commitlint 检查这份提交信息。文件树与源分支末端相同，所以命令不运行 pre-commit。更新 dev 后，命令删除源 worktree（`git worktree remove`，不加 `--force`），再删除本地任务分支；分支只在仍指向源提交时删除。删除失败时（例如 worktree 被锁定），dev 保持已集成，命令仍以零状态退出，在 stderr 输出原因，按[贡献指南的清理](../CONTRIBUTING.md#清理)手动处理。
+
+dev 推送后的 CI 与[选择器](#测试分层)使用同一范围，所以集成前源分支须已通过这些检查。命令用选择器计算 dev 到源提交的检查范围；范围非空时，要求 [`remote-ci.mjs`](#远端-e2e) 记录过该分支的一次通过运行：affected 或 full，改了打包输入时另需 package 或 full。运行的提交须是源提交；rebase 前的运行也算，前提是分支自身的改动（`git patch-id`）完全相同，与 dev 新提交的组合由 dev 推送后的 CI 检查。只改文档、设计素材或任务证据等选择器不选任何检查的改动不需要运行。没有合格运行时命令拒绝集成，并给出 `remote-ci.mjs` 命令；CI 本身无法判断时（例如 GitHub Actions 故障）传 `--skip-ci "<原因>"`。所用运行的链接或跳过原因记为 `CI-Run` trailer。
 
 检查或提交失败时命令返回非零状态，不修改 dev 或源 worktree。命令不暂存、复制、rebase 或推送；分支落后时，先回源 worktree 同步并解决冲突。忽略的构建产物和依赖不计入工作区的脏状态，删除 worktree 时一并删除。命令的 Git 操作都在 Git 公共目录中执行，所以从源 worktree 运行也能删除它，但运行者的 shell 会停在已删除的目录里，因此流程在主目录运行。脚本在删除源 worktree 前已加载完毕并完成 commitlint 检查。
 
-脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、dev 被检出、检查后 dev 被其他集成移动这几种拒绝场景，并核对正常 squash 后的文件树、父提交、提交信息、trailer 位置与 CLI 参数，主目录的 HEAD 与本地改动不受影响，以及集成后删除 worktree 与分支（含被忽略的文件、从源 worktree 运行的情况），删除失败时保留集成结果并以零状态退出。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
+脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、dev 被检出、检查后 dev 被其他集成移动、缺少覆盖本次改动的 CI 运行（失败、e2e 模式、其他提交或分支、rebase 后改动不同、打包输入缺 package 运行）这几种拒绝场景，并核对 rebase 前改动相同的运行、无需运行的文档改动、`--skip-ci` 的记录、正常 squash 后的文件树、父提交、提交信息、trailer 位置与 CLI 参数，主目录的 HEAD 与本地改动不受影响，以及集成后删除 worktree 与分支（含被忽略的文件、从源 worktree 运行的情况），删除失败时保留集成结果并以零状态退出。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
 
 ## 测试分层
 
@@ -50,22 +52,23 @@ git push origin dev
 | 纯文档提交 | 暂存快照的 Markdown 本地链接回归检查；人工或 AI 补充表格／标题预览及负责索引要求的一致性检查 |
 | 代码提交 | 文档回归＋受影响 TypeScript 项目类型检查＋相关单测；本地不自动运行 E2E |
 | dev / main push 及面向它们的 PR | 文档回归＋同一选择器的受影响检查＋明确选中的 E2E spec；不自动打包 |
+| 集成到 dev | 源分支须有通过的远端 affected／full 运行，打包输入另需 package／full，见[任务分支集成](#任务分支集成)；选择器不选任何检查的改动免除 |
 | 空变更、设计素材、任务证据 | 不触发应用测试；文档链接检查仍适用 |
 | 未映射路径／全局配置／缺失比较基线 | 阻断并提示补充影响映射或恢复比较基线；不自动退回全量 |
 | 显式完整命令／手动 CI 的 full 模式 | 完整基础检查；full 另运行全量 E2E、打包与冒烟 |
 | 打包输入变更／手动 CI 的 package 模式 | 只构建、打包与打包冒烟，不运行 E2E 与单测 |
 | AI 需要运行 Electron E2E | 默认在远端 CI 运行，见[远端 E2E](#远端-e2e)；本机运行须用户同意 |
-| 功能／里程碑 | 按 [Task Protocol](../tasks/README.md#acceptance)执行交互、独立、真实 CLI 及人工验收；局部测试不能替代这些要求 |
+| 功能／里程碑 | 按 [Task Protocol](../tasks/README.md#acceptance)执行交互验收、所需的独立评审、真实 CLI 及人工验收；局部测试不能替代这些要求 |
 
 开发、提交、CI 均按影响范围验证。执行前说明改动、测试范围和理由，不把「准备提交／合并」当作全量测试理由。相同代码／依赖／配置／环境基线已有有效结果时引用其来源、时间和覆盖范围，不手工重复门禁将要执行的检查；发生相关变化或冲突修复后重跑受影响部分。当前门禁不缓存测试成功结果，重试提交仍会执行选中的局部检查。
 
-选择器为 [check-affected.mjs](check-affected.mjs)。普通源码与测试文件作为 [Vitest `related`](https://vitest.dev/guide/cli.html#vitest-related) 的种子，按实际静态依赖选择单测，不按所在模块追加整套单测。IPC、共享领域类型、Adapter 构建产物的桌面消费者及删除路径仍显式补充模块覆盖。重命名按旧、新路径共同判定；仅修改测试时只选该测试，不触发 E2E。类型检查以受影响的 TS 项目为最小边界，不声称可按单个文件完整检查类型。
+选择器为 [check-affected.mjs](check-affected.mjs)。普通源码与测试文件作为 [Vitest `related`](https://vitest.dev/guide/cli.html#vitest-related) 的种子，按实际静态依赖选择单测，不按所在模块追加整套单测。IPC、共享领域类型、Adapter 构建产物的桌面消费者及删除路径仍显式补充模块覆盖。重命名按旧、新路径共同判定；仅修改测试时只选该测试，不触发 E2E。E2E 辅助模块（如 `e2e/harness.ts`、`e2e/quit.ts`）选择导入它的 spec，没有 spec 导入时阻断；删除辅助模块只做 E2E 类型检查。`playwright.config.ts` 影响每次 E2E，选择全部 spec。类型检查以受影响的 TS 项目为最小边界，不声称可按单个文件完整检查类型。
 
 CSS 与 Renderer HTML 只选择对应界面 E2E，不触发后端单测或 TypeScript 检查。本地提交不自动执行 E2E，界面改动仍须完成 Task Protocol 要求的交互验收。工作台通过同一 iframe 承载预设与自定义包，两类界面由 `project-view` / `workbench` E2E 覆盖，见 [DEC-29](<../docs/07. Decisions.md#dec-29-预设与自定义工作台统一架构>)。
 
 网页包 JS、HTML、manifest 与生成脚本绕过源码导入图，明确选择读取构建产物的 `package-runtime`、`workbench-service`、`portable-pages` 三份单测。TypeScript 配置仅新增网页包 JSON include 时也使用该范围，其他编译配置须另行映射。`electron.vite.config.ts` 或桌面 Vitest 配置仅增删既定网页包构建 import 与调用时使用该范围，Electron 构建配置另选应用启动。CSP 数组变化选择安全策略单测、工作台界面、应用启动及 `runtime-tools` 中的 Shell 和 Browser 场景；共享工具样式也覆盖这两个界面场景，不带入终端关闭流程。同批修改运行时模块或该 E2E 文件时保留完整 runtime-tools。其他构建和测试配置变化须补充映射，不能套用工作台范围。
 
-打包输入 `apps/desktop/electron-builder.yml` 与 `apps/desktop/scripts/after-pack.cjs` 只影响打包产物。本地检查不启动 Electron，自动 CI 不打包，所以选择器对它们不运行检查，并提示集成前运行手动 package 模式（`node scripts/remote-ci.mjs --scope package`，只构建、打包与打包冒烟），run 记入任务。
+打包输入 `apps/desktop/electron-builder.yml` 与 `apps/desktop/scripts/after-pack.cjs` 只影响打包产物。本地检查不启动 Electron，自动 CI 不打包，所以选择器对它们不运行检查，集成命令要求一次通过的手动 package 或 full 运行（`node scripts/remote-ci.mjs --scope package`，只构建、打包与打包冒烟）。
 
 所有 `related` 命令显式使用 `--no-passWithNoTests`，找不到测试时失败。删除源码后没有剩余模块测试时也阻断，须补充消费者映射。选择器回归除了断言计划，还通过 Vitest 实际依赖图核对必须包含和不得包含的测试，通过真实子进程检查空选择退出码。清单检查不执行应用测试；它先构建 Adapter 以解析桌面依赖，并由测试配置生成本地辅助产物。
 
@@ -148,7 +151,8 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 - CI 设置 `HUSKY=0` 显式运行检查；应用 job 保留依赖安装脚本以安装 Electron 与修复 PTY helper。
 - E2E 前用 `displayplacer` 放大 runner 的虚拟屏幕：默认屏幕会把窗口高度限制到 684px，容纳不下桌面端的布局检查尺寸。此步骤只修改临时 CI runner。
 - E2E 沿用模拟 Session Providers，不需要模型密钥或 CLI 登录；`runtime-tools.spec.ts` 另使用真实本地 Shell / PTY 与回环 HTTP fixture（外站跳转只验证提示，不访问外网）。打包冒烟前在 runner 临时目录安装固定版本的 Codex 与 Claude Code（取开发前校验基线），加入 Bash / Zsh login profile；只执行发现与 `--version`，不发送模型请求。应用仍从最小 PATH 启动，以验证 login-shell 路径恢复。
-- 无论成功或失败都上传已产生的 E2E 截图与打包冒烟 JSON。未签名应用仅验证打包，不自动发布。
+- E2E 在 CI 上失败后重试一次（[playwright.config.ts](../apps/desktop/playwright.config.ts)），重试通过记为 flaky，不使运行失败；本机不重试。Playwright 的 trace 选项不覆盖 Electron，所以 [e2e/harness.ts](../apps/desktop/e2e/harness.ts) 的 `launchElectron` 在 CI 上为每次启动录制 trace，测试已失败时关闭应用即保存到该测试的输出目录。JSON 报告写入 `.runtime/desktop-e2e/report.json`。
+- 无论成功或失败都上传已产生的 E2E 截图、trace、报告与打包冒烟 JSON。未签名应用仅验证打包，不自动发布。
 - 工作流只读仓库内容，外部 Actions 固定到 commit SHA。
 - CI 不替代人工验收，未启用分支保护，也不检查历史提交信息。单人开发的远端设置约定见 [贡献指南](../CONTRIBUTING.md) 第 6 节。
 
@@ -179,7 +183,9 @@ node scripts/remote-ci.mjs --scope full
 
 - 命令先检查当前在分支上、工作区没有改动或未跟踪文件、origin 上的同名分支等于 HEAD。不满足时退出并给出推送命令；命令本身不推送。
 - 运行使用分支上的 `ci.yml`，分支须包含上述模式。本功能之前创建的分支先 rebase dev。
-- 命令用 `gh workflow run` 触发，每 30 秒查询一次，job 状态变化时输出一行；查询失败时下一轮重试，连续 3 次失败才退出。结束后把上传的证据下载到 `.runtime/remote-ci/<run-id>/`。失败时把完整的失败日志存为同目录的 `failed.log`，终端只打印最后 60 行。通过时退出码为 0，否则为 1。
+- 命令用 `gh workflow run` 触发，每 30 秒查询一次，job 状态变化时输出一行；查询失败时下一轮重试，连续 3 次失败才退出。结束后把上传的证据下载到 `.runtime/remote-ci/<run-id>/`，并把这次运行（分支、提交、模式、结论）记到 Git 公共目录的 `ai-studio-ci/`，供[集成命令](#任务分支集成)核对。通过时退出码为 0，否则为 1。
+- 失败时把完整的失败日志存为同目录的 `failed.log`。有 E2E 失败时，按 JSON 报告列出失败用例、错误摘要及下载后的 trace 与页面快照路径（用 `pnpm --filter @ai-studio/desktop exec playwright show-trace <zip>` 查看）；其他失败打印日志最后 60 行。dev 最新的 push 运行也失败时另行提示，先对照 dev 的失败，不重复排查。
+- 通过的运行也列出 flaky 用例。它们不阻断集成，另开修复分支或记入任务的后续项处理，不在无关分支里顺手修。
 - 只跑脚本测试约 3 分钟，构建后跑少量 spec 约 3～5 分钟，全量 10 分钟以上，排队时间另计。AI 在后台运行命令，结束后读取结果。
 - runner 是独立的 macOS 虚拟机，有自己的屏幕和焦点，与用户桌面无关；E2E 使用模拟 Provider，不需要密钥。仓库公开，推送的分支所有人可见。
 

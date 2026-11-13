@@ -1,7 +1,8 @@
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 
 // T20261012-settings-theme: AC-08 (FR-SET-001, FR-SET-002; specs/settings/spec.md). Every settings action goes
 // through the visible entry, the menu bar item or the dialog. Fixtures: an isolated user data directory, the
@@ -12,7 +13,7 @@ const evidence = process.env.STUDIO_E2E_EVIDENCE_DIR ?? join(appDir, '../../.run
 let dir: string, app: ElectronApplication, page: Page
 
 async function launch() {
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
   await app.evaluate(({ app: mainApp, BrowserWindow, nativeTheme }) => {

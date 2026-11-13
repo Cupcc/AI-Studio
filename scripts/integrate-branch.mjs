@@ -4,10 +4,12 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
-import { git } from './check-paths.mjs'
+import { affectedPlan, inventory } from './check-affected.mjs'
+import { changedPaths, git } from './check-paths.mjs'
+import { ciRecords } from './remote-ci.mjs'
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
-const usage = 'Usage: node scripts/integrate-branch.mjs <task-branch> --title "<type(scope): subject>" [--body-file <path>]'
+const usage = 'Usage: node scripts/integrate-branch.mjs <task-branch> --title "<type(scope): subject>" [--body-file <path>] [--skip-ci "<reason>"]'
 
 function lintMessage(message) {
   const cli = createRequire(path.join(root, 'package.json')).resolve('@commitlint/cli/cli.js')
@@ -18,7 +20,37 @@ function lintMessage(message) {
   }
 }
 
-export function integrateBranch({ branch, title, body = '', cwd = process.cwd() }) {
+function patchId(base, commit, cwd) {
+  const diff = git(['diff', '--binary', base, commit], cwd)
+  return diff ? execFileSync('git', ['patch-id', '--stable'], { cwd, input: diff, encoding: 'utf8' }).split(' ')[0] : ''
+}
+
+// The dev push runs the same selector, so the branch must already have passed the checks it selects, in a recorded run
+// (remote-ci.mjs writes the records). A run from before a rebase still counts when the branch's own changes are
+// identical; the dev push run covers the combination.
+export function verifyCi({ branch, head, sourceCommit, source, repo, runs = ciRecords }) {
+  const plan = affectedPlan(changedPaths(head, sourceCommit, repo), inventory(source), { base: head, head: sourceCommit, cwd: source })
+  const needs = []
+  if (plan.commands.length || plan.e2e.length || plan.unknown.length || plan.missingTests.length) needs.push(['affected', 'full'])
+  if (plan.packaging.length) needs.push(['package', 'full'])
+  if (!needs.length) return []
+  const own = patchId(head, sourceCommit, repo)
+  const same = sha => {
+    if (sha === sourceCommit) return true
+    try { return patchId(git(['merge-base', sha, head], repo).trim(), sha, repo) === own }
+    catch { return false }
+  }
+  const passed = runs(repo).filter(run => run.branch === branch && run.conclusion === 'success')
+  return needs.map(scopes => {
+    const run = passed.find(item => scopes.includes(item.scope) && same(item.headSha))
+    if (run) return run.headSha === sourceCommit ? run.url : `${run.url} (before rebase)`
+    throw new Error(`No passing ${scopes.join(' or ')} CI run covers the changes of ${branch} at ${sourceCommit.slice(0, 12)}. ` +
+      `Push the branch and run \`node scripts/remote-ci.mjs${scopes.includes('package') ? ' --scope package' : ''}\` in its worktree, ` +
+      'then integrate. If CI cannot judge this change, pass --skip-ci "<reason>".')
+  })
+}
+
+export function integrateBranch({ branch, title, body = '', skipCi = '', cwd = process.cwd(), runs }) {
   if (!branch || branch === 'dev' || branch === 'main' || branch.startsWith('-')) throw new Error('Specify a local task branch to integrate into dev.')
   if (!title?.trim()) throw new Error('Pass --title with the Conventional Commit title of the squash commit.')
   // Run from the shared Git directory so removing the source worktree never pulls the ground from under a later command.
@@ -39,6 +71,7 @@ export function integrateBranch({ branch, title, body = '', cwd = process.cwd() 
   if (head === sourceCommit) throw new Error('The task branch has no new commits to integrate.')
   try { git(['merge-base', '--is-ancestor', head, sourceCommit], repo) }
   catch { throw new Error('Rebase the task branch onto dev in its worktree, resolve conflicts and commit before integrating.') }
+  const ciRuns = skipCi.trim() ? [`skipped (${skipCi.trim()})`] : verifyCi({ branch, head, sourceCommit, source, repo, runs })
 
   // dev is an ancestor of the source, so the squash commit gets exactly the tree the task branch committed and checked.
   const squashed = git(['log', '--reverse', '--format=- %h %s', `${head}..${sourceCommit}`], repo).trim().split('\n').map(line => line.slice(0, 100))
@@ -46,7 +79,7 @@ export function integrateBranch({ branch, title, body = '', cwd = process.cwd() 
   const paragraphs = body.trim() ? body.trim().split(/\n\s*\n/) : []
   const trailers = paragraphs.length && paragraphs.at(-1).split('\n').every(line => /^[\w-]+: \S/.test(line)) ? paragraphs.pop() : ''
   const message = [title.trim(), paragraphs.join('\n\n'), ['Squashed commits:', ...squashed].join('\n'),
-    [trailers, `Source-Branch: ${branch}`, `Source-Commit: ${sourceCommit}`].filter(Boolean).join('\n')].filter(Boolean).join('\n\n') + '\n'
+    [trailers, `Source-Branch: ${branch}`, `Source-Commit: ${sourceCommit}`, ...ciRuns.map(run => `CI-Run: ${run}`)].filter(Boolean).join('\n')].filter(Boolean).join('\n\n') + '\n'
   lintMessage(message)
   const tree = git(['rev-parse', `${sourceCommit}^{tree}`], repo).trim()
   const commit = execFileSync('git', ['commit-tree', tree, '-p', head, '-F', '-'], { cwd: repo, input: message, encoding: 'utf8' }).trim()
@@ -66,10 +99,10 @@ export function integrateBranch({ branch, title, body = '', cwd = process.cwd() 
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
-    const { values, positionals } = parseArgs({ allowPositionals: true, options: { title: { type: 'string' }, 'body-file': { type: 'string' } } })
+    const { values, positionals } = parseArgs({ allowPositionals: true, options: { title: { type: 'string' }, 'body-file': { type: 'string' }, 'skip-ci': { type: 'string' } } })
     if (positionals.length !== 1) throw new Error(usage)
     const body = values['body-file'] ? readFileSync(values['body-file'], 'utf8') : ''
-    const result = integrateBranch({ branch: positionals[0], title: values.title, body })
+    const result = integrateBranch({ branch: positionals[0], title: values.title, body, skipCi: values['skip-ci'] ?? '' })
     console.log(`Squashed ${result.branch} at ${result.sourceCommit} into dev as ${result.commit}.`)
     if (result.cleanupError) console.error(`dev is integrated, but the worktree ${result.worktree} or the branch ${result.branch} was not removed. ` +
       `Clean up by hand as CONTRIBUTING.md §5 清理 describes, without --force:\n${result.cleanupError}`)

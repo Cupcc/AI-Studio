@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import { pathToFileURL } from 'node:url'
@@ -8,6 +8,64 @@ import { git } from './check-paths.mjs'
 
 const usage = 'Usage: node scripts/remote-ci.mjs [--scope affected|e2e|package|full] [--spec <file>]... [--grep <pattern>]'
 const gh = (args, cwd) => execFileSync('gh', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 64 * 1024 * 1024 })
+
+// Finished runs are recorded in the Git common directory, shared by every worktree, for the integration gate.
+const recordDir = cwd => path.resolve(cwd, git(['rev-parse', '--git-common-dir'], cwd).trim(), 'ai-studio-ci')
+
+export function ciRecords(cwd = process.cwd()) {
+  const dir = recordDir(cwd)
+  if (!existsSync(dir)) return []
+  return readdirSync(dir).filter(name => name.endsWith('.json'))
+    .map(name => JSON.parse(readFileSync(path.join(dir, name), 'utf8')))
+    .sort((a, b) => Number(b.id) - Number(a.id))
+}
+
+const ansi = /\u001b\[[0-9;]*m/g
+
+// Playwright's JSON report (apps/desktop/playwright.config.ts) names each failed or flaky test with its error, trace and
+// page snapshot. Paths in it point into the runner's checkout; map them to the downloaded evidence.
+export function e2eSummary(dir, cwd = process.cwd()) {
+  const local = file => {
+    const tail = file.split('/.runtime/')[1]
+    const artifact = tail && readdirSync(dir).map(name => path.join(dir, name, tail)).find(existsSync)
+    return artifact ? path.relative(cwd, artifact) : file
+  }
+  const failed = [], flaky = []
+  const reports = existsSync(dir) ? readdirSync(dir, { recursive: true }).filter(name => path.basename(String(name)) === 'report.json') : []
+  for (const name of reports) {
+    let report
+    try { report = JSON.parse(readFileSync(path.join(dir, String(name)), 'utf8')) } catch { continue }
+    const specs = suite => [...(suite.specs ?? []), ...(suite.suites ?? []).flatMap(specs)]
+    for (const spec of (report.suites ?? []).flatMap(specs)) for (const test of spec.tests ?? []) {
+      if (test.status !== 'unexpected' && test.status !== 'flaky') continue
+      const result = test.results?.find(item => item.status !== 'passed' && item.status !== 'skipped')
+      const lines = [`${spec.file}:${spec.line} › ${spec.title}`,
+        ...String(result?.error?.message ?? '').replace(ansi, '').trim().split('\n').filter(Boolean).slice(0, 4).map(line => `    ${line}`),
+        ...(result?.attachments ?? []).filter(item => item.path && ['trace', 'error-context'].includes(item.name))
+          .map(item => `    ${item.name}: ${local(item.path)}`)]
+      ;(test.status === 'flaky' ? flaky : failed).push(lines.join('\n'))
+    }
+  }
+  return {
+    failed, flaky,
+    lines: [...(failed.length ? [`Failed E2E tests (${failed.length}):`, ...failed] : []),
+      ...(flaky.length ? [`Flaky E2E tests, passed on retry (${flaky.length}); fix them separately:`, ...flaky] : [])]
+  }
+}
+
+// When dev's own push run is red, the same failure on a branch is most likely not the branch's.
+function devRed(branch, cwd) {
+  if (branch === 'dev') return ''
+  try {
+    const [last] = JSON.parse(gh(['run', 'list', '--workflow', 'ci.yml', '--branch', 'dev', '--event', 'push', '--limit', '1',
+      '--json', 'conclusion,headSha,url'], cwd))
+    if (last?.conclusion === 'failure') {
+      return `dev is red as well: its latest push run failed at ${last.headSha.slice(0, 12)} (${last.url}). ` +
+        'Compare its failures before debugging this branch; dev is fixed first (CONTRIBUTING.md §4).'
+    }
+  } catch { /* the hint is optional */ }
+  return ''
+}
 
 // The runner checks out the pushed commit, so local changes and unpushed commits would make the result misleading.
 export function pushedHead(cwd = process.cwd()) {
@@ -51,18 +109,27 @@ export async function remoteCi({ scope = 'affected', specs = [], grep = '', cwd 
     await sleep(pollMs)
   }
 
+  mkdirSync(recordDir(cwd), { recursive: true })
+  writeFileSync(path.join(recordDir(cwd), `${id}.json`),
+    `${JSON.stringify({ id, url: run.url, branch, headSha: head, scope, conclusion: run.conclusion })}\n`)
   const dir = path.join(cwd, '.runtime', 'remote-ci', id)
   mkdirSync(dir, { recursive: true })
   try { gh(['run', 'download', id, '--dir', dir], cwd) }
   catch (error) { log(`No evidence downloaded: ${String(error.stderr || error.message).trim()}`) }
+  const e2e = e2eSummary(dir, cwd)
   if (run.conclusion !== 'success') {
-    // Keep the whole failed-step log on disk and print only its end, where Playwright summarizes failures.
+    // Keep the whole failed-step log on disk. Failed E2E tests are named by the report; any other failure (types,
+    // unit tests, packaging) is summarized at the end of the log.
     let failed
     try { failed = gh(['run', 'view', id, '--log-failed'], cwd) }
     catch (error) { failed = String(error.stderr || error.message) }
     writeFileSync(path.join(dir, 'failed.log'), failed)
-    log(failed.trimEnd().split('\n').slice(-60).join('\n'))
-  }
+    log(e2e.failed.length
+      ? [...e2e.lines, `Full log: ${path.relative(cwd, path.join(dir, 'failed.log'))}`].join('\n')
+      : failed.trimEnd().split('\n').slice(-60).join('\n'))
+    const red = devRed(branch, cwd)
+    if (red) log(red)
+  } else if (e2e.lines.length) log(e2e.lines.join('\n'))
   log(`${run.conclusion}: ${run.url}\nEvidence: ${path.relative(cwd, dir)}`)
   return { id, url: run.url, conclusion: run.conclusion, dir }
 }

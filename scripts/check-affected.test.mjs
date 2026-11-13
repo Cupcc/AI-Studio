@@ -119,10 +119,33 @@ test('unit-test-only edits do not select E2E; E2E-only selects exact spec', () =
 })
 test('unknown/global config blocks before any commands, never falls back to full', () => {
   const run = vi.fn()
-  for (const file of ['pnpm-lock.yaml', 'package.json', `${d}package.json`, `${d}e2e/fixture.ts`, 'unknown.ts']) {
+  for (const file of ['pnpm-lock.yaml', 'package.json', `${d}package.json`, 'unknown.ts']) {
     expect(runPlan(plan([file]), { run })).toBe(1)
   }
+  // An E2E support module that no spec imports has no consumer to run.
+  const unused = `${d}e2e/fixture.ts`
+  expect(runPlan(affectedPlan([unused], [...available, unused], { base: 'missing-test-baseline' }), { run })).toBe(1)
   expect(run).not.toHaveBeenCalled()
+})
+test('E2E support modules select the specs that import them; the Playwright config selects every spec', () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'studio-e2e-support-'))
+  mkdirSync(join(cwd, `${d}e2e`), { recursive: true })
+  writeFileSync(join(cwd, `${d}e2e/files.spec.ts`), "import { launchElectron } from './harness'\n")
+  writeFileSync(join(cwd, `${d}e2e/diff.spec.ts`), "import { closeTestApp } from './quit'\n")
+  const support = [`${d}e2e/harness.ts`, `${d}e2e/quit.ts`]
+  try {
+    const helper = affectedPlan([`${d}e2e/harness.ts`], [...available, ...support], { cwd })
+    expect(helper).toMatchObject({ e2e: ['e2e/files.spec.ts'], unknown: [] })
+    expect(commandText(helper)).toContain('tsconfig.e2e.json')
+    // Deleting a support module leaves only the type check, which catches a spec that still imports it.
+    expect(affectedPlan([`${d}e2e/old-helper.ts`], available, { cwd })).toMatchObject({ e2e: [], unknown: [] })
+    const config = affectedPlan([`${d}playwright.config.ts`], available, { cwd })
+    expect(config.unknown).toEqual([])
+    expect(config.e2e).toEqual(available.filter(file => file.startsWith(`${d}e2e/`)).map(file => file.slice(d.length)).sort())
+    expect(config.e2eFilters).toEqual({})
+  } finally {
+    rmSync(cwd, { recursive: true, force: true })
+  }
 })
 test('local checks never run Electron; CI builds once then passes explicit specs', () => {
   const run = vi.fn(() => ({ status: 0 }))

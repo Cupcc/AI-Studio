@@ -1,14 +1,15 @@
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 const appDir = join(__dirname, '..')
 let dir: string, projectPath: string, app: ElectronApplication, page: Page
 const workspace = () => page.locator('.project-workspace:not([hidden])')
 const preview = () => page.frameLocator('iframe[title="工作台页面"]')
 test.beforeEach(async () => {
   dir = mkdtempSync(join(tmpdir(), 'studio-project-view-')); projectPath = join(dir, 'Payment Project'); mkdirSync(projectPath)
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await app.evaluate(({ dialog, app, BrowserWindow }, path) => {
     dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] })
@@ -55,7 +56,7 @@ test('AC-06: ordinary Session updates Architecture; last-good, tool stability, h
   await expect(workspace().locator('.view-recent').getByRole('button', { name: '重新整理支付模块架构。', exact: true })).toBeVisible()
   await page.screenshot({ path: test.info().outputPath('ac06-ready.png') })
   await app.close()
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
   await expect(preview().getByText('修复后恢复', { exact: true })).toBeVisible()
 })

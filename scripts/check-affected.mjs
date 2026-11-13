@@ -91,6 +91,10 @@ export function affectedPlan(files, available, comparison = {}) {
     for (const file of selected) seeds[group].add(file)
     return selected.length
   }
+  const specs = available.filter(file => file.startsWith(`${desktop}e2e/`) && file.endsWith('.spec.ts'))
+  const addE2e = file => { e2e.add(file.slice(desktop.length)); fullE2e.add(file.slice(desktop.length)) }
+  const cwd = comparison.cwd ?? process.cwd()
+  const source = file => existsSync(`${cwd}/${file}`) ? readFileSync(`${cwd}/${file}`, 'utf8') : ''
   const addDomainE2e = name => {
     for (const spec of domains[name]) {
       e2e.add(`e2e/${spec}.spec.ts`)
@@ -197,11 +201,21 @@ export function affectedPlan(files, available, comparison = {}) {
     }
     if (file.startsWith(`${desktop}e2e/`)) {
       types.add('e2e')
-      if (file.endsWith('.spec.ts') && available.includes(file)) {
-        e2e.add(file.slice(desktop.length))
-        fullE2e.add(file.slice(desktop.length))
+      if (file.endsWith('.spec.ts') && available.includes(file)) addE2e(file)
+      else if (!file.endsWith('.spec.ts') && available.includes(file)) {
+        // Support modules (launch, quit, fixtures) run every spec that imports them. A deleted one needs only the
+        // type check, which catches a spec still importing it.
+        const name = file.slice(`${desktop}e2e/`.length).replace(/\.ts$/, '')
+        const importers = specs.filter(spec => source(spec).includes(`from './${name}'`))
+        if (importers.length) importers.forEach(addE2e)
+        else unknown.push(file)
       }
-      else if (!file.endsWith('.spec.ts')) unknown.push(file)
+      continue
+    }
+    // The Playwright config shapes every E2E run (retries, reporters, output), so every spec runs.
+    if (file === `${desktop}playwright.config.ts`) {
+      types.add('e2e')
+      specs.forEach(addE2e)
       continue
     }
     if (file.startsWith(`${desktop}src/`) && /\.(?:[cm]?[jt]sx?|css|html|json)$/.test(file)) {
@@ -290,7 +304,7 @@ export function runPlan(plan, { ci = false, cwd = process.cwd(), run = spawnSync
     return 1
   }
   if (plan.packaging?.length) {
-    console.log(`Packaging inputs changed (${plan.packaging.join(', ')}): no local or affected check covers them. Before integrating, run \`node scripts/remote-ci.mjs --scope package\` (build, package and packaged smoke) and record the run in the task.`)
+    console.log(`Packaging inputs changed (${plan.packaging.join(', ')}): no local or affected check covers them. Before integrating, run \`node scripts/remote-ci.mjs --scope package\` (build, package and packaged smoke); the integration command requires a passing package or full run.`)
   }
   const commands = [...plan.commands]
   if (ci && plan.e2e.length) {

@@ -2,7 +2,8 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:f
 import { createServer, type Server } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 import { commitAll, initRepo, put } from './git-fixture'
 import { closeTestApp } from './quit'
 
@@ -20,7 +21,7 @@ const row = (name: string) => tree().locator('.files-row').filter({ has: page.lo
 const tool = (name: string) => workspace().getByRole('button', { name, exact: true })
 
 async function launch() {
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
   await expect(page.getByTestId('topbar')).toBeVisible()
   await app.evaluate(({ BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; win.setContentSize(1440, 900); win.show(); win.focus() })

@@ -1,12 +1,13 @@
 import { existsSync, readFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Locator, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { hoverInPage, launchElectron } from './harness'
 import { closeTestApp } from './quit'
 let dir: string, app: ElectronApplication, page: Page
 const appDir=join(__dirname,'..'), plugin=()=>page.frameLocator('iframe[title="工作台页面"]')
 async function launch() {
-  app=await electron.launch({args:[appDir,`--studio-user-data-dir=${join(dir,'data')}`],cwd:appDir,env:{...process.env,STUDIO_E2E_PROVIDERS:'1'}})
+  app=await launchElectron({args:[appDir,`--studio-user-data-dir=${join(dir,'data')}`],cwd:appDir,env:{...process.env,STUDIO_E2E_PROVIDERS:'1'}})
   page=await app.firstWindow();await page.waitForLoadState('domcontentloaded')
 }
 test.beforeEach(async()=>{
@@ -22,11 +23,6 @@ test.beforeEach(async()=>{
   await expect(page.locator('[data-workbench-id^="workbench-draft:"]')).toHaveCount(0)
 })
 test.afterEach(async()=>{await closeTestApp(app,page);rmSync(dir,{recursive:true,force:true})})
-// The page runs in its own renderer process. Right after it is added, Chromium can still deliver the pointer to the host's
-// <iframe> element, and Playwright reports such a hover or click as done; hover until the page itself sees the pointer.
-async function hoverInPage(target:Locator) {
-  await expect.poll(async()=>{await target.hover();return target.evaluate(el=>el.matches(':hover'))}).toBe(true)
-}
 async function brief(text:string) {
   const toggle=plugin().getByRole('button',{name:'任务要求',exact:true})
   await hoverInPage(toggle)

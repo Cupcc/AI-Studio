@@ -1,7 +1,8 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 
 // Simulated native records. Real native coverage is verified separately against a versioned CLI.
 const appDir = join(__dirname, '..')
@@ -9,7 +10,7 @@ let dir: string, app: ElectronApplication, page: Page
 const workspace = () => page.locator('.project-workspace:not([hidden])')
 const panel = () => workspace().getByRole('region', { name: '本轮变更', exact: true })
 async function launch() {
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
   await expect(page.getByTestId('topbar')).toBeVisible()
   await app.evaluate(({ app, BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; win.setContentSize(1280, 800); app.focus({ steal: true }); win.show(); win.focus() })

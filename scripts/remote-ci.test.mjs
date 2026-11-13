@@ -3,7 +3,7 @@ import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, wr
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { git } from './check-paths.mjs'
-import { remoteCi } from './remote-ci.mjs'
+import { ciRecords, remoteCi } from './remote-ci.mjs'
 
 const temporary = []
 beforeEach(() => {
@@ -19,7 +19,14 @@ const fakeGh = `#!/bin/sh
 printf '%s\\n' "$*" >> "$FAKE_GH_DIR/calls"
 case "$1 $2" in
   "workflow run") echo "https://github.com/owner/repo/actions/runs/42" ;;
-  "run download") mkdir -p "$5/desktop-test-evidence-1" && echo shot > "$5/desktop-test-evidence-1/shot.png" ;;
+  "run download")
+    mkdir -p "$5/desktop-test-evidence-1" && echo shot > "$5/desktop-test-evidence-1/shot.png"
+    if [ -n "$FAKE_GH_REPORT" ]; then
+      mkdir -p "$5/desktop-test-evidence-1/desktop-e2e/test-results/drag"
+      cp "$FAKE_GH_REPORT" "$5/desktop-test-evidence-1/desktop-e2e/report.json"
+      echo zip > "$5/desktop-test-evidence-1/desktop-e2e/test-results/drag/trace-1.zip"
+    fi ;;
+  "run list") printf '%s\\n' "\${FAKE_GH_DEV:-[]}" ;;
   "run view")
     if [ "$4" = "--log-failed" ]; then echo "macOS arm64 checks  1 failed"; exit 0; fi
     if [ -n "$FAKE_GH_FLAKY" ] && [ ! -f "$FAKE_GH_DIR/flaked" ]; then touch "$FAKE_GH_DIR/flaked"; echo "HTTP 502" >&2; exit 1; fi
@@ -93,6 +100,55 @@ test('keeps waiting through a failed status query', async () => {
   expect(result.conclusion).toBe('success')
   expect(lines).toContain('Status query failed, retrying: HTTP 502')
   expect(f.calls().filter(call => call.startsWith('run view 42 --json'))).toHaveLength(3)
+})
+
+test('records each finished run for the integration gate', async () => {
+  const f = fixture('failure')
+  f.push()
+  expect(ciRecords(f.work)).toEqual([])
+  await run(f, { scope: 'full' })
+  expect(ciRecords(f.work)).toEqual([{ id: '42', url: 'https://github.com/owner/repo/actions/runs/42',
+    branch: 'feat/example', headSha: f.head, scope: 'full', conclusion: 'failure' }])
+})
+
+// A Playwright JSON report with one failed and one flaky test; paths point into the runner's checkout.
+function report(dir) {
+  const trace = '/Users/runner/work/AI-Studio/AI-Studio/.runtime/desktop-e2e/test-results/drag/trace-1.zip'
+  const spec = (title, line, status, results) => ({ title, file: 'workbench.spec.ts', line, tests: [{ status, results }] })
+  const file = path.join(dir, 'report.json')
+  writeFileSync(file, JSON.stringify({ suites: [{ title: 'workbench.spec.ts', specs: [], suites: [{ title: 'group', specs: [
+    spec('drags a row', 12, 'unexpected', [{ status: 'failed', error: { message: '\u001b[31mTimeoutError: locator.click: Timeout 30000ms exceeded.\u001b[39m\nCall log:' },
+      attachments: [{ name: 'trace', path: trace, contentType: 'application/zip' }] }]),
+    spec('renames a row', 30, 'flaky', [{ status: 'failed', error: { message: 'Error: element(s) not found' }, attachments: [] }, { status: 'passed', attachments: [] }]),
+    spec('adds a row', 40, 'expected', [{ status: 'passed', attachments: [] }])
+  ] }] }] }))
+  return file
+}
+
+test('names failed and flaky E2E tests with local trace paths and says when dev is red too', async () => {
+  const f = fixture('failure')
+  f.push()
+  vi.stubEnv('FAKE_GH_REPORT', report(path.dirname(f.work)))
+  vi.stubEnv('FAKE_GH_DEV', JSON.stringify([{ conclusion: 'failure', headSha: 'abcdef1234567890', url: 'https://github.com/owner/repo/actions/runs/41' }]))
+  const lines = []
+  const result = await remoteCi({ cwd: f.work, pollMs: 0, log: line => lines.push(line) })
+  const output = lines.join('\n')
+  expect(output).toContain('Failed E2E tests (1):\nworkbench.spec.ts:12 › drags a row\n    TimeoutError: locator.click: Timeout 30000ms exceeded.\n    Call log:')
+  expect(output).toContain(`trace: ${path.join('.runtime', 'remote-ci', '42', 'desktop-test-evidence-1', 'desktop-e2e', 'test-results', 'drag', 'trace-1.zip')}`)
+  expect(output).toContain('Flaky E2E tests, passed on retry (1); fix them separately:\nworkbench.spec.ts:30 › renames a row')
+  expect(output).not.toContain('adds a row')
+  expect(output).toContain(`Full log: ${path.relative(f.work, path.join(result.dir, 'failed.log'))}`)
+  expect(output).toContain('dev is red as well: its latest push run failed at abcdef123456')
+})
+
+test('lists flaky tests after a passing run', async () => {
+  const f = fixture()
+  f.push()
+  vi.stubEnv('FAKE_GH_REPORT', report(path.dirname(f.work)))
+  const lines = []
+  await remoteCi({ cwd: f.work, pollMs: 0, log: line => lines.push(line) })
+  expect(lines.join('\n')).toContain('Flaky E2E tests, passed on retry (1)')
+  expect(f.calls().some(call => call.startsWith('run list'))).toBe(false)
 })
 
 test('runs requested specs and keeps the failed log', async () => {

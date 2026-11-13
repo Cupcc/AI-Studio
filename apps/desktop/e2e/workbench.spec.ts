@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 import { closeTestApp } from './quit'
 
 const appDir = join(__dirname, '..')
@@ -14,7 +15,7 @@ async function more(action: string) {
   await page.getByRole('menu', { name: '更多操作', exact: true }).getByRole('menuitem', { name: action, exact: true }).click()
 }
 async function launch() {
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
 }
 test.beforeEach(async () => {

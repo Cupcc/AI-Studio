@@ -1,7 +1,8 @@
 import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 
 // FR-TOOL-001 / FR-INPUT-001 against the built app. Session Providers are simulated (STUDIO_E2E_PROVIDERS=1) and
 // no CLI or model runs; fixture Projects live under os.tmpdir(). Only the native directory chooser is replaced:
@@ -18,7 +19,7 @@ const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 const row = (name: string) => tree().locator('.files-row').filter({ has: page.locator('.files-row__name', { hasText: new RegExp(`^${escape(name)}$`) }) })
 
 async function launch() {
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' } })
   page = await app.firstWindow()
   await expect(page.getByTestId('topbar')).toBeVisible()
   await app.evaluate(({ BrowserWindow }) => { const win = BrowserWindow.getAllWindows()[0]!; win.setContentSize(1280, 800); win.show(); win.focus() })

@@ -3,7 +3,8 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 
 // Playwright loads specs as CommonJS (the package is not type: module).
 const appDir = join(__dirname, '..')
@@ -17,7 +18,7 @@ let page: Page
 
 test.beforeAll(async () => {
   userData = mkdtempSync(join(tmpdir(), 'studio e2e '))
-  app = await electron.launch({
+  app = await launchElectron({
     args: [appEntry, `--studio-user-data-dir=${userData}`],
     env: { ...process.env, STUDIO_E2E_PROVIDERS: '1' },
     cwd: appDir

@@ -1,7 +1,8 @@
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { launchElectron } from './harness'
 
 // T20261026-claude-adapt: Claude reports its own effort levels (no `ultra`); the menu must follow that catalog.
 const appDir = join(__dirname, '..')
@@ -15,7 +16,7 @@ test.beforeEach(async () => {
   const project = join(dir, 'Project'); mkdirSync(project)
   // Exercise the opt-in collision guard: E2E providers must win over the real
   // Claude development provider when both environment switches are present.
-  app = await electron.launch({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1', STUDIO_ENABLE_CLAUDE_CODE: '1' } })
+  app = await launchElectron({ args: [appDir, `--studio-user-data-dir=${join(dir, 'user-data')}`], cwd: appDir, env: { ...process.env, STUDIO_E2E_PROVIDERS: '1', STUDIO_ENABLE_CLAUDE_CODE: '1' } })
   page = await app.firstWindow(); await page.waitForLoadState('domcontentloaded')
   await expect(page.getByTestId('topbar')).toBeVisible()
   await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }) }, project)
