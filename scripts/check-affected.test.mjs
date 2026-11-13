@@ -56,6 +56,9 @@ test('docs, evidence and empty diff do not run application checks', () => {
     expect(plan(files)).toMatchObject({ commands: [], e2e: [], unknown: [] })
   }
 })
+test('agent rule documents run no application checks', () => {
+  expect(plan(['.agents/rules/design.md'])).toMatchObject({ commands: [], e2e: [], unknown: [] })
+})
 test('input selects related module, not terminal/settings/adapter suites', () => {
   const result = plan([`${d}src/renderer/src/features/input/Composer.tsx`])
   expect(result.unknown).toEqual([])
