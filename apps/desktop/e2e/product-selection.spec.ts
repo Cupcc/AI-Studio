@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
+import { _electron as electron, expect, test, type ElectronApplication, type Locator, type Page } from '@playwright/test'
 import { closeTestApp } from './quit'
 let dir: string, app: ElectronApplication, page: Page
 const appDir=join(__dirname,'..'), plugin=()=>page.frameLocator('iframe[title="工作台页面"]')
@@ -21,11 +21,14 @@ test.beforeEach(async()=>{
   await expect(plugin().locator('#run-all')).toBeEnabled()
 })
 test.afterEach(async()=>{await closeTestApp(app,page);rmSync(dir,{recursive:true,force:true})})
+// The page runs in its own renderer process. Right after it is added, Chromium can still deliver the pointer to the host's
+// <iframe> element, and Playwright reports such a hover or click as done; hover until the page itself sees the pointer.
+async function hoverInPage(target:Locator) {
+  await expect.poll(async()=>{await target.hover();return target.evaluate(el=>el.matches(':hover'))}).toBe(true)
+}
 async function brief(text:string) {
   const toggle=plugin().getByRole('button',{name:'任务要求',exact:true})
-  // The page runs in its own renderer process. Right after it is added, Chromium can still deliver the pointer to the host's
-  // <iframe> element, and Playwright reports such a click as done; hover until the page itself sees the pointer.
-  await expect.poll(async()=>{await toggle.hover();return toggle.evaluate(el=>el.matches(':hover'))}).toBe(true)
+  await hoverInPage(toggle)
   await toggle.click()
   await plugin().getByRole('textbox',{name:'任务目标',exact:true}).fill(text)
   await plugin().getByRole('button',{name:'保存要求',exact:true}).click()
@@ -98,6 +101,10 @@ test('infinite canvas drags groups and nodes, pans, zooms, edits connections and
   const revision=()=>frame.locator('body').evaluate(async()=>(await (window as unknown as {workbench:{getInstance():Promise<{stateRevision:number}>}}).workbench.getInstance()).stateRevision)
   const view=async()=>({zoom:await canvas.getAttribute('data-zoom'),x:await canvas.getAttribute('data-pan-x'),y:await canvas.getAttribute('data-pan-y')})
   const reenter=async()=>{await page.getByRole('button',{name:'概览',exact:true}).click();await page.getByRole('button',{name:'选品工作台',exact:true}).click();await expect(canvas).toHaveAttribute('data-zoom',/./)}
+  // Icon-only controls name themselves on hover; native title tooltips do not show inside the host iframe.
+  await hoverInPage(frame.getByRole('button',{name:'自动排布',exact:true}))
+  await expect(frame.locator('.tip')).toBeVisible()
+  await expect(frame.locator('.tip')).toHaveText('自动排布')
   await frame.locator('[data-stage="0"]').click()
   const group=frame.locator('#stage-0'),handle=group.getByRole('button',{name:'移动分组 数据收集与整理',exact:true})
   const position=()=>group.evaluate(el=>({x:parseFloat(el.style.left),y:parseFloat(el.style.top)}))
@@ -114,6 +121,11 @@ test('infinite canvas drags groups and nodes, pans, zooms, edits connections and
   await card.locator('.node-title').dblclick()
   await expect(frame.getByRole('heading',{name:'市场与趋势',exact:true})).toBeVisible()
   await frame.getByRole('button',{name:'关闭节点详情',exact:true}).click()
+  // The keyboard connect hint lasts only while connect mode does.
+  await frame.getByRole('button',{name:'市场与趋势 输出端点',exact:true}).focus();await page.keyboard.press('Enter')
+  await expect(frame.locator('#notice')).toHaveText('选择目标节点的输入点，Esc 取消。')
+  await page.keyboard.press('Escape')
+  await expect(frame.locator('#notice')).toBeEmpty()
   await frame.getByRole('button',{name:'市场与趋势 输出端点',exact:true}).click()
   await frame.getByRole('button',{name:'竞品与价格 输入端点',exact:true}).click()
   const edge=frame.getByRole('button',{name:'市场与趋势 → 竞品与价格 依赖连线',exact:true})
@@ -121,7 +133,8 @@ test('infinite canvas drags groups and nodes, pans, zooms, edits connections and
   await edge.focus();await page.keyboard.press('Enter')
   await frame.getByRole('button',{name:'删除连线',exact:true}).click()
   await expect(edge).toHaveCount(0)
-  await expect(frame.locator('.layout-status')).toHaveText('布局已保存')
+  await expect(canvas).toHaveAttribute('data-layout-save','saved')
+  await expect(frame.locator('.layout-status')).toBeHidden()
   // Pan and zoom only change the view; they never write the instance state.
   const saved=await revision()
   await frame.getByRole('button',{name:'适应全图',exact:true}).click()

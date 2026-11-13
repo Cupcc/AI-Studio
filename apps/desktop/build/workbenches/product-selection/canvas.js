@@ -3,9 +3,9 @@ import {NODE,nodeSize,layoutFor,groupBounds,worldNode,zoomAt,fitBounds,startView
 const svgNS='http://www.w3.org/2000/svg';
 const svgElement=(name,attributes)=>{const el=document.createElementNS(svgNS,name);for(const [key,value] of Object.entries(attributes))el.setAttribute(key,String(value));return el;};
 export function createCanvas(root,options) {
-  let state=options.state,layout=layoutFor(state),view=null,gesture=null,space=false,connecting=null,edgeSelection=null,ignoreClick=false,lastNodeClick=null,current=null;
+  let state=options.state,layout=layoutFor(state),view=null,gesture=null,space=false,connecting=null,edgeSelection=null,ignoreClick=false,lastNodeClick=null,current=null,connectHint=false;
   const groups=new Map(),cards=new Map(),edges=new Map();
-  root.innerHTML='<div class="canvas-world"><div class="canvas-groups"></div><svg class="canvas-edges" aria-label="节点依赖连线"></svg><div class="canvas-nodes"></div></div><div class="canvas-tools" role="toolbar" aria-label="画布控制"><button data-tool="out" aria-label="缩小画布">−</button><button data-tool="reset" aria-label="画布恢复100%">100%</button><button data-tool="in" aria-label="放大画布">+</button><button data-tool="fit">适应全图</button><button data-tool="delete" hidden>删除连线</button><span class="layout-status" role="status"></span><button data-tool="retry" hidden>重试保存布局</button><button data-tool="help" aria-label="画布操作说明" title="画布操作说明">?</button></div><p class="canvas-help" id="canvas-help">拖动空白平移 · Ctrl/⌘ + 滚轮缩放 · 拖动节点圆点连线 · 空格拖动平移 · 画布聚焦时方向键平移、加减键缩放</p>';
+  root.innerHTML='<div class="canvas-world"><div class="canvas-groups"></div><svg class="canvas-edges" aria-label="节点依赖连线"></svg><div class="canvas-nodes"></div></div><div class="canvas-tools" role="toolbar" aria-label="画布控制"><button data-tool="out" aria-label="缩小画布">−</button><button data-tool="reset" aria-label="画布恢复100%">100%</button><button data-tool="in" aria-label="放大画布">+</button><button data-tool="fit">适应全图</button><button data-tool="delete" hidden>删除连线</button><span class="layout-status" role="status"></span><button data-tool="retry" hidden>重试保存布局</button></div><p class="canvas-help" id="canvas-help">方向键平移，加号或减号缩放，0 适应全图，Esc 取消当前操作。节点与分组用 Alt 加方向键移动。</p>';
   root.setAttribute('aria-describedby','canvas-help');
   const world=root.querySelector('.canvas-world'),groupLayer=root.querySelector('.canvas-groups'),nodeLayer=root.querySelector('.canvas-nodes'),svg=root.querySelector('svg');
   const tool=name=>root.querySelector(`[data-tool="${name}"]`),layoutStatus=root.querySelector('.layout-status');
@@ -40,10 +40,12 @@ export function createCanvas(root,options) {
   function fit(stage){if(!root.clientWidth||!root.clientHeight)return;view=fitBounds(stage===undefined?[0,1,2,3].map(i=>groupBounds(state,layout,i)):[groupBounds(state,layout,stage)],size());paint();}
   function zoom(factor,anchor={x:root.clientWidth/2,y:root.clientHeight/2}){view=zoomAt(view,factor,anchor);paint();}
   function selectEdge(edge){edgeSelection=edge;for(const item of edges.values())item.line.classList.toggle('selected',item===edge);tool('delete').hidden=!edge;tool('delete').disabled=options.locked();}
-  function connect(source,target){connecting=null;paint();void options.connect(source,target,false);}
+  // The keyboard connect hint is only true while that mode lasts; finishing or cancelling clears it.
+  function clearConnectHint(){if(connectHint){connectHint=false;options.notice('');}}
+  function connect(source,target){connecting=null;clearConnectHint();paint();void options.connect(source,target,false);}
   function portAction(id,output){
     if(options.locked()){options.notice('执行中不能修改依赖，请先停止。',true);return;}
-    if(output){connecting={source:id,end:point(id,true)};selectEdge(null);options.notice('将连线拖到目标输入点，或点击目标节点的输入点。Esc 取消。');paint();}
+    if(output){connecting={source:id,end:point(id,true)};selectEdge(null);connectHint=true;options.notice('选择目标节点的输入点，Esc 取消。');paint();}
     else if(connecting)connect(connecting.source,id);
     else options.notice('先选择上游节点的输出点，再连接此输入点。');
   }
@@ -62,7 +64,7 @@ export function createCanvas(root,options) {
       let el=cards.get(n.id);
       if(!el){
         el=document.createElement('article');el.className='canvas-node';el.dataset.canvasNode=n.id;
-        el.innerHTML=`<button class="node" data-node=""><span class="work-card-header"><span class="node-icon">${icon(n.stage===0?'source':n.stage===1?'analysis':'image')}</span><strong class="node-title"></strong></span><span class="node-state"><span class="status"></span><span class="version-label"></span><span class="node-agent">${icon('bot')}独立 Agent</span></span><span class="node-description"></span><span class="dependency"></span></button><button class="expand-node node-action" data-action="open" title="展开节点">${icon('open')}</button><div class="candidate-preview-list"></div><footer><button class="node-action card-run" data-action="run">${icon('play')}<span>生成</span></button><button class="node-action card-chat" data-action="chat">${icon('chat')}讨论此节点</button></footer><button class="node-port input-port" data-port="input"></button><button class="node-port output-port" data-port="output"></button>`;
+        el.innerHTML=`<button class="node" data-node=""><span class="work-card-header"><span class="node-icon">${icon(n.stage===0?'source':n.stage===1?'analysis':'image')}</span><strong class="node-title"></strong></span><span class="node-state"><span class="status"></span><span class="version-label"></span><span class="node-agent">${icon('bot')}独立 Agent</span></span><span class="node-description"></span><span class="dependency"></span></button><button class="expand-node node-action" data-action="open" data-tip="展开节点">${icon('open')}</button><div class="candidate-preview-list"></div><footer><button class="node-action card-run" data-action="run">${icon('play')}<span>生成</span></button><button class="node-action card-chat" data-action="chat">${icon('chat')}讨论此节点</button></footer><button class="node-port input-port" data-port="input"></button><button class="node-port output-port" data-port="output" data-tip="拖到下游节点建立依赖"></button>`;
         el.querySelector('.node').dataset.node=n.id;cards.set(n.id,el);nodeLayer.append(el);
       }
       const [cls,label]=status(n),body=el.querySelector('.node');el.classList.toggle('is-selected',n.id===selected);el.classList.toggle('material',n.stage===0);el.classList.toggle('design',n.stage===3);el.classList.toggle('proposals',n.stage===2);
@@ -126,7 +128,7 @@ export function createCanvas(root,options) {
   }
   function cancel(){
     if(gesture){if(gesture.kind==='pan')view=gesture.origin;else if(gesture.kind==='node')layout.nodes[gesture.id]=gesture.origin;else if(gesture.kind==='group')layout.groups[gesture.stage]=gesture.origin;const id=gesture.pointer;gesture=null;if(root.hasPointerCapture(id))root.releasePointerCapture(id);}
-    connecting=null;space=false;lastNodeClick=null;root.classList.remove('gesturing','pan-ready');paint();
+    connecting=null;clearConnectHint();space=false;lastNodeClick=null;root.classList.remove('gesturing','pan-ready');paint();
   }
   root.onpointerdown=pointerDown;root.onpointermove=pointerMove;root.onpointerup=pointerUp;root.onpointercancel=cancel;
   root.onclick=event=>{
@@ -159,15 +161,15 @@ export function createCanvas(root,options) {
   const spaceDown=event=>{if(event.code==='Space'&&root.contains(event.target)&&!event.target.closest('button')){space=true;root.classList.add('pan-ready');event.preventDefault();}};
   const spaceUp=event=>{if(event.code==='Space'){space=false;root.classList.remove('pan-ready');}};
   document.addEventListener('keydown',spaceDown);document.addEventListener('keyup',spaceUp);window.addEventListener('blur',cancel);
-  tool('in').onclick=()=>zoom(1.2);tool('out').onclick=()=>zoom(1/1.2);tool('reset').onclick=()=>zoom(1/view.zoom);tool('fit').onclick=()=>fit();tool('help').onclick=()=>options.notice(root.querySelector('.canvas-help').textContent);
+  tool('in').onclick=()=>zoom(1.2);tool('out').onclick=()=>zoom(1/1.2);tool('reset').onclick=()=>zoom(1/view.zoom);tool('fit').onclick=()=>fit();
   tool('delete').onclick=()=>{if(edgeSelection)void options.connect(edgeSelection.source,edgeSelection.target,true);};tool('retry').onclick=()=>options.layoutChanged();
   const observer=new ResizeObserver(()=>{if(!view&&root.clientWidth&&root.clientHeight){view=startView([0,1,2,3].map(i=>groupBounds(state,layout,i)),size());paint();}else paint();});observer.observe(root);
   return {
     update,fit,autoLayout:()=>{layout=layoutFor({...state,canvas:undefined});view=null;fit();changed();},
     layout:()=>{const committed=structuredClone(layout);if(gesture?.kind==='node')committed.nodes[gesture.id]={...gesture.origin};if(gesture?.kind==='group')committed.groups[gesture.stage]={...gesture.origin};return committed;},
-    saving:()=>{layoutStatus.textContent='保存布局中…';tool('retry').hidden=true;},
-    saved:()=>{layoutStatus.textContent='布局已保存';tool('retry').hidden=true;},
-    failed:message=>{layoutStatus.textContent='布局未保存';tool('retry').hidden=false;options.notice(message,true);},
+    saving:()=>{root.dataset.layoutSave='saving';layoutStatus.textContent='';tool('retry').hidden=true;},
+    saved:()=>{root.dataset.layoutSave='saved';layoutStatus.textContent='';tool('retry').hidden=true;},
+    failed:message=>{root.dataset.layoutSave='failed';layoutStatus.textContent='布局未保存';tool('retry').hidden=false;options.notice(message,true);},
     dispose:()=>{observer.disconnect();document.removeEventListener('keydown',spaceDown);document.removeEventListener('keyup',spaceUp);window.removeEventListener('blur',cancel);cancel();}
   };
 }

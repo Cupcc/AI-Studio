@@ -12,7 +12,26 @@ const collection = () => state.nodes.find(n=>n.id===activeCandidates && n.stage=
 const allCandidates = () => collection() ? candidatesFor(state,collection()) : [];
 const chosen = () => collection() ? selectedFor(state,collection()) : [];
 const preview = () => snapshot.target.kind === 'draft';
-function notice(text, error = false) { $('notice').textContent = text; $('notice').title = text; $('notice').classList.toggle('error', error); }
+function notice(text, error = false) { $('notice').textContent = text; $('notice').dataset.tip = text; $('notice').classList.toggle('error', error); }
+// Native title tooltips do not show inside the host iframe. Icon-only, collapsed or truncated controls name themselves through one floating tip.
+const tip=document.createElement('div');tip.className='tip';tip.setAttribute('aria-hidden','true');document.body.append(tip);
+let tipTarget=null,tipTimer=0;
+function hideTip(){clearTimeout(tipTimer);tip.classList.remove('shown');}
+function tipFor(el){
+  if(el===tipTarget)return;tipTarget=el;hideTip();if(!el)return;
+  tipTimer=setTimeout(()=>{
+    const text=el.dataset.tip,label=el.querySelector(':scope>span')??(el.textContent.trim()?el:null);
+    if(!text||!el.isConnected||el.getAttribute('aria-expanded')==='true')return;
+    if(label&&label.offsetWidth>1&&label.scrollWidth<=label.clientWidth&&label.scrollHeight<=label.clientHeight)return;
+    tip.textContent=text;const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight,below=r.bottom+6+h<=innerHeight-8;
+    tip.style.left=Math.max(8,Math.min(r.left+r.width/2-w/2,innerWidth-8-w))+'px';tip.style.top=(below?r.bottom+6:r.top-6-h)+'px';tip.classList.add('shown');
+  },500);
+}
+document.addEventListener('pointerover',event=>{if(!event.buttons)tipFor(event.target.closest('[data-tip]'));});
+document.addEventListener('pointerout',event=>{if(!event.relatedTarget)tipFor(null);});
+document.addEventListener('focusin',event=>tipFor(event.target.matches(':focus-visible')?event.target.closest('[data-tip]'):null));
+document.addEventListener('focusout',()=>tipFor(null));
+for(const type of ['pointerdown','wheel','keydown'])document.addEventListener(type,hideTip,{capture:true,passive:true});
 function status(node) {
   const run = currentRun(node);
   if (run?.session.stopping) return ['running','正在停止'];
@@ -191,7 +210,7 @@ $('task-toggle').onclick=()=>{$('task-settings').open=!$('task-settings').open;}
 $('task-settings').ontoggle=()=>$('task-toggle').setAttribute('aria-expanded',String($('task-settings').open));
 document.addEventListener('pointerdown',event=>{if($('task-settings').open&&!event.target.closest('#task-settings,#task-toggle,dialog'))$('task-settings').open=false;});
 document.addEventListener('keydown',event=>{if(event.key!=='Escape'||!$('task-settings').open||document.querySelector('dialog[open]'))return;const inside=$('task-settings').contains(document.activeElement);$('task-settings').open=false;if(inside)$('task-toggle').focus();});
-$('notice-close').onclick=()=>{$('notice').textContent='';$('notice').title='';};
+$('notice-close').onclick=()=>{$('notice').textContent='';$('notice').dataset.tip='';};
 for(const el of document.querySelectorAll('.canvas-top,.notice-bar'))el.addEventListener('wheel',event=>{const nav=event.target.closest('#stages');if(nav&&nav.scrollWidth>nav.clientWidth&&!event.ctrlKey&&!event.metaKey)return;event.preventDefault();$('canvas').dispatchEvent(new WheelEvent('wheel',event));},{passive:false});
 $('save-task').onclick=()=>action(async()=>{await save({...state,brief:$('brief').value,sources:$('sources').value});notice('任务要求已保存。');});
 $('run-all').onclick=()=>action(async()=>{if(!state.brief.trim())throw new Error('请先填写并保存选品任务目标。');queue=executionOrder(state,state.nodes.map(n=>n.id));notice('已按依赖安排执行；停止、失败会终止后续安排。');});
@@ -211,7 +230,7 @@ $('add-node').onclick=()=>editDialog('新建节点','',true,async title=>{
   const stage=Number($('edit-stage').value),id=crypto.randomUUID();
   await save({...state,nodes:[...state.nodes,{id,title:title.slice(0,80),stage,deps:stage===3&&collection()?[collection().id]:[],prompt:'请依据任务目标完成此节点，注明来源与待核实信息。',candidate:stage===3?'A':null,revision:0,result:'',fingerprint:'',runId:null}]});openNode(id);
 });
-$('stages').innerHTML=stages.map((s,i)=>`<button data-stage="${i}" title="${s.title}"><b>${i+1}</b><span>${s.title}</span></button>`).join('');
+$('stages').innerHTML=stages.map((s,i)=>`<button data-stage="${i}" data-tip="${s.title}"><b>${i+1}</b><span>${s.title}</span></button>`).join('');
 function currentStage(stage){for(const button of document.querySelectorAll('[data-stage]'))if(Number(button.dataset.stage)===stage)button.setAttribute('aria-current','location');else button.removeAttribute('aria-current');}
 $('auto-layout').onclick=()=>canvas.autoLayout();
 document.querySelectorAll('[data-stage]').forEach(button=>button.onclick=()=>canvas.fit(Number(button.dataset.stage)));
@@ -234,7 +253,6 @@ try {
       if(runs.some(running)||queue)throw new Error('执行中不能修改依赖，请先停止。');
       await save(connectionState(state,source,target,remove));
       if(selectedNode===target)renderDetail(true);
-      notice(remove?'依赖连线已删除，受影响的结果需要更新。':'依赖连线已保存，执行时将使用此上游结果。');
     })
   });
   $('brief').value=state.brief;$('sources').value=state.sources;
