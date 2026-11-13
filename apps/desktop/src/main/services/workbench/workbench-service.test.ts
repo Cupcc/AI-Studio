@@ -310,7 +310,7 @@ it('previews the latest selection template for the same instance and retains sav
   service.updateState({ref,state:{brief:'保留已有目标',nodes:[{id:'existing',result:'已有成果'}]},expectedRevision:0})
   const upgrade=service.createDraft({projectId,source:'template',instanceId:instance.id,templateId:'product-selection'})
   const preview=await service.getSnapshot(draftRef(upgrade));if(!preview.page)throw new Error('missing upgrade')
-  expect(preview.page.manifest.version).toBe('1.2.2')
+  expect(preview.page.manifest.version).toBe('1.2.3')
   expect((await service.getSnapshot(ref)).page?.manifest.version).toBe('1.0.0')
   expect(preview.page.state).toMatchObject({brief:'保留已有目标'})
   service.updateState({ref,state:{brief:'预览期间的新目标',nodes:[{id:'existing',result:'已有成果'}]},expectedRevision:1})

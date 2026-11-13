@@ -129,7 +129,7 @@ function renderDetail(force) {
     if(!title||!prompt) throw new Error('请填写节点名称与要求。');
     const next=structuredClone(state), item=next.nodes.find(n=>n.id===node.id);
     Object.assign(item,{title,prompt,deps:[...document.querySelectorAll('[data-dep]:checked')].map(el=>el.dataset.dep),candidate:$('candidate-id')?.value||null});
-    executionOrder(next,next.nodes.map(n=>n.id));if(item.stage===3)candidateSource(next,item);await save(next);renderDetail(true);notice('节点要求已保存；受影响的结果需要重新生成。');
+    executionOrder(next,next.nodes.map(n=>n.id));if(item.stage===3)candidateSource(next,item);await save(next);renderDetail(true);
   });
   document.querySelectorAll('[data-history]').forEach(button=>button.onclick=()=>action(()=>api.openSession(runs.find(r=>r.request.requestId===button.dataset.history).session.id)));
   document.querySelectorAll('[data-design]').forEach(button=>button.onclick=()=>{const target=state.nodes.find(n=>n.stage===3&&n.candidate===button.dataset.design&&n.deps.includes(node.id));if(target)openNode(target.id);});
@@ -138,11 +138,11 @@ function renderDetail(force) {
     const c=candidatesFor(state,node).find(c=>c.id===button.dataset.edit);
     editDialog('修改方案 '+c.id+' 的材质与工艺', c.material, false, async material=>{
       const next=structuredClone(state),source=next.nodes.find(n=>n.id===node.id);source.candidates=structuredClone(candidatesFor(next,source));source.candidates.find(x=>x.id===c.id).material=material;
-      await save(next);renderDetail(true);notice('方案 '+c.id+' 已修改，对应设计需要更新。');
+      await save(next);renderDetail(true);
     });
   });
 }
-async function discussNode(node){await api.setDraft('请讨论选品节点“'+node.title+'”。\n任务：'+state.brief+'\n节点要求：'+node.prompt+'\n当前结果：'+node.result,{target:'new'});notice('已填入对话草稿，请检查后发送。');}
+async function discussNode(node){await api.setDraft('请讨论选品节点“'+node.title+'”。\n任务：'+state.brief+'\n节点要求：'+node.prompt+'\n当前结果：'+node.result,{target:'new'});}
 async function startNode(id) {
   if(preview())throw new Error('请先添加工作台。');
   if(runs.some(running))throw new Error('已有节点执行中，请等待或停止。');
@@ -154,7 +154,7 @@ async function startNode(id) {
   item.pending={request,fingerprint:fingerprint(state,node)};
   await save(next);
   const run=await api.startAgent(request);runs.push(run);
-  notice('正在执行 '+node.title+'，可打开会话查看工具调用或处理审批。');renderDetail(true);
+  renderDetail(true);
 }
 async function refreshRuns() {
   if(preview())return;
@@ -183,9 +183,9 @@ async function refreshRuns() {
           const next=structuredClone(state),item=next.nodes.find(n=>n.id===node.id);
           if(item.stage===2){item.candidates=parseCandidates(result);item.selected=selectedFor(next,item).filter(id=>item.candidates.some(c=>c.id===id));}
           item.result=result;item.fingerprint=item.pending.fingerprint;item.runId=id;item.revision++;delete item.pending;
-          await save(next);notice(node.title+' 已完成，结果已保存。');
+          await save(next);
         } catch(error){queue=null;runErrors.set(id,error.message);notice(error.message,true);}
-      } else if(run.session.lastOutcome!=='completed') {queue=null;notice(node.title+(run.session.lastOutcome==='interrupted'?' 已停止；原成果保留。':' 执行失败，请打开会话查看原因。'),run.session.lastOutcome==='failed');}
+      } else if(run.session.lastOutcome!=='completed') {queue=null;if(run.session.lastOutcome==='failed')notice(node.title+' 执行失败，请打开会话查看原因。',true);}
       accepted.set(id,observed);if(selectedNode===node.id)renderDetail(true);
     }
   }
@@ -196,7 +196,7 @@ async function poll() {
     await refreshRuns();
     if(queue && !runs.some(running)) {
       while(queue.length && !stale(state,state.nodes.find(n=>n.id===queue[0])))queue.shift();
-      if(queue.length)await startNode(queue.shift());else {queue=null;notice('四个流程已完成，结果已保存。');}
+      if(queue.length)await startNode(queue.shift());else queue=null;
     }
   }catch(error){queue=null;notice(error.message,true);}
   finally{busy=false;render();}
@@ -213,8 +213,8 @@ document.addEventListener('keydown',event=>{if(event.key!=='Escape'||!$('task-se
 $('notice-close').onclick=()=>{$('notice').textContent='';$('notice').dataset.tip='';};
 for(const el of document.querySelectorAll('.canvas-top,.notice-bar'))el.addEventListener('wheel',event=>{const nav=event.target.closest('#stages');if(nav&&nav.scrollWidth>nav.clientWidth&&!event.ctrlKey&&!event.metaKey)return;event.preventDefault();$('canvas').dispatchEvent(new WheelEvent('wheel',event));},{passive:false});
 $('save-task').onclick=()=>action(async()=>{await save({...state,brief:$('brief').value,sources:$('sources').value});notice('任务要求已保存。');});
-$('run-all').onclick=()=>action(async()=>{if(!state.brief.trim())throw new Error('请先填写并保存选品任务目标。');queue=executionOrder(state,state.nodes.map(n=>n.id));notice('已按依赖安排执行；停止、失败会终止后续安排。');});
-$('stop-all').onclick=()=>action(async()=>{queue=null;for(const run of runs.filter(running))await api.stopAgent(run.request.requestId);await refreshRuns();notice('已停止编排；历史成果保留。');});
+$('run-all').onclick=()=>action(async()=>{if(!state.brief.trim())throw new Error('请先填写并保存选品任务目标。');queue=executionOrder(state,state.nodes.map(n=>n.id));});
+$('stop-all').onclick=()=>action(async()=>{queue=null;for(const run of runs.filter(running))await api.stopAgent(run.request.requestId);await refreshRuns();});
 function editDialog(title,value,showStage,onSave) {
   $('edit-label-text').textContent=showStage?'名称':'材质与工艺';
   $('edit-heading').textContent=title;$('edit-value').value=value;$('edit-stage-label').hidden=!showStage;
@@ -258,6 +258,6 @@ try {
   $('brief').value=state.brief;$('sources').value=state.sources;
   const tools=$('canvas').querySelector('.canvas-tools'),placeNotice=()=>{const room=$('canvas').clientWidth-28-tools.offsetWidth-12;document.body.style.setProperty('--notice-room',room+'px');document.body.classList.toggle('notice-stacked',room<200);};
   new ResizeObserver(placeNotice).observe(tools);new ResizeObserver(placeNotice).observe($('canvas'));
-  notice(preview()?'模板预览：编辑任务后，点击上方“添加至当前项目”开始真实执行。':'填写选品目标与资料，按节点生成或运行四个流程。');
+  notice('');
   render();void tick();
 }catch(error){notice(error.message,true);}
