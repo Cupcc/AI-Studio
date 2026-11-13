@@ -56,7 +56,7 @@ pnpm install
 
 - 新 worktree 先运行 `pnpm install` 再提交。`core.hooksPath` 指向 Husky 生成的 `.husky/_/`，这个目录缺失时 Git 会跳过提交检查。
 - 并行工作开始前核对写入范围。会修改同一文件的工作按先后顺序进行。
-- 本机资源同一时间只给一个 worktree 用。开发模式下各 worktree 共用同一份 userData 与数据库（见[桌面端说明](apps/desktop/README.md)），所以 `pnpm dev` 不能同时运行。需要窗口焦点的 Electron E2E 同一时间也只能运行一份；AI 默认在本机虚拟机中运行 E2E，不占用本机桌面，见[本机 VM CI](scripts/README.md#本机-vm-ci)。
+- 本机资源同一时间只给一个 worktree 用。开发模式下各 worktree 共用同一份 userData 与数据库（见[桌面端说明](apps/desktop/README.md)），所以 `pnpm dev` 不能同时运行。需要窗口焦点的 Electron E2E 同一时间也只能运行一份。AI 默认在本机虚拟机中运行 E2E 和界面交互检查，不占用本机桌面和焦点，也不受这两项限制，见[本机 VM CI](scripts/README.md#本机-vm-ci)与[本机 VM 界面检查](scripts/README.md#本机-vm-界面检查)。每台主机最多同时运行两台 macOS 虚拟机，两者共用这两个名额，名额不够时排队。原生系统交互仍在本机进行，受本条限制。
 
 任务分支用 rebase 同步 dev，不把 dev merge 进任务分支。任务分支可以按需推送，用于备份或远端 CI。个人分支 rebase 后，先确认远端没有他人的新提交，再使用 `--force-with-lease`。禁止对 dev 或 main 强推。
 

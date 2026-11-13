@@ -211,7 +211,7 @@ commitlint 在 `@commitlint/config-conventional` 基础上放开主题大小写�
 
 ## 本机 VM CI
 
-AI 运行的应用检查（受影响检查、选中 E2E、打包冒烟与全量）默认在本机 tart macOS 虚拟机中执行，这是正式 CI，见[任务记录](../.agents/archive/tasks/T20261113-local-vm-ci/task.md)。Electron E2E 会打开真实窗口，部分用例还会抢占焦点；虚拟机有自己的屏幕和焦点，不打扰用户桌面，也不需要推送分支或等待 GitHub runner 排队。在本机桌面运行 E2E 须用户同意，同一时间只运行一份。AI 交互验收用 agent-browser 操作本机应用，不在此列，见 [Task Protocol](../tasks/README.md#acceptance)。
+AI 运行的应用检查（受影响检查、选中 E2E、打包冒烟与全量）默认在本机 tart macOS 虚拟机中执行，这是正式 CI，见[任务记录](../.agents/archive/tasks/T20261113-local-vm-ci/task.md)。Electron E2E 会打开真实窗口，部分用例还会抢占焦点；虚拟机有自己的屏幕和焦点，不打扰用户桌面，也不需要推送分支或等待 GitHub runner 排队。在本机桌面运行 E2E 须用户同意，同一时间只运行一份。AI 交互验收用 agent-browser 操作应用，默认也在虚拟机里进行，见[本机 VM 界面检查](#本机-vm-界面检查)。
 
 每台 Mac 准备一次：
 
@@ -246,6 +246,41 @@ node scripts/vm-ci.mjs --scope full --parallel
 - 失败时，E2E 失败按 JSON 报告列出失败用例、错误摘要与 trace 路径（用 `pnpm --filter @ai-studio/desktop exec playwright show-trace <zip>` 查看）；其他失败打印该步日志的最后 60 行。
 - 通过的运行也列出 flaky 用例。它们不阻断集成，另开修复分支或记入任务的后续项处理，不在无关分支里顺手修。
 - 虚拟机启动到可以执行命令约 20～35 秒；单台全量（含打包）约 7 分钟。AI 在后台运行命令，结束后读取结果。
+
+## 本机 VM 界面检查
+
+AI 的界面交互验收默认在本机 tart 虚拟机里做。`vm-ui.mjs` 起一台运行着应用的虚拟机，之后每条 agent-browser 命令都在虚拟机内执行。应用窗口只出现在虚拟机里，不占用本机桌面和焦点，也不受“开发模式共用 userData，同一时间只能运行一份 `pnpm dev`”的限制，所以几个 worktree 可以同时做界面检查。可行性验证见[任务记录](../.agents/archive/tasks/T20261113-vm-ui-checks/task.md)，镜像的准备见[本机 VM CI](#本机-vm-ci)。
+
+在任务 worktree 中提交后执行：
+
+```sh
+node scripts/vm-ui.mjs start                 # 在后台运行；输出 READY 行后可以操作
+node scripts/vm-ui.mjs ab <label> snapshot -i
+node scripts/vm-ui.mjs open-project <label>
+node scripts/vm-ui.mjs ab <label> find role button click --name 打开本地目录
+node scripts/vm-ui.mjs ab <label> find role textbox fill "虚拟机里的界面检查" --name 消息
+node scripts/vm-ui.mjs ab <label> screenshot "/Volumes/My Shared Files/out/project.png"
+node scripts/vm-ui.mjs stop <label>
+```
+
+| 子命令 | 作用 |
+|---|---|
+| `start [--label <label>] [--ttl <分钟>] [--real]` | 占用一个虚拟机名额，克隆 `ai-studio-ci` 镜像并启动。在虚拟机内检出 HEAD、构建，并用模拟 Provider 启动应用；加 `--real` 时改用真实 CLI。就绪后输出一行 `READY vmci-ui-<label> evidence=<证据目录>`，然后保持运行。`label` 默认取当前分支名，`[a-z0-9-]` 以外的字符换成 `-` |
+| `ab <label> <agent-browser 参数>` | 在这台虚拟机内执行 `agent-browser --session ui <参数>`，原样输出，退出码与它相同。首次使用时自动连接应用。参数里的 `{{名称}}` 换成本地配置中的同名值 |
+| `open-project <label> [<虚拟机内目录>]` | 创建目录（默认 `/tmp/vm-ui-project`，目录为空时写入一行 `README.md`），并让应用的目录选择框直接返回它。之后用 `ab` 点击“打开本地目录” |
+| `stop <label>` | 通知 `start` 进程结束，等虚拟机删除、名额释放后返回。没有这个会话时说明原因，退出码为 1 |
+
+- 检查的是已提交的 HEAD。工作区有改动或未跟踪文件时 `start` 拒绝运行，同名虚拟机已存在时也拒绝。代码经只读共享的 Git 公共目录拉取临时引用 `refs/vm-ui/<label>/head`。改了代码后先提交，再 `stop` 并重新 `start`。
+- 默认使用模拟 Provider（`STUDIO_E2E_PROVIDERS=1`），不发送模型请求。`--real` 在虚拟机里安装被测提交 `ci.yml` 固定版本的 Codex 与 Claude Code，并以真实 Provider 启动应用。虚拟机里没有 CLI 登录状态，两个 CLI 起初显示“未登录”，要在应用的“设置 → CLI → 配置”里选“自定义连接”并填入地址和 Key 后才能使用。真实模式会发送模型请求，只在需要验证真实链路时使用。原生系统交互仍在本机进行，沿用[贡献指南](../CONTRIBUTING.md#主目录与-worktree)的本机限制。
+- 地址和 Key 不写在命令里。`ab` 把参数中的 `{{名称}}` 换成主目录 `apps/desktop/.env.local` 里同名的值，例如 `ab <label> find role textbox fill "{{codex_api_key}}" --name "API Key"`。这个文件不纳入 Git，任务 worktree 里没有它，所以命令从 `git worktree list` 的第一项读取；名称不存在时命令列出可用的名称并退出。应用界面只显示“已安全保存”，不回显 Key。截图里出现网关地址时不提交到仓库，仓库是公开的。
+- agent-browser 不能操作原生的目录选择框。`open-project` 经主进程 inspector 把 `dialog.showOpenDialog` 换成固定返回值，其余操作仍从界面入口执行。验收记录按 [Task Protocol](../tasks/README.md#验收准备与分层) 说明这项注入。
+- 界面检查与虚拟机 CI 共用每台主机两台 macOS 虚拟机的名额，名额不够时排队并输出占用者。`start` 运行期间一直占用一个名额，检查完就 `stop`。
+- `start` 收到 SIGINT、SIGTERM 或 SIGHUP、某一步失败，或运行满 `--ttl`（从 READY 起算，默认 60 分钟）时，停止并删除虚拟机，删除临时引用，释放名额。`start` 进程被强行结束时，用 `stop <label>` 清理遗留的虚拟机、引用和名额。
+- 虚拟机 4 核 6 GB，屏幕 1920×1080。应用以全新的 userData 目录启动，CDP 端口 9341，主进程 inspector 端口 9342。agent-browser 固定为 0.38.2，安装在虚拟机的 `$HOME/ab`，版本与[技能说明](../.agents/skills/README.md#agent-browser-工具依赖)一致，升级时一起改。
+- 证据在 `.runtime/vm-ui/<label>/`，会话结束后保留。其中有准备过程的 `setup.log`（准备失败时 `start` 打印它的最后 40 行）、应用输出 `electron.log` 和 `tart.log`。虚拟机内的 `/Volumes/My Shared Files/out/` 就是这个目录，截图存到它下面即可在本机查看。需要留证的截图再复制到任务的 `evidence/`。
+- 往这个共享目录只写新文件名。本机用“写新文件再改名”替换的文件，虚拟机内会报找不到。
+- `ab` 之后的参数全部交给 agent-browser，含空格或中文的参数照常加引号。
+- 依赖与镜像一致时，从 `start` 到 READY 实测 42 秒，之后每条 `ab` 命令约 0.5 秒。AI 在后台运行 `start`，读到 READY 行后开始操作。
 
 ## GitHub Actions CI
 

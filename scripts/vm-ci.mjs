@@ -22,21 +22,22 @@ export const PARALLEL_MEMORY = 6144
 // macOS allows two macOS guests per host; every vm-ci run on this Mac shares these slots.
 export const MAX_VMS = 2
 const DEFAULT_SPEC_SECONDS = 15
-const SHARE = '/Volumes/My Shared Files'
+export const SHARE = '/Volumes/My Shared Files'
 
 const pnpm = (...args) => ['pnpm', ...args]
 const build = [
   { name: 'build-adapter', cmd: pnpm('--filter', '@ai-studio/agent-adapter', 'run', 'build') },
   { name: 'build-desktop', cmd: pnpm('--filter', '@ai-studio/desktop', 'run', 'build') }
 ]
-const packaging = [
-  { name: 'package', cmd: pnpm('--filter', '@ai-studio/desktop', 'run', 'package:built') },
-  // LaunchServices starts the packaged app with a minimal PATH; the login shell must find these CLIs (as on CI). The
-  // tested commit's ci.yml pins their versions.
-  { name: 'install-clis', shell: 'clis=(${(f)"$(grep -oE "@(openai/codex|anthropic-ai/claude-code)@[0-9][^ ]*" .github/workflows/ci.yml | sort -u)"}) && ' +
+// LaunchServices starts the packaged app with a minimal PATH; the login shell must find these CLIs (as on CI). The
+// tested commit's ci.yml pins their versions.
+export const INSTALL_CLIS = 'clis=(${(f)"$(grep -oE "@(openai/codex|anthropic-ai/claude-code)@[0-9][^ ]*" .github/workflows/ci.yml | sort -u)"}) && ' +
     '(( $#clis == 2 )) && npm install --prefix "$HOME/studio-cli" --no-audit --no-fund $clis && ' +
     'printf \'\\nexport PATH="%s:%s:$PATH"\\n\' "$HOME/studio-cli/node_modules/.bin" "$(dirname "$(command -v node)")" | tee -a "$HOME/.bash_profile" "$HOME/.zprofile" && ' +
-    '"$HOME/studio-cli/node_modules/.bin/codex" --version && "$HOME/studio-cli/node_modules/.bin/claude" --version' },
+    '"$HOME/studio-cli/node_modules/.bin/codex" --version && "$HOME/studio-cli/node_modules/.bin/claude" --version'
+const packaging = [
+  { name: 'package', cmd: pnpm('--filter', '@ai-studio/desktop', 'run', 'package:built') },
+  { name: 'install-clis', shell: INSTALL_CLIS },
   { name: 'smoke-packaged', cmd: pnpm('smoke:packaged') }
 ]
 
@@ -111,10 +112,12 @@ export function planRun({ scope, specs = [], grep = '', parallel = false, base, 
 const GUEST_SETUP_STEPS = 2
 // Dependency inputs: when they match the image's, its node_modules are current and installing again only costs time.
 const DEPS_HASH = 'cat pnpm-lock.yaml pnpm-workspace.yaml package.json apps/*/package.json packages/*/package.json 2>/dev/null | shasum -a 256 | cut -d" " -f1'
+export const INSTALL_DEPS = `if [[ "$(${DEPS_HASH})" == "$(cat ~/.ai-studio-ci.deps 2>/dev/null)" ]]; then echo "Dependencies match the image; install skipped."; ` +
+  'else pnpm install --frozen-lockfile; fi'
 /** Step log names: numbered in run order, so the last log of a failed VM is the failing step. */
 export const stepLog = (index, step) => `${String(index + 1).padStart(2, '0')}-${step.name}`
 
-const quote = value => /^[\w@%+=:,./-]+$/.test(value) ? value : `'${String(value).replaceAll("'", "'\\''")}'`
+export const quote = value => /^[\w@%+=:,./-]+$/.test(value) ? value : `'${String(value).replaceAll("'", "'\\''")}'`
 const render = step => step.shell ? `zsh -c ${quote(step.shell)}` : step.cmd.map(quote).join(' ')
 
 /** The script one VM runs: check out the tested commit from the read-only repository share, run the steps, keep evidence. */
@@ -123,9 +126,7 @@ export function guestScript({ id, head, label, steps }) {
     `git checkout --quiet --force --detach ${head} && git clean -ffdq && ` +
     // A fresh checkout has no build output; do not let the image's stale Adapter dist or app build mask a failure.
     'rm -rf .runtime/desktop-e2e .runtime/desktop packages/agent-adapter/dist apps/desktop/out apps/desktop/dist'
-  const install = `if [[ "$(${DEPS_HASH})" == "$(cat ~/.ai-studio-ci.deps 2>/dev/null)" ]]; then echo "Dependencies match the image; install skipped."; ` +
-    'else pnpm install --frozen-lockfile; fi'
-  const all = [{ name: 'checkout', shell: checkout }, { name: 'install', shell: install }, ...steps]
+  const all = [{ name: 'checkout', shell: checkout }, { name: 'install', shell: INSTALL_DEPS }, ...steps]
   return [
     '#!/bin/zsh',
     'set -u',
@@ -247,9 +248,9 @@ export function testedHead(cwd) {
   return { branch: git(['branch', '--show-current'], cwd).trim(), head: git(['rev-parse', 'HEAD'], cwd).trim() }
 }
 
-const vmList = deps => JSON.parse(deps.tart(['list', '--format', 'json', '--source', 'local']))
+export const vmList = deps => JSON.parse(deps.tart(['list', '--format', 'json', '--source', 'local']))
 
-async function untilReady(deps, name, file, timeoutMs = 240_000) {
+export async function untilReady(deps, name, file, timeoutMs = 240_000) {
   const started = deps.now()
   for (;;) {
     try { deps.tart(['exec', name, 'test', '-f', file], { timeout: 15_000 }); return } catch { /* booting, or the share is not mounted yet */ }
@@ -258,7 +259,7 @@ async function untilReady(deps, name, file, timeoutMs = 240_000) {
   }
 }
 
-async function waitForSlots(dir, count, owner, deps) {
+export async function waitForSlots(dir, count, owner, deps) {
   let shown = 0
   for (;;) {
     const { slots, holders } = acquireSlots(dir, count, owner, deps.alive)

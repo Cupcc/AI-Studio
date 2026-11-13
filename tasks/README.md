@@ -91,10 +91,12 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 | 层次 | 执行方式 | 检查内容 |
 |---|---|---|
 | 自动化检查 | 类型检查、单元测试、Playwright Electron E2E，以及适用的数据库／进程检查；E2E 默认在[本机 VM CI](../scripts/README.md#本机-vm-ci) 运行 | 逻辑、边界、异常与回归；命令和门禁遵循 [桌面端说明](../apps/desktop/README.md)与[贡献指南](../CONTRIBUTING.md) |
-| AI 交互验收 | 涉及用户界面的改动，必须用 agent-browser 操作实际 Electron 应用，并查看关键步骤截图 | 从用户入口执行点击、输入、滚动、切换等相关操作，核对流程、反馈、布局与可用性 |
+| AI 交互验收 | 涉及用户界面的改动，必须用 agent-browser 操作实际 Electron 应用，并查看关键步骤截图；默认在虚拟机里进行，见[本机 VM 界面检查](../scripts/README.md#本机-vm-界面检查) | 从用户入口执行点击、输入、滚动、切换等相关操作，核对流程、反馈、布局与可用性 |
 | 人工产品验收 | 查看功能或阶段结论、未覆盖项与关键证据，体验核心流程 | 判断是否符合预期、是否接受交付；状态按 Lifecycle 单独记录，不逐项签收内部 task |
 
 界面验收须从用户可见入口执行被验收行为，不能以直接调用内部接口、注入状态或仅阅读代码代替。测试准备可使用 fixture，但须说明注入范围；Playwright 回归通过不能替代 AI 本轮的界面操作与截图检查。agent-browser 无法执行的原生系统交互须使用可用的原生自动化补充，或列为待人工检查；未执行的步骤记为未覆盖。
+
+AI 交互验收默认在虚拟机里做。`node scripts/vm-ui.mjs start` 起一台带应用的虚拟机，之后用 `ab` 子命令操作并截图，几个 worktree 可以同时进行。它检查已提交的 HEAD，默认使用模拟 Provider；需要验证真实 CLI 链路时加 `--real`，在应用的设置里填入自定义连接。原生系统交互仍在本机进行，沿用[贡献指南](../CONTRIBUTING.md#主目录与-worktree)的本机限制；虚拟机里的目录选择框用 `open-project` 绕过。截图存到 `.runtime/vm-ui/<label>/`，需要留证的再复制到任务的 `evidence/`。命令与名额见[本机 VM 界面检查](../scripts/README.md#本机-vm-界面检查)。
 
 ### 验收范围与独立性
 

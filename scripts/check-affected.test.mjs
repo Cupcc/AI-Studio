@@ -344,6 +344,7 @@ test.each([
   ['integration command', ['scripts/integrate-branch.mjs', 'scripts/integrate-branch.test.mjs']],
   ['remote CI command', ['scripts/remote-ci.mjs', 'scripts/remote-ci.test.mjs']],
   ['local VM CI command', ['scripts/vm-ci.mjs', 'scripts/vm-ci.test.mjs']],
+  ['local VM UI check command', ['scripts/vm-ui.mjs', 'scripts/vm-ui.test.mjs']],
   ['task overview command', ['scripts/tasks.mjs', 'scripts/tasks.test.mjs']],
   ['acceptance checklist command', ['scripts/acceptance.mjs', 'scripts/acceptance.test.mjs']]
 ])('%s and its tests run script checks without application suites', (_name, files) => {
