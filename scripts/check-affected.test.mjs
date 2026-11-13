@@ -59,6 +59,13 @@ test('docs, evidence and empty diff do not run application checks', () => {
 test('agent rule documents run no application checks', () => {
   expect(plan(['.agents/rules/design.md'])).toMatchObject({ commands: [], e2e: [], unknown: [] })
 })
+test('Claude Code skills, subagents and settings run no application checks', () => {
+  expect(plan(['.claude/skills/impeccable/SKILL.md', '.claude/skills/impeccable/scripts/live-browser.js',
+    '.claude/agents/impeccable-documenter.md', '.claude/settings.json'])).toMatchObject({ commands: [], e2e: [], unknown: [] })
+  for (const file of ['.claude/settings.local.json', '.claude/agents/nested/role.md', '.claude/commands/run.mjs']) {
+    expect(plan([file]).unknown).toEqual([file])
+  }
+})
 test('input selects related module, not terminal/settings/adapter suites', () => {
   const result = plan([`${d}src/renderer/src/features/input/Composer.tsx`])
   expect(result.unknown).toEqual([])

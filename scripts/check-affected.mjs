@@ -133,6 +133,8 @@ export function affectedPlan(files, available, comparison = {}) {
   }
   for (const file of [...new Set(files)].sort()) {
     if (/^\.agents\/rules\/[\w-]+\.md$/.test(file)) continue // agent rule documents; no code reads them
+    // Claude Code skills, subagents and project settings only steer development agents; the app never loads them.
+    if (/^\.claude\/(?:skills\/|agents\/[\w-]+\.md$|settings\.json$)/.test(file)) continue
     const legacyTemplate = /^templates\/(acceptance|plan|report|spec|task)\.md$/.exec(file)
     if (legacyTemplate && !available.includes(file) &&
       available.includes(`${legacyTemplate[1] === 'spec' ? 'specs' : 'tasks'}/templates/${legacyTemplate[1]}.md`)) continue

@@ -10,3 +10,26 @@ playwright-report/
 
 # Local environment files may hold credentials.
 .env*.local
+
+# Impeccable runtime state, per-developer overrides and downloaded engines.
+# Shared artifacts stay tracked: .impeccable/config.json, design.json, surfaces/*.md.
+**/skills/impeccable/scripts/bin/
+**/skills/impeccable/scripts/config.json
+**/.impeccable/config.local.json
+**/.impeccable/hook.cache.json
+**/.impeccable/hook.pending.json
+**/.impeccable/*.png
+**/.impeccable/review/
+**/.impeccable/questions/
+**/.impeccable/history/
+**/.impeccable/live/server.json
+**/.impeccable/live/sessions/
+**/.impeccable/live/previews/
+**/.impeccable/live/annotations/
+**/.impeccable/live/cache/
+**/.impeccable/live/manual-edit-apply-transaction.json
+**/.impeccable/live/manual-edit-events.jsonl
+**/.impeccable/live/manual-edit-evidence/
+**/.impeccable/live/pending-manual-edits.json
+**/.impeccable/live/deferred-svelte-component-accepts.json
+**/.impeccable/live/*.png
