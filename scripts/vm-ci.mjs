@@ -403,7 +403,9 @@ export async function vmCi({ scope = 'affected', specs = [], grep = '', parallel
   // An interrupted run is neither a pass nor a finding; its logs end mid-step.
   const cancelled = codes.includes(130)
   const conclusion = cancelled ? 'cancelled' : failed ? 'failure' : 'success'
-  writeRecord(cwd, { id, url: path.relative(cwd, evidence), branch, headSha: head, scope, conclusion })
+  // The evidence goes with the worktree when it is integrated; the record in the Git common directory stays, so the
+  // integration's CI-Run trailer names the run, not the evidence path.
+  writeRecord(cwd, { id, url: `vm-ci ${id}`, branch, headSha: head, scope, conclusion })
   const e2e = plan.vms.map(vm => e2eSummary(path.join(evidence, vm.label), cwd))
   const failedTests = e2e.flatMap(item => item.failed), flaky = e2e.flatMap(item => item.flaky)
   const summary = [...(failedTests.length ? [`Failed E2E tests (${failedTests.length}):`, ...failedTests] : []),

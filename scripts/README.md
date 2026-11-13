@@ -174,7 +174,7 @@ node scripts/vm-ci.mjs --scope full --parallel
 - 默认一台虚拟机，4 核 8 GB，屏幕 1920×1080。`--parallel` 用两台，各 4 核 6 GB（两台 8 GB 会使 32 GB 内存的本机用到交换区），按上次运行记下的 spec 耗时（Git 公共目录的 `ai-studio-vm-ci/timings.json`）分配 E2E，类型检查与单测放在一台，打包冒烟放在另一台；选中的 spec 不足两个时只用一台。在只有 4 个性能核的本机上，两台同时运行时每项检查都慢了约一倍，实测并行全量并不比单台快（见[任务记录](../.agents/archive/tasks/T20261113-local-vm-ci/task.md#依据)），所以默认用一台。
 - macOS 每台主机最多同时运行两台 macOS 虚拟机。所有 worktree 的运行共用 Git 公共目录 `ai-studio-vm-ci/slots/` 下的两个名额，名额不够时排队并输出占用者；占用进程已退出的名额自动回收。运行结束、失败或被中断（Ctrl-C、SIGTERM，记为 `cancelled`）时都停止并删除克隆的虚拟机与临时引用；进程被强行结束而遗留的 `vmci-*` 虚拟机在下次运行前删除。`--keep` 保留克隆用于排查。
 - 虚拟机中的命令在图形会话中运行，Electron 窗口正常显示。命令设置 `CI=true`，E2E 的重试、trace 与 JSON 报告同 [GitHub Actions CI](#github-actions-ci)。打包冒烟前安装被测提交 `ci.yml` 固定版本的 Codex 与 Claude Code，只执行发现与 `--version`，不发送模型请求。
-- 每步输出一行（例如 `[a] 06-e2e ok 295s`），第一个失败步骤之后的步骤不再执行。证据存到 `.runtime/vm-ci/<id>/`：本机步骤日志 `host-*.log`，以及每台虚拟机一个目录（`a/`、`b/`），其中有按执行顺序编号的步骤日志、每个 E2E 步骤的报告、截图与 trace（`<步骤>/desktop-e2e/`）和打包冒烟结果。运行记录（分支、提交、模式、结论，`runner: vm`）写入 Git 公共目录的 `ai-studio-ci/`，供[集成命令](#任务分支集成)核对。通过时退出码为 0，否则为 1。
+- 每步输出一行（例如 `[a] 06-e2e ok 295s`），第一个失败步骤之后的步骤不再执行。证据存到 `.runtime/vm-ci/<id>/`：本机步骤日志 `host-*.log`，以及每台虚拟机一个目录（`a/`、`b/`），其中有按执行顺序编号的步骤日志、每个 E2E 步骤的报告、截图与 trace（`<步骤>/desktop-e2e/`）和打包冒烟结果。运行记录（分支、提交、模式、结论，`runner: vm`）写入 Git 公共目录的 `ai-studio-ci/<id>.json`，供[集成命令](#任务分支集成)核对，集成提交的 `CI-Run` 记为 `vm-ci <id>`。证据在 worktree 中，集成删除 worktree 时一并删除，运行记录保留。通过时退出码为 0，否则为 1。
 - 失败时，E2E 失败按 JSON 报告列出失败用例、错误摘要与 trace 路径（用 `pnpm --filter @ai-studio/desktop exec playwright show-trace <zip>` 查看）；其他失败打印该步日志的最后 60 行。dev 最新的 GitHub push 运行也失败时另行提示，先对照 dev 的失败，不重复排查。
 - 通过的运行也列出 flaky 用例。它们不阻断集成，另开修复分支或记入任务的后续项处理，不在无关分支里顺手修。
 - 虚拟机启动到可以执行命令约 20～35 秒；单台全量（含打包）约 7 分钟。AI 在后台运行命令，结束后读取结果。

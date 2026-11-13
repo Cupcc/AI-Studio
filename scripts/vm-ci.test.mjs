@@ -243,7 +243,7 @@ test('a parallel run boots two clones, merges their results and always cleans up
   expect(readdirSync(path.join(shared, 'slots'))).toEqual([])
   expect(JSON.parse(readFileSync(path.join(shared, 'timings.json'), 'utf8'))).toMatchObject({ 'e2e/a.spec.ts': 3, 'e2e/b.spec.ts': 3 })
   const record = JSON.parse(readFileSync(path.join(work, '.git', 'ai-studio-ci', `${id}.json`), 'utf8'))
-  expect(record).toMatchObject({ scope: 'e2e', conclusion: 'success', branch: 'feat/example', runner: 'vm', url: `.runtime/vm-ci/${id}` })
+  expect(record).toMatchObject({ scope: 'e2e', conclusion: 'success', branch: 'feat/example', runner: 'vm', url: `vm-ci ${id}` })
   expect(existsSync(path.join(work, '.runtime', 'vm-ci', id, 'b', '05-e2e.log'))).toBe(true)
   expect(logs.some(line => line.startsWith('[b] 05-e2e ok'))).toBe(true)
 })
