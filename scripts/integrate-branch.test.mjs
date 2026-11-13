@@ -5,7 +5,11 @@ import path from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { git } from './check-paths.mjs'
-import { integrateBranch } from './integrate-branch.mjs'
+import { integrateBranch as integrateDelivery } from './integrate-branch.mjs'
+
+const tryLine = '体验：打开示例页，看到新功能'
+// The fixture title is a feat, so an integration that passes no body still says how to try it.
+const integrateBranch = options => integrateDelivery({ body: tryLine, ...options })
 
 // Lets a test move dev between the checks and the compare-and-swap, as a concurrent integration would.
 const hooks = vi.hoisted(() => ({ beforeDevUpdate: null }))
@@ -74,14 +78,14 @@ test('squashes the task branch into one dev commit without touching the acceptan
   const f = fixture(), first = feature(f)
   writeFileSync(path.join(f.source, 'second.txt'), 'second commit')
   const head = f.commit(f.source)
-  const result = integrateBranch({ branch: 'feat/example', title, body: 'Verified by the fixture.', cwd: f.main, runs: passing(f) })
+  const result = integrateBranch({ branch: 'feat/example', title, body: `Verified by the fixture.\n\n${tryLine}\n体验：点击保存`, cwd: f.main, runs: passing(f) })
   expect(result).toMatchObject({ branch: 'feat/example', sourceCommit: head, worktree: f.source })
   expect(result.cleanupError).toBeUndefined()
   expect(dev(f)).toBe(result.commit)
   expect(git(['rev-list', '--parents', '-n1', 'dev'], f.main).trim().split(' ')).toEqual([result.commit, f.base])
   expect(git(['rev-parse', 'dev^{tree}'], f.main)).toBe(git(['rev-parse', `${head}^{tree}`], f.main))
   const message = git(['log', '-1', '--format=%B', 'dev'], f.main)
-  expect(message.startsWith(`${title}\n\nVerified by the fixture.\n\nSquashed commits:\n- ${first.slice(0, 7)}`)).toBe(true)
+  expect(message.startsWith(`${title}\n\nVerified by the fixture.\n\n${tryLine}\n体验：点击保存\n\nSquashed commits:\n- ${first.slice(0, 7)}`)).toBe(true)
   expect(message).toContain(`Source-Branch: feat/example\nSource-Commit: ${head}\nCI-Run: ${runUrl}`)
   expect(git(['reflog', '-1', '--format=%gs', 'dev'], f.main).trim()).toBe('integrate feat/example')
   expect(git(['rev-parse', 'HEAD'], f.main).trim()).toBe(f.base)
@@ -120,10 +124,10 @@ test('runs from the source worktree and still removes it', () => {
 
 test('keeps body trailers in the final trailer block', () => {
   const f = fixture(), head = feature(f)
-  const body = 'Checked with the fixture.\nNote: the first line stays in the body.\n\nCo-Authored-By: Helper <helper@example.invalid>\n'
+  const body = `Checked with the fixture.\nNote: the first line stays in the body.\n${tryLine}\n\nCo-Authored-By: Helper <helper@example.invalid>\n`
   integrateBranch({ branch: 'feat/example', title, body, cwd: f.main, runs: passing(f) })
   const message = git(['log', '-1', '--format=%B', 'dev'], f.main)
-  expect(message).toContain('Checked with the fixture.\nNote: the first line stays in the body.\n\nSquashed commits:')
+  expect(message).toContain(`Checked with the fixture.\nNote: the first line stays in the body.\n${tryLine}\n\nSquashed commits:`)
   expect(git(['log', '-1', '--format=%(trailers:only,unfold)', 'dev'], f.main).trim().split('\n')).toEqual([
     'Co-Authored-By: Helper <helper@example.invalid>', 'Source-Branch: feat/example', `Source-Commit: ${head}`, `CI-Run: ${runUrl}`
   ])
@@ -134,6 +138,26 @@ test('requires a Conventional Commit title before changing dev', () => {
   expect(() => integrateBranch({ branch: 'feat/example', title: ' ', cwd: f.main })).toThrow('--title')
   expect(() => integrateBranch({ branch: 'feat/example', title: 'add the example feature', cwd: f.main, runs: passing(f) })).toThrow('commitlint')
   unchanged(f)
+})
+
+test('refuses a feat, fix or perf delivery that does not say how to try it', () => {
+  const f = fixture(); feature(f)
+  for (const [type, body] of [['feat', ''], ['fix', 'Verified by the fixture.'], ['perf', '体验：'], ['feat', '体验:打开示例页']]) {
+    expect(() => integrateBranch({ branch: 'feat/example', title: `${type}(example): change the example`, body, cwd: f.main, runs: passing(f) }))
+      .toThrow('体验：无')
+  }
+  unchanged(f)
+  expect(existsSync(f.source)).toBe(true)
+})
+
+test.each([
+  ['fix(ci): keep the runner alive', 'Verified by the fixture.\n\n体验：无'],
+  ['chore(example): tidy the example', 'Verified by the fixture.']
+])('integrates %s with the body it was given', (subject, body) => {
+  const f = fixture(); feature(f)
+  const result = integrateBranch({ branch: 'feat/example', title: subject, body, cwd: f.main, runs: passing(f) })
+  expect(dev(f)).toBe(result.commit)
+  expect(git(['log', '-1', '--format=%B', 'dev'], f.main).startsWith(`${subject}\n\n${body}\n\nSquashed commits:`)).toBe(true)
 })
 
 test('refuses while any checkout has the dev branch', () => {
@@ -246,10 +270,16 @@ function recordRun(f) {
   writeFileSync(path.join(dir, '7.json'), JSON.stringify(passing(f)()[0]))
 }
 
+function bodyFile(f, text = tryLine) {
+  const file = path.join(path.dirname(f.main), 'body.md')
+  writeFileSync(file, `${text}\n`)
+  return file
+}
+
 test('CLI rejects a dirty source with a nonzero status and unchanged dev', () => {
   const f = fixture(); feature(f)
   writeFileSync(path.join(f.source, 'extra.txt'), 'not committed')
-  const result = cli(['feat/example', '--title', title], f.main)
+  const result = cli(['feat/example', '--title', title, '--body-file', bodyFile(f)], f.main)
   expect(result.status).toBe(1)
   expect(result.stderr).toContain('commit them on the task branch first')
   unchanged(f)
@@ -259,7 +289,7 @@ test('CLI keeps dev integrated and exits 0 when the worktree cannot be removed',
   const f = fixture(), head = feature(f)
   recordRun(f)
   git(['worktree', 'lock', f.source], f.main)
-  const result = cli(['feat/example', '--title', title], f.main)
+  const result = cli(['feat/example', '--title', title, '--body-file', bodyFile(f)], f.main)
   expect(result.status).toBe(0)
   expect(result.stdout).toContain(`at ${head} into dev as`)
   expect(result.stderr).toContain(`the worktree ${f.source} or the branch feat/example was not removed`)
@@ -272,20 +302,22 @@ test('CLI keeps dev integrated and exits 0 when the worktree cannot be removed',
 test('CLI squashes with a body file and rejects missing arguments', () => {
   const f = fixture(), head = feature(f)
   recordRun(f)
-  const bodyFile = path.join(path.dirname(f.main), 'body.md')
-  writeFileSync(bodyFile, 'Checked with the fixture.\n')
   expect(cli(['--freeze'], f.main).status).toBe(1)
-  const result = cli(['feat/example', '--title', title, '--body-file', bodyFile], f.main)
+  const withoutSteps = cli(['feat/example', '--title', title, '--body-file', bodyFile(f, 'Checked with the fixture.')], f.main)
+  expect(withoutSteps.status).toBe(1)
+  expect(withoutSteps.stderr).toContain('体验：')
+  unchanged(f)
+  const result = cli(['feat/example', '--title', title, '--body-file', bodyFile(f, `Checked with the fixture.\n\n${tryLine}`)], f.main)
   expect(result.status).toBe(0)
   expect(result.stdout).toContain(`at ${head} into dev as`)
   expect(result.stdout).toContain(`Removed the worktree ${f.source} and the branch feat/example.`)
-  expect(git(['log', '-1', '--format=%B', 'dev'], f.main)).toContain('Checked with the fixture.')
+  expect(git(['log', '-1', '--format=%B', 'dev'], f.main)).toContain(`Checked with the fixture.\n\n${tryLine}\n\nSquashed commits:`)
   expect(cli(['feat/example'], f.main).status).toBe(1)
 })
 
 test('CLI records why CI was skipped', () => {
   const f = fixture(); feature(f)
-  const result = cli(['feat/example', '--title', title, '--skip-ci', 'GitHub Actions outage'], f.main)
+  const result = cli(['feat/example', '--title', title, '--body-file', bodyFile(f), '--skip-ci', 'GitHub Actions outage'], f.main)
   expect(result.status, result.stderr).toBe(0)
   expect(git(['log', '-1', '--format=%(trailers:key=CI-Run,valueonly)', 'dev'], f.main).trim()).toBe('skipped (GitHub Actions outage)')
 })

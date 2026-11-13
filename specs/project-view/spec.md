@@ -34,11 +34,11 @@
 | PV-Q6 | Overview 的 Session 摘要区块是否由客户端固定渲染？ | 是（2026-10-09）。 |
 | PV-Q7 | V1 文件上限是否暂定 256 KB、500 节点？ | 是，作为实现防护上限，渲染原型校准后如需调整需更新规格（2026-10-09）。 |
 | PV-Q8 | `ViewSnapshot` 是否同时推送完整 Knowledge 与 Definition，还是只推送渲染后的模型？ | 采用已校验的声明式快照，包含完整 Knowledge 与 Definition，便于 Renderer 保持可测试和 last-good；不推送 Session 敏感区块（2026-10-11，依据 DEC-05、04 第 3 节）。 |
-| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 缩放比例只保存在当前 View 的运行期状态，不扩展 Project `ui_state`；具体手势交给高保真设计确认（2026-10-11，依据 FR-VIEW-005、Project spec 状态边界）。控件与手势已按[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q1 确认（2026-10-11），见 FR-VIEW-005 第 4 条。宿主缩放已由 DEC-30（2026-11-12）取消，本条仅保留历史结论。 |
+| PV-Q9 | 视图缩放是否使用滚轮 + `⌘/Ctrl`，并把比例按 View 持久化？ | 缩放比例只保存在当前 View 的运行期状态，不扩展 Project `ui_state`；具体手势交给高保真设计确认（2026-10-11，依据 FR-VIEW-005、Project spec 状态边界）。控件与手势已按[原型 v03](../../.agents/archive/tasks/T20261011-prototype-v03/task.md) Q1 确认（2026-10-11），见 FR-VIEW-005 第 4 条。宿主缩放已由 DEC-30（2026-11-12）取消，本条仅保留历史结论。 |
 | PV-Q10 | `schemaVersion` 升级是否只支持同版本读取，还是提供迁移器？ | V1 只接受当前支持版本；未知版本进入 `error` 并保留 last-good，迁移器作为后续 task（2026-10-11，依据 DEC-04 与本地文件可回退原则）。 |
 | PV-Q11 | View Context 生成文本是否显示在 transcript 的可折叠区域，还是只作为用户消息元数据？ | 显示可折叠“当前 View”标签，底层保存 `view_context_attached` 与路径元数据，不复制完整模板（2026-10-11，依据 DEC-06、Input spec 上下文标签规则）。 |
 | PV-Q12 | 默认 View 的内置 Definition 是否通过代码常量提供，还是作为应用资源 JSON 打包？ | 作为版本化应用资源 JSON 打包，启动时解析并用同一 Schema 校验；不写入 Project，便于视觉调整（2026-10-11，依据 FR-VIEW-001、DEC-05）。 |
-| PV-Q13 | Preview 缩放的比例范围与步长？ | 50%～200%，每次 10%，与[原型 v03](../../tasks/T20261011-prototype-v03/task.md)一致；高保真阶段如需调整再改本条。用户对话“PV-Q13 采纳答案”（2026-10-11 确认）。宿主缩放已由 DEC-30（2026-11-12）取消，本条仅保留历史结论。 |
+| PV-Q13 | Preview 缩放的比例范围与步长？ | 50%～200%，每次 10%，与[原型 v03](../../.agents/archive/tasks/T20261011-prototype-v03/task.md)一致；高保真阶段如需调整再改本条。用户对话“PV-Q13 采纳答案”（2026-10-11 确认）。宿主缩放已由 DEC-30（2026-11-12）取消，本条仅保留历史结论。 |
 
 ## 2. 职责与边界
 
@@ -196,9 +196,9 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 `stack`、`grid`、`section`、`text`、`metric`、`badge`、`list`、`table`、`timeline`、`diagram`、`callout`、`empty`。
 
 1. 组件属性是有限 JSON 值或受限枚举；不得出现函数、事件处理器、任意 CSS、`style` 字符串、HTML 字符串、脚本、网络 URL 或动态模块名。
-2. 文本通过 React 文本节点输出；不得使用 `dangerouslySetInnerHTML`。链接只允许指向 Project 内相对路径或由客户端提供的安全外部链接策略（技术方案，待实现确认）。Project 内相对路径由用户点击后在 Files 中定位：目录展开，文件选中；属于用户主动打开工具，不由 Agent 触发（[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q3，2026-10-11 确认；UX 第 5 节）。
+2. 文本通过 React 文本节点输出；不得使用 `dangerouslySetInnerHTML`。链接只允许指向 Project 内相对路径或由客户端提供的安全外部链接策略（技术方案，待实现确认）。Project 内相对路径由用户点击后在 Files 中定位：目录展开，文件选中；属于用户主动打开工具，不由 Agent 触发（[原型 v03](../../.agents/archive/tasks/T20261011-prototype-v03/task.md) Q3，2026-10-11 确认；UX 第 5 节）。
 3. `bindings` 使用受限路径读取数据，不执行 JavaScript 表达式；绑定缺失显示组件级空状态，不使整个 Preview 崩溃。
-4. `diagram` 接收节点 / 边和布局方向，由 Renderer 计算布局；Agent 不提供 SVG 坐标或可执行绘图代码。关系图宽于 Preview 时在图内横向滚动，不自动缩小，避免节点文字过小（[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q2，2026-10-11 确认）。
+4. `diagram` 接收节点 / 边和布局方向，由 Renderer 计算布局；Agent 不提供 SVG 坐标或可执行绘图代码。关系图宽于 Preview 时在图内横向滚动，不自动缩小，避免节点文字过小（[原型 v03](../../.agents/archive/tasks/T20261011-prototype-v03/task.md) Q2，2026-10-11 确认）。
 5. Overview 的客户端 Session 区块使用独立 React 组件插槽，不进入 Agent 可编辑的 `root`，避免把 Session 标题、Needs Input 内容交给 View Definition 控制。
 
 ### 4.3 Preview 状态
@@ -206,7 +206,7 @@ Project 内隐藏目录固定为 `.ai-studio/`，默认被 Git 忽略。客户�
 | 状态 | 进入条件 | UI 行为 |
 |---|---|---|
 | `empty` | Knowledge 缺失、为空或没有可渲染内容 | 空状态 + “生成 <View 名称>”入口；不自动发起 Session |
-| `loading` | 首次读取或正在刷新，且没有上一版成功快照 | 读取超过 200 ms 才在 Preview 内显示骨架，之前不显示内容，避免快速读取时闪烁（[原型 v03](../../tasks/T20261011-prototype-v03/task.md) Q6，2026-10-11 确认）；保留 Conversation |
+| `loading` | 首次读取或正在刷新，且没有上一版成功快照 | 读取超过 200 ms 才在 Preview 内显示骨架，之前不显示内容，避免快速读取时闪烁（[原型 v03](../../.agents/archive/tasks/T20261011-prototype-v03/task.md) Q6，2026-10-11 确认）；保留 Conversation |
 | `ready` | Knowledge 与 Definition 校验通过且 Renderer 成功 | 显示只读 View 和最近更新时间 |
 | `stale` | 正在刷新但已有上一版成功快照 | 继续显示上一版，可显示轻量“更新中”标记；不改变布局 |
 | `error` | 稳定读取、Schema、绑定或 Renderer 失败 | 保留上一版成功 View；若无上一版显示错误空状态和可复制摘要 |

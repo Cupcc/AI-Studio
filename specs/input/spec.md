@@ -9,7 +9,7 @@
 | 覆盖需求 | FR-INPUT-001～FR-INPUT-002；关联 FR-STATE-002（在输入框答复 Needs Input）、FR-SESSION-001（输入区固定在对话下方） |
 | 相关验收 | AC-02、AC-05；05 第 4 节专项测试中的 Model Selector、Stop |
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 6、7 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 2.2、6、7 节（宽度对齐、统一底部 Composer）；[v06 采用记录](../../design/layout-ux-review-v02.md#6-采用记录)；线框图 v02（[design/wireframes](../../design/wireframes/README.md)） |
-| 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-INPUT-001～002、FR-STATE-002、FR-CHAT-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 4、6 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 4、5 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 4、5、6 节 |
+| 来源 | [02. Functional Requirements](<../../docs/02. Functional Requirements.md>) FR-INPUT-001～002、FR-STATE-002、FR-CHAT-003；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 4、6 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 4、5 节；[CLI Integration Preflight](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 4、5、6 节 |
 
 ## 1. 问题记录
 
@@ -114,7 +114,7 @@
 1. 输入为空时 Send 禁用（Shell Spec 第 7 节）。
 2. Running 时提供 Stop；有可发送输入时同时提供原生发送操作（I-Q3，优先于旧 Shell 的单按钮示意）。点击 Stop 的效果见 session spec 第 3.12 节；排队处理须与原生能力核对，不能自行丢弃已接收消息。
 3. 输入框在任何状态下都可编辑，包括 Running、Needs Input、Stop 进行中（UX 第 6 节“输入框保持可用”）。
-4. 发送后立即进入 Running，不等待 CLI 首个输出（FR-STATE-001；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节）。
+4. 发送后立即进入 Running，不等待 CLI 首个输出（FR-STATE-001；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节）。
 
 #### Running 中发送
 
@@ -139,7 +139,7 @@ Codex 报告 `steer`，发送进入当前回合。Claude 报告 `queue`：CLI �
 
 ### FR-INPUT-002 Model Selector
 
-依据：FR-INPUT-002；FR-CHAT-003；FR-SESSION-003（独立模型配置）；01 第 8 节原则 8、20；04 第 4 节；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节（模型目录可读取）与第 6 节。Claude 真实链路仍待验证。
+依据：FR-INPUT-002；FR-CHAT-003；FR-SESSION-003（独立模型配置）；01 第 8 节原则 8、20；04 第 4 节；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 4 节（模型目录可读取）与第 6 节。Claude 真实链路仍待验证。
 
 1. 位置：输入区底行右侧，紧邻思考强度信号格，位于 Send / Stop 左侧；不在顶部 Tab Bar 设置全局 Model Selector（FR-INPUT-002；Shell Spec v02 第 7 节）。
 2. 内容：只列出当前 Session（或草稿）所用 CLI 的模型目录，来自 Adapter；不列出其他 CLI 的模型（FR-CHAT-003）。
@@ -149,7 +149,7 @@ Codex 报告 `steer`，发送进入当前回合。Claude 报告 `queue`：CLI �
 6. 恢复：Session 恢复原生会话时按 `Session.model` 重新应用模型选择（04 第 5 节第 6 条“以原 thread.id、cwd 和配置恢复”）。
 7. 目录读取失败：Model Selector 显示当前值并禁用，在框内就近说明原因并提供重试；不影响发送（使用当前或默认模型）。
 8. 已保存的模型不在当前目录中：保留用户选择并说明目录未列出；只有实际原生结果证明不可用时才报告对应错误。客户端不擅自换成默认模型，原生若有回退则如实显示实际使用模型；用户可主动重新选择（I-Q6；01 第 8 节原则 24）。
-9. 模型目录可读取不代表每个模型都有访问权限（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 2 节末段）；选择后调用失败按 Error 处理。
+9. 模型目录可读取不代表每个模型都有访问权限（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 2 节末段）；选择后调用失败按 Error 处理。
 
 #### 思考强度信号与动效
 

@@ -12,7 +12,7 @@ const documentation = new Set([
   'AGENTS.md', 'CONTRIBUTING.md', 'README.md', 'scripts/README.md',
   'apps/desktop/README.md', 'packages/agent-adapter/src/codex/README.md',
   'docs/08. System Architecture.html', '.codex/agents/README.md',
-  '.agents/skills/vercel-react-best-practices/AGENTS.md'
+  '.agents/skills/README.md', '.agents/skills/vercel-react-best-practices/AGENTS.md'
 ])
 
 export function docsOnly(files) {

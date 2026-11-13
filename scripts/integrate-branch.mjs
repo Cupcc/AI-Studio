@@ -4,6 +4,7 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
+import { lacksTryLine, userFacingTypes } from './acceptance.mjs'
 import { affectedPlan, inventory } from './check-affected.mjs'
 import { changedPaths, git } from './check-paths.mjs'
 import { ciRecords } from './remote-ci.mjs'
@@ -53,6 +54,8 @@ export function verifyCi({ branch, head, sourceCommit, source, repo, runs = ciRe
 export function integrateBranch({ branch, title, body = '', skipCi = '', cwd = process.cwd(), runs }) {
   if (!branch || branch === 'dev' || branch === 'main' || branch.startsWith('-')) throw new Error('Specify a local task branch to integrate into dev.')
   if (!title?.trim()) throw new Error('Pass --title with the Conventional Commit title of the squash commit.')
+  if (lacksTryLine(title, body)) throw new Error(`Squash commits of type ${userFacingTypes.join(', ')} must say how to try the change. Add a line that starts with "体验：" to the --body-file: ` +
+    'the steps a person follows in the running app, such as "体验：打开设置页，点击测试连接，看到通过提示", or "体验：无" when nothing is user-visible.')
   // Run from the shared Git directory so removing the source worktree never pulls the ground from under a later command.
   const repo = git(['rev-parse', '--path-format=absolute', '--git-common-dir'], cwd).trim()
 

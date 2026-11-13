@@ -59,4 +59,4 @@ Electron E2E 和 agent-browser 界面检查都会在用户桌面打开真实窗�
 
 - `apps/desktop/README.md` 中“需要真实窗口焦点的多份 Electron 测试须串行运行”仍适用于本机运行，保留。
 - `tasks/T20261112-workbench-ui-polish` 中为避免争抢焦点而暂缓 E2E 的记录是历史过程，保留。
-- [GitHub CI 任务](../../../../tasks/T20261010-github-ci/task.md)记录的是首次配置时的范围，保留；现行行为以脚本说明为准。
+- [GitHub CI 任务](../T20261010-github-ci/task.md)记录的是首次配置时的范围，保留；现行行为以脚本说明为准。

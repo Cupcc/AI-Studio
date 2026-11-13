@@ -28,7 +28,7 @@ created: 2026-11-12
 
 - [V1 核心验收场景](<../../../../docs/05. Acceptance Criteria.md>) AC-02～AC-05；[Task Protocol 的模拟环境与真实 CLI](../../../../tasks/README.md#模拟环境与真实-cli)。
 - [DEC-16](<../../../../docs/07. Decisions.md#dec-16-v1-真实-cli-验收范围>) 曾暂缓 Claude Code 真实验收；本次由用户请求重新启动，结论单独记录，不改写 Codex 的验收基线。
-- [CLI 安装任务](../../../../tasks/T20261108-cli-install/task.md) 中仍保留的 Claude 真实连接 / 打包边界。
+- [CLI 安装任务](../T20261108-cli-install/task.md) 中仍保留的 Claude 真实连接 / 打包边界。
 
 ## 验收标准
 

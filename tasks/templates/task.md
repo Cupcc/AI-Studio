@@ -1,6 +1,11 @@
 ---
 id: TYYYYMMDD-slug
 status: draft        # 取值见 tasks/README.md 的 Lifecycle
+next: ai             # 下一步由谁行动：ai / human / none
+waiting:             # 一行：下一步行动方要做什么；进行中且没有阻塞时留空
+paths: []            # 写入范围，仓库根相对路径或 glob；标为 ready 前必填
+evidence:            # 一行：证明完成的命令或界面场景；标为 ready 前必填
+risk: normal         # normal / review（集成前需要独立评审）
 fr: []               # 本任务覆盖的 FR 编号
 ac: []               # 本任务对应的 AC 编号
 specs: []            # 相关模块 spec 路径

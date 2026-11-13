@@ -139,7 +139,7 @@ export function affectedPlan(files, available, comparison = {}) {
     // `.ignore` and `.gitignore` only decide what search and Git see; no code reads them.
     if (docsOnly([file]) || file === '.ignore' || file === '.gitignore' || /^\.codex\/agents\/[\w-]+\.toml$/.test(file) ||
       /^(?:\.agents\/archive|tasks\/archive|tasks\/T[^/]+\/evidence|design)\//.test(file)) continue
-    if (/^(?:scripts\/(?:check-[\w-]+(?:\.test)?|integrate-branch(?:\.test)?|remote-ci(?:\.test)?|vm-ci(?:\.test)?|vitest\.config)\.mjs|\.codex\/(?:hooks\.json|scripts\/agent-docs-hook(?:\.test)?\.mjs)|\.husky\/(?:pre-commit|commit-msg)|commitlint\.config\.cjs|\.github\/workflows\/ci\.yml)$/.test(file)) {
+    if (/^(?:scripts\/(?:check-[\w-]+(?:\.test)?|integrate-branch(?:\.test)?|remote-ci(?:\.test)?|vm-ci(?:\.test)?|tasks(?:\.test)?|acceptance(?:\.test)?|vitest\.config)\.mjs|\.codex\/(?:hooks\.json|scripts\/agent-docs-hook(?:\.test)?\.mjs)|\.husky\/(?:pre-commit|commit-msg)|commitlint\.config\.cjs|\.github\/workflows\/ci\.yml)$/.test(file)) {
       seeds.scripts.add(file)
       if (file === '.codex/hooks.json') seeds.scripts.add('.codex/scripts/agent-docs-hook.test.mjs')
       else if (/^(?:\.husky\/|commitlint\.|\.github\/)/.test(file)) {

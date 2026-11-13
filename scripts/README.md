@@ -41,7 +41,29 @@ dev 推送后的 CI 与[选择器](#测试分层)使用同一范围，所以集�
 
 检查或提交失败时命令返回非零状态，不修改 dev 或源 worktree。命令不暂存、复制、rebase 或推送；分支落后时，先回源 worktree 同步并解决冲突。忽略的构建产物和依赖不计入工作区的脏状态，删除 worktree 时一并删除。命令的 Git 操作都在 Git 公共目录中执行，所以从源 worktree 运行也能删除它，但运行者的 shell 会停在已删除的目录里，因此流程在主目录运行。脚本在删除源 worktree 前已加载完毕并完成 commitlint 检查。
 
-脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、dev 被检出、检查后 dev 被其他集成移动、缺少覆盖本次改动的 CI 运行（失败、e2e 模式、其他提交或分支、rebase 后改动不同、打包输入缺 package 运行）这几种拒绝场景，并核对 rebase 前改动相同的运行、无需运行的文档改动、`--skip-ci` 的记录、正常 squash 后的文件树、父提交、提交信息、trailer 位置与 CLI 参数，主目录的 HEAD 与本地改动不受影响，以及集成后删除 worktree 与分支（含被忽略的文件、从源 worktree 运行的情况），删除失败时保留集成结果并以零状态退出。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
+标题类型为 `feat`、`fix` 或 `perf` 的交付，`--body-file` 中须至少有一行以 `体验：`（全角冒号）开头。冒号后写怎样在运行的应用里试到这项改动，例如 `体验：打开设置页，点击测试连接，看到通过提示`。步骤多时写多行，每行都以 `体验：` 开头。没有用户可见变化时写 `体验：无`，例如 `fix(ci)`。缺少这一行时命令拒绝集成，不修改 dev，并在错误信息中给出两种写法。其他类型不要求这一行，写了同样有效。这些行留在提交正文中，位于原提交列表之前，由[人工验收清单](#人工验收清单)读取。
+
+脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、`feat`／`fix`／`perf` 交付缺少体验行、dev 被检出、检查后 dev 被其他集成移动、缺少覆盖本次改动的 CI 运行（失败、e2e 模式、其他提交或分支、rebase 后改动不同、打包输入缺 package 运行）这几种拒绝场景，并核对 rebase 前改动相同的运行、无需运行的文档改动、`--skip-ci` 的记录、`体验：无` 与其他类型不写体验行时照常集成、正常 squash 后的文件树、父提交、提交信息、trailer 位置与 CLI 参数，主目录的 HEAD 与本地改动不受影响，以及集成后删除 worktree 与分支（含被忽略的文件、从源 worktree 运行的情况），删除失败时保留集成结果并以零状态退出。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
+
+## 人工验收清单
+
+验收流程由[贡献指南 §5](../CONTRIBUTING.md#人工验收与推进-main)负责。命令读取 `git log main..dev`，输出一份 Markdown 清单，不修改任何引用或文件：
+
+```sh
+node scripts/acceptance.mjs
+node scripts/acceptance.mjs --base <ref> --head <ref>
+```
+
+`--base` 默认 `main`，`--head` 默认 `dev`。提交按从旧到新排列，即 main 可以推进的顺序。清单依次包含：
+
+- 开头：dev 的提交、它领先 main 的提交数，以及主目录所在的提交。主目录取 `git worktree list` 的第一项，所以在任何 worktree 中运行结果相同。主目录不在 dev 的最新提交时，清单给出 `git switch --detach dev`。
+- 需要体验：每个提交一个待勾选条目，写短 SHA、标题和提交日期，下面列出提交正文中的 `体验：` 行。`feat`、`fix`、`perf` 提交没有 `体验：` 行时也列在这里，标注“未记录体验步骤，见提交正文”。[集成命令](#任务分支集成)要求这一行之前集成的提交属于这种情况。
+- 无需体验：其余提交，每个一行。包括只写了 `体验：无` 的提交，以及没有 `体验：` 行的其他类型。
+- 推进 main：贡献指南中推进 main 的命令，已填入 dev 的完整 SHA。
+
+范围内没有提交时，命令只输出一行说明。两种情况都以零状态退出；引用不存在时以非零状态退出。
+
+脚本回归使用临时 Git 仓库。它覆盖两组的划分、从旧到新的顺序、未记录体验步骤的旧提交、`体验：无`、空范围、主目录落后于 dev（含从其他 worktree 运行）以及 `--base` 与 `--head`。
 
 ## 测试分层
 
@@ -100,12 +122,58 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 ### 文档检查边界
 
 - [Codex 项目角色](../.codex/agents/README.md)的 `.codex/agents/*.toml` 只影响开发 Agent，按角色说明核对解析与加载，不触发应用测试；该目录的 README 纳入文档快路径。其他 Codex 配置与脚本不因此豁免。
-- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README、React 技能 AGENTS 的文档链接、已登记的架构 HTML 文档，以及 docs / specs / tasks / design / .agents/archive 下的 `.md`（任务与规格模板分别位于 `tasks/templates/`、`specs/templates/`）。设计目录、任务 evidence、归档目录和搜索忽略配置 `.ignore` 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定；旧 templates 下五份 Markdown 仅在原路径已移除且所属 tasks/specs 模板存在时按迁移识别。空变更不启动应用测试。归档规则见 [Task Protocol](../tasks/README.md#archiving)。
+- 文档快路径清单由 [check-paths.mjs](check-paths.mjs) 负责：根 README / AGENTS / CONTRIBUTING、已登记的包与脚本 README、技能目录 README、React 技能 AGENTS 的文档链接、已登记的架构 HTML 文档，以及 docs / specs / tasks / design / .agents/archive 下的 `.md`（任务与规格模板分别位于 `tasks/templates/`、`specs/templates/`）。设计目录、任务 evidence、归档目录和搜索忽略配置 `.ignore` 由选择器单独识别，不触发应用测试；其他未知路径要求补充映射。重命名按旧、新路径一起判定；旧 templates 下五份 Markdown 仅在原路径已移除且所属 tasks/specs 模板存在时按迁移识别。空变更不启动应用测试。归档规则见 [Task Protocol](../tasks/README.md#archiving)。
 - [check-docs.mjs](check-docs.mjs) 解析 Markdown 与 GFM 表格，检查内联／引用式链接、图片目标、Markdown 标题锚点及显式 HTML id/name。跨文档扫描可发现删除文件、改标题造成的未修改文件入链损坏；代码示例中的伪链接不检查。
 - 本地 `check:docs` 默认比较 HEAD 与当前工作树（包含未忽略的未跟踪文件）；提交门禁比较 HEAD 与 Git 暂存快照，未暂存修复和未跟踪目标不能掩盖提交中的断链。
 - 只阻断相对基线新增的问题，历史问题按来源路径、链接和问题类型识别，不借本任务批量清理。`pnpm check:docs --base <commit> --head <commit>` 检查两个快照；`pnpm check:docs --base ''` 对当前工作树做完整审计，可能暴露历史问题。
 - 不访问外链，不检查 HTML 内 href、非 Markdown 文件锚点或文档内容语义，也不是 Markdown 排版 linter。表格／标题预览、移动后的旧路径搜索、FR/AC 一致性及确认规则仍按负责索引执行。
 - 决策与状态的语义复核按 [贡献指南的文档同步与收尾复核](../CONTRIBUTING.md#文档同步与收尾复核) 执行；提交 hook 的链接检查结果不表示关联文档已同步，未提交工作也须在回复完成前复核。
+
+## 任务总览与归档
+
+[tasks.mjs](tasks.mjs) 读取各任务 `task.md` 的 frontmatter，字段含义见 [Task Protocol](../tasks/README.md)。它不维护共享索引，每次运行都从现有记录重新推导。
+
+| 命令 | 行为 |
+|---|---|
+| `node scripts/tasks.mjs` | 输出任务总览 |
+| `node scripts/tasks.mjs --stale [天数]` | 只列出停留超过指定天数的任务，默认 3 天；`next: human`、`ready` 和 `draft` 的任务不算。始终以零状态退出 |
+| `node scripts/tasks.mjs --check` | 校验当前工作树的任务记录。有问题时每行输出一个问题并以状态 1 退出，没有问题时不输出 |
+| `node scripts/tasks.mjs archive <id> [<id>...]` | 归档 `status: done` 的任务并修正链接 |
+
+总览按以下顺序输出，没有内容的段落省略：
+
+- `待你处理`：`next: human` 的任务，以及未完成任务 `## 未决问题` 表格里决策方不是 AI 的每一行。
+- `进行中`：状态为 `in_progress`、`verifying` 或 `blocked`，且不在等人处理的任务。每行列出状态、下一步行动方、停留天数和 `waiting`；没有 `next` 的记录显示「未填」。
+- `排队`：先列 `ready`，再列 `draft`。每个 `ready` 任务标为 `可并行` 或 `需排队（与 <id> 重叠）`。
+- `需要修正`：总览中的记录违反 `--check` 规则的问题，以及被多个分支同时改动的任务。
+- 最后一行是 dev 领先 main 的提交数。缺少任一分支或没有领先时省略。
+
+总览和 `--stale` 的数据来自 dev 与各分支 worktree。存在 dev 分支时，命令先读取 dev 上的任务记录，再用每个检出了分支的 worktree 中改动过的 `task.md` 工作副本替换，并在该行标注 `@ <分支>`。改动按 worktree 与 dev 的 merge-base 比较，包含未提交和未跟踪的文件。worktree 里新建的任务会加入总览，worktree 里已删除 `task.md` 的任务不再列出。主目录和处于 detached HEAD 的 worktree 不参与。两个 worktree 改动同一任务时，命令保留状态更靠后的一份，顺序为 `draft`、`ready`、`blocked`、`in_progress`、`verifying`、`done`，并在 `需要修正` 中报告。没有 dev 分支时命令读取当前工作树。
+
+停留天数从最后一次改动算起。dev 上的记录取 dev 最后一次改动该任务目录的提交时间，来自 worktree 的记录取该分支最后一次改动任务目录的提交时间，目录有未提交改动时计为 0 天，所以搁置在 worktree 里的任务也会出现在 `--stale` 中。没有 dev 分支时取 HEAD 上的提交时间，目录有未提交改动时计为 0 天。
+
+并行判断故意保守。命令把 `paths` 里的每个 glob 截到第一个 `*`、`?`、`[` 或 `{` 之前，两个前缀中一个以另一个开头就算重叠。`paths` 为空的任务与所有任务重叠。一个 `ready` 任务与 `in_progress` 或 `verifying` 的任务重叠时需排队，与排在它前面且已标为可并行的 `ready` 任务重叠时也需排队。
+
+`--check` 报告以下问题：
+
+- 缺少 `task.md` 或 frontmatter，或 `id` 与目录名不一致。
+- `status` 不是 `draft`、`ready`、`in_progress`、`verifying`、`blocked`、`done` 之一。
+- `status: done` 的任务仍在 `tasks/` 下。
+- `status: ready` 的任务没有填写 `paths` 和 `evidence`。
+- `next` 不是 `ai`、`human`、`none` 之一，或未完成的任务写了 `next: none`。
+- `created` 为 2026-11-13 或之后的任务缺少 `next`。更早的记录缺少 `next` 不算问题。
+
+提交暂存了 `tasks/` 下的路径时，[check-commit.mjs](check-commit.mjs) 对当前工作树执行同一校验，有问题就终止提交。只改 `tasks/templates/` 的提交不触发校验。
+
+`archive` 先检查全部 ID，再开始移动。每个 ID 须有 `tasks/<id>/task.md`，状态为 `done`，目录已纳入 Git，且归档目录不存在。任一条件不满足时命令不做改动并以非零状态退出，对已归档的 ID 再次运行也是如此。检查通过后，命令逐个执行 `git mv tasks/<id> .agents/archive/tasks/<id>`，然后修正链接：
+
+- 被移动的 Markdown 文件中，指向任务目录外的相对链接按新位置重新计算。指向目录内的链接不变。
+- 其他已跟踪的 `.md` 和 `.html` 文件中，指向旧目录的相对链接改为指向新目录，已归档任务里的链接也在其中。
+- 命令只替换链接目标中的路径，锚点、`<...>` 写法和链接文字保持原样。Markdown 文件处理链接、图片和引用定义；`.html` 文件处理引号内的相对路径，包括属性值和脚本里的字符串。
+
+命令输出每个文件改写的链接数。仍写着 `tasks/<id>` 且前面不是 `archive/` 的纯文本列为「需手动核对」，附文件和行号，例如代码片段、`.mjs` 文件和以 `/` 开头的链接。Markdown 内嵌 HTML 里的链接不改写。命令只暂存 `git mv` 产生的重命名，改写后的文件留在工作区，命令不提交。
+
+`pnpm test:scripts` 用临时 Git 仓库覆盖总览的段落顺序、并行判断、`--stale` 的选择、每条 `--check` 规则和日期界限、未决问题表格的提取、worktree 覆盖 dev 的各种情形，以及归档时的移动、双向链接修正和拒绝场景。
 
 ## Agent 文档 Hook
 
@@ -123,7 +191,7 @@ pnpm --filter @ai-studio/desktop run test:e2e project.spec.ts
 
 ## 本地 Commit 门禁
 
-提交约定见 [贡献指南](../CONTRIBUTING.md#3-提交规范)，门禁实现与验证见[任务记录](../tasks/T20261010-commit-gates/task.md)。
+提交约定见 [贡献指南](../CONTRIBUTING.md#3-提交规范)，门禁实现与验证见[任务记录](../.agents/archive/tasks/T20261010-commit-gates/task.md)。
 
 根目录执行 `pnpm install` 时，`prepare` 自动通过 Husky 安装 hooks；已有依赖时可用 `pnpm prepare` 重新安装。Git 客户端的 PATH 必须能找到根 `package.json` 要求的 Node 与 pnpm。若 GUI 客户端找不到版本管理器安装的 Node / pnpm，按 [Husky 官方说明](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis) 配置用户级初始化文件，不在仓库硬编码个人路径。
 
@@ -181,7 +249,7 @@ node scripts/vm-ci.mjs --scope full --parallel
 
 ## GitHub Actions CI
 
-配置：[ci.yml](../.github/workflows/ci.yml)，触发条件、runner、Node 版本、CLI 版本、超时、权限与产物保留期均以该文件为准；任务：[T20261010-github-ci](../tasks/T20261010-github-ci/task.md)。
+配置：[ci.yml](../.github/workflows/ci.yml)，触发条件、runner、Node 版本、CLI 版本、超时、权限与产物保留期均以该文件为准；任务：[T20261010-github-ci](../.agents/archive/tasks/T20261010-github-ci/task.md)。
 
 - 仅 dev / main push、面向 dev / main 的 PR 与手动触发运行；任务分支 push 不触发 CI。任务分支的检查与集成门禁默认用[本机 VM CI](#本机-vm-ci)，本机不可用时手动触发（见[远端 E2E](#远端-e2e)）。main 合入后的验证针对新基线，仍保留。新的 push 或 PR 运行会取消同一分支或 PR 上的旧运行；手动运行各用独立的并发组，互不取消。
 - Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。首次创建 dev 的 push 以 origin/main 与当前提交的共同祖先为基线；其他无效／缺失基线阻断，空 diff 跳过应用。手动 affected 模式以 origin/dev 与 HEAD 的 merge-base 为基线；手动 full 与 e2e 模式的文档以 HEAD 为基线，不声称历史审计通过。
@@ -281,8 +349,8 @@ node scripts/cli-preflight.mjs --provider codex --only 'question|crash' --out /t
 补充原生 Stop 复核使用证据目录中保存的实际执行脚本：
 
 ```sh
-node --check tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs
-node tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs \
+node --check .agents/archive/tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs
+node .agents/archive/tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs \
   --out /tmp/ai-studio-codex-native-stop-check --timeout 90000
 ```
 
@@ -298,6 +366,6 @@ node tasks/T20261008-cli-preflight/evidence/codex-native-stop-check.mjs \
 - 文本取消与异常退出测试生成合成长文本。工具取消测试额外执行一条合成 Python 命令，输出唯一标记后睡眠 47 秒；只为验证 Stop 是否终止子进程，不修改文件。校验失败后会清理确切匹配该标记的测试进程。
 - 原生 Stop 补充复核使用两条带唯一标记、睡眠 120 秒的 Python 命令；同时检查原生后台列表和系统 Python 进程退出。进程探测限定实际 Python 可执行文件，排除包含命令文本的 Shell。`clean` / `terminate` 是实验接口，需锁定所支持 CLI 版本；具体语义与覆盖边界见校验报告第 4、5 节。
 - 本脚本不验证 Electron、PTY、Browser、SQLite、文件变更归因或 GUI 提醒行为，也不代表完整 AC 已验收。
-- 本次实测结果见 [CLI Integration Preflight](../tasks/T20261008-cli-preflight/report.md)。
+- 本次实测结果见 [CLI Integration Preflight](../.agents/archive/tasks/T20261008-cli-preflight/report.md)。
 
 选品模板及 `agent.execute` 变更归入工作台范围，包含 `product-selection.spec.ts`。选品 HTML/JS/manifest 额外选择直接读取业务模型的 `selection-model` 和验证真实 SessionService 接缝的 `agents` 单测；CSS 沿用仅界面回归规则。该 E2E 使用模拟 Provider，真实 Codex 验证见[选品任务](../.agents/archive/tasks/T20261111-product-selection/task.md)。

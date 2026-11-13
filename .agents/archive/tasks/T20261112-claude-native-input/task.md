@@ -28,7 +28,7 @@ created: 2026-11-12
 ## 范围
 
 - 做：Adapter（Claude 驱动、核心 SessionController、公共契约与事件）、桌面 Session 服务与 IPC、输入区与对话中的排队呈现；模拟测试、真实 Claude CLI 验证、agent-browser 界面验收、独立评审；同步 adapter / input / session / tools 规格与路线图。
-- 不做：Claude Skill 目录与 Skill 标签（Claude Provider 尚无 `listSkills`，见[技术决定](#技术决定)）；撤回单条排队消息（原生有 `cancel_async_message` 控制请求，但 SDK 0.3.293 未公开方法）；Codex 行为变更；打包与安装补测（由 [CLI 安装任务](../../../../tasks/T20261108-cli-install/task.md) 负责）。
+- 不做：Claude Skill 目录与 Skill 标签（Claude Provider 尚无 `listSkills`，见[技术决定](#技术决定)）；撤回单条排队消息（原生有 `cancel_async_message` 控制请求，但 SDK 0.3.293 未公开方法）；Codex 行为变更；打包与安装补测（由 [CLI 安装任务](../T20261108-cli-install/task.md) 负责）。
 
 ## 依据
 

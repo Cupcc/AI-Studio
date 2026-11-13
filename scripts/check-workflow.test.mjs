@@ -46,7 +46,7 @@ test('fixture environment excludes inherited Git repository and index overrides'
 
 test.each([
   ['README.md'], ['AGENTS.md'], ['CONTRIBUTING.md'], ['docs/中文 文档.md'],
-  ['.agents/archive/tasks/T-example/task.md'], ['.agents/skills/vercel-react-best-practices/AGENTS.md'], ['specs/session/spec.md'], ['tasks/templates/task.md'], ['specs/templates/spec.md'],
+  ['.agents/archive/tasks/T-example/task.md'], ['.agents/skills/README.md'], ['.agents/skills/vercel-react-best-practices/AGENTS.md'], ['specs/session/spec.md'], ['tasks/templates/task.md'], ['specs/templates/spec.md'],
   ['design/README.md'], ['apps/desktop/README.md'], ['scripts/README.md'],
   ['docs/08. System Architecture.html']
 ])('allows documented path %s', file => expect(docsOnly([file])).toBe(true))
@@ -202,17 +202,21 @@ test.each(['push', 'workflow_dispatch', 'package', 'invalid'])('CI command entry
   if (kind === 'package') expect(readFileSync(path.join(cwd, 'output'), 'utf8')).toContain('e2e=false\nmode=package\nspecs=\n')
 })
 
-test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code', 'unknown', 'partial'])('commit entry point: %s', kind => {
+test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code', 'unknown', 'partial', 'broken-task', 'untouched-task'])('commit entry point: %s', kind => {
   const { cwd, write, commit } = repo()
   write('README.md', '# Baseline')
   write('.gitignore', 'fake-bin/\n')
+  if (kind === 'untouched-task') write('tasks/T1/task.md', '---\nid: T1\nstatus: done\n---\n')
   commit()
   // Fake only the expensive child command; exercise the real scope and docs entry point.
   write('fake-bin/pnpm', `#!/bin/sh\nprintf 'BASIC_CHECK:%s\\n' "$*"\nexit ${kind === 'failed-code' ? 7 : 0}\n`)
   chmodSync(path.join(cwd, 'fake-bin/pnpm'), 0o755)
-  if (kind === 'docs' || kind === 'broken-docs') {
-    write('README.md', kind === 'docs' ? '# Updated' : '[missing](missing.md)')
+  if (kind === 'docs' || kind === 'broken-docs' || kind === 'untouched-task') {
+    write('README.md', kind === 'broken-docs' ? '[missing](missing.md)' : '# Updated')
     git(['add', 'README.md'], cwd)
+  } else if (kind === 'broken-task') {
+    write('tasks/T1/task.md', '---\nid: T1\nstatus: done\n---\n')
+    git(['add', 'tasks'], cwd)
   } else if (kind !== 'empty') {
     const file = kind === 'unknown' ? 'source.ts' : 'scripts/check-example.mjs'
     write(file, 'export const changed = true')
@@ -226,6 +230,9 @@ test.each(['docs', 'code', 'empty', 'broken-docs', 'failed-code', 'unknown', 'pa
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('missing local target')
     expect(result.stdout).not.toContain('BASIC_CHECK')
+  } else if (kind === 'broken-task') {
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('tasks/T1: status 为 done')
   } else if (kind === 'unknown' || kind === 'partial') {
     expect(result.status).toBe(1)
     expect(result.stdout).not.toContain('BASIC_CHECK')

@@ -24,7 +24,7 @@
 |---|---|---|
 | TOOLS-Q2 | 保留 Monaco + Git CLI、xterm.js + node-pty、WebContentsView；文件树采用惰性加载和文件事件刷新 | 用户接受上轮实现建议（2026-10-12）；[DEC-10](<../../docs/07. Decisions.md#dec-10-工程工具实现原则>) |
 | TOOLS-Q3 | 资源生命周期独立于面板挂载；切换工具或隐藏面板不销毁用户终端及输出；历史轮次补丁不能由当前工作区伪造原文 | 同 TOOLS-Q2（2026-10-12）；FR-TOOL-002、FR-TOOL-004 |
-| TOOLS-Q4 | 关闭仍运行的 Terminal Tab 时面板内确认“结束并关闭 / 取消”；最后一个 Tab 关闭后显示“没有打开的终端”及新建入口 | [原型 v03 Q4、Q5](../../tasks/T20261011-prototype-v03/task.md)（2026-10-11 确认） |
+| TOOLS-Q4 | 关闭仍运行的 Terminal Tab 时面板内确认“结束并关闭 / 取消”；最后一个 Tab 关闭后显示“没有打开的终端”及新建入口 | [原型 v03 Q4、Q5](../../.agents/archive/tasks/T20261011-prototype-v03/task.md)（2026-10-11 确认） |
 | TOOLS-Q1 | Browser 首轮完成 localhost / 回环地址预览；一般外站内嵌另行评估；外站跳转提示用户选择是否用系统浏览器打开 | 用户「accept all, not dev, update all docs」（2026-10-13 确认）；[DEC-14](<../../docs/07. Decisions.md#dec-14-工程工具开发准备>) |
 | TOOLS-Q5 | 每个 Project 使用独立浏览器分区；首轮默认不跨应用重启保存登录数据，上次地址仍保存；可选持久化后续评估 | 从原 TOOLS-Q1 拆出；同上（2026-10-13 确认） |
 | TOOLS-Q6 | 客户端新增的 Agent 页面自动化另行评估；不改变原生 CLI 已有能力的接入要求，不将内嵌 OAuth / 跨站预览列为首轮交付承诺 | 从原 TOOLS-Q1 拆出；同上（2026-10-13 确认） |

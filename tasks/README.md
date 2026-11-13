@@ -1,11 +1,11 @@
 # Task Protocol
 
-复杂或跨会话工作的进行中记录位于 `tasks/T<YYYYMMDD>-<slug>/`，已完成记录位于 `.agents/archive/tasks/T<YYYYMMDD>-<slug>/`，归档规则见 Archiving。日期型 ID 避免并行 agent 冲突；任务模板位于 `tasks/templates/`。
+复杂或跨会话工作的进行中记录位于 `tasks/T<YYYYMMDD>-<slug>/`，已完成记录位于 `.agents/archive/tasks/T<YYYYMMDD>-<slug>/`，归档规则见 Archiving。日期型 ID 避免并行 agent 冲突；任务模板位于 `tasks/templates/`。任务总览、排队与待人处理的事项由 `node scripts/tasks.mjs` 从任务头部生成，见 [Queue](#queue)。
 
 ## 待审阅事项
 
 - [Acceptance](#acceptance) 中的分层验收、界面操作、真实 CLI 验证与独立验收要求。
-- 人类与 AI 的职责、任务收尾及功能验收边界，见[职责边界任务](T20261011-review-boundaries/task.md)。
+- 人类与 AI 的职责、任务收尾及功能验收边界，见[职责边界任务](../.agents/archive/tasks/T20261011-review-boundaries/task.md)。
 
 ## When to Create a Task
 
@@ -26,22 +26,41 @@
 
 Tasks that need a record may use only `task.md`; add other files when they help or when Acceptance requires independent verification. Solo work can record implementation notes and self-check results there without creating a separate plan, report, or acceptance file; self-checks are not independent verification. There are no handoff or subtask files: handoff content lands in the responsible file above or returns to the main agent, and subagents spawned inside a worker are not persisted.
 
+## Queue
+
+任务头部是任务状态的唯一数据源。`node scripts/tasks.mjs` 读取 dev 与各任务 worktree 中的任务头部，生成总览、排队和待人处理的清单，命令行为见[脚本说明](../scripts/README.md#任务总览与归档)。不维护手写的任务索引或看板，多个 worktree 同时改同一份索引会冲突，也会过时。
+
+| 字段 | 取值 | 含义 |
+|---|---|---|
+| `status` | 见 [Lifecycle](#lifecycle) | 任务状态 |
+| `next` | `ai` / `human` / `none` | 下一步由谁行动；`done` 时为 `none` |
+| `waiting` | 一行文字 | 下一步行动方要做的事；进行中且没有阻塞时可留空 |
+| `paths` | 仓库根相对路径或 glob 的列表 | 写入范围，用于判断任务能否并行 |
+| `evidence` | 一行文字 | 证明任务完成的命令或界面场景 |
+| `risk` | `normal` / `review` | `review` 表示集成前需要独立评审，适用情形见[验收范围与独立性](#验收范围与独立性) |
+
+状态每次变化时同步更新 `next` 与 `waiting`。提交门禁检查头部：`done` 的任务必须已归档，`ready` 的任务必须写明 `paths` 与 `evidence`。
+
+多个 Agent 并行时按以下流程推进，人只在入口和出口批量参与：
+
+1. 入口：人给出目标并回答产品问题。规划 Agent 把目标拆成任务，写明 `paths`、`evidence`、`risk` 和未决问题的推荐答案，再标为 `ready`。说不出完成证据的任务留在 `draft`。
+2. 派工：协调会话运行 `node scripts/tasks.mjs`，从“排队”中取标为“可并行”的任务，每个任务交给一个 owner，同时进行的 owner 不超过 5 个。新流程或新类型的任务先让一个走完全程，再放开并行。协调会话不写代码。派工说明包含目标、`paths`、`evidence` 和不得执行的操作。
+3. 执行：一个 owner 从头到尾负责一个任务。它在自己的 worktree 把任务改为 `in_progress`，完成实现、自检、适用的 CI 与验收，在任务分支的最后一次提交里把任务标为 `done` 并归档，然后集成 dev。
+4. 疑问：执行中出现产品疑问时，可逆的事按推荐答案继续，并把问题记入任务的“未决问题”，由 `node scripts/tasks.mjs` 汇总给人批量回答。删除用户数据、改变已确认的规格或范围、发布等不可逆的事不按默认值执行：owner 把任务改为 `blocked`、`next: human`，在 `waiting` 写明要人决定什么，然后交回协调会话去做别的任务。
+5. 出口：人按 `node scripts/acceptance.mjs` 的清单在主目录体验 dev，通过后推进 main，见[贡献指南](../CONTRIBUTING.md#人工验收与推进-main)。没通过的反馈成为新的修复任务，进入队列。
+
 ## Lifecycle
 
 `draft` → `ready` → `in_progress` → `verifying` → `done`, or `blocked` at any point. Status lives in the `task.md` frontmatter and is changed only by the main agent.
 
-- `draft` → `ready`: authorized scope and completion criteria are clear, with no blocking open questions. Humans decide product questions; AI resolves technical questions within its authority. Record each resolution with its source, owner and date, distinguishing human confirmation from AI decisions; update every document that still shows it as pending. Non-blocking questions retain their owner and impact.
+- `draft` → `ready`: authorized scope and completion criteria are clear, with no blocking open questions. Humans decide product questions; AI resolves technical questions within its authority. Record each resolution with its source, owner and date, distinguishing human confirmation from AI decisions; update every document that still shows it as pending. Non-blocking questions retain their owner and impact. A `ready` task states its `paths` and `evidence`, see [Queue](#queue).
 - `verifying` → `done`: the main agent checks that the agreed deliverables are complete, required checks and any required independent review have passed, blocking findings are resolved, and related documents and evidence are current. Record who reviewed, the applicable baseline, evidence and the closure date. No additional human task sign-off is required.
 - 文档同步的触发时机、影响追踪及收尾记录按 [贡献指南的文档同步与收尾复核](../CONTRIBUTING.md#文档同步与收尾复核) 执行。
-- `done` means this task's deliverables are complete; it does not mean the feature has been human-accepted, a draft specification is human-confirmed, or further work is authorized. A draft-delivery task can finish while the draft awaits product review. If human review is an explicit prerequisite of the deliverable, it must still be completed; do not silently redefine scope to close a task.
+- `done` means this task's deliverables are complete; it does not mean the feature has been human-accepted, a draft specification is human-confirmed, or further work is authorized. A draft-delivery task can finish while the draft awaits product review. If human review is an explicit prerequisite of the deliverable, it must still be completed; do not silently redefine scope to close a task. 例：文档回写任务提交后即可 `done`，不因“diff 待人审阅”或“功能待人工验收”停在 `verifying`；这两件事分别由负责文档和 `node scripts/acceptance.mjs` 跟踪。
 - Incomplete required checks or unresolved blocking findings keep the task in `verifying` or `blocked`. A later human acceptance issue reopens the task or creates a linked fix task. Acceptance of partial delivery does not automatically satisfy the task's remaining criteria.
 - 一项交付集成 dev 后即收尾。之后的修复与补测另开任务（小修复不建任务），不在已交付的任务里追加评审轮次或验收记录。
 - 标记 `done` 后，在同一次变更中按 Archiving 将任务目录移入归档。
-- There is no shared task index; parallel edits to one would conflict. Query frontmatter with `rg` instead.
-
-### 既有任务的衔接
-
-新规则审阅生效后，进行中任务在下一次收尾时按本协议复核。旧记录中的“待人工签收才能 done”属于旧流程，不再作为所有任务的通用门禁；历史人工确认、验收结论和证据保持原样。主 Agent 逐项核对范围、证据基线、所需评审和真正的人工前置条件，更新当前收尾说明后再决定状态；不批量把 `verifying` 改为 `done`。原先仅授权调研或规格起草的任务，不因本规则取得代码实现授权。
+- There is no hand-written task index; parallel edits to one would conflict. `node scripts/tasks.mjs` derives the overview from frontmatter, see [Queue](#queue).
 
 ### 人工功能验收
 
@@ -49,9 +68,9 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 
 ## Archiving
 
-- 将 `status: done` 的任务归档到 `.agents/archive/tasks/`；其余状态的任务保留在 `tasks/`。待人工验收的功能仍须在路线图保留入口。
-- 归档时整体移动任务目录，保留原 ID、目录名、状态、任务记录与 `evidence/`；不另建归档索引。
-- 移动时同步修正仓库内指向旧路径的引用，以及任务内部因目录深度变化而失效的相对链接和路径；检查链接目标，并搜索旧路径，确保没有遗漏。
+- 将 `status: done` 的任务归档到 `.agents/archive/tasks/`；其余状态的任务保留在 `tasks/`。提交门禁拒绝留在 `tasks/` 的 `done` 任务。待人工验收的交付由 `node scripts/acceptance.mjs` 列出。
+- 归档用 `node scripts/tasks.mjs archive <id>`。它整体移动任务目录，保留原 ID、目录名、状态、任务记录与 `evidence/`，并修正仓库内指向旧路径的链接和任务内部因目录深度变化而失效的相对链接；不另建归档索引。
+- 命令列出的“需手动核对”是代码块、行内代码或脚本里的旧路径，逐条处理后运行 `pnpm check:docs`。
 - 已归档任务需要恢复工作时，由主 agent 将完整目录移回 `tasks/`，更新状态并记录重开原因，同时修正相关引用。
 
 ## Writing task.md
@@ -104,7 +123,7 @@ Tasks that need a record may use only `task.md`; add other files when they help 
 ## Parallel Workers
 
 - The main agent lists workers in `plan.md` and assigns them before starting them; workers never claim work themselves.
-- Each worker has a declared write scope. Scopes must not overlap; overlapping work becomes a dependency and runs in sequence.
+- Each worker has a declared write scope; a queued task declares it in `paths`. Scopes must not overlap; overlapping work becomes a dependency and runs in sequence.
 - Workers that change code concurrently each work in their own worktree, as defined in [CONTRIBUTING.md](../CONTRIBUTING.md) section 2.
 - Workers write only inside their scope and never edit `task.md` or `plan.md`.
 - A worker ends with a report to the main agent in this order: done; outputs (file paths); findings and pitfalls; not done; decisions needed from a human.
@@ -124,7 +143,6 @@ A new main agent resumes from `task.md` and, if present, the `plan.md` progress 
 
 ## Queries
 
-- `rg -l '^status: in_progress' tasks/*/task.md`: active tasks.
-- `rg -l '^status: verifying' tasks/*/task.md`: tasks undergoing verification or closure review; not necessarily waiting for a human.
+- `node scripts/tasks.mjs`: 待人处理、进行中与排队的任务；`node scripts/tasks.mjs --stale` 只列 AI 负责且多日没有变化的任务。
 - `rg -l '^status: done' .agents/archive/tasks --glob task.md`: archived tasks.
 - `rg -l 'FR-STATE-002' tasks .agents/archive/tasks --glob task.md`: tasks covering a requirement, including archived tasks.

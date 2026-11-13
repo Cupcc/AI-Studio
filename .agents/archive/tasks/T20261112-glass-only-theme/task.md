@@ -15,7 +15,7 @@ created: 2026-11-12
 - 检查：设置单测 26/26；提交门禁类型检查与相关单测 141/141；E2E `settings`、`alignment`、`composer`、`app`（27/27，`464c423`）及 `cli-default`、`settings`（10/10，`0ca1794`）；`check:docs` 无新问题。
 - 文档核对：settings spec（SET-C3/Q4/Q5/Q6/T3、新增 SET-C9、FR-SET-001/002、§2/§4/§5）、FR-SET-002、新增 DEC-31（DEC-12 保留原结论并注明被部分取代）、Shell Spec v02 §12 与状态行、Visual Direction、UX 规格（第 6 节、D-16）、AC-08 说明、路线图“设置与外观”、design/README、桌面端 README。历史原型文件保持原样。
 - 未覆盖：真实系统“降低透明度”切换与打包应用未验证，见验收记录；人工功能验收待你在 dev 上体验。
-- 跨任务：[工作台界面规范化任务](../../../../tasks/T20261112-workbench-ui-polish/task.md)第 60 行仍有“设置中切换纯色”的测试步骤，由该任务负责人更新。
+- 跨任务：[工作台界面规范化任务](../T20261112-workbench-ui-polish/task.md)第 60 行仍有“设置中切换纯色”的测试步骤，由该任务负责人更新。
 - 收尾日期：2026-11-12。
 
 ## 目标

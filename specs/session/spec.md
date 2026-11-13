@@ -9,7 +9,7 @@
 | 覆盖需求 | FR-SESSION-001～FR-SESSION-003、FR-STATE-001～FR-STATE-007；关联 FR-PROJ-002（关闭时停止当前一轮、Tab 注意力点数据） |
 | 相关验收 | AC-02、AC-03、AC-04、AC-05；05 第 4 节专项测试中的 Session Resume、错误恢复、大量 Session 性能、Needs Input / Error 清除规则、Project Tab 注意力点、关闭 Project 确认、Stop |
 | 相关设计 | [Shell Spec v01](../../design/components/shell-spec-v01.md) 第 5、6、10 节；[Shell Spec v02](../../design/components/shell-spec-v02.md) 第 6 节（Agent 消息 Markdown、代码块）；线框图 v02（[design/wireframes](../../design/wireframes/README.md)）；交互原型 v01、v02（已确认，行为以本 spec 为准） |
-| 来源 | [01. Product Definition](<../../docs/01. Product Definition.md>) 第 6～8 节；[02. Functional Requirements](<../../docs/02. Functional Requirements.md>) 第 2 节；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6、7、8、10 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2～7 节；[CLI Integration Preflight](../../tasks/T20261008-cli-preflight/report.md) 第 3、5、6 节 |
+| 来源 | [01. Product Definition](<../../docs/01. Product Definition.md>) 第 6～8 节；[02. Functional Requirements](<../../docs/02. Functional Requirements.md>) 第 2 节；[03. UX Specification](<../../docs/03. UX Specification.md>) 第 6、7、8、10 节；[04. Technical Requirements](<../../docs/04. Technical Requirements.md>) 第 2～7 节；[CLI Integration Preflight](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 3、5、6 节 |
 
 ## 1. 问题记录
 
@@ -18,10 +18,10 @@
 | 编号 | 问题 | 推荐答案与依据 | 阻塞实现 | 回答（确认日期） |
 |---|---|---|---|---|
 | S-Q3 | 原生会话无法恢复时，可提供哪些原生恢复／分支入口？ | 报告原生错误；按原则 24 核对并接入 CLI 支持的恢复／分支操作，不再因旧文档未列入口而一律排除。显式新建或分支须显示为新会话，不得暗中替换原 Session ID（04 第 5 节第 7 条） | 否；技术能力核对，具体未接入项如实记录 | |
-| S-Q4 | 首条消息后原生 ID 尚未产生就失败（如 Claude 在 `system/init` 前退出），下一次发送是创建新的原生会话吗？ | 是。此时不存在原生会话，创建不违反 1:1；一旦绑定 ID 便不再新建。依据：01 第 7 节；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 3 节 Claude 初始化时序 | 否 | |
-| S-Q5 | 没有进行中的轮时 Runtime 退出，是否显示 Error？ | 不显示，只标记离线，下一次发送时恢复。FR-STATE-003 的 Error 用于提醒执行出错，空闲退出不影响用户工作；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 4 节已验证进程终止后可按原 ID 恢复 | 否 | |
+| S-Q4 | 首条消息后原生 ID 尚未产生就失败（如 Claude 在 `system/init` 前退出），下一次发送是创建新的原生会话吗？ | 是。此时不存在原生会话，创建不违反 1:1；一旦绑定 ID 便不再新建。依据：01 第 7 节；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 3 节 Claude 初始化时序 | 否 | |
+| S-Q5 | 没有进行中的轮时 Runtime 退出，是否显示 Error？ | 不显示，只标记离线，下一次发送时恢复。FR-STATE-003 的 Error 用于提醒执行出错，空闲退出不影响用户工作；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 4 节已验证进程终止后可按原 ID 恢复 | 否 | |
 | S-Q6（剩余部分） | 关闭最后一个窗口是否等于退出？ | 沿用现有建议：应用继续运行、Session 继续执行，从 Dock 重开窗口；本轮未单独确认此旧问题 | 否；沿用既有实现 | 退出时合并确认的部分已由 FR-PROJ-002 / DEC-14 于 2026-10-13 确认，见 §3.14 |
-| S-Q7 | 应用异常退出（崩溃、强制退出）时进行中的轮，下次启动如何显示？ | 显示 Error（“应用退出时本轮未完成”），以便发现中断的工作；经确认的正常退出则显示“已停止”行、无提醒。依据：FR-STATE-003；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节只有成功终态产生 Completed Unread | 否 | |
+| S-Q7 | 应用异常退出（崩溃、强制退出）时进行中的轮，下次启动如何显示？ | 显示 Error（“应用退出时本轮未完成”），以便发现中断的工作；经确认的正常退出则显示“已停止”行、无提醒。依据：FR-STATE-003；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节只有成功终态产生 Completed Unread | 否 | |
 | S-Q8 | Stop 进行中（等待清理完成）如何显示？ | 列表仍显示 Running；Stop 控件变为禁用的“停止中”；暂停新提交（04 第 5 节第 1 条）。不新增列表状态 | 否 | |
 | S-Q9 | 用户停止的轮是否显示完成行？ | 显示 `Worked for <时长> · 已停止`；失败的轮只显示 Error 卡片。依据：FR-STATE-007“或同等语义形式” | 否 | |
 | S-Q10 | “Worked for” 时长是否包含等待用户答复的时间？ | 包含，按提交到终态的墙钟时间；与 Adapter 报告的回合耗时一致，实现简单 | 否 | |
@@ -59,18 +59,18 @@
 
 ### 3.1 App Session 与 CLI Conversation 生命周期
 
-依据：01 第 7 节 Session 与第 8 节原则 4；04 第 2 节；FR-CHAT-001（D-01）；FR-SESSION-002；FR-STATE-003（D-04）；04 第 5 节第 7 条；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节“每个 App Session 固定 Provider，保存原生会话 ID；恢复不应静默创建新的原生 Session”。
+依据：01 第 7 节 Session 与第 8 节原则 4；04 第 2 节；FR-CHAT-001（D-01）；FR-SESSION-002；FR-STATE-003（D-04）；04 第 5 节第 7 条；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节“每个 App Session 固定 Provider，保存原生会话 ID；恢复不应静默创建新的原生 Session”。
 
 | 阶段 | 进入条件 | 说明 |
 |---|---|---|
 | 草稿 | 用户点击 New Chat | 不是 Session，不持久化为 Session，不进入 Session History（FR-CHAT-001）。由 chat 模块管理。 |
 | 已创建，原生 ID 未知 | 用户在草稿中发送第一条消息 | 立即写入 Session 记录并进入 Session History（FR-CHAT-001 第 5 项），同时进入 Running（第 3.5 节）。`cli_type` 自此锁定（FR-CHAT-003）。 |
-| 已绑定 | Adapter 报告原生会话 ID | 立即持久化 `cli_session_id`。Codex 在创建 Thread 时即可得到 `thread.id`；Claude 的 `session_id` 在首条消息触发 `system/init` 后才出现（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 3 节）。 |
+| 已绑定 | Adapter 报告原生会话 ID | 立即持久化 `cli_session_id`。Codex 在创建 Thread 时即可得到 `thread.id`；Claude 的 `session_id` 在首条消息触发 `system/init` 后才出现（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 3 节）。 |
 | 运行时在线 / 离线 | 技术状态，不在 UI 显示 | 有活动 Runtime 时直接发送；无 Runtime（应用重启、空闲回收、进程退出）时，下一次发送先以 `cli_session_id` 恢复，再发送。 |
 
 规则：
 
-1. 1:1 不变式：一个 App Session 在整个生命周期内只绑定一个原生会话 ID。绑定后不得改为其他 ID；恢复失败时报告 Error，不得静默创建新的原生会话（04 第 5 节第 7 条；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节）。
+1. 1:1 不变式：一个 App Session 在整个生命周期内只绑定一个原生会话 ID。绑定后不得改为其他 ID；恢复失败时报告 Error，不得静默创建新的原生会话（04 第 5 节第 7 条；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节）。
 2. 原生 ID 未知时失败（例如 CLI 进程在 `system/init` 前退出）：Session 保留在 History 中，显示 Error；下一次发送时由于不存在原生会话，按首次创建处理（见 S-Q4）。
 3. 应用重启：Session 列表与对话记录从本地持久化读取，不需要启动 CLI；打开 Session 只读本地记录（第 3.2 节）。用户再次发送时才恢复原生会话。
 4. 恢复失败（原生 ID 无效、原生记录被删除、CLI 拒绝）：本轮以 Error 结束，Error 卡片说明恢复失败并保留原生诊断；用户可重试或自行新建对话（S-Q3）。
@@ -105,7 +105,7 @@
 
 ### 3.5 FR-STATE-001 Running
 
-1. 进入：用户提交消息（首条或后续）后立即进入 Running，不等待首个文本片段或原生 `turn/started`（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 Running 行；agent-adapter task 验收第 2 条）。恢复原生会话、创建 Runtime 的时间也计入 Running。
+1. 进入：用户提交消息（首条或后续）后立即进入 Running，不等待首个文本片段或原生 `turn/started`（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节 Running 行；agent-adapter task 验收第 2 条）。恢复原生会话、创建 Runtime 的时间也计入 Running。
 2. 保持：思考、输出、执行命令、使用工具、修改文件期间均为 Running；用户答复 Needs Input 后回到 Running（FR-STATE-001、FR-STATE-002）。
 3. 结束：本轮到达终态（完成、停止、失败）时结束（UX 第 7 节 Running 清除时机）。
 4. 表现：列表项右侧中性色 Spinner（Shell Spec 第 5 节）。Running 不计入 Project 注意力汇总（第 3.15 节）。
@@ -113,7 +113,7 @@
 
 ### 3.6 FR-STATE-002 Needs Input
 
-1. 进入：Adapter 报告等待输入请求（授权、确认、选择、提问；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 Needs Input 行），Session 从 Running 转为 Needs Input。同一 Session 可以同时有多个未答复请求，各自独立答复（agent-adapter task 验收第 4 条；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 6 节多请求竞态）。
+1. 进入：Adapter 报告等待输入请求（授权、确认、选择、提问；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节 Needs Input 行），Session 从 Running 转为 Needs Input。同一 Session 可以同时有多个未答复请求，各自独立答复（agent-adapter task 验收第 4 条；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 6 节多请求竞态）。
 2. 呈现：每个请求在 Conversation 末尾显示一张等待卡片，内容为 CLI 原生问题与选项，按钮直接回传 CLI（UX 第 6 节；D-03；Shell Spec 第 6 节）。列表项显示橙色点。
 3. 清除：只有用户答复才清除——点击卡片选项，或在输入框直接输入回复（输入回复的协议语义见 input spec I-Q2）。所有未答复请求都已答复后，Session 回到 Running。仅打开查看不清除（FR-STATE-002）。
 4. 正在查看的 Session 进入 Needs Input 时同样显示橙色点，并计入 Project 注意力汇总（例如折叠按钮）；当前 Project 的 Tab 不显示注意力点由壳层处理（UX 第 7 节）。
@@ -123,7 +123,7 @@
 
 ### 3.7 FR-STATE-003 Error
 
-1. 进入：本轮以失败终态结束，包括：CLI 返回错误结果、SDK 异常、Runtime 在轮进行中退出、创建或恢复原生会话失败、Stop 兜底恢复失败（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节执行错误行；04 第 5 节第 6、7 条）。已与用户 Stop 关联的取消终态不是 Error（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节主动取消行；04 第 3 节末段）。
+1. 进入：本轮以失败终态结束，包括：CLI 返回错误结果、SDK 异常、Runtime 在轮进行中退出、创建或恢复原生会话失败、Stop 兜底恢复失败（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节执行错误行；04 第 5 节第 6、7 条）。已与用户 Stop 关联的取消终态不是 Error（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节主动取消行；04 第 3 节末段）。
 2. 呈现：Conversation 末尾显示 Error 卡片：错误摘要、“重试”、“查看详情”（展开原生诊断）（UX 第 6 节；D-04；Shell Spec 第 6 节）。列表项显示红色点。
 3. 清除：用户查看该 Session 时清除列表中的 Error 提醒；卡片与详情永久保留在 Conversation 中（FR-STATE-003）。“查看”的定义见第 3.11 节。
 4. 恢复：用户再次发送消息或点击“重试”时，先恢复对应 CLI Conversation（第 3.1 节第 5 条；S-Q2）。
@@ -132,14 +132,14 @@
 
 ### 3.8 FR-STATE-004 / FR-STATE-005 Completed Unread 与清除
 
-1. 产生：本轮以成功终态结束，且此刻用户未在查看该 Session（FR-STATE-004；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节正常完成行：只有成功终态按是否查看产生 Completed Unread）。停止、失败的轮不产生 Completed Unread。
+1. 产生：本轮以成功终态结束，且此刻用户未在查看该 Session（FR-STATE-004；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节正常完成行：只有成功终态按是否查看产生 Completed Unread）。停止、失败的轮不产生 Completed Unread。
 2. 不产生：完成时 Session 正在被查看，包括显示在 Project View 左侧 Conversation 列中（FR-STATE-004 末段；D-05）。
 3. 清除：用户点击该 Session，直接进入 Conversation 最新位置，绿色点立即清除；不提供 Mark as Read 或任何确认操作（FR-STATE-005；01 第 8 节原则 12）。重新显示（切换 Tab 返回、启动恢复）是否也清除见第 3.11 节与 S-Q1。
 4. 语义是“有新的 Agent 工作结果未查看”，不是“Session 结束”；Session 之后仍可继续对话（FR-STATE-004）。
 
 ### 3.9 FR-STATE-006 无状态
 
-不在运行、不等待用户、无未查看的 Error、无未查看的完成结果时，列表项不显示任何状态元素；UI 中不出现 Idle 字样（FR-STATE-006；01 第 8 节原则 10）。CLI 原生的 `idle` 不映射为列表文字（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节）。
+不在运行、不等待用户、无未查看的 Error、无未查看的完成结果时，列表项不显示任何状态元素；UI 中不出现 Idle 字样（FR-STATE-006；01 第 8 节原则 10）。CLI 原生的 `idle` 不映射为列表文字（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节）。
 
 ### 3.10 FR-STATE-007 轮次完成行
 
@@ -175,15 +175,15 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 
 ### 3.12 Stop
 
-依据：FR-INPUT-001（Send / Stop 控件）；04 第 5 节 Codex Stop 实现约束 1～7；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节主动取消行与 Stop 条目；agent-adapter task 验收。
+依据：FR-INPUT-001（Send / Stop 控件）；04 第 5 节 Codex Stop 实现约束 1～7；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节主动取消行与 Stop 条目；agent-adapter task 验收。
 
 1. 用户在 Running 或 Needs Input 的 Session 中触发 Stop（控件规则见 input spec）。Stop 作用于该 Session 当前一轮，不影响其他 Session（FR-SESSION-003）。
 2. 触发后立即：记录取消意图；暂停该 Session 的新提交（04 第 5 节第 1 条）；所有未答复的 Needs Input 卡片失效（标注“已停止”）；列表状态从 Needs Input 回到 Running（Stop 进行中，S-Q8）。
-3. Stop 完成以 Adapter 报告“本轮终态 + 目标资源已清理”为准，不能只凭收到 `interrupted`（04 第 5 节第 1、5 条；[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节）。完成后：本轮结束，状态回到无状态，追加“已停止”完成行，不产生 Error、不产生 Completed Unread。
+3. Stop 完成以 Adapter 报告“本轮终态 + 目标资源已清理”为准，不能只凭收到 `interrupted`（04 第 5 节第 1、5 条；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节）。完成后：本轮结束，状态回到无状态，追加“已停止”完成行，不产生 Error、不产生 Completed Unread。
 4. 已输出的部分 Agent 文本、工具活动行保留在对话记录中。
 5. 清理失败或超时时由 Adapter 走 Runtime 兜底并以原 ID 恢复（04 第 5 节第 6 条）。兜底恢复失败：本轮以 Error 结束，Error 卡片说明 Stop 清理或恢复失败；不得静默创建新原生会话，不得自动重跑已取消的命令（04 第 5 节第 7 条）。
 6. 重复 Stop 幂等；Stop 完成后到达的迟到事件被丢弃，不改变状态、不追加内容（04 第 5 节；05 第 4 节 Stop 专项）。
-7. Stop 与成功完成竞态：以 Adapter 报告的原生终态为准；原生为成功终态时按完成处理（显示 Done）；Claude 在取消后返回的 `error_during_execution` 视为已停止（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节）。
+7. Stop 与成功完成竞态：以 Adapter 报告的原生终态为准；原生为成功终态时按完成处理（显示 Done）；Claude 在取消后返回的 `error_during_execution` 视为已停止（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节）。
 8. Stop 不改变 `last_user_message_at`。
 
 ### 3.13 关闭 Project（FR-PROJ-002 关闭部分）
@@ -299,7 +299,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | 类型 | 内容 | 来源 |
 |---|---|---|
 | `user_message` | 文本、附带的上下文项（View、文件、图片、Skill，见 input spec）、发送时间 | 用户发送 |
-| `agent_message` | 完整文本（Markdown 原文，展示时渲染，见第 3.2 节第 5 条）；流式期间为增量拼接，完成时以完整消息校正，正文不重复（[CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节文本追加行） | Adapter |
+| `agent_message` | 完整文本（Markdown 原文，展示时渲染，见第 3.2 节第 5 条）；流式期间为增量拼接，完成时以完整消息校正，正文不重复（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节文本追加行） | Adapter |
 | `tool_activity` | 动作类别（Read / Edit / Run / 其他）、单行摘要、进行中 / 完成 / 失败；CLI 已公开 reasoning 折叠正文及 MCP / dynamic tool 结果，按同 item 完整快照替换并持久化（S-Q12、原则 24） | Adapter |
 | `input_request` | 请求 ID、类型（授权 / 提问）、CLI 原生内容与选项、结果（已答复及所选项 / 文字回复 / 已停止 / 已失效） | Adapter + 用户 |
 | `error` | 摘要、原生诊断详情、是否可重试 | Adapter / Session Manager |
@@ -325,7 +325,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 
 以下为本模块所需能力，命名为示意。实现使用 [Adapter spec §5](../agent-adapter/spec.md) 与 `packages/agent-adapter/src/provider.ts` 的正式契约；两者的名称映射见 Adapter §5.5。
 
-| 能力 / 事件 | 用途 | 对应 [CLI 校验报告](../../tasks/T20261008-cli-preflight/report.md) 第 5 节 / 04 第 5 节 | 需对齐的点 |
+| 能力 / 事件 | 用途 | 对应 [CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节 / 04 第 5 节 | 需对齐的点 |
 |---|---|---|---|
 | `create(cli, cwd, options)` → 句柄 | 首条消息创建原生会话 | 06 §3 | 原生 ID 同步返回（Codex）还是异步事件（Claude，`system/init` 后） |
 | 事件 `nativeSessionId(id)` | 立即持久化 `cli_session_id` | 06 §5“保存原生会话 ID” | Claude 首条消息前无法得到 ID |

@@ -3,7 +3,7 @@
 ## 未覆盖与待决事项
 
 - 打包应用：未执行。本轮只覆盖开发构建（`electron-vite build` 产物）。复测条件：`pnpm package` 后使用打包应用重跑 AC-02 / Stop / 恢复。
-- 应用自定义连接（URL / Key）下的 Claude 远端调用：未执行，本轮使用本机 claude.ai 登录（"本机"模式）。复测条件：取得可用的 Claude API Key 或网关。2026-11-13 已用用户提供的网关实测，见 [CLI 安装任务 W3](../../../../tasks/T20261108-cli-install/acceptance.md#2026-11-13-claude-自定义连接实测w3)。
+- 应用自定义连接（URL / Key）下的 Claude 远端调用：未执行，本轮使用本机 claude.ai 登录（"本机"模式）。复测条件：取得可用的 Claude API Key 或网关。2026-11-13 已用用户提供的网关实测，见 [CLI 安装任务 W3](../T20261108-cli-install/acceptance.md#2026-11-13-claude-自定义连接实测w3)。
 - 一键安装的真实网络流程：未执行（本机已安装 Claude Code）。
 - Reasoning Effort 切换对 Claude 的实际作用：未单独验证；本轮只核实了模型选择。
 - AC-06 Project View、工具面板与 Claude 的组合：未覆盖。
