@@ -4,9 +4,10 @@ import type { WorkbenchEntry } from '@shared/workbench/types'
 import { describeWorkbenchError } from './api'
 import type { HostView } from './host'
 
-/** Menu anchored below a button; `end` aligns its right edge with the anchor. Closes on outside clicks,
- *  window blur (a click into the page iframe never reaches this document), resize and Esc. */
-export function WorkbenchMenu({ anchor, children, dismiss, className = '', label = '工作台操作', align = 'start' }: { anchor: HTMLButtonElement; children: ReactNode; dismiss(): void; className?: string; label?: string; align?: 'start' | 'end' }) {
+/** Popover anchored below a button; `end` aligns its right edge with the anchor. Closes on outside clicks,
+ *  window blur (a click into the page iframe never reaches this document), resize and Esc. Use `role="dialog"`
+ *  when the content has headings or rows with several actions, which a `menu` may not contain. */
+export function WorkbenchMenu({ anchor, children, dismiss, className = '', label = '工作台操作', align = 'start', role = 'menu' }: { anchor: HTMLButtonElement; children: ReactNode; dismiss(): void; className?: string; label?: string; align?: 'start' | 'end'; role?: 'menu' | 'dialog' }) {
   const panel = useRef<HTMLDivElement>(null)
   const rect = anchor.getBoundingClientRect()
   const [position, setPosition] = useState({ top: rect.bottom + 4, left: rect.left })
@@ -26,7 +27,7 @@ export function WorkbenchMenu({ anchor, children, dismiss, className = '', label
     window.addEventListener('blur', close)
     return () => { document.removeEventListener('pointerdown', outside); window.removeEventListener('resize', close); window.removeEventListener('blur', close) }
   }, [anchor, dismiss])
-  return createPortal(<div ref={panel} className={`popover workbench-menu ${className}`} role="menu" aria-label={label} style={position} onBlur={event => {
+  return createPortal(<div ref={panel} className={`popover workbench-menu ${className}`} role={role} aria-label={label} style={position} onBlur={event => {
     if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) dismiss()
   }} onKeyDown={event => {
     if (event.key === 'Escape') { event.preventDefault(); dismiss(); anchor.focus(); return }
@@ -39,9 +40,17 @@ export function WorkbenchMenu({ anchor, children, dismiss, className = '', label
   }}>{children}</div>, document.body)
 }
 
-export function WorkbenchDialog({ entry, mode, submit, dismiss, restoreFocus }: {
-  entry: WorkbenchEntry; mode: 'rename' | 'delete'; submit(title: string): Promise<void>; dismiss(): void; restoreFocus(): void
+export type DialogMode = 'rename' | 'delete-draft' | 'delete-instance'
+const DIALOG_TEXT: Record<DialogMode, { title: string; submit: string; pending: string }> = {
+  rename: { title: '重命名工作台', submit: '保存名称', pending: '正在保存…' },
+  'delete-draft': { title: '删除草稿？', submit: '删除草稿', pending: '正在删除…' },
+  'delete-instance': { title: '删除工作台？', submit: '删除工作台', pending: '正在删除…' }
+}
+
+export function WorkbenchDialog({ entry, mode, running = 0, submit, dismiss, restoreFocus }: {
+  entry: WorkbenchEntry; mode: DialogMode; running?: number; submit(title: string): Promise<void>; dismiss(): void; restoreFocus(): void
 }) {
+  const text = DIALOG_TEXT[mode]
   const [title, setTitle] = useState(entry.title), [pending, setPending] = useState(false), [error, setError] = useState<string | null>(null)
   const dialog = useRef<HTMLFormElement>(null), input = useRef<HTMLInputElement>(null), cancel = useRef<HTMLButtonElement>(null)
   const titleId = useId(), inputId = useId(), errorId = useId()
@@ -63,11 +72,13 @@ export function WorkbenchDialog({ entry, mode, submit, dismiss, restoreFocus }: 
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
     if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
   }}>
-    <h2 id={titleId}>{mode === 'rename' ? '重命名工作台' : '删除草稿？'}</h2>
-    {mode === 'rename' ? <><label htmlFor={inputId}>工作台名称</label><input ref={input} id={inputId} value={title} maxLength={100} required disabled={pending} aria-describedby={error ? errorId : undefined} onChange={event => setTitle(event.target.value)} /></>
-      : <p>删除“{entry.title}”的设计草稿记录。项目文件、已有工作台和会话历史会保留。删除后无法从列表恢复此草稿。</p>}
+    <h2 id={titleId}>{text.title}</h2>
+    {mode === 'rename' ? <><label htmlFor={inputId}>工作台名称</label><input ref={input} id={inputId} name="workbench-title" autoComplete="off" value={title} maxLength={100} required disabled={pending} aria-describedby={error ? errorId : undefined} onChange={event => setTitle(event.target.value)} /></>
+      : mode === 'delete-draft' ? <p>删除“{entry.title}”的设计草稿记录。项目文件、已有工作台和会话历史会保留。删除后无法从列表恢复此草稿。</p>
+      : <><p>永久删除“{entry.title}”和它保存的页面数据；未应用的编辑草稿也会删除。会话历史和项目文件保留。此操作无法撤销。</p>
+        {running > 0 && <p className="workbench-dialog__warning">将先停止从此工作台及其编辑草稿发起、仍在运行的 {running} 个会话。</p>}</>}
     {error && <p id={errorId} role="alert">{error}</p>}
-    <div className="confirm-dialog__actions"><button ref={cancel} type="button" className="secondary-button" disabled={pending} onClick={dismiss}>取消</button><button type="submit" className={mode === 'delete' ? 'danger-button' : 'primary-button'} disabled={pending || (mode === 'rename' && !title.trim())}>{pending ? '正在保存…' : mode === 'rename' ? '保存名称' : '删除草稿'}</button></div>
+    <div className="confirm-dialog__actions"><button ref={cancel} type="button" className="secondary-button" disabled={pending} onClick={dismiss}>取消</button><button type="submit" className={mode === 'rename' ? 'primary-button' : 'danger-button'} disabled={pending || (mode === 'rename' && !title.trim())}>{pending ? text.pending : text.submit}</button></div>
   </form></div>, document.body)
 }
 

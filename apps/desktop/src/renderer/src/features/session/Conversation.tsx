@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { isViewId } from '@shared/project/ui-state'
 import { useViewTitle } from '../workbench/use-view-title'
+import { useWorkbenches } from '../workbench/store'
 import type { ShellSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
 import { Composer } from '../input/Composer'
@@ -16,15 +17,17 @@ export function ConversationHeader({ project, canvas }: ShellSlotProps) {
   const draft = useSessions((s) => s.drafts[`${project.id}:draft`])
   const origin = summary?.originViewId
   const originTitle = useViewTitle(project.id, origin ?? '')
+  // Applied drafts and removed or deleted workbenches leave the list; their conversations stay in history.
+  const originListed = useWorkbenches(s => !!origin && !!s.catalogs[project.id]?.some(entry => entry.viewId === origin))
   return <>
     {(summary?.cli ?? draft?.cli) && <CliBadge cli={(summary?.cli ?? draft?.cli)!} />}
     <span className="session-header__title" title={sessionId ? summary?.title : '新对话'}>{sessionId ? summary?.title ?? '正在加载对话…' : '新对话'}</span>
     {origin && <><span className="session-header__from muted">· 来自 {originTitle}</span>
-      <button className="link-button" disabled={!isViewId(origin)} onClick={() => {
-        if (!isViewId(origin)) return
+      <button className="link-button" disabled={!isViewId(origin) || !originListed} onClick={() => {
+        if (!isViewId(origin) || !originListed) return
         useProjectShell.getState().enterView(project.id, origin)
         useProjectShell.getState().setViewConversation(project.id, { kind: 'session', sessionId: sessionId! })
-      }} title={origin}>在工作台中打开</button></>}
+      }} title={originListed ? origin : '该工作台已不在列表中'}>在工作台中打开</button></>}
   </>
 }
 

@@ -102,7 +102,7 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
 4. Agent Team
 5. Business Flow
 
-每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 4 节）。图标采用交互原型 v01。默认项首次打开时显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。移除项从当前导航隐藏，但可以从“工作台”标题右侧的“+”（添加工作台）恢复。添加入口使用浮层，不改变工作台列表或 Session History 的布局。
+每项：图标 + 名称，高 32；状态 Default / Hover / Selected / Focus（Shell 第 4 节）。图标采用交互原型 v01。默认项首次打开时显示，不会因 Knowledge 为空而隐藏或禁用（FR-VIEW-003：Knowledge 为空时 Preview 显示空状态，由 project-view 处理）。移除项从当前导航隐藏，但可以从“工作台”标题右侧的“+”（添加工作台）恢复；已移除的自定义工作台还可在同一处永久删除。添加入口使用浮层，不改变工作台列表或 Session History 的布局。
 
 #### 工作台实例导航
 

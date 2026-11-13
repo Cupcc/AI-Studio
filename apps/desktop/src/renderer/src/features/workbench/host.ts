@@ -66,8 +66,9 @@ export function applyWorkbenchDraft(ref: WorkbenchRef): Promise<void> | undefine
   if (!page || !pageReady || entry?.kind !== 'draft') return
   return run(ref, async live => {
     const instance = await workbenchApi().applyDraft({ ref: { projectId: ref.projectId, viewId: entry.viewId }, expectedPackageRevision: page.packageRevision })
-    await useWorkbenches.getState().loadCatalog(ref.projectId)
+    // The draft closes on apply, so hand the view over before the refreshed list drops it.
     if (live()) useProjectShell.getState().enterView(ref.projectId, instance.viewId)
+    await useWorkbenches.getState().loadCatalog(ref.projectId)
   })
 }
 

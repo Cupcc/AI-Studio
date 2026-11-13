@@ -90,11 +90,24 @@ export class PackageRuntime {
       const path = join(folder, name); assertInside(root, path); writeFileSync(path, text)
     }
   }
+  /** An instance has at most one open draft per source; editing again reopens it while it still matches the applied revision.
+   *  A template upgrade draft, edits included, is reopened while it holds the current App template version; after the App
+   *  template version changes it is replaced, so the preview never shows an older template. */
   createDraft(projectId: string, source: 'template' | 'ai', instanceId?: string, templateId?: 'product-selection'): WorkbenchDraft {
     const root = this.root(projectId), id = randomUUID(), directory = `${ROOT}/drafts/${id}`
     const original = instanceId ? this.instanceRow(projectId, instanceId) : null
     if (templateId && (source !== 'template' || (original && original.plugin_id !== templateId))) throw new Error('只能使用匹配的模板升级此工作台')
-    const files = templateId ? readPackage(this.options.presetRoot, join(this.options.presetRoot, templateId)).files : original ? readPackage(root, join(root, ROOT, 'packages', original.package_revision)).files : new Map([
+    const template = templateId ? readPackage(this.options.presetRoot, join(this.options.presetRoot, templateId)) : null
+    if (original) {
+      const open = this.db().prepare('SELECT * FROM workbench_drafts WHERE project_id=? AND target_instance_id=? AND source=? AND base_package_revision=? ORDER BY created_at DESC,id LIMIT 1').get(projectId, original.id, source, original.package_revision)
+      if (open) {
+        const reopened = storedDraft(open)
+        const version = template ? this.versionOf(root, reopened.directory) : null
+        if (!template || version === null || version === template.manifest.version) return draft(reopened)
+        this.db().prepare('DELETE FROM workbench_drafts WHERE id=? AND project_id=?').run(reopened.id, projectId)
+      }
+    }
+    const files = template ? template.files : original ? readPackage(root, join(root, ROOT, 'packages', original.package_revision)).files : new Map([
       ['manifest.json', Buffer.from(JSON.stringify({ schemaVersion: 1, pluginId: `workbench-${id}`, version: '1.0.0', sdkVersion: 1, title: source === 'ai' ? '新的工作台' : '随手记', entry: 'index.html', capabilities: ['state.read', 'state.write', 'conversation.draft'] }, null, 2))],
       ['index.html', Buffer.from(TEMPLATE_HTML)]
     ])
@@ -128,13 +141,7 @@ export class PackageRuntime {
     const pageUrl = `app://workbench/${target.projectId}/${target.kind}/${target.id}/${pkg.revision}/${pkg.manifest.entry.split('/').map(encodeURIComponent).join('/')}`
     return { target, manifest: pkg.manifest, packageRevision: pkg.revision, state: parseJsonState(JSON.parse(row.state)), stateRevision: row.state_revision, pageUrl, enabled: 'enabled' in row ? row.enabled === 1 : true }
   }
-  applyDraft(projectId: string, draftId: string, expectedPackageRevision: string): WorkbenchInstance {
-    const root = this.root(projectId), row = this.draftRow(projectId, draftId)
-    const pkg = readPackage(root, join(root, row.directory))
-    if (pkg.revision !== expectedPackageRevision) throw new Error('草稿已变化，请刷新预览并检查页面后再应用')
-    const original = row.target_instance_id ? this.instanceRow(projectId, row.target_instance_id) : null
-    if (original && original.package_revision !== row.base_package_revision) throw new Error('此工作台已应用其他版本，请从当前实例重新编辑，避免覆盖新版本')
-    if (original && original.plugin_id !== pkg.manifest.pluginId) throw new Error('编辑工作台时不能修改 pluginId，请恢复原标识')
+  private storePackage(root: string, pkg: PackageFiles): void {
     const destination = join(root, ROOT, 'packages', pkg.revision)
     assertInside(root, destination)
     if (!existsSync(destination)) {
@@ -142,17 +149,65 @@ export class PackageRuntime {
       try { writePackage(root, staging, pkg.files); renameSync(staging, destination) }
       finally { rmSync(staging, { recursive: true, force: true }) }
     } else if (readPackage(root, destination).revision !== pkg.revision) throw new Error('已保存的包版本不完整，请修复包目录后重试')
+  }
+  /** Applying closes the draft: its record goes away (files stay on disk) and the instance is the only entry left. */
+  applyDraft(projectId: string, draftId: string, expectedPackageRevision: string): { instance: WorkbenchInstance; created: boolean } {
+    const root = this.root(projectId), row = this.draftRow(projectId, draftId)
+    const pkg = readPackage(root, join(root, row.directory))
+    if (pkg.revision !== expectedPackageRevision) throw new Error('草稿已变化，请刷新预览并检查页面后再应用')
+    const original = row.target_instance_id ? this.instanceRow(projectId, row.target_instance_id) : null
+    if (original && original.package_revision !== row.base_package_revision) throw new Error('此工作台已应用其他版本，请从当前实例重新编辑，避免覆盖新版本')
+    if (original && original.plugin_id !== pkg.manifest.pluginId) throw new Error('编辑工作台时不能修改 pluginId，请恢复原标识')
+    this.storePackage(root, pkg)
     const id = original?.id ?? randomUUID()
     this.db().exec('SAVEPOINT workbench_apply')
     try {
       if (original) this.db().prepare('UPDATE workbench_instances SET package_revision=?, title=? WHERE id=? AND project_id=?').run(pkg.revision, pkg.manifest.title, id, projectId)
       else this.db().prepare('INSERT INTO workbench_instances(id,project_id,plugin_id,package_revision,title,state,created_at) VALUES (?,?,?,?,?,?,?)').run(id, projectId, pkg.manifest.pluginId, pkg.revision, pkg.manifest.title, row.state, Date.now())
-      this.db().prepare('UPDATE workbench_drafts SET target_instance_id=?,base_package_revision=?,title=? WHERE id=?').run(id, pkg.revision, pkg.manifest.title, draftId)
+      this.db().prepare('DELETE FROM workbench_drafts WHERE id=? AND project_id=?').run(draftId, projectId)
       this.db().exec('RELEASE workbench_apply')
     } catch (error) { this.db().exec('ROLLBACK TO workbench_apply; RELEASE workbench_apply'); throw error }
-    this.options.changed({ projectId, kind: 'draft', id: draftId }, true)
-    this.options.changed({ projectId, kind: 'instance', id }, true)
+    return { instance: instance(this.instanceRow(projectId, id)), created: !original }
+  }
+  /** App templates are trusted packages, so they become an instance directly without a preview draft. */
+  installTemplate(projectId: string, templateId: 'product-selection'): WorkbenchInstance {
+    const root = this.root(projectId), pkg = readPackage(this.options.presetRoot, join(this.options.presetRoot, templateId))
+    if (pkg.manifest.pluginId !== templateId) throw new Error('App 模板包标识不匹配，请重新构建应用')
+    this.storePackage(root, pkg)
+    const id = randomUUID()
+    this.db().prepare('INSERT INTO workbench_instances(id,project_id,plugin_id,package_revision,title,state,created_at) VALUES (?,?,?,?,?,?,?)').run(id, projectId, pkg.manifest.pluginId, pkg.revision, pkg.manifest.title, '{}', Date.now())
     return instance(this.instanceRow(projectId, id))
+  }
+  private revisionOf(root: string, directory: string): string | null {
+    try { return readPackage(root, join(root, directory)).revision } catch { return null }
+  }
+  /** Unreadable draft files return null; such a draft is reopened so its error stays fixable in its conversation. */
+  private versionOf(root: string, directory: string): string | null {
+    try { return readPackage(root, join(root, directory)).manifest.version } catch { return null }
+  }
+  /** Closes drafts flagged by the legacy migration whose files still equal their base revision (the revision they were last
+   *  applied as, or copied from), so nothing unapplied is lost, including drafts a later version superseded; flagged drafts
+   *  with changes stay listed. Each flag is checked once. Returns the closed draft IDs. */
+  closeLegacyDrafts(projectId: string): string[] {
+    const root = this.root(projectId), closed: string[] = []
+    for (const row of this.db().prepare('SELECT id, directory, base_package_revision AS revision FROM workbench_drafts WHERE project_id=? AND legacy_applied=1').all(projectId)) {
+      const id = columnText(row, 'id'), unchanged = this.revisionOf(root, columnText(row, 'directory')) === columnText(row, 'revision')
+      if (unchanged) { this.db().prepare('DELETE FROM workbench_drafts WHERE id=? AND project_id=?').run(id, projectId); closed.push(id) }
+      else this.db().prepare('UPDATE workbench_drafts SET legacy_applied=0 WHERE id=? AND project_id=?').run(id, projectId)
+    }
+    return closed
+  }
+  /** Deletes the instance with its saved state and the drafts that target it; returns those draft IDs. Package and draft files stay. */
+  deleteInstance(projectId: string, instanceId: string): string[] {
+    this.instanceRow(projectId, instanceId)
+    const drafts = this.db().prepare('SELECT id FROM workbench_drafts WHERE project_id=? AND target_instance_id=?').all(projectId, instanceId).map(row => columnText(row, 'id'))
+    this.db().exec('SAVEPOINT workbench_delete_instance')
+    try {
+      this.db().prepare('DELETE FROM workbench_drafts WHERE project_id=? AND target_instance_id=?').run(projectId, instanceId)
+      this.db().prepare('DELETE FROM workbench_instances WHERE project_id=? AND id=?').run(projectId, instanceId)
+      this.db().exec('RELEASE workbench_delete_instance')
+    } catch (error) { this.db().exec('ROLLBACK TO workbench_delete_instance; RELEASE workbench_delete_instance'); throw error }
+    return drafts
   }
   updateState(target: WorkbenchTarget, state: JsonValue, expectedRevision: number): WorkbenchPageSnapshot {
     if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw new Error('状态版本无效')

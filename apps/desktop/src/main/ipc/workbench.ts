@@ -57,6 +57,15 @@ export function createWorkbenchFeature(core: CoreServices) {
       handle: request => service.setVisible(request)
     },
     deleteDraft: { parse: parseDraftWorkbenchRef, handle: ref => service.deleteDraft(ref) },
+    deleteInstance: { parse: parseInstanceWorkbenchRef, handle: ref => service.deleteInstance(ref) },
+    addTemplate: {
+      parse(raw): { projectId: string; templateId: 'product-selection' } {
+        const value = expectRecord(raw); expectOnlyKeys(value, ['projectId', 'templateId'])
+        if (value.templateId !== 'product-selection') throw new Error('无效模板')
+        return { projectId: id(value.projectId, 'projectId'), templateId: value.templateId }
+      },
+      handle: request => service.addTemplate(request)
+    },
     createDraft: {
       parse(raw): { projectId: string; source: 'template' | 'ai'; instanceId?: string; templateId?: 'product-selection' } {
         const value = expectRecord(raw); expectOnlyKeys(value, ['projectId', 'source', 'instanceId', 'templateId'])

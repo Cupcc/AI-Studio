@@ -1,0 +1,26 @@
+# 2026-11-12 Review Agent probes, baseline b7901cc; script W2-review-probes.test.ts placed at apps/desktop/.runtime/review-probe/lifecycle.probe.test.ts with config W2-review-probes.config.ts
+$ pnpm exec vitest run --config .runtime/review-probe/vitest.config.ts --silent=false --reporter=verbose
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/workbench-lifecycle/apps/desktop
+stdout | .runtime/review-probe/lifecycle.probe.test.ts > P3 upgrade preview reuses a stale template draft after the App template changed
+P3 reused: true version shown as "新版": 0.0.2
+stdout | .runtime/review-probe/lifecycle.probe.test.ts > P4 legacy retargeted draft (old applyDraft) stays listed and is reused by upgrade preview
+P4 list after migration still shows legacy draft: [ '选品工作台' ]
+stdout | .runtime/review-probe/lifecycle.probe.test.ts > P4 legacy retargeted draft (old applyDraft) stays listed and is reused by upgrade preview
+P4 upgrade reused legacy draft: true preview version: 0.0.1
+ ✓ .runtime/review-probe/lifecycle.probe.test.ts > P1 nested savepoint: nav update failure rolls back instance insert and draft delete 28ms
+ ✓ .runtime/review-probe/lifecycle.probe.test.ts > P2 deleteInstance rollback: agent_runs delete failure keeps instance, drafts, nav 26ms
+ ✓ .runtime/review-probe/lifecycle.probe.test.ts > P3 upgrade preview reuses a stale template draft after the App template changed 32ms
+stdout | .runtime/review-probe/lifecycle.probe.test.ts > P5 applying an edit draft of a removed instance
+P5 applied to hidden instance; listed? false removed? true
+stdout | .runtime/review-probe/lifecycle.probe.test.ts > P6 events after delete: snapshot events for deleted views
+P6 events: ["catalog"]
+stdout | .runtime/review-probe/lifecycle.probe.test.ts > P7 numbering vs renamed instances and drafts
+P7 titles: [ '概览', '进度', '架构', 'Agent 团队', '业务流程', '选品工作台 2', '选品工作台', '选品工作台 3' ]
+ ✓ .runtime/review-probe/lifecycle.probe.test.ts > P4 legacy retargeted draft (old applyDraft) stays listed and is reused by upgrade preview 29ms
+ ✓ .runtime/review-probe/lifecycle.probe.test.ts > P5 applying an edit draft of a removed instance 20ms
+ ✓ .runtime/review-probe/lifecycle.probe.test.ts > P6 events after delete: snapshot events for deleted views 19ms
+ ✓ .runtime/review-probe/lifecycle.probe.test.ts > P7 numbering vs renamed instances and drafts 24ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  15:46:29
+   Duration  376ms (tests 58%, transform 36%, import 6%)

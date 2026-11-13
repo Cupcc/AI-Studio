@@ -15,6 +15,8 @@ export const workbenchContract = defineContract('workbench', {
     move: invoke<{ ref: WorkbenchRef; before: WorkbenchId | null }, WorkbenchCatalog>('workbench:move'),
     setVisible: invoke<{ ref: WorkbenchRef; visible: boolean }, WorkbenchCatalog>('workbench:set-visible'),
     deleteDraft: invoke<DraftWorkbenchRef, WorkbenchCatalog>('workbench:delete-draft'),
+    deleteInstance: invoke<InstanceWorkbenchRef, WorkbenchCatalog>('workbench:delete-instance'),
+    addTemplate: invoke<{ projectId: string; templateId: 'product-selection' }, CustomInstanceEntry>('workbench:add-template'),
     createDraft: invoke<{ projectId: string; source: 'template' | 'ai'; instanceId?: string; templateId?: 'product-selection' }, CustomDraftEntry>('workbench:create-draft'),
     getSnapshot: invoke<WorkbenchRef, WorkbenchSnapshot>('workbench:get-snapshot'),
     getContext: invoke<WorkbenchRef, WorkbenchContext>('workbench:get-context'),

@@ -3,14 +3,15 @@ import { PRESET_WORKBENCHES } from '@shared/workbench/presets'
 import type { WorkbenchCatalog, WorkbenchEntry, WorkbenchId } from '@shared/workbench/types'
 import type { ShellSlotProps } from '../project/integration'
 import { useProjectShell } from '../project/store'
+import { useSessions } from '../session/store'
 import { Icon } from '../../app/Icon'
 import { openWorkbenchDraft } from './actions'
 import { describeWorkbenchError, workbenchApi } from './api'
-import { WorkbenchDialog, WorkbenchMenu } from './WorkbenchControls'
-import { useWorkbenches } from './store'
+import { WorkbenchDialog, WorkbenchMenu, type DialogMode } from './WorkbenchControls'
+import { useWorkbenches, workbenchKey } from './store'
 import './workbench.css'
 
-type Dialog = { mode: 'rename' | 'delete'; entry: WorkbenchEntry; anchor: HTMLButtonElement }
+type Dialog = { mode: DialogMode; entry: WorkbenchEntry; anchor: HTMLButtonElement; running?: number }
 
 export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps) {
   const catalog = useWorkbenches(s => s.catalogs[project.id]), error = useWorkbenches(s => s.errors[project.id])
@@ -28,6 +29,8 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
     if (!catalog || pending) return
     const shell = useProjectShell.getState(), current = shell.uiStates[project.id]?.mainCanvas
     if (current?.mode !== 'view' || catalog.some(entry => entry.viewId === current.viewId)) return
+    // A draft that is being applied leaves the list before its page hands over to the new instance.
+    if (useWorkbenches.getState().hosts[workbenchKey({ projectId: project.id, viewId: current.viewId })]?.pending) return
     if (catalog[0]) shell.enterView(project.id, catalog[0].viewId)
     else shell.startDraft(project.id)
   }, [catalog, project.id, pending])
@@ -44,8 +47,24 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
     catch (error) { setActionError(describeWorkbenchError(error)) }
     finally { setPending(false) }
   }
-  async function create(source: 'template' | 'ai', templateId?: 'product-selection') {
-    await run(async () => { await openWorkbenchDraft(project.id, source, undefined, templateId); setChoosing(false) })
+  function closeChoices() { setChoosing(false); addButton.current?.focus() }
+  async function create(source: 'template' | 'ai') {
+    await run(async () => { await openWorkbenchDraft(project.id, source); setChoosing(false) })
+  }
+  async function addTemplate(templateId: 'product-selection') {
+    await run(async () => {
+      const instance = await workbenchApi().addTemplate({ projectId: project.id, templateId })
+      setChoosing(false); await useWorkbenches.getState().loadCatalog(project.id)
+      useProjectShell.getState().enterView(project.id, instance.viewId)
+    })
+  }
+  function confirmDelete(entry: WorkbenchEntry, anchor: HTMLButtonElement) {
+    // Deleting an instance also stops conversations started from its edit drafts, which are deleted with it.
+    const drafts = entry.origin === 'custom' && entry.kind === 'instance' ? catalog?.filter(item => item.kind === 'draft' && item.targetInstanceId === entry.id).map(item => item.viewId) ?? [] : []
+    const origins = new Set<string>([entry.viewId, ...drafts])
+    const running = Object.values(useSessions.getState().summaries).filter(session => session.projectId === project.id && session.originViewId !== null && origins.has(session.originViewId) && session.activity !== 'none').length
+    setChoosing(false); setMenu(null)
+    setDialog({ mode: entry.kind === 'draft' ? 'delete-draft' : 'delete-instance', entry, anchor, running })
   }
   function reorder(viewId: WorkbenchId, before: WorkbenchId | null) {
     return run(() => workbenchApi().move({ ref: { projectId: project.id, viewId }, before }))
@@ -81,9 +100,10 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
     else shell.startDraft(project.id)
   }
   const selected = canvas.mode === 'view' ? canvas.viewId : null
+  const removedCustom = removed.filter(entry => entry.origin === 'custom')
   return <section ref={root} className="workbench-navigation" aria-label="工作台">
     <div className="workbench-navigation__heading"><h2 className="navigation__heading">工作台</h2>
-      <button ref={addButton} className="icon-button workbench-navigation__add" aria-label="添加工作台" data-tip="添加工作台" data-tip-align="end" aria-haspopup="menu" aria-expanded={choosing} disabled={pending} onClick={() => { setMenu(null); setChoosing(!choosing) }}><Icon name="plus" size={15} /></button></div>
+      <button ref={addButton} className="icon-button workbench-navigation__add" aria-label="添加工作台" data-tip="添加工作台" data-tip-align="end" aria-haspopup="dialog" aria-expanded={choosing} disabled={pending} onClick={() => { setMenu(null); setChoosing(!choosing) }}><Icon name="plus" size={15} /></button></div>
     <div className="workbench-navigation__items" aria-label="工作台列表">
       {catalog?.map((entry, index) => <div key={entry.viewId} data-workbench-id={entry.viewId} className={`workbench-navigation__row ${drop?.viewId === entry.viewId ? drop.after ? 'is-drop-after' : 'is-drop-before' : ''} ${dragging === entry.viewId ? 'is-dragging' : ''}`} draggable={!pending}
         onDragStart={event => { setMenu(null); setDragging(entry.viewId); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', entry.viewId) }}
@@ -105,17 +125,21 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
       </div>)}
       {catalog?.length === 0 && <p className="workbench-navigation__empty">还没有工作台，点击 + 添加。</p>}
     </div>
-    {choosing && addButton.current && <WorkbenchMenu anchor={addButton.current} align="end" className="workbench-add-menu" dismiss={() => { setChoosing(false); addButton.current?.focus() }}>
-      <div className="workbench-choices" aria-label="创建工作台" onKeyDown={event => { if (event.key === 'Escape') { setChoosing(false); addButton.current?.focus() } }}>
-        <button disabled={pending} onClick={() => void create('ai')}><Icon name="chat" /><span>AI 对话创建<small>描述工作方式，由 AI 编写页面</small></span></button>
-        <button disabled={pending} onClick={() => void create('template')}><Icon name="preview" /><span>从简单模板开始<small>先体验预览、保存与对话</small></span></button>
+    {choosing && addButton.current && <WorkbenchMenu anchor={addButton.current} role="dialog" label="添加工作台" align="end" className="workbench-add-menu" dismiss={closeChoices}>
+      <div className="workbench-choices">
+        <button className="workbench-choice workbench-choice--create" disabled={pending} onClick={() => void create('ai')}><Icon name="chat" /><span>AI 对话创建<small>描述工作方式，由 AI 编写页面</small></span></button>
+        <button className="workbench-choice workbench-choice--create" disabled={pending} onClick={() => void create('template')}><Icon name="preview" /><span>从简单模板开始<small>先体验预览、保存与对话</small></span></button>
         <h3>预设工作台</h3>
         {PRESET_WORKBENCHES.map(preset => {
-          const existing = catalog?.find(entry => entry.viewId === preset.viewId), entry = existing ?? removed.find(entry => entry.viewId === preset.viewId) ?? preset
-          return <button key={preset.viewId} disabled={pending || choiceLoading || !!choiceError || !!existing} aria-label={`添加 ${entry.title}`} onClick={() => visibility(entry, true)}><Icon name={entry.icon} /><span>{existing?.title ?? entry.title}</span><small>{existing ? '已添加' : '添加'}</small></button>
+          const added = catalog?.find(entry => entry.viewId === preset.viewId), entry = added ?? removed.find(entry => entry.viewId === preset.viewId) ?? preset
+          return <button key={preset.viewId} className="workbench-choice" disabled={pending || choiceLoading || !!choiceError || !!added} aria-label={`添加 ${entry.title}`} onClick={() => visibility(entry, true)}><Icon name={preset.icon} /><span>{entry.title}</span>{added && <span className="menu-item__meta">已添加</span>}</button>
         })}
-        <button disabled={pending} aria-label="添加 选品工作台" onClick={() => void create('template', 'product-selection')}><Icon name="preview" /><span>选品工作台<small>四阶段画布，预览后添加到项目</small></span><small>添加</small></button>
-        {removed.some(entry => entry.origin === 'custom') && <><h3>已移除的工作台</h3>{removed.filter(entry => entry.origin === 'custom').map(entry => <button key={entry.viewId} disabled={pending || choiceLoading || !!choiceError} aria-label={`恢复 ${entry.title}`} onClick={() => visibility(entry, true)}><Icon name={entry.icon} /><span>{entry.title}</span><small>恢复</small></button>)}</>}
+        <button className="workbench-choice" disabled={pending} aria-label="添加 选品工作台" onClick={() => void addTemplate('product-selection')}><Icon name="preview" /><span>选品工作台</span></button>
+        {removedCustom.length > 0 && <><h3>已移除的工作台</h3>{removedCustom.map(entry => <div key={entry.viewId} className="workbench-choice workbench-choice--removed">
+          <Icon name={entry.icon} /><span>{entry.title}</span>
+          <button className="workbench-choice__action" disabled={pending || choiceLoading || !!choiceError} aria-label={`恢复 ${entry.title}`} onClick={() => visibility(entry, true)}>恢复</button>
+          <button className="workbench-choice__action workbench-choice__action--danger" disabled={pending || choiceLoading || !!choiceError} aria-label={`删除 ${entry.title}`} onClick={event => confirmDelete(entry, event.currentTarget)}>删除…</button>
+        </div>)}</>}
         {choiceLoading && <p role="status">正在读取可用工作台…</p>}
         {choiceError && <p role="alert">{choiceError} <button className="secondary-button button--small" onClick={() => { setChoosing(false); setActionError(choiceError) }}>关闭后重试</button></p>}
       </div>
@@ -124,10 +148,10 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
       <button role="menuitem" onClick={() => { setDialog({ mode: 'rename', entry: menu.entry, anchor: menu.anchor }); setMenu(null) }}>重命名</button>
       <button role="menuitem" disabled={catalog?.[0]?.viewId === menu.entry.viewId} onClick={() => moveBy(catalog?.findIndex(entry => entry.viewId === menu.entry.viewId) ?? -1, -1)}>上移</button>
       <button role="menuitem" disabled={catalog?.at(-1)?.viewId === menu.entry.viewId} onClick={() => moveBy(catalog?.findIndex(entry => entry.viewId === menu.entry.viewId) ?? -1, 1)}>下移</button>
-      {menu.entry.kind === 'draft' ? <button role="menuitem" className="workbench-menu__danger" onClick={() => { setDialog({ mode: 'delete', entry: menu.entry, anchor: menu.anchor }); setMenu(null) }}>删除草稿…</button>
+      {menu.entry.kind === 'draft' ? <button role="menuitem" className="workbench-menu__danger" onClick={() => confirmDelete(menu.entry, menu.anchor)}>删除草稿…</button>
         : <button role="menuitem" onClick={() => visibility(menu.entry, false)}>移除工作台</button>}
     </WorkbenchMenu>}
-    {dialog && <WorkbenchDialog entry={dialog.entry} mode={dialog.mode} dismiss={() => setDialog(null)} restoreFocus={() => {
+    {dialog && <WorkbenchDialog entry={dialog.entry} mode={dialog.mode} running={dialog.running} dismiss={() => setDialog(null)} restoreFocus={() => {
       if (dialog.anchor.isConnected) { dialog.anchor.focus(); return }
       const current = useProjectShell.getState().uiStates[project.id]?.mainCanvas
       const entries = useWorkbenches.getState().catalogs[project.id]
@@ -139,6 +163,7 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
         const ref = { projectId: project.id, viewId: dialog.entry.viewId }
         if (dialog.mode === 'rename') await workbenchApi().rename({ ref, title })
         else if (dialog.entry.kind === 'draft') { await workbenchApi().deleteDraft({ projectId: project.id, viewId: dialog.entry.viewId }); leaveRemoved(dialog.entry.viewId) }
+        else if (dialog.entry.origin === 'custom') await workbenchApi().deleteInstance({ projectId: project.id, viewId: dialog.entry.viewId })
         await useWorkbenches.getState().loadCatalog(project.id)
       } finally { setPending(false) }
     }} />}

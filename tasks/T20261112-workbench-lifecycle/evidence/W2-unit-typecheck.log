@@ -1,0 +1,12 @@
+# 2026-11-12 Review Agent, baseline b7901cc, cwd apps/desktop
+$ pnpm exec vitest run src/main/services/workbench src/renderer/src/features/workbench src/renderer/src/features/session
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/workbench-lifecycle/apps/desktop
+ Test Files  16 passed (16)
+      Tests  145 passed (145)
+   Start at  15:46:26
+   Duration  2.27s (tests 43%, environment 27%, transform 20%, import 10%)
+  Transform  |node| transforming modules took 2.02s · 36% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+$ pnpm exec tsc --noEmit -p tsconfig.node.json && pnpm exec tsc --noEmit -p tsconfig.web.json
+tsc node+web: exit 0

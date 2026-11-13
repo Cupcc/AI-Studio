@@ -135,6 +135,12 @@ export class WorkbenchService {
     this.projects.add(projectId)
     try { this.knowledge.open(projectId) }
     catch (error) { this.projects.delete(projectId); throw error }
+    // Best effort: a failed check keeps the legacy flags, so the next open retries.
+    try { if (this.packages.closeLegacyDrafts(projectId).length) this.dropClosedDraftNavigation(projectId) } catch {}
+  }
+  /** Removes list preferences of drafts whose records are gone (closed, replaced or deleted). */
+  private dropClosedDraftNavigation(projectId: string): void {
+    this.options.database().prepare("DELETE FROM workbench_navigation WHERE project_id=? AND view_id LIKE 'workbench-draft:%' AND substr(view_id, 17) NOT IN (SELECT id FROM workbench_drafts WHERE project_id=?)").run(projectId, projectId)
   }
   private entries(projectId: string): WorkbenchEntry[] {
     this.open(projectId)
@@ -245,13 +251,79 @@ export class WorkbenchService {
   createDraft(request: { projectId: string; source: 'template' | 'ai'; instanceId?: string; templateId?: 'product-selection' }): CustomDraftEntry {
     this.open(request.projectId)
     this.seedNavigation(request.projectId)
-    return draftEntry(this.packages.createDraft(request.projectId, request.source, request.instanceId, request.templateId))
+    const created = draftEntry(this.packages.createDraft(request.projectId, request.source, request.instanceId, request.templateId))
+    this.dropClosedDraftNavigation(request.projectId)
+    return created
   }
+  /** The draft closes on apply. A first add takes over the draft's place and name in the list; an edit keeps the instance's own. */
   applyDraft(request: { ref: DraftWorkbenchRef; expectedPackageRevision: string }): CustomInstanceEntry {
-    this.open(request.ref.projectId)
-    this.seedNavigation(request.ref.projectId)
-    const target = workbenchTarget(request.ref.projectId, request.ref.viewId)
-    return instanceEntry(this.packages.applyDraft(target.projectId, target.id, request.expectedPackageRevision))
+    const { projectId, viewId } = request.ref, db = this.options.database()
+    this.open(projectId)
+    this.seedNavigation(projectId)
+    db.exec('SAVEPOINT workbench_apply_draft')
+    let applied: ReturnType<PackageRuntime['applyDraft']>
+    try {
+      applied = this.packages.applyDraft(projectId, workbenchTarget(projectId, viewId).id, request.expectedPackageRevision)
+      const instanceViewId = `workbench:${applied.instance.id}`
+      if (applied.created) db.prepare('UPDATE workbench_navigation SET view_id=? WHERE project_id=? AND view_id=?').run(instanceViewId, projectId, viewId)
+      else {
+        db.prepare('DELETE FROM workbench_navigation WHERE project_id=? AND view_id=?').run(projectId, viewId)
+        // Applying changes to a removed instance brings it back, so the user lands on what they just applied.
+        if (this.navigation(projectId).get(instanceViewId)?.hidden) {
+          const end = Math.max(-1, ...[...this.navigation(projectId).values()].map(item => item.position)) + 1
+          db.prepare('UPDATE workbench_navigation SET hidden=0,position=? WHERE project_id=? AND view_id=?').run(end, projectId, instanceViewId)
+        }
+      }
+      db.exec('RELEASE workbench_apply_draft')
+    } catch (error) { db.exec('ROLLBACK TO workbench_apply_draft; RELEASE workbench_apply_draft'); throw error }
+    this.snapshots.delete(this.key(request.ref))
+    this.packageChanged({ projectId, kind: 'instance', id: applied.instance.id }, true)
+    return this.titled(projectId, instanceEntry(applied.instance))
+  }
+  /** Adds another instance of an App template at the end of the list, numbering the name when it is already taken. */
+  addTemplate({ projectId, templateId }: { projectId: string; templateId: 'product-selection' }): CustomInstanceEntry {
+    this.open(projectId)
+    this.seedNavigation(projectId)
+    const titles = new Set([...this.list(projectId), ...this.listRemoved(projectId)].map(entry => entry.title)), db = this.options.database()
+    db.exec('SAVEPOINT workbench_add_template')
+    let created: WorkbenchInstance
+    try {
+      created = this.packages.installTemplate(projectId, templateId)
+      let title = created.title
+      for (let n = 2; titles.has(title); n++) title = `${created.title} ${n}`
+      const end = Math.max(-1, ...[...this.navigation(projectId).values()].map(item => item.position)) + 1
+      db.prepare('INSERT INTO workbench_navigation(project_id,view_id,position,title) VALUES (?,?,?,?)').run(projectId, `workbench:${created.id}`, end, title === created.title ? null : title)
+      db.exec('RELEASE workbench_add_template')
+    } catch (error) { db.exec('ROLLBACK TO workbench_add_template; RELEASE workbench_add_template'); throw error }
+    this.packageChanged({ projectId, kind: 'instance', id: created.id }, true)
+    return this.titled(projectId, instanceEntry(created))
+  }
+  /** Permanent delete, offered only for removed custom instances: running conversations started from it or from its edit
+   *  drafts are stopped first; session history, project files and package files stay. */
+  async deleteInstance(ref: InstanceWorkbenchRef): Promise<WorkbenchCatalog> {
+    const removed = () => {
+      const entry = this.requireEntry(ref)
+      if (entry.origin !== 'custom' || entry.kind !== 'instance') throw new Error('只能删除自定义工作台')
+      if (!this.navigation(ref.projectId).get(ref.viewId)?.hidden) throw new Error('请先移除工作台，再从“已移除”中删除')
+    }
+    removed()
+    const instanceId = workbenchTarget(ref.projectId, ref.viewId).id
+    const origins = new Set<string>([ref.viewId, ...this.packages.list(ref.projectId).drafts.filter(draft => draft.targetInstanceId === instanceId).map(draft => `workbench-draft:${draft.id}`)])
+    const running = this.sessions?.list(ref.projectId).filter(session => session.originViewId !== null && origins.has(session.originViewId) && session.activity !== 'none') ?? []
+    await Promise.all(running.map(session => this.sessions!.stop(session.id)))
+    removed()
+    const db = this.options.database()
+    db.exec('SAVEPOINT workbench_delete')
+    let drafts: string[]
+    try {
+      drafts = this.packages.deleteInstance(ref.projectId, instanceId)
+      db.prepare('DELETE FROM workbench_agent_runs WHERE project_id=? AND view_id=?').run(ref.projectId, ref.viewId)
+      const remove = db.prepare('DELETE FROM workbench_navigation WHERE project_id=? AND view_id=?')
+      for (const viewId of [ref.viewId, ...drafts.map(draft => `workbench-draft:${draft}`)]) remove.run(ref.projectId, viewId)
+      db.exec('RELEASE workbench_delete')
+    } catch (error) { db.exec('ROLLBACK TO workbench_delete; RELEASE workbench_delete'); throw error }
+    for (const viewId of [ref.viewId, ...drafts.map(draft => `workbench-draft:${draft}` as const)]) this.snapshots.delete(this.key({ projectId: ref.projectId, viewId }))
+    return this.catalogChanged(ref.projectId)
   }
   updateState(request: { ref: CustomWorkbenchRef; state: JsonValue; expectedRevision: number }): WorkbenchSnapshot {
     this.open(request.ref.projectId)

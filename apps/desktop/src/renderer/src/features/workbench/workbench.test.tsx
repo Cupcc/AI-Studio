@@ -25,7 +25,7 @@ beforeEach(() => {
   snapshot = makeSnapshot()
   api = {
     startAgent: vi.fn(), listAgents: vi.fn(), getAgent: vi.fn(), stopAgent: vi.fn(),
-    list: vi.fn(async () => [draft, instance]), listRemoved: vi.fn(async () => []), rename: vi.fn(), move: vi.fn(), setVisible: vi.fn(), deleteDraft: vi.fn(), createDraft: vi.fn(), getContext: vi.fn(),
+    list: vi.fn(async () => [draft, instance]), listRemoved: vi.fn(async () => []), rename: vi.fn(), move: vi.fn(), setVisible: vi.fn(), deleteDraft: vi.fn(), deleteInstance: vi.fn(), addTemplate: vi.fn(), createDraft: vi.fn(), getContext: vi.fn(),
     getSnapshot: vi.fn(async () => snapshot), applyDraft: vi.fn(),
     updateState: vi.fn(async () => ({ ...snapshot, revision: 2, page: { ...snapshot.page, stateRevision: 1, state: { count: 1 } } })),
     setEnabled: vi.fn(async ({ enabled }) => { snapshot = { ...makeSnapshot(instance, enabled), revision: snapshot.revision + 1 }; return { ...instance, enabled } }),

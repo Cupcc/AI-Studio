@@ -1,0 +1,22 @@
+# 2026-11-12 Review Agent round 2, baseline 95339a2; script W2-round2-probes.test.ts placed at apps/desktop/.runtime/review-probe/round2.probe.test.ts with config W2-review-probes.config.ts
+$ pnpm exec vitest run --config .runtime/review-probe/vitest.config.ts --silent=false --reporter=verbose .runtime/review-probe/round2.probe.test.ts
+ RUN  v5.0.1 /Users/zhixing/Projects/AI Stduio.worktrees/workbench-lifecycle/apps/desktop
+P3r reused: false preview version: 0.0.3 drafts listed: 1 old listed: false
+P4r before: 4 flags after migrate: [["2add",0],["986c",1],["f5c3",1],["7702",1]]
+P4r A(old add, superseded) listed: true | U(old upgrade, applied) listed: false | unchanged edit listed: false | changed edit listed: true
+P4r applying leftover A: 此工作台已应用其他版本，请从当前实例重新编辑，避免覆盖新版本
+P4r orphan draft nav rows: 0
+ ✓ .runtime/review-probe/round2.probe.test.ts > P3 (re) stale template upgrade draft is replaced after the App template changed 55ms
+P5r listed last: true removed: 0
+F3r stopped: ["draft","inst"]
+R1 same draft reopened: false | edited draft still listed: false
+R2 after failed check listed: true flag kept: 1 | after retry listed: false
+ ✓ .runtime/review-probe/round2.probe.test.ts > P4 (re) real migration: old-flow add + old-flow upgrade, unchanged and changed legacy edits 55ms
+ ✓ .runtime/review-probe/round2.probe.test.ts > P5 (re) applying an edit to a removed instance brings it back 22ms
+ ✓ .runtime/review-probe/round2.probe.test.ts > F3 (re) delete stops sessions started from the instance edit drafts 27ms
+ ✓ .runtime/review-probe/round2.probe.test.ts > R1 upgrade draft edited in its design conversation is replaced on the next upgrade preview 31ms
+ ✓ .runtime/review-probe/round2.probe.test.ts > R2 legacy flagged draft when the Project folder check fails keeps flag and retries 22ms
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  16:05:37
+   Duration  401ms (tests 64%, transform 30%, import 5%, worker 1%)

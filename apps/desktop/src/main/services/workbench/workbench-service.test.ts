@@ -2,12 +2,13 @@ import { fileURLToPath } from 'node:url'
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { afterEach, beforeEach, expect, it } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { PRESET_WORKBENCHES } from '@shared/workbench/presets'
 import type { DraftWorkbenchRef, InstanceWorkbenchRef, CustomDraftEntry, WorkbenchChange } from '@shared/workbench/types'
 import { openDatabase, type StudioDatabase } from '../database/database'
 import { migrations } from '../database/migrations'
 import { createProjectService } from '../project/project-service'
+import type { SessionSummary } from '@shared/session/types'
 import { WorkbenchService } from './workbench-service'
 
 let directory: string, root: string, projectId: string, otherId: string, database: StudioDatabase, service: WorkbenchService
@@ -55,7 +56,8 @@ it('lists presets and custom pages in one catalog with explicit management and s
   expect((await service.getSnapshot(presetRef())).page?.resources?.knowledge?.status).toBe('empty')
   service.buildContext(presetRef())
   expect(existsSync(join(root, '.ai-studio'))).toBe(false)
-  const { draft, instance } = await install()
+  const { instance } = await install()
+  const draft = service.createDraft({ projectId, source: 'ai', instanceId: instance.id })
   const catalog = service.list(projectId)
   expect(catalog).toHaveLength(7)
   expect(catalog.slice(0, 5)).toEqual(PRESET_WORKBENCHES)
@@ -93,7 +95,7 @@ it('watches external files, releases Project resources, rejects late reads and r
   expect(await service.getSnapshot({ projectId: otherId, viewId: 'architecture' })).toMatchObject({ status: 'ready', page: { resources: { knowledge: { status: 'empty', snapshot: { knowledge: null } } } } })
 })
 it('uses one host for package draft isolation, CAS, instance edits, project boundaries and restart recovery', async () => {
-  const { draft, instance, ref } = await install()
+  const { instance, ref } = await install()
   service.updateState({ ref, state: { note: 'saved' }, expectedRevision: 0 })
   expect(() => service.updateState({ ref, state: {}, expectedRevision: 0 })).toThrow('内容已变化')
   expect(() => service.updateState({ ref: { ...ref, projectId: otherId }, state: {}, expectedRevision: 1 })).toThrow('当前 Project')
@@ -107,7 +109,8 @@ it('uses one host for package draft isolation, CAS, instance edits, project boun
   service.updateState({ ref, state: { note: 'live state' }, expectedRevision: 1 })
   service.applyDraft({ ref: draftRef(edit), expectedPackageRevision: preview.page.packageRevision })
   expect(await service.getSnapshot(ref)).toMatchObject({ page: { state: { note: 'live state' }, stateRevision: 2, manifest: { title: 'Revised notebook' } } })
-  expect(await service.getSnapshot(draftRef(draft))).toMatchObject({ page: { state: {} } })
+  await expect(service.getSnapshot(draftRef(edit))).rejects.toThrow('当前 Project')
+  expect(service.list(projectId).some(entry => entry.kind === 'draft')).toBe(false)
   service.dispose(); database.close(); start()
   expect(await service.getSnapshot(ref)).toMatchObject({ page: { state: { note: 'live state' }, stateRevision: 2 } })
   expect(service.list(projectId).filter(entry => entry.kind === 'instance')).toHaveLength(6)
@@ -138,7 +141,7 @@ it('provides all contexts through one entry and initializes preset helpers only 
   service.buildContext(presetRef(), true)
   expect(readFileSync(join(root, '.ai-studio/.gitignore'), 'utf8')).toBe('*\n')
   expect(existsSync(join(root, '.ai-studio/knowledge/architecture.json'))).toBe(false)
-  const { draft, ref } = await install()
+  const { instance, ref } = await install(), draft = service.createDraft({ projectId, source: 'ai', instanceId: instance.id })
   writeFileSync(join(root, draft.directory, 'manifest.json'), '{')
   expect(service.buildContext(draftRef(draft))).toMatchObject({ paths: expect.arrayContaining([draft.directory]), text: expect.stringContaining('刷新预览') })
   expect(service.buildContext(ref)).toMatchObject({ paths: [], text: expect.stringContaining('不是页面结构编辑') })
@@ -217,20 +220,28 @@ it('renames presets, instances and drafts without changing identities, package f
   expect(service.list(projectId).find(entry => entry.viewId === 'architecture')?.title).toBe('项目架构')
   expect(await service.getSnapshot(presetRef())).toMatchObject({ entry: { title: '项目架构' } })
   expect(service.list(otherId).find(entry => entry.viewId === 'architecture')?.title).toBe('架构')
-  const { ref, draft, instance } = await install()
-  service.rename({ ref, title: '项目笔记' })
+  const draft = service.createDraft({ projectId, source: 'template' })
   service.rename({ ref: draftRef(draft), title: '笔记设计' })
   expect(service.list(projectId).find(entry => entry.viewId === draft.viewId)?.title).toBe('笔记设计')
+  const first = await service.getSnapshot(draftRef(draft))
+  const instance = service.applyDraft({ ref: draftRef(draft), expectedPackageRevision: first.page!.packageRevision })
+  const ref: InstanceWorkbenchRef = { projectId, viewId: instance.viewId }
+  expect(instance.title).toBe('笔记设计')
+  service.rename({ ref, title: '项目笔记' })
   expect(await service.getSnapshot(ref)).toMatchObject({ entry: { title: '项目笔记' }, page: { manifest: { title: '随手记' }, packageRevision: instance.packageRevision } })
-  const preview = await service.getSnapshot(draftRef(draft))
-  service.applyDraft({ ref: draftRef(draft), expectedPackageRevision: preview.page!.packageRevision })
+  const edit = service.createDraft({ projectId, source: 'ai', instanceId: instance.id })
+  service.rename({ ref: draftRef(edit), title: '改版设计' })
+  const preview = await service.getSnapshot(draftRef(edit))
+  service.applyDraft({ ref: draftRef(edit), expectedPackageRevision: preview.page!.packageRevision })
   expect(service.list(projectId).find(entry => entry.viewId === ref.viewId)?.title).toBe('项目笔记')
+  expect(service.list(projectId).some(entry => entry.viewId === edit.viewId)).toBe(false)
+  expect(database.db.prepare('SELECT * FROM workbench_navigation WHERE project_id=? AND view_id=?').get(projectId, edit.viewId)).toBeUndefined()
   for (const title of ['', '   ', 'x'.repeat(101), 'line\nbreak']) expect(() => service.rename({ ref, title })).toThrow('名称须为')
   expect(() => service.rename({ ref: { ...ref, projectId: otherId }, title: 'wrong project' })).toThrow('当前 Project')
 })
 
 it('mixes preset, instance and draft order, appends new items, and persists navigation across restart', async () => {
-  const { ref, draft } = await install()
+  const { ref } = await install(), draft = service.createDraft({ projectId, source: 'template' })
   service.move({ ref, before: 'overview' })
   service.move({ ref: draftRef(draft), before: 'architecture' })
   const order = service.list(projectId).map(entry => entry.viewId)
@@ -249,17 +260,18 @@ it('mixes preset, instance and draft order, appends new items, and persists navi
   expect(service.list(projectId)[0]?.viewId).toBe(ref.viewId)
 })
 
-it('appends a new instance after existing drafts before any rename or reorder has happened', async () => {
+it('puts a first-added instance in its closed draft\'s place, before any rename or reorder has happened', async () => {
   const first = service.createDraft({ projectId, source: 'template' }), second = service.createDraft({ projectId, source: 'ai' })
   const before = service.list(projectId).map(entry => entry.viewId)
   const preview = await service.getSnapshot(draftRef(first))
   const instance = service.applyDraft({ ref: draftRef(first), expectedPackageRevision: preview.page!.packageRevision })
-  expect(service.list(projectId).map(entry => entry.viewId)).toEqual([...before, instance.viewId])
   expect(before.slice(-2)).toEqual([first.viewId, second.viewId])
+  expect(service.list(projectId).map(entry => entry.viewId)).toEqual([...before.slice(0, -2), instance.viewId, second.viewId])
+  expect(changes).toContainEqual({ kind: 'catalog', projectId })
 })
 
 it('removes and restores instances without losing saved state, creating duplicates or touching files', async () => {
-  const { ref, draft } = await install()
+  const { ref, draft: closed } = await install(), draft = service.createDraft({ projectId, source: 'template' })
   service.updateState({ ref, state: { note: 'keep this' }, expectedRevision: 0 })
   service.setVisible({ ref, visible: false })
   service.setVisible({ ref, visible: false })
@@ -270,7 +282,7 @@ it('removes and restores instances without losing saved state, creating duplicat
   expect(service.list(projectId).filter(entry => entry.viewId === ref.viewId)).toHaveLength(1)
   expect(service.list(projectId).at(-1)?.viewId).toBe(ref.viewId)
   expect(service.listRemoved(projectId)).toEqual([])
-  expect(existsSync(join(root, draft.directory, 'index.html'))).toBe(true)
+  expect(existsSync(join(root, closed.directory, 'index.html'))).toBe(true)
   expect(() => service.setVisible({ ref: draftRef(draft), visible: false })).toThrow('删除草稿')
   for (const entry of service.list(projectId)) if (entry.kind !== 'draft') service.setVisible({ ref: { projectId, viewId: entry.viewId }, visible: false })
   service.deleteDraft(draftRef(draft))
@@ -280,7 +292,7 @@ it('removes and restores instances without losing saved state, creating duplicat
 })
 
 it('deletes only the selected project draft record and rejects writes from its old page', async () => {
-  const { ref, draft } = await install(), other = service.createDraft({ projectId, source: 'ai' })
+  const { ref } = await install(), draft = service.createDraft({ projectId, source: 'template' }), other = service.createDraft({ projectId, source: 'ai' })
   expect(() => service.deleteDraft({ projectId: otherId, viewId: draft.viewId })).toThrow('当前 Project')
   service.rename({ ref: draftRef(draft), title: 'obsolete design' })
   const snapshot = await service.getSnapshot(draftRef(draft))
@@ -319,4 +331,73 @@ it('previews the latest selection template for the same instance and retains sav
   expect((await service.getSnapshot(ref)).page?.state).toMatchObject({brief:'预览期间的新目标',nodes:[{result:'已有成果'}]})
   const other=await install()
   expect(()=>service.createDraft({projectId,source:'template',instanceId:other.instance.id,templateId:'product-selection'})).toThrow('匹配')
+})
+
+it('adds App templates directly as further instances at the end of the list, numbering repeated names', async () => {
+  const first = service.addTemplate({ projectId, templateId: 'product-selection' })
+  expect(first).toMatchObject({ title: '选品工作台', pluginId: 'product-selection', kind: 'instance', origin: 'custom' })
+  expect(service.list(projectId).at(-1)?.viewId).toBe(first.viewId)
+  expect(service.list(projectId).some(entry => entry.kind === 'draft')).toBe(false)
+  expect(await service.getSnapshot({ projectId, viewId: first.viewId })).toMatchObject({ status: 'ready', page: { state: {}, manifest: { pluginId: 'product-selection' } } })
+  const second = service.addTemplate({ projectId, templateId: 'product-selection' })
+  expect(second).toMatchObject({ title: '选品工作台 2' })
+  service.setVisible({ ref: { projectId, viewId: second.viewId }, visible: false })
+  expect(service.addTemplate({ projectId, templateId: 'product-selection' }).title).toBe('选品工作台 3')
+  expect(service.list(projectId).slice(-2).map(entry => entry.title)).toEqual(['选品工作台', '选品工作台 3'])
+  service.dispose(); database.close(); start()
+  expect(service.listRemoved(projectId)).toMatchObject([{ viewId: second.viewId, title: '选品工作台 2' }])
+})
+
+it('permanently deletes only removed custom instances, stopping their running sessions and keeping history and files', async () => {
+  const running = (id: string, originViewId: string, activity: SessionSummary['activity']) => ({ id, projectId, originViewId, activity }) as SessionSummary
+  const { instance, ref, draft: closed } = await install(), other = await install()
+  const edit = service.createDraft({ projectId, source: 'ai', instanceId: instance.id })
+  service.updateState({ ref, state: { note: 'gone after delete' }, expectedRevision: 0 })
+  const sessions = [running('a', ref.viewId, 'running'), running('b', ref.viewId, 'needs_input'), running('c', ref.viewId, 'none'), running('d', other.ref.viewId, 'running'), running('e', edit.viewId, 'running')]
+  const stop = vi.fn(async (_sessionId: string) => {})
+  service.setAgentPort({ list: () => sessions, stop, create: vi.fn(), getConversation: vi.fn(), rename: vi.fn() } as unknown as Parameters<WorkbenchService['setAgentPort']>[0])
+  database.db.prepare('INSERT INTO sessions(id,project_id,cli,last_user_message_at,created_at,data) VALUES (?,?,?,?,?,?)').run('a', projectId, 'codex', 1, 1, '{}')
+  database.db.prepare('INSERT INTO workbench_agent_runs(project_id,view_id,request_id,request_json,session_id) VALUES (?,?,?,?,?)').run(projectId, ref.viewId, 'r1', '{}', 'a')
+  await expect(service.deleteInstance(ref)).rejects.toThrow('请先移除')
+  await expect(service.deleteInstance({ projectId, viewId: 'overview' } as never)).rejects.toThrow('自定义工作台')
+  service.setVisible({ ref, visible: false })
+  stop.mockRejectedValueOnce(new Error('停止失败'))
+  await expect(service.deleteInstance(ref)).rejects.toThrow('停止失败')
+  expect(service.listRemoved(projectId)).toMatchObject([{ viewId: ref.viewId }])
+  stop.mockClear()
+  expect(await service.deleteInstance(ref)).not.toContainEqual(expect.objectContaining({ viewId: edit.viewId }))
+  expect(stop.mock.calls.map(([id]) => id).sort()).toEqual(['a', 'b', 'e'])
+  expect(service.listRemoved(projectId)).toEqual([])
+  await expect(service.getSnapshot(ref)).rejects.toThrow('当前 Project')
+  for (const table of ['workbench_navigation', 'workbench_agent_runs']) expect(database.db.prepare(`SELECT COUNT(*) AS count FROM ${table} WHERE view_id IN (?,?)`).get(ref.viewId, edit.viewId)?.count).toBe(0)
+  expect(database.db.prepare('SELECT COUNT(*) AS count FROM sessions WHERE id=?').get('a')?.count).toBe(1)
+  expect(existsSync(join(root, edit.directory, 'manifest.json'))).toBe(true)
+  expect(existsSync(join(root, closed.directory, 'manifest.json'))).toBe(true)
+  expect(existsSync(join(root, '.ai-studio/workbench/packages', instance.packageRevision))).toBe(true)
+  expect(await service.getSnapshot(other.ref)).toMatchObject({ status: 'ready' })
+})
+
+it('brings a removed instance back to the end of the list when an edit is applied to it', async () => {
+  const { instance, ref } = await install()
+  const edit = service.createDraft({ projectId, source: 'ai', instanceId: instance.id })
+  service.setVisible({ ref, visible: false })
+  const preview = await service.getSnapshot(draftRef(edit))
+  service.applyDraft({ ref: draftRef(edit), expectedPackageRevision: preview.page!.packageRevision })
+  expect(service.list(projectId).at(-1)?.viewId).toBe(ref.viewId)
+  expect(service.listRemoved(projectId)).toEqual([])
+})
+
+it('closes unchanged legacy drafts and their list entries when the Project is first opened after the upgrade', async () => {
+  const unchanged = await install(), changed = await install()
+  const legacy = service.createDraft({ projectId, source: 'ai', instanceId: unchanged.instance.id })
+  const edited = service.createDraft({ projectId, source: 'ai', instanceId: changed.instance.id })
+  const manifest = join(root, edited.directory, 'manifest.json')
+  writeFileSync(manifest, JSON.stringify({ ...JSON.parse(readFileSync(manifest, 'utf8')), version: '3.0.0' }))
+  service.rename({ ref: draftRef(legacy), title: '选品工作台' })
+  database.db.prepare('UPDATE workbench_drafts SET legacy_applied=1').run()
+  service.dispose(); database.close(); start()
+  const listed = service.list(projectId).map(entry => entry.viewId)
+  expect(listed).not.toContain(legacy.viewId)
+  expect(listed).toContain(edited.viewId)
+  expect(database.db.prepare('SELECT COUNT(*) AS count FROM workbench_navigation WHERE view_id=?').get(legacy.viewId)?.count).toBe(0)
 })

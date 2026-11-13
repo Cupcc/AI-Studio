@@ -1,0 +1,45 @@
+# 2026-11-12 Review Agent round 2 — independent UI check, baseline 95339a2 (out/ built from 95339a2)
+# App: built Electron from apps/desktop, temp userData (lifecycle-review-S2QrGn), fixture Project "Lifecycle Project",
+# STUDIO_E2E_PROVIDERS=1 (simulated Codex), CDP port 9353. Launcher: apps/desktop/../.runtime/lifecycle/review-launch.cjs
+# (copy of launch.cjs; window made transparent, click-through and non-focusable so it cannot take the user's input).
+# Driver: agent-browser 0.41.2, own session review2-2727b27455fb. DB reads: sqlite3 read-only on the temp profile.
+
+## 1 Add panel (W2-ui-add-panel.png)
+dialog "添加工作台": AI 对话创建 + description; 从简单模板开始 + description; heading 预设工作台;
+  添加 概览/进度/架构/Agent 团队/业务流程 [disabled] each "<title>已添加"; 添加 选品工作台 (single line, enabled)
+Escape -> {"open":false,"active":"添加工作台"}
+
+## 2 选品 added directly, twice (W2-ui-selection-numbered.png)
+rows: 概览,进度,架构,Agent 团队,业务流程,选品工作台,选品工作台 2 ; current 选品工作台 2 ; panel closed
+db: workbench_instances=2, workbench_drafts=0, nav title override "选品工作台 2"
+note: list max-height 208px, selected 7th row half hidden (selTop 323, listBottom 339, scrollTop 0) — pre-existing CSS from c1593d0
+
+## 3 Template draft -> 添加至当前项目 (W2-ui-template-added.png)
+after 从简单模板开始: row workbench-draft:0325… "随手记草稿", current 草稿：随手记
+after 添加至当前项目: rows …,选品工作台,选品工作台 2,随手记 (workbench:aec546b1…, position 7 = former draft slot), current 随手记
+db: workbench_drafts=0 ; files: .ai-studio/workbench/drafts/0325f2e1… still on disk
+
+## 4 编辑工作台 twice (W2-ui-edit-reused.png)
+1st: current 草稿：随手记, draft 876f6877, composer prefilled "请按我接下来的要求修改…修改要求："
+typed "REVIEW-TYPED 把标题改成蓝色" into composer; went back to 随手记; 2nd 编辑工作台:
+  current 草稿：随手记, drafts [876f6877] (same), composer still starts with "REVIEW-TYPED …", prompt not added again; db drafts=1
+
+## 5 Remove -> apply edit to removed instance (F2)
+移除工作台 on 随手记: nav hidden=1, draft row still listed, current stays on draft
+应用更改 on the draft: current 随手记, rows …,随手记 ; nav hidden=0 position 8 (end); drafts=0
+
+## 6 Remove -> 已移除的工作台 -> 删除… -> confirm (W2-ui-removed-section.png, W2-ui-delete-confirm.png, W2-ui-after-delete.png)
+new edit draft d2818db7 + one simulated session sent from it (completed immediately, activity none -> no running-count line)
+移除工作台 again; add panel: heading 已移除的工作台, buttons 恢复 随手记 / 删除 随手记
+删除… -> modal "删除工作台？ 永久删除“随手记”和它保存的页面数据；未应用的编辑草稿也会删除。会话历史和项目文件保留。此操作无法撤销。" focus on 取消; add panel closed
+删除工作台 -> current 概览 (was on the deleted draft), rows …,选品工作台,选品工作台 2 ; no dialog; session row still listed
+db: instances 0e6bf523,9193571d only; drafts 0; nav rows only the two 选品; workbench_agent_runs 0; session 36e02685 kept (originViewId workbench-draft:d2818db7…)
+files: drafts/0325f2e1…, 876f6877…, d2818db7… and 2 package revisions remain
+add panel again: headings only 预设工作台 (no 已移除的工作台)
+session header for 36e02685: "· 来自 工作台草稿", 在工作台中打开 disabled, title "该工作台已不在列表中"
+
+## Interference note
+First attempt on port 9338 (profile lifecycle-ui-GvTRMY) and a second on 9353 without hiding the window received input that did not come
+from this review (4 x 添加 选品工作台 then 4 x 移除 at 15:59:46–16:00:40; 1 x 添加 at 16:01:23 right after the window appeared), while the
+only CDP clients were this review's launcher and agent-browser session. Most likely OS-level clicks landing in the newly focused window.
+Both instances were stopped and discarded; all results above come from the hidden third instance (lifecycle-review-S2QrGn).

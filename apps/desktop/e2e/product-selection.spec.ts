@@ -16,9 +16,10 @@ test.beforeEach(async()=>{
   await expect(page.getByRole('button',{name:'选品工作台',exact:true})).toHaveCount(0)
   await page.getByRole('button',{name:'添加工作台',exact:true}).click()
   await page.getByRole('button',{name:'添加 选品工作台',exact:true}).click()
-  await expect(plugin().locator('#run-all')).toBeDisabled()
-  await page.getByRole('button',{name:'添加至当前项目',exact:true}).click()
+  // An App template is added directly as a ready instance; no draft or preview step is left in the list.
   await expect(plugin().locator('#run-all')).toBeEnabled()
+  await expect(page.getByRole('button',{name:'选品工作台',exact:true})).toHaveAttribute('aria-current','page')
+  await expect(page.locator('[data-workbench-id^="workbench-draft:"]')).toHaveCount(0)
 })
 test.afterEach(async()=>{await closeTestApp(app,page);rmSync(dir,{recursive:true,force:true})})
 // The page runs in its own renderer process. Right after it is added, Chromium can still deliver the pointer to the host's

@@ -8,6 +8,7 @@ import { turnDiff } from './2026101801_turn_diff'
 import { workbenchCore } from './2026111101_workbench'
 import { workbenchAgents } from './2026111103_workbench_agents'
 import { workbenchNavigation } from './2026111102_workbench_navigation'
+import { workbenchLegacyDrafts } from './2026111201_workbench_legacy_drafts'
 
 export const migrations: readonly Migration[] = [
   coreAppMeta,
@@ -16,5 +17,6 @@ export const migrations: readonly Migration[] = [
   turnDiff,
   workbenchCore,
   workbenchNavigation,
-  workbenchAgents
+  workbenchAgents,
+  workbenchLegacyDrafts
 ]

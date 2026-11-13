@@ -82,9 +82,11 @@ it('routes preset, design-draft and live contexts through the same Session callb
   if (!preview.page) throw new Error('fixture package failed')
   const instance = await workbench.handlers.applyDraft.handle({ ref: draftRef, expectedPackageRevision: preview.page.packageRevision }, ctx)
   expect(provider.sessions).toHaveLength(0)
+  const edit = await workbench.handlers.createDraft.handle({ projectId, source: 'ai', instanceId: instance.id }, ctx)
+  const editRef = { projectId, viewId: edit.viewId }
   const cases = [
     { viewId: 'architecture', expected: 'Current Workbench: 架构' },
-    { viewId: draft.viewId, expected: '当前任务是创建或编辑 AI Studio 工作台页面' },
+    { viewId: edit.viewId, expected: '当前任务是创建或编辑 AI Studio 工作台页面' },
     { viewId: instance.viewId, expected: '这是工作台使用对话，不是页面结构编辑' }
   ] as const
   const created = []
@@ -107,8 +109,25 @@ it('routes preset, design-draft and live contexts through the same Session callb
   await workbench.handlers.setEnabled.handle({ ref: { projectId, viewId: instance.viewId }, enabled: false }, ctx)
   expect(await projectShellFor(core).sessionPort().getBlockingSessionCounts(projectId)).toEqual(count)
   expect((await sessions.handlers.getConversation.handle({ sessionId: created[2]!.id }, ctx)).session.activity).toBe('running')
+  await expect(workbench.handlers.deleteInstance.handle({ projectId, viewId: instance.viewId }, ctx)).rejects.toThrow('请先移除')
   await workbench.handlers.setVisible.handle({ ref: { projectId, viewId: instance.viewId }, visible: false }, ctx)
-  await workbench.handlers.deleteDraft.handle(draftRef, ctx)
+  await workbench.handlers.deleteDraft.handle(editRef, ctx)
   expect(await projectShellFor(core).sessionPort().getBlockingSessionCounts(projectId)).toEqual(count)
   expect((await sessions.handlers.getConversation.handle({ sessionId: created[1]!.id }, ctx)).session.activity).toBe('running')
+  // Permanent delete stops only the conversations started from that workbench and keeps their history.
+  await workbench.handlers.deleteInstance.handle({ projectId, viewId: instance.viewId }, ctx)
+  expect((await sessions.handlers.getConversation.handle({ sessionId: created[2]!.id }, ctx)).session).toMatchObject({ activity: 'none', originViewId: instance.viewId })
+  expect((await sessions.handlers.getConversation.handle({ sessionId: created[1]!.id }, ctx)).session.activity).toBe('running')
+  expect(await workbench.handlers.listRemoved.handle({ projectId }, ctx)).not.toContainEqual(expect.objectContaining({ viewId: instance.viewId }))
+  await expect(workbench.handlers.getSnapshot.handle({ projectId, viewId: instance.viewId }, ctx)).rejects.toThrow('当前 Project')
+})
+it('validates template and delete requests at the IPC boundary', async () => {
+  const workbench = createWorkbenchFeature(core), ctx = { senderId: 1, senderUrl: 'app://studio/index.html' }
+  disposers.push(() => workbench.dispose?.())
+  expect(() => workbench.handlers.addTemplate.parse({ projectId, templateId: 'arbitrary' })).toThrow('无效模板')
+  expect(() => workbench.handlers.addTemplate.parse({ projectId, templateId: 'product-selection', path: '/' })).toThrow('Unexpected field')
+  expect(() => workbench.handlers.deleteInstance.parse({ projectId, viewId: 'overview' })).toThrow('自定义工作台')
+  expect(() => workbench.handlers.deleteInstance.parse({ projectId, viewId: 'workbench-draft:x' })).toThrow('工作台实例')
+  const added = await workbench.handlers.addTemplate.handle(workbench.handlers.addTemplate.parse({ projectId, templateId: 'product-selection' }), ctx)
+  expect(await workbench.handlers.list.handle({ projectId }, ctx)).toContainEqual(expect.objectContaining({ viewId: added.viewId, title: '选品工作台' }))
 })
