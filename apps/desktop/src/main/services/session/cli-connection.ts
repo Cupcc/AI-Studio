@@ -1,6 +1,6 @@
-import { nativeTestModel, testApiConnection } from './connection-test'
+import { claudeWireModel, isClaudeAlias, nativeTestModel, testApiConnection } from './connection-test'
 import { randomUUID } from 'node:crypto'
-import type { ProviderEnvironment } from '@ai-studio/agent-adapter'
+import type { ModelInfo, ProviderEnvironment } from '@ai-studio/agent-adapter'
 import { SESSION_CLIS, type SessionCli } from '@shared/session/types'
 import type { CliConnection, ConnectionProfile, ConnectionTestResult, SaveCliConnection } from '@shared/session/cli-connection'
 import type { SessionStore } from './store'
@@ -19,7 +19,7 @@ export function validateBaseUrl(value: string): string {
   let url: URL
   try { url = new URL(value) } catch { throw new Error('请输入有效的 Base URL。') }
   if (url.username || url.password || url.search || url.hash) throw new Error('Base URL 不能包含凭据、查询参数或片段。')
-  if (url.protocol !== 'https:' && !(url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))) throw new Error('请使用 HTTPS；本地服务可使用 HTTP。')
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error('Base URL 须以 http:// 或 https:// 开头。')
   return url.href.replace(/\/+$/, '')
 }
 
@@ -89,12 +89,22 @@ export class CliConnections {
     return { env, connection: { baseUrl: profile.baseUrl, apiKey, auth: profile.auth } }
   }
 
-  async test(cli: SessionCli, env: Env): Promise<ConnectionTestResult> {
-    const { connection } = await this.environment(cli, env)
+  /** `catalog` reads the CLI's model catalog (a handshake that sends no message) to resolve Claude Code aliases. */
+  async test(cli: SessionCli, env: Env, catalog: (environment: ProviderEnvironment) => Promise<ModelInfo[]>): Promise<ConnectionTestResult> {
+    const environment = await this.environment(cli, env)
+    const { connection } = environment
     if (!connection) return { ok: false, message: '请先保存应用连接配置。' }
     let model: string
     try { model = await nativeTestModel(cli, env) }
     catch { return { ok: false, message: '无法读取本机模型配置，请检查 CLI 配置文件。' } }
+    if (cli === 'claude-code') {
+      try { model = claudeWireModel(model, await catalog(environment)) }
+      catch {
+        // A full model ID needs no catalog; only an alias or an unset model depends on it.
+        if (!model || isClaudeAlias(model)) return { ok: false, message: '无法读取 Claude Code 的模型目录，不能确定测试模型。请确认 Claude Code 可用后重试。' }
+        model = model.replace(/\[1m\]$/i, '')
+      }
+    }
     return testApiConnection(cli, connection, model)
   }
 

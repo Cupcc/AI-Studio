@@ -50,7 +50,7 @@ afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks() })
 
 test('docs, evidence and empty diff do not run application checks', () => {
   for (const files of [[], ['README.md'], ['docs/08. System Architecture.html'], ['tasks/T-example/evidence/check.mjs'],
-    ['.ignore'], ['.agents/archive/tasks/T-example/task.md'],
+    ['.ignore'], ['.gitignore'], ['.agents/archive/tasks/T-example/task.md'],
     ['.agents/archive/tasks/T-example/evidence/check.mjs'],
     ['tasks/archive/.gitkeep', '.agents/archive/tasks/.gitkeep']]) {
     expect(plan(files)).toMatchObject({ commands: [], e2e: [], unknown: [] })

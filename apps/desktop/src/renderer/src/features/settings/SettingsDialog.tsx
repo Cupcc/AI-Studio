@@ -8,6 +8,7 @@ import { SETTINGS_STRINGS as T } from '@shared/settings/strings'
 import { Icon } from '../../app/Icon'
 import { cliName, useSessions } from '../session/store'
 import { sessionApi } from '../session/api'
+import { ipcErrorText } from '../../lib/ipc-error'
 import { useSettings } from './store'
 
 /** Arrow keys move the checked option of a radio group, wrapping at the ends. */
@@ -38,7 +39,7 @@ function CliSettings() {
     const getConnections = 'getCliConnections' in api ? api.getCliConnections() : Promise.resolve([] as CliConnection[])
     void Promise.all([useSessions.getState().loadProviders(), api.getGlobalDefaultCli(), getInstallations, getConnections]).then(([, cli, installState, connectionState]) => {
       if (active) { setSelected(cli); setInstallations(installState); setConnections(connectionState) }
-    }).catch((reason) => { if (active) setError(String(reason)) }).finally(() => { if (active) setLoading(false) })
+    }).catch((reason) => { if (active) setError(ipcErrorText(reason)) }).finally(() => { if (active) setLoading(false) })
     const offInstall = 'onCliInstallationsChanged' in api ? api.onCliInstallationsChanged(setInstallations) : () => {}
     const offConnections = 'onCliConnectionsChanged' in api ? api.onCliConnectionsChanged(setConnections) : () => {}
     return () => { active = false; offInstall(); offConnections() }
@@ -48,7 +49,7 @@ function CliSettings() {
     try {
       await useSessions.getState().loadProviders(true)
       setSelected(await sessionApi().getGlobalDefaultCli())
-    } catch (reason) { setError(String(reason)) }
+    } catch (reason) { setError(ipcErrorText(reason)) }
     finally { setChecking(false) }
   }
   const toggle = async (cli: SessionCli, enabled: boolean) => {
@@ -57,7 +58,7 @@ function CliSettings() {
       const next = await sessionApi().setCliEnabled({ cli, enabled })
       useSessions.getState().acceptProviders(next)
       requestAnimationFrame(() => panel.current?.querySelector<HTMLButtonElement>(`[data-cli-action="${cli}"]`)?.focus())
-    } catch (reason) { setError(String(reason)) }
+    } catch (reason) { setError(ipcErrorText(reason)) }
     finally { setPending(null) }
   }
   const choose = async (cli: SessionCli) => {
@@ -66,13 +67,13 @@ function CliSettings() {
       await sessionApi().setGlobalDefaultCli({ cli })
       setSelected(cli)
       useSessions.getState().applyGlobalDefault(cli)
-    } catch (reason) { setError(String(reason)) }
+    } catch (reason) { setError(ipcErrorText(reason)) }
     finally { setPending(null) }
   }
   const install = async (cli: SessionCli) => {
     setError(null)
     try { await sessionApi().installCli({ cli }); await useSessions.getState().loadProviders(true) }
-    catch (reason) { setError(String(reason)) }
+    catch (reason) { setError(ipcErrorText(reason)) }
   }
   const installError = (cli: SessionCli) => { const state = installations.find(item => item.cli === cli); return state?.status === 'error' ? state.message : null }
   const connectionFor = (cli: SessionCli) => connections.find(item => item.cli === cli) ?? { cli, mode: 'local' as const, profile: null, revision: 'local' }

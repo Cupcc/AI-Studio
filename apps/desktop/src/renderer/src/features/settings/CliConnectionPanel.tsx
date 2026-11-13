@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CliConnection, ConnectionTestResult, SaveCliConnection } from '@shared/session/cli-connection'
 import { Icon } from '../../app/Icon'
 import { sessionApi } from '../session/api'
+import { ipcErrorText } from '../../lib/ipc-error'
 
 interface Props {
   connection: CliConnection
@@ -42,7 +43,7 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
       onSaved(next)
       if (!active.current) return
       setSaved(next); setBaseUrl(next.profile?.baseUrl ?? ''); setApiKey(''); setShowKey(false)
-    } catch (reason) { if (active.current) setError(String(reason)) }
+    } catch (reason) { if (active.current) setError(ipcErrorText(reason)) }
     finally { if (active.current) setSaving(false) }
   }
   const runTest = async () => {
@@ -51,7 +52,7 @@ export function CliConnectionPanel({ connection, name, onClose, onSaved }: Props
     try {
       const result = await sessionApi().testCliConnection({ cli: connection.cli })
       if (active.current) setTest({ status: 'complete', result })
-    } catch (reason) { if (active.current) setTest({ status: 'complete', result: { ok: false, message: String(reason) } }) }
+    } catch (reason) { if (active.current) setTest({ status: 'complete', result: { ok: false, message: ipcErrorText(reason) } }) }
   }
   return <section className="settings-dialog__content cli-connection" aria-label={`${name} 连接`}>
     <header className="cli-connection__header">

@@ -4,7 +4,7 @@
 
 - 本记录仅覆盖 2026-11-10 的 model 移除、连接字段覆盖和直接 API `hi` 测试，不验收原任务的一键安装或完整打包交付。
 - 新版独立详情页已完成本轮 AI 交互与截图复核，人工体验已于 2026-11-12 验收通过；被否定的旧版界面不计为交付。
-- 当前未取得可用于本轮远端调用的 Claude API Key。Claude 的直接 HTTP 协议由回环服务验证，原生配置继承由真实 CLI + 回环服务验证；均不等同于 Claude 远端模型调用成功。
+- 当前未取得可用于本轮远端调用的 Claude API Key。Claude 的直接 HTTP 协议由回环服务验证，原生配置继承由真实 CLI + 回环服务验证；均不等同于 Claude 远端模型调用成功。2026-11-13 已用真实网关补测，见 [W3](#2026-11-13-claude-自定义连接实测w3)。
 - 组织管理配置、特殊网关协议、旧 CLI 版本及打包应用未在本轮独立复测。直接 API 测试读取用户级模型，不覆盖项目 / 会话专属模型；缺少明确模型时返回错误，不猜测默认模型。
 
 ## 人工功能验收
@@ -84,13 +84,13 @@
 - **登录后转为可用**：隔离 HOME 中新装的两个 CLI 都未登录，只验证了未登录提示。为避免产生新凭据，未在隔离环境登录；“可用”状态由打包形态下用户本机已登录的 CLI 验证。
 - **打包形态的安装只覆盖 Claude Code**：Codex 一键安装只在开发构建执行。
 - **打包 Session 只覆盖创建、流式、完成与 Stop**：并发、恢复、Needs Input 未在打包形态重测；开发构建结果见 [Claude 真实验收](../../.agents/archive/tasks/T20261112-claude-cli-acceptance/acceptance.md)。打包产物禁用 Node inspect，退出改用 SIGTERM，只确认进程清理，不覆盖 QuitFlow 的确认路径。
-- **Claude 自定义 URL / Key 的远端调用**：没有可用 Key，按分派不在本轮范围。
+- **Claude 自定义 URL / Key 的远端调用**：没有可用 Key，按分派不在本轮范围；2026-11-13 补测见 [W3](#2026-11-13-claude-自定义连接实测w3)。
 - **自动化**：仓库中没有 `CliInstaller` / `runInstallCommand` 的单元测试（O-W2-3），本节结论全部来自真实环境操作。
 
 ### 待决事项
 
 - D-W2-1 与 D-W2-2 已在 `1780c63` 修复，W2（未参与修复）复验通过，见[复验](#复验1780c63)。
-- 官方 Claude 安装器会执行 `npm uninstall --global @anthropic-ai/claude-code`（O-W2-4）。一键安装在用户真实环境中可能移除用户经 npm 全局安装的 Claude Code。是否接受、是否在界面提示，需人工决定。
+- 官方 Claude 安装器会执行 `npm uninstall --global @anthropic-ai/claude-code`（O-W2-4）。一键安装在用户真实环境中可能移除用户经 npm 全局安装的 Claude Code。是否接受、是否在界面提示，需人工决定。2026-11-13 已决定接受、不加提示，见 [task](task.md#2026-11-13-claude-自定义连接实测与-o-w2-4-决定)。
 - 原先只在诊断产物上执行的打包场景，已在 `1780c63` 的原始产物上全部重跑通过，不再需要决定是否沿用诊断产物的证据，见[复验](#复验1780c63)。
 
 ### AI 结论与运行环境
@@ -144,7 +144,7 @@
 | O-W2-1 | 观察，未复现 | Claude 首次安装中关闭再打开设置，有一次采样看到该行为可点击的“一键安装”，同时主进程仍为 installing；两次定点复测未出现。源码中重开时安装状态初始为空，要等 Provider 检测等请求一起完成后才写入；如果列表先由缓存渲染，就会出现这一窗口。此时点击会命中主进程去重，不会启动第二个安装。 | 记录；修复 D-W2-2 时可一并让安装状态先于检测结果加载 |
 | O-W2-2 | 观察 | 界面只显示“正在安装…”，主进程的 preparing / downloading / installing / checking 阶段不显示，也没有取消入口。最长一次安装约 71 秒，没有阶段信息。 | 是否需要阶段与取消，由产品决定 |
 | O-W2-3 | 观察 | 当前代码中没有 `cli-installation.ts` 的单元测试；设置页测试只 mock `installCli`。task 场景表中的“服务测试 / 定向测试”没有对应用例，失败、超时、取消路径缺少可重复的回归。 | 建议修复缺陷时补定向测试 |
-| O-W2-4 | 观察，涉及用户数据 | 官方 Claude 安装器的 `claude install` 会执行 `npm uninstall --global @anthropic-ai/claude-code`，使用 PATH 上的 npm 及其全局前缀；隔离 HOME 无法隔离这一步。本机该前缀下没有此包，npm 日志 `reify moves {}`，没有改动。 | 见待决事项 |
+| O-W2-4 | 观察，涉及用户数据 | 官方 Claude 安装器的 `claude install` 会执行 `npm uninstall --global @anthropic-ai/claude-code`，使用 PATH 上的 npm 及其全局前缀；隔离 HOME 无法隔离这一步。本机该前缀下没有此包，npm 日志 `reify moves {}`，没有改动。 | 2026-11-13 决定接受、不加提示，见 [task](task.md#2026-11-13-claude-自定义连接实测与-o-w2-4-决定) |
 | O-W2-5 | P3 文案 | 未登录原因显示英文 “The CLI is not logged in”，与下一行中文提示混排（设置“处理方法”与 New Chat 选择器）。 | 记录 |
 
 ### 执行说明
@@ -181,3 +181,58 @@
 - 本节已执行的场景现在全部通过。“未覆盖与边界”中除第一条（打包原始产物不可启动）已解决外，其余项目不变，补测范围仍为部分覆盖。
 - 用户真实 CLI 安装在复验前后一致。复验未发现新缺陷；O-W2-1～O-W2-5 未处理，状态不变。
 - Main Agent 发起的远端 full CI（打包与打包冒烟）结果不在本节记录范围。
+
+## 2026-11-13 Claude 自定义连接实测（W3）
+
+用户提供了 Claude 兼容网关与 Key（见 [task](task.md#2026-11-13-claude-自定义连接实测与-o-w2-4-决定)）。本节由 Main Agent 执行（W3），它同时实现了本轮修复；独立评审见 [R1](#独立评审r1)。
+
+### 范围与边界
+
+- 覆盖：设置中保存 HTTP 网关、连接测试、新建 Claude Code 会话并发送 `hi`。均为真实远端请求，网关用量按同一 Key 在每步前后读取。
+- 未覆盖：Bearer 认证（`auth: bearer`）、HTTPS 网关、Codex 自定义连接（11-10 已实测，本轮未改其行为）、打包应用中的自定义连接、多轮对话与 Stop。Claude Code 为 2.1.323，不在 Adapter 已测版本列表中（列表到 2.1.322）。
+- 网关地址与 Key 不写入记录；截图中 Base URL 输入框在截图前做了模糊处理。
+
+### 实测前发现的问题
+
+| 编号 | 问题 | 处理 |
+|---|---|---|
+| D-W3-1 | 网关是公网 IP 上的 HTTP 地址，没有 HTTPS。原规则只允许 HTTPS 与本机 HTTP，设置中无法保存 | 用户 2026-11-13 决定「允许http和https，不用警告」；`validateBaseUrl` 改为接受任意主机的 HTTP / HTTPS，仍拒绝其他协议、凭据、查询参数与片段 |
+| D-W3-2 | 连接测试把本机配置的模型别名 `opus` 原样发给 API，网关返回 HTTP 503 `model_not_found`。Claude Code 自身发出的是 `claude-opus-5-5`；本机未设置模型时，测试直接报“未指定模型” | Adapter 目录带出 CLI 的 `resolvedModel`；Claude 测试先经模型目录握手（不发送消息）解析别名，未设置模型时用目录的 `default` 行，目录读取失败则测试不通过 |
+
+### 结果
+
+| 场景 | 操作 | 实际结果 | 结论 | 证据 |
+|---|---|---|---|---|
+| 保存 HTTP 网关 | 设置 → CLI → Claude Code → 配置 → 自定义连接，填入 HTTP Base URL 与 Key，保存 | 保存成功，显示“已安全保存”，无校验错误 | 通过 | [截图](evidence/W3-01-claude-custom-test-pass.jpg) |
+| 连接测试 | 点击“测试连接” | 连接正常，5.9 秒，模型 `claude-opus-5-5`，回复 “Hi there! How can I help you today?”；网关用量 27 → 187 | 通过 | [截图](evidence/W3-01-claude-custom-test-pass.jpg)、[记录](evidence/W3-gateway-run.json) |
+| Claude 会话 | 新建 Claude Code 对话（Default (recommended)），发送 `hi` | 回复“你好！有什么可以帮你的吗？”，Worked for 4s · Done；网关用量 187 → 66019 | 通过 | [截图](evidence/W3-02-claude-custom-session-reply.jpg)、[记录](evidence/W3-gateway-run.json) |
+| 定向测试 | 连接与直接 API 测试、Adapter Claude Provider 测试、全仓类型检查 | 13 项、60 项通过，类型检查通过 | 通过 | 本节 |
+
+用量变化证明两次请求都经过该网关并使用该 Key。人工产品验收不在本节范围。
+
+### 独立评审（R1）
+
+未参与实现的评审 Agent 在 `757e523` 上复核代码、文档与证据，并在隔离 Electron（真实 Provider）中操作界面；只发起 1 次真实连接测试，没有开对话。报告由 Main Agent 转录。结论：有条件通过，代码无阻塞问题，条件为补全文档与确认记录。
+
+| 场景 | 结果 | 结论 | 证据 |
+|---|---|---|---|
+| 保存 `ftp://example.com` | 报错“Base URL 须以 http:// 或 https:// 开头。”，状态仍为“未保存”，配置仍为本机模式 | 通过 | [截图](evidence/R1-01-ftp-rejected.jpg) |
+| 保存 `http://203.0.113.7:3000` | 显示“已保存”“已安全保存”，无警告 | 通过 | [截图](evidence/R1-02-http-public-accepted.jpg) |
+| 真实网关测试连接 | 连接正常，模型 `claude-opus-5-5`（本机配置为 `opus`），回复 “Hi there! How can I help you today?”，测试后无残留 claude 进程 | 通过 | [截图](evidence/R1-03-real-gateway-test-pass.jpg) |
+| 泄露检查 | 网关主机、URL、Key 及其首尾 12 位在 diff、提交信息与证据文件中均为 0 次；截图中 URL 不可辨认 | 通过 | 本节 |
+| 自动化 | 全仓类型检查、session 服务测试 145 项、Adapter Claude Provider 60 项、桌面构建 | 通过 | 本节 |
+
+发现与处理：
+
+| 编号 | 发现 | 处理 |
+|---|---|---|
+| R1-F1（P2） | 已确认的 settings spec 第 4 条（“不启动 CLI”“不猜测模型”）被改动，没有提请用户确认；task 的 11-10 验收场景与 DEC-27 未同步。另外，未安装 Claude Code 但本机配了完整模型 ID 时，测试会因读不到目录而失败，改动前可以通过 | 目录读取失败时，完整模型 ID 照常测试，只有别名或未设置模型才失败，并补了单测；task、DEC-27 已同步；该行为变化列入交付摘要，请用户审阅 |
+| R1-F2（P3） | 连接测试读取目录时没有纳入退出流程：`releaseAllRuntimes` 不等待它，退出过程中仍可能启动新的读取 | 已与 `getModels` 对齐：加入后台任务集合，退出中拒绝新的读取，并补了单测 |
+| R1-F3（P3） | 界面显示的耗时只算 API 请求，不含读取目录的时间（实测 6.2 s 对约 8.3 s） | 保留现状：该耗时表示 API 请求耗时，spec 第 4 条已写明 |
+| R1-F4（P3） | spec 第 4 条“未设置模型时取默认项”与“模型缺失时提示”前后矛盾 | 已改为“Codex 未设置模型、Claude 目录没有默认项”时提示 |
+| R1-F5（P3） | Claude 真实验收归档记录的“复测条件”未指向新记录；证据命名不符合 `W<n>-` 约定 | 已补链接；证据改名为 `W3-*` / `R1-*` |
+| 既有 | 保存出错时提示带 IPC 包装前缀（“Error invoking remote method …”），且错误提示要滚动才能看到 | 改动前就存在。用户同意后，设置页的错误提示已改用 `ipcErrorText` 去掉前缀，并补了单测（修复前失败）；需要滚动才能看到的问题未处理 |
+
+R1-F1、R1-F2 修复后，session 服务测试 146 项通过，新增测试在修复前的代码上失败。修复只影响目录读取失败的路径和应用退出流程，读取成功的路径没有变，上文真实实测的结论仍然有效。这两项修复没有再交 R1 复核，由修复前失败、修复后通过的单测验证。
+
+远端 CI：affected 模式 [run 43341428051](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43341428051)（`757e523`）通过，E2E 21 项（claude-effort、cli-default、composer、session）与单测均通过；设置页错误提示修改后，`settings.spec.ts` 单项 [run 43343623862](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43343623862)（`3914b87`）6 项通过。

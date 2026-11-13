@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-13",
+  "executor": "Main Agent (implementer of this round)",
+  "baseline": "fix/claude-custom-connection on dev c0f85c0; code as in the branch's first commit",
+  "app": "pnpm build output started directly with Electron; isolated userData; real Codex / Claude providers (STUDIO_E2E_PROVIDERS unset); agent-browser over CDP",
+  "claudeCode": "2.1.323 (adapter tested list ends at 2.1.322; reported as untested, still usable)",
+  "gateway": {
+    "address": "HTTP on a public IPv4 with a port; host not recorded",
+    "https": "not offered (TLS handshake fails with ERR_SSL_WRONG_VERSION_NUMBER)",
+    "auth": "x-api-key (Bearer also accepted)",
+    "type": "new-api compatible aggregator; /v1/models lists claude-opus-5-5, claude-sonnet-5-5 and claude-haiku-5-5 among others"
+  },
+  "credentials": "read from the untracked apps/desktop/.env.local through shell substitution; not printed, logged or stored in evidence",
+  "preChecks": [
+    { "check": "POST /v1/messages with model \"opus\" (the user's ~/.claude/settings.json model)", "result": "HTTP 503 model_not_found; no usage charged" },
+    { "check": "Claude Code against a loopback capture fixture (no remote call)", "result": { "opus": "claude-opus-5-5", "sonnet": "claude-sonnet-5-5", "haiku": "claude-haiku-5-5", "unset (user settings model opus)": "claude-opus-5-5" } },
+    { "check": "SDK supportedModels() handshake (no message)", "result": [
+      { "value": "default", "resolvedModel": "claude-opus-5-5" }, { "value": "opus", "resolvedModel": "claude-opus-5-5" },
+      { "value": "claude-fable-5-1[1m]", "resolvedModel": "claude-fable-5-1" }, { "value": "sonnet", "resolvedModel": "claude-sonnet-5-5" },
+      { "value": "haiku", "resolvedModel": "claude-haiku-5-5" } ] }
+  ],
+  "steps": [
+    { "step": "Settings > CLI > Claude Code > 配置 > 自定义连接; fill the HTTP Base URL and the key; 保存", "result": "saved; key shown as 已安全保存; no validation error" },
+    { "step": "测试连接", "result": "连接正常, 5.9 s, model claude-opus-5-5, reply \"Hi there! How can I help you today?\"", "gatewayUsage": { "before": 27, "after": 187 } },
+    { "step": "New chat with Claude Code (model selector: Default (recommended)); send \"hi\"", "result": "reply \"你好！有什么可以帮你的吗？\"; Worked for 4s · Done", "gatewayUsage": { "before": 187, "after": 66019 } }
+  ],
+  "gatewayUsageSource": "GET /api/usage/token/ total_used with the same key, read before and after each step",
+  "screenshots": ["W3-01-claude-custom-test-pass.jpg (Base URL field blurred before capture)", "W3-02-claude-custom-session-reply.jpg"]
+}

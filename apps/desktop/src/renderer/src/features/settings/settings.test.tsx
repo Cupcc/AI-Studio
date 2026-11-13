@@ -84,6 +84,29 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
     } finally { useSessions.setState(previous, true) }
   })
 
+  it('shows a rejected save without the IPC wrapper text', async () => {
+    const previous = useSessions.getState()
+    const connection = { cli: 'claude-code', mode: 'local', profile: null, revision: 'local' }
+    const saveCliConnection = vi.fn(async () => { throw new Error("Error invoking remote method 'session:save-cli-connection': Error: Base URL 须以 http:// 或 https:// 开头。") })
+    Object.assign(window.studio, { session: {
+      getProviders: async () => [{ cli: 'claude-code', displayName: 'Claude Code', status: 'available', reason: null }],
+      getGlobalDefaultCli: async () => 'claude-code', getCliConnections: async () => [connection], saveCliConnection, testCliConnection: vi.fn(),
+    } })
+    useSessions.setState({ providers: [], providersError: null, projects: {}, drafts: {} })
+    try {
+      await openDialog()
+      fireEvent.click(screen.getByRole('button', { name: 'CLI' }))
+      const configure = await screen.findByRole('button', { name: '配置' })
+      await waitFor(() => expect(configure.hasAttribute('disabled')).toBe(false))
+      fireEvent.click(configure)
+      fireEvent.click(screen.getByRole('radio', { name: '自定义连接' }))
+      fireEvent.change(screen.getByLabelText('Base URL'), { target: { value: 'ftp://example.com' } })
+      fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'secret' } })
+      fireEvent.click(screen.getByRole('button', { name: '保存' }))
+      await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('Base URL 须以 http:// 或 https:// 开头。'))
+    } finally { useSessions.setState(previous, true) }
+  })
+
   it('loads the CLI category, saves one default for all Projects and retries detection', async () => {
     const previous = useSessions.getState()
     const provider = { cli: 'codex' as const, displayName: 'Codex CLI', status: 'available' as const, reason: null }

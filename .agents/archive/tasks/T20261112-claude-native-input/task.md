@@ -16,7 +16,7 @@ created: 2026-11-12
 - 交付：Claude 报告并执行原生 `queue`（Adapter `queueUserInput` / `input.started` / `input.cancelled`，桌面排队列表与未送达处理）；结构化附件（图片为 base64 图片块，文件与粘贴文件为路径引用）；Provider 可选 `checkInput`，在创建 Session、记录回合或重试前检查附件。
 - 评审与验证：真实 CLI 集成 8/8（Claude Code 2.1.322）；独立评审 R1（`864f366`）部分通过，修复后 R2（`b14f156`）通过，验收者未参与实现，见 [acceptance](acceptance.md)。之后的 `e60e17f` 补上重试前检查（R2 观察项），有单测。
 - 远端 CI：affected [run 43230534701](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43230534701)（`012587b`）选中 E2E 59 项通过，`product-selection.spec.ts:63` 失败；单独重跑 [run 43231968045](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43231968045) 中 `:35`、`:63` 失败。两者都卡在 `brief()` 填写“任务目标”超时；dev `3d5dbb1` 上同一 spec 以同一症状失败（[run 43232724879](https://github.com/Tiancheng-ai/AI-Studio/actions/runs/43232724879)，`:35`），与本任务无关，不阻塞收尾。
-- 文档复核：adapter / input / session / tools spec；docs/05 的 Claude 暂缓表述（已确认文档，变更 diff 交用户审阅）；docs/06 下一步、人工事项、模块状态与验收进度；docs/08 Claude / 输入 / Files 节点。保留项：Claude Skill 附件与 Skill 目录（不在本任务范围）；已知边界见执行记录与 acceptance。
+- 文档复核：adapter / input / session / tools spec；docs/05 的 Claude 暂缓表述（已确认文档，变更 diff 已于 2026-11-13 经用户审阅通过：「pass」）；docs/06 下一步、人工事项、模块状态与验收进度；docs/08 Claude / 输入 / Files 节点。保留项：Claude Skill 附件与 Skill 目录（不在本任务范围）；已知边界见执行记录与 acceptance。
 
 ## 目标
 

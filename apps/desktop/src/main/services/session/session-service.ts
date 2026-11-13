@@ -1,7 +1,7 @@
 import { open } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import { createHash, randomUUID } from 'node:crypto'
-import { toErrorInfo, type InputAttachment, type NativeSkillInfo, type AdapterEvent, type AdapterErrorInfo, type AgentProvider, type AgentSession, type InputRequest, type InputResolution, type InputResponse, type ItemSnapshot, type ProviderEnvironment, type UserInput } from '@ai-studio/agent-adapter'
+import { toErrorInfo, type InputAttachment, type NativeSkillInfo, type AdapterEvent, type AdapterErrorInfo, type AgentProvider, type AgentSession, type InputRequest, type InputResolution, type InputResponse, type ItemSnapshot, type ModelInfo, type ProviderEnvironment, type UserInput } from '@ai-studio/agent-adapter'
 import { initialSessionTitle, projectSessionState, sessionStatus, sortSessions } from '@shared/session/presentation'
 import type { ComposerDraft, ContextItem, ConversationPage, QueuedMessage, CreateSessionRequest, DraftKey, ModelCatalogResult, SkillCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem } from '@shared/session/types'
 import { SESSION_CLIS } from '@shared/session/types'
@@ -1205,6 +1205,14 @@ export class SessionService implements MainSessionPort {
         return result
       } catch (error) { return { models: [], error: toErrorInfo(error).message } }
     })()
+    this.background.add(task)
+    try { return await task } finally { this.background.delete(task) }
+  }
+
+  /** The native catalog outside any Project, for the connection test; the handshake sends no message. */
+  async nativeModels(cli: SessionCli, environment: ProviderEnvironment): Promise<ModelInfo[]> {
+    if (this.quitting || this.disposed) throw new Error('应用正在退出')
+    const task = this.provider(cli).listModels({ environment, signal: this.discoveryAbort.signal })
     this.background.add(task)
     try { return await task } finally { this.background.delete(task) }
   }

@@ -205,7 +205,7 @@ export function createSessionFeature(core: CoreServices, options: SessionFeature
     } },
     testCliConnection: {
       parse: raw => { const value = record(raw, ['cli']); return { cli: cli(value.cli) } },
-      handle: async ({ cli }) => connections.test(cli, cliEnvironment((await core.shellEnv.get()).env))
+      handle: async ({ cli }) => connections.test(cli, cliEnvironment((await core.shellEnv.get()).env), environment => service.nativeModels(cli, environment))
     },
     getCliInstallations: { parse: noInput, handle: () => installer.snapshot() },
     installCli: {

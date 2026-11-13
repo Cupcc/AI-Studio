@@ -7,3 +7,6 @@ coverage/
 *.tsbuildinfo
 test-results/
 playwright-report/
+
+# Local environment files may hold credentials.
+.env*.local

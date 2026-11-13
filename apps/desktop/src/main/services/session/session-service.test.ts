@@ -674,6 +674,20 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     await models
   })
 
+  it('waits for a connection-test catalog read at release and refuses new reads while quitting', async () => {
+    const probe = deferred<Awaited<ReturnType<FakeProvider['listModels']>>>()
+    class ProbeProvider extends FakeProvider { override listModels() { return probe.promise } }
+    const h = harness(new ProbeProvider('codex'))
+    const models = h.service.nativeModels('codex', { env: {} })
+    let released = false
+    const release = h.service.releaseAllRuntimes().then(() => { released = true })
+    await tick()
+    expect(released).toBe(false)
+    probe.resolve([]); await release; await models
+    await h.service.stopAllTurns()
+    await expect(h.service.nativeModels('codex', { env: {} })).rejects.toThrow('退出')
+  })
+
   it('keeps a timed-out close locked only until its actual Stop settles, then allows retained Tab work', async () => {
     const cleanup = deferred<{ status: 'confirmed'; scope: 'turn' }>()
     const h = harness(new FakeProvider('codex', { behavior: { cleanup: () => cleanup.promise } }))

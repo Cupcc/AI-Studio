@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { createServer, type Server, type RequestListener } from 'node:http'
 import { afterEach, describe, expect, it } from 'vitest'
-import { nativeTestModel, testApiConnection } from './connection-test'
+import { claudeWireModel, isClaudeAlias, nativeTestModel, testApiConnection } from './connection-test'
 
 const directories: string[] = []
 const servers: Server[] = []
@@ -58,6 +58,20 @@ describe('direct API connection test', () => {
 
   it('does not guess a model when local configuration has none', async () => {
     expect(await testApiConnection('codex', { baseUrl: 'http://127.0.0.1:1', apiKey: 'secret', auth: 'api_key' }, '')).toMatchObject({ ok: false, message: expect.stringContaining('未指定模型') })
+  })
+
+  it('maps a Claude Code alias or an unset model to the ID the CLI sends', () => {
+    const catalog = [{ id: 'default', displayName: 'Default', resolvedModel: 'claude-main' }, { id: 'opus', displayName: 'Opus', resolvedModel: 'claude-opus-x' },
+      { id: 'claude-wide[1m]', displayName: 'Wide', resolvedModel: 'claude-wide' }, { id: 'haiku', displayName: 'Haiku' }]
+    expect(claudeWireModel('', catalog)).toBe('claude-main')
+    expect(claudeWireModel('Opus', catalog)).toBe('claude-opus-x')
+    expect(claudeWireModel('opus[1m]', catalog)).toBe('claude-opus-x')
+    expect(claudeWireModel('claude-wide[1m]', catalog)).toBe('claude-wide')
+    expect(claudeWireModel('gateway-model', catalog)).toBe('gateway-model')
+    expect(claudeWireModel('haiku', catalog)).toBe('haiku')
+    expect(claudeWireModel('', [])).toBe('')
+    expect(['opus', 'Sonnet[1m]', 'default', 'opusplan'].every(isClaudeAlias)).toBe(true)
+    expect(['claude-opus-5-5', 'gateway-model', ''].some(isClaudeAlias)).toBe(false)
   })
 
   it('reads native config files without running a CLI and respects model aliases', async () => {

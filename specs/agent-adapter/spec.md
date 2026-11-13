@@ -190,7 +190,7 @@
 5. `canUseTool` 保留原生说明、工具 ID、建议权限更新与选项顺序；只在原生允许时提供持久授权。`AskUserQuestion` 按原题目与选项回写答案，SDK abort 撤回原请求。输入框拒绝以 `deny.message` 交付文字；Stop / 终态 / dispose 释放所有等待。附件：`image` 按文件头识别 PNG / JPEG / GIF / WebP，读入后作为 base64 图片块放在正文之前（上限 10 MiB，与粘贴附件一致；CLI 自行缩放大图，6.3 MB 已实测）；`file` 使用与 Codex 相同的本机路径引用文本，不内联内容；`skill` 前置返回 `unsupported`。附件问题都是发送前的前置错误。
 6. Running / Stopping 中改模型先暂存，下一轮提交前调用 `Query.setModel`；空闲时立即设置。Provider 目录探测不发送消息，使用 `persistSession:false` 调用 `supportedModels()` 后关闭。Stop 前后按本轮后代身份取得退出证明；`still_queued` 若仍含本轮输入，或清理无法确认，走旧 Runtime 退出后原 ID 恢复。没有原生 ID 时不以新建代替恢复。
 7. 验证边界：模拟结果不能替代真实 CLI 的 AC-02 / AC-03 / AC-05；实际启用的版本、输入输出、Rule / Skill、恢复、模型切换、Stop 与并发按相应真实场景验证。采样前已脱离的后代、外部 MCP 进程树与宿主崩溃清理保留证明边界。
-8. 推理强度：`listModels()` 对 `supportsEffort` 的模型把原生 `supportedEffortLevels` 报告为 `reasoningEfforts`，不支持的模型不带该字段；档位不增补、不改名。目录中 CLI 自己的选择行 `default` 标记 `isDefault`，应用在用户未手动选模型时据此解析当前模型的档位。`setReasoningEffort(level)` 通过 `Query.applyFlagSettings({ effortLevel })` 设置：空闲立即应用，Running / Stopping 中暂存到下一轮提交前（与 `setModel` 一致）；`null` 发送 `effortLevel: null`，由 CLI 回到所选模型的原生默认，不硬编码。真实 CLI 对目录外档位（探测值 `ultra`）同样返回成功而不报错，所以按所选（含暂存）模型的初始化目录校验：目录外 → `invalid_argument`，模型不支持 effort → `unsupported`，模型不在目录时回退 SDK 档位集；`null` 不校验。验证过的 Runtime 替换后，已选档位在下一轮提交前重新应用。
+8. 推理强度：`listModels()` 对 `supportsEffort` 的模型把原生 `supportedEffortLevels` 报告为 `reasoningEfforts`，不支持的模型不带该字段；档位不增补、不改名。目录中 CLI 自己的选择行 `default` 标记 `isDefault`，应用在用户未手动选模型时据此解析当前模型的档位。CLI 报告 `resolvedModel`（别名当前对应的模型 ID）时原样带出，供设置中的连接测试使用。`setReasoningEffort(level)` 通过 `Query.applyFlagSettings({ effortLevel })` 设置：空闲立即应用，Running / Stopping 中暂存到下一轮提交前（与 `setModel` 一致）；`null` 发送 `effortLevel: null`，由 CLI 回到所选模型的原生默认，不硬编码。真实 CLI 对目录外档位（探测值 `ultra`）同样返回成功而不报错，所以按所选（含暂存）模型的初始化目录校验：目录外 → `invalid_argument`，模型不支持 effort → `unsupported`，模型不在目录时回退 SDK 档位集；`null` 不校验。验证过的 Runtime 替换后，已选档位在下一轮提交前重新应用。
 
 运行中排队（I-Q3）：只在 `system/init.capabilities` 含 `msg_lifecycle_v1` 时接受，否则前置 `unsupported`；Runtime 刚启动、尚未收到 `system/init` 时先等待（上限为启动超时），Runtime 在此之前结束则 `invalid_state`。附件前置检查与写入 CLI 都按调用顺序进行，先提交的输入不会被后提交的超过。每条输入带客户端 uuid，按 `command_lifecycle`（queued / started / completed / cancelled）跟踪：`started` 时有未结束的原生回合则并入该回合，否则开始新回合；同时 `started` 的多条进入同一回合。普通 interrupt 保留排队输入，CLI 随后把它作为新回合执行；被 Stop 的回合不再接收输入，即使 `started` 先于其 result 到达也开始新回合；该回合若在上一回合 Stop 收尾时开始，核心暂存其事件，待上一回合结束后再发出 `turn.started` 与后续事件。Runtime 退出、被恢复替换或 dispose 时，未开始的排队输入以 `input.cancelled` 报告；新原生回合开始后，上一回合的后代采样停止，避免把新回合进程计入 Stop 清理。原生行为证据见[Claude 原生输入任务](../../.agents/archive/tasks/T20261112-claude-native-input/task.md)。
 
@@ -209,8 +209,8 @@ CLI 连接配置由桌面主进程保存与注入，Adapter 不读写用户配�
 
 - Codex 在创建 / 恢复前通过原生 `config/read` 取得有效 provider，保留非认证传输选项，剔除空可选值与旧认证信息，再用 app-server `-c` 注入连接覆盖。API Key 只放入子进程环境。模型、effort 和其他原生配置不覆盖；目录读取仍使用原生目录，不缩减为应用指定的单个模型。availability 的凭据存在检查不代表远端请求成功。
 - Claude 原生初始化后，通过 SDK `applyFlagSettings` 的 stdin 控制请求只叠加 endpoint / credential 环境项；恢复 Runtime 时重新应用。不设置宿主管理模型标记，不把密钥放进 argv 或配置文件；本机模型环境、默认别名、输出限额与 effort 继续由原生设置合并。
-- 连接覆盖用于 Session、恢复和可用性检查；Session 绑定创建时的 URL / 凭据修订，不在运行中静默切换。设置中的直接 API 测试由[settings spec](../settings/spec.md#cli-连接配置2026-11-08-确认)负责，不经过 Adapter。
-- 连接配置机制验证基线与未覆盖项见[CLI 配置研究](../../tasks/T20261108-cli-install/research.md)。真实网关协议、鉴权和旧版本兼容性仍需按 CLI 单独验收。
+- 连接覆盖用于 Session、恢复和可用性检查；Session 绑定创建时的 URL / 凭据修订，不在运行中静默切换。设置中的直接 API 测试由[settings spec](../settings/spec.md#cli-连接配置2026-11-08-确认)负责：`hi` 请求不经过 Adapter，Claude 的测试模型经 Adapter 模型目录解析。
+- 连接配置机制验证基线与未覆盖项见[CLI 配置研究](../../tasks/T20261108-cli-install/research.md)。真实网关协议、鉴权和旧版本兼容性仍需按 CLI 单独验收；Claude 已用一个 HTTP 兼容网关（`x-api-key`）实测，见[实测记录](../../tasks/T20261108-cli-install/acceptance.md#2026-11-13-claude-自定义连接实测w3)。
 
 ## 4. 状态与数据
 

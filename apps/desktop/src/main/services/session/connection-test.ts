@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { parse } from 'smol-toml'
 import type { SessionCli } from '@shared/session/types'
 import type { ConnectionTestResult } from '@shared/session/cli-connection'
-import type { ProviderConnection } from '@ai-studio/agent-adapter'
+import type { ModelInfo, ProviderConnection } from '@ai-studio/agent-adapter'
 import type { Env } from '../shell-env/login-env'
 
 function record(value: unknown): Record<string, unknown> {
@@ -31,6 +31,18 @@ export async function nativeTestModel(cli: SessionCli, env: Env): Promise<string
     return text(settingsEnv[name]) || text(env[name]) || model
   }
   return model
+}
+
+/** Claude Code's model aliases (https://code.claude.com/docs/en/model-config); only these need the CLI catalog. */
+export function isClaudeAlias(model: string): boolean {
+  return ['default', 'best', 'sonnet', 'opus', 'haiku', 'opusplan'].includes(model.replace(/\[1m\]$/i, '').toLowerCase())
+}
+
+/** Claude Code sends the catalog's resolved ID for an alias, and its `default` row's model when none is set. */
+export function claudeWireModel(model: string, catalog: readonly ModelInfo[]): string {
+  const plain = model.replace(/\[1m\]$/i, '')
+  const row = (id: string) => catalog.find(item => item.id.toLowerCase() === id.toLowerCase())
+  return (row(model || 'default') ?? row(plain))?.resolvedModel?.replace(/\[1m\]$/i, '') || plain
 }
 
 function responseText(value: unknown, claude: boolean): string {

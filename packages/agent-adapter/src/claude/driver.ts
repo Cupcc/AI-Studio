@@ -471,6 +471,7 @@ export class ClaudeDriver implements SessionDriver {
     return models.map((model) => ({ id: model.value, displayName: model.displayName, description: model.description,
       // `default` is the CLI's own selection; the app resolves effort levels through it while no model is chosen.
       ...(model.value === 'default' ? { isDefault: true } : {}),
+      ...(model.resolvedModel ? { resolvedModel: model.resolvedModel } : {}),
       ...(model.supportsEffort && model.supportedEffortLevels?.length ? { reasoningEfforts: model.supportedEffortLevels } : {}) }));
   }
   dispose(): Promise<void> {
