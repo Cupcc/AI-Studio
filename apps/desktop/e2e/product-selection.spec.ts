@@ -22,7 +22,11 @@ test.beforeEach(async()=>{
 })
 test.afterEach(async()=>{await closeTestApp(app,page);rmSync(dir,{recursive:true,force:true})})
 async function brief(text:string) {
-  await plugin().getByRole('button',{name:'任务要求',exact:true}).click()
+  const toggle=plugin().getByRole('button',{name:'任务要求',exact:true})
+  // The page runs in its own renderer process. Right after it is added, Chromium can still deliver the pointer to the host's
+  // <iframe> element, and Playwright reports such a click as done; hover until the page itself sees the pointer.
+  await expect.poll(async()=>{await toggle.hover();return toggle.evaluate(el=>el.matches(':hover'))}).toBe(true)
+  await toggle.click()
   await plugin().getByRole('textbox',{name:'任务目标',exact:true}).fill(text)
   await plugin().getByRole('button',{name:'保存要求',exact:true}).click()
   await expect(plugin().locator('#notice')).toHaveText('任务要求已保存。')
