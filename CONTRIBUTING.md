@@ -22,28 +22,31 @@
 | 分支 | 用途 | 约束 |
 |---|---|---|
 | `main` | 稳定基线，只含人工验收通过的版本 | 只从 dev 快进；不直接提交，不强推，不重写已发布历史 |
-| `dev` | 集成与人工体验分支 | 每个任务分支集成为一个 squash 提交；不强推，不改写已集成的提交 |
+| `dev` | 集成与人工体验分支 | 只由集成命令更新，每个任务分支成为一个 squash 提交；不直接提交，不在任何目录检出，不强推，不改写已集成的提交 |
 | 任务分支 | 一项能单独验收的功能、修复或其他工作 | 从最新 dev 创建，在独立 worktree 中开发；名称用英文小写加连字符，例如 `feat/project-view`、`fix/workbench-order` |
 | `<任务分支>-<worker>` | 已安排的并行 worker | 独立 worktree；写入范围与集成方式见 [Task Protocol](tasks/README.md#parallel-workers) |
 
-dev 和 main 都是一条线，main 始终是 dev 的前缀。`git log --oneline main..dev` 列出待验收的提交，每行是一个任务分支或一个直接提交。集成命令会删除已集成的 worktree，所以 `git worktree list` 只列出尚未集成的工作。
+dev 和 main 都是一条线，main 始终是 dev 的前缀。`git log --oneline main..dev` 列出待验收的提交，每行是一个任务分支。集成命令会删除已集成的 worktree，所以 `git worktree list` 只列出尚未集成的工作。
 
-一项工作按以下顺序进行。AI 在任务 worktree 中实现、自检和提交，再按[第 5 节](#5-合并与收尾)集成到 dev。用户在主目录体验 dev，验收通过后，main 快进到该版本。体验中发现的问题由新的修复分支处理，同样集成到 dev。
+一项工作按以下顺序进行。AI 在任务 worktree 中实现、自检，通过适用的门禁后直接提交，不另行征求同意，再按[第 5 节](#5-合并与收尾)集成到 dev。用户在主目录体验 dev 的某个提交，验收通过后，main 快进到该版本。体验中发现的问题由新的修复分支处理，同样集成到 dev。
 
-小改动可以直接提交到 dev，但仍须检查 diff 并通过适用的门禁。主目录留有未提交的改动时，所有集成都会被拒绝，所以主目录只做当轮能完成的小改动：通过门禁后立即提交，不等用户确认，只暂存本轮改动，每次回复结束时主目录都是干净的。用户看过效果要再调整时，追加提交或 `git revert`。可能中途停下等待决定、或需要多轮才能完成的改动，从一开始就放到任务 worktree。main 不接收待验收的改动。
+所有改动都走任务分支，一行的小改动也不例外。dev 只由集成命令更新，main 只从 dev 快进。
 
 ### 主目录与 worktree
 
-主目录指仓库根目录。它常驻 dev，不切换到任务分支或 main。多个 AI 会话共用主目录时，也共用 HEAD、文件和暂存区，所以同一时间只能有一个会话在主目录暂存、提交或集成。
-
-开始工作前，确认主目录干净并同步 dev。无法快进时先检查差异，不强推，也不丢弃本地改动：
+主目录指仓库根目录，是人工验收用的检出。它停在一个具体的 dev 提交上（detached HEAD），不检出 dev、任务分支或 main。AI 不在主目录修改文件。集成命令只移动 dev 引用，不改动任何目录的文件，所以主目录的内容只在用户切换时变化，集成也不受主目录状态影响。用户切换到最新的 dev：
 
 ```sh
-git status --short
-git pull --ff-only origin dev
+git switch --detach dev
 ```
 
-较大的工作在仓库同级目录 `../AI Stduio.worktrees/` 下创建 worktree，不放在仓库内：
+开始工作前同步本地 dev。dev 没有检出，用 fetch 直接更新这个引用；无法快进时先检查差异，不强推：
+
+```sh
+git fetch origin dev:dev
+```
+
+每项工作在仓库同级目录 `../AI Stduio.worktrees/` 下创建 worktree，不放在仓库内：
 
 ```sh
 git worktree add "../AI Stduio.worktrees/example" -b feat/example dev
@@ -93,18 +96,18 @@ PR 可选。需要集中查看较大的 diff、邀请他人审阅或协作时再
 只集成任务分支上已提交的内容。不得把未提交 worktree 中的文件、补丁或目录复制到 dev 再代为提交。源 worktree 有改动时，先回到该目录提交。只看分支 HEAD 不能证明源码已经交付。
 
 1. 在任务 worktree 检查全部改动，把本轮交付提交到任务分支。确认暂存区、工作区和未跟踪文件都已处理。
-2. 在主目录同步 dev，再回到任务 worktree 执行 `git rebase dev`。冲突只在任务 worktree 中解决，并完成 `git rebase --continue`，不留下未提交的冲突处理。rebase 后按变化复验受影响的部分。
+2. 同步本地 dev，再在任务 worktree 执行 `git rebase dev`。冲突只在任务 worktree 中解决，并完成 `git rebase --continue`，不留下未提交的冲突处理。rebase 后按变化复验受影响的部分。
 3. 完成 [Task Protocol](tasks/README.md#acceptance) 要求的 AI 评审与验收。功能交付由未参与实现的 AI 验收，界面改动还须做交互验收。这一步放在集成之前，因为坏的改动进入 dev 后，会挡住它后面的所有改动推进 main。
 4. 确认源 worktree 干净，然后在主目录运行[集成命令](scripts/README.md#任务分支集成)，再普通推送 dev。命令失败时修复它提示的问题，不改用文件复制、自动 stash 或普通 merge。集成成功后命令删除源 worktree 与本地任务分支，见[清理](#清理)，所以运行前先停止该 worktree 中的会话与 `pnpm dev` 等进程，之后的命令都在主目录执行。推送过的远端任务分支在推送 dev 后删除。
-5. 集成提交已记录源分支与源提交。向用户报告 dev 提交、主目录状态与清理结果、dev 上新增了什么以及怎样体验。提交完成不等于人工验收通过。
+5. 集成提交已记录源分支与源提交。向用户报告 dev 提交与清理结果、dev 上新增了什么以及怎样体验。主目录不会自动更新，用户切换后才能体验。提交完成不等于人工验收通过。
 
 ```sh
 # 在任务 worktree 中，提交完成后执行。
 git rebase dev
 git status --short
 
-# 在主目录（dev）中执行。
-node scripts/integrate-branch.mjs feat/example --title "feat(example): add the example view" --body-file <验证摘要文件>
+# 在主目录中执行，脚本取自源 worktree：主目录的脚本停在验收提交上。
+node "../AI Stduio.worktrees/example/scripts/integrate-branch.mjs" feat/example --title "feat(example): add the example view" --body-file <验证摘要文件>
 git push origin dev
 git push origin --delete feat/example   # 仅当推送过任务分支
 ```
@@ -116,21 +119,14 @@ git push origin --delete feat/example   # 仅当推送过任务分支
 - 先完成的分支先集成。dev 前进后，其他分支要重新 rebase 才能集成。
 - 任务分支集成后即删除，不再复用。反馈修复从最新的 dev 新建分支。
 
-使用 PR 时，源分支同样先在自己的 worktree 提交并推送。PR 用 **Squash and merge** 合入 dev，PR 标题即 squash 提交的标题；禁止使用 **Create a merge commit**。合并后，主目录用 `git pull --ff-only origin dev` 同步，再按[清理](#清理)手动删除 worktree 与分支；GitHub 生成的 squash 提交没有 `Source-Commit`，以 `gh pr view <任务分支> --json state` 显示 `MERGED` 为准。
+使用 PR 时，源分支同样先在自己的 worktree 提交并推送。PR 用 **Squash and merge** 合入 dev，PR 标题即 squash 提交的标题；禁止使用 **Create a merge commit**。合并后用 `git fetch origin dev:dev` 同步本地 dev，再按[清理](#清理)手动删除 worktree 与分支；GitHub 生成的 squash 提交没有 `Source-Commit`，以 `gh pr view <任务分支> --json state` 显示 `MERGED` 为准。
 
 ### 人工验收与推进 main
 
-用户验收的是 dev 上的一个具体提交。开始体验前冻结 dev，以免新的集成改变正在运行的应用：
-
-```sh
-node scripts/integrate-branch.mjs --freeze    # 记录当前 dev 提交，暂停集成
-node scripts/integrate-branch.mjs --unfreeze  # 体验结束后解除冻结，并输出该提交
-```
-
-冻结期间，集成命令拒绝执行。此时也不向 dev 直接提交或合并 PR，原本要直接改 dev 的小改动也放到任务 worktree，不在主目录留下未提交的改动。其他任务照常在自己的 worktree 中开发，解除冻结后再集成。
+用户验收的是主目录所在的那个 dev 提交（`git rev-parse HEAD`）。集成照常进行，只移动 dev，不改变主目录里正在运行的应用，所以验收期间不需要暂停集成。
 
 - 通过：按 [Task Protocol](tasks/README.md#人工功能验收) 记录接受范围与提交，再把 main 快进到该提交并推送。
-- 不通过：从 dev 新建修复分支，按上一节集成，然后重新冻结并体验。短期内修不好时，在 dev 上 `git revert` 对应的提交，验证剩余的组合后再推进。以后重新集成时，修复分支先 `git revert` 这个撤回提交，恢复原改动，再加修复。
+- 不通过：从 dev 新建修复分支，按上一节集成，然后在主目录切换到新的 dev 再体验。短期内修不好时，在任务分支上 `git revert` 对应的提交并集成，验证剩余的组合后再推进。以后重新集成时，修复分支先 `git revert` 这个撤回提交，恢复原改动，再加修复。
 - main 只能拿到 dev 从旧到新连续的一段。要推进后面的提交，前面未通过的提交须先修复或撤回。dev 领先 main 的提交越少，这类等待就越少。
 
 推进 main 不需要切换主目录：
@@ -145,7 +141,7 @@ git fetch origin main:main
 
 ### 清理
 
-集成命令快进 dev 后会删除源 worktree 与本地任务分支。squash 提交已包含分支末端的全部内容，修复和回退都针对 dev 上的提交，所以不保留旧分支。删除失败时（例如 worktree 被锁定，或集成期间分支又有新提交），命令仍保留集成结果并输出原因，按下列命令手动清理；worktree 被锁定时，确认无人使用后先 `git worktree unlock`。squash 后任务分支不是 dev 的祖先，`git branch -d` 会拒绝删除；先确认分支末端已集成到 dev，再用 `git branch -D` 删除：
+集成命令更新 dev 后会删除源 worktree 与本地任务分支。squash 提交已包含分支末端的全部内容，修复和回退都针对 dev 上的提交，所以不保留旧分支。删除失败时（例如 worktree 被锁定，或集成期间分支又有新提交），命令仍保留集成结果并输出原因，按下列命令手动清理；worktree 被锁定时，确认无人使用后先 `git worktree unlock`。squash 后任务分支不是 dev 的祖先，`git branch -d` 会拒绝删除；先确认分支末端已集成到 dev，再用 `git branch -D` 删除：
 
 ```sh
 git log -1 --oneline --grep "Source-Commit: $(git rev-parse feat/example)" dev

@@ -27,27 +27,18 @@
 
 ## 任务分支集成
 
-分支流程由[贡献指南 §5](../CONTRIBUTING.md#5-合并与收尾)负责。源 worktree 提交完成后，在主目录 dev 执行：
+分支流程由[贡献指南 §5](../CONTRIBUTING.md#5-合并与收尾)负责。源 worktree 提交完成后，在主目录运行源 worktree 里的脚本。主目录停在验收提交上，自带的脚本可能是旧版本；源 worktree 已 rebase 到最新 dev：
 
 ```sh
-node scripts/integrate-branch.mjs feat/example --title "feat(example): add the example view" --body-file <path>
+node "../AI Stduio.worktrees/example/scripts/integrate-branch.mjs" feat/example --title "feat(example): add the example view" --body-file <path>
 git push origin dev
 ```
 
-命令先做以下检查：主目录在 dev 且 dev 未冻结；源分支有独立的 worktree；两边都没有暂存或未暂存的改动及未跟踪文件；源提交包含当前 dev 且有新增提交。检查通过后，命令用 `git commit-tree` 生成一个提交，文件树取自源提交，父提交是当前 dev，然后快进 dev。提交信息依次是 `--title`、`--body-file` 的内容（可省略）、原提交列表，最后是 trailer 段。`--body-file` 末段的 trailer（例如 `Co-Authored-By`）会移到这一段，后接 `Source-Branch` 与 `Source-Commit`，因为 Git 只把最后一段识别为 trailer。命令先用 commitlint 检查这份提交信息。文件树与源分支末端相同，所以命令不运行 pre-commit。快进 dev 后，命令删除源 worktree（`git worktree remove`，不加 `--force`），再删除本地任务分支；分支只在仍指向源提交时删除。删除失败时（例如 worktree 被锁定），dev 保持已集成，命令仍以零状态退出，在 stderr 输出原因，按[贡献指南的清理](../CONTRIBUTING.md#清理)手动处理。
+命令先做以下检查：没有任何目录检出 dev 分支；源分支有独立的 worktree，且没有暂存或未暂存的改动及未跟踪文件；源提交包含当前 dev 且有新增提交。主目录的状态不在检查之列。检查通过后，命令用 `git commit-tree` 生成一个提交，文件树取自源提交，父提交是当前 dev，再用 `git update-ref` 把 dev 移到这个提交，不改动任何目录的文件。更新时核对 dev 仍是检查时的提交，其间被别的集成移动过就拒绝，需要重新 rebase。提交信息依次是 `--title`、`--body-file` 的内容（可省略）、原提交列表，最后是 trailer 段。`--body-file` 末段的 trailer（例如 `Co-Authored-By`）会移到这一段，后接 `Source-Branch` 与 `Source-Commit`，因为 Git 只把最后一段识别为 trailer。命令先用 commitlint 检查这份提交信息。文件树与源分支末端相同，所以命令不运行 pre-commit。更新 dev 后，命令删除源 worktree（`git worktree remove`，不加 `--force`），再删除本地任务分支；分支只在仍指向源提交时删除。删除失败时（例如 worktree 被锁定），dev 保持已集成，命令仍以零状态退出，在 stderr 输出原因，按[贡献指南的清理](../CONTRIBUTING.md#清理)手动处理。
 
-检查或提交失败时命令返回非零状态，不修改 dev 或源 worktree。命令不暂存、复制、rebase 或推送；分支落后时，先回源 worktree 同步并解决冲突。忽略的构建产物和依赖不计入工作区的脏状态，删除 worktree 时一并删除。
+检查或提交失败时命令返回非零状态，不修改 dev 或源 worktree。命令不暂存、复制、rebase 或推送；分支落后时，先回源 worktree 同步并解决冲突。忽略的构建产物和依赖不计入工作区的脏状态，删除 worktree 时一并删除。命令的 Git 操作都在 Git 公共目录中执行，所以从源 worktree 运行也能删除它，但运行者的 shell 会停在已删除的目录里，因此流程在主目录运行。脚本在删除源 worktree 前已加载完毕并完成 commitlint 检查。
 
-人工验收期间冻结 dev：
-
-```sh
-node scripts/integrate-branch.mjs --freeze    # 要求主目录在 dev 且干净，记录当前提交
-node scripts/integrate-branch.mjs --unfreeze  # 删除记录并输出该提交
-```
-
-冻结记录保存在 Git 公共目录的 `ai-studio-acceptance` 文件中（主目录下为 `.git/ai-studio-acceptance`）。它对本机所有 worktree 生效，不随推送同步。
-
-脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、冻结期间集成这几种拒绝场景，并核对正常 squash 后的文件树、父提交、提交信息、trailer 位置与 CLI 参数，以及集成后删除 worktree 与分支（含被忽略的文件），删除失败时保留集成结果并以零状态退出。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
+脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、dev 被检出、检查后 dev 被其他集成移动这几种拒绝场景，并核对正常 squash 后的文件树、父提交、提交信息、trailer 位置与 CLI 参数，主目录的 HEAD 与本地改动不受影响，以及集成后删除 worktree 与分支（含被忽略的文件、从源 worktree 运行的情况），删除失败时保留集成结果并以零状态退出。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
 
 ## 测试分层
 
