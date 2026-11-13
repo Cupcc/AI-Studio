@@ -31,8 +31,6 @@ export function ciScope(eventName, event, cwd) {
       base = git(['merge-base', event.pull_request.base.sha, 'HEAD'], cwd).trim()
     } else if (eventName === 'push' && /^[a-f0-9]{40}$/.test(event.before) && !/^0+$/.test(event.before)) {
       base = git(['rev-parse', '--verify', `${event.before}^{commit}`], cwd).trim()
-    } else if (eventName === 'push' && /^0{40}$/.test(event.before) && event.ref === 'refs/heads/dev') {
-      base = git(['merge-base', 'refs/remotes/origin/main', 'HEAD'], cwd).trim()
     } else return { app: false, base: '', error: 'Missing comparison baseline; restore history or explicitly run manual CI.' }
     const files = changedPaths(base, 'HEAD', cwd)
     return { app: files.length > 0 && !docsOnly(files), base, mode: 'affected' }

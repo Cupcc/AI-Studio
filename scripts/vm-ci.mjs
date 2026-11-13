@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
 import { affectedPlan, inventory } from './check-affected.mjs'
 import { changedPaths, git } from './check-paths.mjs'
-import { devRed, e2eSummary } from './remote-ci.mjs'
+import { e2eSummary } from './remote-ci.mjs'
 
 const usage = 'Usage: node scripts/vm-ci.mjs [--scope affected|e2e|package|full] [--spec <file>]... [--grep <pattern>] [--parallel] [--base <commit>] [--keep]\n' +
   '       node scripts/vm-ci.mjs --setup'
@@ -237,7 +237,7 @@ export function defaultDeps() {
     // Long-running tart processes (run / exec / clone from a registry); output goes to a log or is parsed by the caller.
     spawnTart: (args, output) => spawn(tart, args, { stdio: ['ignore', output ?? 'pipe', output ?? 'pipe'] }),
     run: (command, args, options) => spawnSync(command, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, ...options }),
-    sleep, alive: pidAlive, now: Date.now, log: console.log, devRed
+    sleep, alive: pidAlive, now: Date.now, log: console.log
   }
 }
 
@@ -416,8 +416,6 @@ export async function vmCi({ scope = 'affected', specs = [], grep = '', parallel
     if (failed && existsSync(failed.log)) deps.log(readFileSync(failed.log, 'utf8').trimEnd().split('\n').slice(-60).join('\n'))
     if (summary.length) deps.log(summary.join('\n'))
   }
-  const red = failed && !cancelled && deps.devRed?.(branch, cwd)
-  if (red) deps.log(red)
   deps.log(`${conclusion}: vm-ci ${id}${plan.vms.length ? '' : ' (no VM work)'}\nEvidence: ${path.relative(cwd, evidence)}`)
   return { id, conclusion, dir: evidence, codes }
 }

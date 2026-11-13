@@ -210,7 +210,7 @@ test('refuses when another integration moves dev after the checks', () => {
 test('requires a passing affected or full run that covers the source changes', () => {
   const f = fixture(), head = feature(f)
   const attempt = runs => () => integrateBranch({ branch: 'feat/example', title, cwd: f.main, runs })
-  expect(attempt(() => [])).toThrow('No passing affected or full CI run covers the changes of feat/example')
+  expect(attempt(() => [])).toThrow('No passing affected or full CI run covers feat/example')
   expect(attempt(passing(f, { conclusion: 'failure' }))).toThrow('node scripts/vm-ci.mjs')
   // A manual e2e run checks only the listed specs; a run of other changes or another branch says nothing about these.
   expect(attempt(passing(f, { scope: 'e2e' }))).toThrow('No passing')
@@ -222,12 +222,17 @@ test('requires a passing affected or full run that covers the source changes', (
   expect(git(['log', '-1', '--format=%(trailers:key=Source-Commit,valueonly)', 'dev'], f.main).trim()).toBe(head)
 })
 
-test('accepts a run from before a rebase when the branch changes are the same', () => {
+test('rejects a run from before a rebase onto a newer dev, which never tested the combination', () => {
   const f = fixture(), tested = feature(f)
   advanceDev(f)
   git(['rebase', '-q', 'dev'], f.source)
-  integrateBranch({ branch: 'feat/example', title, cwd: f.main, runs: passing(f, { headSha: tested }) })
-  expect(git(['log', '-1', '--format=%(trailers:key=CI-Run,valueonly)', 'dev'], f.main).trim()).toBe(`${runUrl} (before rebase)`)
+  expect(() => integrateBranch({ branch: 'feat/example', title, cwd: f.main, runs: passing(f, { headSha: tested }) }))
+    .toThrow('a run from before a rebase onto a newer dev does not count')
+  // A reworded commit tests the same tree.
+  const rebased = git(['rev-parse', 'HEAD'], f.source).trim()
+  git(['commit', '-q', '--amend', '-m', 'feat: reworded'], f.source)
+  integrateBranch({ branch: 'feat/example', title, cwd: f.main, runs: passing(f, { headSha: rebased }) })
+  expect(git(['log', '-1', '--format=%(trailers:key=CI-Run,valueonly)', 'dev'], f.main).trim()).toBe(runUrl)
 })
 
 test('rejects a run from before a rebase when the branch changed afterwards', () => {

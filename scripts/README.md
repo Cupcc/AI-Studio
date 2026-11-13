@@ -37,13 +37,13 @@ git push origin dev
 
 命令先做以下检查：没有任何目录检出 dev 分支；源分支有独立的 worktree，且没有暂存或未暂存的改动及未跟踪文件；源提交包含当前 dev 且有新增提交；CI 已通过（见下段）。主目录的状态不在检查之列。检查通过后，命令用 `git commit-tree` 生成一个提交，文件树取自源提交，父提交是当前 dev，再用 `git update-ref` 把 dev 移到这个提交，不改动任何目录的文件。更新时核对 dev 仍是检查时的提交，其间被别的集成移动过就拒绝，需要重新 rebase。提交信息依次是 `--title`、`--body-file` 的内容（可省略）、原提交列表，最后是 trailer 段。`--body-file` 末段的 trailer（例如 `Co-Authored-By`）会移到这一段，后接 `Source-Branch`、`Source-Commit` 与 `CI-Run`，因为 Git 只把最后一段识别为 trailer。命令先用 commitlint 检查这份提交信息。文件树与源分支末端相同，所以命令不运行 pre-commit。更新 dev 后，命令删除源 worktree（`git worktree remove`，不加 `--force`），再删除本地任务分支；分支只在仍指向源提交时删除。删除失败时（例如 worktree 被锁定），dev 保持已集成，命令仍以零状态退出，在 stderr 输出原因，按[贡献指南的清理](../CONTRIBUTING.md#清理)手动处理。
 
-dev 推送后的 CI 与[选择器](#测试分层)使用同一范围，所以集成前源分支须已通过这些检查。命令用选择器计算 dev 到源提交的检查范围；范围非空时，要求 [`vm-ci.mjs`](#本机-vm-ci) 或 [`remote-ci.mjs`](#远端-e2e) 记录过该分支的一次通过运行：affected 或 full，改了打包输入时另需 package 或 full。运行的提交须是源提交；rebase 前的运行也算，前提是分支自身的改动（`git patch-id`）完全相同，与 dev 新提交的组合由 dev 推送后的 CI 检查。只改文档、设计素材或任务证据等选择器不选任何检查的改动不需要运行。没有合格运行时命令拒绝集成，并给出 `vm-ci.mjs` 命令；CI 本身无法判断时（例如本机虚拟机与 GitHub Actions 都不可用）传 `--skip-ci "<原因>"`。所用运行的链接或跳过原因记为 `CI-Run` trailer。
+GitHub CI 不检查 dev，所以集成前源分支须已通过[选择器](#测试分层)选中的检查。命令用选择器计算 dev 到源提交的检查范围；范围非空时，要求 [`vm-ci.mjs`](#本机-vm-ci) 或 [`remote-ci.mjs`](#远端-e2e) 记录过该分支的一次通过运行：affected 或 full，改了打包输入时另需 package 或 full。运行检查的文件树须与源提交相同，也就是分支 rebase 到当前 dev 之后的结果，这样分支与 dev 新提交的组合在集成前就检查过。只改提交信息的提交仍算；rebase 到更新的 dev 之前的运行不算，dev 移动后 rebase 并重跑。只改文档、设计素材或任务证据等选择器不选任何检查的改动不需要运行。没有合格运行时命令拒绝集成，并给出 `vm-ci.mjs` 命令；CI 本身无法判断时（例如本机虚拟机与 GitHub Actions 都不可用）传 `--skip-ci "<原因>"`。所用运行的链接或跳过原因记为 `CI-Run` trailer。
 
 检查或提交失败时命令返回非零状态，不修改 dev 或源 worktree。命令不暂存、复制、rebase 或推送；分支落后时，先回源 worktree 同步并解决冲突。忽略的构建产物和依赖不计入工作区的脏状态，删除 worktree 时一并删除。命令的 Git 操作都在 Git 公共目录中执行，所以从源 worktree 运行也能删除它，但运行者的 shell 会停在已删除的目录里，因此流程在主目录运行。脚本在删除源 worktree 前已加载完毕并完成 commitlint 检查。
 
 标题类型为 `feat`、`fix` 或 `perf` 的交付，`--body-file` 中须至少有一行以 `体验：`（全角冒号）开头。冒号后写怎样在运行的应用里试到这项改动，例如 `体验：打开设置页，点击测试连接，看到通过提示`。步骤多时写多行，每行都以 `体验：` 开头。没有用户可见变化时写 `体验：无`，例如 `fix(ci)`。缺少这一行时命令拒绝集成，不修改 dev，并在错误信息中给出两种写法。其他类型不要求这一行，写了同样有效。这些行留在提交正文中，位于原提交列表之前，由[人工验收清单](#人工验收清单)读取。
 
-脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、`feat`／`fix`／`perf` 交付缺少体验行、dev 被检出、检查后 dev 被其他集成移动、缺少覆盖本次改动的 CI 运行（失败、e2e 模式、其他提交或分支、rebase 后改动不同、打包输入缺 package 运行）这几种拒绝场景，并核对 rebase 前改动相同的运行、无需运行的文档改动、`--skip-ci` 的记录、`体验：无` 与其他类型不写体验行时照常集成、正常 squash 后的文件树、父提交、提交信息、trailer 位置与 CLI 参数，主目录的 HEAD 与本地改动不受影响，以及集成后删除 worktree 与分支（含被忽略的文件、从源 worktree 运行的情况），删除失败时保留集成结果并以零状态退出。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
+脚本回归使用临时 Git 仓库。它覆盖未提交文件、无新增提交、分叉、缺少或不合规的标题、`feat`／`fix`／`perf` 交付缺少体验行、dev 被检出、检查后 dev 被其他集成移动、缺少覆盖本次改动的 CI 运行（失败、e2e 模式、其他提交或分支、rebase 到更新的 dev 之前、rebase 后改动不同、打包输入缺 package 运行）这几种拒绝场景，并核对只改提交信息、文件树相同的运行、无需运行的文档改动、`--skip-ci` 的记录、`体验：无` 与其他类型不写体验行时照常集成、正常 squash 后的文件树、父提交、提交信息、trailer 位置与 CLI 参数，主目录的 HEAD 与本地改动不受影响，以及集成后删除 worktree 与分支（含被忽略的文件、从源 worktree 运行的情况），删除失败时保留集成结果并以零状态退出。它归入脚本检查，不触发桌面构建、界面测试或模型请求。
 
 ## 人工验收清单
 
@@ -74,7 +74,7 @@ node scripts/acceptance.mjs --base <ref> --head <ref>
 | 开发迭代 | 先跑受影响文件／模块的测试；共享 IPC、数据库、Adapter 等跨模块变化扩大回归范围 |
 | 纯文档提交 | 暂存快照的 Markdown 本地链接回归检查；人工或 AI 补充表格／标题预览及负责索引要求的一致性检查 |
 | 代码提交 | 文档回归＋受影响 TypeScript 项目类型检查＋相关单测；本地不自动运行 E2E |
-| dev / main push 及面向它们的 PR | 文档回归＋同一选择器的受影响检查＋明确选中的 E2E spec；不自动打包 |
+| main push 及面向 main 的 PR | 文档回归＋同一选择器的受影响检查＋明确选中的 E2E spec；不自动打包 |
 | 集成到 dev | 源分支须有通过的 CI affected／full 运行，打包输入另需 package／full，见[任务分支集成](#任务分支集成)；选择器不选任何检查的改动免除 |
 | 空变更、设计素材、任务证据 | 不触发应用测试；文档链接检查仍适用 |
 | 未映射路径／全局配置／缺失比较基线 | 阻断并提示补充影响映射或恢复比较基线；不自动退回全量 |
@@ -243,7 +243,7 @@ node scripts/vm-ci.mjs --scope full --parallel
 - macOS 每台主机最多同时运行两台 macOS 虚拟机。所有 worktree 的运行共用 Git 公共目录 `ai-studio-vm-ci/slots/` 下的两个名额，名额不够时排队并输出占用者；占用进程已退出的名额自动回收。运行结束、失败或被中断（Ctrl-C、SIGTERM，记为 `cancelled`）时都停止并删除克隆的虚拟机与临时引用；进程被强行结束而遗留的 `vmci-*` 虚拟机在下次运行前删除。`--keep` 保留克隆用于排查。
 - 虚拟机中的命令在图形会话中运行，Electron 窗口正常显示。命令设置 `CI=true`，E2E 的重试、trace 与 JSON 报告同 [GitHub Actions CI](#github-actions-ci)。打包冒烟前安装被测提交 `ci.yml` 固定版本的 Codex 与 Claude Code，只执行发现与 `--version`，不发送模型请求。
 - 每步输出一行（例如 `[a] 06-e2e ok 295s`），第一个失败步骤之后的步骤不再执行。证据存到 `.runtime/vm-ci/<id>/`：本机步骤日志 `host-*.log`，以及每台虚拟机一个目录（`a/`、`b/`），其中有按执行顺序编号的步骤日志、每个 E2E 步骤的报告、截图与 trace（`<步骤>/desktop-e2e/`）和打包冒烟结果。运行记录（分支、提交、模式、结论，`runner: vm`）写入 Git 公共目录的 `ai-studio-ci/<id>.json`，供[集成命令](#任务分支集成)核对，集成提交的 `CI-Run` 记为 `vm-ci <id>`。证据在 worktree 中，集成删除 worktree 时一并删除，运行记录保留。通过时退出码为 0，否则为 1。
-- 失败时，E2E 失败按 JSON 报告列出失败用例、错误摘要与 trace 路径（用 `pnpm --filter @ai-studio/desktop exec playwright show-trace <zip>` 查看）；其他失败打印该步日志的最后 60 行。dev 最新的 GitHub push 运行也失败时另行提示，先对照 dev 的失败，不重复排查。
+- 失败时，E2E 失败按 JSON 报告列出失败用例、错误摘要与 trace 路径（用 `pnpm --filter @ai-studio/desktop exec playwright show-trace <zip>` 查看）；其他失败打印该步日志的最后 60 行。
 - 通过的运行也列出 flaky 用例。它们不阻断集成，另开修复分支或记入任务的后续项处理，不在无关分支里顺手修。
 - 虚拟机启动到可以执行命令约 20～35 秒；单台全量（含打包）约 7 分钟。AI 在后台运行命令，结束后读取结果。
 
@@ -251,8 +251,8 @@ node scripts/vm-ci.mjs --scope full --parallel
 
 配置：[ci.yml](../.github/workflows/ci.yml)，触发条件、runner、Node 版本、CLI 版本、超时、权限与产物保留期均以该文件为准；任务：[T20261010-github-ci](../.agents/archive/tasks/T20261010-github-ci/task.md)。
 
-- 仅 dev / main push、面向 dev / main 的 PR 与手动触发运行；任务分支 push 不触发 CI。任务分支的检查与集成门禁默认用[本机 VM CI](#本机-vm-ci)，本机不可用时手动触发（见[远端 E2E](#远端-e2e)）。main 合入后的验证针对新基线，仍保留。新的 push 或 PR 运行会取消同一分支或 PR 上的旧运行；手动运行各用独立的并发组，互不取消。
-- Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。首次创建 dev 的 push 以 origin/main 与当前提交的共同祖先为基线；其他无效／缺失基线阻断，空 diff 跳过应用。手动 affected 模式以 origin/dev 与 HEAD 的 merge-base 为基线；手动 full 与 e2e 模式的文档以 HEAD 为基线，不声称历史审计通过。
+- 仅 main push、面向 main 的 PR 与手动触发运行；dev 与任务分支 push 不触发 CI。每次集成到 dev 前，集成命令已要求本机 VM CI 检查过分支在当前 dev 之上的结果（见[任务分支集成](#任务分支集成)）；main 快进时，GitHub 在干净的 runner 上对推进的整段提交再独立检查一次。本机不可用时手动触发（见[远端 E2E](#远端-e2e)）。新的 push 或 PR 运行会取消同一分支或 PR 上的旧运行；手动运行各用独立的并发组，互不取消。
+- Ubuntu scope job 取完整历史，按整个 push 的 before→HEAD 或 PR 的 merge-base→合并快照生成影响计划并检查文档。只安装根工具依赖、禁用安装脚本，不下载 Electron；不再每次无条件运行脚本单测。无效／缺失基线阻断，空 diff 跳过应用。手动 affected 模式以 origin/dev 与 HEAD 的 merge-base 为基线；手动 full 与 e2e 模式的文档以 HEAD 为基线，不声称历史审计通过。
 - macOS arm64 job 冻结 lockfile 安装，push、PR 与手动 affected 模式执行 `check-affected.mjs --ci`：受影响类型检查、相关单测，以及选中的 E2E spec。仅有工作流脚本改动时只执行脚本测试；无 E2E 时不构建桌面或配置显示器。需要 E2E 时构建桌面一次，无自动打包。
 - 手动 e2e 模式构建桌面一次，只运行指定的 spec，不做类型检查和单测。仅手动 full 模式（界面手动触发的默认值）执行 `check:code` 与完整 E2E；`package:built` 和 `smoke:packaged` 只在手动 full 与 package 模式执行，package 模式不运行 E2E，也不配置显示器。构建产物只在本 job 的同一基线复用，不跨运行缓存输出。显式根命令保留原语义。
 - CI 设置 `HUSKY=0` 显式运行检查；应用 job 保留依赖安装脚本以安装 Electron 与修复 PTY helper。
@@ -285,7 +285,7 @@ node scripts/remote-ci.mjs --scope full
 - 命令先检查当前在分支上、工作区没有改动或未跟踪文件、origin 上的同名分支等于 HEAD。不满足时退出并给出推送命令；命令本身不推送。
 - 运行使用分支上的 `ci.yml`，分支须包含上述模式。本功能之前创建的分支先 rebase dev。
 - 命令用 `gh workflow run` 触发，每 30 秒查询一次，job 状态变化时输出一行；查询失败时下一轮重试，连续 3 次失败才退出。结束后把上传的证据下载到 `.runtime/remote-ci/<run-id>/`，并把这次运行（分支、提交、模式、结论）记到 Git 公共目录的 `ai-studio-ci/`，供[集成命令](#任务分支集成)核对。通过时退出码为 0，否则为 1。
-- 失败时把完整的失败日志存为同目录的 `failed.log`。失败与 flaky 用例的输出、dev 失败提示和处理同本机 VM CI，trace 路径指向下载的证据。
+- 失败时把完整的失败日志存为同目录的 `failed.log`。失败与 flaky 用例的输出和处理同本机 VM CI，trace 路径指向下载的证据。
 - 只跑脚本测试约 3 分钟，构建后跑少量 spec 约 3～5 分钟，全量 10 分钟以上，排队时间另计。AI 在后台运行命令，结束后读取结果。
 
 ## GitHub Release 发布准备

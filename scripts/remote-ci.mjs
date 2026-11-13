@@ -53,20 +53,6 @@ export function e2eSummary(dir, cwd = process.cwd()) {
   }
 }
 
-// When dev's own push run is red, the same failure on a branch is most likely not the branch's.
-export function devRed(branch, cwd) {
-  if (branch === 'dev') return ''
-  try {
-    const [last] = JSON.parse(gh(['run', 'list', '--workflow', 'ci.yml', '--branch', 'dev', '--event', 'push', '--limit', '1',
-      '--json', 'conclusion,headSha,url'], cwd))
-    if (last?.conclusion === 'failure') {
-      return `dev is red as well: its latest push run failed at ${last.headSha.slice(0, 12)} (${last.url}). ` +
-        'Compare its failures before debugging this branch; dev is fixed first (CONTRIBUTING.md §4).'
-    }
-  } catch { /* the hint is optional */ }
-  return ''
-}
-
 // The runner checks out the pushed commit, so local changes and unpushed commits would make the result misleading.
 export function pushedHead(cwd = process.cwd()) {
   const branch = git(['branch', '--show-current'], cwd).trim()
@@ -127,8 +113,6 @@ export async function remoteCi({ scope = 'affected', specs = [], grep = '', cwd 
     log(e2e.failed.length
       ? [...e2e.lines, `Full log: ${path.relative(cwd, path.join(dir, 'failed.log'))}`].join('\n')
       : failed.trimEnd().split('\n').slice(-60).join('\n'))
-    const red = devRed(branch, cwd)
-    if (red) log(red)
   } else if (e2e.lines.length) log(e2e.lines.join('\n'))
   log(`${run.conclusion}: ${run.url}\nEvidence: ${path.relative(cwd, dir)}`)
   return { id, url: run.url, conclusion: run.conclusion, dir }

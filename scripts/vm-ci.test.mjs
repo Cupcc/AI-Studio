@@ -267,14 +267,12 @@ test('a failing E2E step names the failed tests from the report, with traces map
     attachments: [{ name: 'trace', path: '/Users/admin/ai-studio/.runtime/desktop-e2e/test-results/t/trace.zip' }]
   }] }] }] }] }
   const { logs, deps } = fakeDeps({ failStep: 'e2e', report, vms: [{ Name: IMAGE, Running: false }] })
-  deps.devRed = branch => `dev is red as well (${branch})`
   const result = await vmCi({ scope: 'e2e', specs: ['a.spec.ts'], cwd: work, deps })
   expect(result.conclusion).toBe('failure')
   const summary = logs.find(line => line.startsWith('Failed E2E tests (1):'))
   expect(summary).toContain('a.spec.ts:7 › opens\n    Timed out waiting')
   expect(summary).toContain(`trace: .runtime/vm-ci/${result.id}/a/e2e/desktop-e2e/test-results/t/trace.zip`)
   expect(summary).toContain(`Full log: .runtime/vm-ci/${result.id}/a/05-e2e.log`)
-  expect(logs).toContain('dev is red as well (feat/example)')
 })
 
 test('an interrupted run is recorded as cancelled and still removes the VM and its ref', async () => {

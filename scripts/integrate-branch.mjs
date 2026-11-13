@@ -21,31 +21,23 @@ function lintMessage(message) {
   }
 }
 
-function patchId(base, commit, cwd) {
-  const diff = git(['diff', '--binary', base, commit], cwd)
-  return diff ? execFileSync('git', ['patch-id', '--stable'], { cwd, input: diff, encoding: 'utf8' }).split(' ')[0] : ''
-}
-
-// The dev push runs the same selector, so the branch must already have passed the checks it selects, in a recorded run
-// (vm-ci.mjs, or remote-ci.mjs as the fallback, writes the records). A run from before a rebase still counts when the branch's own changes are
-// identical; the dev push run covers the combination.
+// The branch must already have passed the checks the selector picks, in a recorded run (vm-ci.mjs, or remote-ci.mjs as
+// the fallback, writes the records). GitHub no longer checks dev pushes, so the run must have tested the very tree that
+// lands on dev: the branch on top of the current dev. A reworded commit with the same tree counts; a run from before a
+// rebase onto a newer dev does not.
 export function verifyCi({ branch, head, sourceCommit, source, repo, runs = ciRecords }) {
   const plan = affectedPlan(changedPaths(head, sourceCommit, repo), inventory(source), { base: head, head: sourceCommit, cwd: source })
   const needs = []
   if (plan.commands.length || plan.e2e.length || plan.unknown.length || plan.missingTests.length) needs.push(['affected', 'full'])
   if (plan.packaging.length) needs.push(['package', 'full'])
   if (!needs.length) return []
-  const own = patchId(head, sourceCommit, repo)
-  const same = sha => {
-    if (sha === sourceCommit) return true
-    try { return patchId(git(['merge-base', sha, head], repo).trim(), sha, repo) === own }
-    catch { return false }
-  }
+  const tree = sha => { try { return git(['rev-parse', '--verify', '--quiet', `${sha}^{tree}`], repo).trim() } catch { return '' } }
+  const target = tree(sourceCommit)
   const passed = runs(repo).filter(run => run.branch === branch && run.conclusion === 'success')
   return needs.map(scopes => {
-    const run = passed.find(item => scopes.includes(item.scope) && same(item.headSha))
-    if (run) return run.headSha === sourceCommit ? run.url : `${run.url} (before rebase)`
-    throw new Error(`No passing ${scopes.join(' or ')} CI run covers the changes of ${branch} at ${sourceCommit.slice(0, 12)}. ` +
+    const run = passed.find(item => scopes.includes(item.scope) && tree(item.headSha) === target)
+    if (run) return run.url
+    throw new Error(`No passing ${scopes.join(' or ')} CI run covers ${branch} at ${sourceCommit.slice(0, 12)}; a run from before a rebase onto a newer dev does not count. ` +
       `Run \`node scripts/vm-ci.mjs${scopes.includes('package') ? ' --scope package' : ''}\` in its worktree, then integrate. ` +
       'If CI cannot judge this change, pass --skip-ci "<reason>".')
   })

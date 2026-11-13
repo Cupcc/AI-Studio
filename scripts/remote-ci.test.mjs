@@ -26,7 +26,6 @@ case "$1 $2" in
       cp "$FAKE_GH_REPORT" "$5/desktop-test-evidence-1/desktop-e2e/report.json"
       echo zip > "$5/desktop-test-evidence-1/desktop-e2e/test-results/drag/trace-1.zip"
     fi ;;
-  "run list") printf '%s\\n' "\${FAKE_GH_DEV:-[]}" ;;
   "run view")
     if [ "$4" = "--log-failed" ]; then echo "macOS arm64 checks  1 failed"; exit 0; fi
     if [ -n "$FAKE_GH_FLAKY" ] && [ ! -f "$FAKE_GH_DIR/flaked" ]; then touch "$FAKE_GH_DIR/flaked"; echo "HTTP 502" >&2; exit 1; fi
@@ -125,11 +124,10 @@ function report(dir) {
   return file
 }
 
-test('names failed and flaky E2E tests with local trace paths and says when dev is red too', async () => {
+test('names failed and flaky E2E tests with local trace paths', async () => {
   const f = fixture('failure')
   f.push()
   vi.stubEnv('FAKE_GH_REPORT', report(path.dirname(f.work)))
-  vi.stubEnv('FAKE_GH_DEV', JSON.stringify([{ conclusion: 'failure', headSha: 'abcdef1234567890', url: 'https://github.com/owner/repo/actions/runs/41' }]))
   const lines = []
   const result = await remoteCi({ cwd: f.work, pollMs: 0, log: line => lines.push(line) })
   const output = lines.join('\n')
@@ -138,7 +136,6 @@ test('names failed and flaky E2E tests with local trace paths and says when dev 
   expect(output).toContain('Flaky E2E tests, passed on retry (1); fix them separately:\nworkbench.spec.ts:30 › renames a row')
   expect(output).not.toContain('adds a row')
   expect(output).toContain(`Full log: ${path.relative(f.work, path.join(result.dir, 'failed.log'))}`)
-  expect(output).toContain('dev is red as well: its latest push run failed at abcdef123456')
 })
 
 test('lists flaky tests after a passing run', async () => {
@@ -148,7 +145,6 @@ test('lists flaky tests after a passing run', async () => {
   const lines = []
   await remoteCi({ cwd: f.work, pollMs: 0, log: line => lines.push(line) })
   expect(lines.join('\n')).toContain('Flaky E2E tests, passed on retry (1)')
-  expect(f.calls().some(call => call.startsWith('run list'))).toBe(false)
 })
 
 test('runs requested specs and keeps the failed log', async () => {

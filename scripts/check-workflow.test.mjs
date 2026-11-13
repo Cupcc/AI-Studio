@@ -139,20 +139,6 @@ test('CI covers the whole push, PR comparison, manual, empty and missing baselin
   expect(ciScope('push', { before: git(['rev-parse', 'HEAD'], cwd).trim() }, cwd).app).toBe(false)
 })
 
-test('first dev push compares against main and requires a valid shared baseline', () => {
-  const { cwd, write, commit } = repo()
-  write('README.md', '# Stable')
-  const base = commit()
-  write('code.ts', 'export const integrated = true')
-  commit()
-  const event = { before: '0'.repeat(40), ref: 'refs/heads/dev' }
-  expect(ciScope('push', event, cwd).error).toContain('baseline')
-  git(['update-ref', 'refs/remotes/origin/main', base], cwd)
-  expect(ciScope('push', event, cwd)).toEqual({ app: true, base, mode: 'affected' })
-  expect(ciScope('push', { ...event, ref: 'refs/heads/feat/example' }, cwd).error).toContain('baseline')
-  expect(ciScope('push', { ref: event.ref }, cwd).error).toContain('baseline')
-})
-
 test('manual runs check a task branch against dev, requested specs or everything', () => {
   const { cwd, write, commit } = repo()
   write('README.md', '# Dev')

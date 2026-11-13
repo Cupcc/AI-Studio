@@ -1,10 +1,12 @@
 name: CI
 
+# Task branches are checked by the local VM CI before they reach dev (scripts/README.md); GitHub checks main and serves as
+# the manual fallback.
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
-    branches: [main, dev]
+    branches: [main]
   workflow_dispatch:
     inputs:
       scope:
