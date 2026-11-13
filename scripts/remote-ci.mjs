@@ -34,9 +34,16 @@ export async function remoteCi({ scope = 'affected', specs = [], grep = '', cwd 
   if (!id) throw new Error(`gh did not return the run URL:\n${dispatched}`)
   log(`Dispatched ${scope} CI for ${branch} at ${head.slice(0, 12)}: ${dispatched.trim()}`)
 
-  let run, progress = ''
+  let run, progress = '', failures = 0
   for (;;) {
-    run = JSON.parse(gh(['run', 'view', id, '--json', 'status,conclusion,headSha,url,jobs'], cwd))
+    // One failed status query must not abandon a run that is still going; give up after three in a row.
+    try { run = JSON.parse(gh(['run', 'view', id, '--json', 'status,conclusion,headSha,url,jobs'], cwd)); failures = 0 }
+    catch (error) {
+      if (++failures >= 3) throw error
+      log(`Status query failed, retrying: ${String(error.stderr || error.message).trim().split('\n')[0]}`)
+      await sleep(pollMs)
+      continue
+    }
     if (run.headSha !== head) throw new Error(`Run ${id} checked out ${run.headSha}, not ${head}; the branch moved during dispatch.`)
     const line = run.jobs.map(job => `${job.name}: ${job.conclusion || job.status}`).join('; ') || run.status
     if (line !== progress) log(progress = line)

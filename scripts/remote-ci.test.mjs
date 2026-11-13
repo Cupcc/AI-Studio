@@ -22,6 +22,7 @@ case "$1 $2" in
   "run download") mkdir -p "$5/desktop-test-evidence-1" && echo shot > "$5/desktop-test-evidence-1/shot.png" ;;
   "run view")
     if [ "$4" = "--log-failed" ]; then echo "macOS arm64 checks  1 failed"; exit 0; fi
+    if [ -n "$FAKE_GH_FLAKY" ] && [ ! -f "$FAKE_GH_DIR/flaked" ]; then touch "$FAKE_GH_DIR/flaked"; echo "HTTP 502" >&2; exit 1; fi
     if [ -f "$FAKE_GH_DIR/viewed" ]; then status=completed; conclusion="$FAKE_GH_CONCLUSION"; else status=in_progress; conclusion=""; fi
     touch "$FAKE_GH_DIR/viewed"
     printf '{"status":"%s","conclusion":"%s","headSha":"%s","url":"https://github.com/owner/repo/actions/runs/42","jobs":[{"name":"macOS arm64 checks","status":"%s","conclusion":"%s"}]}\\n' \\
@@ -81,6 +82,17 @@ test('dispatches the pushed branch, waits for completion and downloads evidence'
   expect(calls[0]).toBe('workflow run ci.yml --ref feat/example -f scope=affected')
   expect(calls.filter(call => call.startsWith('run view 42 --json'))).toHaveLength(2)
   expect(calls.at(-1)).toBe(`run download 42 --dir ${result.dir}`)
+})
+
+test('keeps waiting through a failed status query', async () => {
+  const f = fixture()
+  f.push()
+  vi.stubEnv('FAKE_GH_FLAKY', '1')
+  const lines = []
+  const result = await remoteCi({ cwd: f.work, pollMs: 0, log: line => lines.push(line) })
+  expect(result.conclusion).toBe('success')
+  expect(lines).toContain('Status query failed, retrying: HTTP 502')
+  expect(f.calls().filter(call => call.startsWith('run view 42 --json'))).toHaveLength(3)
 })
 
 test('runs requested specs and keeps the failed log', async () => {
