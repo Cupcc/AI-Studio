@@ -54,13 +54,11 @@ it('runs through SessionService, deduplicates requests, persists ownership and s
   await expect(f.host.startAgent(f.ref,request)).resolves.toMatchObject({session:{id:first.session.id}})
   expect(()=>f.host.startAgent(f.ref,{...request,text:'different'})).toThrow('不同请求')
 })
-it('refuses undeclared/disabled execution and access from another instance', async () => {
+it('refuses undeclared execution and access from another instance', async () => {
   const f=await fixture(), run=await f.host.startAgent(f.ref,request), other=await f.install('product-selection'), notes=await f.install()
   expect(()=>f.host.getAgent(other,run.request.requestId)).toThrow('不属于')
   expect(()=>f.host.stopAgent(other,run.request.requestId)).toThrow('不属于')
   expect(()=>f.host.startAgent(notes,request)).toThrow('未启用')
-  f.host.setEnabled({ref:f.ref,enabled:false})
-  expect(()=>f.host.startAgent(f.ref,{...request,requestId:'two'})).toThrow('未启用')
   await f.sessions.stop(run.session.id)
 })
 it('rolls back session creation when the durable association fails', async () => {

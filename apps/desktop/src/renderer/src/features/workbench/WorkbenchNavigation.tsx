@@ -85,11 +85,10 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
     if (event.key === 'End') next = count - 1
     if (next !== undefined) { event.preventDefault(); setFocusIndex(next); refs.current[next]?.focus() }
   }
-  function visibility(entry: WorkbenchEntry, visible: boolean) {
+  function show(entry: WorkbenchEntry) {
     void run(async () => {
-      await workbenchApi().setVisible({ ref: { projectId: project.id, viewId: entry.viewId }, visible })
-      if (visible) { setChoosing(false); await useWorkbenches.getState().loadCatalog(project.id); useProjectShell.getState().enterView(project.id, entry.viewId) }
-      else leaveRemoved(entry.viewId)
+      await workbenchApi().setVisible({ ref: { projectId: project.id, viewId: entry.viewId }, visible: true })
+      setChoosing(false); await useWorkbenches.getState().loadCatalog(project.id); useProjectShell.getState().enterView(project.id, entry.viewId)
     })
   }
   function leaveRemoved(viewId: WorkbenchId) {
@@ -118,8 +117,7 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
           onKeyDown={event => navigate(event, index)} onFocus={() => setFocusIndex(index)}
           onClick={() => useProjectShell.getState().enterView(project.id, entry.viewId)}>
           <Icon name={entry.icon} /><span>{entry.title}</span>
-          {entry.kind === 'draft' ? <small className="workbench-navigation__badge">草稿</small>
-            : !entry.enabled && <small className="workbench-navigation__badge">已停用</small>}
+          {entry.kind === 'draft' && <small className="workbench-navigation__badge">草稿</small>}
         </button>
         <button className="icon-button workbench-navigation__manage" aria-label={`管理 ${entry.kind === 'draft' ? '草稿：' : ''}${entry.title}`} data-tip="管理工作台" data-tip-align="end" aria-haspopup="menu" aria-expanded={menu?.entry.viewId === entry.viewId} disabled={pending} onClick={event => { setChoosing(false); setMenu(menu?.entry.viewId === entry.viewId ? null : { entry, anchor: event.currentTarget }) }}><Icon name="dots" size={14} /></button>
       </div>)}
@@ -132,13 +130,13 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
         <h3>预设工作台</h3>
         {PRESET_WORKBENCHES.map(preset => {
           const added = catalog?.find(entry => entry.viewId === preset.viewId), entry = added ?? removed.find(entry => entry.viewId === preset.viewId) ?? preset
-          return <button key={preset.viewId} className="workbench-choice" disabled={pending || choiceLoading || !!choiceError || !!added} aria-label={`添加 ${entry.title}`} onClick={() => visibility(entry, true)}><Icon name={preset.icon} /><span>{entry.title}</span>{added && <span className="menu-item__meta">已添加</span>}</button>
+          return <button key={preset.viewId} className="workbench-choice" disabled={pending || choiceLoading || !!choiceError || !!added} aria-label={`添加 ${entry.title}`} onClick={() => show(entry)}><Icon name={preset.icon} /><span>{entry.title}</span>{added && <span className="menu-item__meta">已添加</span>}</button>
         })}
         <button className="workbench-choice" disabled={pending} aria-label="添加 选品工作台" onClick={() => void addTemplate('product-selection')}><Icon name="preview" /><span>选品工作台</span></button>
         {removedCustom.length > 0 && <><h3>已移除的工作台</h3>{removedCustom.map(entry => <div key={entry.viewId} className="workbench-choice workbench-choice--removed">
           <Icon name={entry.icon} /><span>{entry.title}</span>
-          <button className="workbench-choice__action" disabled={pending || choiceLoading || !!choiceError} aria-label={`恢复 ${entry.title}`} onClick={() => visibility(entry, true)}>恢复</button>
-          <button className="workbench-choice__action workbench-choice__action--danger" disabled={pending || choiceLoading || !!choiceError} aria-label={`删除 ${entry.title}`} onClick={event => confirmDelete(entry, event.currentTarget)}>删除…</button>
+          <button className="workbench-choice__action" disabled={pending || choiceLoading || !!choiceError} aria-label={`恢复 ${entry.title}`} onClick={() => show(entry)}>恢复</button>
+          <button className="workbench-choice__action workbench-choice__action--danger" disabled={pending || choiceLoading || !!choiceError} aria-label={`删除 ${entry.title}`} onClick={event => confirmDelete(entry, event.currentTarget)}>删除</button>
         </div>)}</>}
         {choiceLoading && <p role="status">正在读取可用工作台…</p>}
         {choiceError && <p role="alert">{choiceError} <button className="secondary-button button--small" onClick={() => { setChoosing(false); setActionError(choiceError) }}>关闭后重试</button></p>}
@@ -148,8 +146,8 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
       <button role="menuitem" onClick={() => { setDialog({ mode: 'rename', entry: menu.entry, anchor: menu.anchor }); setMenu(null) }}>重命名</button>
       <button role="menuitem" disabled={catalog?.[0]?.viewId === menu.entry.viewId} onClick={() => moveBy(catalog?.findIndex(entry => entry.viewId === menu.entry.viewId) ?? -1, -1)}>上移</button>
       <button role="menuitem" disabled={catalog?.at(-1)?.viewId === menu.entry.viewId} onClick={() => moveBy(catalog?.findIndex(entry => entry.viewId === menu.entry.viewId) ?? -1, 1)}>下移</button>
-      {menu.entry.kind === 'draft' ? <button role="menuitem" className="workbench-menu__danger" onClick={() => confirmDelete(menu.entry, menu.anchor)}>删除草稿…</button>
-        : <button role="menuitem" onClick={() => visibility(menu.entry, false)}>移除工作台</button>}
+      {menu.entry.kind === 'draft' ? <button role="menuitem" className="workbench-menu__danger" onClick={() => confirmDelete(menu.entry, menu.anchor)}>删除草稿</button>
+        : <button role="menuitem" className="workbench-menu__danger" onClick={() => { setDialog({ mode: 'remove', entry: menu.entry, anchor: menu.anchor }); setMenu(null) }}>移除工作台</button>}
     </WorkbenchMenu>}
     {dialog && <WorkbenchDialog entry={dialog.entry} mode={dialog.mode} running={dialog.running} dismiss={() => setDialog(null)} restoreFocus={() => {
       if (dialog.anchor.isConnected) { dialog.anchor.focus(); return }
@@ -162,6 +160,7 @@ export function WorkbenchNavigation({ project, canvas, active }: ShellSlotProps)
       try {
         const ref = { projectId: project.id, viewId: dialog.entry.viewId }
         if (dialog.mode === 'rename') await workbenchApi().rename({ ref, title })
+        else if (dialog.mode === 'remove') { await workbenchApi().setVisible({ ref, visible: false }); leaveRemoved(dialog.entry.viewId) }
         else if (dialog.entry.kind === 'draft') { await workbenchApi().deleteDraft({ projectId: project.id, viewId: dialog.entry.viewId }); leaveRemoved(dialog.entry.viewId) }
         else if (dialog.entry.origin === 'custom') await workbenchApi().deleteInstance({ projectId: project.id, viewId: dialog.entry.viewId })
         await useWorkbenches.getState().loadCatalog(project.id)

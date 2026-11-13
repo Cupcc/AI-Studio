@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import type { WorkbenchRef } from '@shared/workbench/types'
 import type { PreviewHeaderProps } from '../project/integration'
 import { Icon } from '../../app/Icon'
-import { applyWorkbenchDraft, editWorkbench, refreshWorkbench, toggleWorkbench, useWorkbenchHost, type HostView } from './host'
+import { applyWorkbenchDraft, editWorkbench, refreshWorkbench, useWorkbenchHost, type HostView } from './host'
 import { WorkbenchAbout, WorkbenchMenu } from './WorkbenchControls'
 
 /** Workbench parts of the right-area header: status after the title, the draft action, and "更多操作". */
@@ -22,8 +22,7 @@ function HeaderStatus({ view }: { view: HostView }) {
   if (!view.snapshot && status.kind === 'waiting') return null
   return <div className="workbench-header-status">
     {view.snapshot?.entry.kind === 'draft' && <span className="workbench-chip workbench-chip--draft">草稿</span>}
-    {status.kind === 'disabled' ? <span className="workbench-chip" role="status">{status.text}</span>
-      : status.kind === 'loading' ? <span className="workbench-header-status__text" role="status"><span className="workbench-spinner" aria-hidden="true" />{status.text}</span>
+    {status.kind === 'loading' ? <span className="workbench-header-status__text" role="status"><span className="workbench-spinner" aria-hidden="true" />{status.text}</span>
       : status.kind === 'waiting' ? <span className="workbench-header-status__text" role="status">{status.text}</span>
       : <span className={`workbench-status-mark workbench-status-mark--${status.kind}`} role="status" data-tip={status.visible ? undefined : status.text}>
         <span className={`workbench-status-dot workbench-status-dot--${status.kind}`} aria-hidden="true" />
@@ -42,8 +41,6 @@ function HeaderMenu({ target: ref, view }: { target: WorkbenchRef; view: HostVie
       {entry.editable && entry.kind === 'instance' && <button role="menuitem" disabled={host.pending || !page} onClick={() => choose(() => editWorkbench(ref))}><Icon name="pencil" />编辑工作台</button>}
       <button role="menuitem" disabled={loading || host.pending} onClick={() => choose(() => refreshWorkbench(ref))}><Icon name="refresh" />重新加载</button>
       <button role="menuitem" onClick={() => { setOpen(false); setAbout(true) }}><Icon name="info" /><span>关于此工作台</span>{page && <span className="menu-item__meta" aria-hidden="true">{page.manifest.version}</span>}</button>
-      {entry.canDisable && <><div className="menu-divider" role="separator" />
-        <button role="menuitem" className={page?.enabled === false ? undefined : 'workbench-menu__danger'} disabled={host.pending || !page} onClick={() => choose(() => toggleWorkbench(ref))}><Icon name="power" />{page?.enabled === false ? '启用工作台' : '停用工作台'}</button></>}
     </WorkbenchMenu>}
     {about && entry && <WorkbenchAbout entry={entry} view={view} dismiss={() => { setAbout(false); button.current?.focus() }} />}
   </>

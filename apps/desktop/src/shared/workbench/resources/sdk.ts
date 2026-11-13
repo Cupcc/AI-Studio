@@ -99,7 +99,6 @@ interface WorkbenchSnapshot {
   state: JsonValue
   stateRevision: number
   pageUrl: string
-  enabled: boolean
   resources?: { knowledge?: WorkbenchKnowledgeResource; sessions?: WorkbenchSessionLink[] }
   appearance?: { dark: boolean; variables: Record<string, string> }
 }

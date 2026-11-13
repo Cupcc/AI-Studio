@@ -40,9 +40,10 @@ export function WorkbenchMenu({ anchor, children, dismiss, className = '', label
   }}>{children}</div>, document.body)
 }
 
-export type DialogMode = 'rename' | 'delete-draft' | 'delete-instance'
+export type DialogMode = 'rename' | 'remove' | 'delete-draft' | 'delete-instance'
 const DIALOG_TEXT: Record<DialogMode, { title: string; submit: string; pending: string }> = {
   rename: { title: '重命名工作台', submit: '保存名称', pending: '正在保存…' },
+  remove: { title: '移除工作台？', submit: '移除', pending: '正在移除…' },
   'delete-draft': { title: '删除草稿？', submit: '删除草稿', pending: '正在删除…' },
   'delete-instance': { title: '删除工作台？', submit: '删除工作台', pending: '正在删除…' }
 }
@@ -74,6 +75,7 @@ export function WorkbenchDialog({ entry, mode, running = 0, submit, dismiss, res
   }}>
     <h2 id={titleId}>{text.title}</h2>
     {mode === 'rename' ? <><label htmlFor={inputId}>工作台名称</label><input ref={input} id={inputId} name="workbench-title" autoComplete="off" value={title} maxLength={100} required disabled={pending} aria-describedby={error ? errorId : undefined} onChange={event => setTitle(event.target.value)} /></>
+      : mode === 'remove' ? <p>“{entry.title}”会从列表中移除，保存的数据和会话历史保留。之后可从“添加工作台”重新添加。</p>
       : mode === 'delete-draft' ? <p>删除“{entry.title}”的设计草稿记录。项目文件、已有工作台和会话历史会保留。删除后无法从列表恢复此草稿。</p>
       : <><p>永久删除“{entry.title}”和它保存的页面数据；未应用的编辑草稿也会删除。会话历史和项目文件保留。此操作无法撤销。</p>
         {running > 0 && <p className="workbench-dialog__warning">将先停止从此工作台及其编辑草稿发起、仍在运行的 {running} 个会话。</p>}</>}

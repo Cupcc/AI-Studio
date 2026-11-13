@@ -61,8 +61,8 @@ it('lists presets and custom pages in one catalog with explicit management and s
   const catalog = service.list(projectId)
   expect(catalog).toHaveLength(7)
   expect(catalog.slice(0, 5)).toEqual(PRESET_WORKBENCHES)
-  expect(catalog.find(entry => entry.viewId === instance.viewId)).toMatchObject({ kind: 'instance', origin: 'custom', editable: true, canDisable: true })
-  expect(catalog.find(entry => entry.viewId === draft.viewId)).toMatchObject({ kind: 'draft', origin: 'custom', canDisable: false })
+  expect(catalog.find(entry => entry.viewId === instance.viewId)).toMatchObject({ kind: 'instance', origin: 'custom', editable: true })
+  expect(catalog.find(entry => entry.viewId === draft.viewId)).toMatchObject({ kind: 'draft', origin: 'custom' })
   expect(database.db.prepare('SELECT COUNT(*) AS count FROM workbench_instances').get()?.count).toBe(1)
 })
 it('publishes last-good Knowledge resources through the same host event and reuses the observed revision on reads', async () => {
@@ -115,7 +115,7 @@ it('uses one host for package draft isolation, CAS, instance edits, project boun
   expect(await service.getSnapshot(ref)).toMatchObject({ page: { state: { note: 'live state' }, stateRevision: 2 } })
   expect(service.list(projectId).filter(entry => entry.kind === 'instance')).toHaveLength(6)
 })
-it('returns package diagnostics in the common snapshot, requires a fresh preview and preserves disabled content', async () => {
+it('returns package diagnostics in the common snapshot and requires a fresh preview', async () => {
   const draft = service.createDraft({ projectId, source: 'template' })
   const first = await service.getSnapshot(draftRef(draft))
   if (!first.page) throw new Error('fixture package failed')
@@ -123,16 +123,6 @@ it('returns package diagnostics in the common snapshot, requires a fresh preview
   expect(() => service.applyDraft({ ref: draftRef(draft), expectedPackageRevision: first.page!.packageRevision })).toThrow('刷新预览')
   writeFileSync(join(root, draft.directory, 'manifest.json'), '{')
   expect(await service.getSnapshot(draftRef(draft))).toMatchObject({ status: 'error', page: null, error: expect.stringContaining('不是有效 JSON') })
-  const { ref } = await install()
-  service.updateState({ ref, state: { count: 8 }, expectedRevision: 0 })
-  service.setEnabled({ ref, enabled: false })
-  const disabled = await service.getSnapshot(ref)
-  expect(disabled).toMatchObject({ status: 'disabled', page: { state: { count: 8 }, enabled: false } })
-  if (!disabled.page) throw new Error('fixture package failed')
-  expect((await service.handleRequest(new Request(disabled.page.pageUrl))).status).toBe(403)
-  expect(() => service.updateState({ ref, state: {}, expectedRevision: 1 })).toThrow('停用')
-  service.setEnabled({ ref, enabled: true })
-  expect(await service.getSnapshot(ref)).toMatchObject({ status: 'ready', page: { state: { count: 8 } } })
 })
 it('provides all contexts through one entry and initializes preset helpers only at the attached-send boundary', async () => {
   const context = service.buildContext(presetRef())

@@ -65,7 +65,6 @@ export function attachWorkbenchPageBridge(options: {
     void (async () => {
       try {
         const req = request(value), snapshot = options.snapshot()
-        if (!snapshot.enabled) throw new Error('工作台已停用')
         let result: unknown
         switch (req.method) {
           case 'startAgent':

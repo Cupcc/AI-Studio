@@ -21,7 +21,7 @@ const knowledge = (): ViewState => ({
 })
 const snapshot = (name = 'architecture'): WorkbenchPageSnapshot => ({
   target: { projectId: 'p', kind: 'instance', id: name }, manifest: JSON.parse(asset(name, 'manifest.json')),
-  packageRevision: 'r1', state: {}, stateRevision: 0, pageUrl: 'app://workbench/page.html', enabled: true,
+  packageRevision: 'r1', state: {}, stateRevision: 0, pageUrl: 'app://workbench/page.html',
   resources: { knowledge: knowledge() }, appearance: { dark: false, variables: { '--color-text': '#123456' } }
 })
 async function boot(name: string, initial: WorkbenchPageSnapshot) {

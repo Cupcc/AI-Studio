@@ -4,7 +4,7 @@ import { type WorkbenchSnapshot } from '@shared/workbench/types'
 import { WorkbenchPage } from './WorkbenchPage'
 import type { ViewSlotProps } from '../project/integration'
 import { Icon } from '../../app/Icon'
-import { explainWorkbenchError, refreshWorkbench, resetPage, toggleWorkbench, upgradeWorkbench, useWorkbenchHost } from './host'
+import { explainWorkbenchError, refreshWorkbench, resetPage, upgradeWorkbench, useWorkbenchHost } from './host'
 import { useWorkbenches, workbenchKey } from './store'
 import './workbench.css'
 
@@ -28,9 +28,7 @@ function WorkbenchContent({ active, snapshot }: ViewSlotProps & { snapshot: Work
       <button className="secondary-button button--small" disabled={loading} onClick={() => void refreshWorkbench(ref)}>重试预览</button>
       <button className="primary-button button--small" onClick={() => void explainWorkbenchError(ref)}>将错误填入对话</button>
     </ErrorBanner>}
-    {page?.enabled === false ? <div className="workbench-idle"><Icon name="power" size={28} /><h2>此工作台已停用</h2><p>页面已卸载，保存的数据都还在，对话不受影响。</p>
-      {entry.canDisable && <button className="primary-button" disabled={host.pending} onClick={() => void toggleWorkbench(ref)}>启用工作台</button>}</div>
-      : page && active ? <WorkbenchPage key={`${page.packageRevision}:${host.reload}`} workbenchRef={ref} page={page} onPageStatus={status => useWorkbenches.getState().updateHost(ref, previous => ({
+    {page && active ? <WorkbenchPage key={`${page.packageRevision}:${host.reload}`} workbenchRef={ref} page={page} onPageStatus={status => useWorkbenches.getState().updateHost(ref, previous => ({
         connectedRevision: page.packageRevision,
         pageStatus: previous.pageStatus.kind === 'error' && status.kind === 'ready' ? previous.pageStatus : status
       }))} onSaveStatus={(saveStatus, failed = false) => useWorkbenches.getState().updateHost(ref, { saveStatus, saveFailed: failed })} />

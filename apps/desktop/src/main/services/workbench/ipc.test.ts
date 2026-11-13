@@ -45,13 +45,11 @@ it('routes the registered contract through actual persistence and blocks plugin 
   expect(broadcast).toHaveBeenCalledWith(workbenchContract.events.changed, expect.objectContaining({ projectId }))
   await expect(invoke('workbench:create-draft', { projectId, source: 'arbitrary' })).rejects.toThrow('source')
   await expect(invoke('workbench:update-state', { ref: { projectId, viewId: 'workbench-draft:missing' }, state: new Map(), expectedRevision: 0 })).rejects.toThrow('JSON')
-  await expect(invoke('workbench:set-enabled', { ref: { projectId, viewId: 'workbench:missing' }, enabled: 'yes' })).rejects.toThrow('布尔值')
   await expect(invoke('workbench:list', { projectId, root: '/' })).rejects.toThrow('Unexpected field')
   for (const expectedPackageRevision of [undefined, '', 'f'.repeat(63), 'z'.repeat(64)]) {
     await expect(invoke('workbench:apply-draft', { ref: { projectId, viewId: 'workbench-draft:draft' }, ...(expectedPackageRevision === undefined ? {} : { expectedPackageRevision }) })).rejects.toThrow('expectedPackageRevision')
   }
   await expect(invoke('workbench:update-state', { ref: { projectId, viewId: 'overview' }, state: {}, expectedRevision: 0 })).rejects.toThrow('自定义工作台')
-  await expect(invoke('workbench:set-enabled', { ref: { projectId, viewId: 'architecture' }, enabled: false })).rejects.toThrow('自定义工作台')
   await invoke('workbench:rename', { ref: { projectId, viewId: 'architecture' }, title: '项目架构' })
   await invoke('workbench:move', { ref: { projectId, viewId: 'architecture' }, before: 'overview' })
   expect(await invoke('workbench:list', { projectId })).toEqual(expect.arrayContaining([expect.objectContaining({ viewId: 'architecture', title: '项目架构' }), expect.objectContaining({ viewId: 'overview' })]))
@@ -106,8 +104,6 @@ it('routes preset, design-draft and live contexts through the same Session callb
   expect(detached).toMatchObject({ originViewId: 'architecture', viewContextAttached: false })
   expect(JSON.stringify(provider.sessions[3]!.driver.callsTo('startTurn'))).not.toContain('Current Workbench')
   const count = await projectShellFor(core).sessionPort().getBlockingSessionCounts(projectId)
-  await workbench.handlers.setEnabled.handle({ ref: { projectId, viewId: instance.viewId }, enabled: false }, ctx)
-  expect(await projectShellFor(core).sessionPort().getBlockingSessionCounts(projectId)).toEqual(count)
   expect((await sessions.handlers.getConversation.handle({ sessionId: created[2]!.id }, ctx)).session.activity).toBe('running')
   await expect(workbench.handlers.deleteInstance.handle({ projectId, viewId: instance.viewId }, ctx)).rejects.toThrow('请先移除')
   await workbench.handlers.setVisible.handle({ ref: { projectId, viewId: instance.viewId }, visible: false }, ctx)

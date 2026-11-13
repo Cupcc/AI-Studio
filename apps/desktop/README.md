@@ -102,7 +102,7 @@ scripts/                       postinstall、afterPack、打包冒烟脚本
 
 `shared/workbench/` 保存清单规则、SDK、开发说明与模板；`main/services/workbench/` 负责包资源、固定修订和 SQLite 实例状态；`renderer/features/workbench/` 负责统一导航、快照 store、预览与页面通信。预设与自定义页面共享同一宿主、IPC 和生命周期，所有页面使用相同的标准网页包与 iframe，Knowledge 作为公共只读资源提供；当前契约见[workbench §9.7](../../specs/workbench/spec.md#97-预设与自定义工作台统一宿主)。新增操作先修改 typed IPC，不把插件操作接到任意 `window.studio` 转发接口。
 
-宿主呈现（标题栏状态标记、草稿主按钮、“更多操作”菜单、关于此工作台与停用页）由 [workbench §9.7](../../specs/workbench/spec.md#生命周期与通用呈现)负责。`features/workbench/host.ts` 汇总每个页面的宿主状态与操作，`WorkbenchHeader.tsx` 通过 Project 壳层的 `PreviewHeader` 插槽渲染到右侧区域标题栏，页面主体与标题栏读取同一份状态。宿主不提供页面缩放，带画布的页面自行实现。实施与验证见[界面规范化任务](../../tasks/T20261112-workbench-ui-polish/task.md)。
+宿主呈现（标题栏状态标记、草稿主按钮、“更多操作”菜单与关于此工作台）由 [workbench §9.7](../../specs/workbench/spec.md#生命周期与通用呈现)负责。`features/workbench/host.ts` 汇总每个页面的宿主状态与操作，`WorkbenchHeader.tsx` 通过 Project 壳层的 `PreviewHeader` 插槽渲染到右侧区域标题栏，页面主体与标题栏读取同一份状态。宿主不提供页面缩放，带画布的页面自行实现。实施与验证见[界面规范化任务](../../tasks/T20261112-workbench-ui-polish/task.md)。
 
 开发及机制验收记录见[实施任务](../../.agents/archive/tasks/T20261111-workbench-plugins/task.md)。真实 Codex 与实际 UI 验证单列，不以模拟 Provider 的自动化通过代替。五图和产物服务属于后续业务。
 

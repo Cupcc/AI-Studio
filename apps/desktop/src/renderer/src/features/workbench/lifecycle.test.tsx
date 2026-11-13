@@ -11,8 +11,8 @@ import { applyWorkbenchDraft } from './host'
 import { initialHost, useWorkbenches, workbenchKey } from './store'
 
 const project = { id: 'p', name: 'Project', localPath: '/p', displayPath: '/p', canonicalPath: '/p', createdAt: '', lastOpenedAt: '' }
-const draft: CustomDraftEntry = { id: 'd', projectId: 'p', source: 'ai', title: '笔记', directory: '.ai-studio/workbench/drafts/d', targetInstanceId: 'i', viewId: 'workbench-draft:d', origin: 'custom', kind: 'draft', icon: 'pencil', editable: true, canDisable: false }
-const instance: CustomInstanceEntry = { id: 'i', projectId: 'p', pluginId: 'notes', packageRevision: 'b'.repeat(64), title: '笔记', enabled: true, viewId: 'workbench:i', origin: 'custom', kind: 'instance', icon: 'preview', editable: true, canDisable: true }
+const draft: CustomDraftEntry = { id: 'd', projectId: 'p', source: 'ai', title: '笔记', directory: '.ai-studio/workbench/drafts/d', targetInstanceId: 'i', viewId: 'workbench-draft:d', origin: 'custom', kind: 'draft', icon: 'pencil', editable: true }
+const instance: CustomInstanceEntry = { id: 'i', projectId: 'p', pluginId: 'notes', packageRevision: 'b'.repeat(64), title: '笔记', viewId: 'workbench:i', origin: 'custom', kind: 'instance', icon: 'preview', editable: true }
 const composerKey = { projectId: 'p', kind: 'new_chat' as const, viewId: draft.viewId }
 const originalSessions = useSessions.getState(), originalShell = useProjectShell.getState()
 const api = { createDraft: vi.fn(async () => draft), applyDraft: vi.fn(async () => instance), list: vi.fn(async () => [instance]) }

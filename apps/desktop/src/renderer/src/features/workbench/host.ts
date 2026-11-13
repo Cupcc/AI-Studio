@@ -5,7 +5,7 @@ import { describeWorkbenchError, workbenchApi } from './api'
 import { appendWorkbenchDraft } from './conversation'
 import { initialHost, useWorkbenches, workbenchGeneration, workbenchKey, type HostPatch, type WorkbenchHost } from './store'
 
-export type HostStatus = { kind: 'ready' | 'loading' | 'waiting' | 'error' | 'disabled'; text: string; visible: boolean }
+export type HostStatus = { kind: 'ready' | 'loading' | 'waiting' | 'error'; text: string; visible: boolean }
 
 /** Derived view of one workbench, shared by the header and the page body. */
 export function deriveHost(snapshot: WorkbenchSnapshot | undefined, loading: boolean, readError: string | null, host: WorkbenchHost) {
@@ -13,8 +13,7 @@ export function deriveHost(snapshot: WorkbenchSnapshot | undefined, loading: boo
   const pageReady = host.pageStatus.kind === 'ready' && host.connectedRevision === page?.packageRevision
   const pageError = host.pageStatus.kind === 'error' && host.connectedRevision === page?.packageRevision ? host.pageStatus.message : null
   const error = host.actionError || snapshot?.error || null
-  const status: HostStatus = page?.enabled === false ? { kind: 'disabled', text: '已停用', visible: true }
-    : loading ? { kind: 'loading', text: '正在检查包…', visible: true }
+  const status: HostStatus = loading ? { kind: 'loading', text: '正在检查包…', visible: true }
     : error || readError ? { kind: 'error', text: '无法预览工作台', visible: false }
     : pageError ? { kind: 'error', text: '页面未正常运行', visible: false }
     : !page ? { kind: 'waiting', text: '等待页面文件', visible: true }
@@ -86,15 +85,6 @@ export function upgradeWorkbench(ref: WorkbenchRef): Promise<void> | undefined {
   const entry = currentHost(ref).snapshot?.entry
   if (entry?.origin !== 'custom' || entry.kind !== 'instance') return
   return run(ref, () => openWorkbenchDraft(ref.projectId, 'template', entry.id, 'product-selection'))
-}
-
-export function toggleWorkbench(ref: WorkbenchRef): Promise<void> | undefined {
-  const { snapshot, page } = currentHost(ref), entry = snapshot?.entry
-  if (!page || entry?.origin !== 'custom' || entry.kind !== 'instance') return
-  return run(ref, async () => {
-    await workbenchApi().setEnabled({ ref: { projectId: ref.projectId, viewId: entry.viewId }, enabled: !page.enabled })
-    await refreshWorkbench(ref)
-  })
 }
 
 export async function explainWorkbenchError(ref: WorkbenchRef): Promise<void> {

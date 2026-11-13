@@ -50,7 +50,6 @@ const paths: Record<string, ReactNode> = {
   appearance: <><circle cx="8" cy="8" r="5.5" /><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor" stroke="none" /></>,
   // Workbench host menu, about dialog, disabled page and error banner
   info: <><circle cx="8" cy="8" r="5.75" /><path d="M8 7.3v3.7M8 5.1v.01" /></>,
-  power: <path d="M8 2.5V8M4.8 4.6a4.9 4.9 0 1 0 6.4 0" />,
   alert: <path d="M8 2.6l5.9 10.4H2.1zM8 6.6v3M8 11.3v.01" />
 }
 

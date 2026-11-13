@@ -16,10 +16,10 @@ export interface WorkbenchOptions {
   settleMs?: number
 }
 function draftEntry(draft: WorkbenchDraft): CustomDraftEntry {
-  return { ...draft, viewId: `workbench-draft:${draft.id}`, origin: 'custom', kind: 'draft', icon: 'pencil', editable: true, canDisable: false }
+  return { ...draft, viewId: `workbench-draft:${draft.id}`, origin: 'custom', kind: 'draft', icon: 'pencil', editable: true }
 }
 function instanceEntry(instance: WorkbenchInstance): CustomInstanceEntry {
-  return { ...instance, viewId: `workbench:${instance.id}`, origin: 'custom', kind: 'instance', icon: 'preview', editable: true, canDisable: true }
+  return { ...instance, viewId: `workbench:${instance.id}`, origin: 'custom', kind: 'instance', icon: 'preview', editable: true }
 }
 
 /** Every source resolves to an ordinary package; Knowledge is a declared page resource. */
@@ -36,7 +36,7 @@ export class WorkbenchService {
   setAgentPort(port: NonNullable<WorkbenchService['sessions']>): void { this.sessions = port }
   private agentPort(ref: InstanceWorkbenchRef) {
     const page = this.packages.getSnapshot(workbenchTarget(ref.projectId, ref.viewId))
-    if (!page.enabled || !page.manifest.capabilities.includes('agent.execute')) throw new Error('工作台未启用 Agent 执行能力')
+    if (!page.manifest.capabilities.includes('agent.execute')) throw new Error('工作台未启用 Agent 执行能力')
     if (!this.sessions) throw new Error('Agent Provider 尚未就绪')
     return this.sessions
   }
@@ -118,7 +118,7 @@ export class WorkbenchService {
       const knowledgeViewId = current.manifest.knowledgeViewId
       const knowledge = knowledgeViewId ? this.knowledgeStates.get(this.knowledgeKey(ref.projectId, knowledgeViewId)) : undefined
       const enriched = knowledge ? { ...current, resources: { ...current.resources, knowledge } } : current
-      return { ref, entry, revision, status: current.enabled ? 'ready' : 'disabled', error: null, page: enriched }
+      return { ref, entry, revision, status: 'ready', error: null, page: enriched }
     } catch (error) {
       return { ref, entry, revision, status: 'error', error: error instanceof Error ? error.message : '工作台加载失败', page: null }
     }
@@ -331,11 +331,6 @@ export class WorkbenchService {
     const snapshot = this.snapshots.get(this.key(request.ref))
     if (!snapshot) throw new Error('工作台状态未发布')
     return snapshot
-  }
-  setEnabled(request: { ref: InstanceWorkbenchRef; enabled: boolean }): CustomInstanceEntry {
-    this.open(request.ref.projectId)
-    const target = workbenchTarget(request.ref.projectId, request.ref.viewId)
-    return instanceEntry(this.packages.setEnabled(target.projectId, target.id, request.enabled))
   }
   refresh(projectId: string): Promise<void> { return this.knowledge.refresh(projectId) }
   refreshAll(): void { this.knowledge.refreshAll() }

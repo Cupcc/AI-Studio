@@ -15,7 +15,7 @@ export const AUTHORING_GUIDE = `# AI Studio 工作台开发说明 · SDK 1
 
 宿主在页面入口之前注入 window.workbench；不需要自行加载 SDK。完整签名见 sdk.d.ts。
 
-- getInstance()：返回当前绑定目标、manifest、state、stateRevision、pageUrl、enabled，以及已声明能力提供的 resources。
+- getInstance()：返回当前绑定目标、manifest、state、stateRevision、pageUrl，以及已声明能力提供的 resources。
 - updateState(state, expectedRevision)：写当前目标的 JSON 状态并返回新快照。期望版本必须与最近快照一致；冲突时重新读取、让用户确认后重试，不能悄悄覆盖。状态上限 1 MiB。
 - subscribe(listener)：接收当前目标状态更新，返回取消订阅函数；页面卸载时清理监听。用新的快照更新显示。
 - setDraft(text, options?)：填入可编辑的对话草稿。options.target 可选 current（默认，当前对话）或 new（当前工作台的新对话草稿）。它不发送请求、不调用模型。用户仍需点击 Send。

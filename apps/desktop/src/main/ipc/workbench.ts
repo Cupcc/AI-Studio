@@ -93,14 +93,6 @@ export function createWorkbenchFeature(core: CoreServices) {
         return { ref: parseCustomWorkbenchRef(value.ref), state: parseJsonState(value.state), expectedRevision: value.expectedRevision }
       },
       handle: request => service.updateState(request)
-    },
-    setEnabled: {
-      parse(raw) {
-        const value = expectRecord(raw); expectOnlyKeys(value, ['ref', 'enabled'])
-        if (typeof value.enabled !== 'boolean') throw new Error('enabled 必须为布尔值')
-        return { ref: parseInstanceWorkbenchRef(value.ref), enabled: value.enabled }
-      },
-      handle: request => service.setEnabled(request)
     }
   }, () => { service.dispose(); shell.workbenches = undefined })
 }

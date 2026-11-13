@@ -21,8 +21,7 @@ export const workbenchContract = defineContract('workbench', {
     getSnapshot: invoke<WorkbenchRef, WorkbenchSnapshot>('workbench:get-snapshot'),
     getContext: invoke<WorkbenchRef, WorkbenchContext>('workbench:get-context'),
     applyDraft: invoke<{ ref: DraftWorkbenchRef; expectedPackageRevision: string }, CustomInstanceEntry>('workbench:apply-draft'),
-    updateState: invoke<{ ref: CustomWorkbenchRef; state: JsonValue; expectedRevision: number }, WorkbenchSnapshot>('workbench:update-state'),
-    setEnabled: invoke<{ ref: InstanceWorkbenchRef; enabled: boolean }, CustomInstanceEntry>('workbench:set-enabled')
+    updateState: invoke<{ ref: CustomWorkbenchRef; state: JsonValue; expectedRevision: number }, WorkbenchSnapshot>('workbench:update-state')
   },
   events: { changed: event<WorkbenchChange>('workbench:changed') }
 })

@@ -4,7 +4,7 @@ import { attachWorkbenchPageBridge } from './page-bridge'
 
 const snapshot = (): WorkbenchPageSnapshot => ({
   target: { projectId: 'p', kind: 'instance', id: 'one' }, manifest: { schemaVersion: 1, sdkVersion: 1, pluginId: 'local.notes', title: 'Notes', version: '1.0.0', entry: 'index.html', capabilities: ['state.read', 'state.write', 'conversation.draft'] },
-  state: { count: 1 }, stateRevision: 1, packageRevision: 'r1', pageUrl: 'app://workbench/one/index.html', enabled: true
+  state: { count: 1 }, stateRevision: 1, packageRevision: 'r1', pageUrl: 'app://workbench/one/index.html'
 })
 let iframe: HTMLIFrameElement, frame: Window, dispose: () => void
 const updateState = vi.fn(), setDraft = vi.fn(), openSession = vi.fn(), ready = vi.fn(), error = vi.fn()

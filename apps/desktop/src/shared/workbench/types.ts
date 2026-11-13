@@ -56,7 +56,6 @@ export interface WorkbenchInstance {
   pluginId: string
   packageRevision: string
   title: string
-  enabled: boolean
 }
 
 /** SDK 1 page payload. The host envelope is separate from this stable page contract. */
@@ -67,7 +66,6 @@ export interface WorkbenchPageSnapshot {
   state: JsonValue
   stateRevision: number
   pageUrl: string
-  enabled: boolean
   resources?: WorkbenchPageResources
   appearance?: { dark: boolean; variables: Record<string, string> }
 }
@@ -118,7 +116,6 @@ export interface CustomInstanceEntry extends WorkbenchInstance {
   kind: 'instance'
   icon: 'preview'
   editable: true
-  canDisable: true
 }
 export interface CustomDraftEntry extends WorkbenchDraft {
   viewId: DraftWorkbenchId
@@ -126,7 +123,6 @@ export interface CustomDraftEntry extends WorkbenchDraft {
   kind: 'draft'
   icon: 'pencil'
   editable: true
-  canDisable: false
 }
 export type CustomWorkbenchEntry = CustomInstanceEntry | CustomDraftEntry
 export type WorkbenchEntry = PresetWorkbenchEntry | CustomWorkbenchEntry
@@ -137,7 +133,7 @@ export interface WorkbenchSnapshot {
   entry: WorkbenchEntry
   /** Host read/event ordering, independent of the page's stateRevision CAS token. */
   revision: number
-  status: 'ready' | 'error' | 'disabled'
+  status: 'ready' | 'error'
   error: string | null
   page: WorkbenchPageSnapshot | null
 }

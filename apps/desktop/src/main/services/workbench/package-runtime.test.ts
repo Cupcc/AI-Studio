@@ -49,7 +49,7 @@ it('creates versioned developer resources and an isolated runnable draft without
   const draft = service.createDraft(projectId, 'ai')
   const snapshot = service.getSnapshot(target(draft))
   expect(service.list(projectId)).toEqual({ instances: [], drafts: [draft] })
-  expect(snapshot).toMatchObject({ target: target(draft), state: {}, stateRevision: 0, enabled: true, manifest: { sdkVersion: 1 } })
+  expect(snapshot).toMatchObject({ target: target(draft), state: {}, stateRevision: 0, manifest: { sdkVersion: 1 } })
   expect(readFileSync(join(root, '.ai-studio/.gitignore'), 'utf8')).toBe('existing-policy\n')
   expect(readFileSync(join(root, '.ai-studio/workbench/sdk/GUIDE.md'), 'utf8')).toContain('updateState')
   const response = await service.handleRequest(new Request(snapshot.pageUrl))
@@ -114,7 +114,7 @@ it('reopens one edit draft per instance and source, and replaces a draft made st
 it('installs an App template as a ready instance without a draft and deletes an instance with the drafts that target it', () => {
   const selection = service.installTemplate(projectId, 'product-selection')
   const selected: WorkbenchTarget = { projectId, kind: 'instance', id: selection.id }
-  expect(service.list(projectId)).toMatchObject({ instances: [{ id: selection.id, pluginId: 'product-selection', title: '选品工作台', enabled: true }], drafts: [] })
+  expect(service.list(projectId)).toMatchObject({ instances: [{ id: selection.id, pluginId: 'product-selection', title: '选品工作台' }], drafts: [] })
   expect(service.getSnapshot(selected)).toMatchObject({ state: {}, stateRevision: 0, manifest: { pluginId: 'product-selection' } })
   expect(service.installTemplate(projectId, 'product-selection').id).not.toBe(selection.id)
   service.updateState(selected, { brief: 'keep until deleted' }, 0)
@@ -150,17 +150,6 @@ it('rejects package path escapes, symlinks and unsupported capabilities', () => 
   expect(() => service.getSnapshot(target(draft))).toThrow('不支持能力')
   alter(draft, { capabilities: ['state.read'] }); symlinkSync('/etc/hosts', join(root, draft.directory, 'outside'))
   expect(() => service.getSnapshot(target(draft))).toThrow('符号链接')
-})
-it('stops new page requests and writes while disabled, retaining state for re-enable', async () => {
-  const { instance, selected } = install()
-  service.updateState(selected, { note: 'keep' }, 0)
-  service.setEnabled(projectId, instance.id, false)
-  const disabled = service.getSnapshot(selected)
-  expect(disabled).toMatchObject({ enabled: false, state: { note: 'keep' } })
-  expect((await service.handleRequest(new Request(disabled.pageUrl))).status).toBe(403)
-  expect(() => service.updateState(selected, {}, 1)).toThrow('停用')
-  service.setEnabled(projectId, instance.id, true)
-  expect(service.getSnapshot(selected)).toMatchObject({ enabled: true, state: { note: 'keep' } })
 })
 it('binds every read and write to the owning Project and enforces declared state write capability', () => {
   const { selected } = install()

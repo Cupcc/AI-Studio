@@ -7,7 +7,7 @@ import { useWorkbenches, watchWorkbenches } from './store'
 let change: (event: WorkbenchChange) => void
 let detach: () => void
 let list: StudioApi['workbench']['list'], getSnapshot: StudioApi['workbench']['getSnapshot']
-const instance = { id: 'one', projectId: 'p', title: 'New', packageRevision: 'r1', enabled: true, pluginId: 'notes', viewId: 'workbench:one', origin: 'custom', kind: 'instance', icon: 'preview', editable: true, canDisable: true } as const
+const instance = { id: 'one', projectId: 'p', title: 'New', packageRevision: 'r1', pluginId: 'notes', viewId: 'workbench:one', origin: 'custom', kind: 'instance', icon: 'preview', editable: true } as const
 const populated = (): WorkbenchCatalog => [...PRESET_WORKBENCHES, instance]
 const presetSnapshot = (revision = 1, projectId = 'p'): WorkbenchSnapshot => ({
   ref: { projectId, viewId: 'architecture' }, revision,

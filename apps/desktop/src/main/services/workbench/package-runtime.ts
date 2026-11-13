@@ -14,7 +14,7 @@ import { assertInside, readPackage, writePackage, type PackageFiles } from './pa
 
 interface InstanceRow {
   id: string; project_id: string; plugin_id: string; package_revision: string; title: string
-  enabled: number; state: string; state_revision: number
+  state: string; state_revision: number
 }
 interface DraftRow {
   id: string; project_id: string; source: 'template' | 'ai'; target_instance_id: string | null
@@ -31,7 +31,7 @@ function columnNumber(row: Record<string, unknown>, key: string): number {
   return value
 }
 function storedInstance(row: Record<string, unknown>): InstanceRow {
-  return { id: columnText(row, 'id'), project_id: columnText(row, 'project_id'), plugin_id: columnText(row, 'plugin_id'), package_revision: columnText(row, 'package_revision'), title: columnText(row, 'title'), enabled: columnNumber(row, 'enabled'), state: columnText(row, 'state'), state_revision: columnNumber(row, 'state_revision') }
+  return { id: columnText(row, 'id'), project_id: columnText(row, 'project_id'), plugin_id: columnText(row, 'plugin_id'), package_revision: columnText(row, 'package_revision'), title: columnText(row, 'title'), state: columnText(row, 'state'), state_revision: columnNumber(row, 'state_revision') }
 }
 function storedDraft(row: Record<string, unknown>): DraftRow {
   const source = row.source
@@ -50,7 +50,7 @@ const TYPES: Record<string, string> = {
   css: 'text/css; charset=utf-8', json: 'application/json; charset=utf-8', svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', ico: 'image/x-icon', woff: 'font/woff', woff2: 'font/woff2', txt: 'text/plain; charset=utf-8'
 }
 function instance(row: InstanceRow): WorkbenchInstance {
-  return { id: row.id, projectId: row.project_id, pluginId: row.plugin_id, packageRevision: row.package_revision, title: row.title, enabled: row.enabled === 1 }
+  return { id: row.id, projectId: row.project_id, pluginId: row.plugin_id, packageRevision: row.package_revision, title: row.title }
 }
 function draft(row: DraftRow): WorkbenchDraft {
   return { id: row.id, projectId: row.project_id, source: row.source, targetInstanceId: row.target_instance_id, directory: row.directory, title: row.title }
@@ -120,12 +120,12 @@ export class PackageRuntime {
     this.options.changed(target, true)
     return draft(this.draftRow(projectId, id))
   }
-  private package(target: WorkbenchTarget): { row: DraftRow | InstanceRow | { state: string; state_revision: number; enabled: number }; package: PackageFiles } {
+  private package(target: WorkbenchTarget): { row: DraftRow | InstanceRow | { state: string; state_revision: number }; package: PackageFiles } {
     this.root(target.projectId)
     if (target.kind === 'instance' && isPresetWorkbenchId(target.id)) {
       const pkg = readPackage(this.options.presetRoot, join(this.options.presetRoot, target.id))
       if (pkg.manifest.pluginId !== presetWorkbench(target.id).pluginId) throw new Error('App 工作台包标识不匹配，请重新构建应用')
-      return { row: { state: '{}', state_revision: 0, enabled: 1 }, package: pkg }
+      return { row: { state: '{}', state_revision: 0 }, package: pkg }
     }
     const row = target.kind === 'draft' ? this.draftRow(target.projectId, target.id) : this.instanceRow(target.projectId, target.id)
     const directory = 'directory' in row ? row.directory : `${ROOT}/packages/${row.package_revision}`
@@ -137,9 +137,9 @@ export class PackageRuntime {
     const result = this.package(target)
     return this.snapshot(target, result.row, result.package)
   }
-  private snapshot(target: WorkbenchTarget, row: { state: string; state_revision: number; enabled?: number }, pkg: PackageFiles): WorkbenchPageSnapshot {
+  private snapshot(target: WorkbenchTarget, row: { state: string; state_revision: number }, pkg: PackageFiles): WorkbenchPageSnapshot {
     const pageUrl = `app://workbench/${target.projectId}/${target.kind}/${target.id}/${pkg.revision}/${pkg.manifest.entry.split('/').map(encodeURIComponent).join('/')}`
-    return { target, manifest: pkg.manifest, packageRevision: pkg.revision, state: parseJsonState(JSON.parse(row.state)), stateRevision: row.state_revision, pageUrl, enabled: 'enabled' in row ? row.enabled === 1 : true }
+    return { target, manifest: pkg.manifest, packageRevision: pkg.revision, state: parseJsonState(JSON.parse(row.state)), stateRevision: row.state_revision, pageUrl }
   }
   private storePackage(root: string, pkg: PackageFiles): void {
     const destination = join(root, ROOT, 'packages', pkg.revision)
@@ -212,7 +212,6 @@ export class PackageRuntime {
   updateState(target: WorkbenchTarget, state: JsonValue, expectedRevision: number): WorkbenchPageSnapshot {
     if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw new Error('状态版本无效')
     const result = this.package(target)
-    if ('enabled' in result.row && !result.row.enabled) throw new Error('工作台已停用，请先启用')
     if (!result.package.manifest.capabilities.includes('state.write')) throw new Error('此工作台未声明 state.write 能力')
     const encoded = JSON.stringify(parseJsonState(state))
     const table = target.kind === 'draft' ? 'workbench_drafts' : 'workbench_instances'
@@ -221,12 +220,6 @@ export class PackageRuntime {
     const snapshot = this.snapshot(target, { ...result.row, state: encoded, state_revision: expectedRevision + 1 }, result.package)
     this.options.changed(target, false, snapshot)
     return snapshot
-  }
-  setEnabled(projectId: string, instanceId: string, enabled: boolean): WorkbenchInstance {
-    this.instanceRow(projectId, instanceId)
-    this.db().prepare('UPDATE workbench_instances SET enabled=? WHERE id=? AND project_id=?').run(enabled ? 1 : 0, instanceId, projectId)
-    this.options.changed({ projectId, kind: 'instance', id: instanceId }, true)
-    return instance(this.instanceRow(projectId, instanceId))
   }
   deleteDraft(projectId: string, draftId: string): void {
     this.draftRow(projectId, draftId)
@@ -254,7 +247,6 @@ export class PackageRuntime {
       const target = parseTarget({ projectId, kind, id })
       const path = packagePath(assets.join('/'))
       const result = this.package(target)
-      if ('enabled' in result.row && !result.row.enabled) return new Response('工作台已停用', { status: 403, headers })
       if (revision !== result.package.revision) return new Response('草稿已变化，请刷新预览', { status: 409, headers })
       if (path === '__studio_sdk.js') return new Response(PAGE_SDK, { headers: { ...headers, 'Content-Type': 'text/javascript; charset=utf-8' } })
       const content = result.package.files.get(path)

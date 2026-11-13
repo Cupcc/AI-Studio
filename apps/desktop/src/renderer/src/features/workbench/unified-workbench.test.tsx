@@ -12,8 +12,8 @@ import { pageWithEnvironment } from './WorkbenchPage'
 import { useWorkbenches, watchWorkbenches } from './store'
 
 const project = { id: 'p', name: 'Project', localPath: '/p', displayPath: '/p', canonicalPath: '/p', createdAt: '', lastOpenedAt: '' }
-const custom = { id: 'one', projectId: 'p', pluginId: 'notes', packageRevision: 'r1', title: '随手记', enabled: true, viewId: 'workbench:one', origin: 'custom', kind: 'instance', icon: 'preview', editable: true, canDisable: true } as const
-const draft = { id: 'draft', projectId: 'p', source: 'template', title: '新工作台', directory: '/p/draft', targetInstanceId: null, viewId: 'workbench-draft:draft', origin: 'custom', kind: 'draft', icon: 'pencil', editable: true, canDisable: false } as const
+const custom = { id: 'one', projectId: 'p', pluginId: 'notes', packageRevision: 'r1', title: '随手记', viewId: 'workbench:one', origin: 'custom', kind: 'instance', icon: 'preview', editable: true } as const
+const draft = { id: 'draft', projectId: 'p', source: 'template', title: '新工作台', directory: '/p/draft', targetInstanceId: null, viewId: 'workbench-draft:draft', origin: 'custom', kind: 'draft', icon: 'pencil', editable: true } as const
 const catalog: WorkbenchCatalog = [...PRESET_WORKBENCHES, custom, draft]
 const originalShell = useProjectShell.getState()
 let api: StudioApi['workbench'], change: (event: WorkbenchChange) => void, detach: () => void
@@ -23,7 +23,7 @@ const presetSnapshot = (): WorkbenchSnapshot => ({
   page: {
     target: { projectId: 'p', kind: 'instance', id: 'architecture' },
     manifest: { schemaVersion: 1, sdkVersion: 1, pluginId: 'studio-architecture', version: '1.0.0', title: '架构', entry: 'index.html', capabilities: ['state.read', 'project.knowledge.read'] },
-    packageRevision: 'r1', stateRevision: 0, state: {}, pageUrl: 'app://workbench/architecture/index.html', enabled: true,
+    packageRevision: 'r1', stateRevision: 0, state: {}, pageUrl: 'app://workbench/architecture/index.html',
     resources: { knowledge: { projectId: 'p', viewId: 'architecture', revision: 1, status: 'ready', error: null,
       snapshot: { projectId: 'p', viewId: 'architecture', catalog: catalogEntry('architecture'), revision: 1, updatedAt: 1,
         knowledge: { schemaVersion: 1, viewId: 'architecture', data: { summary: '当前架构信息' } },
@@ -37,7 +37,7 @@ beforeEach(() => {
   api = {
     startAgent: vi.fn(), listAgents: vi.fn(), getAgent: vi.fn(), stopAgent: vi.fn(),
     list: vi.fn(async () => catalog), getSnapshot: vi.fn(async () => presetSnapshot()), getContext: vi.fn(),
-    listRemoved: vi.fn(async () => []), rename: vi.fn(), move: vi.fn(), setVisible: vi.fn(), deleteDraft: vi.fn(), deleteInstance: vi.fn(), addTemplate: vi.fn(), createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(), setEnabled: vi.fn(),
+    listRemoved: vi.fn(async () => []), rename: vi.fn(), move: vi.fn(), setVisible: vi.fn(), deleteDraft: vi.fn(), deleteInstance: vi.fn(), addTemplate: vi.fn(), createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(),
     onChanged: vi.fn(listener => { change = listener; return () => {} })
   }
   Object.defineProperty(window, 'studio', { configurable: true, value: { workbench: api, project: { updateUiState: vi.fn(async () => defaultUiState()) } } })

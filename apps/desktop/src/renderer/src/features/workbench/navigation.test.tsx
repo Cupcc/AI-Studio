@@ -10,8 +10,8 @@ import { useWorkbenches } from './store'
 import { WorkbenchNavigation } from './WorkbenchNavigation'
 
 const project = { id: 'p', name: 'Project', localPath: '/p', displayPath: '/p', canonicalPath: '/p', createdAt: '', lastOpenedAt: '' }
-const draft = { id: 'draft', projectId: 'p', source: 'template', title: '笔记设计', directory: '/p/draft', targetInstanceId: null, viewId: 'workbench-draft:draft', origin: 'custom', kind: 'draft', runtime: 'web', icon: 'pencil', editable: true, canDisable: false } as const
-const selection = { id: 'sel', projectId: 'p', pluginId: 'product-selection', packageRevision: 'r'.repeat(64), title: '选品工作台', enabled: true, viewId: 'workbench:sel', origin: 'custom', kind: 'instance', icon: 'preview', editable: true, canDisable: true } as const
+const draft = { id: 'draft', projectId: 'p', source: 'template', title: '笔记设计', directory: '/p/draft', targetInstanceId: null, viewId: 'workbench-draft:draft', origin: 'custom', kind: 'draft', runtime: 'web', icon: 'pencil', editable: true } as const
+const selection = { id: 'sel', projectId: 'p', pluginId: 'product-selection', packageRevision: 'r'.repeat(64), title: '选品工作台', viewId: 'workbench:sel', origin: 'custom', kind: 'instance', icon: 'preview', editable: true } as const
 const originalShell = useProjectShell.getState()
 let catalog: WorkbenchCatalog, removed: WorkbenchEntry[], api: StudioApi['workbench']
 function Navigation() {
@@ -24,7 +24,7 @@ beforeEach(() => {
   useWorkbenches.setState({ catalogs: {}, snapshots: {}, errors: {}, snapshotErrors: {}, loading: {}, hosts: {} })
   api = {
     startAgent: vi.fn(), listAgents: vi.fn(), getAgent: vi.fn(), stopAgent: vi.fn(),
-    list: vi.fn(async () => catalog), listRemoved: vi.fn(async () => removed), getSnapshot: vi.fn(), getContext: vi.fn(), createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(), setEnabled: vi.fn(), onChanged: vi.fn(),
+    list: vi.fn(async () => catalog), listRemoved: vi.fn(async () => removed), getSnapshot: vi.fn(), getContext: vi.fn(), createDraft: vi.fn(), applyDraft: vi.fn(), updateState: vi.fn(), onChanged: vi.fn(),
     addTemplate: vi.fn(async () => { catalog = [...catalog, selection]; return selection }),
     deleteInstance: vi.fn(async ref => { removed = removed.filter(entry => entry.viewId !== ref.viewId); return catalog }),
     rename: vi.fn(async ({ ref, title }) => { catalog = catalog.map(entry => entry.viewId === ref.viewId ? { ...entry, title } : entry); return catalog }),
@@ -130,10 +130,21 @@ it('moves via menu and Alt+Arrow, and reports failed saves without changing the 
   expect(list().querySelector('button')?.textContent).toBe('概览')
 })
 
-it('removes the selected preset, selects a neighbor and restores it using the add chooser', async () => {
+it('removes the selected preset after confirmation, selects a neighbor and restores it using the add chooser', async () => {
   render(<Navigation />)
   await manage('概览')
+  const item = screen.getByRole('menuitem', { name: '移除工作台' })
+  expect(item.className).toContain('workbench-menu__danger')
+  fireEvent.click(item)
+  const dialog = screen.getByRole('dialog', { name: '移除工作台？' })
+  expect(dialog.textContent).toContain('保存的数据和会话历史保留')
+  expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: '取消' }))
+  fireEvent.click(within(dialog).getByRole('button', { name: '取消' }))
+  expect(api.setVisible).not.toHaveBeenCalled()
+  await manage('概览')
   fireEvent.click(screen.getByRole('menuitem', { name: '移除工作台' }))
+  fireEvent.click(within(screen.getByRole('dialog', { name: '移除工作台？' })).getByRole('button', { name: '移除' }))
+  await waitFor(() => expect(api.setVisible).toHaveBeenCalledExactlyOnceWith({ ref: { projectId: 'p', viewId: 'overview' }, visible: false }))
   await waitFor(() => expect(screen.queryByRole('button', { name: '概览' })).toBeNull())
   expect(useProjectShell.getState().uiStates.p?.mainCanvas).toMatchObject({ mode: 'view', viewId: 'progress' })
   fireEvent.click(screen.getByRole('button', { name: '添加工作台' }))
@@ -150,12 +161,12 @@ it('cancels draft deletion, then deletes with confirmation and shows the empty-l
   useProjectShell.setState({ uiStates: { p: { ...defaultUiState(), mainCanvas: { mode: 'view', viewId: draft.viewId, conversation: { kind: 'draft' } } } } })
   render(<Navigation />)
   await manage('草稿：笔记设计')
-  fireEvent.click(screen.getByRole('menuitem', { name: '删除草稿…' }))
+  fireEvent.click(screen.getByRole('menuitem', { name: '删除草稿' }))
   expect(screen.getByRole('dialog').textContent).toContain('项目文件、已有工作台和会话历史会保留')
   fireEvent.click(screen.getByRole('button', { name: '取消' }))
   expect(api.deleteDraft).not.toHaveBeenCalled()
   await manage('草稿：笔记设计')
-  fireEvent.click(screen.getByRole('menuitem', { name: '删除草稿…' }))
+  fireEvent.click(screen.getByRole('menuitem', { name: '删除草稿' }))
   fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: '删除草稿' }))
   await screen.findByText('还没有工作台，点击 + 添加。')
   expect(api.deleteDraft).toHaveBeenCalledExactlyOnceWith({ projectId: 'p', viewId: draft.viewId })
@@ -172,6 +183,7 @@ it('keeps a later workbench selection when an earlier removal finishes', async (
   render(<Navigation />)
   await manage('概览')
   fireEvent.click(screen.getByRole('menuitem', { name: '移除工作台' }))
+  fireEvent.click(within(screen.getByRole('dialog', { name: '移除工作台？' })).getByRole('button', { name: '移除' }))
   fireEvent.click(screen.getByRole('button', { name: '业务流程' }))
   finish()
   await waitFor(() => expect(screen.queryByRole('button', { name: '概览' })).toBeNull())

@@ -14,7 +14,7 @@ const PACKAGES = [
 
 export const PRESET_WORKBENCHES = PACKAGES.map(({ viewId, icon, manifest }) => ({
   viewId, icon, title: manifest.title, pluginId: manifest.pluginId,
-  origin: 'preset', kind: 'instance', enabled: true, editable: false, canDisable: false
+  origin: 'preset', kind: 'instance', editable: false
 } as const))
 export type PresetWorkbenchEntry = typeof PRESET_WORKBENCHES[number]
 export type PresetWorkbenchId = PresetWorkbenchEntry['viewId']
