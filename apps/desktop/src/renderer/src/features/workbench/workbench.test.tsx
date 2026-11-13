@@ -143,6 +143,26 @@ it('keeps a healthy instance silent and offers its actions in the "更多操作"
   await waitFor(() => expect(api.getSnapshot).toHaveBeenCalledTimes(2))
   expect(status().textContent).toBe('正在加载页面…')
 })
+it('reload loads changed files once, even when their snapshot is published first, and remounts unchanged files', async () => {
+  const { emit } = await mount()
+  emit({ type: 'ready' })
+  const first = document.querySelector('iframe')
+  const changed = { ...snapshot, revision: 2, page: { ...snapshot.page, packageRevision: 'r2' } }
+  let finish!: (value: WorkbenchSnapshot) => void
+  vi.mocked(api.getSnapshot).mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+  openMenu()
+  fireEvent.click(screen.getByRole('menuitem', { name: '重新加载' }))
+  // A knowledge-backed read publishes the new package before it returns.
+  act(() => change({ kind: 'snapshot', snapshot: changed }))
+  const second = document.querySelector('iframe')
+  expect(second).not.toBe(first)
+  await act(async () => { finish({ ...changed, revision: 3 }); await new Promise(resolve => setTimeout(resolve, 0)) })
+  expect(document.querySelector('iframe')).toBe(second)
+  snapshot = { ...changed, revision: 4 }
+  openMenu()
+  fireEvent.click(screen.getByRole('menuitem', { name: '重新加载' }))
+  await waitFor(() => expect(document.querySelector('iframe')).not.toBe(second))
+})
 it('disables without confirmation, shows the idle page and enables again', async () => {
   snapshot = makeSnapshot(instance)
   const { emit } = await mount(instance)

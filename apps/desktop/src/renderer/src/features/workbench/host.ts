@@ -56,9 +56,13 @@ export function resetPage(ref: WorkbenchRef): void {
 
 export async function refreshWorkbench(ref: WorkbenchRef): Promise<void> {
   const { update } = liveness(ref)
+  const before = currentHost(ref).page?.packageRevision
   update({ actionError: null, pageStatus: { kind: 'loading' }, connectedRevision: null })
   await useWorkbenches.getState().loadSnapshot(ref)
-  update(host => ({ reload: host.reload + 1, saveStatus: '已读取保存状态', saveFailed: false }))
+  // Changed files bring a new package revision, which remounts the page by itself, possibly from a published
+  // snapshot before this read returns. Remount here only for unchanged files, so the page loads once.
+  const after = currentHost(ref).page?.packageRevision
+  update(host => ({ reload: after !== undefined && after === before ? host.reload + 1 : host.reload, saveStatus: '已读取保存状态', saveFailed: false }))
 }
 
 export function applyWorkbenchDraft(ref: WorkbenchRef): Promise<void> | undefined {

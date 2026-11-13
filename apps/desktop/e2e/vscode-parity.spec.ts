@@ -271,6 +271,8 @@ test('FR-TOOL-004 / DEC-25: ⌘-click links to Browser and Files, find, ⌘K cle
   await expect(workspace().getByRole('combobox', { name: '网址', exact: true })).toHaveValue(url)
 
   await tool('Terminal').click()
+  // Returning to Terminal mounts a new screen that restores its buffer asynchronously; find runs once per input.
+  await expect(workspace().locator('.xterm-rows > div').filter({ hasText: /^PLAIN_42$/ })).toHaveCount(1)
   await workspace().locator('.xterm-helper-textarea').focus()
   await page.keyboard.press('Meta+f')
   const find = workspace().getByRole('search', { name: '在终端中查找' })

@@ -35,6 +35,8 @@ async function capture(mode: string, width: number, height: number) {
   await expect.poll(() => page.evaluate(() => innerWidth)).toBe(width)
   await expect.poll(() => workspace().locator('.navigation').evaluate((el) => el.getBoundingClientRect().width)).toBe(248)
   await expect.poll(() => workspace().locator('.canvas-header').first().evaluate((el) => el.getBoundingClientRect().height)).toBe(48)
+  // Pane widths follow a ResizeObserver measurement of the canvas, so they settle a render after the window.
+  await expect.poll(() => workspace().evaluate((el) => el.scrollWidth)).toBe(width)
   const dims = await workspace().evaluate((el) => {
     const conversation = el.querySelector('.conversation-pane')!.getBoundingClientRect()
     const right = el.querySelector('.right-pane')!.getBoundingClientRect()
