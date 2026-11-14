@@ -30,9 +30,10 @@
   --canvas-header-height: 48px;
   --conversation-max-width: 720px;
   --session-conversation-min-width: 400px;
-  --view-conversation-min-width: 360px;
-  --workbench-min-width: 400px;
-  --sidebar-min-width: 320px;
+  /* Drag minimums; the same values as shared/project/ui-state.ts (Shell Spec v02 §2.2). */
+  --view-conversation-min-width: 320px;
+  --workbench-min-width: 320px;
+  --sidebar-min-width: 280px;
   --sidebar-default-width: 400px;
   --tab-height: 32px;
   --tab-min-width: 96px;
@@ -57,7 +58,10 @@
   --attention-size: 7px;
   --attention-offset: 3px;
   --attention-ring: 0 0 0 2px;
-  --resize-hit-width: 6px;
+  /* Column separators follow VS Code's sash: an 8px hit area, a line that shows after a 300ms hover. */
+  --resize-hit-width: 8px;
+  --resize-line-width: 2px;
+  --resize-hover-delay: 300ms;
   --cli-menu-width: 260px;
   --placeholder-icon-size: 28px;
   --placeholder-text-width: 360px;

@@ -15,7 +15,7 @@ const initial = useProjectShell.getState()
 const projects = ['a', 'b', 'c'].map((id) => ({ id, name: id, canonicalPath: `/projects/${id}`, localPath: `/projects/${id}`, displayPath: `/projects/${id}`, createdAt: '', lastOpenedAt: '' }))
 const bootstrap = (): ShellBootstrap => ({
   projects, recent: [],
-  windowState: { tabs: projects.map((p) => ({ kind: 'project', id: `project:${p.id}`, projectId: p.id })), currentTabId: 'project:a', navCollapsed: false },
+  windowState: { tabs: projects.map((p) => ({ kind: 'project', id: `project:${p.id}`, projectId: p.id })), currentTabId: 'project:a', navCollapsed: false, navWidth: null },
   uiStates: Object.fromEntries(projects.map((p) => [p.id, defaultUiState()]))
 })
 let restoreIntegration: () => void
@@ -112,6 +112,31 @@ describe('Project shell · FR-PROJ/NAV · AC-01', () => {
     fireEvent.click(screen.getByRole('button', { name: '展开导航' }))
     expect(useProjectShell.getState()).toMatchObject({ navKeptOpen: true, windowState: { navCollapsed: false } })
     expect(screen.getByRole('button', { name: '折叠导航' })).toBeTruthy()
+  })
+  it('drags column separators like VS Code sashes, saving the navigation width for the window', async () => {
+    // jsdom has no pointer capture.
+    Object.defineProperty(Element.prototype, 'setPointerCapture', { configurable: true, value: () => {} })
+    await mount()
+    // jsdom: a 1024 wide workspace without gutters holds navigation 248 | conversation 440 | workbench 336.
+    const nav = screen.getByRole('separator', { name: '调整导航宽度' })
+    expect(nav.getAttribute('aria-valuenow')).toBe('248')
+    fireEvent.keyDown(nav, { key: 'ArrowRight' })
+    expect(useProjectShell.getState().windowState.navWidth).toBe(258)
+    expect(screen.getByRole('separator', { name: '调整导航宽度' }).getAttribute('aria-valuenow')).toBe('258')
+    // Dragging the conversation edge: the window keeps the resize cursor and iframes stop taking the pointer until release.
+    const conversation = screen.getByRole('separator', { name: '调整对话列宽度' })
+    fireEvent.pointerDown(conversation, { button: 0, clientX: 700, pointerId: 1 })
+    expect(document.documentElement.classList.contains('is-resizing-columns')).toBe(true)
+    fireEvent.pointerMove(window, { clientX: 660, pointerId: 1 })
+    expect(screen.getByRole('separator', { name: '调整对话列宽度' }).getAttribute('aria-valuenow')).toBe('400')
+    fireEvent.pointerUp(window, { clientX: 660, pointerId: 1 })
+    expect(document.documentElement.classList.contains('is-resizing-columns')).toBe(false)
+    expect(useProjectShell.getState().uiStates.a!.viewConversationWidth).toBe(400)
+    // Double-click resets a column to its default.
+    fireEvent.doubleClick(screen.getByRole('separator', { name: '调整导航宽度' }))
+    expect(useProjectShell.getState().windowState.navWidth).toBeNull()
+    await useProjectShell.getState().flush()
+    expect(api.saveWindowState).toHaveBeenLastCalledWith(expect.objectContaining({ navWidth: null }))
   })
   it('gives every icon-only shell button a prototype v01 tooltip (data-tip) except Tab close buttons', async () => {
     await mount()

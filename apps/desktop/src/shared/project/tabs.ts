@@ -1,6 +1,7 @@
 // Tab rules (specs/project/spec.md §2.2; PROJ-Q2 confirmed, PROJ-Q9/Q10
 // recommendations). Pure functions over WindowState; callers persist.
 import type { ProjectId, ProjectRecord, WindowState, WindowTab } from './types'
+import { NAV_WIDTH, parseWidth } from './ui-state'
 
 export function projectTabId(projectId: ProjectId): string {
   return `project:${projectId}`
@@ -11,7 +12,7 @@ export function newLauncherTabId(): string {
 }
 
 export function initialWindowState(launcherId = newLauncherTabId()): WindowState {
-  return { tabs: [{ id: launcherId, kind: 'launcher' }], currentTabId: launcherId, navCollapsed: false }
+  return { tabs: [{ id: launcherId, kind: 'launcher' }], currentTabId: launcherId, navCollapsed: false, navWidth: null }
 }
 
 export function findProjectTab(state: WindowState, projectId: ProjectId): WindowTab | undefined {
@@ -69,7 +70,7 @@ export function normalizeWindowState(
   }
   const requested = typeof record.currentTabId === 'string' ? record.currentTabId : ''
   const currentTabId = tabs.some((t) => t.id === requested) ? requested : tabs[0]!.id
-  return { tabs, currentTabId, navCollapsed: record.navCollapsed === true }
+  return { tabs, currentTabId, navCollapsed: record.navCollapsed === true, navWidth: parseWidth(record.navWidth, NAV_WIDTH) ?? null }
 }
 
 export function activateTab(state: WindowState, tabId: string): WindowState {

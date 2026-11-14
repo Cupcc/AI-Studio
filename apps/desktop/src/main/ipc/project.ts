@@ -4,7 +4,7 @@ import { BrowserWindow, dialog } from 'electron'
 import { S } from '@shared/project/strings'
 import type { WindowState } from '@shared/project/types'
 import { PATH_MAX_LENGTH, projectContract } from '@shared/ipc/project'
-import { parseUiStatePatch } from '@shared/project/ui-state'
+import { NAV_WIDTH, parseUiStatePatch, parseWidth } from '@shared/project/ui-state'
 import type { CoreServices } from '../services/core'
 import { projectShellFor } from '../services/project'
 import { defineHandlers, IpcValidationError, type HandlerContext } from './registry'
@@ -34,7 +34,7 @@ function parseProjectRef(raw: unknown): { projectId: string } {
 
 function parseWindowState(raw: unknown): WindowState {
   const input = expectRecord(raw)
-  expectOnlyKeys(input, ['tabs', 'currentTabId', 'navCollapsed'])
+  expectOnlyKeys(input, ['tabs', 'currentTabId', 'navCollapsed', 'navWidth'])
   if (!Array.isArray(input.tabs) || input.tabs.length > 500) throw new IpcValidationError('tabs must be an array')
   for (const tab of input.tabs) {
     const t = expectRecord(tab, 'tab')
@@ -45,7 +45,9 @@ function parseWindowState(raw: unknown): WindowState {
   }
   expectString(input.currentTabId, 'currentTabId', { minLength: 1, maxLength: ID_MAX_LENGTH + 20 })
   if (typeof input.navCollapsed !== 'boolean') throw new IpcValidationError('navCollapsed must be a boolean')
-  return input as unknown as WindowState
+  const navWidth = parseWidth(input.navWidth, NAV_WIDTH)
+  if (navWidth === undefined) throw new IpcValidationError('navWidth must be a number or null')
+  return { ...input, navWidth } as unknown as WindowState
 }
 
 export function createProjectFeature(core: Pick<CoreServices, 'database'>, deps: ProjectFeatureDeps = {

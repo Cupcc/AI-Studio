@@ -8,7 +8,7 @@ import { installFilesIntegration } from './integration'
 
 vi.mock('./api', () => ({ filesApi: vi.fn() }))
 const previousWindow = useProjectShell.getState().windowState
-const opened: WindowState = { tabs: [{ id: 'project:fi', kind: 'project', projectId: 'fi' }], currentTabId: 'project:fi', navCollapsed: false }
+const opened: WindowState = { tabs: [{ id: 'project:fi', kind: 'project', projectId: 'fi' }], currentTabId: 'project:fi', navCollapsed: false, navWidth: null }
 let fake: ReturnType<typeof createFakeFiles>
 beforeEach(() => {
   fake = createFakeFiles('fi')
@@ -58,7 +58,7 @@ it('forgets the state of a Project when its tab closes, and ignores events that 
     await useFiles.getState().activate('fi')
     await idle()
     expect(useFiles.getState().projects.fi).toBeDefined()
-    useProjectShell.setState({ windowState: { tabs: [{ id: 'launcher', kind: 'launcher' }], currentTabId: 'launcher', navCollapsed: false } })
+    useProjectShell.setState({ windowState: { tabs: [{ id: 'launcher', kind: 'launcher' }], currentTabId: 'launcher', navCollapsed: false, navWidth: null } })
     expect(useFiles.getState().projects.fi).toBeUndefined()
     expect(fake.mocks.unsubscribe).toHaveBeenCalledWith({ projectId: 'fi', subscriptionId: 's1' })
     fake.emitChanged([''], true)

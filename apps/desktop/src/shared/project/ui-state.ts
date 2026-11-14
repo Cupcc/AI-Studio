@@ -15,12 +15,18 @@ import {
 
 export const UI_STATE_VERSION = 1
 
-/** Shell Spec v02 §2.2. */
-export const SIDEBAR_WIDTH = { min: 320, max: 560, default: 400 } as const
-export const VIEW_CONVERSATION_WIDTH = { min: 360, max: 560, default: 440 } as const
+/** Shell Spec v02 §2.2. Minimums are as narrow as dragging goes; no upper bound other than the room left by the other columns. */
+export const SIDEBAR_WIDTH = { min: 280, max: Number.POSITIVE_INFINITY, default: 400 } as const
+export const VIEW_CONVERSATION_WIDTH = { min: 320, max: Number.POSITIVE_INFINITY, default: 440 } as const
 export const SESSION_CONVERSATION_MIN_WIDTH = 400
-export const WORKBENCH_MIN_WIDTH = 400
-export const NAV_WIDTH = 248
+export const WORKBENCH_MIN_WIDTH = 320
+/** Window-level, like its collapsed state (UX D-14). */
+export const NAV_WIDTH = { min: 200, max: 480, default: 248 } as const
+/**
+ * DEC-33: the navigation collapses for space when the open columns cannot keep these widths beside a navigation of the
+ * default width. They are wider than the drag minimums, so a narrow window hides the navigation before squeezing every column.
+ */
+export const NAV_COLLAPSE_WIDTHS = { viewConversation: 360, workbench: 400, sidebar: 320 } as const
 
 /** PROJ-Q14 recommendation: first expansion shows Files. */
 export const DEFAULT_TOOL: ToolId = 'files'
@@ -93,7 +99,7 @@ export function parseMainCanvas(value: unknown): MainCanvas | null {
   }
 }
 
-function parseWidth(value: unknown, range: { min: number; max: number }): number | null | undefined {
+export function parseWidth(value: unknown, range: { min: number; max: number }): number | null | undefined {
   if (value === null) return null
   if (typeof value !== 'number' || !Number.isFinite(value)) return undefined
   return Math.round(Math.min(range.max, Math.max(range.min, value)))

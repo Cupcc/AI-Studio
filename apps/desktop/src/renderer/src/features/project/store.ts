@@ -35,6 +35,8 @@ export interface ProjectShellState {
   newTab(): void
   cycleTab(delta: 1 | -1): void
   toggleNav(): void
+  /** Saves a dragged navigation width; null resets it to the default. */
+  setNavWidth(width: number | null): void
   setNavSpaceShort(short: boolean): void
   updateUiState(projectId: string, patch: UiStatePatch | null): void
   enterView(projectId: string, viewId: ViewId): void
@@ -148,6 +150,10 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
     // Reopening a navigation that collapsed for space keeps the saved preference; the sidebar then floats instead.
     if (navHidden(s) && !collapsed) { set({ navKeptOpen: true }); return }
     set({ windowState: { ...s.windowState, navCollapsed: !collapsed }, navKeptOpen: collapsed && s.navSpaceShort }); saveWindow()
+  },
+  setNavWidth(width) {
+    if (get().windowState.navWidth === width) return
+    set({ windowState: { ...get().windowState, navWidth: width } }); saveWindow()
   },
   setNavSpaceShort(short) {
     const s = get()

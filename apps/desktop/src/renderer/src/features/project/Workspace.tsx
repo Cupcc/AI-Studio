@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { S, TOOL_NAMES } from '@shared/project/strings'
 import { TOOL_IDS, type UiState, type ViewId } from '@shared/project/types'
-import { currentTool, SIDEBAR_WIDTH, VIEW_CONVERSATION_WIDTH } from '@shared/project/ui-state'
-import { canvasLayout } from '@shared/project/layout'
+import { currentTool } from '@shared/project/ui-state'
+import { canvasLayout, columnWidth, dragSeparator, separatorRange, type CanvasLayout, type ColumnWidths, type SizedColumn } from '@shared/project/layout'
 import { closeRightSidebar, selectTool, toggleWorkbench } from '@shared/project/ui-rules'
 import { Icon } from '../../app/Icon'
 import { useViewTitle } from '../workbench/use-view-title'
@@ -10,28 +10,43 @@ import { Navigation } from '../navigation/Navigation'
 import { useProjectShell } from './store'
 import { useShellIntegration, type ShellSlotProps } from './integration'
 
-function ResizeHandle({ width, min, max, direction, label, onPreview, onCommit }: {
-  width: number; min: number; max: number; direction: 1 | -1; label: string
-  onPreview(width: number | null): void; onCommit(width: number): void
+const SEPARATOR_LABELS: Record<SizedColumn, string> = { nav: S.resizeNav, conversation: S.resizeConversation, sidebar: S.resizeSidebar }
+
+/**
+ * A column edge that drags like a VS Code sash: it pushes the neighbouring columns down to their minimums
+ * (`dragSeparator`), shows its line after a short hover or while dragging, and resets the column on double-click.
+ * While dragging, iframes stop taking the pointer and the whole window keeps the resize cursor (as in VS Code's sash.ts).
+ */
+function ColumnSeparator({ layout, column, onPreview, onCommit }: {
+  layout: CanvasLayout; column: SizedColumn
+  onPreview(widths: ColumnWidths | null): void; onCommit(widths: ColumnWidths): void
 }) {
-  const clamp = (n: number) => Math.max(min, Math.min(max, Math.round(n)))
-  return <div className="resize-handle" role="separator" aria-orientation="vertical" aria-label={label} aria-valuenow={Math.round(width)} aria-valuemin={min} aria-valuemax={Math.floor(max)} tabIndex={0}
+  const { min, max } = separatorRange(layout, column)
+  return <div className={`resize-handle resize-handle--${column}`} role="separator" aria-orientation="vertical" aria-label={SEPARATOR_LABELS[column]}
+    aria-valuenow={Math.round(columnWidth(layout, column))} aria-valuemin={Math.round(min)} aria-valuemax={Math.round(max)} tabIndex={0}
     onKeyDown={(event) => {
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        event.preventDefault(); onCommit(clamp(width + (event.key === 'ArrowRight' ? 10 : -10) * direction))
+        event.preventDefault(); onCommit(dragSeparator(layout, column, event.key === 'ArrowRight' ? 10 : -10))
       }
-    }} onPointerDown={(event) => {
+    }}
+    onDoubleClick={() => onCommit({ [column]: null })}
+    onPointerDown={(event) => {
+      if (event.button !== 0) return
       event.preventDefault()
-      const target = event.currentTarget, start = event.clientX
+      const target = event.currentTarget, start = event.clientX, root = document.documentElement
       target.setPointerCapture(event.pointerId)
-      let next = width
-      const move = (e: PointerEvent) => { next = clamp(width + (e.clientX - start) * direction); onPreview(next) }
-      const finish = () => {
-        target.removeEventListener('pointermove', move); target.removeEventListener('pointerup', finish); target.removeEventListener('pointercancel', cancel)
-        onCommit(next); onPreview(null)
+      target.classList.add('is-active'); root.classList.add('is-resizing-columns')
+      let next: ColumnWidths | null = null
+      const move = (e: PointerEvent) => { next = dragSeparator(layout, column, e.clientX - start); onPreview(next) }
+      // Window listeners still end the drag if a layout change removes this separator mid-drag.
+      const end = (commit: boolean) => {
+        window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', cancel)
+        target.classList.remove('is-active'); root.classList.remove('is-resizing-columns')
+        if (commit && next) onCommit(next)
+        onPreview(null)
       }
-      const cancel = () => { target.removeEventListener('pointermove', move); target.removeEventListener('pointerup', finish); target.removeEventListener('pointercancel', cancel); onPreview(null) }
-      target.addEventListener('pointermove', move); target.addEventListener('pointerup', finish); target.addEventListener('pointercancel', cancel)
+      const up = () => end(true), cancel = () => end(false)
+      window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', cancel)
     }} />
 }
 /** Right tool sidebar: the same column in Session and Project View Mode (DEC-33). */
@@ -70,7 +85,7 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
   const viewTitle = useViewTitle(projectId, ui.mainCanvas.mode === 'view' ? ui.mainCanvas.viewId : 'overview')
   const root = useRef<HTMLDivElement>(null), canvasRef = useRef<HTMLElement>(null)
   const [size, setSize] = useState({ workspace: window.innerWidth, gutter: 0, measured: false })
-  const [drag, setDrag] = useState<{ conversation?: number | null; sidebar?: number | null }>({})
+  const [drag, setDrag] = useState<ColumnWidths | null>(null)
   const [fileViewerHost, setFileViewerHost] = useState<HTMLDivElement | null>(null)
   // Measured before paint so an automatic navigation collapse does not flash.
   useLayoutEffect(() => {
@@ -86,14 +101,27 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
   }, [])
   const view = ui.mainCanvas.mode === 'view'
   const workbench = ui.mainCanvas.mode === 'view' && ui.workbenchOpen
+  // A drag previews its widths; the saved ones apply again when it ends.
+  const width = (column: SizedColumn, saved: number | null) => { const value = drag?.[column]; return value === undefined ? saved : value }
   const layout = canvasLayout({
     workspace: size.workspace, gutter: size.gutter, navExpanded: !shell.windowState.navCollapsed, navKeptOpen: shell.navKeptOpen || !size.measured,
-    workbench, sidebar: ui.sidebarOpen, conversationWidth: drag.conversation ?? ui.viewConversationWidth, sidebarWidth: drag.sidebar ?? ui.sidebarWidth
+    workbench, sidebar: ui.sidebarOpen,
+    navWidth: width('nav', shell.windowState.navWidth), conversationWidth: width('conversation', ui.viewConversationWidth), sidebarWidth: width('sidebar', ui.sidebarWidth)
   })
   const { setNavSpaceShort } = shell
   useEffect(() => { if (active && size.measured) setNavSpaceShort(layout.spaceShort) }, [active, size.measured, layout.spaceShort, setNavSpaceShort])
-  return <div className="project-workspace" ref={root} hidden={!active} data-project-id={projectId}>
+  const commitWidths = (widths: ColumnWidths) => {
+    if (widths.nav !== undefined) shell.setNavWidth(widths.nav)
+    const patch = {
+      ...(widths.conversation !== undefined && widths.conversation !== ui.viewConversationWidth ? { viewConversationWidth: widths.conversation } : {}),
+      ...(widths.sidebar !== undefined && widths.sidebar !== ui.sidebarWidth ? { sidebarWidth: widths.sidebar } : {})
+    }
+    if (Object.keys(patch).length) shell.updateUiState(projectId, patch)
+  }
+  const separator = (column: SizedColumn) => <ColumnSeparator layout={layout} column={column} onPreview={setDrag} onCommit={commitWidths} />
+  return <div className="project-workspace" ref={root} hidden={!active} data-project-id={projectId} style={{ '--nav-width': `${layout.navWidth}px` } as CSSProperties}>
     {layout.nav && <Navigation {...props} />}
+    {layout.nav && separator('nav')}
     <main className={`canvas-mode ${view ? 'canvas-mode--view' : 'canvas-mode--session'} ${workbench ? 'canvas-mode--split' : 'canvas-mode--single'}${layout.overlay ? ' canvas-mode--overlay' : ''}`} ref={canvasRef} style={{ '--conversation-width': `${layout.conversation}px`, '--sidebar-width': `${layout.sidebar}px` } as CSSProperties}>
       <section className="conversation-pane" aria-label={view ? '工作台对话' : '对话'}>
         <header className="canvas-header">{ui.mainCanvas.mode === 'view' && slots.ViewConversationHeader
@@ -106,12 +134,12 @@ export function Workspace({ projectId, active }: { projectId: string; active: bo
           ? slots.ViewConversation ? <slots.ViewConversation {...props} viewId={ui.mainCanvas.viewId} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{S.draftTitle}</h2><p>{S.placeholderViewConversation}</p></div>
           : slots.Conversation ? <slots.Conversation {...props} /> : <div className="canvas-placeholder"><Icon name="chat" size={28} /><h2>{ui.mainCanvas.mode === 'draft' ? S.draftTitle : '对话'}</h2><p>{ui.mainCanvas.mode === 'draft' ? S.placeholderDraft : S.placeholderConversation}</p></div>}
         </div>
-        {workbench && <ResizeHandle width={layout.conversation} min={VIEW_CONVERSATION_WIDTH.min} max={layout.conversationMax} direction={1} label={S.resizeConversation} onPreview={(w) => setDrag({ conversation: w })} onCommit={(w) => shell.updateUiState(projectId, { viewConversationWidth: w })} />}
+        {workbench && separator('conversation')}
       </section>
       {ui.mainCanvas.mode === 'view' && workbench && <WorkbenchColumn props={props} ui={ui} viewId={ui.mainCanvas.viewId} />}
       <div className="file-viewer-column" ref={setFileViewerHost} />
       {ui.sidebarOpen && <div className="right-pane">
-        <ResizeHandle width={layout.sidebar} min={SIDEBAR_WIDTH.min} max={layout.sidebarMax} direction={-1} label={S.resizeSidebar} onPreview={(w) => setDrag({ sidebar: w })} onCommit={(w) => shell.updateUiState(projectId, { sidebarWidth: w })} />
+        {separator('sidebar')}
         <ToolSidebar props={props} ui={ui} fileViewerHost={fileViewerHost} />
       </div>}
     </main>

@@ -81,6 +81,7 @@ export const S = {
   close: '关闭',
   resizeSidebar: '调整右侧边栏宽度',
   resizeConversation: '调整对话列宽度',
+  resizeNav: '调整导航宽度',
 
   // Close and quit confirmation (D-10; PROJ-Q6, PROJ-Q7)
   closeTitle: (name: string) => `关闭 ${name}？`,

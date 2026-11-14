@@ -223,9 +223,9 @@ PROJ-Q6 已于 2026-10-13 随 DEC-14 确认：关闭 / 退出清理失败保留�
 | Main Canvas 当前内容 | Project | 以下三种之一：某个 Session 的 Conversation；New Chat 草稿；某个 Project View（含该 View 下左侧 Conversation 所显示的对话：某个 Session，或草稿） | FR-PROJ-003；D-15 |
 | 右侧边栏展开状态 | Project | 右侧边栏是否展开及显示哪个工具，两种模式共用；Project View Mode 下工作台列是否打开 | FR-PROJ-003；03 第 5 节；DEC-33 |
 | 当前工具 | Project | 最近一次选择的工具（Files / Search / Diff / Browser / Terminal），展开时默认显示它（P-C） | FR-PROJ-003；P-C |
-| 右侧边栏宽度 | Project | Session Mode 下，范围 320–560，默认 400 | D-13；Shell 第 2.2 节 |
-| Conversation 列宽度 | Project | Project View Mode 下，范围 360–560，默认 440 | Shell 第 2.2 节 |
-| 左侧导航折叠 | **窗口级** | 切换 Project 时保持不变，不属于任何 Project | 03 第 8 节；D-14 |
+| 右侧边栏宽度 | Project | 两种模式共用，最小 280，默认 400 | D-13；Shell 第 2.2 节；DEC-34 |
+| Conversation 列宽度 | Project | Project View Mode 下，最小 320，默认 440 | Shell 第 2.2 节；DEC-34 |
+| 左侧导航折叠与宽度 | **窗口级** | 切换 Project 时保持不变，不属于任何 Project | 03 第 8 节；D-14；DEC-34 |
 | Tab 集合、顺序、当前 Tab | **窗口级** | 应用重启后是否恢复，见 PROJ-Q1 | — |
 
 不保存、也不恢复的内容：
@@ -284,24 +284,26 @@ Files 查看文件时新增内容列；这一状态下的布局及窄窗口压�
 |---|---|---|---|
 | 窗口 | 设计基准 1280×800，复核 1440×900 | 最小 1024×640 | 达到最小后不再缩小（Shell 第 2.3 节第 3 条） |
 | 顶栏（Project Tab Bar） | 高 40 | 固定 | 所有模式一致 |
-| 左侧导航 | 宽 248 | 固定；折叠后为 0 | 不提供拖拽调整宽度；折叠为窗口级偏好 |
+| 左侧导航 | 宽 248 | 200–480，可拖拽；折叠后为 0 | 宽度与折叠都是窗口级偏好（DEC-34） |
 | 主画布顶栏 | 高 48 | 固定 | 显示当前 Session 或 View 信息，内容归 session / project-view |
 | Session Mode：Conversation 区 | 随窗口伸缩 | 最小 400；正文最大宽 720，居中 | |
-| 右侧边栏（两种模式） | 宽 400 | 320–560，可拖拽 | 按 Project 记忆，两种模式共用；收起时宽度为 0 |
-| Project View Mode：Conversation 列 | 宽 440 | 360–560，可拖拽分隔线 | 按 Project 记忆；工作台列关闭时按 Session Mode 的 Conversation 区伸缩 |
-| Project View Mode：工作台列 | 剩余宽度 | 最小 400 | 位于 Conversation 与右侧边栏之间，可单独关闭（DEC-33） |
+| 右侧边栏（两种模式） | 宽 400 | 最小 280，可拖拽 | 按 Project 记忆，两种模式共用；收起时宽度为 0 |
+| Project View Mode：Conversation 列 | 宽 440 | 最小 320，可拖拽分隔线 | 按 Project 记忆；工作台列关闭时按 Session Mode 的 Conversation 区伸缩 |
+| Project View Mode：工作台列 | 剩余宽度 | 最小 320 | 位于 Conversation 与右侧边栏之间，可单独关闭（DEC-33） |
+
+可拖拽的列没有固定上限。分隔线的位置、推挤顺序与操作见 Shell 第 2.2 节（DEC-34）。
 
 #### 3.4.2 空间不足时的压缩顺序
 
-规则来自 Shell 第 2.3 节（DEC-33）：
+规则来自 Shell 第 2.3 节（DEC-33、DEC-34）：
 
-1. 依次把工作台列、右侧边栏、Conversation 区或列压缩到各自的最小宽度。
-2. 仍放不下时自动折叠左侧导航；折叠导航后仍放不下时，右侧边栏浮在工作台上方。自动折叠只改变显示，不写入窗口级折叠偏好（4.3），空间恢复后导航回来；期间用户点展开按钮，导航按用户选择展开，直到空间恢复或用户再次折叠。
+1. 依次把工作台列、右侧边栏、Conversation 区或列、左侧导航压缩到各自的最小宽度。
+2. 按默认导航宽度 248 核算，各列放不下折叠宽度（工作台模式：Conversation 360、工作台 400、右侧边栏 320）时自动折叠左侧导航；折叠导航后仍放不下时，右侧边栏浮在工作台上方。自动折叠只改变显示，不写入窗口级折叠偏好（4.3），空间恢复后导航回来；期间用户点展开按钮，导航按用户选择展开，直到空间恢复或用户再次折叠。
 3. 不因空间不足关闭右侧边栏或工作台列，也不切换工具：这些开关只由用户操作触发（对应 Product Definition 第 8 节原则 21、22）。
-4. 最小窗口按最小值核算：工作台模式不开右侧边栏为 248 + 360 + 400 = 1008；Session Mode 打开右侧边栏为 248 + 400 + 320 = 968；工作台模式打开右侧边栏需要 360 + 400 + 320 = 1080，超过 1024 − 248，因此会触发第 2 条。
-5. 保存的宽度（用户拖拽值）与实际生效宽度分离：窗口缩小时生效值按上述顺序压缩，保存值不变；窗口恢复变大时回到保存值。
-6. 拖拽调整时的上下限取各自范围与其他列最小值共同决定的较小者，不允许把其他列挤到最小值以下。
-7. 实现为 [`layout.ts`](../../apps/desktop/src/shared/project/layout.ts) 的 `canvasLayout`；Workspace 测量整个 Project 区域的宽度，导航是否因空间折叠由当前 Project 的列计算得出（AI 技术决定，2026-11-13）。
+4. 最小窗口按折叠宽度核算：工作台模式不开右侧边栏为 248 + 360 + 400 = 1008；Session Mode 打开右侧边栏为 248 + 400 + 320 = 968；工作台模式打开右侧边栏需要 360 + 400 + 320 = 1080，超过 1024 − 248，因此会触发第 2 条。折叠后三列的拖拽最小值 320 + 320 + 280 = 920 在 1024 宽也放得下，只有用户在窄窗口手动展开导航时右侧边栏才会浮起。
+5. 保存的宽度（用户拖拽值）与实际生效宽度分离：窗口缩小时生效值按上述顺序压缩，保存值不变；窗口恢复变大时回到保存值。拖拽结束时保存当前可见各列的实际宽度。
+6. 拖拽时对侧各列由近及远依次让出宽度，不会挤到最小值以下（Shell 第 2.2 节）。
+7. 实现为 [`layout.ts`](../../apps/desktop/src/shared/project/layout.ts) 的 `canvasLayout`，拖拽为同文件的 `dragSeparator`（移植自 VS Code SplitView）；Workspace 测量整个 Project 区域的宽度，导航是否因空间折叠由当前 Project 的列计算得出（AI 技术决定，2026-11-13）。
 
 ## 4. 状态与数据
 
@@ -331,8 +333,8 @@ Files 查看文件时新增内容列；这一状态下的布局及窄窗口压�
 | `sidebar_open` | 布尔 | 右侧边栏是否展开，两种模式共用（DEC-33） |
 | `workbench_open` | 布尔，默认是 | Project View Mode 下工作台列是否打开；从导航进入 View 时置为是。旧版本保存的 `view_right_area` 读取时忽略 |
 | `last_tool` | `"files"` / `"search"` / `"diff"` / `"browser"` / `"terminal"` / 空 | 右侧边栏显示的工具；空时用默认工具（PROJ-Q14） |
-| `sidebar_width` | 数值，空表示默认 | 320–560，两种模式共用 |
-| `view_conversation_width` | 数值，空表示默认 | 360–560 |
+| `sidebar_width` | 数值，空表示默认 | 最小 280，两种模式共用 |
+| `view_conversation_width` | 数值，空表示默认 | 最小 320 |
 
 `ui_state` 只保存 ID 与取值，不保存 Session 内容；各工具的内部状态由对应模块在自己的字段中保存。
 
@@ -343,6 +345,7 @@ Files 查看文件时新增内容列；这一状态下的布局及窄窗口压�
 | `tabs` | 有序列表，元素为 `{ kind: "project", project_id }` 或 `{ kind: "launcher" }` |
 | `current_tab` | 当前 Tab |
 | `nav_collapsed` | 用户的左侧导航折叠偏好（D-14，归 navigation spec，此处仅列出存放位置）；因空间不足的自动折叠不写入（3.4.2） |
+| `nav_width` | 拖拽的导航宽度，空表示默认 248；200–480（DEC-34） |
 
 窗口级状态是否持久化到下次启动，见 PROJ-Q1。
 

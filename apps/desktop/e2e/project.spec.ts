@@ -50,9 +50,10 @@ async function capture(mode: string, width: number, height: number, nav = true) 
     }
   })
   expect(dims.total).toBe(dims.window)
-  expect(dims.conversation).toBeGreaterThanOrEqual(mode === 'view' ? 360 : 400)
-  expect(dims.right).toBeGreaterThanOrEqual(320)
-  if (mode === 'view') expect(dims.workbench).toBeGreaterThanOrEqual(400)
+  // Drag minimums (Shell Spec v02 §2.2): conversation 320 beside a workbench (400 alone), workbench 320, sidebar 280.
+  expect(dims.conversation).toBeGreaterThanOrEqual(mode === 'view' ? 320 : 400)
+  expect(dims.right).toBeGreaterThanOrEqual(280)
+  if (mode === 'view') expect(dims.workbench).toBeGreaterThanOrEqual(320)
   await page.screenshot({ path: join(evidence, `project-${mode}-${width}.png`) })
   return dims
 }
@@ -93,21 +94,35 @@ test('FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, t
   // The default glass appearance leaves its 8px canvas gutter (Shell Spec v02 §12), on the left too once the navigation is hidden.
   const gutter = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--canvas-gutter')))
   expect(gutter).toBe(8)
-  // 1024: 1008 wide without the navigation is less than 360 + 400 + 320, so the sidebar floats over the workbench.
-  expect(await capture('view', 1024, 640, false)).toMatchObject({ overlay: true, conversation: 450, workbench: 1024 - 2 * gutter - 450, right: 400 })
+  // 1024: 1008 wide without the navigation still holds the drag minimums 320 + 320 + 280; the workbench, then the sidebar,
+  // then the conversation give way.
+  expect(await capture('view', 1024, 640, false)).toMatchObject({ overlay: false, conversation: 1024 - 2 * gutter - 320 - 280, workbench: 320, right: 280 })
   // 1280: the four columns fit once the navigation is collapsed; the workbench takes the rest.
   expect(await capture('view', 1280, 800, false)).toMatchObject({ overlay: false, conversation: 450, workbench: 1280 - 2 * gutter - 450 - 400, right: 400 })
-  // 1440: all four fit; the workbench shrinks to its minimum first, then the sidebar gives way.
-  expect(await capture('view', 1440, 900)).toMatchObject({ overlay: false, conversation: 450, workbench: 400, right: 1440 - 248 - gutter - 450 - 400 })
+  // 1440: all four fit and the workbench takes the rest.
+  expect(await capture('view', 1440, 900)).toMatchObject({ overlay: false, conversation: 450, workbench: 1440 - 248 - gutter - 450 - 400, right: 400 })
+  // Dragging the conversation edge across the workbench page pushes the workbench to its minimum, then the sidebar (VS Code sash).
+  const edge = (await workspace().getByRole('separator', { name: '调整对话列宽度' }).boundingBox())!
+  await page.mouse.move(edge.x + edge.width / 2, edge.y + 300); await page.mouse.down()
+  await page.mouse.move(edge.x + edge.width / 2 + 100, edge.y + 300, { steps: 5 }); await page.mouse.up()
+  const pushed = 100 - (1440 - 248 - gutter - 450 - 400 - 320)
+  expect(await capture('view', 1440, 900)).toMatchObject({ conversation: 550, workbench: 320, right: 400 - pushed })
   await expect(workspace().getByRole('button', { name: '架构', exact: true })).toHaveAttribute('aria-current', 'page')
   await page.getByRole('tab', { name: 'Beta' }).click()
   await expect(workspace().getByRole('button', { name: 'Diff', exact: true })).toHaveAttribute('aria-pressed', 'true')
   expect(await capture('session', 1024, 640)).toMatchObject({ workbench: null, right: 1024 - 248 - gutter - 400 })
   expect(await capture('session', 1280, 800)).toMatchObject({ workbench: null, right: 410 })
   await capture('session', 1440, 900)
+  // The navigation edge drags too; its width is kept for the window.
+  const navEdge = (await workspace().getByRole('separator', { name: '调整导航宽度' }).boundingBox())!
+  await page.mouse.move(navEdge.x + navEdge.width / 2, navEdge.y + 300); await page.mouse.down()
+  await page.mouse.move(navEdge.x + navEdge.width / 2 + 52, navEdge.y + 300, { steps: 4 }); await page.mouse.up()
+  const navWidth = () => workspace().locator('.navigation').evaluate((el) => el.getBoundingClientRect().width)
+  await expect.poll(navWidth).toBe(300)
   const boot = await page.evaluate(() => window.studio.project.bootstrap())
+  expect(boot.windowState.navWidth).toBe(300)
   const alpha = boot.projects.find((p) => p.name === 'Alpha')!, beta = boot.projects.find((p) => p.name === 'Beta')!, gamma = boot.projects.find((p) => p.name === 'Gamma')!
-  expect(boot.uiStates[alpha.id]).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'architecture' }, workbenchOpen: true, sidebarOpen: true, lastTool: 'terminal', viewConversationWidth: 450 })
+  expect(boot.uiStates[alpha.id]).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'architecture' }, workbenchOpen: true, sidebarOpen: true, lastTool: 'terminal', viewConversationWidth: 550 })
   expect(boot.uiStates[beta.id]).toMatchObject({ mainCanvas: { mode: 'draft' }, sidebarOpen: true, lastTool: 'diff', sidebarWidth: 410 })
   expect(boot.uiStates[gamma.id]).toMatchObject({ mainCanvas: { mode: 'view', viewId: 'progress' }, workbenchOpen: true, sidebarOpen: false })
   await page.getByRole('button', { name: '折叠导航' }).click()
@@ -118,6 +133,7 @@ test('FR-PROJ-001/003, FR-NAV-001/002 · AC-01: three isolated Projects, tabs, t
   await expect(page.getByRole('button', { name: '展开导航' })).toBeVisible()
   await expect(workspace().getByRole('button', { name: 'Diff', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: '展开导航' }).click()
+  await expect.poll(navWidth).toBe(300)
   await page.getByRole('tab', { name: 'Alpha' }).click()
   await expect(workspace().getByRole('button', { name: '架构', exact: true })).toHaveAttribute('aria-current', 'page')
   await expect(workspace().getByRole('tab', { name: 'Terminal 1', exact: true })).toBeVisible()

@@ -10,8 +10,8 @@ vi.mock('./api', () => ({ diffApi: vi.fn() }))
 const previousWindow = useProjectShell.getState().windowState
 afterEach(() => { useProjectShell.setState({ windowState: previousWindow }); useDiff.getState().forget('p') })
 
-const opened: WindowState = { tabs: [{ id: 'project:p', kind: 'project', projectId: 'p' }], currentTabId: 'project:p', navCollapsed: false }
-const closedTabs: WindowState = { tabs: [{ id: 'launcher', kind: 'launcher' }], currentTabId: 'launcher', navCollapsed: false }
+const opened: WindowState = { tabs: [{ id: 'project:p', kind: 'project', projectId: 'p' }], currentTabId: 'project:p', navCollapsed: false, navWidth: null }
+const closedTabs: WindowState = { tabs: [{ id: 'launcher', kind: 'launcher' }], currentTabId: 'launcher', navCollapsed: false, navWidth: null }
 
 it('routes service events to the active Project, forgets it when its tab closes and stops after uninstall', async () => {
   const fake = fakeDiffApi()

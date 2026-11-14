@@ -25,7 +25,7 @@
 .project-tab__activate:focus-visible, .project-tab__close:focus-visible { outline-offset: -2px; }
 
 /* Left navigation */
-.project-workspace { display: flex; height: 100%; min-width: 0; }
+.project-workspace { position: relative; display: flex; height: 100%; min-width: 0; }
 .project-workspace[hidden] { display: none; }
 .navigation { position: relative; display: flex; flex-direction: column; flex: 0 0 var(--nav-width); width: var(--nav-width); min-height: 0; padding: var(--space-3) var(--space-2-5) 0; background: var(--color-nav); border-right: 1px solid var(--color-nav-line); }
 .navigation__new-chat { position: relative; flex: none; margin-bottom: var(--space-2-5); }
@@ -92,10 +92,18 @@
 .tool-switcher { display: flex; align-items: center; gap: var(--space-0); }
 .tool-switcher__divider { flex: none; width: 1px; height: var(--vsep-height); margin: 0 var(--space-1); background: var(--color-border); }
 .right-area__content { flex: 1; min-height: 0; overflow: auto; }
-.resize-handle { position: absolute; top: 0; bottom: 0; width: var(--resize-hit-width); z-index: var(--z-handle); cursor: col-resize; touch-action: none; }
+/* Column separators, after VS Code's sash.css (MIT): the line shows after a hover delay, at once while dragging.
+   During a drag the whole window keeps the resize cursor and iframes (workbench pages) stop taking the pointer. */
+.resize-handle { position: absolute; top: 0; bottom: 0; width: var(--resize-hit-width); z-index: var(--z-handle); cursor: col-resize; touch-action: none; outline: none; }
+.resize-handle::before { content: ''; position: absolute; top: 0; bottom: 0; left: calc(50% - var(--resize-line-width) / 2); width: var(--resize-line-width); background: transparent; pointer-events: none; transition: background-color .1s ease-out; }
+.resize-handle:hover::before { background: var(--color-focus-ring); transition-delay: var(--resize-hover-delay); }
+.resize-handle:is(.is-active, :focus-visible)::before { background: var(--color-focus-ring); transition-delay: 0s; }
+@media (prefers-reduced-motion: reduce) { .resize-handle::before { transition-duration: 0s; } }
+.resize-handle--nav { left: calc(var(--nav-width) - var(--resize-hit-width) / 2); }
 .conversation-pane > .resize-handle { right: calc(var(--resize-hit-width) / -2); }
 .right-pane > .resize-handle { left: calc(var(--resize-hit-width) / -2); }
-.resize-handle:hover, .resize-handle:focus-visible { background: var(--color-focus-ring-soft); }
+:root.is-resizing-columns, :root.is-resizing-columns * { cursor: col-resize !important; user-select: none !important; }
+:root.is-resizing-columns iframe { pointer-events: none !important; }
 .canvas-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1-5); height: 100%; padding: 0 var(--placeholder-padding); text-align: center; color: var(--color-text-muted); }
 .canvas-placeholder > svg { width: var(--placeholder-icon-size); height: var(--placeholder-icon-size); }
 .canvas-placeholder h2 { margin: var(--space-2) 0 0; font-size: var(--font-size-lg); font-weight: 500; color: var(--color-text); text-wrap: balance; }

@@ -45,7 +45,7 @@ beforeEach(() => {
     onSummaryChanged: () => () => {}, onTranscriptChanged: () => () => {}, onProvidersChanged: () => () => {}
   } as unknown as SessionApi
   Object.defineProperty(window, 'studio', { configurable: true, value: { session: api, project: { updateUiState: async ({ patch }: { patch: object }) => ({ ...defaultUiState(), ...patch }) } } as unknown as StudioApi })
-  useProjectShell.setState({ projects: { p: project }, windowState: { tabs: [{ kind: 'project', id: 'project:p', projectId: 'p' }], currentTabId: 'project:p', navCollapsed: false } })
+  useProjectShell.setState({ projects: { p: project }, windowState: { tabs: [{ kind: 'project', id: 'project:p', projectId: 'p' }], currentTabId: 'project:p', navCollapsed: false, navWidth: null } })
   show({ mode: 'draft' })
 })
 afterEach(async () => { cleanup(); await flushSessionDrafts(); await useProjectShell.getState().flush(); vi.unstubAllGlobals() })

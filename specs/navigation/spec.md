@@ -61,9 +61,9 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
   - New Chat 的草稿、Default CLI 取值与设置、CLI 下拉菜单内容、不可用 CLI 的说明 → `specs/chat/spec.md`（本 spec 只规定按钮放在哪里）。
   - Session 状态的含义、来源、优先级与清除规则；Session 标题的来源（CLI 原生名称或客户端生成）；Rename 的持久化 → `specs/session/spec.md`。
   - Project View 的内容、Conversation 列、最近对话块、Preview → `specs/project-view/spec.md`（后续 task）。
-  - Tab 条、窗口尺寸与压缩顺序、状态保存 → `specs/project/spec.md`。导航宽度 248 与折叠后为 0 引用其 3.4 节。
+  - Tab 条、窗口尺寸与压缩顺序、状态保存 → `specs/project/spec.md`。导航宽度（默认 248，可拖拽）与折叠后为 0 引用其 3.4 节。
   - 色值、字体、图标、圆角（Visual Direction 第 1 节）。
-- V1 范围外（文档未要求，本 spec 不设计）：Session 搜索 / 过滤、删除 / 归档 Session（NAV-Q9）、拖拽排序、导航宽度拖拽、右键菜单、跨 Project 的统一列表（01 第 4 节）。
+- V1 范围外（文档未要求，本 spec 不设计）：Session 搜索 / 过滤、删除 / 归档 Session（NAV-Q9）、拖拽排序、右键菜单、跨 Project 的统一列表（01 第 4 节）。
 
 ## 3. 行为细则
 
@@ -71,7 +71,7 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
 
 ### FR-NAV-001 导航区域划分
 
-宽度 248，固定（Shell 第 2.2 节）。自上而下：
+默认宽 248，可拖拽右侧边缘调整为 200–480，宽度为窗口级偏好（Shell 第 2.2 节；[DEC-34](<../../docs/07. Decisions.md#dec-34-列宽拖拽对齐-vs-code>)）。自上而下：
 
 | 序 | 区域 | 尺寸 | 说明 | 来源 |
 |---|---|---|---|---|
@@ -87,7 +87,7 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
 1. 两个区域用分隔线明确划分，上部为工作台，下部为 Session History（FR-NAV-001）；New Chat 位于导航顶部，其下依次是工作台与 Session History（03 第 8 节）。
 2. 只有 Session History 区域滚动；New Chat 与 工作台 区域固定在上方，不随列表滚动（提案，与 03 第 8 节“Session History 可持续增长”一致）。工作台 增加自定义 View（FR-VIEW-002，P1）后的区域高度策略见 NAV-Q7。
 3. 导航内容属于**当前 Project**：切换 Tab 时 工作台 与 Session History 同时切换为该 Project 的内容，列表与高亮互不混淆（FR-PROJ-002；AC-01）。导航所需的数据按 `project_id` 取用，不使用全局“当前列表”（技术方案，待实现确认）。
-4. 宽度稳定：展开状态下始终为 248，不随内容、窗口宽度变化（03 第 8 节“宽度稳定”；Shell 第 2.2 节）。
+4. 宽度稳定：展开状态下保持用户设定的宽度（默认 248），不随内容变化；只在其他列都已压到最小时随窗口收窄（03 第 8 节“宽度稳定”；Shell 第 2.2、2.3 节）。
 5. 启动页 Tab 激活时没有当前 Project，导航不显示内容；相关按钮的呈现见 `specs/project/spec.md` 3.2.5 与 PROJ-Q2。
 
 ### FR-NAV-002 Project View Navigation
@@ -266,7 +266,7 @@ NAV-Q13 的名称对照：规格正文继续使用左列的英文概念名，界
 1. **按钮位置**：折叠 / 展开按钮位于顶栏左侧、窗口控制区之后（macOS 为交通灯之后），尺寸 30×28，侧栏图标；展开与折叠使用同一个按钮、同一位置。状态 Default / Hover / Focus。
 2. **折叠**：点击后左侧导航完全隐藏，宽度变为 0；Main Canvas 获得空间，已保存的右侧边栏宽度与 Conversation 列宽度不变，Main Canvas 的伸缩与压缩遵循 `specs/project/spec.md` 3.4。
 3. **折叠后顶栏保留**：展开按钮，其右侧紧邻 New Chat 按钮，然后是 Project Tabs（Shell 第 3 节）。New Chat 按钮的行为同导航中的主区，使用 Default CLI；是否带 CLI 下拉见 NAV-Q8。
-4. **展开**：点击展开按钮恢复 248 宽度，列表滚动位置与高亮保持。展开会占用 Main Canvas 宽度，窗口宽度不足时按 `specs/project/spec.md` 3.4.2 压缩各列，不会自动关闭右侧边栏或工作台列。
+4. **展开**：点击展开按钮恢复折叠前的宽度，列表滚动位置与高亮保持。展开会占用 Main Canvas 宽度，窗口宽度不足时按 `specs/project/spec.md` 3.4.2 压缩各列，不会自动关闭右侧边栏或工作台列。
 5. **注意力点**：仅在**折叠**状态下，当前 Project 存在 Needs Input、Error 或 Completed Unread 的 Session 时，展开按钮右上角显示一个 7px 的点；优先级为 Needs Input > Error > Completed Unread，与 Tab 注意力点相同，不显示数量与 Running（03 第 8 节；Shell 第 3、5 节）。
    - 数据来自 session 模块的 `getProjectAttention(current_project_id)`（5.1），导航只订阅并渲染。
    - 只反映**当前** Project；其他 Project 的状态在各自 Tab 的点上显示（`specs/project/spec.md` 3.2.3）。

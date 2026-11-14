@@ -106,19 +106,19 @@ async function assertLayout(state: string, kind: Kind, size: { width: number; he
   expect(m.document).toBeLessThanOrEqual(m.innerWidth)
   expect(m.workspace).toBe(m.innerWidth)
   expect(m.topbar).toBe(40)
-  // DEC-33: a workbench beside the tool sidebar needs 360 + 400 + 320; below 1440 the navigation collapses for it,
-  // and at 1024 the sidebar also floats over the workbench.
+  // DEC-33: the navigation collapses when a workbench beside the tool sidebar cannot keep 360 + 400 + 320, so below 1440;
+  // without it the columns' drag minimums (320 + 320 + 280) fit even at 1024, so the sidebar does not float.
   const label = `${state} ${size.width}`
   expect(m.nav, label).toBe(kind === 'view-tool' && size.width < 1440 ? null : 248)
-  expect(m.overlay, label).toBe(kind === 'view-tool' && size.width === 1024 ? 1 : 0)
+  expect(m.overlay, label).toBe(0)
   expect(m.headers.length).toBeGreaterThan(0)
   for (const height of m.headers) expect(height).toBe(48)
   const view = kind === 'view' || kind === 'view-tool'
-  expect(m.conversation, label).toBeGreaterThanOrEqual(view ? 360 : 400)
-  if (view) expect(m.workbench, label).toBeGreaterThanOrEqual(400)
+  expect(m.conversation, label).toBeGreaterThanOrEqual(view ? 320 : 400)
+  if (view) expect(m.workbench, label).toBeGreaterThanOrEqual(320)
   else expect(m.workbench).toBeNull()
   if (kind === 'session' || kind === 'view') expect(m.right).toBeNull()
-  else expect(m.right, label).toBeGreaterThanOrEqual(320)
+  else expect(m.right, label).toBeGreaterThanOrEqual(280)
   if (m.column !== null) expect(m.column).toBeLessThanOrEqual(720 + 2 * 24)
   if (m.composer !== null) expect(m.composer).toBeLessThanOrEqual(720)
   // Shell Spec v02 §2.2: message column content and composer share left and right edges
@@ -307,7 +307,8 @@ test('FR-TOOL-001 / FR-VIEW-005 · AC-07: Files viewer column in View Mode and S
   await expect(viewer()).toHaveCount(0)
   await openFile()
   await expect.poll(treeWidth).toBeCloseTo(viewTree, 0)
-  expect((await widths())[1]).toBeGreaterThanOrEqual(400 - 0.5)
+  // The content keeps the workbench's drag minimum (Shell Spec v02 §2.2).
+  expect((await widths())[1]).toBeGreaterThanOrEqual(320 - 0.5)
   expect((await widths())[1]).toBeCloseTo(viewContent!, 0)
 })
 

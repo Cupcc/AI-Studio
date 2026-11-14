@@ -70,6 +70,8 @@ export interface WindowState {
   tabs: WindowTab[]
   currentTabId: string
   navCollapsed: boolean
+  /** Dragged navigation width; null = default. */
+  navWidth: number | null
 }
 
 export type OpenFailureReason = 'not_found' | 'not_directory' | 'unreadable'

@@ -27,7 +27,7 @@ it('drops cached terminals when the Project tab closes and creates a new first s
   vi.mocked(terminalApi).mockReturnValue(api as unknown as TerminalApi)
   vi.mocked(diffApi).mockReturnValue({ onInvalidated: vi.fn(() => () => {}), onWatchChanged: vi.fn(() => () => {}) } as unknown as ReturnType<typeof diffApi>)
   vi.mocked(filesApi).mockReturnValue({ onChanged: vi.fn(() => () => {}), onWatchChanged: vi.fn(() => () => {}) } as unknown as ReturnType<typeof filesApi>)
-  const opened: WindowState = { tabs: [{ id: 'project:lifecycle', kind: 'project', projectId: 'lifecycle' }], currentTabId: 'project:lifecycle', navCollapsed: false }
+  const opened: WindowState = { tabs: [{ id: 'project:lifecycle', kind: 'project', projectId: 'lifecycle' }], currentTabId: 'project:lifecycle', navCollapsed: false, navWidth: null }
   useProjectShell.setState({ windowState: opened })
   const dispose = installToolsIntegration()
   try {
@@ -40,7 +40,7 @@ it('drops cached terminals when the Project tab closes and creates a new first s
     useReferenceInspector.setState({ current: inspected })
     await useTerminals.getState().open('lifecycle')
     expect(useTerminals.getState().projects.lifecycle?.activeId).toBe('t1')
-    useProjectShell.setState({ windowState: { tabs: [{ id: 'launcher', kind: 'launcher' }], currentTabId: 'launcher', navCollapsed: false } })
+    useProjectShell.setState({ windowState: { tabs: [{ id: 'launcher', kind: 'launcher' }], currentTabId: 'launcher', navCollapsed: false, navWidth: null } })
     expect(useTerminals.getState().projects.lifecycle).toBeUndefined()
     expect(useReferenceInspector.getState().current).toBeNull()
     // Resource-cleanup events can arrive after the tab closes.

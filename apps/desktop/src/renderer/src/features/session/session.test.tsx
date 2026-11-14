@@ -37,7 +37,7 @@ beforeEach(() => {
     onSummaryChanged: (listener) => { summaryEvent = listener; return () => {} }, onTranscriptChanged: (listener) => { transcriptEvent = listener; return () => {} }, onProvidersChanged: () => () => {}
   }
   Object.defineProperty(window, 'studio', { configurable: true, value: { session: api, project: { updateUiState: async ({ patch }: { patch: object }) => ({ ...defaultUiState(), ...patch }) } } as unknown as StudioApi })
-  useProjectShell.setState({ projects: { p: project }, uiStates: { p: { ...defaultUiState(), mainCanvas: { mode: 'draft' } } }, windowState: { tabs: [{ kind: 'project', id: 'project:p', projectId: 'p' }], currentTabId: 'project:p', navCollapsed: false } })
+  useProjectShell.setState({ projects: { p: project }, uiStates: { p: { ...defaultUiState(), mainCanvas: { mode: 'draft' } } }, windowState: { tabs: [{ kind: 'project', id: 'project:p', projectId: 'p' }], currentTabId: 'project:p', navCollapsed: false, navWidth: null } })
 })
 afterEach(async () => { cleanup(); await flushSessionDrafts(); await useProjectShell.getState().flush(); disposers.forEach((off) => off()); vi.unstubAllGlobals() })
 
