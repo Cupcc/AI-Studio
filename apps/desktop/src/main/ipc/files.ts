@@ -1,7 +1,11 @@
 import { filesContract } from '@shared/ipc/files'
-import { FILES_LIMITS, FILES_OPERATION_LIMITS, FILES_STAT_LIMIT, parseProjectPath, type FileOpenTarget, type FileReadRequest, type ProjectPath } from '@shared/tools/files'
+import {
+  FILES_LIMITS, FILES_OPERATION_LIMITS, FILES_STAT_LIMIT, FILES_UNSAVED_LIMIT, parseProjectPath,
+  type FileEncoding, type FileOpenTarget, type FileReadRequest, type FilesPreferences, type FileWriteRequest, type ProjectPath
+} from '@shared/tools/files'
 import type { CoreServices } from '../services/core'
 import { filesFor } from '../services/files'
+import { readFilesPreferences, writeFilesPreferences } from '../services/files/preferences'
 import { defineHandlers, IpcValidationError } from './registry'
 import { expectOnlyKeys, expectRecord, expectString, noInput } from './validate'
 
@@ -41,6 +45,33 @@ function newName(value: unknown, allowNested = false): string {
 }
 
 const OPEN_TARGETS: readonly FileOpenTarget[] = ['default', 'finder', 'vscode', 'cursor']
+const ENCODINGS: readonly FileEncoding[] = ['utf-8', 'utf-16le', 'utf-16be']
+const PREFERENCES: readonly (keyof FilesPreferences)[] = ['markdownPreview', 'wordWrap']
+
+function writeRequest(raw: unknown): FileWriteRequest {
+  const value = record(raw, ['projectId', 'path', 'text', 'expectedVersion', 'encoding', 'bom'])
+  // Every UTF-16 code unit takes at least one byte, so this bounds the clone; the encoded size is checked by the writer.
+  if (typeof value.text !== 'string' || value.text.length > FILES_LIMITS.readBytes) throw new IpcValidationError(`text must be a string of at most ${FILES_LIMITS.readBytes} characters`)
+  const expectedVersion = value.expectedVersion === null ? null : expectString(value.expectedVersion, 'expectedVersion', { minLength: 1, maxLength: IF_VERSION_LIMIT })
+  if (!ENCODINGS.includes(value.encoding as FileEncoding)) throw new IpcValidationError('Unknown encoding')
+  if (typeof value.bom !== 'boolean') throw new IpcValidationError('bom must be a boolean')
+  // UTF-16 is only ever read with a BOM (read.ts), so it is written with one.
+  if (value.encoding !== 'utf-8' && !value.bom) throw new IpcValidationError('UTF-16 is written with its BOM')
+  const path = projectPath(value.path)
+  if (path === '') throw new IpcValidationError('path must name a file')
+  return { projectId: projectId(value), path, text: value.text, expectedVersion, encoding: value.encoding as FileEncoding, bom: value.bom }
+}
+
+function preferencesPatch(raw: unknown): Partial<FilesPreferences> {
+  const value = record(raw, PREFERENCES)
+  const patch: Partial<FilesPreferences> = {}
+  for (const name of PREFERENCES) {
+    if (value[name] === undefined) continue
+    if (typeof value[name] !== 'boolean') throw new IpcValidationError(`${name} must be a boolean`)
+    patch[name] = value[name] as boolean
+  }
+  return patch
+}
 
 export function createFilesFeature(core: CoreServices) {
   const service = filesFor(core)
@@ -73,6 +104,17 @@ export function createFilesFeature(core: CoreServices) {
       parse: (raw) => { const value = record(raw, ['projectId', 'path']); return { projectId: projectId(value), path: projectPath(value.path) } },
       handle: ({ projectId: id, path }) => service.readImage(id, path)
     },
+    write: { parse: writeRequest, handle: (request) => service.write(request) },
+    setUnsaved: {
+      parse: (raw) => {
+        const value = record(raw, ['projectId', 'paths'])
+        if (!Array.isArray(value.paths) || value.paths.length > FILES_UNSAVED_LIMIT) throw new IpcValidationError(`paths must hold at most ${FILES_UNSAVED_LIMIT} entries`)
+        return { projectId: projectId(value), paths: Array.from(value.paths as unknown[], (path, index) => projectPath(path, `paths[${index}]`)) }
+      },
+      handle: ({ projectId: id, paths }, context) => service.setUnsaved(id, paths, context.senderId)
+    },
+    preferences: { parse: noInput, handle: () => readFilesPreferences(core.database().db) },
+    setPreferences: { parse: preferencesPatch, handle: (patch) => writeFilesPreferences(core.database().db, patch) },
     create: {
       parse: (raw) => {
         const value = record(raw, ['projectId', 'parent', 'name', 'kind'])

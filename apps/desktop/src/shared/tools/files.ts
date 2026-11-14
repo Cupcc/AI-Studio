@@ -139,6 +139,43 @@ export interface FilesSubscriptionRef extends FilesProjectRef { subscriptionId: 
 export interface FilesChanged { projectId: string; revision: number; dirs: ProjectPath[]; overflow: boolean }
 export interface FilesWatchChanged { projectId: string; revision: number; watch: FilesWatchState }
 
+// ---- Editing (FR-TOOL-001 2026-11-14, TOOLS-Q13) ------------------------------------------------------------------
+
+/**
+ * Saves the viewer's text. `expectedVersion` is the `version` the edit started from: the write happens only while the
+ * file on disk still has it, otherwise the answer is `conflict` with what is there now. `null` means the file is
+ * expected to be gone (it was deleted while edited): the save then creates it, and refuses if something appeared.
+ * The text is encoded as it was read (encoding and BOM); line endings are written as the text holds them.
+ */
+export interface FileWriteRequest extends FilesPathRef {
+  text: string
+  expectedVersion: string | null
+  encoding: FileEncoding
+  bom: boolean
+}
+export type FileWriteFailure =
+  | 'invalid_path' | 'project_unavailable' | 'project_closing' | 'missing' | 'not_file' | 'symlink_refused' | 'excluded'
+  | 'permission_denied' | 'too_large' | 'failed'
+export type FileWriteResult =
+  | { status: 'ok'; path: ProjectPath; version: string; size: number }
+  /** The file changed (or disappeared: `version` null) since `expectedVersion`; nothing was written. */
+  | { status: 'conflict'; path: ProjectPath; version: string | null }
+  | { status: 'failed'; path: ProjectPath; reason: FileWriteFailure }
+
+/** The open files with unsaved changes of one Project, so closing the Project or quitting can ask about them. */
+export interface FilesUnsavedRequest extends FilesProjectRef { paths: ProjectPath[] }
+/** At most this many unsaved files per Project are reported (the viewer keeps at most 20 tabs). */
+export const FILES_UNSAVED_LIMIT = 100
+
+/** Viewer preferences kept across restarts, like VS Code's settings. */
+export interface FilesPreferences {
+  /** Markdown files open in the preview; follows the last choice made in a viewer (TOOLS-Q13). */
+  markdownPreview: boolean
+  /** Soft wrap (⌥Z). */
+  wordWrap: boolean
+}
+export const DEFAULT_FILES_PREFERENCES: FilesPreferences = { markdownPreview: false, wordWrap: false }
+
 /** Shared by the Files and the Diff watcher so both ignore the same trees. */
 export const FILES_WATCH_IGNORED = { anywhere: ['.git'], belowFirstLevel: ['node_modules'] } as const
 

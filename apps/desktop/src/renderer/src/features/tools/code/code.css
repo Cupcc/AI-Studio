@@ -2,7 +2,9 @@
 .code-viewer { position: relative; flex: 1 1 0; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; color: var(--color-text); }
 /* Monaco measures its container: an absolutely positioned host has exactly the box of the viewer, whatever the panel does around it. */
 .code-viewer__host { position: absolute; inset: 0; }
-.code-viewer:has(:focus-visible) { outline: 2px solid var(--color-focus-ring); outline-offset: -2px; }
+/* A read-only viewer shows keyboard focus around the pane. An editor is a text field: its caret and current line show focus,
+   as in VS Code, and Chromium treats a clicked text field as :focus-visible, which would frame it while typing. */
+.code-viewer:not([data-editable]):has(:focus-visible) { outline: 2px solid var(--color-focus-ring); outline-offset: -2px; }
 .code-viewer__notice { position: absolute; inset: 0 0 auto; margin: 0; padding: var(--space-3); color: var(--color-text-muted); font-size: var(--font-size-md); overflow-wrap: anywhere; }
 /* Widgets (find, context menu) use the UI font; the code itself keeps the font of the `fontFamily` option. */
 .code-viewer .monaco-editor, .code-viewer .monaco-diff-editor { font-family: var(--font-sans); }

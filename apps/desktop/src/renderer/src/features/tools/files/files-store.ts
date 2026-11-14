@@ -1,9 +1,10 @@
 import { create } from 'zustand'
-import { joinProjectPath, projectPathParent } from '@shared/tools/files'
+import { DEFAULT_FILES_PREFERENCES, joinProjectPath, projectPathParent } from '@shared/tools/files'
 import type {
-  FileEncoding, FileEntry, FileEntryKind, FileReadResult, FileUnavailableReason, FilesChanged, FilesListResult, FilesWatchChanged,
-  FilesSubscription, FilesWatchState, ProjectPath
+  FileEncoding, FileEntry, FileEntryKind, FileReadResult, FileUnavailableReason, FilesChanged, FilesListResult, FilesPreferences,
+  FilesWatchChanged, FilesSubscription, FilesWatchState, FileWriteFailure, FileWriteResult, ProjectPath
 } from '@shared/tools/files'
+import { releaseCodeModels } from '../code/model-cache'
 import { filesApi } from './api'
 
 export interface DirListing {
@@ -22,8 +23,29 @@ export type FileViewer =
   | { path: ProjectPath; phase: 'ready'; text: string; version: string; size: number; encoding: FileEncoding; bom: boolean; lineEnding: 'lf' | 'crlf' | 'mixed' | 'none' }
   | { path: ProjectPath; phase: 'unavailable'; reason: FileUnavailableReason; size?: number }
 
-/** An open file in the viewer's tab row. An unpinned tab is VS Code's preview tab: the next single-click replaces it. */
-export interface FileTab { path: ProjectPath; pinned: boolean }
+/**
+ * An open file in the viewer's tab row. An unpinned tab is VS Code's preview tab: the next single-click replaces it.
+ * `preview`: a Markdown file shows its rendered preview instead of the editor (TOOLS-Q13); set from the remembered
+ * choice when the tab opens, then kept per tab.
+ */
+export interface FileTab { path: ProjectPath; pinned: boolean; preview: boolean }
+
+/**
+ * Unsaved changes of one open file (TOOLS-Q13). `base` is the disk state the edit started from, or was last saved as:
+ * a save writes only while the file still has `base.version`. The draft goes away when its text is the base text again.
+ */
+export interface FileDraft {
+  text: string
+  base: { version: string; text: string; encoding: FileEncoding; bom: boolean }
+  saving: boolean
+  /** The file on disk is no longer `base`: changed to `version`, or deleted (`null`). A save then needs a decision. */
+  conflict: { version: string | null } | null
+  error: FileWriteFailure | null
+}
+export type SaveOutcome = 'saved' | 'clean' | SaveFailure
+export type SaveFailure = 'busy' | 'conflict' | FileWriteFailure
+
+export const isMarkdownPath = (path: ProjectPath) => /\.(md|mdx|markdown)$/i.test(path)
 /** The inline name input in the tree: a new entry under `parent`, or renaming `path`. */
 export type FilesEdit = { mode: 'create'; parent: ProjectPath; kind: 'file' | 'directory' } | { mode: 'rename'; path: ProjectPath }
 
@@ -43,6 +65,7 @@ export interface ProjectFiles {
   /** Where a ⇧-click range starts. */
   anchor: ProjectPath | null
   tabs: FileTab[]
+  drafts: ReadonlyMap<ProjectPath, FileDraft>
   edit: FilesEdit | null
   /** Line to show in the viewer (Quick Open, Search, Terminal links); `nonce` repeats a request for the same line. */
   reveal: { path: ProjectPath; line: number; nonce: number } | null
@@ -50,6 +73,26 @@ export interface ProjectFiles {
 
 interface FilesStore {
   projects: Record<string, ProjectFiles>
+  /** Remembered across restarts (main process app_meta); defaults until `loadPreferences` answers. */
+  prefs: FilesPreferences
+  loadPreferences(): Promise<void>
+  setPreferences(patch: Partial<FilesPreferences>): void
+  /**
+   * The editor's text for `path`. Keeps a draft while it differs from the disk copy and pins the tab. `base` is the disk
+   * copy the editor was showing, used when no draft exists yet (the viewer may already show another file).
+   */
+  edit(projectId: string, path: ProjectPath, text: string, base?: FileDraft['base']): void
+  /**
+   * Writes the draft. `overwrite` replaces whatever is on disk now (after a conflict). A deleted file is created again,
+   * as in VS Code. A change on disk that was not decided yet answers `conflict` without writing.
+   */
+  save(projectId: string, path: ProjectPath, options?: { overwrite?: boolean }): Promise<SaveOutcome>
+  /** Saves every draft of the Project (or of all Projects); the paths that could not be saved, with why. */
+  saveAll(projectId?: string): Promise<{ projectId: string; path: ProjectPath; outcome: SaveFailure }[]>
+  /** Drops the draft and shows the file as it is on disk (VS Code: Revert File). */
+  revert(projectId: string, path: ProjectPath): void
+  /** Markdown preview of one tab; also becomes the remembered default for files opened later. */
+  setTabPreview(projectId: string, path: ProjectPath, preview: boolean): void
   /** The panel is visible: load the root, subscribe and revalidate what was loaded before. */
   activate(projectId: string): Promise<void>
   /** The panel is hidden or unmounted: unsubscribe. The state stays in memory. */
@@ -57,7 +100,7 @@ interface FilesStore {
   toggle(projectId: string, path: ProjectPath): Promise<void>
   /** Opens a file in the viewer. Never touches the conversation. `pin` keeps the tab (double-click); otherwise it is the preview tab. */
   select(projectId: string, path: ProjectPath, options?: { pin?: boolean }): Promise<void>
-  /** Closes the viewer's current tab; the neighbour becomes current. */
+  /** Closes the viewer's current tab; the neighbour becomes current. Unsaved changes are dropped: ask first. */
   closeViewer(projectId: string): void
   /** Puts the file content away and keeps its tabs: entering a workbench brings the workbench back (DEC-33). */
   hideViewer(projectId: string): void
@@ -87,7 +130,8 @@ const RESUBSCRIBE_BASE_MS = 500
 const RESUBSCRIBE_MAX_MS = 10_000
 
 const emptyDir = (): DirListing => ({ entries: [], truncated: false, reason: null, loading: false, dirty: false })
-const emptyProject = (): ProjectFiles => ({ dirs: new Map(), expanded: new Set(), selected: null, viewer: null, watch: null, split: 0.45, marked: [], anchor: null, tabs: [], edit: null, reveal: null })
+const emptyProject = (): ProjectFiles => ({ dirs: new Map(), expanded: new Set(), selected: null, viewer: null, watch: null, split: 0.45, marked: [], anchor: null, tabs: [], drafts: new Map(), edit: null, reveal: null })
+export const NO_DRAFTS: ReadonlyMap<ProjectPath, FileDraft> = new Map()
 const MAX_TABS = 20
 let revealNonce = 0
 /** Moves a path (or anything under it) from one place to another. */
@@ -169,15 +213,28 @@ function pruneBelow(dirs: Map<ProjectPath, DirListing>, expanded: Set<ProjectPat
   if (forgetExpansion) for (const path of [...expanded]) if (within(path, root) && (dropRoot || path !== root)) expanded.delete(path)
 }
 
-/** Adds the tab, or replaces the preview tab (VS Code: a single-click opens in the reused preview tab). */
-function withTab(tabs: FileTab[], path: ProjectPath, pin: boolean): FileTab[] {
+/**
+ * Adds the tab, or replaces the preview tab (VS Code: a single-click opens in the reused preview tab). A tab with unsaved
+ * changes is never replaced or dropped: editing pins it, and the oldest clean tabs go first when there are too many.
+ */
+function withTab(tabs: FileTab[], path: ProjectPath, pin: boolean, markdownPreview: boolean, drafts: ReadonlyMap<ProjectPath, FileDraft>): FileTab[] {
   const existing = tabs.find(tab => tab.path === path)
   if (existing) return pin && !existing.pinned ? tabs.map(tab => tab.path === path ? { ...tab, pinned: true } : tab) : tabs
-  const preview = tabs.findIndex(tab => !tab.pinned)
-  const next = preview >= 0 ? tabs.map((tab, index) => index === preview ? { path, pinned: pin } : tab) : [...tabs, { path, pinned: pin }]
-  // The oldest pinned tabs go first when there are too many.
-  return next.length > MAX_TABS ? next.slice(next.length - MAX_TABS) : next
+  const created: FileTab = { path, pinned: pin, preview: markdownPreview && isMarkdownPath(path) }
+  const reusable = tabs.findIndex(tab => !tab.pinned && !drafts.has(tab.path))
+  const next = reusable >= 0 ? tabs.map((tab, index) => index === reusable ? created : tab) : [...tabs, created]
+  let excess = next.length - MAX_TABS
+  return excess <= 0 ? next : next.filter(tab => tab.path === path || drafts.has(tab.path) || excess-- <= 0)
 }
+
+/** The line endings of saved text, as the reader reports them. */
+function lineEndingOf(text: string): 'lf' | 'crlf' | 'mixed' | 'none' {
+  const crlf = text.split('\r\n').length - 1, cr = text.split('\r').length - 1 - crlf, lf = text.split('\n').length - 1 - crlf
+  if (cr > 0 || (crlf > 0 && lf > 0)) return 'mixed'
+  return crlf > 0 ? 'crlf' : lf > 0 ? 'lf' : 'none'
+}
+/** The editor's view-state / model key of a file (code/model-cache.ts). */
+export const editorKey = (projectId: string, path: ProjectPath) => `${projectId}:${path}`
 
 export const useFiles = create<FilesStore>((set, get) => {
   const project = (projectId: string) => get().projects[projectId]
@@ -306,6 +363,7 @@ export const useFiles = create<FilesStore>((set, get) => {
     }
     if (result.status === 'ok') {
       patchProject(projectId, { viewer: { path, phase: 'ready', text: result.text, version: result.version, size: result.size, encoding: result.encoding, bom: result.bom, lineEnding: result.lineEnding } })
+      diskIs(projectId, path, result.version)
     } else if (result.status === 'unchanged') {
       const viewer = current.viewer
       // Unchanged only makes sense for the copy we asked about; anything else is read again in full.
@@ -318,9 +376,46 @@ export const useFiles = create<FilesStore>((set, get) => {
     if (result.status !== 'unavailable' && predatesSubscription(projectId, key, result.revision)) void readFile(projectId, path)
   }
 
-  /** The tree selection goes away, the viewer keeps a notice until another file is selected or the viewer is closed. */
+  /**
+   * The tree selection goes away, the viewer keeps a notice until another file is selected or the viewer is closed. A file
+   * with unsaved changes stays open in its editor instead: saving creates it again (VS Code).
+   */
   function markDeleted(projectId: string, path: ProjectPath) {
+    if (project(projectId)?.drafts.has(path)) {
+      patchProject(projectId, current => current.viewer?.path === path ? { viewer: { path, phase: 'unavailable', reason: 'missing' } } : {})
+      diskIs(projectId, path, null)
+      return
+    }
     patchProject(projectId, current => current.selected === path ? { selected: null, viewer: { path, phase: 'unavailable', reason: 'missing' } } : {})
+  }
+
+  // ---- drafts ------------------------------------------------------------------------------------------------
+
+  const patchDraft = (projectId: string, path: ProjectPath, update: (draft: FileDraft) => FileDraft | null) => patchProject(projectId, current => {
+    const draft = current.drafts.get(path)
+    if (!draft) return {}
+    const drafts = new Map(current.drafts), next = update(draft)
+    if (next) drafts.set(path, next); else drafts.delete(path)
+    return { drafts }
+  })
+
+  /** What a read found on disk for a file with a draft: the base version means no conflict, anything else is one. */
+  function diskIs(projectId: string, path: ProjectPath, version: string | null) {
+    patchDraft(projectId, path, draft => {
+      // A save in flight settles the state itself (its own write changes the version).
+      if (draft.saving) return draft
+      const conflict = version === draft.base.version ? null : { version }
+      return conflict?.version === draft.conflict?.version && !!conflict === !!draft.conflict ? draft : { ...draft, conflict }
+    })
+  }
+
+  /** What is on disk as far as this renderer knows: the last conflict, the viewer's read, or the draft's base. */
+  function knownDisk(current: ProjectFiles, path: ProjectPath, draft: FileDraft): string | null {
+    if (draft.conflict) return draft.conflict.version
+    const viewer = current.viewer
+    if (viewer?.path === path && viewer.phase === 'ready') return viewer.version
+    if (viewer?.path === path && viewer.phase === 'unavailable' && viewer.reason === 'missing') return null
+    return draft.base.version
   }
 
   function revalidateViewer(projectId: string, force = false) {
@@ -435,10 +530,11 @@ export const useFiles = create<FilesStore>((set, get) => {
       if (!current) return
       const kind = entryOf(current, path)?.kind ?? 'file'
       if (kind === 'directory') return get().toggle(projectId, path)
-      const tabs = withTab(current.tabs, path, options.pin ?? false)
+      const tabs = withTab(current.tabs, path, options.pin ?? false, get().prefs.markdownPreview, current.drafts)
       const refused = localReason(kind)
       if (refused) { patchProject(projectId, { selected: path, tabs, viewer: { path, phase: 'unavailable', reason: refused } }); return }
       const same = current.viewer?.path === path
+      // A file with unsaved changes keeps showing them while it is read again (the draft is what the editor shows).
       // Selecting the open file again keeps what is shown and revalidates it; a failed or deleted state starts over.
       patchProject(projectId, { selected: path, tabs, viewer: same && current.viewer?.phase === 'ready' ? current.viewer : { path, phase: 'loading' } })
       await readFile(projectId, path)
@@ -461,9 +557,12 @@ export const useFiles = create<FilesStore>((set, get) => {
       if (!current) return
       const index = current.tabs.findIndex(tab => tab.path === path)
       const tabs = current.tabs.filter(tab => tab.path !== path)
-      if (current.viewer?.path !== path) { patchProject(projectId, { tabs }); return }
+      const drafts = new Map(current.drafts)
+      drafts.delete(path)
+      releaseCodeModels(editorKey(projectId, path))
+      if (current.viewer?.path !== path) { patchProject(projectId, { tabs, drafts }); return }
       const next = tabs[Math.min(Math.max(index, 0), tabs.length - 1)]
-      patchProject(projectId, { tabs, selected: null, viewer: null })
+      patchProject(projectId, { tabs, drafts, selected: null, viewer: null })
       if (next) void get().select(projectId, next.path, { pin: next.pinned })
     },
 
@@ -523,12 +622,15 @@ export const useFiles = create<FilesStore>((set, get) => {
     moved(projectId, from, to) {
       patchProject(projectId, current => {
         const tabs = current.tabs.map(tab => ({ ...tab, path: relocate(tab.path, from, to) ?? tab.path }))
+        // Unsaved changes follow the file; the editor starts a new undo history under the new name.
+        const drafts = new Map([...current.drafts].map(([path, draft]) => [relocate(path, from, to) ?? path, draft]))
+        for (const [path] of current.drafts) if (relocate(path, from, to) !== null) releaseCodeModels(editorKey(projectId, path))
         const marked = current.marked.map(path => relocate(path, from, to) ?? path)
         const expanded = new Set([...current.expanded].map(path => relocate(path, from, to) ?? path))
         const selected = current.selected === null ? null : relocate(current.selected, from, to) ?? current.selected
         // The viewer re-reads the file under its new path; the old text stays until the read answers.
         const viewer = current.viewer && relocate(current.viewer.path, from, to) !== null ? { ...current.viewer, path: relocate(current.viewer.path, from, to)! } : current.viewer
-        return { tabs, marked, expanded, selected, viewer }
+        return { tabs, drafts, marked, expanded, selected, viewer }
       })
       const after = project(projectId)
       if (after?.selected && after.viewer?.path === after.selected) void readFile(projectId, after.selected, true)
@@ -581,7 +683,111 @@ export const useFiles = create<FilesStore>((set, get) => {
       clearRetry(projectId); subscribing.delete(projectId)
       release(projectId, dropSubscription(projectId))
       applied.delete(projectId); tokens.delete(projectId)
+      releaseCodeModels(`${projectId}:`, { prefix: true })
       set(state => { const projects = { ...state.projects }; delete projects[projectId]; return { projects } })
+    },
+
+    // ---- editing (TOOLS-Q13) ---------------------------------------------------------------------------------
+
+    prefs: DEFAULT_FILES_PREFERENCES,
+
+    async loadPreferences() {
+      try {
+        const prefs = await filesApi().preferences()
+        set({ prefs })
+      } catch { /* the defaults stay */ }
+    },
+
+    setPreferences(patch) {
+      set(state => ({ prefs: { ...state.prefs, ...patch } }))
+      void Promise.resolve().then(() => filesApi().setPreferences(patch)).catch(() => { /* kept for this run */ })
+    },
+
+    edit(projectId, path, text, shownBase) {
+      const current = project(projectId)
+      // A file whose tab was closed (its changes discarded) is not brought back by a late editor flush.
+      if (!current || !current.tabs.some(tab => tab.path === path)) return
+      const draft = current.drafts.get(path), viewer = current.viewer
+      const base = draft?.base ?? shownBase ?? (viewer?.path === path && viewer.phase === 'ready' ? { version: viewer.version, text: viewer.text, encoding: viewer.encoding, bom: viewer.bom } : null)
+      if (!base) return
+      const drafts = new Map(current.drafts)
+      // Back to the disk text (undo): nothing is unsaved any more; a newer disk copy is then shown, as in VS Code.
+      if (text === base.text) drafts.delete(path)
+      else drafts.set(path, { text, base, saving: draft?.saving ?? false, conflict: draft?.conflict ?? null, error: null })
+      // VS Code: editing a preview tab keeps it.
+      const tabs = current.tabs.some(tab => tab.path === path && !tab.pinned) ? current.tabs.map(tab => tab.path === path ? { ...tab, pinned: true } : tab) : current.tabs
+      patchProject(projectId, { drafts, tabs })
+    },
+
+    async save(projectId, path, options = {}) {
+      const current = project(projectId), draft = current?.drafts.get(path)
+      if (!current || !draft) return 'clean'
+      if (draft.saving) return 'busy'
+      const disk = knownDisk(current, path, draft)
+      // A change on disk needs a decision (compare / overwrite / discard); a deleted file is simply created again.
+      if (!options.overwrite && draft.conflict && disk !== null) return 'conflict'
+      const expectedVersion = options.overwrite || draft.conflict ? disk : draft.base.version
+      const text = draft.text, epoch = currentEpoch(projectId)
+      patchDraft(projectId, path, d => ({ ...d, saving: true, error: null }))
+      let result: FileWriteResult
+      try {
+        result = await filesApi().write({ projectId, path, text, expectedVersion, encoding: draft.base.encoding, bom: draft.base.bom })
+      } catch { result = { status: 'failed', path, reason: 'failed' } }
+      if (!isCurrent(projectId, epoch)) return 'failed'
+      if (result.status === 'conflict') {
+        patchDraft(projectId, path, d => ({ ...d, saving: false, conflict: { version: result.version } }))
+        // Load what is on disk now, for the comparison.
+        const after = project(projectId)
+        if (after?.viewer?.path === path && after.selected === path) void readFile(projectId, path, true)
+        return 'conflict'
+      }
+      if (result.status === 'failed') {
+        patchDraft(projectId, path, d => ({ ...d, saving: false, error: result.reason }))
+        return result.reason
+      }
+      const base = { version: result.version, text, encoding: draft.base.encoding, bom: draft.base.bom }
+      patchProject(projectId, state => {
+        const drafts = new Map(state.drafts), latest = drafts.get(path)
+        // Typing went on during the save: what was typed since stays unsaved, on top of the new base.
+        if (latest && latest.text !== text) drafts.set(path, { ...latest, base, saving: false, conflict: null, error: null })
+        else drafts.delete(path)
+        const shown = state.viewer?.path === path
+        return {
+          drafts,
+          ...(shown ? { selected: path, viewer: { path, phase: 'ready' as const, text, version: result.version, size: result.size, encoding: base.encoding, bom: base.bom, lineEnding: lineEndingOf(text) } } : {})
+        }
+      })
+      return 'saved'
+    },
+
+    async saveAll(projectId) {
+      const failures: { projectId: string; path: ProjectPath; outcome: SaveFailure }[] = []
+      for (const [id, files] of Object.entries(get().projects)) {
+        if (projectId !== undefined && id !== projectId) continue
+        for (const path of [...files.drafts.keys()]) {
+          const outcome = await get().save(id, path)
+          if (outcome !== 'saved' && outcome !== 'clean') failures.push({ projectId: id, path, outcome })
+        }
+      }
+      return failures
+    },
+
+    revert(projectId, path) {
+      const current = project(projectId)
+      if (!current?.drafts.has(path)) return
+      const drafts = new Map(current.drafts)
+      drafts.delete(path)
+      releaseCodeModels(editorKey(projectId, path))
+      const shown = current.viewer?.path === path
+      // A deleted file has nothing to show once its changes are gone.
+      const gone = shown && current.viewer?.phase === 'unavailable' && current.viewer.reason === 'missing'
+      patchProject(projectId, { drafts, ...(gone ? { selected: null } : {}) })
+      if (shown && !gone) { patchProject(projectId, { selected: path }); void readFile(projectId, path, true) }
+    },
+
+    setTabPreview(projectId, path, preview) {
+      patchProject(projectId, current => ({ tabs: current.tabs.map(tab => tab.path === path ? { ...tab, preview } : tab) }))
+      if (get().prefs.markdownPreview !== preview) get().setPreferences({ markdownPreview: preview })
     }
   }
 })

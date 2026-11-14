@@ -7,7 +7,8 @@ import { createFilesFeature } from '../../ipc/files'
 
 const service = vi.hoisted(() => ({
   list: vi.fn(), read: vi.fn(), resolveReference: vi.fn(), subscribe: vi.fn(), unsubscribe: vi.fn(), dispose: vi.fn(),
-  create: vi.fn(), rename: vi.fn(), move: vi.fn(), copy: vi.fn(), trash: vi.fn(), open: vi.fn(), editors: vi.fn(), index: vi.fn(), readImage: vi.fn()
+  create: vi.fn(), rename: vi.fn(), move: vi.fn(), copy: vi.fn(), trash: vi.fn(), open: vi.fn(), editors: vi.fn(), index: vi.fn(), readImage: vi.fn(),
+  write: vi.fn(), setUnsaved: vi.fn()
 }))
 vi.mock('./index', () => ({ filesFor: () => service }))
 
@@ -16,6 +17,34 @@ const { handlers } = feature
 const context = { senderId: 42, senderUrl: 'app://studio/index.html' }
 
 describe('Files IPC input parsing', () => {
+  it('parses saves, unsaved lists and preferences, and refuses malformed ones (TOOLS-Q13)', () => {
+    const save = { projectId: 'p1', path: 'a.ts', text: 'x', expectedVersion: '1:2:3:4', encoding: 'utf-8', bom: false }
+    expect(handlers.write.parse(save)).toEqual(save)
+    expect(handlers.write.parse({ ...save, expectedVersion: null, encoding: 'utf-16be', bom: true })).toEqual({ ...save, expectedVersion: null, encoding: 'utf-16be', bom: true })
+    expect(() => handlers.write.parse({ ...save, path: '' })).toThrow()
+    expect(() => handlers.write.parse({ ...save, path: '../x' })).toThrow()
+    expect(() => handlers.write.parse({ ...save, text: 7 })).toThrow()
+    expect(() => handlers.write.parse({ ...save, text: 'x'.repeat(FILES_LIMITS.readBytes + 1) })).toThrow()
+    expect(() => handlers.write.parse({ ...save, encoding: 'latin1' })).toThrow()
+    expect(() => handlers.write.parse({ ...save, encoding: 'utf-16le', bom: false })).toThrow()
+    expect(() => handlers.write.parse({ ...save, expectedVersion: '' })).toThrow()
+    expect(() => handlers.write.parse({ ...save, absolutePath: '/etc/passwd' })).toThrow()
+    expect(handlers.setUnsaved.parse({ projectId: 'p1', paths: [] })).toEqual({ projectId: 'p1', paths: [] })
+    expect(handlers.setUnsaved.parse({ projectId: 'p1', paths: ['a', 'b/c'] })).toEqual({ projectId: 'p1', paths: ['a', 'b/c'] })
+    expect(() => handlers.setUnsaved.parse({ projectId: 'p1', paths: ['/etc/passwd'] })).toThrow()
+    expect(() => handlers.setUnsaved.parse({ projectId: 'p1', paths: Array.from({ length: 101 }, (_, i) => `f${i}`) })).toThrow()
+    expect(handlers.setPreferences.parse({ markdownPreview: true })).toEqual({ markdownPreview: true })
+    expect(handlers.setPreferences.parse({})).toEqual({})
+    expect(() => handlers.setPreferences.parse({ markdownPreview: 'yes' })).toThrow()
+    expect(() => handlers.setPreferences.parse({ theme: 'dark' })).toThrow()
+    expect(service.write).not.toHaveBeenCalled()
+  })
+
+  it('records unsaved files for the renderer that sent them', async () => {
+    await handlers.setUnsaved.handle({ projectId: 'p1', paths: ['a.ts'] }, context)
+    expect(service.setUnsaved).toHaveBeenCalledWith('p1', ['a.ts'], 42)
+  })
+
   it('accepts well-formed requests and returns them without extra data', () => {
     expect(handlers.list.parse({ projectId: 'p1', path: '' })).toEqual({ projectId: 'p1', path: '' })
     expect(handlers.list.parse({ projectId: 'p1', path: 'src/déjà vu/-x [1].ts' })).toEqual({ projectId: 'p1', path: 'src/déjà vu/-x [1].ts' })

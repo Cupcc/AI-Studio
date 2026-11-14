@@ -84,8 +84,20 @@ export function lockViewerModelOptions(model: editor.ITextModel): IDisposable {
   return model.onDidChangeOptions(apply)
 }
 
-export function codeEditorOptions(fontFamily: string, theme: string, path: string): editor.IStandaloneEditorConstructionOptions {
-  return { ...viewerOptions(fontFamily, theme), ariaLabel: codeAriaLabel(path) }
+/**
+ * Editing a file (TOOLS-Q13) lifts the read-only options and gives Tab back to indentation, as in VS Code (⌃⇧M toggles
+ * Tab moving focus). Language services stay off: no worker, no suggestions.
+ */
+const EDITABLE = {
+  readOnly: false,
+  domReadOnly: false,
+  tabFocusMode: false,
+  emptySelectionClipboard: true,
+  dragAndDrop: true
+} satisfies editor.IEditorOptions
+
+export function codeEditorOptions(fontFamily: string, theme: string, path: string, editable = false): editor.IStandaloneEditorConstructionOptions {
+  return { ...viewerOptions(fontFamily, theme), ...(editable ? EDITABLE : {}), ariaLabel: codeAriaLabel(path) }
 }
 
 export function diffEditorOptions(fontFamily: string, theme: string, path: string): editor.IStandaloneDiffEditorConstructionOptions {

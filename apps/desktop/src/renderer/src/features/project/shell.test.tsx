@@ -173,6 +173,44 @@ describe('Project shell · FR-PROJ/NAV · AC-01', () => {
     expect(useProjectShell.getState().windowState.tabs).toHaveLength(2)
     expect(port.onProjectClosed).toHaveBeenCalledWith('b')
   })
+  it('offers to save unsaved files before closing a Project, and keeps it open when a file could not be saved (TOOLS-Q13)', async () => {
+    await mount()
+    const saveFiles = vi.fn(async () => ['src/a.ts：没有写入权限'])
+    const restore = registerShellIntegration({ saveFiles })
+    try {
+      const file = { kind: 'file' as const, id: 'src/a.ts', projectId: 'b', title: 'src/a.ts' }
+      closeResult = { status: 'confirmation_required', counts: { running: 0, needsInput: 0, files: 1, resources: [file] } }
+      fireEvent.click(screen.getByRole('button', { name: '关闭 b' }))
+      const dialog = await screen.findByRole('dialog')
+      expect(dialog.textContent).toContain('1 个文件有未保存的修改')
+      expect(dialog.textContent).toContain('未保存的文件 · src/a.ts')
+      fireEvent.click(screen.getByRole('button', { name: '保存并关闭' }))
+      await screen.findByText('src/a.ts：没有写入权限')
+      expect(saveFiles).toHaveBeenCalledWith('b')
+      expect(useProjectShell.getState().windowState.tabs).toHaveLength(3)
+      // Saved this time: the Project closes as confirmed.
+      saveFiles.mockResolvedValueOnce([])
+      closeResult = { status: 'closed' }
+      fireEvent.click(screen.getByRole('button', { name: '保存并关闭' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+      expect(useProjectShell.getState().windowState.tabs).toHaveLength(2)
+    } finally { restore() }
+  })
+  it('closes without saving when asked to (TOOLS-Q13)', async () => {
+    await mount()
+    const saveFiles = vi.fn(async () => [])
+    const restore = registerShellIntegration({ saveFiles })
+    try {
+      closeResult = { status: 'confirmation_required', counts: { running: 0, needsInput: 0, files: 2 } }
+      fireEvent.click(screen.getByRole('button', { name: '关闭 b' }))
+      await screen.findByRole('dialog')
+      closeResult = { status: 'closed' }
+      fireEvent.click(screen.getByRole('button', { name: '不保存并关闭' }))
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+      expect(saveFiles).not.toHaveBeenCalled()
+      expect(useProjectShell.getState().windowState.tabs).toHaveLength(2)
+    } finally { restore() }
+  })
   it('sends repeated user-open signals separately from foreground changes', async () => {
     await mount()
     const shell = useProjectShell.getState()

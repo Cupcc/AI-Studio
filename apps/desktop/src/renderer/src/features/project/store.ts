@@ -10,6 +10,8 @@ import { shellIntegration } from './integration'
 export interface CloseDialog {
   tabId: string; projectId: string; counts: BlockingSessionCounts
   stopping: boolean; failed: StopProjectResult['failed']
+  /** Unsaved files are being saved before the close (TOOLS-Q13); `saveFailures` lists those that were not. */
+  saving?: boolean; saveFailures?: string[]
 }
 export interface ProjectShellState {
   status: 'idle' | 'loading' | 'ready' | 'error'
@@ -23,6 +25,9 @@ export interface ProjectShellState {
   closeDialog: CloseDialog | null
   quitRequest: QuitRequest | null
   quitting: boolean
+  /** Unsaved files are being saved before quitting (TOOLS-Q13); `quitSaveFailures` lists those that were not. */
+  quitSaving: boolean
+  quitSaveFailures: string[]
   /** The current workspace's open columns do not fit beside the navigation (DEC-33); not saved. */
   navSpaceShort: boolean
   /** The user reopened the navigation while space was short; cleared once space returns. */
@@ -44,10 +49,14 @@ export interface ProjectShellState {
   startDraft(projectId: string): void
   setViewConversation(projectId: string, conversation: ViewConversation): void
   requestClose(tabId: string, confirmed?: boolean): Promise<void>
+  /** Saves the Project's unsaved files, then closes it as confirmed; stays open when a file could not be saved. */
+  saveAndClose(): Promise<void>
   cancelClose(): void
   setForeground(foreground: boolean): void
   watchEvents(): () => void
   confirmQuit(): Promise<void>
+  /** Saves every unsaved file, then quits as confirmed; stays open when a file could not be saved. */
+  saveAndQuit(): Promise<void>
   cancelQuit(): void
   flush(): Promise<void>
 }
@@ -113,7 +122,7 @@ export function navHidden(s: Pick<ProjectShellState, 'windowState' | 'navSpaceSh
 
 export const useProjectShell = create<ProjectShellState>()((set, get) => ({
   status: 'idle', error: null, windowState: initialWindowState(), projects: {}, uiStates: {}, recent: [],
-  opening: false, foreground: document.hasFocus(), closeDialog: null, quitRequest: null, quitting: false, navSpaceShort: false, navKeptOpen: false,
+  opening: false, foreground: document.hasFocus(), closeDialog: null, quitRequest: null, quitting: false, quitSaving: false, quitSaveFailures: [], navSpaceShort: false, navKeptOpen: false,
   async bootstrap() {
     if (get().status !== 'idle') return
     set({ status: 'loading' })
@@ -210,7 +219,19 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
     set({ windowState: closeTab(get().windowState, tabId), closeDialog: null })
     saveWindow(); syncViewing(true)
   },
-  cancelClose() { if (!get().closeDialog?.stopping) set({ closeDialog: null }) },
+  async saveAndClose() {
+    const dialog = get().closeDialog
+    if (!dialog || dialog.stopping || dialog.saving) return
+    set({ closeDialog: { ...dialog, saving: true, saveFailures: [] } })
+    let failures: string[]
+    try { failures = await (shellIntegration().saveFiles?.(dialog.projectId) ?? Promise.resolve([])) }
+    catch (error) { failures = [String(error)] }
+    const current = get().closeDialog
+    if (!current || current.tabId !== dialog.tabId) return
+    set({ closeDialog: { ...current, saving: false, saveFailures: failures } })
+    if (!failures.length) await get().requestClose(dialog.tabId, true)
+  },
+  cancelClose() { if (!get().closeDialog?.stopping && !get().closeDialog?.saving) set({ closeDialog: null }) },
   setForeground(foreground) {
     set({ foreground }); shellIntegration().session.setWindowForeground(foreground); syncViewing()
   },
@@ -218,7 +239,7 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
     let active = true, focusRevision = 0
     const unsub = [
       studio().app.onWindowFocusChanged(({ focused }) => { focusRevision++; get().setForeground(focused) }),
-      studio().project.onQuitRequested((request) => set({ quitRequest: request, quitting: false })),
+      studio().project.onQuitRequested((request) => set({ quitRequest: request, quitting: false, quitSaveFailures: [] })),
       studio().project.onFlushRequested(() => {
         void get().flush().then(() => studio().project.stateFlushed())
       }),
@@ -241,7 +262,7 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
     return () => { active = false; unsub.forEach((off) => off()) }
   },
   async confirmQuit() {
-    if (get().quitting) return
+    if (get().quitting || get().quitSaving) return
     set({ quitting: true })
     try { await get().flush(); await studio().project.confirmQuit() }
     catch (error) {
@@ -249,6 +270,15 @@ export const useProjectShell = create<ProjectShellState>()((set, get) => ({
       if (request) set({ quitting: false, quitRequest: { ...request, failures: [String(error)] } })
     }
   },
-  cancelQuit() { if (!get().quitting) { set({ quitRequest: null }); void studio().project.cancelQuit() } },
+  async saveAndQuit() {
+    if (get().quitting || get().quitSaving || !get().quitRequest) return
+    set({ quitSaving: true, quitSaveFailures: [] })
+    let failures: string[]
+    try { failures = await (shellIntegration().saveFiles?.() ?? Promise.resolve([])) }
+    catch (error) { failures = [String(error)] }
+    set({ quitSaving: false, quitSaveFailures: failures })
+    if (!failures.length && get().quitRequest) await get().confirmQuit()
+  },
+  cancelQuit() { if (!get().quitting && !get().quitSaving) { set({ quitRequest: null, quitSaveFailures: [] }); void studio().project.cancelQuit() } },
   async flush() { await shellIntegration().session.flush?.(); await writes }
 }))

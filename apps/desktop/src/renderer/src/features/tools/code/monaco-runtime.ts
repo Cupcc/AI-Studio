@@ -1,7 +1,7 @@
 // Must stay the first import: Monaco reads `MonacoEnvironment` lazily, but later modules may create editors at load time.
 import './monaco-environment'
 import * as monaco from 'monaco-editor/editor/editor.api.js'
-// Contributions are opt-in in Monaco 0.57: only what a read-only viewer needs. Everything backed by the language service
+// Contributions are opt-in in Monaco 0.57: only what the viewer / editor needs. Everything backed by the language service
 // or the worker (hover, suggestions, links, unicode highlight, ...) is left out on purpose. Folding (indentation ranges,
 // computed on the main thread) and Go to Line (⌃G) were added for VS Code parity (DEC-25).
 import 'monaco-editor/features/codicon/register.js'
@@ -12,6 +12,21 @@ import 'monaco-editor/features/contextmenu/register.js'
 import 'monaco-editor/features/wordOperations/register.js'
 import 'monaco-editor/features/folding/register.js'
 import 'monaco-editor/features/gotoLine/register.js'
+// Editing (TOOLS-Q13): VS Code's basic text commands, all computed on the main thread from the text and the language
+// configuration — move / copy / delete lines (⌥↑, ⇧⌥↓, ⇧⌘K), indent (⌘] ⌘[), toggle comment (⌘/), multiple cursors (⌘D,
+// ⌥⌘↓), go to bracket, soft undo, expand selection, drag and drop, and ⌃⇧M to let Tab move focus out of the editor.
+import 'monaco-editor/features/linesOperations/register.js'
+import 'monaco-editor/features/comment/register.js'
+import 'monaco-editor/features/multicursor/register.js'
+import 'monaco-editor/features/bracketMatching/register.js'
+import 'monaco-editor/features/indentation/register.js'
+import 'monaco-editor/features/cursorUndo/register.js'
+import 'monaco-editor/features/smartSelect/register.js'
+import 'monaco-editor/features/caretOperations/register.js'
+import 'monaco-editor/features/lineSelection/register.js'
+import 'monaco-editor/features/wordPartOperations/register.js'
+import 'monaco-editor/features/dnd/register.js'
+import 'monaco-editor/features/toggleTabFocusMode/register.js'
 import { JSON_CONFIGURATION, JSON_MONARCH } from './json-language'
 import { JSON_LANGUAGE, PLAIN_TEXT } from './languages'
 import { LANGUAGE_LOADERS } from './language-loaders'

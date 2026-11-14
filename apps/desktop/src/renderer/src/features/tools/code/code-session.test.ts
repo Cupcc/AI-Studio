@@ -1,14 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { codeViewStates, openCodeSession, type CodeContent } from './code-session'
+import { CODE_CHANGE_DEBOUNCE_MS, codeViewStates, openCodeSession, type CodeContent } from './code-session'
 import { codeAriaLabel } from './editor-options'
-import { createFakeMonaco } from './fake-monaco'
+import { createFakeMonaco, FAKE_SAVE_KEY } from './fake-monaco'
+import { cachedCodeModels, releaseCodeModels } from './model-cache'
 
 const never = () => false
 const file = (path: string, text: string, key = `k:${path}`): CodeContent => ({ path, text, viewStateKey: key })
 const FAKE_LANGUAGES = { typescript: {}, python: {}, json: {} }
 
 let host: HTMLElement
-beforeEach(() => { host = document.createElement('div'); document.body.append(host); codeViewStates.clear() })
+beforeEach(() => { host = document.createElement('div'); document.body.append(host); codeViewStates.clear(); releaseCodeModels('', { prefix: true }) })
 afterEach(() => { host.remove(); delete document.documentElement.dataset.scheme })
 
 describe('openCodeSession', () => {
@@ -187,5 +188,120 @@ describe('CodeSession.dispose', () => {
     expect(fake.models).toHaveLength(25)
     expect(fake.liveModels()).toHaveLength(0)
     expect(fake.liveEditors()).toHaveLength(0)
+  })
+})
+
+describe('editing (TOOLS-Q13)', () => {
+  /** Records what the editor reports; `dirty` follows the owner, which keeps a draft once a change was reported. */
+  function editing() {
+    const changes: string[] = []
+    const saves: string[] = []
+    const state = { dirty: false }
+    const callbacks = () => ({ onChange: (text: string) => { changes.push(text); state.dirty = true }, onSave: () => saves.push(changes.at(-1) ?? ''), dirty: state.dirty })
+    return { changes, saves, state, callbacks }
+  }
+
+  it('creates a writable editor in which Tab indents', async () => {
+    const fake = createFakeMonaco(FAKE_LANGUAGES)
+    const session = await openCodeSession(fake.runtime, host, file('a.ts', 'x'), never, editing().callbacks)
+    expect(fake.editors[0]!.options).toMatchObject({ readOnly: false, domReadOnly: false, tabFocusMode: false })
+    session!.dispose()
+  })
+
+  it('reports the first edit at once, later ones after a quiet moment, and at once on focus loss', async () => {
+    vi.useFakeTimers()
+    try {
+      const fake = createFakeMonaco(FAKE_LANGUAGES)
+      const edits = editing()
+      const session = await openCodeSession(fake.runtime, host, file('a.ts', 'x'), never, edits.callbacks)
+      const model = fake.models[0]!
+      model.type('x1')
+      expect(edits.changes).toEqual(['x1'])
+      model.type('x12'); model.type('x123')
+      expect(edits.changes).toEqual(['x1'])
+      vi.advanceTimersByTime(CODE_CHANGE_DEBOUNCE_MS)
+      expect(edits.changes).toEqual(['x1', 'x123'])
+      model.type('x1234')
+      fake.editors[0]!.blur()
+      expect(edits.changes).toEqual(['x1', 'x123', 'x1234'])
+      session!.dispose()
+    } finally { vi.useRealTimers() }
+  })
+
+  it('reports the first edit after a save (the file is clean again) at once, so a quit or a disk write cannot get ahead of it', async () => {
+    vi.useFakeTimers()
+    try {
+      const fake = createFakeMonaco(FAKE_LANGUAGES)
+      const edits = editing()
+      const session = await openCodeSession(fake.runtime, host, file('a.ts', 'x'), never, edits.callbacks)
+      const model = fake.models[0]!
+      model.type('x1'); model.type('x12')
+      expect(edits.changes).toEqual(['x1'])
+      vi.advanceTimersByTime(CODE_CHANGE_DEBOUNCE_MS)
+      // Saved: the owner drops its draft; the editor keeps showing the same text, so nothing new is pushed into it.
+      edits.state.dirty = false
+      model.type('x123')
+      expect(edits.changes).toEqual(['x1', 'x12', 'x123'])
+      session!.dispose()
+    } finally { vi.useRealTimers() }
+  })
+
+  it('delivers the pending text before ⌘S and before the editor goes away', async () => {
+    vi.useFakeTimers()
+    try {
+      const fake = createFakeMonaco(FAKE_LANGUAGES)
+      const edits = editing()
+      const session = await openCodeSession(fake.runtime, host, file('a.ts', 'x'), never, edits.callbacks)
+      const model = fake.models[0]!
+      model.type('a'); model.type('ab')
+      fake.editors[0]!.press(FAKE_SAVE_KEY)
+      expect(edits.saves).toEqual(['ab'])
+      model.type('abc')
+      session!.dispose()
+      expect(edits.changes.at(-1)).toBe('abc')
+    } finally { vi.useRealTimers() }
+  })
+
+  it('does not report new content pushed into it, nor push back the text it reported', async () => {
+    const fake = createFakeMonaco(FAKE_LANGUAGES)
+    const edits = editing()
+    const session = await openCodeSession(fake.runtime, host, file('a.ts', 'x'), never, edits.callbacks)
+    const model = fake.models[0]!
+    model.type('mine')
+    fake.log.length = 0
+    session!.show(file('a.ts', 'mine'))
+    expect(fake.log).not.toContain(`model${model.id}.setValue`)
+    session!.show(file('a.ts', 'from disk'))
+    expect(model.value).toBe('from disk')
+    expect(edits.changes).toEqual(['mine'])
+    session!.dispose()
+  })
+
+  it('keeps the model (and its undo history) for the same text when the editor comes back, and recreates it otherwise', async () => {
+    const fake = createFakeMonaco(FAKE_LANGUAGES)
+    const first = await openCodeSession(fake.runtime, host, file('a.ts', 'x', 'p:a.ts'), never, editing().callbacks)
+    fake.models[0]!.type('edited')
+    first!.dispose()
+    expect(fake.models[0]!.disposed).toBe(false)
+    expect(cachedCodeModels()).toBe(1)
+    const again = await openCodeSession(fake.runtime, host, file('a.ts', 'edited', 'p:a.ts'), never, editing().callbacks)
+    expect(fake.editors[1]!.model).toBe(fake.models[0])
+    again!.dispose()
+    // Different text (reverted meanwhile): the stale model goes.
+    const reverted = await openCodeSession(fake.runtime, host, file('a.ts', 'x', 'p:a.ts'), never, editing().callbacks)
+    expect(fake.models[0]!.disposed).toBe(true)
+    expect(fake.editors[2]!.model).toBe(fake.models[1])
+    reverted!.dispose()
+    releaseCodeModels('p:', { prefix: true })
+    expect(cachedCodeModels()).toBe(0)
+    expect(fake.liveModels()).toHaveLength(0)
+  })
+
+  it('never keeps the model of a read-only viewer', async () => {
+    const fake = createFakeMonaco(FAKE_LANGUAGES)
+    const session = await openCodeSession(fake.runtime, host, file('a.ts', 'x'), never)
+    session!.dispose()
+    expect(fake.liveModels()).toHaveLength(0)
+    expect(cachedCodeModels()).toBe(0)
   })
 })

@@ -135,4 +135,33 @@ describe('Terminal and Browser lifecycle · DEC-14 / FR-PROJ-002', () => {
     expect(session.releaseAllRuntimes).toHaveBeenCalledTimes(2)
     expect(quit).toHaveBeenCalledOnce()
   })
+
+  it('asks about unsaved files when closing their Project, and closes without blocking once confirmed (TOOLS-Q13)', async () => {
+    const file: ClosingResource = { kind: 'file', id: 'src/a.ts', projectId: 'p1', title: 'src/a.ts' }
+    let unsaved = [file]
+    const runtime: MainToolPort = { ...stubMainToolPort,
+      unsavedFiles: projectId => unsaved.filter(item => !projectId || item.projectId === projectId),
+      closeProject: vi.fn(async () => { unsaved = [] })
+    }
+    expect(await closeProjectWithSessions(stubMainSessionPort, 'p1', false, 100, runtime))
+      .toEqual({ status: 'confirmation_required', counts: { running: 0, needsInput: 0, files: 1, resources: [file] } })
+    expect(await closeProjectWithSessions(stubMainSessionPort, 'p2', false, 100, runtime)).toEqual({ status: 'closed' })
+    expect(await closeProjectWithSessions(stubMainSessionPort, 'p1', true, 100, runtime)).toEqual({ status: 'closed' })
+    expect(runtime.closeProject).toHaveBeenCalledWith('p1')
+  })
+
+  it('asks before quitting with only unsaved files, and quits after the confirmation (TOOLS-Q13)', async () => {
+    const file: ClosingResource = { kind: 'file', id: 'a.md', projectId: 'p2', title: 'a.md' }
+    let unsaved = [file]
+    const quit = vi.fn(), requested: QuitRequest[] = []
+    const runtime: MainToolPort = { ...stubMainToolPort, unsavedFiles: () => unsaved, closeAll: vi.fn(async () => { unsaved = [] }) }
+    const flow = createQuitFlow({ getPort: () => stubMainSessionPort, getTools: () => runtime,
+      askRenderer: request => { requested.push(request); return true }, askNative: async () => false, quit })
+    flow.onBeforeQuit({ preventDefault: vi.fn() })
+    await vi.waitFor(() => expect(flow.state).toBe('asking'))
+    expect(requested.at(-1)).toMatchObject({ sessions: 0, projects: 1, files: 1, resources: [file] })
+    expect(quit).not.toHaveBeenCalled()
+    await flow.confirm()
+    expect(quit).toHaveBeenCalledOnce()
+  })
 })

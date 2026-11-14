@@ -85,11 +85,18 @@ export const S = {
 
   // Close and quit confirmation (D-10; PROJ-Q6, PROJ-Q7)
   closeTitle: (name: string) => `关闭 ${name}？`,
-  closeBody: (n: number, terminals = 0) => [
+  closeBody: (n: number, terminals = 0, files = 0) => [
     n ? `${n} 个对话仍在运行或等待你的输入。当前一轮将停止，对话记录会保留。` : '',
-    terminals ? `${terminals} 个终端尚未退出，终端及其运行的命令将结束。` : ''
+    terminals ? `${terminals} 个终端尚未退出，终端及其运行的命令将结束。` : '',
+    files ? `${files} 个文件有未保存的修改，不保存将丢失。` : ''
   ].filter(Boolean).join(' '),
   closeConfirm: '关闭并停止',
+  // Unsaved files (TOOLS-Q13): save them all first, or close without saving.
+  closeSave: '保存并关闭',
+  closeDiscard: '不保存并关闭',
+  saving: '正在保存…',
+  saveFailedBody: '以下文件未能保存，没有关闭。可处理后重试，或选择不保存。',
+  unsavedFile: '未保存的文件',
   cancel: '取消',
   stopping: '正在停止…',
   stopFailedTitle: '部分资源未能停止',
@@ -97,12 +104,17 @@ export const S = {
   stopTimeout: '停止超时',
   retry: '重试',
   quitTitle: `退出 ${PRODUCT_NAME}？`,
-  quitBody: (sessions: number, projects: number, terminals = 0) =>
-    `${projects} 个 Project 中有${sessions ? ` ${sessions} 个活动对话` : ''}${sessions && terminals ? '及' : ''}${terminals ? ` ${terminals} 个未退出终端` : ''}。`
-    + `${[sessions ? '对话当前一轮将停止，历史保留' : '', terminals ? '终端及其运行的命令将结束' : ''].filter(Boolean).join('；')}。`,
+  quitBody: (sessions: number, projects: number, terminals = 0, files = 0) => {
+    const parts = [sessions ? `${sessions} 个活动对话` : '', terminals ? `${terminals} 个未退出终端` : '', files ? `${files} 个未保存的文件` : ''].filter(Boolean)
+    const listed = parts.length < 2 ? parts.join('') : `${parts.slice(0, -1).join('、')}及 ${parts.at(-1)}`
+    return `${projects} 个 Project 中有 ${listed}。`
+      + `${[sessions ? '对话当前一轮将停止，历史保留' : '', terminals ? '终端及其运行的命令将结束' : '', files ? '不保存的修改将丢失' : ''].filter(Boolean).join('；')}。`
+  },
   quitFailedTitle: '退出未完成',
   quitFailedBody: '部分资源未能清理，应用保持打开。请检查原因后重试。',
   quitConfirm: '停止并退出',
+  quitSave: '保存并退出',
+  quitDiscard: '不保存并退出',
 
   // Application menu (PROJ-Q17)
   menu: {

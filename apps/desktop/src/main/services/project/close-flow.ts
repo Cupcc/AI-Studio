@@ -22,10 +22,12 @@ export async function closeProjectWithSessions(
   try {
     const counts = await port.getBlockingSessionCounts(projectId)
     const terminals = tools.activeTerminals(projectId)
-    const resources = [...(port.activeSessions?.(projectId) ?? []), ...terminals]
-    if (!confirmed && counts.running + counts.needsInput + terminals.length > 0) {
+    const files = tools.unsavedFiles?.(projectId) ?? []
+    const resources = [...(port.activeSessions?.(projectId) ?? []), ...terminals, ...files]
+    if (!confirmed && counts.running + counts.needsInput + terminals.length + files.length > 0) {
       return { status: 'confirmation_required', counts: {
-        ...counts, ...(terminals.length ? { terminals: terminals.length } : {}), ...(resources.length ? { resources } : {})
+        ...counts, ...(terminals.length ? { terminals: terminals.length } : {}), ...(files.length ? { files: files.length } : {}),
+        ...(resources.length ? { resources } : {})
       } }
     }
     const cleanup = (async (): Promise<CloseProjectResult> => {

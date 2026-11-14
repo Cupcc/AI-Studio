@@ -8,6 +8,7 @@ import { useTerminals, watchTerminals } from './terminal-store'
 import { installFilesIntegration } from './files/integration'
 import { filesApi } from './files/api'
 import { useFiles } from './files/files-store'
+import { saveFailureText } from './files/strings'
 import { installDiffIntegration } from './diff/integration'
 import { QuickOpen, useQuickOpen } from './quick-open/QuickOpen'
 import { useSearch } from './search/search-store'
@@ -44,6 +45,9 @@ export function installToolsIntegration(): () => void {
   const unregister = registerShellIntegration({ Tool: Tools, Overlay: QuickOpen, toolSelected(projectId, area) {
     previousToolSelected?.(projectId, area)
     if (area === 'files' && useReferenceInspector.getState().current?.projectId === projectId) useReferenceInspector.setState({ current: null })
+  }, async saveFiles(projectId) {
+    const failures = await useFiles.getState().saveAll(projectId)
+    return failures.map(item => `${item.path}：${saveFailureText(item.outcome)}`)
   } })
   const offMenu = studio().project.onMenuCommand(({ command }) => onToolCommand(command))
   // The Quick Open listing is refreshed after files change; opened files become "recent".

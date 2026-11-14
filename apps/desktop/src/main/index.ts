@@ -122,15 +122,19 @@ async function startRuntime(): Promise<void> {
         })
       },
       askRenderer: (request) => {
+        // Unsaved files can only be saved by the renderer that holds them: bring a closed (hidden) window back to ask.
         const win = BrowserWindow.getAllWindows().find((w) => w.isVisible())
+          ?? (request.files ? BrowserWindow.getAllWindows().find((w) => !w.isDestroyed() && !w.webContents.isLoading()) : undefined)
         if (!win) return false
+        if (!win.isVisible()) { win.show(); win.focus() }
         emit(win.webContents, projectContract.events.quitRequested, request); return true
       },
       askNative: async (request) => {
         browserFor(core!).setOverlayBlocked(true)
         try {
-          const detail = [...(request.resources ?? []).map(resource => `${shell.projects.getProject(resource.projectId)?.name ?? resource.projectId} · ${resource.kind === 'terminal' ? 'Terminal' : 'Session'} · ${resource.title}`), ...(request.failures ?? [])].join('\n')
-          const result = await dialog.showMessageBox({ type: 'question', title: request.failures?.length ? S.quitFailedTitle : S.quitTitle, message: request.failures?.length ? S.quitFailedBody : S.quitBody(request.sessions, request.projects, request.terminals), detail, buttons: [S.cancel, request.failures?.length ? S.retry : S.quitConfirm], defaultId: 0, cancelId: 0 })
+          const kind = { session: 'Session', terminal: 'Terminal', file: S.unsavedFile } as const
+          const detail = [...(request.resources ?? []).map(resource => `${shell.projects.getProject(resource.projectId)?.name ?? resource.projectId} · ${kind[resource.kind]} · ${resource.title}`), ...(request.failures ?? [])].join('\n')
+          const result = await dialog.showMessageBox({ type: 'question', title: request.failures?.length ? S.quitFailedTitle : S.quitTitle, message: request.failures?.length ? S.quitFailedBody : S.quitBody(request.sessions, request.projects, request.terminals, request.files), detail, buttons: [S.cancel, request.failures?.length ? S.retry : request.files ? S.quitDiscard : S.quitConfirm], defaultId: 0, cancelId: 0 })
           return result.response === 1
         } finally { browserFor(core!).setOverlayBlocked(false) }
       },

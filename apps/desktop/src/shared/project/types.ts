@@ -99,13 +99,16 @@ export interface QuitRequest {
   sessions: number
   projects: number
   terminals?: number
+  /** Open files with unsaved changes (TOOLS-Q13). */
+  files?: number
   resources?: ClosingResource[]
   failures?: string[]
 }
 
 /** Names and identities shown in one Project / application close confirmation. */
 export interface ClosingResource {
-  kind: 'session' | 'terminal'
+  /** `file`: an open file with unsaved changes; `id` and `title` are its Project path. */
+  kind: 'session' | 'terminal' | 'file'
   id: string
   projectId: ProjectId
   title: string
@@ -114,7 +117,7 @@ export interface ClosingResource {
 /** Highest-priority attention of a Project (Needs Input > Error > Completed Unread). */
 export type ProjectAttention = 'needs_input' | 'error' | 'completed_unread' | null
 
-export interface BlockingSessionCounts { running: number; needsInput: number; terminals?: number; resources?: ClosingResource[] }
+export interface BlockingSessionCounts { running: number; needsInput: number; terminals?: number; files?: number; resources?: ClosingResource[] }
 export interface StopProjectResult {
   stopped: SessionId[]
   failed: { sessionId: SessionId; reason: string }[]

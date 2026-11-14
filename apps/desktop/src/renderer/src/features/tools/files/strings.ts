@@ -1,5 +1,6 @@
 import { FILES_LIMITS } from '@shared/tools/files'
 import type { FileEncoding, FileReferenceFailureReason, FileUnavailableReason } from '@shared/tools/files'
+import type { SaveFailure } from './files-store'
 import type { AddFileReferenceResult } from '../../input/add-file-reference'
 
 // User-facing strings of the Files tool. Contracts carry reason codes only; every message is chosen here.
@@ -36,6 +37,24 @@ export function fileReasonText(reason: FileUnavailableReason, size?: number): st
     case 'too_large': return size === undefined ? `文件过大，超过 ${formatBytes(FILES_LIMITS.readBytes)} 的查看上限` : `文件过大（${formatBytes(size)}），超过 ${formatBytes(FILES_LIMITS.readBytes)} 的查看上限`
     case 'unsupported_encoding': return '非 UTF-8 编码，无法显示'
     case 'changed_while_reading': return '文件在读取时发生变化，请稍后重试'
+  }
+}
+
+/** Why a save did not happen (TOOLS-Q13). */
+export function saveFailureText(outcome: SaveFailure): string {
+  switch (outcome) {
+    case 'busy': return '正在保存'
+    case 'conflict': return '磁盘上的文件已被修改，需先比较、覆盖或放弃修改'
+    case 'invalid_path': return '路径无效'
+    case 'project_unavailable': return 'Project 目录不可用'
+    case 'project_closing': return 'Project 正在关闭'
+    case 'missing': return '所在文件夹已不存在'
+    case 'not_file': return '该路径已不是普通文件'
+    case 'symlink_refused': return '路径经过符号链接，未写入'
+    case 'excluded': return '该路径已被排除，不能写入'
+    case 'permission_denied': return '没有写入权限'
+    case 'too_large': return `保存后超过 ${formatBytes(FILES_LIMITS.readBytes)}，超出应用内编辑的上限`
+    case 'failed': return '写入失败'
   }
 }
 
@@ -132,11 +151,30 @@ export const FILES_TEXT = {
   copied: '已复制路径',
   copiedRelative: '已复制相对路径',
   wrap: '自动换行',
+  // Editing (TOOLS-Q13)
+  mode: 'Markdown 显示方式',
+  edit: '编辑',
   preview: '预览',
-  source: '源码',
+  previewShortcut: '⇧⌘V 切换',
+  save: '保存',
+  saving: '正在保存…',
+  unsaved: '未保存',
+  unsavedTip: '有未保存的修改（⌘S 保存）',
+  saveFailed: (reason: string) => `未能保存：${reason}`,
+  changedOnDisk: '磁盘上的文件已被修改（可能来自 Agent 或其他编辑器），你的修改尚未保存。',
+  deletedOnDisk: '磁盘上的文件已被删除。保存会重新创建它。',
+  comparing: '左侧是磁盘上的版本，右侧是你的修改。',
+  compare: '比较',
+  overwrite: '覆盖',
+  overwriteDisk: '用我的修改覆盖',
+  discardMine: '放弃我的修改',
+  backToEdit: '返回编辑',
+  confirmCloseTitle: (name: string) => `保存对“${name}”的修改？`,
+  confirmCloseBody: '不保存，修改将丢失。',
+  dontSave: '不保存',
   more: '更多文件操作',
   tabs: '打开的文件',
-  closeTab: (name: string) => `关闭 ${name}`,
+  closeTab: (name: string, dirty = false) => dirty ? `关闭 ${name}（未保存）` : `关闭 ${name}`,
   imageLoading: '正在读取图片…',
   imageFailed: '无法显示图片'
 } as const
@@ -161,6 +199,8 @@ export const FILES_MENU = {
   copyRelativePath: '复制相对路径',
   rename: '重命名…',
   delete: '删除',
+  save: '保存',
+  revert: '还原文件',
   refresh: '刷新',
   collapseAll: '全部折叠'
 } as const

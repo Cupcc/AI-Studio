@@ -213,3 +213,45 @@ describe('subscriptions through the service', () => {
     } finally { vi.useRealTimers() }
   })
 })
+
+describe('saving and unsaved files (TOOLS-Q13)', () => {
+  it('saves through the Project queue, announcing only a file that was created again', async () => {
+    const h = harness()
+    h.fixture.write('src/a.ts', 'old')
+    const read = await h.service.read({ projectId: 'p', path: 'src/a.ts' })
+    if (read.status !== 'ok') throw new Error('unreadable')
+    const saved = await h.service.write({ projectId: 'p', path: 'src/a.ts', text: 'new', expectedVersion: read.version, encoding: 'utf-8', bom: false })
+    expect(saved).toMatchObject({ status: 'ok', path: 'src/a.ts', size: 3 })
+    expect(h.changed).toEqual([])
+    const created = await h.service.write({ projectId: 'p', path: 'src/b.ts', text: 'b', expectedVersion: null, encoding: 'utf-8', bom: false })
+    expect(created).toMatchObject({ status: 'ok' })
+    expect(h.changed).toEqual([expect.objectContaining({ projectId: 'p', dirs: ['src'], overflow: false })])
+    expect(await h.service.write({ projectId: 'p', path: 'src/a.ts', text: 'x', expectedVersion: read.version, encoding: 'utf-8', bom: false })).toMatchObject({ status: 'conflict' })
+  })
+
+  it('refuses to save for an unknown or closing Project', async () => {
+    const h = harness()
+    h.fixture.write('a.ts', 'old')
+    expect(await h.service.write({ projectId: 'other', path: 'a.ts', text: 'x', expectedVersion: null, encoding: 'utf-8', bom: false })).toEqual({ status: 'failed', path: 'a.ts', reason: 'project_unavailable' })
+    h.state.closing = true
+    expect(await h.service.write({ projectId: 'p', path: 'a.ts', text: 'x', expectedVersion: null, encoding: 'utf-8', bom: false })).toEqual({ status: 'failed', path: 'a.ts', reason: 'project_closing' })
+  })
+
+  it('keeps the unsaved files per Project until the Project closes or the renderer goes away', async () => {
+    const gone = new Map<number, () => void>()
+    const h = harness({ watchOwner: (owner, onGone) => { gone.set(owner, onGone); return () => gone.delete(owner) } })
+    h.service.setUnsaved('p', ['a.ts', 'b/c.ts'], 7)
+    h.service.setUnsaved('unknown', ['x'], 7)
+    expect(h.service.unsaved()).toEqual([{ projectId: 'p', path: 'a.ts' }, { projectId: 'p', path: 'b/c.ts' }])
+    expect(h.service.unsaved('p')).toHaveLength(2)
+    expect(h.service.unsaved('other')).toEqual([])
+    h.service.setUnsaved('p', [], 7)
+    expect(h.service.unsaved()).toEqual([])
+    h.service.setUnsaved('p', ['a.ts'], 7)
+    await h.service.closeProject('p')
+    expect(h.service.unsaved()).toEqual([])
+    h.service.setUnsaved('p', ['a.ts'], 7)
+    gone.get(7)!()
+    expect(h.service.unsaved()).toEqual([])
+  })
+})

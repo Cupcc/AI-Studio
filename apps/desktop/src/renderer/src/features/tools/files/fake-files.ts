@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import type { FileEntry, FilesChanged, FileUnavailableReason, FilesWatchChanged, FilesWatchState } from '@shared/tools/files'
+import type { FileEntry, FilesChanged, FilesPreferences, FileUnavailableReason, FilesWatchChanged, FilesWatchState, FileWriteRequest, FileWriteResult } from '@shared/tools/files'
 import type { FilesApi } from './api'
 
 // In-memory stand-in for the Files service used by the store and panel tests. The real bridge is never used.
@@ -27,6 +27,10 @@ export function createFakeFiles(projectId = 'p') {
   const watchListeners = new Set<(event: FilesWatchChanged) => void>()
   let subscriptions = 0
   let subscribeWatch: FilesWatchState = 'live'
+  let prefs: FilesPreferences = { markdownPreview: false, wordWrap: false }
+  /** Set to make the next writes wait for `release()` or fail with this reason. */
+  let writeGate: Deferred<void> | null = null
+  let writeFailure: Extract<FileWriteResult, { status: 'failed' }>['reason'] | null = null
 
   const api = {
     list: vi.fn(async ({ path }: { path: string }) => {
@@ -46,7 +50,22 @@ export function createFakeFiles(projectId = 'p') {
     subscribe: vi.fn(async () => ({ projectId, subscriptionId: `s${++subscriptions}`, revision: ++revision, watch: subscribeWatch })),
     unsubscribe: vi.fn(async () => undefined),
     onChanged: vi.fn((listener: (event: FilesChanged) => void) => { changedListeners.add(listener); return () => { changedListeners.delete(listener) } }),
-    onWatchChanged: vi.fn((listener: (event: FilesWatchChanged) => void) => { watchListeners.add(listener); return () => { watchListeners.delete(listener) } })
+    onWatchChanged: vi.fn((listener: (event: FilesWatchChanged) => void) => { watchListeners.add(listener); return () => { watchListeners.delete(listener) } }),
+    // Editing (TOOLS-Q13): the same optimistic version check as the main process.
+    write: vi.fn(async ({ path, text, expectedVersion }: FileWriteRequest): Promise<FileWriteResult> => {
+      if (writeGate) await writeGate.promise
+      if (writeFailure) return { status: 'failed', path, reason: writeFailure }
+      const current = files.get(path)
+      const version = typeof current === 'object' ? `v${current.version}` : null
+      if (typeof current === 'string') return { status: 'failed', path, reason: 'not_file' }
+      if (version !== expectedVersion) return { status: 'conflict', path, version }
+      files.set(path, { text, version: typeof current === 'object' ? current.version + 1 : 1 })
+      const saved = files.get(path) as { version: number }
+      return { status: 'ok', path, version: `v${saved.version}`, size: text.length }
+    }),
+    setUnsaved: vi.fn(async () => undefined),
+    preferences: vi.fn(async () => prefs),
+    setPreferences: vi.fn(async (patch: Partial<FilesPreferences>) => { prefs = { ...prefs, ...patch }; return prefs })
   }
 
   return {
@@ -61,6 +80,13 @@ export function createFakeFiles(projectId = 'p') {
       files.set(path, { text, version: typeof current === 'object' ? current.version + 1 : 1 })
     },
     failFile(path: string, reason: FileUnavailableReason) { files.set(path, reason) },
+    /** The text on disk, or undefined. */
+    text(path: string) { const entry = files.get(path); return typeof entry === 'object' ? entry.text : undefined },
+    setPrefs(next: Partial<FilesPreferences>) { prefs = { ...prefs, ...next } },
+    /** Holds every write until the returned gate is resolved. */
+    holdWrites() { writeGate = deferred<void>(); return writeGate },
+    releaseWrites() { writeGate?.resolve(); writeGate = null },
+    failWrites(reason: Extract<FileWriteResult, { status: 'failed' }>['reason'] | null) { writeFailure = reason },
     removeFile(path: string) { files.delete(path) },
     nextRevision: () => ++revision,
     setSubscribeWatch(watch: FilesWatchState) { subscribeWatch = watch },

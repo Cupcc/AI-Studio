@@ -37,11 +37,13 @@ export function createQuitFlow(deps: QuitFlowDeps): QuitFlow {
   }
   const counts = (request: QuitRequest): QuitRequest => {
     const terminals = tools().activeTerminals()
+    const files = tools().unsavedFiles?.() ?? []
     const sessions = deps.getPort().activeSessions?.() ?? []
-    const resources = [...sessions, ...terminals]
+    const resources = [...sessions, ...terminals, ...files]
     return { ...request,
       projects: resources.length ? new Set(resources.map(item => item.projectId)).size : request.projects,
-      ...(terminals.length ? { terminals: terminals.length } : {}), ...(resources.length ? { resources } : {})
+      ...(terminals.length ? { terminals: terminals.length } : {}), ...(files.length ? { files: files.length } : {}),
+      ...(resources.length ? { resources } : {})
     }
   }
   const ask = async (request: QuitRequest) => {
@@ -111,7 +113,7 @@ export function createQuitFlow(deps: QuitFlowDeps): QuitFlow {
       state = 'checking'
       void Promise.resolve(request).then(async initial => {
         const current = counts(initial)
-        if (current.sessions || current.terminals) await ask(current)
+        if (current.sessions || current.terminals || current.files) await ask(current)
         else {
           await boundedCleanup(startCleanup(releaseResources), deps.stopTimeoutMs ?? STOP_ALL_TIMEOUT_MS)
           await approve()

@@ -10,6 +10,16 @@ export interface CodeViewerProps {
   wordWrap?: boolean
   /** Scrolls to and selects this 1-based line; a new `nonce` repeats the request for the same line. */
   revealLine?: { line: number; nonce: number }
+  /**
+   * The text can be edited (TOOLS-Q13). `onChange` receives the whole text after edits: at once while the file is not
+   * `dirty`, then at most every ~150 ms and whenever the editor loses focus or goes away. `onSave` is ⌘S inside the editor, after the
+   * pending text was delivered. The model (and its undo history) outlives the editor under `viewStateKey`.
+   */
+  editable?: boolean
+  /** The owner already holds unsaved text for this file: later edits are batched. While false, each edit is reported at once. */
+  dirty?: boolean
+  onChange?(text: string): void
+  onSave?(): void
 }
 
 export interface CodeDiffViewerProps {

@@ -107,3 +107,22 @@
   background-position: 0 0, 8px 8px; background-size: 16px 16px; }
 .files-image img { max-width: 100%; max-height: 100%; object-fit: contain; image-rendering: auto; }
 .files-markdown { flex: 1; min-height: 0; padding: var(--space-3) var(--space-4); overflow: auto; font-size: var(--font-size-md); line-height: 1.6; }
+
+/* Editing (TOOLS-Q13) */
+/* Markdown 编辑 / 预览: a segmented pair, as the colour mode in Settings. */
+.files-mode { display: inline-flex; gap: var(--space-0); padding: var(--space-0); border: 1px solid var(--color-border); border-radius: var(--radius-button); }
+.files-mode__option { height: calc(var(--button-small-height) - 4px); padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-3); font: var(--font-size-sm) var(--font-sans); }
+.files-mode__option:hover:not(.is-selected) { background: var(--color-hover); }
+.files-mode__option.is-selected { background: var(--color-selected); color: var(--color-text); font-weight: 500; }
+/* Unsaved: VS Code's filled dot, after the name and in place of the tab's close button (the × returns on hover). */
+.files-viewer__dirty { display: inline-block; width: 7px; height: 7px; margin-inline-start: var(--space-1-5); border-radius: 50%; background: var(--color-text-2); vertical-align: middle; }
+.files-tab__dirty { width: 7px; height: 7px; border-radius: 50%; background: var(--color-text-2); }
+.files-tab.is-dirty .files-tab__close { opacity: 1; }
+.files-tab.is-dirty .files-tab__close svg { display: none; }
+.files-tab.is-dirty:hover .files-tab__close svg, .files-tab.is-dirty .files-tab__close:focus-visible svg { display: block; }
+.files-tab.is-dirty:hover .files-tab__dirty, .files-tab.is-dirty .files-tab__close:focus-visible .files-tab__dirty { display: none; }
+/* The file on disk moved on, or a save failed: the choices stay in view above the editor. */
+.files-conflict { display: flex; flex: none; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); padding: var(--space-1-5) var(--space-3); border-top: 1px solid var(--color-needs-input-border); background: var(--color-needs-input-bg); color: var(--color-text-2); font-size: var(--font-size-sm); }
+.files-conflict[data-kind="error"] { border-top-color: var(--color-error-border); background: var(--color-error-bg); }
+.files-conflict p { flex: 1 1 200px; margin: 0; overflow-wrap: anywhere; }
+.files-conflict__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-1); margin-inline-start: auto; }

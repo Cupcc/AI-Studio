@@ -15,3 +15,9 @@ it('lists only the consequences that apply to the running work', () => {
   expect(sessionsOnly.endsWith('对话当前一轮将停止，历史保留。')).toBe(true)
   expect(sessionsOnly).not.toContain('终端')
 })
+
+it('names unsaved files and their consequence in the quit and close confirmations (TOOLS-Q13)', () => {
+  expect(S.quitBody(0, 1, 0, 2)).toBe('1 个 Project 中有 2 个未保存的文件。不保存的修改将丢失。')
+  expect(S.quitBody(1, 2, 1, 1)).toContain('1 个活动对话、1 个未退出终端及 1 个未保存的文件')
+  expect(S.closeBody(0, 0, 1)).toBe('1 个文件有未保存的修改，不保存将丢失。')
+})

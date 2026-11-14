@@ -114,6 +114,21 @@ export async function openNoFollow(absolute: string): Promise<FileHandle> {
   return open(absolute, NONBLOCKING_READ | fsConstants.O_NOFOLLOW)
 }
 
+/**
+ * Opens for writing without following any link (O_NOFOLLOW_ANY on darwin, as `openNoFollow`). O_NONBLOCK keeps a FIFO
+ * swapped in after the checks from blocking the open (ENXIO without a reader). `extra` adds O_CREAT | O_EXCL for a new file.
+ */
+export async function openNoFollowForWrite(absolute: string, extra = 0, mode = 0o666): Promise<FileHandle> {
+  const flags = fsConstants.O_WRONLY | fsConstants.O_NONBLOCK | extra
+  if (darwinNoFollowAny) {
+    try { return await open(absolute, flags | O_NOFOLLOW_ANY, mode) } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EINVAL') throw error
+      darwinNoFollowAny = false
+    }
+  }
+  return open(absolute, flags | fsConstants.O_NOFOLLOW, mode)
+}
+
 export interface OpenedFile {
   handle: FileHandle
   /** fstat of the descriptor right after open. */

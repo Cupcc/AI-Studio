@@ -13,7 +13,7 @@ import {
 } from './file-actions'
 import { FileTree, type TreeKeyAction } from './FileTree'
 import { FileViewer } from './FileViewer'
-import { entryOf, useFiles } from './files-store'
+import { entryOf, NO_DRAFTS, useFiles } from './files-store'
 import { flattenTree, type EntryRow } from './files-tree'
 import { useGitDecorations } from './git-decorations'
 import { displayName, FILES_MENU, FILES_TEXT } from './strings'
@@ -38,11 +38,14 @@ export interface FilesPanelProps {
 
 export function FilesPanel({ projectId, canvas, active, root = '', viewerHost }: FilesPanelProps) {
   const state = useFiles(s => s.projects[projectId])
+  const prefs = useFiles(s => s.prefs)
   const clipboard = useFilesClipboard()
   const decorations = useGitDecorations(projectId, active)
   const [message, setMessage] = useState<(AddOutcome & { path: string }) | null>(null)
   const [notice, setNotice] = useState<ActionMessage | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<ProjectPath[] | null>(null)
+  /** A tab with unsaved changes asked to close (TOOLS-Q13). */
+  const [confirmClose, setConfirmClose] = useState<ProjectPath | null>(null)
   const [adding, setAdding] = useState(false)
 
   useEffect(() => {
@@ -175,6 +178,24 @@ export function FilesPanel({ projectId, canvas, active, root = '', viewerHost }:
     if (paths?.length) say(await trashEntries(projectId, paths))
   }
 
+  /** Closing a file with unsaved changes asks first, as VS Code does; anything else closes at once. */
+  function requestClose(path: ProjectPath | null) {
+    if (path !== null && state?.drafts.has(path)) { setConfirmClose(path); return }
+    if (path === null || path === viewer?.path) { files.closeViewer(projectId); setMessage(null) }
+    else files.closeTab(projectId, path)
+  }
+  async function saveAndClose(path: ProjectPath) {
+    setConfirmClose(null)
+    const outcome = await files.save(projectId, path)
+    if (outcome === 'saved' || outcome === 'clean') { files.closeTab(projectId, path); return }
+    // Not saved: show the file, its banner says why and offers the choices.
+    if (useFiles.getState().projects[projectId]?.viewer?.path !== path) void files.select(projectId, path, { pin: true })
+  }
+  function discardAndClose(path: ProjectPath) {
+    setConfirmClose(null)
+    files.closeTab(projectId, path)
+  }
+
   /** New entries go into the selected folder, or next to the selected file, as VS Code does. */
   const newTarget = (): ProjectPath => {
     const last = marked.at(-1)
@@ -182,16 +203,31 @@ export function FilesPanel({ projectId, canvas, active, root = '', viewerHost }:
     return entryOf(state, last)?.kind === 'directory' ? last : projectPathParent(last)
   }
 
+  const closingName = confirmClose === null ? '' : displayName(projectPathName(confirmClose))
   const viewerContent = viewer && <div className="files-tool files-viewer-pane">
+    {confirmClose !== null && <div className="files-confirm" role="alertdialog" aria-label={FILES_TEXT.confirmCloseTitle(closingName)}>
+      <p>{FILES_TEXT.confirmCloseTitle(closingName)}</p><span className="muted">{FILES_TEXT.confirmCloseBody}</span>
+      <div className="files-confirm__actions">
+        <button className="secondary-button button--small" onClick={() => setConfirmClose(null)}>{FILES_TEXT.cancel}</button>
+        <button className="secondary-button button--small" onClick={() => discardAndClose(confirmClose)}>{FILES_TEXT.dontSave}</button>
+        <button className="primary-button button--small" autoFocus onClick={() => void saveAndClose(confirmClose)}>{FILES_TEXT.save}</button>
+      </div>
+    </div>}
     <FileViewer
       projectId={projectId} viewer={viewer} canAdd={canAdd} active={active} tabs={state?.tabs ?? []} reveal={state?.reveal ?? null}
+      drafts={state?.drafts ?? NO_DRAFTS} prefs={prefs}
       message={message?.path === viewer.path ? message : null} adding={adding}
-      onAdd={() => void add()} onAddImage={() => void add(selected, 'image')} onClose={() => { files.closeViewer(projectId); setMessage(null) }}
+      onAdd={() => void add()} onAddImage={() => void add(selected, 'image')} onClose={() => requestClose(viewer.path)}
       onRetry={() => void files.refresh(projectId)}
       onSelectTab={(path, pinned) => void files.select(projectId, path, { pin: pinned })}
-      onCloseTab={path => files.closeTab(projectId, path)}
+      onCloseTab={requestClose}
       onPinTab={path => files.pinTab(projectId, path)}
       onNotice={say}
+      onEdit={(path, text, base) => files.edit(projectId, path, text, base)}
+      onSave={(path, options) => void files.save(projectId, path, options)}
+      onRevert={path => files.revert(projectId, path)}
+      onSetPreview={(path, preview) => files.setTabPreview(projectId, path, preview)}
+      onSetWrap={wrap => files.setPreferences({ wordWrap: wrap })}
     />
   </div>
 

@@ -24,6 +24,11 @@ export interface ViewSlotProps extends ShellSlotProps { viewId: ViewId }
 export interface PreviewHeaderProps extends ViewSlotProps { part: 'status' | 'actions' | 'menu' }
 export interface ShellIntegration {
   openTurnDiff?(ref: TurnDiffRef): void
+  /**
+   * Saves the open files with unsaved changes of one Project (or of all), before a confirmed Project close or quit
+   * (TOOLS-Q13). Resolves the files that could not be saved, as readable lines; empty when all were saved.
+   */
+  saveFiles?(projectId?: string): Promise<string[]>
   toolSelected?(projectId: string, area: ToolId): void
   session: RendererSessionPort
   Workbenches?: ComponentType<ShellSlotProps>

@@ -3,7 +3,7 @@ import {
   type ExternalEditors, type FileImageResult, type FileIndexResult, type FileOpenRequest, type FileOpenResult,
   type FileOperationResult, type FileReadRequest, type FileReadResult, type FileReferenceFailureReason, type FileReferenceRejection,
   type FileReferenceResolver, type FileReferenceResult, type FilesChanged, type FilesListResult,
-  type FilesSubscription, type FilesWatchChanged, type ProjectPath
+  type FilesSubscription, type FilesWatchChanged, type FileWriteRequest, type FileWriteResult, type ProjectPath
 } from '@shared/tools/files'
 import { listDirectory, type ListOutcome } from './list'
 import { readTextFile, type ReadOutcome } from './read'
@@ -13,6 +13,7 @@ import { listProjectFiles } from './file-index'
 import { readImageFile } from './image'
 import { absoluteOf, copyEntries, createEntry, moveEntries, renameEntry, trashEntries } from './operations'
 import { resolveEntry } from './safe-path'
+import { writeTextFile, type WriteOptions } from './write'
 
 export const FILES_REQUEST_TIMEOUT_MS = 5000
 /** Slow or stalled volumes cannot take every libuv thread (default pool of 4) away from the rest of the app. */
@@ -46,8 +47,12 @@ export interface FilesServiceOptions {
     afterListOpen?: (absolute: string) => Promise<void>
     afterOpen?: (absolute: string) => Promise<void>
     afterRead?: (absolute: string) => Promise<void>
+    beforeWrite?: WriteOptions['beforeWrite']
   }
 }
+
+/** A file with unsaved changes in a renderer (TOOLS-Q13), named in the Project close and quit confirmations. */
+export interface UnsavedFile { projectId: string; path: ProjectPath }
 
 export interface FilesService extends FileReferenceResolver {
   list(projectId: string, path: ProjectPath): Promise<FilesListResult>
@@ -64,6 +69,11 @@ export interface FilesService extends FileReferenceResolver {
   stat(projectId: string, paths: readonly ProjectPath[]): Promise<('file' | 'directory' | null)[]>
   index(projectId: string): Promise<FileIndexResult>
   readImage(projectId: string, path: ProjectPath): Promise<FileImageResult>
+  /** Saves the viewer's text when the file still has `expectedVersion` (TOOLS-Q13). Shares the Project's mutation queue. */
+  write(request: FileWriteRequest): Promise<FileWriteResult>
+  /** Replaces the Project's unsaved files reported by `owner`; forgotten when the Project closes or the renderer goes away. */
+  setUnsaved(projectId: string, paths: readonly ProjectPath[], owner: number): void
+  unsaved(projectId?: string): UnsavedFile[]
   /** Absolute path of a Project directory, for starting a Terminal there (main-only). */
   resolveDirectory(projectId: string, path: ProjectPath): Promise<string>
   subscribe(projectId: string, owner: number): FilesSubscription
@@ -95,7 +105,9 @@ export function createFilesService(options: FilesServiceOptions): FilesService {
   let disposed = false
   let allEpoch = 0
   const epochs = new Map<string, number>()
-  const mutations = new Map<string, Promise<FileOperationResult>>()
+  const mutations = new Map<string, Promise<unknown>>()
+  const unsavedFiles = new Map<string, { owner: number; paths: ProjectPath[] }>()
+  const unsavedOwners = new Map<number, () => void>()
   const indexes = new Map<string, Set<AbortController>>()
   const timeoutMs = options.timeoutMs ?? FILES_REQUEST_TIMEOUT_MS
   const limited = createLimiter(options.concurrency ?? FILES_CONCURRENCY)
@@ -143,25 +155,35 @@ export function createFilesService(options: FilesServiceOptions): FilesService {
   }
 
   /**
-   * Runs a file operation for an open Project. No request deadline: a large copy may legitimately take long. The
-   * affected directories are announced right away, so the tree refreshes even while the watcher is degraded.
+   * Runs a mutation for an open Project in its queue. No request deadline: a large copy may legitimately take long.
+   * `announce` names the directories whose entries changed; they are broadcast right away, so the tree refreshes even
+   * while the watcher is degraded.
    */
-  async function operate(projectId: string, dirs: ProjectPath[], work: (root: string) => Promise<FileOperationResult>): Promise<FileOperationResult> {
+  async function queued<T>(projectId: string, work: (root: string) => Promise<T>, unavailable: (reason: 'project_unavailable' | 'project_closing') => T, announce: (result: T) => ProjectPath[]): Promise<T> {
     const stamp = stampOf(projectId)
-    const first = dirs[0] ?? ''
     // Destination checks and the mutation must share one Project queue. Otherwise two rename / move requests can
     // both see a missing destination and the second fs.rename would replace the first one's data.
     const previous = mutations.get(projectId)
-    const task = (async (): Promise<FileOperationResult> => {
+    const task = (async (): Promise<T> => {
       await previous?.catch(() => {})
       const opened = gate(projectId)
-      if (stampOf(projectId) !== stamp || 'reason' in opened) return { status: 'failed', reason: 'reason' in opened ? opened.reason : 'project_closing', path: first, done: [] }
+      if (stampOf(projectId) !== stamp || 'reason' in opened) return unavailable('reason' in opened ? opened.reason : 'project_closing')
       const result = await work(opened.root)
-      if (stampOf(projectId) === stamp && !disposed && (result.status === 'ok' || result.done.length)) options.changed({ projectId, revision: nextRevision(), dirs: [...new Set(dirs)], overflow: false })
+      const dirs = announce(result)
+      if (stampOf(projectId) === stamp && !disposed && dirs.length) options.changed({ projectId, revision: nextRevision(), dirs: [...new Set(dirs)], overflow: false })
       return result
     })()
     mutations.set(projectId, task)
     try { return await task } finally { if (mutations.get(projectId) === task) mutations.delete(projectId) }
+  }
+
+  function operate(projectId: string, dirs: ProjectPath[], work: (root: string) => Promise<FileOperationResult>): Promise<FileOperationResult> {
+    const first = dirs[0] ?? ''
+    return queued(projectId, work, (reason) => ({ status: 'failed', reason, path: first, done: [] }), (result) => result.status === 'ok' || result.done.length ? dirs : [])
+  }
+
+  function forgetUnsaved(projectId?: string) {
+    for (const id of projectId === undefined ? [...unsavedFiles.keys()] : [projectId]) unsavedFiles.delete(id)
   }
 
   const service: FilesService = {
@@ -270,6 +292,30 @@ export function createFilesService(options: FilesServiceOptions): FilesService {
       try { parseProjectPath(path) } catch { return { status: 'unavailable', path, reason: 'invalid_path' } }
       return { ...(await readImageFile(opened.root, path)), path }
     },
+    async write(request) {
+      const { projectId, path } = request
+      try { parseProjectPath(path) } catch { return { status: 'failed', path, reason: 'invalid_path' } }
+      // A recreated file is a new entry of its directory; an overwrite changes no listing (the watcher reports it anyway).
+      return queued<FileWriteResult>(projectId,
+        (root) => writeTextFile(root, path, request.text, request.expectedVersion, request.encoding, request.bom, options.hooks?.beforeWrite ? { beforeWrite: options.hooks.beforeWrite } : {}),
+        (reason) => ({ status: 'failed', path, reason }),
+        (result) => result.status === 'ok' && request.expectedVersion === null ? [projectPathParent(path)] : [])
+    },
+    setUnsaved(projectId, paths, owner) {
+      if (disposed || !options.projectRoot(projectId)) return
+      if (paths.length) unsavedFiles.set(projectId, { owner, paths: [...paths] })
+      else unsavedFiles.delete(projectId)
+      if (!unsavedOwners.has(owner) && options.watchOwner) {
+        unsavedOwners.set(owner, options.watchOwner(owner, () => {
+          unsavedOwners.delete(owner)
+          for (const [id, entry] of unsavedFiles) if (entry.owner === owner) unsavedFiles.delete(id)
+        }))
+      }
+    },
+    unsaved(projectId) {
+      const entries = projectId === undefined ? [...unsavedFiles] : unsavedFiles.has(projectId) ? [[projectId, unsavedFiles.get(projectId)!] as const] : []
+      return entries.flatMap(([id, entry]) => entry.paths.map(path => ({ projectId: id, path })))
+    },
     async resolveDirectory(projectId, path) {
       const opened = gate(projectId)
       if ('reason' in opened) throw new Error(opened.reason === 'project_closing' ? 'Project is closing' : 'Unknown project')
@@ -279,21 +325,29 @@ export function createFilesService(options: FilesServiceOptions): FilesService {
     },
     subscribe: (projectId, owner) => watcher.subscribe(projectId, owner),
     unsubscribe: (projectId, subscriptionId, owner) => watcher.unsubscribe(projectId, subscriptionId, owner),
-    detachOwner: (owner) => watcher.detachOwner(owner),
+    detachOwner(owner) {
+      watcher.detachOwner(owner)
+      for (const [id, entry] of unsavedFiles) if (entry.owner === owner) unsavedFiles.delete(id)
+    },
     async closeProject(projectId) {
       epochs.set(projectId, (epochs.get(projectId) ?? 0) + 1)
+      forgetUnsaved(projectId)
       for (const controller of indexes.get(projectId) ?? []) controller.abort()
       watcher.closeProject(projectId)
       await mutations.get(projectId)
     },
     async closeAll() {
       allEpoch++
+      forgetUnsaved()
       for (const active of indexes.values()) for (const controller of active) controller.abort()
       watcher.closeAll()
       await Promise.all(mutations.values())
     },
     async dispose() {
       disposed = true
+      forgetUnsaved()
+      for (const stop of unsavedOwners.values()) stop()
+      unsavedOwners.clear()
       for (const active of indexes.values()) for (const controller of active) controller.abort()
       watcher.dispose()
       await Promise.all(mutations.values())

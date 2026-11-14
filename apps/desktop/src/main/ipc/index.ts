@@ -35,6 +35,7 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
     activeTerminals: projectId => terminal.activeTerminals(projectId).map(item => ({
       kind: 'terminal' as const, id: item.terminalId, projectId: item.projectId, title: item.title
     })),
+    unsavedFiles: projectId => files.unsaved(projectId).map(item => ({ kind: 'file' as const, id: item.path, projectId: item.projectId, title: item.path })),
     closeProject: projectId => attemptAll('Project 工具清理失败', [
       async () => { await terminal.closeProject(projectId); await browser.close(projectId) },
       () => files.closeProject(projectId),

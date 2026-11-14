@@ -475,10 +475,10 @@ describe('VS Code explorer behaviour (DEC-25)', () => {
     await store().activate(id)
     await store().select(id, 'README.md')
     await store().select(id, 'src/a.ts')
-    expect(project()!.tabs).toEqual([{ path: 'src/a.ts', pinned: false }])
+    expect(project()!.tabs).toEqual([{ path: 'src/a.ts', pinned: false, preview: false }])
     await store().select(id, 'src/a.ts', { pin: true })
     await store().select(id, 'README.md')
-    expect(project()!.tabs).toEqual([{ path: 'src/a.ts', pinned: true }, { path: 'README.md', pinned: false }])
+    expect(project()!.tabs).toEqual([{ path: 'src/a.ts', pinned: true, preview: false }, { path: 'README.md', pinned: false, preview: false }])
     store().closeTab(id, 'README.md')
     await idle()
     expect(viewer()).toMatchObject({ path: 'src/a.ts' })
@@ -514,7 +514,7 @@ describe('VS Code explorer behaviour (DEC-25)', () => {
     await store().select(id, 'src/a.ts', { pin: true })
     store().mark(id, 'src/a.ts', 'replace', [])
     store().moved(id, 'src', 'lib')
-    expect(project()!.tabs).toEqual([{ path: 'lib/a.ts', pinned: true }])
+    expect(project()!.tabs).toEqual([{ path: 'lib/a.ts', pinned: true, preview: false }])
     expect(project()!.marked).toEqual(['lib/a.ts'])
     expect(project()!.selected).toBe('lib/a.ts')
     expect(project()!.expanded.has('lib')).toBe(true)
@@ -528,5 +528,196 @@ describe('VS Code explorer behaviour (DEC-25)', () => {
     expect(project()!.edit).toEqual({ mode: 'create', parent: 'docs', kind: 'file' })
     store().cancelEdit(id)
     expect(project()!.edit).toBeNull()
+  })
+})
+
+describe('editing (TOOLS-Q13)', () => {
+  const draft = () => project()!.drafts.get('src/a.ts')
+  async function openA() {
+    await store().activate(id)
+    await store().select(id, 'src/a.ts')
+    await idle()
+    expect(viewer()).toMatchObject({ phase: 'ready', text: 'const a = 1', version: 'v1' })
+  }
+
+  it('keeps a draft while the text differs from the disk copy, pins the tab, and drops it when edited back', async () => {
+    await openA()
+    expect(project()!.tabs).toEqual([{ path: 'src/a.ts', pinned: false, preview: false }])
+    store().edit(id, 'src/a.ts', 'const a = 2')
+    expect(draft()).toMatchObject({ text: 'const a = 2', base: { version: 'v1', text: 'const a = 1', encoding: 'utf-8', bom: false }, conflict: null })
+    expect(project()!.tabs[0]!.pinned).toBe(true)
+    store().edit(id, 'src/a.ts', 'const a = 1')
+    expect(draft()).toBeUndefined()
+  })
+
+  it('takes the base the editor was showing when the viewer already moved to another file', async () => {
+    await openA()
+    store().pinTab(id, 'src/a.ts')
+    await store().select(id, 'README.md', { pin: true })
+    await idle()
+    // A late flush from the editor of src/a.ts (its tab is still open).
+    store().edit(id, 'src/a.ts', 'late', { version: 'v1', text: 'const a = 1', encoding: 'utf-8', bom: false })
+    expect(draft()).toMatchObject({ text: 'late', base: { version: 'v1' } })
+    // Once the tab is closed, a flush does not bring the changes back.
+    store().closeTab(id, 'src/a.ts')
+    store().edit(id, 'src/a.ts', 'later', { version: 'v1', text: 'const a = 1', encoding: 'utf-8', bom: false })
+    expect(draft()).toBeUndefined()
+  })
+
+  it('saves with the base version and encoding, then shows the saved text as the file', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'const a = 2')
+    await expect(store().save(id, 'src/a.ts')).resolves.toBe('saved')
+    expect(fake.mocks.write).toHaveBeenCalledWith({ projectId: id, path: 'src/a.ts', text: 'const a = 2', expectedVersion: 'v1', encoding: 'utf-8', bom: false })
+    expect(fake.text('src/a.ts')).toBe('const a = 2')
+    expect(draft()).toBeUndefined()
+    expect(viewer()).toMatchObject({ phase: 'ready', text: 'const a = 2', version: 'v2' })
+    // Nothing left to save.
+    await expect(store().save(id, 'src/a.ts')).resolves.toBe('clean')
+  })
+
+  it('keeps what was typed during a save as unsaved, on top of the new base', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'one')
+    fake.holdWrites()
+    const saving = store().save(id, 'src/a.ts')
+    expect(draft()!.saving).toBe(true)
+    await expect(store().save(id, 'src/a.ts')).resolves.toBe('busy')
+    store().edit(id, 'src/a.ts', 'one two')
+    fake.releaseWrites()
+    await expect(saving).resolves.toBe('saved')
+    expect(draft()).toMatchObject({ text: 'one two', base: { version: 'v2', text: 'one' }, saving: false })
+  })
+
+  it('reloads an unchanged file from disk but turns a change under unsaved edits into a conflict that blocks a plain save', async () => {
+    await openA()
+    fake.setFile('src/a.ts', 'agent wrote this')
+    fake.emitChanged(['src'])
+    await idle()
+    expect(viewer()).toMatchObject({ text: 'agent wrote this', version: 'v2' })
+    store().edit(id, 'src/a.ts', 'mine')
+    fake.setFile('src/a.ts', 'agent again')
+    fake.emitChanged(['src'])
+    await idle()
+    expect(draft()).toMatchObject({ text: 'mine', conflict: { version: 'v3' } })
+    fake.mocks.write.mockClear()
+    await expect(store().save(id, 'src/a.ts')).resolves.toBe('conflict')
+    expect(fake.mocks.write).not.toHaveBeenCalled()
+    expect(fake.text('src/a.ts')).toBe('agent again')
+    // Overwrite replaces exactly the version that was seen.
+    await expect(store().save(id, 'src/a.ts', { overwrite: true })).resolves.toBe('saved')
+    expect(fake.mocks.write).toHaveBeenLastCalledWith(expect.objectContaining({ text: 'mine', expectedVersion: 'v3' }))
+    expect(fake.text('src/a.ts')).toBe('mine')
+    expect(draft()).toBeUndefined()
+  })
+
+  it('reports a conflict found by the save itself and reads the disk copy for the comparison', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'mine')
+    // Changed without an event reaching the renderer.
+    fake.setFile('src/a.ts', 'theirs')
+    fake.mocks.read.mockClear()
+    await expect(store().save(id, 'src/a.ts')).resolves.toBe('conflict')
+    expect(draft()!.conflict).toEqual({ version: 'v2' })
+    await idle()
+    expect(fake.mocks.read).toHaveBeenCalled()
+    expect(viewer()).toMatchObject({ text: 'theirs', version: 'v2' })
+    expect(draft()!.text).toBe('mine')
+  })
+
+  it('keeps the editor of a file deleted under unsaved edits, and saving creates it again', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'keep me')
+    fake.removeFile('src/a.ts')
+    fake.setDir('src', [dir('sub')])
+    fake.emitChanged(['src'])
+    await idle()
+    expect(project()!.selected).toBe('src/a.ts')
+    expect(viewer()).toMatchObject({ phase: 'unavailable', reason: 'missing' })
+    expect(draft()).toMatchObject({ text: 'keep me', conflict: { version: null } })
+    await expect(store().save(id, 'src/a.ts')).resolves.toBe('saved')
+    expect(fake.mocks.write).toHaveBeenLastCalledWith(expect.objectContaining({ expectedVersion: null }))
+    expect(fake.text('src/a.ts')).toBe('keep me')
+    expect(viewer()).toMatchObject({ phase: 'ready', text: 'keep me' })
+  })
+
+  it('records a failed save on the draft and keeps the changes', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'mine')
+    fake.failWrites('permission_denied')
+    await expect(store().save(id, 'src/a.ts')).resolves.toBe('permission_denied')
+    expect(draft()).toMatchObject({ text: 'mine', error: 'permission_denied', saving: false })
+    fake.failWrites(null)
+    // The next edit clears the message.
+    store().edit(id, 'src/a.ts', 'mine!')
+    expect(draft()!.error).toBeNull()
+  })
+
+  it('reverts to the disk copy', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'mine')
+    fake.mocks.read.mockClear()
+    store().revert(id, 'src/a.ts')
+    expect(draft()).toBeUndefined()
+    await idle()
+    expect(fake.mocks.read).toHaveBeenCalled()
+    expect(viewer()).toMatchObject({ phase: 'ready', text: 'const a = 1' })
+  })
+
+  it('drops the changes with the closed tab and never evicts or replaces a tab with unsaved changes', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'mine')
+    // The single-click preview tab is replaced; the edited one (pinned by the edit) is not.
+    await store().select(id, 'README.md')
+    await store().select(id, 'docs/guide.md')
+    expect(project()!.tabs.map(tab => tab.path)).toEqual(['src/a.ts', 'docs/guide.md'])
+    store().closeTab(id, 'src/a.ts')
+    expect(draft()).toBeUndefined()
+  })
+
+  it('moves unsaved changes with a renamed file', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'mine')
+    store().moved(id, 'src', 'lib')
+    expect(project()!.drafts.get('lib/a.ts')).toMatchObject({ text: 'mine' })
+    expect(draft()).toBeUndefined()
+  })
+
+  it('saves every draft and lists what could not be saved', async () => {
+    await openA()
+    store().edit(id, 'src/a.ts', 'mine')
+    await store().select(id, 'README.md', { pin: true })
+    await idle()
+    store().edit(id, 'README.md', 'new readme')
+    fake.setFile('src/a.ts', 'theirs')
+    const failures = await store().saveAll(id)
+    expect(failures).toEqual([{ projectId: id, path: 'src/a.ts', outcome: 'conflict' }])
+    expect(fake.text('README.md')).toBe('new readme')
+    expect(project()!.drafts.has('README.md')).toBe(false)
+  })
+})
+
+describe('remembered viewer preferences (TOOLS-Q13)', () => {
+  it('opens Markdown files in the mode chosen last, keeps each open tab\'s own mode, and saves the choice', async () => {
+    fake.setPrefs({ markdownPreview: false, wordWrap: true })
+    await store().loadPreferences()
+    expect(store().prefs).toEqual({ markdownPreview: false, wordWrap: true })
+    await store().activate(id)
+    await store().select(id, 'README.md', { pin: true })
+    expect(project()!.tabs[0]).toMatchObject({ path: 'README.md', preview: false })
+    store().setTabPreview(id, 'README.md', true)
+    expect(project()!.tabs[0]!.preview).toBe(true)
+    expect(store().prefs.markdownPreview).toBe(true)
+    await idle()
+    expect(fake.mocks.setPreferences).toHaveBeenCalledWith({ markdownPreview: true })
+    // A Markdown file opened later starts in the preview; other files never do.
+    await store().select(id, 'docs/guide.md', { pin: true })
+    await store().select(id, 'src/a.ts', { pin: true })
+    expect(project()!.tabs.map(tab => [tab.path, tab.preview])).toEqual([['README.md', true], ['docs/guide.md', true], ['src/a.ts', false]])
+    // Switching one tab back to the editor changes the default, not the other open tabs.
+    store().setTabPreview(id, 'docs/guide.md', false)
+    expect(project()!.tabs.map(tab => tab.preview)).toEqual([true, false, false])
+    expect(store().prefs.markdownPreview).toBe(false)
+    store().setPreferences({ markdownPreview: false, wordWrap: false })
   })
 })

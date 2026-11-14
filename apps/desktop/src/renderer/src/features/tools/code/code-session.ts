@@ -2,6 +2,7 @@ import type { editor } from 'monaco-editor/editor/editor.api.js'
 import { openEditorAppearance } from './editor-appearance'
 import { codeAriaLabel, codeEditorOptions, lockViewerModelOptions } from './editor-options'
 import { languageIdForPath, PLAIN_TEXT } from './languages'
+import { keepCodeModel, takeCodeModel } from './model-cache'
 import type { MonacoRuntime } from './monaco-runtime-types'
 import { VIEW_STATE_LIMIT, ViewStateStore } from './view-state-store'
 
@@ -10,6 +11,16 @@ export interface CodeContent {
   text: string
   viewStateKey: string
 }
+
+/** Editing (TOOLS-Q13): read on every use, so the caller can pass the latest values. */
+export interface CodeEditing {
+  onChange(text: string): void
+  onSave(): void
+  /** The owner already holds unsaved text for this file. Until it does, every edit is reported at once. */
+  dirty: boolean
+}
+/** Quiet time before an edit is reported again; focus loss and disposal report at once. */
+export const CODE_CHANGE_DEBOUNCE_MS = 150
 
 /** One Monaco editor with one model, alive between `openCodeSession` and `dispose`. */
 export interface CodeSession {
@@ -30,7 +41,7 @@ export const codeViewStates = new ViewStateStore<editor.ICodeEditorViewState>(VI
  * grammar are still loading, so a viewer that was hidden meanwhile never builds DOM. Throws if Monaco cannot create the editor.
  */
 export async function openCodeSession(
-  runtime: MonacoRuntime, host: HTMLElement, initial: CodeContent, cancelled: () => boolean
+  runtime: MonacoRuntime, host: HTMLElement, initial: CodeContent, cancelled: () => boolean, editing?: () => CodeEditing
 ): Promise<CodeSession | null> {
   const { monaco } = runtime
   const appearance = await openEditorAppearance(monaco, host)
@@ -44,10 +55,13 @@ export async function openCodeSession(
   let disposed = false
   let model: editor.ITextModel | undefined
   let view: editor.IStandaloneCodeEditor | undefined
+  // An editable file returns to the model it had (same text): its undo history survives a tab switch or a hidden panel.
+  const cached = editing ? takeCodeModel(initial.viewStateKey, initial.text) : undefined
   try {
-    model = monaco.editor.createModel(initial.text, language)
-    view = monaco.editor.create(host, { ...codeEditorOptions(appearance.fontFamily, appearance.theme, initial.path), model })
-    lockViewerModelOptions(model)
+    model = cached ?? monaco.editor.createModel(initial.text, language)
+    if (cached && cached.getLanguageId() !== language) monaco.editor.setModelLanguage(cached, language)
+    view = monaco.editor.create(host, { ...codeEditorOptions(appearance.fontFamily, appearance.theme, initial.path, !!editing), model })
+    if (!cached) lockViewerModelOptions(model)
   } catch (error) {
     view?.dispose(); model?.dispose(); appearance.dispose()
     throw error
@@ -56,6 +70,31 @@ export async function openCodeSession(
   const textModel = model
   const restored = codeViewStates.get(initial.viewStateKey)
   if (restored) editorInstance.restoreViewState(restored)
+
+  // Edits are reported as whole texts; the text reported last counts as shown, so it is not pushed back into the model.
+  let timer: ReturnType<typeof setTimeout> | undefined
+  let pending = false
+  const report = () => {
+    if (timer !== undefined) { clearTimeout(timer); timer = undefined }
+    if (!pending || !editing) return
+    pending = false
+    const text = textModel.getValue()
+    shown = { ...shown, text }
+    editing().onChange(text)
+  }
+  if (editing) {
+    textModel.onDidChangeContent((event) => {
+      // `setValue` (new content from disk, or another file) is not an edit.
+      if (event.isFlush || disposed) return
+      pending = true
+      // A clean file must be known as unsaved from its first changed character: closing, quitting or a write from
+      // outside may come before any quiet moment (after a save, after undoing back to the saved text).
+      if (!editing().dirty) { report(); return }
+      if (timer === undefined) timer = setTimeout(report, CODE_CHANGE_DEBOUNCE_MS)
+    })
+    editorInstance.onDidBlurEditorText(report)
+    editorInstance.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => { report(); editing().onSave() })
+  }
 
   return {
     show(next) {
@@ -66,7 +105,12 @@ export async function openCodeSession(
       const saved = editorInstance.saveViewState()
       if (!sameFile) codeViewStates.set(previous.viewStateKey, saved)
       const target = sameFile ? saved : codeViewStates.get(next.viewStateKey)
-      if (next.text !== previous.text) textModel.setValue(next.text)
+      if (next.text !== previous.text) {
+        // New content replaces the model: the owner discarded or replaced the edits (revert, reload of an unchanged file).
+        if (timer !== undefined) { clearTimeout(timer); timer = undefined }
+        pending = false
+        textModel.setValue(next.text)
+      }
       if (next.path !== previous.path) editorInstance.updateOptions({ ariaLabel: codeAriaLabel(next.path) })
       shown = next
       if (target) editorInstance.restoreViewState(target)
@@ -92,11 +136,13 @@ export async function openCodeSession(
     },
     dispose() {
       if (disposed) return
+      report()
       disposed = true
       codeViewStates.set(shown.viewStateKey, editorInstance.saveViewState())
       appearance.dispose()
       editorInstance.dispose()
-      textModel.dispose()
+      if (editing) keepCodeModel(shown.viewStateKey, textModel)
+      else textModel.dispose()
     }
   }
 }

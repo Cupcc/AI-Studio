@@ -1,4 +1,4 @@
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
@@ -187,4 +187,96 @@ test('FR-TOOL-001 item 4 / FR-INPUT-001: add to the conversation, send through t
   await expect(message).toHaveText('second message')
   await expect(fileTags()).toHaveCount(1)
   await capture('files-reference-failed-kept')
+})
+
+test('TOOLS-Q13: edit and save, a change on disk, unsaved changes on close and quit, and the remembered Markdown preview', async () => {
+  const root = await openProject('Edit Project', project => {
+    put(project, 'src/a.ts', 'export const A = 1\n')
+    put(project, 'crlf.txt', Buffer.from('one\r\ntwo\r\n'))
+    put(project, 'README.md', '# Title\n\nbody\n')
+    put(project, 'docs/guide.md', '# Guide\n')
+  })
+  const read = (path: string) => readFileSync(join(root, path), 'utf8')
+  const unsaved = () => viewer().getByRole('img', { name: '未保存' })
+  const editAtEnd = async (text: string) => {
+    await viewer().locator('.monaco-editor .view-lines').click()
+    await page.keyboard.press('Meta+ArrowDown')
+    await page.keyboard.type(text)
+  }
+  await showTool(page, 'Files')
+  await row('src').click()
+  await row('a.ts').click()
+  await expect(viewer().locator('.monaco-editor')).toBeVisible()
+
+  // Typing marks the file unsaved; ⌘S writes it and clears the mark.
+  await editAtEnd('export const B = 2')
+  await expect(unsaved()).toBeVisible()
+  await capture('files-edit-unsaved')
+  await page.keyboard.press('Meta+s')
+  await expect(unsaved()).toHaveCount(0)
+  expect(read('src/a.ts')).toBe('export const A = 1\nexport const B = 2')
+
+  // Line endings are kept.
+  await row('crlf.txt').click()
+  await editAtEnd('three')
+  await viewer().getByRole('button', { name: '保存', exact: true }).click()
+  await expect(unsaved()).toHaveCount(0)
+  expect(readFileSync(join(root, 'crlf.txt'))).toEqual(Buffer.from('one\r\ntwo\r\nthree'))
+
+  // A change on disk under unsaved edits is never overwritten silently.
+  await row('a.ts').click()
+  await editAtEnd(' // mine')
+  writeFileSync(join(root, 'src', 'a.ts'), 'agent version\n')
+  const banner = viewer().getByRole('alert')
+  await expect(banner).toContainText('磁盘上的文件已被修改', { timeout: 15_000 })
+  await viewer().locator('.monaco-editor .view-lines').click()
+  await page.keyboard.press('Meta+s')
+  await expect(banner).toBeVisible()
+  expect(read('src/a.ts')).toBe('agent version\n')
+  await banner.getByRole('button', { name: '比较', exact: true }).click()
+  await expect(viewer().locator('.monaco-diff-editor')).toBeVisible()
+  await capture('files-conflict-compare')
+  await banner.getByRole('button', { name: '用我的修改覆盖', exact: true }).click()
+  await expect(banner).toHaveCount(0)
+  expect(read('src/a.ts')).toBe('export const A = 1\nexport const B = 2 // mine')
+
+  // Closing with unsaved changes asks; "不保存" drops them and shows the neighbouring tab, as VS Code does.
+  await editAtEnd(' dropped')
+  await viewer().getByRole('button', { name: '关闭查看器', exact: true }).click()
+  const ask = workspace().getByRole('alertdialog', { name: '保存对“a.ts”的修改？' })
+  await expect(ask).toBeVisible()
+  await capture('files-close-unsaved')
+  await ask.getByRole('button', { name: '不保存', exact: true }).click()
+  await expect(viewer().locator('.files-viewer__name')).toHaveText('crlf.txt')
+  await expect(unsaved()).toHaveCount(0)
+  expect(read('src/a.ts')).toBe('export const A = 1\nexport const B = 2 // mine')
+
+  // The Markdown preview chosen for one file becomes the default for the next.
+  await row('README.md').click()
+  await viewer().getByRole('button', { name: '预览', exact: true }).click()
+  await expect(viewer().locator('.files-markdown').getByRole('heading', { name: 'Title', exact: true })).toBeVisible()
+  await row('docs').click()
+  await row('guide.md').click()
+  await expect(viewer().locator('.files-markdown').getByRole('heading', { name: 'Guide', exact: true })).toBeVisible()
+  await capture('files-markdown-preview-default')
+
+  // Quitting with unsaved changes asks in the quit confirmation; "保存并退出" writes them first.
+  await row('a.ts').click()
+  await editAtEnd(' // on quit')
+  await expect(unsaved()).toBeVisible()
+  const closing = app.close()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toContainText('未保存的文件 · src/a.ts')
+  await capture('files-quit-unsaved')
+  await dialog.getByRole('button', { name: '保存并退出', exact: true }).click()
+  await closing
+  expect(read('src/a.ts')).toBe('export const A = 1\nexport const B = 2 // mine // on quit')
+
+  // After a restart, Markdown still opens in the preview.
+  await launch()
+  await expect(page.getByRole('tab', { name: 'Edit Project', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await showTool(page, 'Files')
+  await row('README.md').click()
+  await expect(viewer().locator('.files-markdown').getByRole('heading', { name: 'Title', exact: true })).toBeVisible()
+  await expect(viewer().getByRole('button', { name: '预览', exact: true })).toHaveAttribute('aria-pressed', 'true')
 })

@@ -21,13 +21,20 @@ vi.mock('../../input/add-file-reference', () => ({ addFileReference: vi.fn() }))
 const gate = vi.hoisted(() => ({ pending: null as Promise<void> | null }))
 vi.mock('../code/lazy', async () => {
   const { use: suspend } = await import('react')
-  const Viewer = ({ path, text, active, viewStateKey, onError }: { path: string; text: string; active: boolean; viewStateKey: string; onError?(message: string): void }) => {
+  type Props = { path: string; text: string; active: boolean; viewStateKey: string; onError?(message: string): void; onChange?(text: string): void; onSave?(): void }
+  const Viewer = ({ path, text, active, viewStateKey, onError, onChange, onSave }: Props) => {
     if (gate.pending) suspend(gate.pending)
     if (text === 'BOOM') throw new Error('editor failed')
     if (text === 'REPORT') queueMicrotask(() => onError?.('editor failed to start'))
-    return <pre data-testid="code" data-path={path} data-active={String(active)} data-key={viewStateKey}>{text}</pre>
+    // Typing reports the whole text (as the real editor does); ⌘S inside it saves.
+    return <>
+      <pre data-testid="code" data-path={path} data-active={String(active)} data-key={viewStateKey}>{text}</pre>
+      {onChange && <textarea data-testid="editor" aria-label="编辑器" value={text} onChange={event => onChange(event.target.value)}
+        onKeyDown={event => { if (event.metaKey && event.key === 's') { event.preventDefault(); onSave?.() } }} />}
+    </>
   }
-  return { LazyCodeViewer: Viewer, LazyCodeDiffViewer: Viewer }
+  const DiffViewer = ({ original, modified }: { original: string; modified: string }) => <pre data-testid="diff">{`${original} → ${modified}`}</pre>
+  return { LazyCodeViewer: Viewer, LazyCodeDiffViewer: DiffViewer }
 })
 
 let n = 0
@@ -592,5 +599,108 @@ describe('watching', () => {
     expect(await screen.findByRole('treeitem', { name: 'new.md' })).toBeTruthy()
     expect(screen.queryByRole('treeitem', { name: 'src' })).toBeNull()
     expect(fake.mocks.read).toHaveBeenCalledWith({ projectId: id, path: 'README.md', ifVersion: 'v1' })
+  })
+})
+
+const mount = async () => { render(panel()); await screen.findByRole('treeitem', { name: 'README.md' }) }
+const openFile = async (name: string | RegExp) => { fireEvent.click(await screen.findByRole('treeitem', { name })); await screen.findByTestId('code') }
+
+const type = (text: string) => fireEvent.change(screen.getByTestId('editor'), { target: { value: text } })
+
+describe('editing (TOOLS-Q13)', () => {
+  it('marks unsaved changes on the title and the tab, saves with the button or ⌘S, and clears the mark', async () => {
+    await mount()
+    fireEvent.click(row('src'))
+    await openFile('a.ts')
+    type('const a = 2')
+    expect(screen.getByRole('img', { name: '未保存' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: '保存' }))
+    await waitFor(() => expect(screen.queryByRole('img', { name: '未保存' })).toBeNull())
+    expect(fake.text('src/a.ts')).toBe('const a = 2')
+    type('const a = 3')
+    fireEvent.keyDown(screen.getByTestId('editor'), { key: 's', metaKey: true })
+    await waitFor(() => expect(fake.text('src/a.ts')).toBe('const a = 3'))
+    // ⌘S from the header (not the editor) saves too.
+    type('const a = 4')
+    fireEvent.keyDown(screen.getByRole('button', { name: '保存' }), { code: 'KeyS', metaKey: true })
+    await waitFor(() => expect(fake.text('src/a.ts')).toBe('const a = 4'))
+  })
+
+  it('asks before closing a tab with unsaved changes: cancel keeps it, don\'t save drops it, save writes it', async () => {
+    await mount()
+    await openFile('README.md')
+    type('changed readme')
+    fireEvent.click(screen.getByRole('button', { name: '关闭查看器' }))
+    const ask = screen.getByRole('alertdialog', { name: '保存对“README.md”的修改？' })
+    fireEvent.click(within(ask).getByRole('button', { name: '取消' }))
+    expect(screen.queryByRole('alertdialog')).toBeNull()
+    expect(store().projects[id]!.drafts.has('README.md')).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: '关闭查看器' }))
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '保存' }))
+    await waitFor(() => expect(store().projects[id]!.viewer).toBeNull())
+    expect(fake.text('README.md')).toBe('changed readme')
+    await openFile('README.md')
+    type('discard me')
+    fireEvent.click(screen.getByRole('button', { name: '关闭查看器' }))
+    fireEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: '不保存' }))
+    expect(store().projects[id]!.viewer).toBeNull()
+    expect(store().projects[id]!.drafts.size).toBe(0)
+    expect(fake.text('README.md')).toBe('changed readme')
+  })
+
+  it('shows a change on disk under unsaved edits, compares, and overwrites only when asked', async () => {
+    await mount()
+    await openFile('README.md')
+    type('mine')
+    fake.setFile('README.md', 'agent wrote this')
+    act(() => fake.emitChanged(['']))
+    const banner = await screen.findByRole('alert')
+    expect(banner.textContent).toContain('磁盘上的文件已被修改')
+    fireEvent.click(within(banner).getByRole('button', { name: '比较' }))
+    expect(screen.getByTestId('diff').textContent).toBe('agent wrote this → mine')
+    fireEvent.click(within(screen.getByRole('alert')).getByRole('button', { name: '用我的修改覆盖' }))
+    await waitFor(() => expect(fake.text('README.md')).toBe('mine'))
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull())
+    expect(screen.getByTestId('code').textContent).toBe('mine')
+  })
+
+  it('discards my changes from the conflict banner and shows the disk copy', async () => {
+    await mount()
+    await openFile('README.md')
+    type('mine')
+    fake.setFile('README.md', 'theirs')
+    act(() => fake.emitChanged(['']))
+    fireEvent.click(within(await screen.findByRole('alert')).getByRole('button', { name: '放弃我的修改' }))
+    await waitFor(() => expect(screen.getByTestId('code').textContent).toBe('theirs'))
+    expect(screen.queryByRole('img', { name: '未保存' })).toBeNull()
+  })
+})
+
+describe('Markdown preview memory (TOOLS-Q13)', () => {
+  it('opens Markdown in the mode chosen last and remembers it, while code files always open in the editor', async () => {
+    await mount()
+    await openFile('README.md')
+    const edit = screen.getByRole('button', { name: '编辑' }), preview = screen.getByRole('button', { name: '预览' })
+    expect(edit.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(preview)
+    expect(screen.queryByTestId('code')).toBeNull()
+    expect(document.querySelector('.files-markdown')?.textContent).toContain('hello readme')
+    await waitFor(() => expect(fake.mocks.setPreferences).toHaveBeenCalledWith({ markdownPreview: true }))
+    fireEvent.click(row('docs'))
+    fireEvent.click(await screen.findByRole('treeitem', { name: 'guide.md' }))
+    await waitFor(() => expect(document.querySelector('.files-markdown')?.textContent).toContain('guide text'))
+    fireEvent.click(row('src'))
+    await openFile('a.ts')
+    expect(screen.queryByRole('button', { name: '预览' })).toBeNull()
+    store().setPreferences({ markdownPreview: false })
+  })
+
+  it('previews the unsaved text', async () => {
+    await mount()
+    await openFile('README.md')
+    type('# Draft heading')
+    fireEvent.click(screen.getByRole('button', { name: '预览' }))
+    expect(screen.getByRole('heading', { name: 'Draft heading' })).toBeTruthy()
+    store().setPreferences({ markdownPreview: false })
   })
 })

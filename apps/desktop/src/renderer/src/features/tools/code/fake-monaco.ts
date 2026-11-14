@@ -12,6 +12,12 @@ export interface FakeModel {
   disposed: boolean
   bracketColorization: boolean
   setValue(value: string): void
+  getValue(): string
+  isDisposed(): boolean
+  getLanguageId(): string
+  onDidChangeContent(listener: (event: { isFlush: boolean }) => void): { dispose(): void }
+  /** Simulates the user typing: replaces the text and fires a content change that is not a flush. */
+  type(value: string): void
   getOptions(): { bracketPairColorizationOptions: { enabled: boolean } }
   updateOptions(options: { bracketColorizationOptions?: { enabled: boolean } }): void
   onDidChangeOptions(listener: () => void): { dispose(): void }
@@ -31,9 +37,18 @@ export interface FakeEditor {
   updates: Record<string, unknown>[]
   /** Fires `onDidUpdateDiff` listeners (diff editor only). */
   fireDiffUpdate(): void
+  /** Fires the editor's focus-loss listeners. */
+  blur(): void
+  /** Runs the command bound to `keybinding` (e.g. ⌘S), as a key press inside the editor would. */
+  press(keybinding: number): void
 }
 
 export interface FakeLanguage { pending?: boolean; ok?: boolean }
+
+/** Monaco's values for ⌘ and S (KeyMod.CtrlCmd, KeyCode.KeyS). */
+export const FAKE_KEY_MOD = { CtrlCmd: 2048 } as const
+export const FAKE_KEY_CODE = { KeyS: 49 } as const
+export const FAKE_SAVE_KEY = FAKE_KEY_MOD.CtrlCmd | FAKE_KEY_CODE.KeyS
 
 export function createFakeMonaco(languages: Record<string, FakeLanguage> = {}) {
   const log: string[] = []
@@ -49,9 +64,15 @@ export function createFakeMonaco(languages: Record<string, FakeLanguage> = {}) {
 
   function makeModel(value: string, language = 'plaintext'): FakeModel {
     const listeners = new Set<() => void>()
+    const content = new Set<(event: { isFlush: boolean }) => void>()
     const model: FakeModel = {
       id: nextId++, value, language, disposed: false, bracketColorization: true,
-      setValue(next) { log.push(`model${model.id}.setValue`); model.value = next },
+      setValue(next) { log.push(`model${model.id}.setValue`); model.value = next; content.forEach((l) => l({ isFlush: true })) },
+      getValue: () => model.value,
+      isDisposed: () => model.disposed,
+      getLanguageId: () => model.language,
+      onDidChangeContent(listener) { content.add(listener); return { dispose: () => { content.delete(listener) } } },
+      type(next) { model.value = next; content.forEach((l) => l({ isFlush: false })) },
       getOptions: () => ({ bracketPairColorizationOptions: { enabled: model.bracketColorization } }),
       updateOptions(options) {
         if (options.bracketColorizationOptions) model.bracketColorization = options.bracketColorizationOptions.enabled
@@ -67,9 +88,13 @@ export function createFakeMonaco(languages: Record<string, FakeLanguage> = {}) {
 
   function makeEditor(kind: 'code' | 'diff', host: HTMLElement, options: Record<string, unknown>) {
     const diffListeners = new Set<() => void>()
+    const blurListeners = new Set<() => void>()
+    const commands = new Map<number, () => void>()
     const record: FakeEditor = {
       kind, host, options, model: null, models: null, state: { scrollTop: 0, line: 1 }, disposed: false, updates: [],
-      fireDiffUpdate: () => [...diffListeners].forEach((l) => l())
+      fireDiffUpdate: () => [...diffListeners].forEach((l) => l()),
+      blur: () => [...blurListeners].forEach((l) => l()),
+      press: (keybinding) => commands.get(keybinding)?.()
     }
     editors.push(record)
     const base = {
@@ -77,12 +102,16 @@ export function createFakeMonaco(languages: Record<string, FakeLanguage> = {}) {
       restoreViewState: (state: { scrollTop: number; line: number } | null) => { log.push(`${kind}.restoreViewState`); if (state) record.state = { ...state } },
       setScrollPosition: (position: { scrollTop: number }) => { log.push(`${kind}.scrollTo(${position.scrollTop})`); record.state = { ...record.state, scrollTop: position.scrollTop } },
       updateOptions: (update: Record<string, unknown>) => { record.updates.push(update) },
-      dispose: () => { log.push(`${kind}.dispose`); record.disposed = true }
+      onDidBlurEditorText: (listener: () => void) => { blurListeners.add(listener); return { dispose: () => { blurListeners.delete(listener) } } },
+      addCommand: (keybinding: number, handler: () => void) => { commands.set(keybinding, handler); return null },
+      dispose: () => { log.push(`${kind}.dispose`); record.disposed = true; blurListeners.clear(); commands.clear() }
     }
     return { record, base, diffListeners }
   }
 
   const monaco = {
+    KeyMod: FAKE_KEY_MOD,
+    KeyCode: FAKE_KEY_CODE,
     editor: {
       defineTheme: (name: string) => { definedThemes.push(name) },
       setTheme: (name: string) => { themes.push(name) },

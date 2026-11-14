@@ -8,16 +8,18 @@ import './code.css'
 
 type Phase = { kind: 'loading' } | { kind: 'ready' } | { kind: 'failed'; message: string }
 
+const NOOP = () => {}
+
 /**
- * Read-only Monaco viewer of one file (FR-TOOL-001). The editor exists only while `active` and the text is within the
- * viewer limit: it is created on activation, destroyed (view state saved per `viewStateKey`) on deactivation or unmount,
- * and fed new content through the session instead of being recreated.
+ * Monaco viewer of one file (FR-TOOL-001), editable when `editable` (TOOLS-Q13). The editor exists only while `active`
+ * and the text is within the viewer limit: it is created on activation, destroyed (view state saved per `viewStateKey`)
+ * on deactivation or unmount, and fed new content through the session instead of being recreated.
  */
-export default function CodeViewer({ path, text, active, viewStateKey, onError, wordWrap = false, revealLine }: CodeViewerProps) {
+export default function CodeViewer({ path, text, active, viewStateKey, onError, wordWrap = false, revealLine, editable = false, dirty = false, onChange, onSave }: CodeViewerProps) {
   const host = useRef<HTMLDivElement>(null)
   const session = useRef<CodeSession | null>(null)
-  const latest = useRef({ content: { path, text, viewStateKey } as CodeContent, onError, wordWrap, revealLine })
-  latest.current = { content: { path, text, viewStateKey }, onError, wordWrap, revealLine }
+  const latest = useRef({ content: { path, text, viewStateKey } as CodeContent, onError, wordWrap, revealLine, onChange, onSave, dirty })
+  latest.current = { content: { path, text, viewStateKey }, onError, wordWrap, revealLine, onChange, onSave, dirty }
   const tooLarge = viewerTextTooLarge(text)
   const [phase, setPhase] = useState<Phase>({ kind: 'loading' })
 
@@ -27,7 +29,8 @@ export default function CodeViewer({ path, text, active, viewStateKey, onError, 
     let cancelled = false
     setPhase({ kind: 'loading' })
     void loadMonaco()
-      .then((runtime) => openCodeSession(runtime, node, latest.current.content, () => cancelled))
+      .then((runtime) => openCodeSession(runtime, node, latest.current.content, () => cancelled,
+        editable ? () => ({ onChange: latest.current.onChange ?? NOOP, onSave: latest.current.onSave ?? NOOP, dirty: latest.current.dirty }) : undefined))
       .then((opened) => {
         if (!opened) return
         if (cancelled) { opened.dispose(); return }
@@ -49,7 +52,7 @@ export default function CodeViewer({ path, text, active, viewStateKey, onError, 
       session.current?.dispose()
       session.current = null
     }
-  }, [active, tooLarge])
+  }, [active, tooLarge, editable])
 
   useEffect(() => { session.current?.show({ path, text, viewStateKey }) }, [path, text, viewStateKey])
   useEffect(() => { session.current?.setWordWrap(wordWrap) }, [wordWrap])
@@ -65,7 +68,7 @@ export default function CodeViewer({ path, text, active, viewStateKey, onError, 
     : phase.kind === 'loading' ? { role: 'status', text: '代码查看器加载中…' }
     : null
   return (
-    <div className="code-viewer" role="group" aria-label={codeAriaLabel(path)} data-state={tooLarge ? 'too-large' : active ? phase.kind : 'inactive'}>
+    <div className="code-viewer" role="group" aria-label={codeAriaLabel(path)} data-state={tooLarge ? 'too-large' : active ? phase.kind : 'inactive'} data-editable={editable || undefined}>
       <div className="code-viewer__host" ref={host} />
       {notice && <p className="code-viewer__notice" role={notice.role}>{notice.text}</p>}
     </div>
