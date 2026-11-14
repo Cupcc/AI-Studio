@@ -23,10 +23,10 @@
 | S-Q6（剩余部分） | 关闭最后一个窗口是否等于退出？ | 沿用现有建议：应用继续运行、Session 继续执行，从 Dock 重开窗口；本轮未单独确认此旧问题 | 否；沿用既有实现 | 退出时合并确认的部分已由 FR-PROJ-002 / DEC-14 于 2026-10-13 确认，见 §3.14 |
 | S-Q7 | 应用异常退出（崩溃、强制退出）时进行中的轮，下次启动如何显示？ | 显示 Error（“应用退出时本轮未完成”），以便发现中断的工作；经确认的正常退出则显示“已停止”行、无提醒。依据：FR-STATE-003；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节只有成功终态产生 Completed Unread | 否 | |
 | S-Q8 | Stop 进行中（等待清理完成）如何显示？ | 列表仍显示 Running；Stop 控件变为禁用的“停止中”；暂停新提交（04 第 5 节第 1 条）。不新增列表状态 | 否 | |
-| S-Q9 | 用户停止的轮是否显示完成行？ | 显示 `Worked for <时长> · 已停止`；失败的轮只显示 Error 卡片。依据：FR-STATE-007“或同等语义形式” | 否 | |
-| S-Q10 | “Worked for” 时长是否包含等待用户答复的时间？ | 包含，按提交到终态的墙钟时间；与 Adapter 报告的回合耗时一致，实现简单 | 否 | |
+| S-Q9 | 用户停止的轮是否显示完成标识？ | 过程行显示 `已停止 · <时长>`；失败的轮只显示 Error 卡片。依据：FR-STATE-007“或同等语义形式” | 否 | |
+| S-Q10 | 轮次时长是否包含等待用户答复的时间？ | 包含，按提交到终态的墙钟时间；与 Adapter 报告的回合耗时一致，实现简单 | 否 | |
 | S-Q11 | 因 Stop、错误、关闭 Project、原生撤回而失效的 Needs Input 卡片如何显示？ | 变为只读并标注原因（“已停止”“已失效”），按钮不可点击。依据：Shell Spec 第 6 节“答复后变为只读记录” | 否 | |
-| S-Q12 | 原生向用户公开的推理 / 思考内容如何接入和呈现？ | 按 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>) 接入公开输出，不再以原型未列出而省略。当前已将原生公开reasoning / summary及工具正文持久化并折叠呈现，W28已真实展开非空摘要；技术结果2026-10-18，见总体验收；不推测或重建原生未公开内容 | 否；技术接入问题，不再等待是否展示的产品选择 | |
+| S-Q12 | 原生向用户公开的推理 / 思考内容如何接入和呈现？ | 按 [01 第 8 节原则 24](<../../docs/01. Product Definition.md#8-已确认的产品原则>) 接入公开输出，不再以原型未列出而省略。当前已将原生公开reasoning / summary及工具正文持久化，作为过程中的步骤呈现（第 3.2 节第 5 条；没有公开内容的思考结束后不显示），W28已真实展开非空摘要；技术结果2026-10-18，见总体验收；不推测或重建原生未公开内容 | 否；技术接入问题，不再等待是否展示的产品选择 | |
 | S-Q13 | 如何接入原生历史会话与应用外续聊记录？ | 按原则 24 核对 CLI 的历史查询、恢复与记录读取接口并接入，不再把“V1 不导入、不同步”作为产品限制。当前只记录应用内会话是实现缺口；重复绑定、并行写入和记录格式差异由 AI 验证并记录技术边界 | 否；技术接入问题 | |
 
 ### 1.2 已确认
@@ -41,7 +41,7 @@
 - 负责：
   - App Session 与 CLI Conversation 的 1:1 生命周期：首次发送时创建、绑定原生 ID、恢复、错误恢复（01 第 7 节 Session；04 第 2 节）。
   - Session 注意力状态机：Running、Needs Input、Error、Completed Unread、无状态，以及产生与清除规则（FR-STATE-001～006）。
-  - Conversation Mode 中的对话展示：打开即在底部、流式追加、工具活动行、Needs Input 卡片、Error 卡片、轮次完成行（FR-SESSION-001、FR-STATE-007；Shell Spec 第 6 节）。
+  - Conversation Mode 中的对话展示：打开即在底部、流式追加、按轮次呈现的过程与回答、Needs Input 卡片、Error 卡片、轮次页脚（FR-SESSION-001、FR-STATE-007；Shell Spec v02 第 6 节）。
   - Stop 对 Session 状态的影响；关闭 Project、退出应用时停止当前一轮（FR-PROJ-002；UX D-10）。
   - 多 Session 并行与互相隔离（FR-SESSION-003）。
   - 对话记录（transcript）与 Session 元数据的本地持久化。
@@ -85,7 +85,7 @@
 2. 定位到底部时，末尾的 Needs Input 卡片或 Error 卡片完整可见（AC-05；UX 第 6 节）。
 3. 流式输出逐段追加；用户位于底部时自动跟随；向上滚动后停止跟随并显示“回到最新”；点击后返回底部并聚焦输入框（Shell Spec v02 第 6 节；DEC-23）。
 4. 切换 Project Tab 后返回、或在同一 Project 内从其他 View 返回同一 Session 时：离开时处于底部（跟随中）的，返回后定位到最新位置；离开时已向上滚动的，恢复离开时的位置并显示“回到最新”（建议；依据 UX D-15“恢复离开时的完整状态”，与 FR-STATE-005“点击进入最新位置”在点击路径上一致）。
-5. 对话记录条目（Shell Spec 第 6 节）：用户消息、Agent 消息、工具活动行、Needs Input 卡片、Error 卡片、轮次完成行。条目定义见第 4.4 节。是否显示 CLI 的推理 / 思考内容见 S-Q12。Agent 消息按 Markdown 渲染，用户消息保持纯文本；渲染范围、代码块和链接规则见 Shell Spec v02 第 6 节（交互原型 v02，2026-10-10 确认）。流式输出期间按已到达的文本渲染，未闭合的代码块显示到当前末尾。
+5. 对话记录条目：用户消息、Agent 消息、工具活动、Needs Input 请求、Error、轮次结束。条目定义见第 4.4 节，界面组件见 Shell Spec v02 第 6 节。CLI 的推理 / 思考内容见 S-Q12。条目按轮次呈现（[UX D-17](<../../docs/03. UX Specification.md#10-原型阶段决策记录>)）：每条用户消息开始一段，运行中追加的用户输入也开始新的一段。一段内，思考、工具活动、中间说明和已答复的请求组成过程，等待中的请求、回答、Error 与页脚在过程之外。回答与中间说明的划分：CLI 为文字标注了说明 / 回答（`phase`）时按标注；没有标注时，最后一个步骤（工具活动或请求）之后的文字是回答，之前的是中间说明，所以流式输出的文字在后面出现新步骤时转为中间说明。已结束的轮总有回答：按上述规则没有回答时取最后一个步骤之后的文字，仍没有则取最后一段文字。过程在运行中展开，结束后收起，用户自己的展开或收起优先；这一状态只在窗口内保留，不持久化。Agent 消息按 Markdown 渲染，用户消息保持纯文本；渲染范围、代码块和链接规则见 Shell Spec v02 第 6 节（交互原型 v02，2026-10-10 确认）。流式输出期间按已到达的文本渲染，未闭合的代码块显示到当前末尾。
 6. 主画布顶栏显示 CLI 标识与 Session 标题；完整 CLI 名称保留在标识的提示与无障碍名称，长标题省略但保留完整提示（[DEC-23](<../../docs/07. Decisions.md#dec-23-v06-ui-采用与高强度思考动效>)，2026-10-23 确认）。Session 的 `origin_view_id` 不为空时，显示来源 View 和“在工作台中打开”入口（UX 第 6 节 Session 打开；D-02）。该入口通过壳层导航到真实 Project View，并在左列打开原 Session。
 7. 输入区固定在对话区域下方（FR-SESSION-001），可立即输入（UX 第 6 节 Session 打开第 4 项），细节见 input spec。
 8. 性能：打开 Session 和切换 Session 不等待 CLI；大量历史 Session 时只加载列表所需元数据（04 第 7 节性能）。
@@ -141,13 +141,13 @@
 
 不在运行、不等待用户、无未查看的 Error、无未查看的完成结果时，列表项不显示任何状态元素；UI 中不出现 Idle 字样（FR-STATE-006；01 第 8 节原则 10）。CLI 原生的 `idle` 不映射为列表文字（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节）。
 
-### 3.10 FR-STATE-007 轮次完成行
+### 3.10 FR-STATE-007 轮次完成标识
 
-1. 成功结束的轮在 Conversation 末尾追加完成行：`Worked for <时长> · Done`（FR-STATE-007；Shell Spec 第 6 节）。“Done”只表示这一轮结束。
-2. 时长：从用户提交到终态的墙钟时间，含等待用户答复的时间（建议，S-Q10）。格式建议：小于 1 分钟为 `48s`，小于 1 小时为 `2m 18s`，否则为 `1h 05m`。
-3. 用户停止的轮：建议显示同类行 `Worked for <时长> · 已停止`（S-Q9）。失败的轮以 Error 卡片结尾，不显示 Done。
-4. context-tools 已按 FR-TOOL-002 和 04 第 1 节第 13 项接入本轮原生记录与持久化补丁（2026-10-18 实施）。完成 / 停止行与 Error 卡片进入该轮“本轮变更”；不可用原因明确显示，并提供“项目变更”。既有 `files_changed` 预留字段的 null 仍表示未知，不得显示为 0。关联、来源、可用状态、修订和存储契约由 [Tools §4.2](../tools/spec.md#42-轮次补丁契约) 负责；Session 将 Adapter 记录绑定到 App Turn 并保存，Tools 只消费保存内容，旧历史不按当前工作区回填。迁移、冻结、脱敏与实际验证边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)。
-5. 完成行数据随对话记录持久化，重启后照常显示。
+1. 结束的轮在回答上方的过程行显示 `已处理 <时长>`，有步骤时后接 `· N 步`（FR-STATE-007 的同等语义形式；Shell Spec v02 第 6 节）。它只表示这一轮结束。
+2. 时长：从用户提交到终态的墙钟时间，含等待用户答复的时间（建议，S-Q10）。格式：小于 1 分钟为 `48 秒`，小于 1 小时为 `2 分 18 秒`，否则为 `1 小时 05 分`。
+3. 用户停止的轮显示 `已停止 · <时长>`（S-Q9）。失败的轮以 Error 卡片结尾，不显示完成标识。
+4. context-tools 已按 FR-TOOL-002 和 04 第 1 节第 13 项接入本轮原生记录与持久化补丁（2026-10-18 实施）。轮次页脚与 Error 卡片进入该轮“本轮变更”；不可用原因明确显示，并提供“项目变更”。轮结束时，保存的补丁状态为可用且文件列表完整的，`turn_end` 记录 `changes`：文件数，以及补丁完整时的增删行数；页脚据此显示“N 个文件 +x −y”。没有 `changes` 时页脚只显示“本轮变更”，不显示 0。关联、来源、可用状态、修订和存储契约由 [Tools §4.2](../tools/spec.md#42-轮次补丁契约) 负责；Session 将 Adapter 记录绑定到 App Turn 并保存，Tools 只消费保存内容，旧历史不按当前工作区回填。迁移、冻结、脱敏与实际验证边界见 [Tools §5.3](../tools/spec.md#53-本轮-diff-实现与原生能力证据)。
+5. 轮次结束的数据随对话记录持久化，重启后照常显示。
 
 ### 3.11 “正在查看”的定义
 
@@ -180,7 +180,7 @@ V1 是否支持多窗口文档未说明（D-14 称折叠为“窗口级偏好”
 1. 用户在 Running 或 Needs Input 的 Session 中触发 Stop（控件规则见 input spec）。Stop 作用于该 Session 当前一轮，不影响其他 Session（FR-SESSION-003）。
 2. 触发后立即：记录取消意图；暂停该 Session 的新提交（04 第 5 节第 1 条）；所有未答复的 Needs Input 卡片失效（标注“已停止”）；列表状态从 Needs Input 回到 Running（Stop 进行中，S-Q8）。
 3. Stop 完成以 Adapter 报告“本轮终态 + 目标资源已清理”为准，不能只凭收到 `interrupted`（04 第 5 节第 1、5 条；[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节）。完成后：本轮结束，状态回到无状态，追加“已停止”完成行，不产生 Error、不产生 Completed Unread。
-4. 已输出的部分 Agent 文本、工具活动行保留在对话记录中。
+4. 已输出的部分 Agent 文本、工具活动保留在对话记录中。
 5. 清理失败或超时时由 Adapter 走 Runtime 兜底并以原 ID 恢复（04 第 5 节第 6 条）。兜底恢复失败：本轮以 Error 结束，Error 卡片说明 Stop 清理或恢复失败；不得静默创建新原生会话，不得自动重跑已取消的命令（04 第 5 节第 7 条）。
 6. 重复 Stop 幂等；Stop 完成后到达的迟到事件被丢弃，不改变状态、不追加内容（04 第 5 节；05 第 4 节 Stop 专项）。
 7. Stop 与成功完成竞态：以 Adapter 报告的原生终态为准；原生为成功终态时按完成处理（显示 Done）；Claude 在取消后返回的 `error_during_execution` 视为已停止（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节）。
@@ -288,7 +288,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 |---|---|
 | `turn_id` | 客户端编号；另记录原生 turn ID（如有）用于关联 Stop 与过滤迟到事件 |
 | `session_id` | — |
-| `started_at` / `ended_at` | 用于完成行时长（S-Q10） |
+| `started_at` / `ended_at` | 用于轮次时长（S-Q10） |
 | `outcome` | 实现使用 Adapter `completed` / `interrupted` / `failed`；`interrupted` 显示已停止。启动发现未结束轮时按 S-Q7 记为 `failed` 并显示退出中断错误 |
 | `model` | 本轮实际使用的模型（如 Adapter 可报告） |
 | `files_changed` | 后续 Context 工具再提供，本切片不存储该字段 |
@@ -299,11 +299,11 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | 类型 | 内容 | 来源 |
 |---|---|---|
 | `user_message` | 文本、附带的上下文项（View、文件、图片、Skill，见 input spec）、发送时间 | 用户发送 |
-| `agent_message` | 完整文本（Markdown 原文，展示时渲染，见第 3.2 节第 5 条）；流式期间为增量拼接，完成时以完整消息校正，正文不重复（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节文本追加行） | Adapter |
-| `tool_activity` | 动作类别（Read / Edit / Run / 其他）、单行摘要、进行中 / 完成 / 失败；CLI 已公开 reasoning 折叠正文及 MCP / dynamic tool 结果，按同 item 完整快照替换并持久化（S-Q12、原则 24） | Adapter |
+| `agent_message` | 完整文本（Markdown 原文，展示时渲染，见第 3.2 节第 5 条）；CLI 标注了说明 / 回答时带 `phase`；流式期间为增量拼接，完成时以完整消息校正，正文不重复（[CLI 校验报告](../../.agents/archive/tasks/T20261008-cli-preflight/report.md) 第 5 节文本追加行） | Adapter |
+| `tool_activity` | 动作类别（Read / Edit / Run / 其他）、单行摘要、进行中 / 完成 / 失败；CLI 已公开 reasoning 折叠正文及 MCP / dynamic tool 结果，按同 item 完整快照替换并持久化（S-Q12、原则 24）；离开进行中状态时记录 `endedAt`，与创建时间一起给出该步用时 | Adapter + Session Manager |
 | `input_request` | 请求 ID、类型（授权 / 提问）、CLI 原生内容与选项、结果（已答复及所选项 / 文字回复 / 已停止 / 已失效） | Adapter + 用户 |
 | `error` | 摘要、原生诊断详情、是否可重试 | Adapter / Session Manager |
-| `turn_end` | 时长、结果（Done / 已停止）、`files_changed` | Session Manager |
+| `turn_end` | 时长、结果（完成 / 已停止）、`changes?`（本轮保存补丁的文件数与增删行数，见第 3.10 节） | Session Manager |
 
 新增控制和附件字段的当前可序列化契约见 [`shared/session/types.ts`](../../apps/desktop/src/shared/session/types.ts)：摘要 / 草稿 `reasoningEffort?: string|null` 区分未设置与显式默认，ActiveTurn 接受时快照；上下文按 Input 负责规格保存，不保存 Runtime 句柄。独立持久身份 journal 由 [Adapter 第 3.9 节](../agent-adapter/spec.md)负责，不代替 Session 历史或原生 ID。
 
@@ -333,7 +333,7 @@ Runtime 句柄、`pending_requests` 与 `stopping` 只存在于主进程内存�
 | `send(句柄, {text, context, model?})` | 提交一轮；立即可视为 Running | 06 §5 Running 行 | 上下文项（View、文件）如何传入，留给 project-view / context-tools |
 | 事件 `turnStarted(turnId)` / `turnEnded(turnId, outcome, durationMs, error?)` | 状态机 E2、E7、E8；完成行 | 06 §5 正常完成 / 执行错误行 | `outcome` 区分 completed / interrupted / failed；已关联 Stop 的取消不报 failed |
 | 事件 `textDelta(itemId, delta)` / `messageCompleted(itemId, text)` | 流式与校正 | 06 §5 文本追加行 | 区分增量与完整消息 |
-| 事件 `toolActivity(itemId, kind, summary, state)` | 工具活动行 | 06 §5 | 原生工具类型到 Read / Edit / Run 的归类 |
+| 事件 `toolActivity(itemId, kind, summary, state)` | 过程中的步骤行 | 06 §5 | 原生工具类型到 Read / Edit / Run 的归类 |
 | 事件 `inputRequested(requestId, kind, nativeContent, options)` / `inputResolved(requestId, reason)` | Needs Input 卡片与清除 | 06 §5 Needs Input 行 | 原生撤回请求时是否有事件（Codex 服务端请求失效） |
 | `answer(requestId, optionId)` | 卡片答复 | 06 §5 | — |
 | `replyWithText(requestId[], text)` | 在输入框回复 Needs Input | UX 第 6 节 | Codex W25 Adapter / W26 UI 已落实 I-Q2；Claude 真实语义后续 |

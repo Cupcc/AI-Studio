@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { isViewId } from '@shared/project/ui-state'
 import { useViewTitle } from '../workbench/use-view-title'
 import { useWorkbenches } from '../workbench/store'
@@ -9,7 +9,8 @@ import { cliName, useSessions } from './store'
 import type { QueuedMessage } from '@shared/session/types'
 import { displayName } from '../../lib/display-path'
 import { CliBadge } from './Status'
-import { Transcript } from './Transcript'
+import { TurnView } from './TurnView'
+import { buildTurns } from './turns'
 
 export function ConversationHeader({ project, canvas }: ShellSlotProps) {
   const sessionId = canvas.mode === 'session' ? canvas.sessionId : null
@@ -39,6 +40,9 @@ export function SessionConversation({ sessionId, projectId, active }: { sessionI
   const lastScrollTop = useRef(0)
   const [away, setAway] = useState(!following.current), [positioned, setPositioned] = useState(false), [gutter, setGutter] = useState(0)
   const previousLatestRequest = useRef(latestRequest)
+  const turns = useMemo(() => buildTurns(conversation?.items ?? []), [conversation?.items])
+  // The agent is at work on the last turn only; input sent meanwhile opens the next one.
+  const working = !!summary && summary.activity !== 'none'
   const prepend = useRef<{ height: number; top: number } | null>(null)
   useEffect(() => { void useSessions.getState().loadConversation(sessionId) }, [sessionId])
   function latest() {
@@ -108,9 +112,8 @@ export function SessionConversation({ sessionId, projectId, active }: { sessionI
       {conversation?.error && <div className="conversation-load-error" role="alert"><p>{conversation.error}</p><button className="secondary-button" onClick={() => void useSessions.getState().loadConversation(sessionId, conversation.loaded)}>重试加载</button></div>}
       <div ref={contentRef} className="session-conversation__transcript" style={{ visibility: positioned ? 'visible' : 'hidden' }}>
         {conversation?.hasMore && <button className="conversation-older" disabled={conversation.loading} onClick={() => void older()}>{conversation.loading ? '正在加载…' : '加载更早的消息'}</button>}
-        {conversation?.items.map((item) => <Transcript key={item.id} item={item} />)}
+        {turns.map((block, index) => <TurnView key={block.key} block={block} summary={summary} live={working && index === turns.length - 1} />)}
         {conversation?.loaded && !conversation.items.length && <p className="muted">还没有消息</p>}
-        {summary?.activity === 'running' && !conversation?.items.some((item) => item.kind === 'agent_message' && !item.complete) && <p className="conversation-working"><span className="session-spinner" />{summary.stopping ? '正在停止当前一轮…' : 'Agent 正在执行…'}</p>}
         {!!summary?.queuedMessages?.length && <QueuedMessages sessionId={sessionId} messages={summary.queuedMessages} />}
         {openError && <p role="alert" className="error-message">{openError}</p>}
       </div>

@@ -172,6 +172,9 @@ describe('SessionController: turns', () => {
     const turnId = await startTurn(controller);
     sink.itemStarted(turnId, { itemId: 'm1', kind: 'assistant_message', status: 'in_progress' });
     sink.itemDelta(turnId, 'm1', 'text', 'partial');
+    // Codex starts a message with empty text; what streamed afterwards must survive the close.
+    sink.itemStarted(turnId, { itemId: 'm2', kind: 'assistant_message', status: 'in_progress', text: '' });
+    sink.itemDelta(turnId, 'm2', 'text', 'streamed');
     sink.itemStarted(turnId, {
       itemId: 'c1',
       kind: 'command',
@@ -182,6 +185,7 @@ describe('SessionController: turns', () => {
     const closed = recorder.ofType('item.completed');
     expect(closed.map((e) => [e.item.itemId, e.item.status, e.item.text])).toEqual([
       ['m1', 'interrupted', 'partial'],
+      ['m2', 'interrupted', 'streamed'],
       ['c1', 'interrupted', undefined],
     ]);
     expect(recorder.last('turn.completed')).toMatchObject({ outcome: 'interrupted', stopRequested: false });

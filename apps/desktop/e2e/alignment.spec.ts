@@ -172,7 +172,7 @@ test('FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom befo
   expect(await sessions()).toHaveLength(0)
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(workspace().locator('.session-conversation--draft')).toHaveCount(0)
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
   const after = await workspace().locator('.composer__box').evaluate((node) => node.getBoundingClientRect().bottom)
   expect(Math.abs(before - after)).toBeLessThanOrEqual(0.5)
   await expect(workspace().locator('.canvas-header .session-header__cli')).toHaveCount(0)
@@ -183,8 +183,8 @@ test('FR-CHAT-001 / FR-INPUT-001 · v06: draft composer stays at the bottom befo
 test('FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right-sidebar tool at 1024 / 1280 / 1440', async () => {
   await newChat()
   await send('实现支付模块的订阅续费与取消。[e2e:delay]')
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
-  await expect(workspace().locator('.transcript-tool')).not.toHaveCount(0)
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
+  await expect(workspace().locator('button.transcript-process__toggle')).toContainText('1 步')
   await page.getByRole('button', { name: '右侧边栏', exact: true }).click()
   await showTool(page, 'Files')
   await expect(workspace().getByRole('button', { name: 'Files', exact: true })).toHaveAttribute('aria-pressed', 'true')
@@ -207,7 +207,7 @@ test('FR-SESSION-001 / FR-TOOL-001 · AC-07: completed conversation with a right
 
 test('FR-SESSION-001 · Shell Spec v02 §2.2 / §6: Markdown reply with edges aligned to the composer at 1024 / 1280 / 1440', async () => {
   await newChat(); await send('[e2e:markdown] 运行测试并修复失败用例')
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
   await expect(workspace().locator('.code-block')).toHaveCount(2)
   await atEachWidth('markdown', 'session')
   const edges = metrics.filter((m) => m.state === 'markdown' && m.theme === each).map((m) => m.edges)
@@ -319,15 +319,16 @@ test('FR-STATE-002 / FR-INPUT-001 · AC-05: Needs Input approval at three widths
   await atEachWidth('needs-input', 'session')
   await fit(BASE)
   await workspace().locator('.request-card__actions button').first().click()
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
+  await workspace().locator('button.transcript-process__toggle').click()
   await expect(workspace().locator('.request-card__resolution')).toContainText('已选择')
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
   await newChat('claude-code'); const question = await send('需要确认下一步范围。[e2e:question]')
   await expect(workspace().getByRole('region', { name: '等待你的回答' })).toBeVisible()
   await assertLayout('needs-input-question', 'session', BASE); await snap('needs-input-question', BASE.width)
   await workspace().getByRole('textbox', { name: '回复 Agent', exact: true }).fill('使用较小的范围')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
   await expect(row(question.id).getByRole('img', { name: 'Needs Input', exact: true })).toHaveCount(0)
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
 })
 
 test('FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1440', async () => {
@@ -338,7 +339,7 @@ test('FR-STATE-003 · AC-05: Error card with details expanded at 1024 / 1280 / 1
   await atEachWidth('error', 'session')
   await fit(BASE)
   await workspace().getByRole('button', { name: '重试', exact: true }).click()
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
 })
 
 test('FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirmation and launcher at 1280', async () => {
@@ -384,7 +385,7 @@ test('FR-PROJ-001/002 / FR-CHAT-001/002: draft, CLI menu, tooltip, close confirm
   await dialog.getByRole('button', { name: '取消', exact: true }).click()
   await expect(dialog).toHaveCount(0)
   await workspace().getByRole('button', { name: 'Stop', exact: true }).click()
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('已停止')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'interrupted')
 
   await page.getByRole('button', { name: '新建标签页', exact: true }).click()
   await openProject('Second Project')

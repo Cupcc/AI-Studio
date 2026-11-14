@@ -34,7 +34,7 @@ test('FR-INPUT-001: a default Claude draft offers exactly the levels its catalog
   await expect(effort()).toHaveAttribute('aria-description', '思考强度 · low')
   await workspace().getByLabel('消息', { exact: true }).fill('Claude effort follows the Session')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
   await expect(effort()).toHaveAttribute('aria-description', '思考强度 · low')
   await effort().click(); await panel().getByRole('button', { name: 'max', exact: true }).click()
   await expect(effort()).toHaveAttribute('aria-description', '思考强度 · max')

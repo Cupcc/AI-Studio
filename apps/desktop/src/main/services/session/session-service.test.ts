@@ -280,6 +280,29 @@ describe('Session state, persistence and native continuity · AC-02–05 / FR-ST
     expect(h.items(session.id)).toContainEqual(expect.objectContaining({ kind: 'tool_activity', item: expect.objectContaining({ kind: 'reasoning', text: 'public reasoning summary' }) }))
   })
 
+  it('records the CLI label of a message, when each step ended, and the totals of the turn diff', async () => {
+    const h = harness()
+    const session = await h.create(); await tick()
+    const { controller: runtime } = h.native()
+    const turn = runtime.activeTurn!.turnId
+    runtime.sink.bindNativeTurnId(turn, 'native-turn')
+    runtime.sink.itemStarted(turn, { itemId: 'run', kind: 'command', status: 'in_progress', command: { command: 'pnpm test' } })
+    runtime.sink.itemStarted(turn, { itemId: 'think', kind: 'reasoning', status: 'in_progress' })
+    h.clock.now = 7000
+    runtime.sink.itemCompleted(turn, { itemId: 'run', kind: 'command', status: 'completed', command: { command: 'pnpm test', exitCode: 0 } })
+    runtime.sink.itemCompleted(turn, { itemId: 'note', kind: 'assistant_message', status: 'completed', text: 'Looking.', phase: 'commentary' })
+    runtime.sink.itemCompleted(turn, { itemId: 'reply', kind: 'assistant_message', status: 'completed', text: 'Done.', phase: 'final_answer' })
+    runtime.sink.turnDiffUpdated(turn, { nativeSessionId: runtime.nativeSessionId!, nativeTurnId: 'native-turn', source: 'codex:turn/diff/updated', protocolVersion: '0.161.0', state: 'available', truncated: false, files: [],
+      patch: 'diff --git a/a.ts b/a.ts\n--- a/a.ts\n+++ b/a.ts\n@@ -1 +1,2 @@\n-old\n+new\n+more\n' })
+    h.clock.now = 9000
+    runtime.sink.nativeTurnEnded(turn, { status: 'completed' })
+    const items = h.items(session.id)
+    expect(items.filter(item => item.kind === 'agent_message').map(item => item.phase)).toEqual(['commentary', 'final_answer'])
+    const steps = items.filter(item => item.kind === 'tool_activity')
+    expect(steps.map(item => [item.item.itemId, item.endedAt! - item.at])).toEqual([['run', 6000], ['think', 8000]])
+    expect(items.at(-1)).toMatchObject({ kind: 'turn_end', durationMs: 8000, changes: { files: 1, additions: 2, deletions: 1 } })
+  })
+
   it('keeps a selected model absent from the directory and lets the native call decide', async () => {
     const h = harness()
     await h.service.getModels('codex', 'p')

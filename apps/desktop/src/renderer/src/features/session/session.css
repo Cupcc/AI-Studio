@@ -45,7 +45,7 @@
 /* both-edges: a classic (always-shown) scrollbar must not shift the column off the composer's centre */
 .session-conversation__scroll { grid-area: 1 / 1; min-height: 0; display: flex; flex-direction: column; overflow: auto; overflow-anchor: none; scrollbar-gutter: stable both-edges; }
 /* A short transcript starts at the top, like ChatGPT / Claude desktop (Shell Spec 第 6 节; replaces the prototype's bottom-anchored .feed-in) */
-.session-conversation__transcript { --feed-gap: 14px; display: flex; flex-direction: column; flex: none; gap: var(--feed-gap); width: 100%; max-width: var(--feed-max-width); margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-2); }
+.session-conversation__transcript { --feed-gap: var(--space-6); display: flex; flex-direction: column; flex: none; gap: var(--feed-gap); width: 100%; max-width: var(--feed-max-width); margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-2); }
 .session-conversation > .composer { grid-area: 2 / 1; padding-inline: calc(var(--space-6) + var(--scrollbar-gutter, 0px)); }
 .conversation-latest { grid-area: 1 / 1; align-self: end; justify-self: center; margin-bottom: var(--space-3); padding: var(--space-1) var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-2); background: var(--color-surface); border: 1px solid var(--color-border-strong); border-radius: 999px; box-shadow: var(--shadow-floating); z-index: 1; }
 /* v06: independently scroll the greeting in short windows; reserve the same bottom row for every composer. */
@@ -65,7 +65,6 @@
 .conversation-skeleton span:last-child { width: 40%; }
 .conversation-load-error { flex: none; width: 100%; max-width: var(--feed-max-width); margin: 0 auto; padding: var(--space-4) var(--space-6); font-size: var(--font-size-md); color: var(--color-error); }
 .conversation-older { align-self: center; padding: var(--space-1) var(--space-2-5); font-size: var(--font-size-sm); color: var(--color-text-muted); border-radius: var(--radius-sm); }
-.conversation-working { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--font-size-md); color: var(--color-text-muted); }
 
 /* Messages, tool activity, turn end */
 .transcript-user { align-self: flex-end; max-width: 80%; padding: var(--space-2-5) 14px; background: var(--color-bubble); box-shadow: var(--shadow-bubble); border-radius: var(--radius-bubble); font-size: var(--font-size-body); line-height: 1.55; }
@@ -79,14 +78,57 @@
 .conversation-queue__item.is-undelivered .conversation-queue__badge { color: var(--color-error); }
 .conversation-queue__text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .conversation-queue__actions { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
-.transcript-tool { padding: 7px var(--space-2-5); font: var(--font-size-sm)/1.65 var(--font-mono); color: var(--color-text-3); background: var(--color-surface-sub); border: 1px solid var(--color-border-soft); border-radius: var(--radius-button); }
-.transcript-tool > summary { display: flex; align-items: center; gap: var(--space-2); cursor: pointer; overflow-wrap: anywhere; }
-.transcript-tool > :not(summary) { margin: var(--space-1-5) 0 0; }
-.transcript-tool .error-message { font-family: var(--font-sans); }
-/* Consecutive tool rows read as one block, like the prototype's multi-line .tool */
-.transcript-tool:has(+ .transcript-tool) { padding-bottom: 0; border-bottom-color: transparent; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-.transcript-tool + .transcript-tool { margin-top: calc(-1 * var(--feed-gap) - 1px); padding-top: 0; border-top-color: transparent; border-top-left-radius: 0; border-top-right-radius: 0; }
-.transcript-turn-end { margin: 0; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+/* A turn (Shell Spec v02 §6): the process folds into one line once the turn ends. Three text levels: the reply
+   in body size and primary ink, commentary one step quieter, steps as single 13px rows. The code face is only
+   for paths, commands and output. */
+.transcript-turn { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.transcript-turn > .transcript-user { margin-bottom: var(--space-1); }
+.transcript-chevron { display: inline-flex; flex: none; color: var(--color-text-muted); transition: transform .18s cubic-bezier(.2, .8, .2, 1); }
+[aria-expanded="true"] > .transcript-chevron, [aria-expanded="true"] > .transcript-step__meta > .transcript-chevron { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .transcript-chevron { transition: none; } }
+.transcript-process__toggle { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; max-width: calc(100% + var(--space-2)); min-height: 28px; margin: 0 0 0 calc(-1 * var(--space-2)); padding: 0 var(--space-2); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-muted); font-variant-numeric: tabular-nums; text-align: left; }
+button.transcript-process__toggle:hover { background: var(--color-hover); color: var(--color-text-2); }
+.transcript-process__toggle strong { font-weight: 500; color: var(--color-text-2); }
+.transcript-process__toggle > span:not(.transcript-process__label) { flex: none; }
+.transcript-process__label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.transcript-process { display: flex; flex-direction: column; gap: 1px; margin: calc(-1 * var(--space-1-5)) 0 var(--space-0) var(--space-1-5); padding: var(--space-0) 0 var(--space-0) 14px; border-left: 1px solid var(--color-border-strong); }
+.transcript-step { display: flex; align-items: center; gap: var(--space-2); min-height: 28px; margin: 0 calc(-1 * var(--space-2)); padding: 0 var(--space-2); border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-3); text-align: left; }
+button.transcript-step:hover { background: var(--color-hover); }
+.transcript-step > svg { flex: none; color: var(--color-text-muted); }
+.transcript-step__verb { flex: none; color: var(--color-text-2); }
+.transcript-step__target { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-muted); }
+.transcript-step__target.is-code { font: 12.5px/1.4 var(--font-mono); color: var(--color-text-2); }
+.transcript-step__directory { color: var(--color-text-muted); }
+.transcript-step__meta { flex: none; display: flex; align-items: center; gap: var(--space-2); margin-left: auto; padding-left: var(--space-2); font-size: var(--font-size-xs); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.transcript-step__meta .request-card__resolution { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: inherit; }
+.transcript-step.is-failed > svg, .transcript-step.is-failed .transcript-step__verb, .transcript-step__problem { color: var(--color-error); }
+.transcript-diffstat__add { color: var(--color-diff-add-text); }
+.transcript-diffstat__del { color: var(--color-diff-del-text); }
+.transcript-step__group { display: flex; flex-direction: column; gap: 1px; margin: 0 0 var(--space-1) 22px; }
+.transcript-step__detail { display: flex; flex-direction: column; gap: var(--space-1-5); min-width: 0; margin: var(--space-0) 0 var(--space-2) 22px; }
+.transcript-step__detail > p { margin: 0; }
+/* The row already says what the request was; its card only adds the content and the full outcome. */
+.transcript-step__detail .request-card h3 { display: none; }
+.transcript-step__thinking { max-height: 240px; overflow: auto; }
+.transcript-step__thinking .markdown, .transcript-step__thinking .markdown :is(h3, h4) { font-size: var(--font-size-sm); line-height: 1.7; color: var(--color-text-3); }
+.transcript-step__thinking .markdown > * + *, .transcript-step__thinking .markdown > * + :is(h3, h4) { margin-top: var(--space-1-5); }
+.transcript-step__output { max-height: 240px; overflow: auto; background: var(--color-surface-sub); border: 1px solid var(--color-border); border-radius: var(--radius-button); }
+.transcript-step__output pre { margin: 0; padding: var(--space-2) var(--space-2-5); font: var(--font-size-xs)/1.65 var(--font-mono); color: var(--color-text-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+.transcript-step__prompt, .transcript-step__label { color: var(--color-text-muted); }
+.transcript-step__label { font-size: var(--font-size-xs); }
+.transcript-step__file { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.transcript-step__file + .transcript-step__file { margin-top: var(--space-1-5); }
+.transcript-step__path { margin: 0; font: 12.5px/1.5 var(--font-mono); color: var(--color-text-2); overflow-wrap: anywhere; }
+.transcript-step__detail .code-block pre { max-height: 240px; overflow: auto; font-size: var(--font-size-xs); }
+.transcript-commentary { padding: 5px 0; }
+.transcript-commentary .markdown { font-size: var(--font-size-md); line-height: 1.65; color: var(--color-text-2); }
+.transcript-agent { min-width: 0; }
+/* Turn footer: copy the reply and open the turn's changes */
+.transcript-turn-end { display: flex; align-items: center; gap: var(--space-0); margin-left: -7px; font-size: var(--font-size-sm); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.transcript-turn-end:empty { display: none; }
+.transcript-action { display: inline-flex; align-items: center; gap: var(--space-1-5); min-height: 28px; padding: 0 7px; border-radius: var(--radius-md); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.transcript-action:hover:not(:disabled) { background: var(--color-hover); color: var(--color-text-2); }
+.transcript-error .transcript-action { margin-left: auto; }
 
 /* Agent reply Markdown (prototype v02 .ma); user messages stay plain text */
 .markdown { min-width: 0; font-size: var(--font-size-body); line-height: 1.7; overflow-wrap: anywhere; }
@@ -136,7 +178,7 @@
 .request-card ul { margin: 0; padding-left: var(--space-4); }
 .request-card code { font: var(--font-size-sm) var(--font-mono); }
 .request-card__title { font-size: var(--font-size-md); font-weight: 400; }
-.request-card pre, .transcript-error pre, .transcript-tool pre { max-height: 320px; overflow: auto; font: var(--font-size-sm)/1.6 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.request-card pre, .transcript-error pre { max-height: 320px; overflow: auto; font: var(--font-size-sm)/1.6 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 .request-card pre, .transcript-error pre { margin: 0; padding: 7px var(--space-2-5); color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-button); }
 .request-card summary, .transcript-error summary { cursor: pointer; font-size: var(--font-size-sm); color: var(--color-text-muted); }
 .request-card details > pre { margin-top: var(--space-1-5); }
@@ -184,5 +226,3 @@
 .composer__notice, .composer .error-message { margin-top: var(--space-2); margin-bottom: 0; }
 .composer__availability .text-button { font-size: inherit; }
 
-.transcript-turn-end { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
-.transcript-diff-link { padding: 0; border: 0; background: transparent; color: var(--color-text-2); font: inherit; font-size: var(--font-size-sm); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

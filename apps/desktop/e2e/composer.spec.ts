@@ -102,7 +102,7 @@ test('five static effort bars; max / ultra ignite only on selection, across four
   await expect.poll(async () => (await switches()).length).toBe(++selections)
   await expect(workspace().locator('[data-effort-transition]')).toHaveCount(0)
   await input().fill('Persist ultra'); await workspace().getByRole('button', { name: 'Send', exact: true }).click()
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
   await expect(effort()).toHaveAttribute('aria-description', '思考强度 · ultra')
   await app.close(); await launch()
   await observeEffortSwitches()

@@ -5,11 +5,12 @@ import type {
   InputResolution,
   InputResponse,
   ItemSnapshot,
+  MessagePhase,
   ModelInfo,
   ProviderCapabilities
 } from '@ai-studio/agent-adapter'
 
-export type { InputRequest, InputResolution, InputResponse, ModelInfo, ProviderCapabilities }
+export type { InputRequest, InputResolution, InputResponse, ItemSnapshot, MessagePhase, ModelInfo, ProviderCapabilities }
 
 export type SessionCli = 'codex' | 'claude-code'
 export const SESSION_CLIS: readonly SessionCli[] = ['codex', 'claude-code']
@@ -73,12 +74,21 @@ interface TranscriptBase {
 
 export type TranscriptItem = TranscriptBase & (
   | { kind: 'user_message'; text: string; contextItems: ContextItem[]; redacted?: boolean; viewContextAttached?: boolean; viewContextPaths?: string[] }
-  | { kind: 'agent_message'; text: string; complete: boolean; nativeItemId: string }
-  | { kind: 'tool_activity'; item: ItemSnapshot }
+  /** `phase` is the CLI's own label, when it gives one; otherwise position within the turn decides (session spec §3.2). */
+  | { kind: 'agent_message'; text: string; complete: boolean; nativeItemId: string; phase?: MessagePhase }
+  /** `endedAt` is when the item left `in_progress`; with `at` it gives the step's duration. */
+  | { kind: 'tool_activity'; item: ItemSnapshot; endedAt?: number }
   | { kind: 'input_request'; request: InputRequest; resolution: InputResolution | null; redacted?: boolean }
   | { kind: 'error'; summary: string; details: string; retryable: boolean }
-  | { kind: 'turn_end'; outcome: 'completed' | 'interrupted'; durationMs: number; model?: string }
+  | { kind: 'turn_end'; outcome: 'completed' | 'interrupted'; durationMs: number; model?: string; changes?: TurnChanges }
 )
+
+/** Totals of the turn's saved native diff; line counts are absent when the patch is missing or truncated. */
+export interface TurnChanges {
+  files: number
+  additions?: number
+  deletions?: number
+}
 
 export interface ConversationPage {
   session: SessionSummary

@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { TranscriptItem } from '@shared/session/types'
 import { AgentMarkdown, CodeBlock } from './Markdown'
-import { Transcript } from './Transcript'
+import { UserMessage } from './Transcript'
 
 afterEach(() => { cleanup(); vi.useRealTimers(); Reflect.deleteProperty(navigator, 'clipboard') })
 
@@ -53,8 +53,8 @@ describe('Agent reply Markdown · Shell Spec v02 §6 · FR-SESSION-001', () => {
   })
 
   it('keeps user messages as plain text', () => {
-    const item: TranscriptItem = { id: 'u', sessionId: 's', turnId: 't', at: 1, sequence: 1, kind: 'user_message', text: '**不要加粗** `code`', contextItems: [] }
-    const { container } = render(<Transcript item={item} />)
+    const item: Extract<TranscriptItem, { kind: 'user_message' }> = { id: 'u', sessionId: 's', turnId: 't', at: 1, sequence: 1, kind: 'user_message', text: '**不要加粗** `code`', contextItems: [] }
+    const { container } = render(<UserMessage item={item} />)
     expect(container.querySelector('strong, code')).toBeNull()
     expect(container.textContent).toBe('**不要加粗** `code`')
   })

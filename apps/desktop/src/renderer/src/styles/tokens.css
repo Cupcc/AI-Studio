@@ -167,6 +167,9 @@
   --color-link-underline: rgba(29, 78, 216, .35);
   --color-diff-add-bg: #e9f6ed;
   --color-diff-del-bg: #fbecea;
+  /* Added / removed line counts as small text: >= 4.5:1 on the pane in every appearance (the glass blocks inherit these) */
+  --color-diff-add-text: #166534;
+  --color-diff-del-text: #b91c1c;
   /* Code highlighting, only inside code blocks (prototype v02 open question, confirmed 2026-10-10) */
   --color-code-keyword: #7c3a8f;
   --color-code-string: #2f6b45;
@@ -330,6 +333,8 @@
   --color-link-underline: rgba(138, 180, 248, .4);
   --color-diff-add-bg: #1b3324;
   --color-diff-del-bg: #3b1f1f;
+  --color-diff-add-text: #4ade80;
+  --color-diff-del-text: #f87171;
   --color-code-keyword: #c792ea;
   --color-code-string: #a5d6a7;
   --color-code-number: #f2b872;

@@ -9,6 +9,7 @@ AI Developer Studio V1.0 的设计工作区，用于保存设计资料、参考�
 - [页面布局与输入体验评审 v02](layout-ux-review-v02.md#6-采用记录)：v06 UI 的采用范围、五格静态思考指示、选中切换反馈及人工复验结果；可操作稿见[原型 v06](prototypes/README.md#studio-灰度交互原型-v06)，初始布局反馈与竞品观察见 [v01](layout-ux-review-v01.md)。
 - [组件修订确认记录](components/shell-spec-v02.md#1-已确认与待确认)。
 - [视觉参数待确定项](visual-direction.md#1-高保真阶段待确定)；字体基线已按 [1.2 系统字体优先](visual-direction.md#12-系统字体优先2026-11-12)修订，已人工验收。
+- [Conversation 轮次呈现设计稿](screens/README.md#3-方案索引)：过程收成一行的方案 A（2026-11-14 确认）；规格见 [Shell Spec v02 第 6 节](components/shell-spec-v02.md#6-conversation)，diff 待审阅，实现待人工验收，见[任务记录](../.agents/archive/tasks/T20261114-conversation-turns/task.md#收尾2026-11-14)。
 - [工作台界面规范化设计稿](screens/README.md#3-方案索引)：宿主单行标题栏、“更多操作”、状态变体与选品悬浮条（2026-11-12 确认）；实现已人工验收，见[界面规范化任务](../.agents/archive/tasks/T20261112-workbench-ui-polish/task.md#人工功能验收)。
 
 ## 1. 设计依据
@@ -56,7 +57,7 @@ design/
 | 视觉方向 | [Visual Direction](visual-direction.md)；当前视觉参数见其第 1 节 |
 | 参考资料 | [参考索引](references/README.md)，含 Codex / Claude 官方图片与来源边界 |
 | 线框图 | v02，见 [wireframes](wireframes/README.md) |
-| 高保真界面 | 工作台界面规范化 v01（2026-11-12 确认），见 [screens](screens/README.md#3-方案索引)；Session 与 Project View 主界面尚无 |
+| 高保真界面 | 工作台界面规范化 v01（2026-11-12 确认）、Conversation 轮次呈现方案 A v01（2026-11-14 确认），见 [screens](screens/README.md#3-方案索引)；Session 与 Project View 主界面的整页稿尚无 |
 | 应用图标 | 本机采用的版本与确认范围见[图标索引](icons/README.md#本机采用) |
 | 组件规范 | [Shell Spec v01](components/shell-spec-v01.md) 基线；工具行为、原型 v01 对齐后的组件修订与原型 v02 的 Conversation 修订均已确认，见 [Shell Spec v02](components/shell-spec-v02.md)；外观主题与设置见其第 12 节（2026-10-12 确认，diff 待审阅） |
 | 外观主题 | 毛玻璃取自交互原型 v04，纯色（浅色）取自 v03；2026-11-12 起设置只保留毛玻璃，纯色仅作“降低透明度”回退（[DEC-31](<../docs/07. Decisions.md#dec-31-设置移除纯色主题选项>)）；颜色模式默认跟随系统，深色取值与“纯色”名称已按 SET-Q6 / Q7 确认（2026-10-18，[DEC-20](<../docs/07. Decisions.md#dec-20-terminal-视觉取舍与深色主题方案>)）；见 [prototypes](prototypes/README.md#3-原型索引) |

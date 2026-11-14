@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { groupSessions, initialSessionTitle, projectSessionState, sessionStatus, sortSessions } from './presentation'
+import { countDiffLines, formatDuration, groupSessions, initialSessionTitle, projectSessionState, sessionStatus, sortSessions } from './presentation'
 import type { SessionSummary } from './types'
 
 const summary = (id: string, patch: Partial<SessionSummary> = {}): SessionSummary => ({
@@ -52,5 +52,16 @@ describe('FR-NAV-003 history', () => {
     expect(initialSessionTitle('\n  Build   the app\nsecond line')).toBe('Build the app')
     expect(initialSessionTitle('🙂'.repeat(41))).toBe('🙂'.repeat(40) + '…')
     expect(initialSessionTitle(' \n ')).toBe('新对话')
+  })
+})
+
+describe('Transcript durations and diff totals · Shell Spec v02 §6', () => {
+  it('formats a duration in Chinese units and does not show a sub-second turn as zero', () => {
+    expect([400, 8000, 138_000, 3_900_000].map(formatDuration)).toEqual(['不到 1 秒', '8 秒', '2 分 18 秒', '1 小时 05 分'])
+  })
+
+  it('counts changed lines of a patch without its file headers', () => {
+    expect(countDiffLines('diff --git a/a.ts b/a.ts\n--- a/a.ts\n+++ b/a.ts\n@@ -1,2 +1,3 @@\n context\n-old\n+new\n+more\n')).toEqual({ additions: 2, deletions: 1 })
+    expect(countDiffLines('')).toEqual({ additions: 0, deletions: 0 })
   })
 })

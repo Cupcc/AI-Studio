@@ -1,18 +1,26 @@
 import { displayName } from '../../lib/display-path'
 import { useEffect, useState } from 'react'
 import type { InputRequest, InputResolution, InputResponse, TranscriptItem } from '@shared/session/types'
-import { formatWorkedFor } from '@shared/session/presentation'
-import { AgentMarkdown } from './Markdown'
+import { Icon } from '../../app/Icon'
 import { useSessions } from './store'
 import { shellIntegration } from '../project/integration'
 
-function TurnDiffButton({ item }: { item: TranscriptItem }) {
+/** Opens the turn's saved diff. The totals come from that record; without them the button only names the action. */
+export function TurnDiffButton({ item }: { item: TranscriptItem }) {
   const projectId = useSessions(state => state.summaries[item.sessionId]?.projectId)
   if (!projectId || !item.turnId) return null
-  return <button className="transcript-diff-link" onClick={() => shellIntegration().openTurnDiff?.({ projectId, sessionId: item.sessionId, turnId: item.turnId! })}>查看本轮变更</button>
+  const changes = item.kind === 'turn_end' ? item.changes : undefined
+  return <button className="transcript-action" aria-label="查看本轮变更" onClick={() => shellIntegration().openTurnDiff?.({ projectId, sessionId: item.sessionId, turnId: item.turnId! })}>
+    <Icon name="diff" size={14} />
+    {changes ? <>
+      <span>{changes.files} 个文件</span>
+      {changes.additions !== undefined && <span className="transcript-diffstat__add">+{changes.additions}</span>}
+      {changes.deletions !== undefined && <span className="transcript-diffstat__del">−{changes.deletions}</span>}
+    </> : <span>本轮变更</span>}
+  </button>
 }
 
-function resolutionText(request: InputRequest, resolution: InputResolution, redacted?: boolean): string {
+export function resolutionText(request: InputRequest, resolution: InputResolution, redacted?: boolean): string {
   if (resolution.status === 'declined_with_text' || (resolution.status === 'answered' && resolution.viaText)) return '已在输入框回复'
   if (resolution.status === 'cancelled') return resolution.reason === 'turn_stopping' || resolution.reason === 'disposed' ? '已停止' : '已失效'
   if (redacted) return '已答复（私密内容不保存）'
@@ -74,33 +82,15 @@ export function InputRequestCard({ item }: { item: Extract<TranscriptItem, { kin
   </section>
 }
 
-export function Transcript({ item }: { item: TranscriptItem }) {
-  if (item.kind === 'user_message') return <article className="transcript-user" data-transcript-id={item.id}>
+export function UserMessage({ item }: { item: Extract<TranscriptItem, { kind: 'user_message' }> }) {
+  return <article className="transcript-user" data-transcript-id={item.id}>
     {item.viewContextAttached && <details className="transcript-user__context"><summary>当前工作台</summary><ul>{item.viewContextPaths?.map(path => <li key={path}><code>{path}</code></li>)}</ul></details>}
     {item.contextItems.length > 0 && <div className="transcript-user__context">{item.contextItems.filter(context => context.type !== 'view' || !item.viewContextAttached).map((context, index) => <span key={index}>{context.type === 'view' ? context.viewId : context.type === 'skill' ? `Skill · ${context.name}` : context.type === 'upload' ? displayName(context.name) : displayName(context.path)}</span>)}</div>}
     <p>{item.redacted ? '••••••（私密回复不保存）' : item.text}</p>
   </article>
-  if (item.kind === 'agent_message') return <article className="transcript-agent" data-transcript-id={item.id}><AgentMarkdown text={item.text} />{!item.complete && <span className="sr-only">正在输出</span>}</article>
-  if (item.kind === 'tool_activity') {
-    const tool = item.item
-    const label = tool.kind === 'reasoning' ? '推理摘要' : tool.activity?.label ?? tool.command?.command ?? tool.tool?.name ?? tool.text ?? tool.nativeType ?? '工具活动'
-    return <details className="transcript-tool" data-transcript-id={item.id}>
-      <summary>{tool.status === 'in_progress' ? <span className="session-spinner" aria-label="工具运行中" /> : <span aria-hidden="true">{tool.status === 'completed' ? '✓' : tool.status === 'failed' ? '!' : '—'}</span>}<span>{label}</span></summary>
-      {tool.command?.cwd && <p className="muted">{tool.command.cwd}</p>}
-      {tool.command?.output && <pre>{tool.command.output}</pre>}
-      {tool.files?.map((file) => <p key={file.path}>{file.change} · {file.path}</p>)}
-      {tool.text && tool.text !== label && <pre>{tool.text}</pre>}
-      {tool.tool?.input !== undefined && <pre>{JSON.stringify(tool.tool.input, null, 2)}</pre>}
-      {tool.tool?.result !== undefined && <pre aria-label="工具结果">{JSON.stringify(tool.tool.result, null, 2)}</pre>}
-      {tool.error && <p className="error-message">{tool.error}</p>}
-    </details>
-  }
-  if (item.kind === 'input_request') return <div data-transcript-id={item.id}><InputRequestCard item={item} /></div>
-  if (item.kind === 'turn_end') return <div className="transcript-turn-end" data-transcript-id={item.id}><span>Worked for {formatWorkedFor(item.durationMs)} · {item.outcome === 'completed' ? 'Done' : '已停止'}</span><TurnDiffButton item={item} /></div>
-  return <ErrorCard item={item} />
 }
 
-function ErrorCard({ item }: { item: Extract<TranscriptItem, { kind: 'error' }> }) {
+export function ErrorCard({ item }: { item: Extract<TranscriptItem, { kind: 'error' }> }) {
   const summary = useSessions((s) => s.summaries[item.sessionId]), pending = useSessions((s) => s.pending[`retry:${item.sessionId}`]), error = useSessions((s) => s.errors[`retry:${item.sessionId}`])
   const [details, setDetails] = useState(false)
   return <section className="transcript-error" aria-label="执行错误" data-transcript-id={item.id}>

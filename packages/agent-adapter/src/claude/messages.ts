@@ -1,7 +1,7 @@
 import type { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 import type { SessionSink } from '../core/session-controller.js';
 import type { AdapterErrorCode, AdapterErrorInfo } from '../errors.js';
-import type { ItemSnapshot } from '../types.js';
+import { itemDiff, type ItemSnapshot } from '../types.js';
 
 export function claudeError(message: string, nativeCode: string | number = 'unknown'): AdapterErrorInfo {
   const text = `${nativeCode} ${message}`;
@@ -103,12 +103,20 @@ function toolItem(id: string, name: string, raw: unknown): ItemSnapshot {
   const input = raw && typeof raw === 'object' ? raw as Record<string, unknown> : {};
   const command = typeof input.command === 'string' ? input.command : '';
   const target = [input.file_path, input.path, input.pattern, input.url].find((value) => typeof value === 'string') as string | undefined;
-  const verb = name === 'Bash' ? 'run' : name === 'Read' ? 'read' : ['Write', 'Edit', 'NotebookEdit'].includes(name) ? 'edit'
+  const verb = name === 'Bash' ? 'run' : name === 'Read' ? 'read' : ['Write', 'Edit', 'MultiEdit', 'NotebookEdit'].includes(name) ? 'edit'
     : name === 'Glob' ? 'list' : ['Grep', 'WebSearch'].includes(name) ? 'search' : name === 'WebFetch' ? 'fetch'
     : ['Agent', 'Task'].includes(name) ? 'agent' : 'tool';
   return { itemId: id, kind: name === 'Bash' ? 'command' : verb === 'edit' ? 'file_change' : 'tool_call', status: 'in_progress',
     activity: { verb, label: `${name} ${command || target || ''}`.trim().replace(/\s+/g, ' ').slice(0, 240), target: command || target },
     tool: { name, input: raw }, nativeType: `tool_use:${name}`,
     ...(name === 'Bash' ? { command: { command } } : {}),
-    ...(verb === 'edit' && target ? { files: [{ path: target, change: 'unknown' as const }] } : {}) };
+    ...(verb === 'edit' && target ? { files: [{ path: target, change: 'unknown' as const, ...itemDiff(editDiff(name, input)) }] } : {}) };
+}
+
+/** Claude reports an edit as its tool input, not a patch: show the replaced and the new lines. */
+function editDiff(name: string, input: Record<string, unknown>): string {
+  const lines = (prefix: string, value: unknown) => typeof value === 'string' && value ? value.split('\n').map((line) => prefix + line) : [];
+  if (name === 'Write') return lines('+', input.content).join('\n');
+  const edits = name === 'MultiEdit' && Array.isArray(input.edits) ? input.edits as Record<string, unknown>[] : name === 'Edit' ? [input] : [];
+  return edits.map((edit) => [...lines('-', edit.old_string), ...lines('+', edit.new_string)].join('\n')).filter(Boolean).join('\n@@\n');
 }

@@ -7,6 +7,11 @@ const paths: Record<string, ReactNode> = {
   pencil: <path d="M3 13l.8-3.2L10.5 3l2.5 2.5-6.8 6.7z" />,
   chat: <path d="M2.5 3.5h11v7.5H7l-3.5 2.5V11h-1z" />,
   chevron: <path d="M4 6l4 4 4-4" />,
+  'chevron-right': <path d="M6 4l4 4-4 4" />,
+  // Conversation process rows (Shell Spec v02 §6)
+  thought: <path d="M5.6 9.8a3.9 3.9 0 1 1 4.8 0c-.4.4-.6.8-.6 1.4H6.2c0-.6-.2-1-.6-1.4zM6.5 13.6h3" />,
+  globe: <><circle cx="8" cy="8" r="5.5" /><path d="M2.5 8h11M8 2.5c1.7 1.6 2.5 3.4 2.5 5.5S9.7 11.9 8 13.5C6.3 11.9 5.5 10.1 5.5 8S6.3 4.1 8 2.5z" /></>,
+  plug: <path d="M6 2.2v3M10 2.2v3M4.2 5.2h7.6v2.3a3.8 3.8 0 0 1-7.6 0zM8 11.3v2.5" />,
   plus: <path d="M8 3v10M3 8h10" />,
   'arrow-up': <path d="M8 13V3M4 7l4-4 4 4" />,
   'arrow-left': <path d="M13 8H3M7 4L3 8l4 4" />,

@@ -104,6 +104,16 @@ export interface NativeDiffFile {
   truncated?: boolean;
 }
 
+export type MessagePhase = 'commentary' | 'final_answer';
+
+/** Per-file patch text kept on an item; the turn diff remains the complete record. */
+export const ITEM_DIFF_LIMIT = 12_000;
+
+export function itemDiff(diff: string): { diff?: string; diffTruncated?: boolean } {
+  if (!diff) return {};
+  return diff.length > ITEM_DIFF_LIMIT ? { diff: diff.slice(0, ITEM_DIFF_LIMIT), diffTruncated: true } : { diff };
+}
+
 export interface ItemSnapshot {
   /** Native item id (Codex item id, Claude message/tool_use id). Unique within the session. */
   itemId: string;
@@ -114,9 +124,15 @@ export interface ItemSnapshot {
    * authoritative body and replaces any text accumulated from `item.delta` events.
    */
   text?: string;
+  /**
+   * assistant_message only: the CLI's own label for text that narrates work in progress versus
+   * the reply to the user. Absent when the CLI does not say; hosts then decide by position.
+   */
+  phase?: MessagePhase;
   activity?: ActivityDescriptor;
   command?: { command: string; cwd?: string; exitCode?: number | null; output?: string };
-  files?: ReadonlyArray<{ path: string; change: FileChangeKind }>;
+  /** `diff` is the CLI's patch text for that file, capped at `ITEM_DIFF_LIMIT`; absent when the CLI gives none. */
+  files?: ReadonlyArray<{ path: string; change: FileChangeKind; diff?: string; diffTruncated?: boolean }>;
   tool?: { name: string; server?: string; input?: unknown; result?: unknown };
   /** Short failure text for failed items. */
   error?: string;

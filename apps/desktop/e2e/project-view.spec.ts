@@ -70,7 +70,7 @@ test('removed View label sends without creating helpers, and each View has an in
   await expect(workspace().getByRole('textbox', { name: '消息', exact: true })).toHaveText('保留架构草稿')
   await workspace().getByRole('button', { name: '移除上下文 architecture' }).click()
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
   expect(existsSync(join(projectPath, '.ai-studio'))).toBe(false)
   await expect(workspace().locator('.transcript-user summary')).toHaveCount(0)
   await workspace().locator('.session-row__open').first().click()
@@ -122,7 +122,7 @@ test('a copied Overview package reads scoped Session cards and opens a conversat
   await workspace().getByRole('button', { name: '新对话', exact: true }).first().click()
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('Portable Overview Session')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
   await copyPresetIntoOrdinaryDraft('overview')
   const sessions = preview().getByLabel('项目 Session 摘要')
   await expect(sessions.getByText('Recent Sessions', { exact: true })).toBeVisible()
@@ -134,7 +134,7 @@ test('a copied Overview package reads scoped Session cards and opens a conversat
 test('the package generate action starts a new unsent workbench draft from an existing Session', async () => {
   await workspace().getByRole('textbox', { name: '消息', exact: true }).fill('仅回复这条消息，不整理项目知识')
   await workspace().getByRole('button', { name: 'Send', exact: true }).click()
-  await expect(workspace().locator('.transcript-turn-end')).toContainText('Done')
+  await expect(workspace().locator('.transcript-turn-end')).toHaveAttribute('data-outcome', 'completed')
   const generate = preview().getByRole('button', { name: '生成 架构', exact: true })
   // The first click into a freshly loaded workbench page can land on the host's iframe element (e2e/harness.ts).
   await hoverInPage(generate); await generate.click()

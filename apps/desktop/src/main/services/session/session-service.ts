@@ -2,8 +2,8 @@ import { open } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import { createHash, randomUUID } from 'node:crypto'
 import { toErrorInfo, type InputAttachment, type NativeSkillInfo, type AdapterEvent, type AdapterErrorInfo, type AgentProvider, type AgentSession, type InputRequest, type InputResolution, type InputResponse, type ItemSnapshot, type ProviderEnvironment, type UserInput } from '@ai-studio/agent-adapter'
-import { initialSessionTitle, projectSessionState, sessionStatus, sortSessions } from '@shared/session/presentation'
-import type { ComposerDraft, ContextItem, ConversationPage, QueuedMessage, CreateSessionRequest, DraftKey, ModelCatalogResult, SkillCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem } from '@shared/session/types'
+import { countDiffLines, initialSessionTitle, projectSessionState, sessionStatus, sortSessions } from '@shared/session/presentation'
+import type { ComposerDraft, ContextItem, ConversationPage, QueuedMessage, CreateSessionRequest, DraftKey, ModelCatalogResult, SkillCatalogResult, ProviderSummary, SessionCli, SessionMessage, SessionProjectState, SessionSummary, SessionSummaryChange, SessionViewing, StopProjectSessionsResult, TranscriptChange, TranscriptItem, TurnChanges } from '@shared/session/types'
 import { SESSION_CLIS } from '@shared/session/types'
 import { SESSION_MESSAGE_MAX_LENGTH, TRANSCRIPT_PAGE_SIZE } from '@shared/ipc/session'
 import type { ProjectService } from '../project/project-service'
@@ -77,6 +77,15 @@ export interface SessionServiceOptions {
 }
 
 /** Paths of a message's file context items, first occurrence kept. */
+/** Totals for the turn footer. Line counts need the whole patch; a truncated record only gives the file count. */
+function turnChanges(diff: TurnDiffRecord): TurnChanges | undefined {
+  if (diff.state !== 'available' || diff.fileListTruncated) return undefined
+  const complete = diff.patch !== null && !diff.patchTruncated && !diff.truncated
+  // An aggregate patch can arrive without per-file records; its file headers still name the files.
+  const files = diff.files.length || (complete ? diff.patch!.split('\n').filter((line) => line.startsWith('diff --git ')).length : 0)
+  return files ? { files, ...(complete ? countDiffLines(diff.patch!) : {}) } : undefined
+}
+
 function fileReferencePaths(message: SessionMessage): ProjectPath[] {
   const seen = new Set<string>()
   const paths: ProjectPath[] = []
@@ -684,9 +693,11 @@ export class SessionService implements MainSessionPort {
         item.text = snapshot.text ?? item.text
         item.complete = snapshot.status !== 'in_progress'
       }
+      if (item.kind === 'agent_message' && snapshot.phase) item.phase = snapshot.phase
     } else {
       if (!item) item = this.append(entry, { kind: 'tool_activity', item: snapshot })
       else if (item.kind === 'tool_activity') item.item = snapshot
+      if (item.kind === 'tool_activity' && snapshot.status !== 'in_progress') item.endedAt ??= this.now()
     }
     turn.items.set(snapshot.itemId, item!)
     if (!entry.secrets.size || snapshot.status !== 'in_progress') this.writeItem(entry, item!)
@@ -700,6 +711,7 @@ export class SessionService implements MainSessionPort {
       for (const item of turn.items.values()) {
         if (item.kind === 'agent_message') item.complete = true
         if (item.kind === 'tool_activity' && item.item.status === 'in_progress') item.item.status = outcome === 'completed' ? 'completed' : outcome === 'failed' ? 'failed' : 'interrupted'
+        if (item.kind === 'tool_activity') item.endedAt ??= this.now()
         this.writeItem(entry, item)
       }
       this.flushDisk()
@@ -714,7 +726,10 @@ export class SessionService implements MainSessionPort {
       if (outcome === 'failed') {
         const info = error ?? { code: 'provider_error', message: 'CLI 执行失败' }
         this.append(entry, { kind: 'error', summary: info.message, details: JSON.stringify(info, null, 2), retryable: info.retryable !== false })
-      } else this.append(entry, { kind: 'turn_end', outcome, durationMs: Math.max(0, this.now() - turn.at), ...(model ? { model } : {}) })
+      } else {
+        const changes = diff && turnChanges(diff)
+        this.append(entry, { kind: 'turn_end', outcome, durationMs: Math.max(0, this.now() - turn.at), ...(model ? { model } : {}), ...(changes ? { changes } : {}) })
+      }
       entry.turn = undefined
       this.publish(entry)
     })

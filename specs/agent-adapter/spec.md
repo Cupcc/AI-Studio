@@ -297,7 +297,7 @@ CLI 连接配置由桌面主进程保存与注入，Adapter 不读写用户配�
 | `turn.started` | `turnId`、`startedAt`、`queuedInputIds?` | 提交时；CLI 从队列开始回合时带排队输入 |
 | `input.started` / `input.cancelled` | `turnId`、`inputId` / `inputId`、`reason` | 排队输入被 CLI 取用 / 不会执行（第 3.4 节） |
 | `turn.completed` | `outcome`、`durationMs`、`nativeDurationMs?`、`model?`、`stopRequested`、`stop?`、`error?`、`nativeTurnId?` | 每回合一次；`error` 只在 `failed` 时出现 |
-| `item.started` / `item.updated` / `item.completed` | `item`（`kind`、`status`、`text`、`activity`、`command`、`files`、`tool`） | 条目快照 |
+| `item.started` / `item.updated` / `item.completed` | `item`（`kind`、`status`、`text`、`phase?`、`activity`、`command`、`files`、`tool`） | 条目快照。`phase` 只用于 `assistant_message`，是 CLI 自己对说明 / 回答的标注：Codex 的 `commentary`、`final_answer` 原样传递，`partial_answer` 与未标注时不带；Claude 不提供。`files[].diff` 是该文件的补丁文字：Codex 取原生补丁，Claude 由 Edit / MultiEdit / Write 的输入给出被替换的行与写入的行；超过 12,000 字符时截断并带 `diffTruncated`，完整内容以回合 Diff 为准 |
 | `item.delta` | `itemId`、`channel`（`text` / `reasoning` / `output`）、`delta` | 增量 |
 | `input.requested` / `input.resolved` | `request` / `resolution` | 第 3.5 节 |
 | `stop.updated` | `phase`、`detail?` | Stop 进度，可用于“停止中” |

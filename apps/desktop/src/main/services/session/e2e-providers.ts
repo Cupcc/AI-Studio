@@ -47,10 +47,13 @@ export function createE2eProviders(): AgentProvider[] {
       turn.signal.addEventListener('abort', () => clearTimeout(timer), { once: true })
     }
     const DEFAULT_REPLY = '模拟回复已完成。可以继续同一个 Session。'
-    const complete = (run: { turn: TurnContext; sink: SessionSink; files: string[] }, text = DEFAULT_REPLY) => {
+    const NARRATION = '正在处理模拟请求…'
+    // `afterRequest`: the narration ended when the CLI asked the user, so the reply is a message of its own.
+    const complete = (run: { turn: TurnContext; sink: SessionSink; files: string[] }, text = DEFAULT_REPLY, afterRequest = false) => {
       // Lets Playwright assert from the transcript which references actually reached the Provider.
       const reply = text === DEFAULT_REPLY && run.files.length ? `已收到文件引用：${run.files.join(', ')}` : text
-      run.sink.itemCompleted(run.turn.turnId, { itemId: `${run.turn.turnId}:message`, kind: 'assistant_message', status: 'completed', text: reply })
+      if (afterRequest) run.sink.itemCompleted(run.turn.turnId, { itemId: `${run.turn.turnId}:message`, kind: 'assistant_message', status: 'completed', text: NARRATION })
+      run.sink.itemCompleted(run.turn.turnId, { itemId: `${run.turn.turnId}:${afterRequest ? 'reply' : 'message'}`, kind: 'assistant_message', status: 'completed', text: reply })
       run.sink.nativeTurnEnded(run.turn.turnId, { status: 'completed', model: cli === 'codex' ? 'e2e-codex' : 'e2e-claude' })
     }
     const approval: InputRequestInit = {
@@ -114,16 +117,18 @@ export function createE2eProviders(): AgentProvider[] {
             }, 250)
             return
           }
-          sink.itemStarted(turn.turnId, { itemId: `${turn.turnId}:message`, kind: 'assistant_message', status: 'in_progress', text: '' })
+          if (input.text.includes('[e2e:process]')) { process(run, input.text.includes('[e2e:slow]')); return }
+          // Items arrive in the order a CLI produces them: the step first, then the text that follows it.
           sink.itemStarted(turn.turnId, {
             itemId: `${turn.turnId}:tool`, kind: 'command', status: 'in_progress',
             activity: { verb: 'run', label: 'Run echo studio-e2e' }, command: { command: 'echo studio-e2e' }
           })
+          sink.itemStarted(turn.turnId, { itemId: `${turn.turnId}:message`, kind: 'assistant_message', status: 'in_progress', text: '' })
           schedule(turn, () => sink.itemCompleted(turn.turnId, {
             itemId: `${turn.turnId}:tool`, kind: 'command', status: 'completed',
             activity: { verb: 'run', label: 'Run echo studio-e2e' }, command: { command: 'echo studio-e2e', exitCode: 0, output: 'studio-e2e' }
           }), 160)
-          schedule(turn, () => sink.itemDelta(turn.turnId, `${turn.turnId}:message`, 'text', '正在处理模拟请求…'), 80)
+          schedule(turn, () => sink.itemDelta(turn.turnId, `${turn.turnId}:message`, 'text', NARRATION), 80)
           if (input.text.includes('[e2e:slow]')) return
           if (input.text.includes('Current Workbench: 架构') && input.text.includes('重新整理支付模块架构')) {
             const cwd = provider.sessions.find(session => session.controller.activeTurn?.turnId === turn.turnId)?.options.cwd
@@ -169,14 +174,61 @@ export function createE2eProviders(): AgentProvider[] {
         },
         onRespond(record) {
           const run = runs.get(record.request.turnId)
-          if (run && --run.remaining === 0) schedule(run.turn, () => complete(run), 100)
+          if (run && --run.remaining === 0) schedule(run.turn, () => complete(run, DEFAULT_REPLY, true), 100)
         },
         onDeclineWithText(records) {
           const run = records[0] && runs.get(records[0].request.turnId)
-          if (run) { run.remaining = 0; schedule(run.turn, () => complete(run), 100) }
+          if (run) { run.remaining = 0; schedule(run.turn, () => complete(run, DEFAULT_REPLY, true), 100) }
         }
       }
     })
+    /**
+     * `[e2e:process]`: a turn with every kind of step the conversation shows (Shell Spec v02 §6): thinking with and
+     * without published text, lookups, commentary, edits with patches, a failing and a passing command, a tool
+     * call, then the reply and the turn's diff. With `[e2e:slow]` it stays on the failing command while it runs.
+     */
+    function process(run: { turn: TurnContext; sink: SessionSink }, slow: boolean): void {
+      const { turn, sink } = run, id = (name: string) => `${turn.turnId}:${name}`
+      const at = (delay: number, callback: () => void) => schedule(turn, callback, delay)
+      const command = (name: string, start: number, verb: 'read' | 'search' | 'run', line: string, target: string, output: string, exitCode = 0) => {
+        const item = { itemId: id(name), kind: 'command' as const, activity: { verb, label: line, target }, command: { command: line, cwd: '/project' } }
+        at(start, () => sink.itemStarted(turn.turnId, { ...item, status: 'in_progress' }))
+        at(start + 40, () => sink.itemCompleted(turn.turnId, { ...item, status: exitCode ? 'failed' : 'completed', command: { ...item.command, exitCode, output } }))
+      }
+      const phase = (value: 'commentary' | 'final_answer') => cli === 'codex' ? { phase: value } : {}
+      const patches = ['@@ -12 +12 @@\n-export const TEST_TIMEOUT_MS = 8000\n+export const TEST_TIMEOUT_MS = 15000\n', '@@ -30,2 +30,2 @@\n-  vi.advanceTimersByTime(8000)\n-  expect(result.message).toBe(\'连接失败：8 秒内无响应\')\n+  vi.advanceTimersByTime(TEST_TIMEOUT_MS)\n+  expect(result.message).toBe(\'连接失败：15 秒内无响应\')\n']
+      const files = ['src/settings/cli-connection.ts', 'src/settings/cli-connection.test.ts'].map((path, index) => ({ path, change: 'modify' as const, diff: patches[index]! }))
+      const thinking = '**确认超时常量**\n\n超时常量定义在哪里，测试里有没有写死 8 秒。先搜索常量名，再看设置页有没有展示这个数字。'
+      at(0, () => sink.itemStarted(turn.turnId, { itemId: id('think'), kind: 'reasoning', status: 'in_progress', text: '' }))
+      at(40, () => sink.itemDelta(turn.turnId, id('think'), 'reasoning', thinking.slice(0, 20)))
+      at(120, () => sink.itemCompleted(turn.turnId, { itemId: id('think'), kind: 'reasoning', status: 'completed', text: thinking }))
+      command('search', 160, 'search', 'rg -n TEST_TIMEOUT_MS src', 'TEST_TIMEOUT_MS', 'src/settings/cli-connection.ts:12:export const TEST_TIMEOUT_MS = 8000')
+      command('read-1', 220, 'read', "sed -n '1,80p' src/settings/cli-connection.ts", 'src/settings/cli-connection.ts', 'export const TEST_TIMEOUT_MS = 8000')
+      command('read-2', 280, 'read', "sed -n '1,120p' src/settings/cli-connection.test.ts", 'src/settings/cli-connection.test.ts', 'vi.advanceTimersByTime(8000)')
+      at(340, () => sink.itemCompleted(turn.turnId, { itemId: id('commentary'), kind: 'assistant_message', status: 'completed', text: '超时常量只在 `cli-connection.ts` 里定义，测试里另有一处写死的 8000，一起改掉。', ...phase('commentary') }))
+      at(380, () => sink.itemCompleted(turn.turnId, { itemId: id('edit'), kind: 'file_change', status: 'completed', activity: { verb: 'edit', label: files.map(file => file.path).join(', ') }, files }))
+      const failing = { itemId: id('test-1'), kind: 'command' as const, activity: { verb: 'run' as const, label: 'pnpm vitest run settings', target: 'pnpm vitest run settings' }, command: { command: 'pnpm vitest run settings', cwd: '/project' } }
+      at(420, () => sink.itemStarted(turn.turnId, { ...failing, status: 'in_progress' }))
+      at(460, () => sink.itemDelta(turn.turnId, id('test-1'), 'output', ' RUN  settings\n ❯ src/settings/cli-connection.test.ts (4)\n'))
+      if (slow) return
+      at(520, () => sink.itemCompleted(turn.turnId, { ...failing, status: 'failed', command: { ...failing.command, exitCode: 1, output: " FAIL  src/settings/cli-connection.test.ts\n  × 超时后返回可读的错误\n    AssertionError: expected '连接失败：8 秒内无响应' to be '连接失败：15 秒内无响应'\n\n Tests  1 failed | 13 passed (14)" } }))
+      // Thinking the CLI did not publish: it has no row once it is done.
+      at(560, () => sink.itemCompleted(turn.turnId, { itemId: id('think-2'), kind: 'reasoning', status: 'completed', text: '' }))
+      at(600, () => sink.itemCompleted(turn.turnId, { itemId: id('tool'), kind: 'tool_call', status: 'completed', activity: { verb: 'tool', label: 'docs / search' }, tool: { name: 'search', server: 'docs', input: { query: 'connection timeout copy' }, result: [{ title: '错误文案规范', url: 'https://example.com/copy' }] } }))
+      command('test-2', 660, 'run', 'pnpm vitest run settings', 'pnpm vitest run settings', ' Test Files  4 passed (4)\n      Tests  14 passed (14)')
+      at(760, () => {
+        const nativeSessionId = provider.sessions.find(session => session.controller.activeTurn?.turnId === turn.turnId)?.controller.nativeSessionId
+        if (nativeSessionId) {
+          const nativeTurnId = `native:${turn.turnId}`
+          sink.bindNativeTurnId(turn.turnId, nativeTurnId)
+          sink.turnDiffUpdated(turn.turnId, { nativeSessionId, nativeTurnId, source: 'e2e:turn/diff/updated', cliVersion: 'fixture', protocolVersion: '0.161.0', state: 'available',
+            patch: files.map(file => `diff --git a/${file.path} b/${file.path}\n--- a/${file.path}\n+++ b/${file.path}\n${file.diff}`).join(''),
+            files: files.map((file, index) => ({ itemId: `file-${index}`, path: file.path, change: file.change, status: 'completed' as const, patch: file.diff })), truncated: false })
+        }
+        sink.itemCompleted(turn.turnId, { itemId: id('message'), kind: 'assistant_message', status: 'completed', text: '超时改为 15 秒，错误文案改为由同一个常量生成。`pnpm vitest run settings` 14 项通过。', ...phase('final_answer') })
+        sink.nativeTurnEnded(turn.turnId, { status: 'completed', model: cli === 'codex' ? 'e2e-codex' : 'e2e-claude' })
+      })
+    }
     function references(turn: TurnContext, input: UserInput): string[] {
       const cwd = provider.sessions.find(session => session.controller.activeTurn?.turnId === turn.turnId)?.options.cwd
       return [...parseReferencedFiles(input.text), ...(input.attachments ?? []).flatMap(file => file.kind === 'file' && cwd ? [relative(cwd, file.path)] : [])]

@@ -734,8 +734,9 @@ export class SessionController implements AgentSession {
       payload.outcome === 'completed' ? 'completed' : payload.outcome === 'failed' ? 'failed' : 'interrupted';
     for (const item of turn.openItems.values()) {
       const closed: ItemSnapshot = { ...item, status: itemStatus };
+      // The open snapshot is the one the item started with, often with empty text; what streamed since is the body.
       const text = turn.text.get(item.itemId);
-      if (closed.text === undefined && text !== undefined) closed.text = text;
+      if (!closed.text && text !== undefined) closed.text = text;
       this.emit('item.completed', { turnId, item: closed });
     }
     turn.openItems.clear();

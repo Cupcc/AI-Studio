@@ -56,9 +56,21 @@ export function initialSessionTitle(text: string): string {
   return characters.length ? characters.slice(0, 40).join('') + (characters.length > 40 ? '…' : '') : '新对话'
 }
 
-export function formatWorkedFor(durationMs: number): string {
+/** Durations in the transcript: 不到 1 秒, 8 秒, 2 分 18 秒, 1 小时 05 分. */
+export function formatDuration(durationMs: number): string {
   const seconds = Math.max(0, Math.floor(durationMs / 1000))
-  if (seconds < 60) return `${seconds}s`
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`
-  return `${Math.floor(seconds / 3600)}h ${String(Math.floor(seconds / 60) % 60).padStart(2, '0')}m`
+  if (seconds < 1) return '不到 1 秒'
+  if (seconds < 60) return `${seconds} 秒`
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} 分 ${String(seconds % 60).padStart(2, '0')} 秒`
+  return `${Math.floor(seconds / 3600)} 小时 ${String(Math.floor(seconds / 60) % 60).padStart(2, '0')} 分`
+}
+
+/** Added and removed lines of a unified diff or of a bare hunk; file headers do not count. */
+export function countDiffLines(patch: string): { additions: number; deletions: number } {
+  let additions = 0, deletions = 0
+  for (const line of patch.split('\n')) {
+    if (line.startsWith('+') && !line.startsWith('+++')) additions++
+    else if (line.startsWith('-') && !line.startsWith('---')) deletions++
+  }
+  return { additions, deletions }
 }

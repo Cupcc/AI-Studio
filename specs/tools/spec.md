@@ -165,7 +165,7 @@ FR-TOOL-002、FR-STATE-007、FR-INPUT-001；依据 §4.1 / §4.2、04 第 1 节�
 - Adapter 以 `turn.diff.updated` 输出已绑定的原生 Thread / Turn、实际 CLI 版本、协议版本、来源及可用状态。绑定时先发 `client:native-turn-bound` 的 unknown 记录；`turn/diff/updated` 替换聚合快照，完成的 `fileChange` 按 item ID 替换其文件记录，并保留补丁、变更类型、移动路径及原生完成状态。实际 patch 来源只记录收到的通知。Runtime 代次、Thread / Turn 与活动轮次共同过滤重复、迟到及错投事件；完成后冻结。
 - Session 以 `turn_diffs` 迁移（`2026101801`）按 App Turn 保存 JSON，事件 seq 作为修订，校验 Project / Session / App Turn 与原生身份。终态与补丁 final / outcome 在同一事务落盘；旧修订及已终结记录不可覆写。读取只接受该 Project / Session 的 Turn，旧历史没有记录时保持 unknown，不读当前工作区回填。Claude 未实现同等数据时返回 unavailable。
 - 聚合 patch 限 512 KiB；全部单文件 patch 合计另限 512 KiB；最多 2000 条文件记录，单路径限 8192 UTF-8 字节。裁切不拆 Unicode，分别记录聚合、文件及列表截断。先仅对 patch / 路径 / 原因脱敏，再重新施加限额；结构身份和枚举不作文本脱敏。UI 复用只读 PatchView 的 4000 行显示限额，HTML 作为文本展示。
-- Conversation 的完成 / 停止行与失败卡片提供“查看本轮变更”；只由用户点击打开，显示 Session / Turn、outcome、来源与覆盖提示，可选择聚合 / 原生文件记录。unknown、CLI 明确 empty、unavailable、failed 分别展示，不将未知文件数显示成 0；文件补丁不证明写入成功。点击工具栏 Diff 或“项目变更”返回共享工作区范围。
+- Conversation 的轮次页脚与失败卡片提供“查看本轮变更”（页脚上显示为文件数与增删行数，或“本轮变更”）；只由用户点击打开，显示 Session / Turn、outcome、来源与覆盖提示，可选择聚合 / 原生文件记录。unknown、CLI 明确 empty、unavailable、failed 分别展示，不将未知文件数显示成 0；文件补丁不证明写入成功。点击工具栏 Diff 或“项目变更”返回共享工作区范围。
 - 本轮 Diff 只展示收到的原生记录，不覆盖全部工作区修改，不宣称完整 CLI 协议兼容。没有收到 Shell 文件补丁时不能推断为零变更；本地附件输入与转换契约见 [Adapter §3.13](../agent-adapter/spec.md#313-工程工具接缝)，缓存附件的接收须通过相应真实链路验证。
 
 Claude Code 真实能力仍暂缓且不随当前 V1 发布；以上应用 UI 结果是 Main Agent 技术复验，不扩大完整 AC-07、Codex 原生 Stop 或其他协议专项的通过范围。

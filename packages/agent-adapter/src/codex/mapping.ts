@@ -1,4 +1,4 @@
-import type { ApprovalOption, InputResponse, ItemSnapshot, ItemStatus, UserInput } from '../types.js';
+import { itemDiff, type ApprovalOption, type InputResponse, type ItemSnapshot, type ItemStatus, type UserInput } from '../types.js';
 import type { InputRequestInit } from '../core/session-controller.js';
 import type { IncomingRequest } from '../core/json-rpc.js';
 import { adapterError } from '../errors.js';
@@ -39,7 +39,8 @@ export function mapItem(item: ThreadItem, completed: boolean): ItemSnapshot | un
   const base = { itemId: item.id, status: (completed ? 'completed' : 'in_progress') as ItemStatus, nativeType: item.type };
   switch (item.type) {
     case 'userMessage': return undefined;
-    case 'agentMessage': return { ...base, kind: 'assistant_message', text: item.text };
+    case 'agentMessage': return { ...base, kind: 'assistant_message', text: item.text,
+      ...(item.phase === 'commentary' || item.phase === 'final_answer' ? { phase: item.phase } : {}) };
     case 'reasoning': return { ...base, kind: 'reasoning', text: (item.summary.length ? item.summary : item.content).join('\n') };
     case 'plan': return { ...base, kind: 'plan', text: item.text };
     case 'commandExecution': {
@@ -51,7 +52,7 @@ export function mapItem(item: ThreadItem, completed: boolean): ItemSnapshot | un
     }
     case 'fileChange': return { ...base, kind: 'file_change', status: status(item.status, completed),
       activity: { verb: 'edit', label: item.changes.map((change) => change.path).join(', ') },
-      files: item.changes.map((change) => ({ path: change.path, change: change.kind.type === 'update' ? (change.kind.move_path ? 'rename' : 'modify') : change.kind.type })) };
+      files: item.changes.map((change) => ({ path: change.path, change: change.kind.type === 'update' ? (change.kind.move_path ? 'rename' : 'modify') : change.kind.type, ...itemDiff(change.diff ?? '') })) };
     case 'mcpToolCall': return { ...base, kind: 'tool_call', status: status(item.status, completed),
       activity: { verb: 'tool', label: `${item.server} / ${item.tool}` }, tool: { name: item.tool, server: item.server, input: item.arguments, ...(item.result !== null ? { result: item.result } : {}) },
       ...(item.error ? { error: item.error.message } : {}) };
