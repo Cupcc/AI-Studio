@@ -18,7 +18,7 @@ const domains = {
   code: ['files', 'diff', 'vscode-parity'], search: ['files'], 'quick-open': ['files'],
   browser: ['runtime-tools'], terminal: ['runtime-tools'], pty: ['runtime-tools'],
   database: ['project', 'session'], 'shell-env': ['cli-default', 'runtime-tools'],
-  'app-info': ['app'], menu: ['app', 'project']
+  'app-info': ['app', 'settings'], updates: ['settings'], menu: ['app', 'project']
 }
 
 function domainFor(file) {
@@ -64,6 +64,12 @@ export function buildConfigChange(before, after) {
   // other configuration require a new reviewed mapping rather than broad tests.
   const stripCsp = text => text.replace(/^export const CSP_(PRODUCTION|DEVELOPMENT) = \[\n[\s\S]*?^\]\.join\('; '\)/gm, 'CSP_$1')
   if (before !== after && stripCsp(before) === stripCsp(after)) return 'csp'
+  // Build metadata (commit, date) injected into the main process for Settings › 关于 and the About panel.
+  const stripBuildInfo = text => text
+    .replace(/^import \{ execFileSync \} from 'node:child_process'\r?\n/m, '')
+    .replace(/^\/\*\* Shown in Settings › 关于[^\n]*\n^function buildInfo\(\)[\s\S]*?^\}\r?\n\r?\n/m, '')
+    .replace(/^ {4}define: \{ __STUDIO_BUILD__: JSON\.stringify\(buildInfo\(\)\) \},\r?\n/m, '')
+  if (before !== after && stripBuildInfo(before) === stripBuildInfo(after)) return 'build-info'
   return null
 }
 
@@ -200,7 +206,10 @@ export function affectedPlan(files, available, comparison = {}) {
       if (!change) { unknown.push(file); continue }
       types.add('node'); types.add('web')
       if (change === 'workbench-package') addPackageTests()
-      else {
+      else if (change === 'build-info') {
+        requireTests(['src/renderer/src/features/app-info/app-info.test.tsx'])
+        addDomainE2e('app-info')
+      } else {
         requireTests(['src/main/security/policy.test.ts', 'src/main/security/hardening.test.ts'])
         addDomainE2e('workbench')
         e2e.add('e2e/runtime-tools.spec.ts')
@@ -241,6 +250,11 @@ export function affectedPlan(files, available, comparison = {}) {
       specs.forEach(addE2e)
       continue
     }
+    // Images bundled into the renderer (app icon in Settings › 关于); Vitest's graph does not see binaries.
+    if (/^apps\/desktop\/src\/renderer\/src\/assets\/[\w-]+\.(?:png|svg)$/.test(file)) {
+      e2e.add('e2e/app.spec.ts'); e2e.add('e2e/settings.spec.ts')
+      continue
+    }
     if (file.startsWith(`${desktop}src/`) && /\.(?:[cm]?[jt]sx?|css|html|json)$/.test(file)) {
       const relative = file.slice(desktop.length)
       const domain = domainFor(relative)
@@ -271,7 +285,7 @@ export function affectedPlan(files, available, comparison = {}) {
         if (/^src\/(shared\/ipc|main\/ipc)\//.test(relative)) {
           addTests('desktop', test => /src\/(preload|shared\/ipc)\/.*\.test\.ts$/.test(test))
         }
-      } else if (/^src\/(preload\/|shared\/ipc\/|main\/(ipc\/|index\.ts|security\/|window\/|launch-options|shutdown|menu\/)|renderer\/(index\.html|src\/(app\/|lib\/|styles\/|main\.tsx|env\.d\.ts|features\/tools\/[^/]+\.(?:ts|tsx|css)$)))/.test(relative)) {
+      } else if (/^src\/(preload\/|shared\/ipc\/|main\/(ipc\/|index\.ts|build-info\.ts|security\/|window\/|launch-options|shutdown|menu\/)|renderer\/(index\.html|src\/(app\/|lib\/|styles\/|main\.tsx|env\.d\.ts|features\/tools\/[^/]+\.(?:ts|tsx|css)$)))/.test(relative)) {
         // Shared shell/bridge: smoke + layout, not every feature's E2E.
         e2e.add('e2e/app.spec.ts'); e2e.add('e2e/alignment.spec.ts')
         if (!available.includes(file) || /^src\/(preload\/|shared\/ipc\/|main\/(ipc\/|index\.ts))/.test(relative)) {

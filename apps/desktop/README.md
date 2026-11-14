@@ -39,7 +39,8 @@ src/
   main/ipc/index.ts            处理器登记（每功能一行）
   main/ipc/registry.ts         注册、发送方校验、事件发送
   main/services/core.ts        CoreServices：数据库、登录 Shell 环境、广播
-  main/services/<feature>/     功能服务（database、shell-env、pty 冒烟、project、session、settings、project-view、terminal、browser、files、diff 已有）
+  main/services/<feature>/     功能服务（database、shell-env、pty 冒烟、project、session、settings、updates、project-view、terminal、browser、files、diff 已有）
+  main/build-info.ts           构建时注入的提交与日期（electron.vite.config.ts 的 define）
   main/security/               app:// 协议、导航与权限拦截
   main/window/                 主窗口（Shell Spec v01 第 1、2 节）
   main/smoke/                  --studio-smoke-output 冒烟模式
@@ -79,6 +80,7 @@ scripts/                       postinstall、afterPack、打包冒烟脚本
 - PTY：只在主进程 `services/` 中创建；node-pty 需懒加载并处理加载失败（参考 `services/pty/pty-smoke.ts`）。
 - 工程工具遵循 [工具规格](../../specs/tools/spec.md) 与 [DEC-10](<../../docs/07. Decisions.md#dec-10-工程工具实现原则>)：Terminal 服务持有 PTY、headless xterm 屏幕与序号输出；Browser 服务持有隔离 WebContentsView，Renderer 隐藏 / 卸载只解除显示。两工具分别登记 typed IPC；Project / 退出由独立 `MainToolPort` 清理，Session Stop 不触及用户 PTY。显示 ACK / 屏幕缓存、显隐与关闭细节见 Tools spec §5.1；当前 Browser 共享分区、文件管理、Search 与 Terminal / Diff 扩展见 §5.4；Files / 项目 Diff 已接入有界主进程服务与按需 Monaco 查看器，限制及文件引用转换见 Tools spec §5.2，Files 编辑与保存见 §5.5；本轮 Diff 通过 Session 保存的 `turn_diffs` 记录与 `session:get-turn-diff` 展示历史，不读取工作区重建；迁移、来源、限额与原生覆盖见 Tools spec §5.3。`@xterm/*` 版本精确锁定，屏幕检查点依赖其私有结构（`shared/tools/terminal.ts`），升级后须重跑 ANSI 差分验证。
 - 启动参数：`--studio-user-data-dir=<abs>` 用于测试隔离数据；`--studio-smoke-output=<abs>` 运行冒烟并退出。
+- 软件更新（FR-SET-003；[settings spec](../../specs/settings/spec.md#fr-set-003-关于与软件更新)）：`main/services/updates/` 从 GitHub Releases 检查、下载并校验新版本，退出后由 `installer.ts` 的脚本替换应用包。只有打包版自动检查和自行安装；开发版可手动检查，`STUDIO_UPDATE_FEED_URL` 可把检查指向本地夹具（`e2e/settings.spec.ts`，打包版忽略）。发布物要求见[发布准备](../../scripts/README.md#github-release-发布准备)。
 - Adapter 为 ESM workspace 包；Electron 主进程构建当前为 CJS，包的 `exports` 同时提供 `import` 与 `default` 条件，供支持同步 ESM require 的 Node / Electron 加载。新增公共子路径需一并保留这两个条件，E2E 启动门禁覆盖实际构建产物。
 - Session：`sessionCore` 迁移登记后创建 `createSessionFeature`，注册 Project 的主进程 SessionPort；Renderer 在 `createRoot` 前一次调用 `installSessionIntegration()`。退出时 QuitFlow 依次 Stop 全部回合、经 `MainToolPort` 清理全部工程工具资源、`releaseAllRuntimes` 释放全部空闲 / 已退役 Session Runtime（批准前可逆，任一失败保持应用打开并可重试），再完成草稿 / 壳层 flush 并批准退出；Renderer 确认路径先 flush，原生确认路径先 Stop 再 flush。最终统一等待功能与 IPC 清理后关闭数据库。
 - 自动化：未打包且 `STUDIO_E2E_PROVIDERS=1` 时使用模拟 Provider，打包产物忽略该开关。按 DEC-19 的 2026-11-08 后续确认，当前默认注册 Codex 与 Claude Code，开发与打包共用此列表，不再使用 `STUDIO_ENABLE_CLAUDE_CODE` 开关；Runtime 均交给宿主归属登记。新安装 / 连接路径的真实与打包验证状态见 [CLI 安装任务](../../.agents/archive/tasks/T20261108-cli-install/task.md)。普通 E2E 截图写 `.runtime/desktop-e2e/`；`STUDIO_E2E_EVIDENCE_DIR` 仅用于明确生成验收证据。需要真实窗口焦点的多份 Electron 测试须串行运行。用例一旦打开过 Terminal，结束应用须用 `e2e/quit.ts` 的 `closeTestApp` 处理合并退出确认。 启动应用统一用 `e2e/harness.ts` 的 `launchElectron`，CI 上测试失败时据此保存 trace（见 [GitHub Actions CI](../../scripts/README.md#github-actions-ci)）。工作台页面在独立的渲染进程中，刚加载时第一次点击可能落到宿主的 iframe 元素上，首次点击前先用同文件的 `hoverInPage` 等页面收到指针。

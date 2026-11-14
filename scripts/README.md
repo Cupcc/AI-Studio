@@ -336,6 +336,18 @@ Claude Code 已确定不随当前 V1 发布（DEC-19）；后续真实验收和�
 
 产物生成和检查结果不表示已经发布，也不表示产物已签名或公证。
 
+应用的自动更新（[FR-SET-003](<../docs/02. Functional Requirements.md#fr-set-003-关于与软件更新>)、DEC-36）读取 GitHub 的最新 Release，发布时须满足：
+
+- tag 为 `v<版本>`，与 `apps/desktop/package.json` 的 `version` 一致；不标为 draft 或 pre-release，否则不会被检查到。
+- 资产名为 `AI-Developer-Studio-<版本>-mac-arm64.zip`，用 `ditto` 打包以保留框架内的符号链接，zip 内只有一个 `AI Developer Studio.app`：
+
+  ```sh
+  cd apps/desktop/dist/mac-arm64
+  ditto -c -k --sequesterRsrc --keepParent "AI Developer Studio.app" "AI-Developer-Studio-<版本>-mac-arm64.zip"
+  ```
+
+- GitHub 会为上传的资产记录 SHA-256，应用据此校验；说明中仍写一行 `SHA-256: \`<十六进制>\``，供手动下载核对，也是 GitHub 未提供校验值时的后备。
+
 生成产物时的验证命令：
 
 ```sh

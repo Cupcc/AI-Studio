@@ -4,6 +4,7 @@ import type { StudioApi } from '@shared/ipc/contracts'
 import { appearanceOf, type AppearanceState, type ColorMode, type GlassColor } from '@shared/ipc/settings'
 import { SettingsDialog } from './SettingsDialog'
 import { installSettingsIntegration, SettingsEntry } from './integration'
+import { useAbout } from '../app-info/store'
 import { useSettings } from './store'
 import { shellIntegration } from '../project/integration'
 import { useSessions } from '../session/store'
@@ -23,6 +24,8 @@ beforeEach(() => {
     getAppearance: async () => state, setGlassColor, setMode,
     onAppearanceChanged: (cb: typeof changed) => { changed = cb; return () => { changed = null } },
     onOpenRequested: (cb: typeof openRequested) => { openRequested = cb; return () => { openRequested = null } }
+  }, app: { getInfo: async () => { throw new Error('not needed') } }, updates: {
+    getState: async () => null, onStateChanged: () => () => {}, onAboutRequested: () => () => {}
   } } as unknown as StudioApi })
 })
 afterEach(() => { cleanup() })
@@ -258,6 +261,16 @@ describe('settings · FR-SET-001 / FR-SET-002 · AC-08', () => {
     render(<SettingsEntry />)
     fireEvent.click(screen.getByRole('button', { name: '设置' }))
     expect(useSettings.getState().dialogOpen).toBe(true)
+  })
+
+  it('badges the entry when an update is ready and then opens 关于 (FR-SET-003)', () => {
+    const release = { version: '1.2.0', name: '1.2.0', notes: '', publishedAt: null, url: '' }
+    useAbout.setState({ update: { phase: 'ready', release, progress: null, error: null, checkedAt: 1, automatic: true, blocked: null } })
+    try {
+      render(<SettingsEntry />)
+      fireEvent.click(screen.getByRole('button', { name: '设置（可更新）' }))
+      expect(useSettings.getState()).toMatchObject({ dialogOpen: true, category: 'about' })
+    } finally { useAbout.setState({ update: null }) }
   })
 
   it('shows the Appearance category with mode and glass background radio groups, no theme choice; the current mode is checked and focused', async () => {

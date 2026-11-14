@@ -9,7 +9,8 @@ import { Icon } from '../../app/Icon'
 import { cliName, useSessions } from '../session/store'
 import { sessionApi } from '../session/api'
 import { ipcErrorText } from '../../lib/ipc-error'
-import { useSettings } from './store'
+import { useSettings, type SettingsCategory } from './store'
+import { AboutPanel } from '../app-info/AboutPanel'
 
 /** Arrow keys move the checked option of a radio group, wrapping at the ends. */
 function arrowStep(event: KeyboardEvent): number {
@@ -150,7 +151,7 @@ export function SettingsDialog() {
   const { appearance, saveFailed, closeDialog, setGlassColor, setMode } = useSettings()
   const dialog = useRef<HTMLDivElement>(null)
   const category = useSettings(state => state.category)
-  const setCategory = (category: 'appearance' | 'cli') => useSettings.setState({ category })
+  const setCategory = (category: SettingsCategory) => useSettings.setState({ category })
   const swatches = useRef<Partial<Record<GlassColor, HTMLButtonElement | null>>>({})
   const modes = useRef<Partial<Record<ColorMode, HTMLButtonElement | null>>>({})
   useEffect(() => {
@@ -180,8 +181,9 @@ export function SettingsDialog() {
         <nav className="settings-dialog__categories" aria-label={T.categories}>
           <button className={`settings-category ${category === 'appearance' ? 'is-selected' : ''}`} aria-current={category === 'appearance' ? 'page' : undefined} onClick={() => setCategory('appearance')}><Icon name="appearance" /><span>{T.appearance}</span></button>
           <button className={`settings-category ${category === 'cli' ? 'is-selected' : ''}`} aria-current={category === 'cli' ? 'page' : undefined} onClick={() => setCategory('cli')}><Icon name="terminal" /><span>{T.cli}</span></button>
+          <button className={`settings-category ${category === 'about' ? 'is-selected' : ''}`} aria-current={category === 'about' ? 'page' : undefined} onClick={() => setCategory('about')}><Icon name="info" /><span>{T.about}</span></button>
         </nav>
-        {category === 'cli' ? <CliSettings /> : <section className="settings-dialog__content" aria-label={T.appearance}>
+        {category === 'about' ? <AboutPanel /> : category === 'cli' ? <CliSettings /> : <section className="settings-dialog__content" aria-label={T.appearance}>
           <h3 id="settings-mode">{T.mode}</h3>
           <div className="mode-options" role="radiogroup" aria-labelledby="settings-mode">
             {COLOR_MODES.map((mode, index) => {

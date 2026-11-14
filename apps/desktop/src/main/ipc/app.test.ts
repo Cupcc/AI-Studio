@@ -9,7 +9,9 @@ const info: AppInfo = {
   isPackaged: false,
   platform: 'darwin',
   arch: 'arm64',
-  versions: { electron: '44.4.5', chrome: '152', node: '24.21.0' }
+  versions: { electron: '44.4.5', chrome: '152', node: '24.21.0' },
+  osVersion: '26.6',
+  build: { commit: null, date: null }
 }
 const ctx = { senderUrl: 'app://studio/index.html', senderId: 1 }
 

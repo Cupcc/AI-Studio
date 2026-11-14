@@ -3,10 +3,11 @@ import { projectContract } from '@shared/ipc/project'
 import { S } from '@shared/project/strings'
 import { settingsContract } from '@shared/ipc/settings'
 import { SETTINGS_STRINGS } from '@shared/settings/strings'
+import { updatesContract } from '@shared/ipc/updates'
 import type { MenuCommand } from '@shared/project/types'
 import { emit } from '../ipc/registry'
 
-export function installProjectMenu(): void {
+export function installProjectMenu(options: { checkForUpdates(): void }): void {
   const command = (label: string, accelerator: string, command: MenuCommand): MenuItemConstructorOptions => ({
     label, accelerator, click: () => {
       const win = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
@@ -22,8 +23,16 @@ export function installProjectMenu(): void {
       win.show(); emit(win.webContents, settingsContract.events.openRequested, undefined)
     }
   }
+  // Opens Settings › 关于, where the check's progress and result are shown.
+  const checkForUpdates: MenuItemConstructorOptions = {
+    label: SETTINGS_STRINGS.checkForUpdates, click: () => {
+      const win = BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0]
+      if (win) { win.show(); emit(win.webContents, updatesContract.events.aboutRequested, undefined) }
+      options.checkForUpdates()
+    }
+  }
   const template: MenuItemConstructorOptions[] = [
-    ...(process.platform === 'darwin' ? [{ label: app.name, submenu: [{ role: 'about' }, { type: 'separator' }, settings, { type: 'separator' }, { role: 'services' }, { type: 'separator' }, { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' }, { type: 'separator' }, { role: 'quit' }] } as MenuItemConstructorOptions] : []),
+    ...(process.platform === 'darwin' ? [{ label: app.name, submenu: [{ role: 'about', label: `${SETTINGS_STRINGS.aboutMenu} ${app.name}` }, checkForUpdates, { type: 'separator' }, settings, { type: 'separator' }, { role: 'services' }, { type: 'separator' }, { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' }, { type: 'separator' }, { role: 'quit' }] } as MenuItemConstructorOptions] : []),
     { label: S.menu.file, submenu: [command(S.menu.newTab, 'CommandOrControl+T', 'newTab'), command(S.menu.openDirectory, 'CommandOrControl+O', 'openDirectory'), { type: 'separator' }, command(S.menu.closeTab, 'CommandOrControl+W', 'closeTab'), { role: 'close', accelerator: 'CommandOrControl+Shift+W' }] },
     { label: S.menu.edit, submenu: [{ role: 'undo' }, { role: 'redo' }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] },
     { label: S.menu.view, submenu: [

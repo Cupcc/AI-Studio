@@ -32,6 +32,8 @@ const available = [
   `${d}src/renderer/src/features/session/session.test.tsx`,
   `${d}src/renderer/src/features/tools/terminal-panel.test.tsx`,
   `${d}src/renderer/src/features/settings/settings.test.tsx`,
+  `${d}src/renderer/src/features/app-info/app-info.test.tsx`,
+  `${d}src/main/services/updates/update-service.test.ts`,
   ...['files', 'session', 'cli-default', 'composer', 'app', 'alignment', 'runtime-tools', 'settings',
     'project', 'project-view', 'workbench', 'product-selection', 'diff', 'turn-diff', 'vscode-parity', 'claude-effort'].map(name => `${d}e2e/${name}.spec.ts`),
   `${a}src/codex/driver.ts`, `${a}test/codex/driver.test.ts`,
@@ -292,6 +294,24 @@ test('classifies exact package wiring and CSP changes, rejects unrelated or mixe
   expect(buildConfigChange(config, config)).toBeNull()
   expect(buildConfigChange(withoutPackage, config.replace('plugins: [react()', 'plugins: [unknown()'))).toBeNull()
   expect(buildConfigChange(withoutPackage, cspChange)).toBeNull()
+})
+
+test('classifies the build metadata define alone and selects the About checks', () => {
+  const withoutBuildInfo = config.replace("import { execFileSync } from 'node:child_process'\n", '')
+    .replace(/^\/\*\* Shown in Settings › 关于[^\n]*\nfunction buildInfo\(\)[\s\S]*?^\}\n\n/m, '')
+    .replace("    define: { __STUDIO_BUILD__: JSON.stringify(buildInfo()) },\n", '')
+  expect(withoutBuildInfo).not.toContain('buildInfo')
+  expect(buildConfigChange(withoutBuildInfo, config)).toBe('build-info')
+  expect(buildConfigChange(withoutBuildInfo, config.replace('JSON.stringify(buildInfo())', 'JSON.stringify({})'))).toBeNull()
+  expect(buildConfigChange(withoutBuildInfo, cspChange)).toBeNull()
+})
+
+test('update service, About assets and build metadata select the settings and app checks', () => {
+  expect(plan([`${d}src/main/services/updates/installer.ts`])).toMatchObject({ e2e: ['e2e/settings.spec.ts'], unknown: [] })
+  expect(plan([`${d}src/renderer/src/assets/app-icon.png`])).toMatchObject({ commands: [], e2e: ['e2e/app.spec.ts', 'e2e/settings.spec.ts'], unknown: [] })
+  const buildInfo = plan([`${d}src/main/build-info.ts`])
+  expect(buildInfo).toMatchObject({ e2e: ['e2e/alignment.spec.ts', 'e2e/app.spec.ts'], unknown: [] })
+  expect(commandText(buildInfo)).toContain('tsconfig.node.json')
 })
 
 test('config scope reads Git index, committed snapshots and working tree independently', () => {

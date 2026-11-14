@@ -13,6 +13,7 @@ import { createDiffFeature } from './diff'
 import { createMenuFeature } from './menu'
 import { createSearchFeature } from './search'
 import { createWorkbenchFeature } from './workbench'
+import { createUpdatesFeature } from './updates'
 import { projectShellFor } from '../services/project'
 import { terminalFor } from '../services/terminal'
 import { browserFor } from '../services/browser'
@@ -59,7 +60,8 @@ export function createFeatures(core: CoreServices, sessionOptions: SessionFeatur
     createFilesFeature(core),
     createDiffFeature(core),
     createMenuFeature(),
-    createSearchFeature(core)
+    createSearchFeature(core),
+    createUpdatesFeature(core)
   ]
 }
 

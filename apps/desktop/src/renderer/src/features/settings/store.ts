@@ -17,15 +17,17 @@ export function applyDocumentTheme(appearance: AppearanceState): void {
   root.glassColor = appearance.glassColor
 }
 
+export type SettingsCategory = 'appearance' | 'cli' | 'about'
+
 export interface SettingsState {
   appearance: AppearanceState
   dialogOpen: boolean
-  category: 'appearance' | 'cli'
+  category: SettingsCategory
   saveFailed: boolean
   /** Reads the saved appearance; the first render waits for it so it never shows the other look. */
   load(): Promise<void>
   watchEvents(): () => void
-  openDialog(category?: 'appearance' | 'cli'): void
+  openDialog(category?: SettingsCategory): void
   closeDialog(): void
   setGlassColor(color: GlassColor): Promise<void>
   setMode(mode: ColorMode): Promise<void>

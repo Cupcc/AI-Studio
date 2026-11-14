@@ -93,3 +93,6 @@
 .cli-connection__native-icon { display: inline-flex; padding: var(--space-3); margin-bottom: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-card); color: var(--color-text-2); }
 .cli-connection__native h4 { font-size: var(--font-size-body); }
 .cli-connection__native p { color: var(--color-text-muted); font-size: var(--font-size-sm); line-height: 1.8; }
+
+/* Update badge on the navigation entry (FR-SET-003) */
+.settings-entry__badge { margin-left: auto; padding: 1px var(--space-1-5); border-radius: var(--radius-xs); background: var(--color-primary); color: var(--color-on-primary); font-size: var(--font-size-xs); font-weight: 500; line-height: 1.5; }

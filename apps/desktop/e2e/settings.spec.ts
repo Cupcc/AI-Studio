@@ -1,4 +1,6 @@
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { createServer } from 'node:http'
+import type { AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test'
@@ -257,4 +259,56 @@ test('FR-SET-002 · AC-08: the colour mode follows the system by default; light 
   await expect.poll(windowBackground).toBe(SOLID_LIGHT)
   if (process.platform === 'darwin') await expect.poll(dockIconName).toBe('icon.png')
   expect(await app.evaluate(({ nativeTheme }) => nativeTheme.themeSource)).toBe('light')
+})
+
+// FR-SET-003: Settings › 关于 and updates. A loopback fixture stands in for GitHub's "latest release" API
+// (STUDIO_UPDATE_FEED_URL, honoured only by development builds); nothing leaves the machine. A development build never
+// installs, so the newer release is offered as a download link.
+test('FR-SET-003: 关于 shows the version and build; 检查更新 reports a newer release with its notes', async () => {
+  const version = JSON.parse(readFileSync(join(appDir, 'package.json'), 'utf8')).version as string
+  let latest = version
+  const feed = createServer((_request, response) => {
+    response.setHeader('Content-Type', 'application/json')
+    response.end(JSON.stringify({
+      tag_name: `v${latest}`, name: `AI Developer Studio ${latest}`, body: `## ${latest}\n\n- 更快的启动`, draft: false, prerelease: false,
+      html_url: `https://github.com/Tiancheng-ai/AI-Studio/releases/tag/v${latest}`,
+      assets: [{ name: `AI-Developer-Studio-${latest}-mac-arm64.zip`, size: 1, digest: `sha256:${'a'.repeat(64)}`, browser_download_url: 'https://example.invalid/app.zip' }]
+    }))
+  })
+  await new Promise<void>(resolve => feed.listen(0, '127.0.0.1', resolve))
+  process.env.STUDIO_UPDATE_FEED_URL = `http://127.0.0.1:${(feed.address() as AddressInfo).port}/latest`
+  try {
+    await relaunch()
+    await openProject('About Project')
+    await app.evaluate(({ Menu }) => Menu.getApplicationMenu()!.items[0]!.submenu!.items.find((item) => item.label === '检查更新…')!.click())
+    await expect(dialog().getByRole('button', { name: '关于', exact: true })).toHaveAttribute('aria-current', 'page')
+    await expect(dialog().getByTestId('app-version')).toContainText(`版本 ${version}`)
+    await expect(dialog().getByText('已是最新版本')).toBeVisible()
+    await expect(dialog().getByTestId('app-info')).toContainText('Electron')
+    await expect(dialog().getByRole('link', { name: '本版本更新说明' })).toHaveAttribute('href', `https://github.com/Tiancheng-ai/AI-Studio/releases/tag/v${version}`)
+    await snap('about-current-1280')
+
+    const [major, minor] = version.split('.').map(Number)
+    latest = `${major}.${minor! + 1}.0`
+    await dialog().getByRole('button', { name: '检查更新', exact: true }).click()
+    await expect(dialog().getByText(`发现新版本 ${latest}`)).toBeVisible()
+    await expect(dialog().getByText(/开发版本不会自行安装更新/)).toBeVisible()
+    await expect(dialog().getByRole('link', { name: '前往下载' })).toHaveAttribute('href', `https://github.com/Tiancheng-ai/AI-Studio/releases/tag/v${latest}`)
+    await dialog().getByText(`更新说明 · AI Developer Studio ${latest}`).click()
+    await expect(dialog().getByText('更快的启动')).toBeVisible()
+    await snap('about-available-1280')
+
+    // The choice persists; the navigation entry carries the badge and reopens 关于.
+    await dialog().getByRole('checkbox', { name: /自动检查并下载更新/ }).uncheck()
+    await page.keyboard.press('Escape')
+    await page.locator('.navigation__footer').getByRole('button', { name: '设置（新版本）' }).click()
+    await expect(dialog().getByRole('button', { name: '关于', exact: true })).toHaveAttribute('aria-current', 'page')
+    await relaunch()
+    await menuSettings()
+    await dialog().getByRole('button', { name: '关于', exact: true }).click()
+    await expect(dialog().getByRole('checkbox', { name: /自动检查并下载更新/ })).not.toBeChecked()
+  } finally {
+    delete process.env.STUDIO_UPDATE_FEED_URL
+    feed.close()
+  }
 })

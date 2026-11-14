@@ -14,6 +14,8 @@ export interface QuitFlowDeps {
   flushState?(): Promise<void>
   stopTimeoutMs?: number
   onError?(error: unknown): void
+  /** The user cancelled a quit that had been asked about. */
+  onCancel?(): void
 }
 
 export interface QuitFlow {
@@ -132,6 +134,7 @@ export function createQuitFlow(deps: QuitFlowDeps): QuitFlow {
       if (state === 'asking') {
         state = 'idle'; pending = null
         if (!cleanup) deps.getPort().cancelQuit?.()
+        deps.onCancel?.()
       }
     }
   }

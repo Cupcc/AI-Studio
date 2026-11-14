@@ -9,6 +9,10 @@ export interface AppInfo {
   platform: string
   arch: string
   versions: { electron: string; chrome: string; node: string }
+  /** macOS version, e.g. "26.6". */
+  osVersion: string
+  /** Source commit and time of the build; null when they were not recorded (tests, builds outside Git). */
+  build: { commit: string | null; date: string | null }
 }
 
 export interface PingRequest {

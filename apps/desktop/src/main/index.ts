@@ -26,6 +26,8 @@ import { createMainWindow } from './window/main-window'
 import { createShutdownHandler } from './shutdown'
 import { createE2eProviders } from './services/session/e2e-providers'
 import { settingsFor } from './services/settings'
+import { updatesFor } from './services/updates'
+import { BUILD_INFO } from './build-info'
 import { installWindowAppearance } from './window/appearance'
 import { terminalFor } from './services/terminal'
 import { diffFor } from './services/diff'
@@ -53,7 +55,9 @@ function appInfo(): AppInfo {
       electron: process.versions.electron,
       chrome: process.versions.chrome,
       node: process.versions.node
-    }
+    },
+    osVersion: process.getSystemVersion(),
+    build: BUILD_INFO
   }
 }
 
@@ -138,10 +142,15 @@ async function startRuntime(): Promise<void> {
           return result.response === 1
         } finally { browserFor(core!).setOverlayBlocked(false) }
       },
-      onError: (error) => console.error('[project] quit failed', error)
+      onError: (error) => console.error('[project] quit failed', error),
+      // A cancelled "重启并更新" must not relaunch on a later ordinary quit (FR-SET-003 §4).
+      onCancel: () => updatesFor(core!).cancelRestart()
     })
     app.on('before-quit', shell.quitFlow.onBeforeQuit)
-    installProjectMenu()
+    const updates = updatesFor(core)
+    installProjectMenu({ checkForUpdates: () => void updates.check() })
+    // Automatic checks only in packaged builds: development and E2E runs stay offline unless asked.
+    void updates.start({ automaticChecks: app.isPackaged })
   }
 }
 
@@ -175,6 +184,13 @@ async function runSmokeAndQuit(output: string): Promise<void> {
 }
 
 registerAppScheme()
+// Native About panel (app menu): version plus the build it came from.
+app.setAboutPanelOptions({
+  applicationName: app.getName(),
+  applicationVersion: app.getVersion(),
+  version: [BUILD_INFO.commit, BUILD_INFO.date?.slice(0, 10)].filter(Boolean).join(' · '),
+  copyright: `Copyright © ${new Date(BUILD_INFO.date ?? Date.now()).getFullYear()} AI Developer Studio`
+})
 
 if (launch.smokeOutput) {
   const output = launch.smokeOutput
@@ -214,7 +230,7 @@ if (launch.smokeOutput) {
   app.on('will-quit', createShutdownHandler({
     disposeFeatures: async () => { await disposeIpc?.() },
     disposeCore: () => core?.dispose(),
-    quit: () => app.quit(),
+    quit: () => { if (core) updatesFor(core).applyOnQuit(); app.quit() },
     onError: (error) => {
       console.error('[main] dispose failed:', error)
       dialog.showErrorBox('退出清理失败', '进程退出尚未确认。请再次退出以重试。\n' + (error instanceof Error ? error.message : String(error)))

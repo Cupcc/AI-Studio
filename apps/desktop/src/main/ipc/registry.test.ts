@@ -16,7 +16,7 @@ import {
 } from './registry'
 import { expectRecord, expectString } from './validate'
 
-vi.mock('electron', () => ({ app: { getPath: () => '/tmp/studio-registry-no-attachments', getAppPath: () => process.cwd() } }))
+vi.mock('electron', () => ({ app: { getPath: () => '/tmp/studio-registry-no-attachments', getAppPath: () => process.cwd(), getVersion: () => '0.0.0', isPackaged: false } }))
 
 type Handler = (event: IpcInvokeEventLike, ...args: unknown[]) => unknown
 

@@ -1,0 +1,38 @@
+/* Settings › 关于 (FR-SET-003). Lives inside .settings-dialog__content; headings reuse the settings subheading. */
+.about__product { display: flex; align-items: center; gap: var(--space-4); }
+.about__icon { flex: 0 0 64px; line-height: 0; }
+.about__icon img { width: 64px; height: 64px; }
+.about__identity { flex: 1; min-width: 0; }
+.settings-dialog__content .about__identity h3 { margin: 0; font-size: var(--font-size-heading); font-weight: 600; }
+.about__version { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-1) 0 0; font-size: var(--font-size-md); color: var(--color-text-2); font-variant-numeric: tabular-nums; }
+.about__tag { padding: 0 var(--space-1-5); border-radius: var(--radius-xs); background: var(--color-selected); font-size: var(--font-size-xs); color: var(--color-text-2); }
+.about__build { margin: 2px 0 0; font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+.about__copy { flex-shrink: 0; align-self: flex-start; }
+
+.about-update { padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border-soft); border-radius: var(--radius-md); background: var(--color-control); }
+.about-update__row { display: flex; align-items: center; gap: var(--space-3); }
+.about-update__text { flex: 1; min-width: 0; }
+.about-update__title { display: flex; align-items: center; gap: var(--space-1-5); margin: 0; font-size: var(--font-size-md); font-weight: 500; }
+.about-update__detail { margin: 2px 0 0; font-size: var(--font-size-sm); line-height: 1.5; color: var(--color-text-muted); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.about-update__actions { display: flex; flex-shrink: 0; gap: var(--space-2); }
+.about-update__actions a { text-decoration: none; color: inherit; }
+.about-update__progress { height: 4px; margin-top: var(--space-2-5); overflow: hidden; border-radius: 2px; background: var(--color-selected); }
+.about-update__progress span { display: block; height: 100%; background: var(--color-primary); transition: width .2s ease; }
+.about-update .error-message { margin: var(--space-2) 0 0; overflow-wrap: anywhere; }
+.about-update__notes { margin-top: var(--space-2-5); padding-top: var(--space-2-5); border-top: 1px solid var(--color-border-soft); font-size: var(--font-size-sm); }
+.about-update__notes summary { cursor: default; color: var(--color-text-2); }
+.about-update__notes-body { max-height: 220px; margin-top: var(--space-2); overflow-y: auto; font-size: var(--font-size-sm); }
+
+.about__toggle { display: flex; align-items: flex-start; gap: var(--space-2-5); margin-top: var(--space-3); font-size: var(--font-size-md); }
+.about__toggle input { margin: 3px 0 0; }
+.about__toggle > span { display: flex; flex-direction: column; gap: 2px; }
+.about__toggle small { font-size: var(--font-size-sm); color: var(--color-text-muted); line-height: 1.5; }
+
+.about__details { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-1-5) var(--space-5); margin: 0; font-size: var(--font-size-sm); }
+.about__details dt { color: var(--color-text-muted); }
+.about__details dd { margin: 0; font-family: var(--font-mono); font-size: var(--font-size-xs); line-height: 1.7; }
+
+.about__links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); margin: 0; padding: 0; list-style: none; font-size: var(--font-size-sm); }
+.about__links a { color: var(--color-link); text-decoration: none; }
+.about__links a:hover { text-decoration: underline; text-decoration-color: var(--color-link-underline); }
+.about__copyright { margin: var(--space-6) 0 0; font-size: var(--font-size-xs); color: var(--color-text-muted); }

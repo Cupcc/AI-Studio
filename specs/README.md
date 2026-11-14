@@ -48,6 +48,6 @@
 | `project-view/` | FR-VIEW-001～FR-VIEW-008；预设网页包使用的 Knowledge 与 Definition 数据 | [spec.md](project-view/spec.md) |
 | `workbench/` | FR-VIEW-002、FR-WB-001～FR-WB-008；统一工作台宿主、统一网页插件格式 | [spec.md](workbench/spec.md) |
 | `tools/` | FR-TOOL-001～FR-TOOL-005 | [spec.md](tools/spec.md) |
-| `settings/` | FR-SET-001～FR-SET-002 | [spec.md](settings/spec.md) |
+| `settings/` | FR-SET-001～FR-SET-003 | [spec.md](settings/spec.md) |
 | `agent-todos/` | FR-TODO-001～FR-TODO-009；增量范围 / 阶段见 [02 §8](<../docs/02. Functional Requirements.md#8-后续阶段agent-to-dos>)与[路线图 §4.1](<../docs/06. Development Roadmap.md#41-agent-to-dos-分阶段建设规划>) | [spec.md](agent-todos/spec.md) |
 | `agent-adapter/` | 无 FR 前缀；承接 [04. Technical Requirements](<../docs/04. Technical Requirements.md>) 第 4、5 节与 [CLI Integration Preflight](../.agents/archive/tasks/T20261008-cli-preflight/report.md) | [spec.md](agent-adapter/spec.md) |

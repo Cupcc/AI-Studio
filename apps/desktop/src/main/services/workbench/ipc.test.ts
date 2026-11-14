@@ -20,7 +20,7 @@ beforeEach(() => {
   directory = mkdtempSync(join(tmpdir(), 'workbench-ipc-'))
   const path = join(directory, 'project'); mkdirSync(path)
   electron.userData = join(directory, 'data')
-  core = createCoreServices({ userDataDir: join(directory, 'data'), broadcast, appInfo: () => ({ name: 'Test', version: '1', isPackaged: false, platform: process.platform, arch: process.arch, versions: { electron: '', chrome: '', node: process.versions.node } }) })
+  core = createCoreServices({ userDataDir: join(directory, 'data'), broadcast, appInfo: () => ({ name: 'Test', version: '1', isPackaged: false, platform: process.platform, arch: process.arch, versions: { electron: '', chrome: '', node: process.versions.node }, osVersion: '', build: { commit: null, date: null } }) })
   const opened = projectShellFor(core).projects.openPath(path)
   if (!opened.ok) throw new Error('fixture failed')
   projectId = opened.project.id

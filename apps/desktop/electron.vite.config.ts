@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'electron-vite'
@@ -7,6 +8,13 @@ import { buildWorkbenchPackages } from './scripts/build-workbench-packages.mjs'
 
 buildFilesHelper()
 buildWorkbenchPackages()
+
+/** Shown in Settings › 关于 and the native About panel, so a report names the exact build. */
+function buildInfo(): { commit: string | null; date: string } {
+  let commit: string | null = null
+  try { commit = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null } catch { /* not a Git checkout */ }
+  return { commit, date: new Date().toISOString() }
+}
 
 const shared = fileURLToPath(new URL('./src/shared', import.meta.url))
 const renderer = fileURLToPath(new URL('./src/renderer/src', import.meta.url))
@@ -66,6 +74,7 @@ function contentSecurityPolicy(): Plugin {
 export default defineConfig({
   main: {
     resolve: { alias: { '@shared': shared } },
+    define: { __STUDIO_BUILD__: JSON.stringify(buildInfo()) },
     build: {
       rollupOptions: {
         input: {
