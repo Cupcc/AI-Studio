@@ -75,6 +75,22 @@ function configChange(file, comparison) {
   } catch { return null }
 }
 
+// A release bump edits only the version field; app.spec.ts reads it through app.getVersion().
+export function packageVersionOnlyChange(before, after) {
+  try {
+    const prior = JSON.parse(before), next = JSON.parse(after)
+    return prior.version !== next.version && JSON.stringify({ ...prior, version: null }) === JSON.stringify({ ...next, version: null })
+  } catch { return false }
+}
+
+function versionOnlyChange(file, comparison) {
+  const { base = 'HEAD', head, cwd = process.cwd() } = comparison
+  try {
+    return packageVersionOnlyChange(git(['show', `${base}:${file}`], cwd),
+      head ? git(['show', `${head}:${file}`], cwd) : readFileSync(`${cwd}/${file}`, 'utf8'))
+  } catch { return false }
+}
+
 export function affectedPlan(files, available, comparison = {}) {
   const workbenchConfigs = workbenchConfigPaths(files, comparison)
   const seeds = { scripts: new Set(), desktop: new Set(), adapter: new Set() }
@@ -172,6 +188,11 @@ export function affectedPlan(files, available, comparison = {}) {
     // never packages, so only a manual package (or full) CI run covers them; runPlan says so.
     if (file === `${desktop}electron-builder.yml` || file === `${desktop}scripts/after-pack.cjs`) {
       packaging.push(file)
+      continue
+    }
+    if (file === `${desktop}package.json` && versionOnlyChange(file, comparison)) {
+      packaging.push(file)
+      e2e.add('e2e/app.spec.ts')
       continue
     }
     if (file === `${desktop}electron.vite.config.ts`) {

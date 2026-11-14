@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
-import { affectedPlan, buildConfigChange, runPlan, workbenchPackageIncludeChange } from './check-affected.mjs'
+import { affectedPlan, buildConfigChange, packageVersionOnlyChange, runPlan, workbenchPackageIncludeChange } from './check-affected.mjs'
 
 const d = 'apps/desktop/'
 const a = 'packages/agent-adapter/'
@@ -222,6 +222,16 @@ test('packaging inputs run nothing locally or in affected CI and require the man
   expect(mixed.packaging).toEqual([builder])
   expect(commandText(mixed)).toContain('settings.test.tsx')
   expect(commandText(mixed)).not.toMatch(/package|smoke/)
+})
+
+test('a version-only package.json change selects the app smoke spec and the manual package mode', () => {
+  const before = JSON.stringify({ name: 'x', version: '1.0.0', scripts: { build: 'a' } })
+  expect(packageVersionOnlyChange(before, before.replace('1.0.0', '1.1.0'))).toBe(true)
+  expect(packageVersionOnlyChange(before, before)).toBe(false)
+  expect(packageVersionOnlyChange(before, before.replace('1.0.0', '1.1.0').replace('"a"', '"b"'))).toBe(false)
+  expect(packageVersionOnlyChange(before, 'not json')).toBe(false)
+  // Without a readable baseline the file stays unmapped instead of guessing.
+  expect(plan([`${d}package.json`]).unknown).toEqual([`${d}package.json`])
 })
 
 test('unknown desktop config changes and missing baselines block', () => {

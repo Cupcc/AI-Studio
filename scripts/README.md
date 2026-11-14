@@ -91,7 +91,7 @@ CSS 与 Renderer HTML 只选择对应界面 E2E，不触发后端单测或 TypeS
 
 网页包 JS、HTML、manifest 与生成脚本绕过源码导入图，明确选择读取构建产物的 `package-runtime`、`workbench-service`、`portable-pages` 三份单测。TypeScript 配置仅新增网页包 JSON include 时也使用该范围，其他编译配置须另行映射。`electron.vite.config.ts` 或桌面 Vitest 配置仅增删既定网页包构建 import 与调用时使用该范围，Electron 构建配置另选应用启动。CSP 数组变化选择安全策略单测、工作台界面、应用启动及 `runtime-tools` 中的 Shell 和 Browser 场景；共享工具样式也覆盖这两个界面场景，不带入终端关闭流程。同批修改运行时模块或该 E2E 文件时保留完整 runtime-tools。其他构建和测试配置变化须补充映射，不能套用工作台范围。
 
-打包输入 `apps/desktop/electron-builder.yml` 与 `apps/desktop/scripts/after-pack.cjs` 只影响打包产物。本地检查不启动 Electron，自动 CI 不打包，所以选择器对它们不运行检查，集成命令要求一次通过的 package 或 full 运行（`node scripts/vm-ci.mjs --scope package`，只构建、打包与打包冒烟）。
+打包输入 `apps/desktop/electron-builder.yml` 与 `apps/desktop/scripts/after-pack.cjs` 只影响打包产物。本地检查不启动 Electron，自动 CI 不打包，所以选择器对它们不运行检查，集成命令要求一次通过的 package 或 full 运行（`node scripts/vm-ci.mjs --scope package`，只构建、打包与打包冒烟）。只改 `apps/desktop/package.json` 的 `version` 字段（发布升级版本号）同样按打包输入处理，另选中读取版本号的 `e2e/app.spec.ts`；该文件的其他改动仍需新增评审过的映射。
 
 所有 `related` 命令显式使用 `--no-passWithNoTests`，找不到测试时失败。删除源码后没有剩余模块测试时也阻断，须补充消费者映射。选择器回归除了断言计划，还通过 Vitest 实际依赖图核对必须包含和不得包含的测试，通过真实子进程检查空选择退出码。清单检查不执行应用测试；它先构建 Adapter 以解析桌面依赖，并由测试配置生成本地辅助产物。
 
@@ -325,7 +325,7 @@ node scripts/remote-ci.mjs --scope full
 
 ## GitHub Release 发布准备
 
-发布渠道为 GitHub Releases，目标版本为 `v1.0.0`，不设固定上线日期（DEC-17、DEC-21）。发布准备仅生成和留存产物，暂不创建或上传 Release；2026-10-18 的仅文档指令已由同日后续「continue to implement」恢复实施，执行范围及历史边界见 [DEC-22](<../docs/07. Decisions.md#dec-22-发布准备范围与本轮文档边界>)。阶段打包自检不等于最终 V1 发布产物。CI 继续只检查、打包和保存产物，不自动发布。
+发布渠道为 GitHub Releases，当前版本为 `v1.1.0`，不设固定上线日期（DEC-17、DEC-35；取代 DEC-21 的 `v1.0.0`）。发布准备仅生成和留存产物，暂不创建或上传 Release；2026-10-18 的仅文档指令已由同日后续「continue to implement」恢复实施，执行范围及历史边界见 [DEC-22](<../docs/07. Decisions.md#dec-22-发布准备范围与本轮文档边界>)。阶段打包自检不等于最终 V1 发布产物。CI 继续只检查、打包和保存产物，不自动发布。
 
 发布前保留事项：
 
