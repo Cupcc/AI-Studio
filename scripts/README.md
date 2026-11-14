@@ -31,7 +31,7 @@
 分支流程由[贡献指南 §5](../CONTRIBUTING.md#5-合并与收尾)负责。源 worktree 提交完成后，在主目录运行源 worktree 里的脚本。主目录停在验收提交上，自带的脚本可能是旧版本；源 worktree 已 rebase 到最新 dev：
 
 ```sh
-node "../AI Stduio.worktrees/example/scripts/integrate-branch.mjs" feat/example --title "feat(example): add the example view" --body-file <path>
+node .agents/worktrees/example/scripts/integrate-branch.mjs feat/example --title "feat(example): add the example view" --body-file <path>
 git push origin dev
 ```
 

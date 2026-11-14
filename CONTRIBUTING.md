@@ -46,11 +46,11 @@ git switch --detach dev
 git fetch origin dev:dev
 ```
 
-每项工作在仓库同级目录 `../AI Stduio.worktrees/` 下创建 worktree，不放在仓库内：
+每项工作在仓库内的 `.agents/worktrees/` 下创建 worktree，Claude Code、Codex 等工具共用这个目录，不用工具自带的位置。这个目录必须被 Git 忽略，已写入 `.gitignore`：
 
 ```sh
-git worktree add "../AI Stduio.worktrees/example" -b feat/example dev
-cd "../AI Stduio.worktrees/example"
+git worktree add .agents/worktrees/example -b feat/example dev
+cd .agents/worktrees/example
 pnpm install
 ```
 
@@ -107,7 +107,7 @@ git rebase dev
 git status --short
 
 # 在主目录中执行，脚本取自源 worktree：主目录的脚本停在验收提交上。
-node "../AI Stduio.worktrees/example/scripts/integrate-branch.mjs" feat/example --title "feat(example): add the example view" --body-file <验证摘要文件>
+node .agents/worktrees/example/scripts/integrate-branch.mjs feat/example --title "feat(example): add the example view" --body-file <验证摘要文件>
 git push origin dev
 git push origin --delete feat/example   # 仅当推送过任务分支
 ```
@@ -155,7 +155,7 @@ git fetch origin main:main
 
 ```sh
 git log -1 --oneline --grep "Source-Commit: $(git rev-parse feat/example)" dev
-git worktree remove "../AI Stduio.worktrees/example"
+git worktree remove .agents/worktrees/example
 git branch -D feat/example
 ```
 

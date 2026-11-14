@@ -8,6 +8,9 @@ coverage/
 test-results/
 playwright-report/
 
+# Task worktrees, see CONTRIBUTING.md §2.
+.agents/worktrees/
+
 # Local environment files may hold credentials.
 .env*.local
 
